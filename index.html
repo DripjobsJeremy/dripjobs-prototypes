@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DripJobs Prototype Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --color-primary:        #8B85EA;
+    --color-primary-hover:  #736BE3;
+    --color-primary-active: #5C53DC;
+    --color-primary-rgb:    139, 133, 234;
+    --color-bg:             #F3F1FC;
+    --color-text:           #32415B;
+    --color-text-muted:     #80879A;
+    --color-border:         #DAD8E3;
+    --color-card:           #FFFFFF;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100vh;
+    padding: 0 0 60px 0;
+  }
+
+  /* ── Header ── */
+  .hub-header {
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .hub-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hub-logo-mark {
+    width: 32px;
+    height: 32px;
+    background: var(--color-primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hub-logo-mark svg { width: 18px; height: 18px; }
+  .hub-logo-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text);
+    letter-spacing: -0.2px;
+  }
+  .hub-logo-sub {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-top: 1px;
+  }
+  .hub-meta {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    text-align: right;
+  }
+  .hub-meta strong { color: var(--color-text); }
+
+  /* ── Page body ── */
+  .hub-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 0;
+  }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .filter-search {
+    flex: 1;
+    min-width: 200px;
+    height: 38px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0 14px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--color-text);
+    background: var(--color-card);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .filter-search:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+  }
+  .filter-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-card);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .chip.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+  }
+
+  /* ── Stats row ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  /* ── Section heading ── */
+  .section-heading {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--color-text-muted);
+    margin-bottom: 12px;
+  }
+
+  /* ── Prototype grid ── */
+  .proto-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .proto-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+  .proto-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.12);
+  }
+  .proto-card.hidden { display: none; }
+
+  .proto-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .proto-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+  }
+  .proto-status-badge {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  /* Status colors */
+  .status-active    { background: #E6FAF0; color: #166534; }
+  .status-triage    { background: #EFF6FF; color: #1E40AF; }
+  .status-analysis  { background: #FFFBEB; color: #92400E; }
+  .status-new       { background: #E8E6FA; color: #5C53DC; }
+  .status-postponed { background: #FAE6E6; color: #991B1B; }
+
+  .proto-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.3;
+  }
+  .proto-desc {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+  }
+
+  .proto-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-border);
+    gap: 8px;
+  }
+  .ticket-link {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-decoration: none;
+    letter-spacing: 0.2px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.15s;
+  }
+  .ticket-link:hover { color: var(--color-primary-active); }
+  .ticket-link svg { width: 11px; height: 11px; opacity: 0.7; }
+
+  .proto-links {
+    display: flex;
+    gap: 8px;
+  }
+  .proto-btn {
+    height: 30px;
+    padding: 0 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s;
+    border: none;
+  }
+  .proto-btn-primary {
+    background: var(--color-primary);
+    color: #fff;
+  }
+  .proto-btn-primary:hover { background: var(--color-primary-hover); }
+  .proto-btn-outline {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+  }
+  .proto-btn-outline:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  /* ── Template callout ── */
+  .template-callout {
+    background: var(--color-card);
+    border: 1px dashed var(--color-primary);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .template-callout-icon {
+    width: 40px;
+    height: 40px;
+    background: #E8E6FA;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+  .template-callout-text { flex: 1; }
+  .template-callout-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .template-callout-desc  { font-size: 12px; color: var(--color-text-muted); }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--color-text-muted);
+    display: none;
+  }
+  .empty-state.visible { display: block; }
+  .empty-state p { font-size: 14px; margin-top: 8px; }
+
+  /* ── Footer ── */
+  .hub-footer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    font-size: 11px;
+    color: var(--color-text-muted);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .hub-footer-dot { opacity: 0.4; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hub-header">
+  <div class="hub-logo">
+    <div class="hub-logo-mark">
+      <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="6" height="6" rx="1.5" fill="white" opacity="0.9"/>
+        <rect x="10" y="2" width="6" height="6" rx="1.5" fill="white" opacity="0.6"/>
+        <rect x="2" y="10" width="6" height="6" rx="1.5" fill="white" opacity="0.6"/>
+        <rect x="10" y="10" width="6" height="6" rx="1.5" fill="white" opacity="0.9"/>
+      </svg>
+    </div>
+    <div>
+      <div class="hub-logo-text">DripJobs Prototype Hub</div>
+      <div class="hub-logo-sub">Jeremy Harrison · Product Manager</div>
+    </div>
+  </div>
+  <div class="hub-meta">
+    <strong id="last-updated">10 prototypes</strong><br/>
+    Last updated June 2026
+  </div>
+</header>
+
+<!-- Body -->
+<div class="hub-body">
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Prototypes</div>
+      <div class="stat-value" id="stat-total">10</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Active Triage</div>
+      <div class="stat-value" id="stat-triage">1</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Needs PM Review</div>
+      <div class="stat-value" id="stat-analysis">6</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Postponed</div>
+      <div class="stat-value" id="stat-postponed">1</div>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <input class="filter-search" type="text" id="searchInput" placeholder="Search prototypes…" />
+    <div class="filter-chips">
+      <button class="chip active" data-filter="all">All</button>
+      <button class="chip" data-filter="triage">Active Triage</button>
+      <button class="chip" data-filter="analysis">Needs PM Analysis</button>
+      <button class="chip" data-filter="new">New</button>
+      <button class="chip" data-filter="postponed">Postponed</button>
+    </div>
+  </div>
+
+  <!-- Prototype grid -->
+  <div class="section-heading">Prototypes</div>
+
+  <div class="proto-grid" id="protoGrid">
+
+    <!-- 1. Email Inbox -->
+    <div class="proto-card" data-status="analysis" data-name="email inbox v1 inbox ui">
+      <div class="proto-card-top">
+        <div class="proto-icon" style="background:#E8E6FA;">📬</div>
+        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+      </div>
+      <div class="proto-name">Email Inbox</div>
+      <div class="proto-desc">V1 inbox UI prototype — inbound email threading and management experience.</div>
+      <div class="proto-card-footer">
+        <a class="ticket-link" href="https://app.clickup.com/t/86ba8590w" target="_blank">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          86ba8590w
+        </a>
+        <div class="proto-links">
+          <a class="proto-btn proto-btn-outline" href="https://github.com/DripjobsJeremy/email-inbox-jun-02" target="_blank">GitHub</a>
+          <a class="proto-btn proto-btn-primary" href="email-inbox/index.html">View</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Health Score -->
+    <div class="proto-card" data-status="analysis" data-name="health score dj healthscore lead scoring">
+      <div class="proto-card-top">
+        <div class="proto-icon" style="background:#E6FAF0;">📊</div>
+        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+      </div>
+      <div class="proto-name">DJ Health Score v1.5</div>
+      <div class="proto-desc">Lead temperature and account health scoring dashboard prototype.</div>
+      <div class="proto-card-footer">
+        <a class="ticket-link" href="https://app.clickup.com/t/86b9512kq" target="_blank">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          86b9512kq
+        </a>
+        <div class="proto-links">
+          <a class="proto-btn proto-btn-outline" href="https://github.com/DripjobsJeremy/DJ-HealthScore-v1.5" target="_blank">GitHub</a>
+          <a class="proto-btn proto-btn-primary" href="health-score/index.html">View</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Notifications UX -->
+    <div class="proto-card" data-status="analysis" data-name="notifications ux refresh company settings">
+      <div class="proto-card-top">
+        <div class="proto-icon" style="background:#E6F3FA;">🔔</div>
+        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+      </div>
+      <div class="proto-name">Notifications UX Refresh</div>
+      <div class="proto-desc">Company Settings → Notifications redesign — improved hierarchy and controls.</div>
+      <div class="proto-card-footer">
+        <a class="ticket-link" href="https://app.clickup.com/t/86b9nerwj" target="_blank">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          86b9nerwj
+        </a>
+        <div class="proto-links">
+          <a class="proto-btn proto-btn-outline" href="https://github.com/DripjobsJeremy/Notifications-UX-Refresh-Prototype" target="_blank">GitHub</a>
+          <a class="proto-btn proto-btn-primary" href="notifications-ux/index.html">View</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Prod Rates Misconfiguration - User Facing -->
+    <div class="proto-card" data-status="analysis" data-name="production rates substrate misconfiguration user facing guide">
+      <div class="proto-card-top">
+        <div class="proto-icon" style="background:#FAF0E6;">🔧</div>
+        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+      </div>
+      <div class="proto-name">Prod Rates — Misconfiguration (User-Facing)</div>
+      <div class="proto-desc">User-facing guide for diagnosing and resolving substrate misconfiguration issues.</div>
+      <div class="proto-card-footer">
+        <a class="ticket-link" href="https://app.clickup.com/t/86b903mm5" target="_blank">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          86b903mm5
+        </a>
+        <div class="proto-links">
+          <a class="proto-btn proto-btn-outline" href="https://github.com/DripjobsJeremy/Prod-Rates-Misconfiguration-User-Facing" target="_blank">GitHub</a>
+          <a class="proto-btn proto-btn-primary" href="prod-rates-misconfiguration-user/index.html">View</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Prod Rates Misconfiguration - Internal -->
+    <div class="proto-card" data-status="new" data-name="production rates substrate misconfiguration internal diagnosis">
+      <div class="proto-card-top">
+        <div class="proto-icon" style="background:#FAF7E6;">⚙️</div>
+        <span class="proto-status-badge status-new">New</span>
+      </div>
+      <div class="proto-name">Prod Rates — Misconfiguration (Internal)</div>
+      <div class="proto-desc">Internal CS/PM tool for substrate configuration health check and validation.</div>
+      <div class="proto-card-footer">
+        <a class="ticket-link" href="https://app.clickup.com/t/86b903vvr" target="_blank">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          86b903vvr
+        </a>
+        <div class="proto-links">
+          <a class="proto-btn proto-btn-outline" href="https://github.com/DripjobsJeremy/Prod-Rates-Substrate-Misconfiguration" target="_blank">GitHub</a>
+          <a class="proto-btn proto-btn-primary" href="prod-rates-misconfiguration-internal/index.html">View</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Tasks UI Refresh -->
+    <div class="proto-card" data-status="postponed" data-name="tasks ui refresh overhaul postponed">
+      <div class="proto-card-top">
+        <div class="proto-icon" style="background:#FAE6E6;">✅</div>
+        <span class="proto-status-badge status-postponed">Postponed</span>
+      </div>
+      <div class="proto-name">Tasks UI Refresh</div>
+      <div class="proto-desc">Full UX/UI overhaul of the Tasks page. Ticket currently postponed — confirm before advancing.</div>
+      <div class="proto-card-footer">
+        <a class="ticket-link" href="https://app.clickup.com/t/86b8yhwwx" target="_blank">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          86b8yhwwx
+        </a>
+        <div class="proto-links">
+          <a class="proto-btn proto-btn-outline" href="https://github.com/DripjobsJeremy/Tasks-UI-Refresh" target="_blank">GitHub</a>
+          <a class="proto-btn proto-btn-primary" href="tasks-ui-refresh/index.html">View</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Prod Rates Import -->
+    <div class="proto-card" data-status="analysis" data-name="production rates import wizard csv excel">
+      <div class="proto-card-top">
+        <div class="proto-icon" style="background:#E6FAFA;">📥</div>
+        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+      </div>
+      <div class="proto-name">Prod Rates Import Wizard</div>
+      <div class="proto-desc">Step-by-step import wizard for bringing production rates in from CSV/Excel.</div>
+      <div class="proto-card-footer">
+        <a class="ticket-link" href="https://app.clickup.com/t/86b8tq9m9" target="_blank">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          86b8tq9m9
+        </a>
+        <div class="proto-links">
+          <a class="proto-btn proto-btn-outline" href="https://github.com/DripjobsJeremy/Prod-Rates-Import-Prototype" target="_blank">GitHub</a>
+          <a class="proto-btn proto-btn-primary" href="prod-rates-import/index.html">View</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Default Proposal Templates -->
+    <div class="proto-card" data-status="analysis" data-name="default proposal templates new accounts">
+      <div class="proto-card-top">
+        <div class="proto-icon" style="background:#F0FAE6;">📄</div>
+        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+      </div>
+      <div class="proto-name">Default Proposal Templates</div>
+      <div class="proto-desc">Default proposal template system for new DripJobs accounts at signup.</div>
+      <div class="proto-card-footer">
+        <a class="ticket-link" href="https://app.clickup.com/t/86b8q5zv7" target="_blank">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          86b8q5zv7
+        </a>
+        <div class="proto-links">
+          <a class="proto-btn proto-btn-outline" href="https://github.com/DripjobsJeremy/Default-Proposal-Templates" target="_blank">GitHub</a>
+          <a class="proto-btn proto-btn-primary" href="default-proposal-templates/index.html">View</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. Invoice Void Handling -->
+    <div class="proto-card" data-status="analysis" data-name="invoice void confirmation modal archiving proposals job costing">
+      <div class="proto-card-top">
+        <div class="proto-icon" style="background:#FAE6F0;">🧾</div>
+        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+      </div>
+      <div class="proto-name">Invoice Void Handling</div>
+      <div class="proto-desc">Confirmation modal when archiving proposals/deals with active job costing invoices.</div>
+      <div class="proto-card-footer">
+        <a class="ticket-link" href="https://app.clickup.com/t/86b8qu9b4" target="_blank">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          86b8qu9b4
+        </a>
+        <div class="proto-links">
+          <a class="proto-btn proto-btn-outline" href="https://github.com/DripjobsJeremy/Invoice-Void-Handling" target="_blank">GitHub</a>
+          <a class="proto-btn proto-btn-primary" href="invoice-void-handling/index.html">View</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. Hybrid Onboarding Wizard -->
+    <div class="proto-card" data-status="triage" data-name="hybrid onboarding wizard company settings brandfetch">
+      <div class="proto-card-top">
+        <div class="proto-icon" style="background:#E8E6FA;">🚀</div>
+        <span class="proto-status-badge status-triage">Active Triage</span>
+      </div>
+      <div class="proto-name">Hybrid Onboarding Wizard</div>
+      <div class="proto-desc">Guided onboarding walkthrough for Company Settings with Brandfetch integration.</div>
+      <div class="proto-card-footer">
+        <a class="ticket-link" href="https://app.clickup.com/t/86b4ek0j7" target="_blank">
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          86b4ek0j7
+        </a>
+        <div class="proto-links">
+          <a class="proto-btn proto-btn-outline" href="https://github.com/DripjobsJeremy/Hybrid-Onboarding-Wizard" target="_blank">GitHub</a>
+          <a class="proto-btn proto-btn-primary" href="hybrid-onboarding-wizard/index.html">View</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /proto-grid -->
+
+  <!-- Empty state -->
+  <div class="empty-state" id="emptyState">
+    <div style="font-size:32px;">🔍</div>
+    <p>No prototypes match that filter.</p>
+  </div>
+
+  <!-- Template callout -->
+  <div class="template-callout">
+    <div class="template-callout-icon">📁</div>
+    <div class="template-callout-text">
+      <div class="template-callout-title">Starting a new prototype?</div>
+      <div class="template-callout-desc">Copy the <code>_template/</code> folder, rename it, add your HTML, and add a card above. Link the ClickUp ticket ID before sharing.</div>
+    </div>
+    <a class="proto-btn proto-btn-outline" href="_template/index.html">Preview Template</a>
+  </div>
+
+  <!-- Footer -->
+  <div class="hub-footer">
+    DripJobs Prototype Hub
+    <span class="hub-footer-dot">·</span>
+    Jeremy Harrison, PM
+    <span class="hub-footer-dot">·</span>
+    github.com/DripjobsJeremy/dripjobs-prototypes
+  </div>
+
+</div><!-- /hub-body -->
+
+<script>
+  const cards = document.querySelectorAll('.proto-card');
+  const chips = document.querySelectorAll('.chip');
+  const searchInput = document.getElementById('searchInput');
+  const emptyState = document.getElementById('emptyState');
+  let activeFilter = 'all';
+
+  function applyFilters() {
+    const q = searchInput.value.toLowerCase().trim();
+    let visible = 0;
+    cards.forEach(card => {
+      const nameMatch = card.dataset.name.includes(q);
+      const statusMatch = activeFilter === 'all' || card.dataset.status === activeFilter;
+      if (nameMatch && statusMatch) {
+        card.classList.remove('hidden');
+        visible++;
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+    emptyState.classList.toggle('visible', visible === 0);
+  }
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeFilter = chip.dataset.filter;
+      applyFilters();
+    });
+  });
+
+  searchInput.addEventListener('input', applyFilters);
+</script>
+</body>
+</html>
