@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inbox · DripJobs</title>
+
+<!-- Bootstrap 4.6 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    /* DripJobs design system tokens */
+    --brand:#8B85EA; --brand-600:#8B85EA; --brand-700:#736BE3;
+    --brand-active:#5C53DC;
+    --brand-50:#F5F3FF; --brand-100:#EDEBFC; --brand-200:#D6D2F5;
+    --teal:#0DCECE; --teal-bg:#f0fafa;
+    --ink:#32415B; --muted:#80879A; --line:#DAD8E3; --bg:#f6f7fb;
+  }
+  *{ -webkit-font-smoothing:antialiased; }
+  body{ font-family:'Nunito',sans-serif; background:var(--bg); color:var(--ink); margin:0; overflow:hidden; }
+
+  .app{ display:flex; height:100vh; }
+
+  /* ---------- App sidebar (chrome) ---------- */
+  .sidebar{ width:248px; min-width:248px; background:#fff; border-right:1px solid var(--line);
+    height:100vh; overflow-y:auto; display:flex; flex-direction:column; }
+  .brand{ display:flex; align-items:center; gap:11px; padding:18px 18px; }
+  .brand-logo{ width:40px; height:40px; border-radius:50%; background:radial-gradient(circle at 30% 30%,#3b4757,#1f2937);
+    border:2px solid #f5d27a; display:flex; align-items:center; justify-content:center; color:#f5d27a;
+    font-weight:800; font-size:13px; box-shadow:0 1px 3px rgba(0,0,0,.18); }
+  .brand-name{ font-weight:800; font-size:16px; }
+  .nav-section{ font-size:10.5px; letter-spacing:.09em; font-weight:700; color:#9aa6b6;
+    padding:14px 20px 6px; text-transform:uppercase; }
+  .nav-item{ display:flex; align-items:center; gap:12px; padding:9px 16px; margin:2px 12px; border-radius:11px;
+    color:#1e293b; font-weight:500; font-size:14px; cursor:pointer; text-decoration:none; position:relative; }
+  .nav-item i{ font-size:17px; color:#334155; }
+  .nav-item:hover{ background:#f4f5f8; color:var(--ink); text-decoration:none; }
+  .nav-item.active{ background:#EDEBFC; color:var(--brand-active); font-weight:600; }
+  .nav-item.active i{ color:var(--brand); }
+  .nav-badge{ margin-left:auto; background:var(--brand-100); color:var(--brand-active); font-size:10.5px; font-weight:700;
+    border-radius:20px; padding:2px 9px; }
+  .nav-item.active .nav-badge{ background:var(--brand-200); }
+  .nav-settings{ margin-top:auto; background:#1f2937; border-radius:12px; margin:14px 10px; }
+  .nav-settings .nav-item{ color:#cbd5e1; margin:0; }
+  .nav-settings .nav-item i{ color:#94a3b8; }
+
+  /* ---------- Main ---------- */
+  .main{ flex:1; display:flex; flex-direction:column; height:100vh; min-width:0; }
+  .topbar{ background:#fff; border-bottom:1px solid var(--line); padding:14px 22px; display:flex;
+    align-items:center; gap:14px; flex-wrap:wrap; }
+  .topbar h1{ font-size:20px; font-weight:800; margin:0; }
+  .pill-count{ background:var(--brand-100); color:var(--brand-700); font-weight:700; font-size:12px;
+    border-radius:20px; padding:3px 10px; }
+
+  .toolbar{ background:#fff; border-bottom:1px solid var(--line); padding:10px 22px; display:flex;
+    align-items:center; gap:10px; flex-wrap:wrap; }
+  .search-wrap{ position:relative; flex:1; min-width:200px; max-width:340px; }
+  .search-wrap i{ position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:15px; }
+  .search-wrap input{ width:100%; border:1px solid var(--line); border-radius:9px; padding:8px 12px 8px 34px;
+    font-size:13.5px; background:#fafbfc; }
+  .search-wrap input:focus{ outline:none; border-color:var(--brand-200); box-shadow:0 0 0 3px var(--brand-50); }
+  .filter-sel{ border:1px solid var(--line); border-radius:9px; padding:8px 10px; font-size:13px;
+    background:#fafbfc; color:var(--ink); min-width:150px; cursor:pointer; }
+  .filter-sel:focus{ outline:none; border-color:var(--brand-200); }
+  .sort-sel{ margin-left:auto; min-width:140px; }
+
+  /* filter button + dropdown */
+  .filter-wrap{ position:relative; }
+  .btn-filter{ border:1px solid var(--line); background:#fafbfc; color:var(--ink); font-weight:600;
+    font-size:13px; border-radius:9px; padding:8px 13px; display:inline-flex; align-items:center;
+    gap:7px; cursor:pointer; white-space:nowrap; }
+  .btn-filter:hover{ background:#f1f0f8; border-color:var(--brand-200); }
+  .btn-filter.has-filters{ border-color:var(--brand); color:var(--brand-active); background:var(--brand-100); }
+  .filter-dot{ width:7px; height:7px; border-radius:50%; background:var(--brand); display:none; }
+  .btn-filter.has-filters .filter-dot{ display:inline-block; }
+  .filter-panel{ position:absolute; top:calc(100% + 6px); left:0; background:#fff;
+    border:1px solid var(--line); border-radius:12px; padding:16px; width:260px;
+    box-shadow:0 8px 24px rgba(15,23,42,.10); z-index:200; display:none; flex-direction:column; gap:12px; }
+  .filter-panel.open{ display:flex; }
+  .filter-panel-label{ font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;
+    letter-spacing:.06em; margin-bottom:3px; }
+  .filter-panel select{ width:100%; border:1px solid var(--line); border-radius:8px; padding:7px 10px;
+    font-size:13px; background:#fafbfc; color:var(--ink); cursor:pointer; font-family:inherit; }
+  .filter-panel select:focus{ outline:none; border-color:var(--brand-200); }
+  .filter-panel-footer{ display:flex; justify-content:flex-end; padding-top:4px; border-top:1px solid var(--line); margin-top:2px; }
+  .btn-clear-filters{ background:none; border:none; font-size:12px; font-weight:600;
+    color:var(--muted); cursor:pointer; padding:4px 0; }
+  .btn-clear-filters:hover{ color:var(--brand-active); }
+  .btn-brand{ background:var(--brand); border:none; color:#fff; font-weight:700; font-size:13.5px;
+    border-radius:10px; padding:8px 16px; display:inline-flex; align-items:center; gap:7px; }
+  .btn-brand:hover{ background:var(--brand-700); color:#fff; }
+
+  /* type tabs — two-state only: active = light purple, inactive = grey */
+  .type-tabs{ display:flex; gap:6px; padding:10px 22px 12px; background:#fff; border-bottom:1px solid var(--line);
+    overflow-x:auto; }
+  .type-tab{ background:#EFEFF3; border:1px solid transparent; color:#80879A; font-size:12.5px; font-weight:600;
+    border-radius:20px; padding:7px 15px; white-space:nowrap; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .type-tab:hover{ background:#E8E6FA; color:var(--brand-active); }
+  .type-tab .cnt{ background:rgba(0,0,0,.07); color:inherit; border-radius:20px; padding:0 7px; font-size:10.5px; }
+  .type-tab.active{ background:#E8E6FA !important; border-color:transparent !important; color:var(--brand-active) !important;
+    font-weight:700; }
+  .type-tab.active .cnt{ background:var(--brand-200); color:var(--brand-active); }
+
+  /* ---------- Split panes ---------- */
+  .panes{ flex:1; display:flex; min-height:0; }
+  .list-pane{ width:420px; min-width:420px; border-right:1px solid var(--line); background:#fff;
+    overflow-y:auto; }
+  .read-pane{ flex:1; background:#fff; display:flex; flex-direction:column; min-width:0; }
+
+  /* email row */
+  .mail-row{ display:flex; gap:12px; padding:14px 18px; border-bottom:1px solid #f1f3f7; cursor:pointer;
+    position:relative; }
+  .mail-row:hover{ background:#fafbfc; }
+  .mail-row.active{ background:var(--brand-50); }
+  .mail-row.unread{ background:#fafbff; }
+  .mail-row.unread::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--brand-200); }
+  .avatar{ width:42px; height:42px; min-width:42px; border-radius:50%; font-weight:700; font-size:14px;
+    display:flex; align-items:center; justify-content:center; }
+  .mail-body{ flex:1; min-width:0; }
+  .mail-top{ display:flex; align-items:center; gap:8px; }
+  .mail-name{ font-size:14px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mail-row.unread .mail-name{ font-weight:800; }
+  .mail-time{ margin-left:auto; font-size:11.5px; color:#94a3b8; white-space:nowrap; }
+  .badge-new{ background:#e7f6ec; color:#15803d; font-size:9.5px; font-weight:800; letter-spacing:.04em;
+    border-radius:5px; padding:1px 6px; text-transform:uppercase; }
+  .mail-subj{ font-size:13px; color:#334155; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mail-row.unread .mail-subj{ font-weight:700; color:var(--ink); }
+  .mail-prev{ font-size:12.5px; color:#94a3b8; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mail-tags{ display:flex; gap:5px; margin-top:7px; flex-wrap:wrap; align-items:center; }
+  .tag{ font-size:10.5px; font-weight:700; border-radius:5px; padding:2px 7px; display:inline-flex; align-items:center; gap:4px; }
+  /* type tags — grey, matching inactive tab state */
+  .tag-drip,
+  .tag-invoice,
+  .tag-proposal,
+  .tag-change_order,
+  .tag-inbound,
+  .tag-general{ background:#EFEFF3; color:#80879A; }
+  /* assign tag — purple, carries functional meaning */
+  .tag-assign{ background:var(--brand-100); color:var(--brand-active); border:1px solid var(--brand-200); }
+
+  /* row actions — always-visible ⋯ menu trigger */
+  .row-menu-wrap{ position:absolute; right:10px; top:50%; transform:translateY(-50%); }
+  .row-menu-btn{ border:1px solid var(--line); background:#fff; border-radius:8px; width:32px; height:44px;
+    color:#80879A; font-size:16px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; opacity:0; transition:opacity .15s; }
+  .mail-row:hover .row-menu-btn,
+  .mail-row.active .row-menu-btn{ opacity:1; }
+  .row-menu-btn:hover{ background:#f1f0f8; color:var(--brand-active); border-color:var(--brand-200); }
+  .row-dropdown{ position:absolute; right:0; top:calc(100% + 4px); background:#fff; border:1px solid var(--line);
+    border-radius:10px; box-shadow:0 8px 24px rgba(15,23,42,.10); min-width:170px; z-index:300; display:none; overflow:hidden; }
+  .row-dropdown.open{ display:block; }
+  .row-dd-item{ display:flex; align-items:center; gap:9px; padding:10px 14px; font-size:13px; font-weight:500;
+    color:var(--ink); cursor:pointer; white-space:nowrap; }
+  .row-dd-item:hover{ background:#f8f7ff; color:var(--brand-active); }
+  .row-dd-item.danger:hover{ background:#fef2f2; color:#dc2626; }
+  .row-dd-item i{ font-size:14px; color:var(--muted); }
+  .row-dd-item:hover i{ color:inherit; }
+
+  /* read pane */
+  .read-head{ padding:18px 24px; border-bottom:1px solid var(--line); }
+  .read-subj{ font-size:19px; font-weight:800; margin:0 0 8px; }
+  .read-meta{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .read-actions{ margin-left:auto; display:flex; gap:8px; }
+  .btn-ghost{ border:1px solid var(--line); background:#fff; color:#475569; font-weight:600; font-size:12.5px;
+    border-radius:8px; padding:7px 12px; display:inline-flex; align-items:center; gap:6px; }
+  .btn-ghost:hover{ background:#f4f5f8; color:var(--ink); border-color:var(--brand-200); }
+  /* read-head overflow menu */
+  .read-overflow-wrap{ position:relative; }
+  .read-overflow-menu{ position:absolute; right:0; top:calc(100% + 4px); background:#fff; border:1px solid var(--line);
+    border-radius:10px; box-shadow:0 8px 24px rgba(15,23,42,.10); min-width:170px; z-index:300; display:none; overflow:hidden; }
+  .read-overflow-menu.open{ display:block; }
+  .read-overflow-item{ display:flex; align-items:center; gap:9px; padding:10px 14px; font-size:13px; font-weight:500;
+    color:var(--ink); cursor:pointer; white-space:nowrap; }
+  .read-overflow-item:hover{ background:#f8f7ff; color:var(--brand-active); }
+  .read-overflow-item.danger:hover{ background:#fef2f2; color:#dc2626; }
+  .read-overflow-item i{ font-size:14px; color:var(--muted); }
+  .read-overflow-item:hover i{ color:inherit; }
+
+  .thread{ flex:1; overflow-y:auto; padding:22px 24px; background:#f8f9fc; }
+  .msg{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-bottom:14px; }
+  .msg.outbound{ background:#faf9ff; border-color:#ece6ff; }
+  .msg-send-status{ display:flex; align-items:center; gap:5px; font-size:11px; margin-top:8px; justify-content:flex-end; }
+  .msg-send-status.sending{ color:#94a3b8; }
+  .msg-send-status.sent{ color:#15803d; }
+  .msg-send-status.failed{ color:#dc2626; cursor:pointer; }
+  .msg-head{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .msg-from{ font-weight:700; font-size:13.5px; }
+  .msg-email{ font-size:12px; color:#94a3b8; }
+  .msg-time{ margin-left:auto; font-size:11.5px; color:#94a3b8; }
+  .msg-text{ font-size:13.5px; color:#334155; line-height:1.6; white-space:pre-line; }
+
+  .composer{ border-top:1px solid var(--line); background:#fff; padding:14px 24px; }
+  .composer-to{ font-size:12.5px; color:var(--muted); margin-bottom:8px; }
+  .composer-to b{ color:var(--ink); }
+  .composer textarea{ width:100%; border:1px solid var(--line); border-radius:10px; padding:12px 14px;
+    font-size:13.5px; resize:none; font-family:inherit; }
+  .composer textarea:focus{ outline:none; border-color:var(--brand-200); box-shadow:0 0 0 3px var(--brand-50); }
+  .composer-bar{ display:flex; align-items:center; gap:8px; margin-top:10px; }
+  .composer-bar .icon-btn{ border:none; background:transparent; color:#94a3b8; font-size:17px; }
+
+  .empty{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#94a3b8; }
+  .empty i{ font-size:56px; margin-bottom:14px; color:#cbd5e1; }
+  .empty-unread-cta{ margin-top:18px; background:var(--brand); color:#fff; border:none; border-radius:10px;
+    padding:10px 20px; font-size:13.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-family:inherit; }
+  .empty-unread-cta:hover{ background:var(--brand-700); }
+  /* bulk action bar */
+  .bulk-bar{ display:none; align-items:center; gap:10px; padding:8px 18px;
+    background:#EDEBFC; border-bottom:1px solid var(--brand-200); }
+  .bulk-bar.visible{ display:flex; }
+  .bulk-count{ font-size:13px; font-weight:700; color:var(--brand-active); }
+  .bulk-btn{ border:1px solid var(--brand-200); background:#fff; color:var(--brand-active);
+    font-size:12.5px; font-weight:600; border-radius:8px; padding:6px 12px;
+    display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-family:inherit; }
+  .bulk-btn:hover{ background:var(--brand-100); }
+  .bulk-btn.danger{ border-color:#fecaca; color:#dc2626; }
+  .bulk-btn.danger:hover{ background:#fef2f2; }
+  .bulk-deselect{ margin-left:auto; background:none; border:none; color:var(--muted);
+    font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; padding:4px 0; }
+  .bulk-deselect:hover{ color:var(--ink); }
+
+  /* row checkbox */
+  .row-checkbox-wrap{ display:flex; align-items:center; justify-content:center;
+    width:20px; min-width:20px; margin-right:-4px; }
+  .row-checkbox{ width:16px; height:16px; accent-color:var(--brand); cursor:pointer;
+    opacity:0; transition:opacity .12s; }
+  .mail-row:hover .row-checkbox,
+  .mail-row.selected .row-checkbox{ opacity:1; }
+  .mail-row.selected{ background:#F5F3FF; }
+  .mail-row.selected .row-checkbox{ opacity:1; }
+  .badge-needs-reply{ background:#fef3c7; color:#92400e; font-size:9.5px; font-weight:800;
+    letter-spacing:.04em; border-radius:5px; padding:1px 6px; text-transform:uppercase;
+    display:inline-flex; align-items:center; gap:3px; }
+  .mail-row.needs-reply::after{ content:""; position:absolute; right:0; top:0; bottom:0;
+    width:3px; background:#f59e0b; border-radius:0 3px 3px 0; }
+  .mail-row.unmatched{ background:#fffbf0; }
+  .mail-row.unmatched::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:#f59e0b; }
+  .tag-unmatched{ background:#fef3c7; color:#92400e; }
+  .unmatched-banner{ display:flex; align-items:flex-start; gap:10px; background:#fffbf0;
+    border-left:4px solid #f59e0b; border-radius:0 6px 6px 0;
+    font-size:12.5px; padding:10px 16px; margin:10px 22px 0; color:#78350f; }
+  .unmatched-banner-icon{ width:20px; height:20px; min-width:20px; border-radius:50%; background:#f59e0b;
+    display:flex; align-items:center; justify-content:center; }
+  .unmatched-banner-icon i{ font-size:11px; color:#fff; }
+  /* associate panel in read pane */
+  .assoc-bar{ background:#fffbf0; border-bottom:1px solid #fde68a; padding:12px 24px;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .assoc-bar-text{ font-size:13px; color:#92400e; flex:1; min-width:0; }
+  .assoc-bar-text b{ color:#78350f; }
+  .btn-assoc{ background:#f59e0b; border:none; color:#fff; font-weight:700; font-size:13px;
+    border-radius:9px; padding:7px 14px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-family:inherit; }
+  .btn-assoc:hover{ background:#d97706; }
+  /* associate modal */
+  .assoc-modal-backdrop{ position:fixed; inset:0; background:rgba(15,23,42,.35); z-index:8500;
+    display:none; align-items:center; justify-content:center; }
+  .assoc-modal-backdrop.open{ display:flex; }
+  .assoc-modal{ background:#fff; border-radius:14px; padding:28px; width:420px; max-width:92vw;
+    box-shadow:0 16px 48px rgba(15,23,42,.18); }
+  .assoc-modal h3{ font-size:16px; font-weight:800; margin:0 0 6px; }
+  .assoc-modal p{ font-size:13px; color:var(--muted); margin:0 0 18px; line-height:1.5; }
+  .assoc-modal-field{ margin-bottom:14px; }
+  .assoc-modal-label{ font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase;
+    letter-spacing:.06em; margin-bottom:5px; }
+  .assoc-modal-select{ width:100%; border:1px solid var(--line); border-radius:8px; padding:9px 12px;
+    font-size:13.5px; font-family:inherit; color:var(--ink); background:#fafbfc; }
+  .assoc-modal-select:focus{ outline:none; border-color:var(--brand-200); }
+  .assoc-modal-footer{ display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+  .compose-pane{ flex:1; display:flex; flex-direction:column; min-width:0; }
+  .compose-head{ padding:18px 24px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
+  .compose-head h2{ font-size:17px; font-weight:800; margin:0; }
+  .compose-body{ flex:1; padding:22px 24px; background:#f8f9fc; overflow-y:auto; }
+  .compose-field{ background:#fff; border:1px solid var(--line); border-radius:10px; margin-bottom:10px; display:flex; align-items:center; }
+  .compose-field-label{ font-size:12px; font-weight:700; color:var(--muted); padding:0 14px; white-space:nowrap; border-right:1px solid var(--line); min-width:70px; text-align:right; line-height:40px; }
+  .compose-field input{ flex:1; border:none; padding:10px 14px; font-size:13.5px; font-family:inherit; background:transparent; outline:none; color:var(--ink); }
+  .compose-textarea{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; width:100%; font-size:13.5px; font-family:inherit; resize:none; min-height:220px; color:var(--ink); }
+  .compose-textarea:focus{ outline:none; border-color:var(--brand-200); box-shadow:0 0 0 3px var(--brand-50); }
+  .compose-footer{ border-top:1px solid var(--line); background:#fff; padding:14px 24px; display:flex; align-items:center; gap:8px; }
+
+  /* helper text — DripJobs standard: #f0fafa bg, 4px #0DCECE left border, teal circle icon */
+  .info-bar{ display:flex; align-items:flex-start; gap:10px; background:var(--teal-bg);
+    border-left:4px solid var(--teal); border-radius:0 6px 6px 0;
+    color:#32415B; font-size:12.5px; padding:10px 16px; margin:10px 22px 0; }
+  .info-bar-icon{ width:20px; height:20px; min-width:20px; border-radius:50%; background:var(--teal);
+    display:flex; align-items:center; justify-content:center; }
+  .info-bar-icon i{ font-size:11px; color:#fff; }
+  .info-bar b{ color:#32415B; font-weight:700; }
+
+  /* drip auto-reply indicator */
+  .drip-flag{ display:inline-flex; align-items:center; gap:5px; background:#eef9fb; color:#0e7490;
+    border:1px solid #cdeef2; font-size:10.5px; font-weight:700; border-radius:6px; padding:2px 8px; }
+  .drip-flag.lg{ font-size:11.5px; padding:4px 11px; }
+
+  /* internal note (Intercom-style) */
+  .msg.note{ background:#fffbeb; border-color:#fde9a8; }
+  .note-label{ display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:800;
+    text-transform:uppercase; letter-spacing:.04em; color:#a16207; background:#fdf3d4; border-radius:5px; padding:1px 7px; }
+  .comp-tabs{ display:flex; gap:6px; margin-bottom:10px; }
+  .comp-tab{ border:1px solid var(--line); background:#fff; color:#64748b; font-weight:600; font-size:12.5px;
+    border-radius:8px; padding:6px 14px; cursor:pointer; display:flex; align-items:center; gap:6px; }
+  .comp-tab.active{ background:var(--brand-100); border-color:var(--brand-200); color:var(--brand-active); }
+  .comp-tab.note.active{ background:#fffbeb; border-color:#fde9a8; color:#a16207; }
+  .composer.note-mode textarea{ background:#fffdf5; border-color:#fde9a8; }
+  .composer.note-mode textarea:focus{ box-shadow:0 0 0 3px #fef9e7; border-color:#fcd34d; }
+  .btn-note{ background:#f59e0b; border:none; color:#fff; font-weight:700; font-size:13.5px; border-radius:10px;
+    padding:8px 16px; display:inline-flex; align-items:center; gap:7px; }
+  .btn-note:hover{ background:#d97706; color:#fff; }
+
+  /* not-enabled gate */
+  .gate{ flex:1; display:flex; align-items:center; justify-content:center; background:#fafbfc; padding:40px; }
+  .gate-card{ max-width:540px; text-align:center; background:#fff; border:1px solid var(--line);
+    border-radius:18px; padding:40px 40px; box-shadow:0 12px 40px rgba(31,41,55,.07); }
+  .gate-icon{ width:74px; height:74px; border-radius:50%; background:var(--brand-100); color:var(--brand);
+    font-size:32px; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+  .gate-card h2{ font-size:22px; font-weight:800; margin:0 0 10px; }
+  .gate-card p{ color:#64748b; font-size:14px; line-height:1.6; margin:0 0 22px; }
+  .gate-steps{ text-align:left; background:#f8f9fc; border:1px solid var(--line); border-radius:12px;
+    padding:18px 18px; margin:0 0 24px; }
+  .gate-steps .row{ display:flex; gap:11px; align-items:flex-start; font-size:13px; color:#475569; margin-bottom:12px; }
+  .gate-steps .row:last-child{ margin-bottom:0; }
+  .gate-steps .n{ width:22px; height:22px; min-width:22px; border-radius:50%; background:var(--brand-100); color:var(--brand-active);
+    font-weight:800; font-size:11px; display:flex; align-items:center; justify-content:center; }
+  .btn-enable{ background:var(--brand); border:none; color:#fff; font-weight:700; font-size:14px; border-radius:10px;
+    padding:11px 24px; display:inline-flex; align-items:center; gap:8px; }
+  .btn-enable:hover{ background:var(--brand-700); color:#fff; }
+  .gate-note{ font-size:12px; color:#94a3b8; margin-top:16px; }
+
+  /* contact slideout panel */
+  .panel-backdrop{ position:fixed; inset:0; background:rgba(15,23,42,.18); opacity:0; visibility:hidden;
+    transition:opacity .25s, visibility .25s; z-index:40; }
+  .panel-backdrop.show{ opacity:1; visibility:visible; }
+  .contact-panel{ position:fixed; top:0; right:0; height:100vh; width:372px; background:#fff;
+    border-left:1px solid var(--line); box-shadow:-14px 0 44px rgba(15,23,42,.12);
+    transform:translateX(100%); transition:transform .28s cubic-bezier(.4,0,.2,1); z-index:50;
+    display:flex; flex-direction:column; overflow-y:auto; }
+  .contact-panel.open{ transform:translateX(0); }
+  .cp-head{ display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--line); }
+  .cp-head h3{ font-size:14px; font-weight:800; margin:0; }
+  .cp-close{ border:none; background:transparent; font-size:24px; line-height:1; color:#94a3b8; cursor:pointer; }
+  .cp-close:hover{ color:#1e293b; }
+  .cp-id{ text-align:center; padding:22px 20px 20px; border-bottom:1px solid var(--line); }
+  .cp-avatar{ width:66px; height:66px; border-radius:50%; margin:0 auto 12px; display:flex; align-items:center;
+    justify-content:center; font-size:23px; font-weight:800; }
+  .cp-name{ font-size:17px; font-weight:800; }
+  .cp-sub{ font-size:12.5px; color:#94a3b8; margin-top:2px; }
+  .cp-actions{ display:flex; gap:8px; justify-content:center; margin-top:16px; }
+  .cp-act{ flex:1; max-width:98px; border:1px solid var(--line); background:#fff; border-radius:10px; padding:9px 4px;
+    font-size:11.5px; font-weight:600; color:#475569; display:flex; flex-direction:column; align-items:center; gap:5px; cursor:pointer; }
+  .cp-act:hover{ background:#f4f3fd; border-color:var(--brand-200); }
+  .cp-act i{ font-size:16px; color:var(--brand); }
+  .cp-section{ padding:18px 20px; }
+  .cp-section h4{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:#94a3b8; font-weight:700; margin:0 0 14px; }
+  .cp-field{ display:flex; gap:11px; align-items:flex-start; margin-bottom:13px; font-size:13px; }
+  .cp-field i{ color:#94a3b8; font-size:15px; margin-top:1px; min-width:16px; }
+  .cp-field .v{ color:#1e293b; font-weight:500; word-break:break-word; }
+  .cp-field .l{ color:#94a3b8; font-size:11px; margin-top:1px; }
+  .cp-tags{ display:flex; flex-wrap:wrap; gap:6px; }
+  .cp-tag{ background:#f1f5f9; color:#475569; font-size:11px; font-weight:600; border-radius:6px; padding:3px 9px; }
+  .cp-tag.vip{ background:#fdf3d4; color:#a16207; }
+  .cp-deals{ border-top:1px solid var(--line); padding:18px 20px 24px; background:#fafbfc; flex:1; }
+  .deal-card{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:13px 14px; margin-bottom:10px; }
+  .deal-name{ font-size:13.5px; font-weight:700; color:#1e293b; line-height:1.35; }
+  .deal-meta{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+  .deal-stage{ font-size:10.5px; font-weight:700; border-radius:6px; padding:3px 9px; }
+  .deal-val{ font-size:15px; font-weight:800; color:#1e293b; }
+  .deal-link{ font-size:12px; color:var(--brand); font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:4px; }
+  .deal-link:hover{ color:var(--brand-active); }
+  .cp-empty{ text-align:center; color:#94a3b8; font-size:13px; padding:20px 0; }
+  .cp-empty i{ font-size:28px; display:block; margin-bottom:8px; color:#cbd5e1; }
+
+  .toast-host{ position:fixed; bottom:22px; left:50%; transform:translateX(-50%); z-index:9999; }
+  .toast-msg{ background:#1f2937; color:#fff; font-size:13px; font-weight:500; padding:11px 18px;
+    border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.2); display:flex; align-items:center; gap:8px; }
+
+  /* ---- Command Center modal ---- */
+  .cc-backdrop{ position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:8000; display:none; align-items:center; justify-content:center; }
+  .cc-backdrop.open{ display:flex; }
+  .cc-modal{ background:#fff; border-radius:16px; width:920px; max-width:95vw; max-height:90vh;
+    display:flex; flex-direction:column; box-shadow:0 24px 60px rgba(15,23,42,.22); overflow:hidden; }
+  .cc-modal-inner{ display:flex; flex:1; min-height:0; }
+
+  /* left column */
+  .cc-left{ width:260px; min-width:260px; border-right:1px solid var(--line); display:flex; flex-direction:column; overflow-y:auto; }
+  .cc-left-head{ padding:18px 18px 14px; border-bottom:1px solid var(--line); }
+  .cc-deal-label{ font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px; }
+  .cc-deal-name{ font-size:15px; font-weight:800; color:var(--ink); line-height:1.3; }
+  .cc-deal-meta{ font-size:12px; color:var(--muted); margin-top:3px; }
+  .cc-stage-row{ display:flex; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .cc-stage-pill{ font-size:11px; font-weight:700; border-radius:20px; padding:3px 10px; }
+  .cc-seq-row{ background:#f5f3ff; border-radius:10px; padding:10px 14px; margin:12px 18px 0; font-size:12px; }
+  .cc-seq-label{ color:var(--brand-active); font-weight:700; display:flex; align-items:center; gap:5px; margin-bottom:2px; }
+  .cc-seq-sub{ color:var(--muted); font-size:11.5px; }
+  .cc-contact-section{ padding:14px 18px; }
+  .cc-contact-title{ font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; }
+  .cc-contact-row{ display:flex; align-items:flex-start; gap:9px; margin-bottom:9px; font-size:13px; color:var(--ink); }
+  .cc-contact-row i{ color:var(--muted); font-size:14px; margin-top:1px; min-width:14px; }
+  .cc-contact-row a{ color:var(--brand-active); text-decoration:none; }
+  .cc-actions-row{ display:flex; gap:8px; padding:0 18px 14px; }
+  .cc-action-btn{ flex:1; background:var(--brand); color:#fff; border:none; border-radius:9px; padding:9px 6px;
+    font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .cc-action-btn:hover{ background:var(--brand-700); }
+  .cc-split-row{ display:flex; gap:10px; padding:0 18px 16px; }
+  .cc-meta-block{ flex:1; }
+  .cc-meta-label{ font-size:10.5px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px; }
+  .cc-meta-val{ font-size:13px; font-weight:600; color:var(--ink); display:flex; align-items:center; gap:6px; }
+  .cc-meta-avatar{ width:22px; height:22px; border-radius:50%; background:#EFEFF3; font-size:9px; font-weight:800;
+    display:inline-flex; align-items:center; justify-content:center; color:var(--muted); }
+
+  /* right column */
+  .cc-right{ flex:1; display:flex; flex-direction:column; min-width:0; }
+  .cc-tabs{ display:flex; gap:6px; padding:14px 18px 0; border-bottom:1px solid var(--line); overflow-x:auto; }
+  .cc-tab{ padding:8px 16px; font-size:13px; font-weight:600; border-radius:20px 20px 0 0; cursor:pointer;
+    color:var(--muted); background:transparent; border:1px solid transparent; border-bottom:none; white-space:nowrap; position:relative; bottom:-1px; }
+  .cc-tab:hover{ color:var(--ink); }
+  .cc-tab.active{ background:#fff; border-color:var(--line); border-bottom-color:#fff; color:var(--brand-active); }
+  .cc-tab .cc-tab-dot{ width:7px; height:7px; border-radius:50%; background:var(--brand); display:inline-block; margin-left:5px; vertical-align:middle; }
+  .cc-content{ flex:1; overflow-y:auto; padding:22px 22px; }
+
+  /* Jobi AI panel */
+  .jobi-hero{ text-align:center; padding:10px 0 24px; }
+  .jobi-icon{ width:72px; height:72px; border-radius:18px; background:linear-gradient(135deg,#8B85EA,#5C53DC);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 14px; box-shadow:0 4px 16px rgba(139,133,234,.35); }
+  .jobi-icon i{ font-size:30px; color:#fff; }
+  .jobi-hero h3{ font-size:18px; font-weight:800; margin:0 0 6px; }
+  .jobi-hero p{ color:var(--muted); font-size:13.5px; margin:0; }
+  .jobi-cards{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .jobi-card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; cursor:pointer;
+    transition:border-color .15s, box-shadow .15s; }
+  .jobi-card:hover{ border-color:var(--brand-200); box-shadow:0 4px 14px rgba(139,133,234,.12); }
+  .jobi-card-icon{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center;
+    justify-content:center; font-size:18px; margin-bottom:12px; }
+  .jobi-card h4{ font-size:14px; font-weight:800; margin:0 0 6px; display:flex; align-items:center; justify-content:space-between; }
+  .jobi-card p{ font-size:12.5px; color:var(--muted); margin:0 0 12px; line-height:1.5; }
+  .jobi-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .jobi-chip{ font-size:11px; font-weight:700; border-radius:20px; padding:3px 10px; border:1px solid; }
+  .jobi-chip-purple{ background:#f0eefb; color:var(--brand-active); border-color:var(--brand-200); }
+  .jobi-chip-green{ background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+
+  /* insight result panel */
+  .insight-panel{ background:#f8f9fc; border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-top:16px; }
+  .insight-panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .insight-panel-title{ font-size:12px; font-weight:800; color:var(--brand-active); text-transform:uppercase; letter-spacing:.06em; display:flex; align-items:center; gap:6px; }
+  .insight-panel-ts{ font-size:11px; color:var(--muted); }
+  .insight-item{ display:flex; gap:10px; margin-bottom:10px; font-size:13px; color:var(--ink); line-height:1.5; }
+  .insight-item:last-child{ margin-bottom:0; }
+  .insight-dot{ width:8px; height:8px; min-width:8px; border-radius:50%; background:var(--brand); margin-top:5px; }
+
+  /* cc close */
+  .cc-close-row{ display:flex; align-items:center; justify-content:flex-end; padding:12px 18px;
+    border-top:1px solid var(--line); background:#fafbfc; }
+  .cc-close-btn{ background:none; border:1px solid var(--line); border-radius:9px; padding:7px 18px;
+    font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; font-family:inherit; }
+  .cc-close-btn:hover{ background:#f4f3fd; border-color:var(--brand-200); color:var(--brand-active); }
+
+  /* floating demo controls panel — top left, below sidebar brand */
+  .demo-panel{ position:fixed; top:80px; left:10px; z-index:9000; font-family:'Nunito',sans-serif; width:230px; }
+  .demo-toggle{ background:#1f2937; color:#fff; border:none; border-radius:10px; padding:9px 14px;
+    font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:7px;
+    box-shadow:0 4px 14px rgba(0,0,0,.22); font-family:inherit; letter-spacing:.02em; width:100%; }
+  .demo-toggle:hover{ background:#374151; }
+  .demo-toggle i{ font-size:14px; }
+  .demo-body{ background:#1f2937; border-radius:12px; padding:14px 16px; margin-bottom:8px;
+    box-shadow:0 8px 28px rgba(0,0,0,.22); display:none; }
+  .demo-body.open{ display:block; }
+  .demo-body-title{ font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+    color:#6b7280; margin-bottom:12px; }
+  .demo-divider{ border:none; border-top:1px solid #374151; margin:10px 0; }
+  .demo-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .demo-row:last-child{ margin-bottom:0; }
+  .demo-row-label{ font-size:12.5px; font-weight:600; color:#e2e8f0; display:flex; align-items:center; gap:6px; }
+  .demo-row-label i{ font-size:13px; color:#6b7280; }
+  .demo-status{ font-size:11px; font-weight:700; border-radius:20px; padding:2px 9px; }
+  .demo-status.on{ background:#d1fae5; color:#065f46; }
+  .demo-status.off{ background:#374151; color:#9ca3af; }
+  .demo-btn{ background:#374151; border:none; color:#e2e8f0; font-size:12px; font-weight:600;
+    border-radius:7px; padding:5px 11px; cursor:pointer; font-family:inherit; }
+  .demo-btn:hover{ background:#4b5563; }
+  .demo-btn-full{ width:100%; text-align:center; padding:7px 11px; margin-top:4px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">SN</div>
+      <div class="brand-name">Sparrow's Nest Painting</div>
+    </div>
+
+    <div class="nav-section">Sales</div>
+    <a class="nav-item"><i class="bi bi-people"></i> Contacts</a>
+    <a class="nav-item"><i class="bi bi-card-list"></i> Sales List</a>
+    <a class="nav-item"><i class="bi bi-diagram-3"></i> Sales Pipeline</a>
+
+    <div class="nav-section">Jobs</div>
+    <a class="nav-item"><i class="bi bi-briefcase"></i> Change Orders</a>
+    <a class="nav-item"><i class="bi bi-calendar2-week"></i> Job Schedule</a>
+    <a class="nav-item"><i class="bi bi-list-check"></i> Jobs List</a>
+
+    <div class="nav-section">Daily Operations</div>
+    <a class="nav-item"><i class="bi bi-clock-history"></i> Appointments</a>
+    <a class="nav-item active"><i class="bi bi-inbox-fill"></i> Inbox <span class="nav-badge" id="navUnread">0</span></a>
+    <a class="nav-item"><i class="bi bi-chat-dots"></i> Chat</a>
+    <a class="nav-item"><i class="bi bi-check2-square"></i> Tasks</a>
+
+    <div class="nav-settings">
+      <a class="nav-item"><i class="bi bi-gear"></i> Settings</a>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <div class="topbar">
+      <h1>Inbox</h1>
+      <span class="pill-count" id="headUnread">0 unread</span>
+      <div class="ml-auto">
+        <button class="btn-brand" onclick="openCompose()"><i class="bi bi-pencil-square"></i> Compose</button>
+      </div>
+    </div>
+
+    <div class="toolbar" id="toolbar">
+      <div class="search-wrap">
+        <i class="bi bi-search"></i>
+        <input id="search" placeholder="Search by contact, subject, or message…" oninput="render()">
+      </div>
+      <div class="filter-wrap">
+        <button class="btn-filter" id="filterBtn" onclick="toggleFilterPanel()">
+          <i class="bi bi-sliders"></i> Filter
+          <span class="filter-dot"></span>
+          <span class="filter-count" style="display:none;font-size:11px;background:var(--brand);color:#fff;border-radius:20px;padding:0 6px;"></span>
+        </button>
+        <div class="filter-panel" id="filterPanel">
+          <div>
+            <div class="filter-panel-label">Salesperson</div>
+            <select id="fSales" onchange="updateFilterState()">
+              <option value="">All Salespeople</option>
+            </select>
+          </div>
+          <div>
+            <div class="filter-panel-label">Project Manager</div>
+            <select id="fPM" onchange="updateFilterState()">
+              <option value="">All Project Managers</option>
+            </select>
+          </div>
+          <div>
+            <div class="filter-panel-label">Status</div>
+            <select id="fStatus" onchange="updateFilterState()">
+              <option value="">All Status</option>
+              <option value="unread">Unread only</option>
+              <option value="read">Read only</option>
+            </select>
+          </div>
+          <div class="filter-panel-footer">
+            <button class="btn-clear-filters" onclick="clearFilters()">Clear filters</button>
+          </div>
+        </div>
+      </div>
+      <select class="filter-sel sort-sel" id="fSort" onchange="render()" title="Sort order">
+        <option value="recency">Sort: Recency</option>
+        <option value="unread">Sort: Unread first</option>
+      </select>
+    </div>
+
+    <div class="type-tabs" id="typeTabs"></div>
+
+    <div class="info-bar" id="infoBar">
+      <div class="info-bar-icon"><i class="bi bi-info-lg"></i></div>
+      <div>Emails appear here <b>only when a customer replies</b> to an outbound message — drips, proposals, invoices, or change-order emails.</div>
+    </div>
+
+    <div class="panes" id="panes">
+      <div class="list-pane" id="listPane">
+        <div class="bulk-bar" id="bulkBar">
+          <span class="bulk-count" id="bulkCount">0 selected</span>
+          <button class="bulk-btn" onclick="bulkMarkRead()"><i class="bi bi-envelope-open"></i> Mark read</button>
+          <button class="bulk-btn danger" onclick="bulkArchive()"><i class="bi bi-archive"></i> Archive</button>
+          <button class="bulk-deselect" onclick="clearSelection()">Deselect all</button>
+        </div>
+        <div id="mailRows"></div>
+      </div>
+      <div class="read-pane" id="readPane"></div>
+    </div>
+
+    <!-- Not-enabled gate -->
+    <div class="gate" id="gate" style="display:none;">
+      <div class="gate-card">
+        <div class="gate-icon"><i class="bi bi-envelope-slash"></i></div>
+        <h2>Reply routing is turned off</h2>
+        <p>Customer replies aren’t being captured yet. Enable <b>System Reply-To</b> so replies to your outbound emails route into this centralized inbox.</p>
+        <div class="gate-steps">
+          <div class="row"><span class="n">1</span><div>We set a dedicated reply-to address on every outbound email (drips, proposals, invoices, change orders).</div></div>
+          <div class="row"><span class="n">2</span><div>When a customer replies, the message is matched to their contact and lands here — assigned to the right salesperson &amp; PM.</div></div>
+          <div class="row"><span class="n">3</span><div>Your team replies or leaves internal notes without leaving DripJobs.</div></div>
+        </div>
+        <button class="btn-enable" onclick="enableRouting()"><i class="bi bi-toggle-on"></i> Enable Reply Routing</button>
+        <div class="gate-note">You can turn this off anytime in Settings → Email Settings.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Contact slideout -->
+<div class="panel-backdrop" id="panelBackdrop" onclick="closeContactPanel()"></div>
+<aside class="contact-panel" id="contactPanel"><div id="contactPanelBody"></div></aside>
+
+<!-- Demo controls panel -->
+<div class="demo-panel">
+  <button class="demo-toggle" onclick="toggleDemoPanel()">
+    <i class="bi bi-tools"></i> Demo Controls
+    <i class="bi bi-chevron-down" id="demoChevron" style="font-size:11px;transition:transform .2s;margin-left:auto;"></i>
+  </button>
+  <div class="demo-body" id="demoBody">
+    <div class="demo-body-title">⚙ Demo Controls</div>
+    <div class="demo-row">
+      <span class="demo-row-label"><i class="bi bi-arrow-repeat"></i> Reply routing</span>
+      <span class="demo-status" id="demoRoutingStatus">on</span>
+    </div>
+    <div class="demo-row">
+      <span class="demo-row-label" style="font-size:11px;color:#6b7280;">Toggles the inbox gate screen</span>
+      <button class="demo-btn" onclick="toggleRouting()">Toggle</button>
+    </div>
+    <hr class="demo-divider">
+    <div class="demo-row">
+      <span class="demo-row-label"><i class="bi bi-person-badge"></i> View as role</span>
+      <span class="demo-status on" id="demoRoleStatus">Admin</span>
+    </div>
+    <div class="demo-row">
+      <span class="demo-row-label" style="font-size:11px;color:#6b7280;">Salesperson sees only assigned threads</span>
+      <button class="demo-btn" onclick="toggleRole()">Switch</button>
+    </div>
+    <hr class="demo-divider">
+    <div class="demo-row">
+      <span class="demo-row-label"><i class="bi bi-layout-text-sidebar"></i> Views</span>
+    </div>
+    <button class="demo-btn demo-btn-full" onclick="openCommandCenter()">
+      <i class="bi bi-grid-1x2"></i> Open Command Center
+    </button>
+  </div>
+</div>
+
+<!-- Command Center modal -->
+<div class="cc-backdrop" id="ccBackdrop" onclick="handleCCBackdropClick(event)">
+  <div class="cc-modal" id="ccModal">
+    <div class="cc-modal-inner">
+
+      <!-- Left column -->
+      <div class="cc-left">
+        <div class="cc-left-head">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <span style="background:#fde9e7;color:#b91c1c;font-size:10px;font-weight:800;border-radius:20px;padding:2px 9px;text-transform:uppercase;letter-spacing:.04em;">Follow Up 2</span>
+            <div style="display:flex;gap:8px;">
+              <i class="bi bi-pencil" style="color:var(--muted);cursor:pointer;font-size:14px;"></i>
+              <i class="bi bi-three-dots" style="color:var(--muted);cursor:pointer;font-size:14px;"></i>
+            </div>
+          </div>
+          <div class="cc-deal-name">Marcus & Diana Holloway</div>
+          <div class="cc-deal-meta">Deal #3041882 · Created 14d ago</div>
+          <div class="cc-stage-row">
+            <span class="cc-stage-pill" style="background:#e4edfb;color:#1d4ed8;">Proposal Sent</span>
+            <button class="demo-btn" style="font-size:11px;padding:3px 10px;" onclick="toast('Move stage: mockup')">Move</button>
+          </div>
+        </div>
+        <div class="cc-seq-row">
+          <div class="cc-seq-label"><i class="bi bi-droplet-fill" style="font-size:11px;"></i> Next Drip: 48hr Proposal Follow Up</div>
+          <div class="cc-seq-sub">Sends on 6/4/2026 at 10:30AM EST</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+            <span style="font-size:11.5px;color:var(--muted);">Current Sequence</span>
+            <button class="demo-btn" style="font-size:11px;padding:3px 10px;" onclick="toast('Change sequence: mockup')">Change</button>
+          </div>
+          <div style="font-size:12.5px;font-weight:700;color:var(--ink);margin-top:2px;">Standard Proposal Follow Up</div>
+        </div>
+        <div class="cc-contact-section">
+          <div class="cc-contact-title">Contact Information</div>
+          <div class="cc-contact-row"><i class="bi bi-person"></i> Marcus Holloway</div>
+          <div class="cc-contact-row"><i class="bi bi-diagram-2"></i> Referral — Existing Customer</div>
+          <div class="cc-contact-row"><i class="bi bi-envelope"></i> <a href="#">m.holloway@gmail.com</a></div>
+          <div class="cc-contact-row"><i class="bi bi-telephone"></i> (352) 555-0174</div>
+          <div class="cc-contact-row"><i class="bi bi-geo-alt"></i> 2218 NW Creekside Dr, Ocala, FL 34475</div>
+        </div>
+        <div class="cc-actions-row">
+          <button class="cc-action-btn" onclick="toast('New Proposal: mockup')">New Proposal</button>
+          <button class="cc-action-btn" style="background:#EFEFF3;color:var(--ink);" onclick="toast('New Appt: mockup')">New Appt ▾</button>
+        </div>
+        <div class="cc-split-row">
+          <div class="cc-meta-block">
+            <div class="cc-meta-label">Salesperson</div>
+            <div class="cc-meta-val"><span class="cc-meta-avatar">CP</span> Chris Palmer</div>
+          </div>
+          <div class="cc-meta-block">
+            <div class="cc-meta-label">Project Manager</div>
+            <div class="cc-meta-val"><span class="cc-meta-avatar" style="color:#94a3b8;">—</span> No PM</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div class="cc-right">
+        <div class="cc-tabs" id="ccTabs">
+          <div class="cc-tab" onclick="setCCTab('email')">Inbox</div>
+          <div class="cc-tab" onclick="setCCTab('chat')">Chat</div>
+          <div class="cc-tab active" onclick="setCCTab('jobi')">Jobi AI <span class="cc-tab-dot"></span></div>
+          <div class="cc-tab" onclick="setCCTab('proposals')">Proposals / Jobs</div>
+          <div class="cc-tab" onclick="setCCTab('invoices')">Invoices / Payments</div>
+          <div class="cc-tab" onclick="setCCTab('notes')">Notes</div>
+          <div class="cc-tab" onclick="setCCTab('attachments')">Attachments</div>
+          <div class="cc-tab" onclick="setCCTab('tasks')">Tasks</div>
+        </div>
+        <div class="cc-content" id="ccContent">
+          <!-- Jobi tab rendered by JS -->
+        </div>
+      </div>
+
+    </div>
+    <div class="cc-close-row">
+      <button class="cc-close-btn" onclick="closeCommandCenter()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Associate to contact modal -->
+<div class="assoc-modal-backdrop" id="assocModalBackdrop" onclick="handleAssocBackdropClick(event)">
+  <div class="assoc-modal">
+    <h3><i class="bi bi-person-check" style="color:#f59e0b;margin-right:8px;"></i>Associate to Contact</h3>
+    <p>This reply came from an email address not on any contact record. Select an existing contact to link this thread to their deal, or create a new contact.</p>
+    <div class="assoc-modal-field">
+      <div class="assoc-modal-label">Inbound email address</div>
+      <div style="font-size:13.5px;font-weight:700;color:var(--ink);padding:8px 0;" id="assocEmail">—</div>
+    </div>
+    <div class="assoc-modal-field">
+      <div class="assoc-modal-label">Match to existing contact</div>
+      <select class="assoc-modal-select" id="assocContactSelect">
+        <option value="">— Select a contact —</option>
+        <option value="1">Karen Whitfield — karen.whitfield@gmail.com</option>
+        <option value="2">Robert Mancini — rob.mancini@yahoo.com</option>
+        <option value="3">The Delgado Family — delgado.home@outlook.com</option>
+        <option value="4">Greg Halverson — g.halverson@halversonllc.com</option>
+        <option value="5">Patty Nguyen — patty.nguyen@gmail.com</option>
+        <option value="6">Tom Brückner — tom.b@brucknerhvac.com</option>
+      </select>
+    </div>
+    <div class="assoc-modal-footer">
+      <button class="btn-ghost" onclick="closeAssocModal()">Cancel</button>
+      <button class="btn-ghost" onclick="toast('Create new contact: mockup');closeAssocModal()"><i class="bi bi-person-plus"></i> New Contact</button>
+      <button class="btn-assoc" onclick="submitAssociation()"><i class="bi bi-check-lg"></i> Associate</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-host" id="toastHost"></div>
+
+<script>
+/* ---------------- Reference data ---------------- */
+const SALES = { mr:'Mike Reynolds', sc:'Sarah Chen', jd:'Jordan Diaz' };
+const PMS   = { dt:'Dave Thompson', lm:'Lisa Martinez' };
+
+const TYPES = [
+  { key:'all',       label:'All',       icon:'bi-collection'        },
+  { key:'drip',      label:'Drip',      icon:'bi-droplet'           },
+  { key:'proposal',  label:'Proposals', icon:'bi-file-earmark-text' },
+  { key:'other',     label:'Other',     icon:'bi-envelope'          },
+  { key:'unmatched', label:'Unmatched', icon:'bi-exclamation-circle'},
+];
+const OTHER_TYPES = ['inbound','invoice','change_order','general'];
+const TYPE_LABEL = { drip:'Drip', invoice:'Invoice', proposal:'Proposal', change_order:'Change Order', inbound:'Inbound', general:'General' };
+
+const AV_PAIRS = [
+  {bg:'#ece9fb',fg:'#6d28d9'}, {bg:'#e0f2f3',fg:'#0e7490'}, {bg:'#e6f4ea',fg:'#15803d'},
+  {bg:'#fde9e7',fg:'#b91c1c'}, {bg:'#fdf3da',fg:'#a16207'}, {bg:'#e4edfb',fg:'#1d4ed8'},
+  {bg:'#fbe6f0',fg:'#be185d'}, {bg:'#e3efed',fg:'#0f766e'},
+];
+function avPair(s){ let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))>>>0; return AV_PAIRS[h%AV_PAIRS.length]; }
+function initials(n){ return n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+/* ---------------- Mock conversations ----------------
+   ts = minutes ago (smaller = newer). All inbound mail arrives via Postmark. */
+let MAILS = [
+  { id:1, name:'Karen Whitfield', email:'karen.whitfield@gmail.com', type:'inbound', unread:true, ts:8,
+    sales:'mr', pm:'dt', subject:'Re: Your exterior repaint proposal',
+    thread:[
+      {dir:'out', from:"Sparrow's Nest Painting", email:'hello@sparrowsnestpainting.com', channel:'email', ts:'Yesterday 4:12 PM', context:'Proposal #PR-2041',
+       text:'Hi Karen,\n\nThanks for having us out. Attached is your proposal for the full exterior repaint — Sherwin-Williams Duration, 2 coats, including the detached garage.\n\nLet me know if you have any questions!\n\n— Mike, Sparrow\'s Nest Painting'},
+      {dir:'in', from:'Karen Whitfield', email:'karen.whitfield@gmail.com', channel:'email', ts:'8 min ago',
+       text:'Hi Mike — this looks great! Quick question, does the price include the trim around the front windows? And could we start the week of the 15th?'},
+    ]},
+  { id:2, name:'Robert Mancini', email:'rob.mancini@yahoo.com', type:'invoice', unread:true, ts:34,
+    sales:'sc', pm:'lm', subject:'Re: Invoice #INV-8830 — balance due',
+    thread:[
+      {dir:'out', from:"Sparrow's Nest Painting (Billing)", email:'billing@sparrowsnestpainting.com', channel:'email', ts:'Today 9:01 AM', context:'Invoice #INV-8830 · $2,450.00', status:'failed',
+       text:'Hi Robert,\n\nYour final invoice for the interior project is ready. Balance due: $2,450.00. You can pay securely using the button below.\n\nThank you for your business!'},
+      {dir:'in', from:'Robert Mancini', email:'rob.mancini@yahoo.com', channel:'email', ts:'34 min ago',
+       text:'Got it. Card on file declined — can you resend the payment link? Want to take care of this today.'},
+    ]},
+  { id:3, name:'The Delgado Family', email:'delgado.home@outlook.com', type:'drip', unread:true, ts:52,
+    sales:'jd', pm:'', subject:'Re: Still thinking about your cabinet refinish?',
+    thread:[
+      {dir:'out', from:"Sparrow's Nest Painting", email:'hello@sparrowsnestpainting.com', channel:'email', ts:'Today 8:30 AM', context:'Drip: Nurture · Day 5',
+       text:'Hi! Just checking in on the kitchen cabinet refinishing estimate we sent over. Happy to answer any questions or set up a time to chat.'},
+      {dir:'in', from:'The Delgado Family', email:'delgado.home@outlook.com', channel:'email', ts:'52 min ago', replyTo:'drip',
+       text:'Yes still interested! We were waiting on a color sample. Can someone bring by the white dove vs. alabaster swatches?'},
+    ]},
+  { id:4, name:'Greg Halverson', email:'g.halverson@halversonllc.com', type:'change_order', unread:false, ts:140,
+    sales:'mr', pm:'dt', subject:'Re: Change Order #CO-119 approval',
+    thread:[
+      {dir:'out', from:"Sparrow's Nest Painting", email:'hello@sparrowsnestpainting.com', channel:'email', ts:'Today 6:40 AM', context:'Change Order #CO-119 · +$880.00',
+       text:'Hi Greg,\n\nPer our conversation, here is the change order to add the two bedroom ceilings. Additional cost is $880.00. Approve below and we’ll add it to the schedule.'},
+      {dir:'in', from:'Greg Halverson', email:'g.halverson@halversonllc.com', channel:'email', ts:'2 hr ago',
+       text:'Approved. Go ahead and add it. Thanks for turning this around fast.'},
+    ]},
+  { id:5, name:'Patty Nguyen', email:'patty.nguyen@gmail.com', type:'proposal', unread:false, ts:200,
+    sales:'sc', pm:'', subject:'Re: Deck staining proposal',
+    thread:[
+      {dir:'out', from:"Sparrow's Nest Painting", email:'hello@sparrowsnestpainting.com', channel:'email', ts:'Today 5:20 AM', context:'Proposal #PR-2038',
+       text:'Hi Patty, attached is the proposal for the deck sanding + stain. Two options included — transparent and semi-transparent.'},
+      {dir:'in', from:'Patty Nguyen', email:'patty.nguyen@gmail.com', channel:'email', ts:'3 hr ago',
+       text:'We’ll go with the semi-transparent. What’s the next step?'},
+    ]},
+  { id:6, name:'Tom Brückner', email:'tom.b@brucknerhvac.com', type:'inbound', unread:false, ts:320,
+    sales:'jd', pm:'lm', subject:'Re: Scheduling the commercial lobby repaint',
+    thread:[
+      {dir:'out', from:"Sparrow's Nest Painting", email:'hello@sparrowsnestpainting.com', channel:'email', ts:'Yesterday 2:10 PM',
+       text:'Hi Tom, following up on the lobby + stairwell repaint. We can do it after hours to avoid disruption. What week works?'},
+      {dir:'in', from:'Tom Brückner', email:'tom.b@brucknerhvac.com', channel:'email', ts:'5 hr ago',
+       text:'After hours is perfect. Let’s target the last week of the month. Send over the COI for our building manager when you can.'},
+    ]},
+  { id:7, name:'Alicia Romano', email:'alicia.romano@gmail.com', type:'invoice', unread:false, ts:1440,
+    sales:'mr', pm:'dt', subject:'Re: Invoice #INV-8810 — paid, thank you!',
+    thread:[
+      {dir:'out', from:"Sparrow's Nest Painting (Billing)", email:'billing@sparrowsnestpainting.com', channel:'email', ts:'Yesterday 11:00 AM', context:'Invoice #INV-8810 · $1,200.00 · PAID',
+       text:'Hi Alicia, your payment of $1,200.00 was received. Here is your receipt. Thanks again!'},
+      {dir:'in', from:'Alicia Romano', email:'alicia.romano@gmail.com', channel:'email', ts:'1 day ago',
+       text:'Thank you! The team did a beautiful job on the nursery. Will definitely refer you.'},
+    ]},
+  { id:8, name:'Dennis Park', email:'dpark.home@icloud.com', type:'drip', unread:false, ts:2880,
+    sales:'sc', pm:'', subject:'Re: A little reminder about your free estimate',
+    thread:[
+      {dir:'out', from:"Sparrow's Nest Painting", email:'hello@sparrowsnestpainting.com', channel:'email', ts:'2 days ago', context:'Drip: Cold Lead · Day 2',
+       text:'Hi Dennis! You requested a free estimate last week — want to grab a time this week? We have Thursday and Friday open.'},
+      {dir:'in', from:'Dennis Park', email:'dpark.home@icloud.com', channel:'email', ts:'2 days ago', replyTo:'drip',
+       text:'Friday afternoon works. Around 3?'},
+    ]},
+  { id:9, name:'Unknown Sender', email:'jt_replies_2024@protonmail.com', type:'unmatched', unread:true, ts:18, unmatched:true,
+    sales:'', pm:'', subject:'Re: Your painting estimate',
+    thread:[
+      {dir:'in', from:'Unknown Sender', email:'jt_replies_2024@protonmail.com', channel:'email', ts:'18 min ago',
+       text:'Hey, I got your email about the estimate. Yes I\'m still interested. What does the timeline look like for exterior work in July?'},
+    ]},
+  { id:10, name:'Unknown Sender', email:'coastal.props.mgmt@outlook.com', type:'unmatched', unread:true, ts:95, unmatched:true,
+    sales:'', pm:'', subject:'Re: Commercial repaint proposal — Unit 4B',
+    thread:[
+      {dir:'in', from:'Unknown Sender', email:'coastal.props.mgmt@outlook.com', channel:'email', ts:'1 hr ago',
+       text:'We reviewed the proposal for Unit 4B. The price looks reasonable. Can you also quote Units 4C and 4D while you\'re at it? Same scope, same building.'},
+    ]},
+];
+
+/* ---------------- Contact + deals (per conversation) ---------------- */
+const STAGES = {
+  'Warm Lead':{bg:'#fdeee2',fg:'#c2410c'},
+  'Estimate Scheduled':{bg:'#fdf3d4',fg:'#a16207'},
+  'Scope Review':{bg:'#eef9fb',fg:'#0e7490'},
+  'Proposal Sent':{bg:'#e4edfb',fg:'#1d4ed8'},
+  'In Production':{bg:'#ece9fb',fg:'#6d28d9'},
+  'Won':{bg:'#e6f4ea',fg:'#15803d'},
+};
+const CONTACTS = {
+  1:{phone:'(352) 555-0142', address:'4130 Burgess Dr, Ocala, FL 34474', since:'Jan 2025', ltv:'$0', tags:['Exterior','Homeowner'], deals:[
+      {name:'Exterior Repaint — Whole Home', stage:'Proposal Sent', value:'$6,450'},
+      {name:'Detached Garage Repaint', stage:'Estimate Scheduled', value:'$1,750'} ]},
+  2:{phone:'(352) 555-0188', address:'882 SE 18th Ave, Ocala, FL 34471', since:'Aug 2024', ltv:'$2,450', tags:['Interior','Repeat'], deals:[
+      {name:'Interior Repaint — Main Floor', stage:'In Production', value:'$4,900'} ]},
+  3:{phone:'(352) 555-0117', address:'1290 NW 50th St, Ocala, FL 34482', since:'May 2026', ltv:'$0', tags:['Cabinets','New Lead'], deals:[
+      {name:'Kitchen Cabinet Refinish', stage:'Warm Lead', value:'$3,200'} ]},
+  4:{phone:'(352) 555-0164', address:'55 Halverson LLC, Ocala, FL', since:'Feb 2025', ltv:'$22,800', tags:['Commercial','VIP'], deals:[
+      {name:'Interior Repaint — 4BR Home', stage:'In Production', value:'$11,520'},
+      {name:'Bedroom Ceilings (CO-119)', stage:'In Production', value:'$880'} ]},
+  5:{phone:'(352) 555-0133', address:'7702 SW 80th Pl, Ocala, FL 34476', since:'Apr 2026', ltv:'$0', tags:['Deck','Homeowner'], deals:[
+      {name:'Deck Sand & Stain', stage:'Proposal Sent', value:'$2,100'} ]},
+  6:{phone:'(352) 555-0199', address:'310 Commerce Blvd, Gainesville, FL', since:'Mar 2025', ltv:'$9,400', tags:['Commercial','Repeat'], deals:[
+      {name:'Lobby + Stairwell Repaint', stage:'Scope Review', value:'$18,500'} ]},
+  7:{phone:'(352) 555-0151', address:'419 NE 9th St, Ocala, FL 34470', since:'Nov 2025', ltv:'$1,200', tags:['Interior'], deals:[] },
+  8:{phone:'(352) 555-0176', address:'6051 SW 54th Ln, Ocala, FL 34474', since:'May 2026', ltv:'$0', tags:['New Lead','Estimate'], deals:[
+      {name:'Free Estimate — Interior', stage:'Warm Lead', value:'TBD'} ]},
+};
+
+let activeType = 'all';
+let selectedId = null;
+let selectedIds = new Set();  // bulk selection
+let panelOpen = false;              // contact slideout
+let routingEnabled = true;          // System Reply-To on/off
+let composeMode = 'reply';          // 'reply' | 'note'
+let drafts = { reply:'', note:'' }; // preserve text when switching modes
+const CURRENT_USER = 'Tanner Mullen';
+const TENANT_NAME  = "Sparrow's Nest Painting";
+// Role: 'admin' sees all threads; 'salesperson' sees only assigned threads
+let CURRENT_ROLE = 'admin';
+
+/* ---------------- Bulk selection ---------------- */
+function toggleSelect(id, checked){
+  if(checked) selectedIds.add(id);
+  else selectedIds.delete(id);
+  syncBulkBar();
+  render();
+}
+function syncBulkBar(){
+  const bar = document.getElementById('bulkBar');
+  const cnt = document.getElementById('bulkCount');
+  const n = selectedIds.size;
+  bar.classList.toggle('visible', n > 0);
+  cnt.textContent = n + ' selected';
+}
+function clearSelection(){
+  selectedIds.clear();
+  syncBulkBar();
+  render();
+}
+function bulkMarkRead(){
+  selectedIds.forEach(id=>{
+    const m = MAILS.find(x=>x.id===id);
+    if(m) m.unread = false;
+  });
+  const n = selectedIds.size;
+  selectedIds.clear();
+  syncBulkBar();
+  toast(`${n} conversation${n!==1?'s':''} marked as read`);
+  render();
+}
+function bulkArchive(){
+  const n = selectedIds.size;
+  MAILS = MAILS.filter(m=>!selectedIds.has(m.id));
+  if(selectedIds.has(selectedId)){ selectedId=null; closeContactPanel(); renderEmptyState(); }
+  selectedIds.clear();
+  syncBulkBar();
+  toast(`${n} conversation${n!==1?'s':''} archived`);
+  render();
+}
+
+/* ---------------- Routing gate ---------------- */
+function applyRouting(){
+  const on = routingEnabled;
+  ['toolbar','typeTabs','infoBar','panes'].forEach(id=> document.getElementById(id).style.display = on?'':'none');
+  document.getElementById('gate').style.display = on?'none':'flex';
+  const status = document.getElementById('demoRoutingStatus');
+  if(status){ status.textContent = on?'on':'off'; status.className = 'demo-status ' + (on?'on':'off'); }
+}
+function toggleRouting(){
+  routingEnabled = !routingEnabled;
+  applyRouting();
+  toast(routingEnabled?'Reply routing enabled':'Reply routing disabled');
+}
+function enableRouting(){
+  routingEnabled = true;
+  applyRouting();
+  render();
+  toast('Reply routing enabled — replies will now route here');
+  // Re-render CC email tab if CC is open on email tab
+  if(document.getElementById('ccBackdrop').classList.contains('open') && ccActiveTab === 'email'){
+    renderCCTab('email');
+  }
+}
+
+let demoPanelOpen = false;
+function toggleDemoPanel(){
+  demoPanelOpen = !demoPanelOpen;
+  document.getElementById('demoBody').classList.toggle('open', demoPanelOpen);
+  const chev = document.getElementById('demoChevron');
+  chev.style.transform = demoPanelOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+function toggleRole(){
+  CURRENT_ROLE = CURRENT_ROLE === 'admin' ? 'salesperson' : 'admin';
+  const status = document.getElementById('demoRoleStatus');
+  if(status){
+    status.textContent = CURRENT_ROLE === 'admin' ? 'Admin' : 'Salesperson';
+    status.className = 'demo-status ' + (CURRENT_ROLE === 'admin' ? 'on' : 'off');
+  }
+  // If a thread is open that the salesperson can't see, close it
+  if(CURRENT_ROLE === 'salesperson' && selectedId !== null){
+    const m = MAILS.find(x=>x.id===selectedId);
+    if(m && m.sales !== 'mr'){ selectedId = null; closeContactPanel(); }
+  }
+  toast(`Viewing as ${CURRENT_ROLE === 'admin' ? 'Admin' : 'Salesperson (Mike Reynolds)'}`);
+  render();
+}
+
+/* ---------------- Command Center ---------------- */
+let ccActiveTab = 'jobi';
+let insightGenerated = false;
+
+function openCommandCenter(){
+  insightGenerated = false;
+  ccActiveTab = 'jobi';
+  document.getElementById('ccBackdrop').classList.add('open');
+  renderCCTab('jobi');
+  // sync tab active state
+  document.querySelectorAll('.cc-tab').forEach(t => t.classList.remove('active'));
+  const jobTab = [...document.querySelectorAll('.cc-tab')].find(t=>t.getAttribute('onclick')==="setCCTab('jobi')");
+  if(jobTab) jobTab.classList.add('active');
+}
+function closeCommandCenter(){
+  document.getElementById('ccBackdrop').classList.remove('open');
+}
+function handleCCBackdropClick(e){
+  if(e.target === document.getElementById('ccBackdrop')) closeCommandCenter();
+}
+function setCCTab(tab){
+  ccActiveTab = tab;
+  document.querySelectorAll('.cc-tab').forEach(t => t.classList.remove('active'));
+  const target = [...document.querySelectorAll('.cc-tab')].find(t=>t.getAttribute('onclick')===`setCCTab('${tab}')`);
+  if(target) target.classList.add('active');
+  renderCCTab(tab);
+}
+function renderCCTab(tab){
+  const content = document.getElementById('ccContent');
+  if(tab === 'jobi'){
+    const insightResult = insightGenerated ? `
+      <div class="insight-panel">
+        <div class="insight-panel-head">
+          <div class="insight-panel-title"><i class="bi bi-stars"></i> Deal Intelligence</div>
+          <div class="insight-panel-ts">Generated just now</div>
+        </div>
+        <div class="insight-item"><div class="insight-dot"></div><div><b>Lead Score: 78/100 — High Intent.</b> Customer replied to a drip on Day 2, well above the average response window of Day 5. Early engagement is a strong close indicator.</div></div>
+        <div class="insight-item"><div class="insight-dot"></div><div><b>Sentiment: Positive.</b> Reply tone is warm and specific — they referenced the trim detail from the proposal directly, suggesting they read it closely.</div></div>
+        <div class="insight-item"><div class="insight-dot"></div><div><b>Next Steps:</b> Respond within 2 hours to maintain momentum. Confirm trim inclusion and propose a start-week. Deals replied to within 2hr have a 34% higher close rate.</div></div>
+      </div>` : '';
+    content.innerHTML = `
+      <div class="jobi-hero">
+        <div class="jobi-icon"><i class="bi bi-stars"></i></div>
+        <h3>Jobi AI Assistant</h3>
+        <p>Leverage AI-powered tools to close more deals and communicate smarter.</p>
+      </div>
+      <div class="jobi-cards">
+        <div class="jobi-card">
+          <div class="jobi-card-icon" style="background:#f0eefb;"><i class="bi bi-graph-up-arrow" style="color:var(--brand-active);"></i></div>
+          <h4>Deal Intelligence <i class="bi bi-arrow-right" style="font-size:13px;color:var(--muted);"></i></h4>
+          <p>Get AI-powered insights about this deal including lead scoring, sentiment analysis, and strategic recommendations.</p>
+          <div class="jobi-chips" style="margin-bottom:14px;">
+            <span class="jobi-chip jobi-chip-purple">Lead Scoring</span>
+            <span class="jobi-chip jobi-chip-purple">Sentiment</span>
+            <span class="jobi-chip jobi-chip-purple">Next Steps</span>
+          </div>
+          <button class="cc-action-btn" style="width:100%;font-size:13px;" onclick="runInsight()">
+            <i class="bi bi-stars"></i> Run Deal Insight
+          </button>
+        </div>
+        <div class="jobi-card" style="display:flex;flex-direction:column;">
+          <div class="jobi-card-icon" style="background:#f0fdf4;"><i class="bi bi-chat-text" style="color:#15803d;"></i></div>
+          <h4>Communications Assistant <span style="font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;border-radius:20px;padding:2px 8px;margin-left:6px;vertical-align:middle;">V2</span></h4>
+          <p>Generate personalized SMS and email messages tailored to this customer with AI-suggested follow-ups.</p>
+          <div class="jobi-chips" style="margin-bottom:14px;">
+            <span class="jobi-chip jobi-chip-green" style="cursor:pointer;" onclick="showCommsPreview('sms')">SMS</span>
+            <span class="jobi-chip jobi-chip-green" style="cursor:pointer;" onclick="showCommsPreview('email')">Email</span>
+            <span class="jobi-chip jobi-chip-green" style="cursor:pointer;" onclick="showCommsPreview('autofollowup')">Auto-Follow Up</span>
+          </div>
+          <div id="commsPreview" style="display:none;background:#f8f9fc;border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin-top:auto;font-size:12.5px;color:var(--ink);line-height:1.5;"></div>
+        </div>
+      </div>
+      ${insightResult}`;
+  } else if(tab === 'email'){
+    if(routingEnabled){
+      content.innerHTML = `
+        <div style="text-align:center;padding:40px 20px 28px;">
+          <div style="width:60px;height:60px;border-radius:50%;background:#f0fafa;border:2px solid #0DCECE;
+            display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+            <i class="bi bi-envelope-check" style="font-size:24px;color:#0DCECE;"></i>
+          </div>
+          <div style="font-weight:800;font-size:15px;color:var(--ink);margin-bottom:6px;">Reply routing is active</div>
+          <div style="font-size:13px;color:var(--muted);max-width:300px;margin:0 auto 20px;line-height:1.6;">
+            When <b style="color:var(--ink);">Marcus Holloway</b> replies to a drip, proposal, or outbound email,
+            that thread will appear here — threaded with the original send.
+          </div>
+          <div style="background:#f0fafa;border-left:4px solid #0DCECE;border-radius:0 8px 8px 0;
+            padding:10px 14px;text-align:left;max-width:340px;margin:0 auto;font-size:12.5px;color:#32415B;">
+            <b>No replies yet.</b> The next reply from this contact will surface here automatically.
+          </div>
+        </div>`;
+    } else {
+      content.innerHTML = `
+        <div style="text-align:center;padding:40px 20px 28px;">
+          <div style="width:60px;height:60px;border-radius:50%;background:#fef3c7;border:2px solid #f59e0b;
+            display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+            <i class="bi bi-envelope-slash" style="font-size:24px;color:#f59e0b;"></i>
+          </div>
+          <div style="font-weight:800;font-size:15px;color:var(--ink);margin-bottom:6px;">Reply routing is off</div>
+          <div style="font-size:13px;color:var(--muted);max-width:300px;margin:0 auto 20px;line-height:1.6;">
+            Customer email replies aren't being captured yet. Enable <b style="color:var(--ink);">System Reply-To</b>
+            so replies to outbound emails route into DripJobs.
+          </div>
+          <button class="btn-enable" onclick="enableRouting();closeCommandCenter();setCCTab('email');"
+            style="margin:0 auto;display:inline-flex;">
+            <i class="bi bi-toggle-on"></i> Enable Reply Routing
+          </button>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:12px;">
+            You can also enable this in Settings → Email Settings.
+          </div>
+        </div>`; 
+    }
+  } else {
+    const labels = {chat:'Chat',proposals:'Proposals / Jobs',invoices:'Invoices / Payments',notes:'Notes',attachments:'Attachments',tasks:'Tasks'};
+    content.innerHTML = `
+      <div style="text-align:center;padding:40px 20px;color:var(--muted);">
+        <i class="bi bi-layout-text-sidebar" style="font-size:40px;color:#D6D2F5;display:block;margin-bottom:14px;"></i>
+        <div style="font-weight:700;color:var(--ink);margin-bottom:6px;">${labels[tab]||tab}</div>
+        <div style="font-size:13px;">This tab is outside the scope of this prototype.</div>
+      </div>`;
+  }
+}
+function runInsight(){
+  insightGenerated = true;
+  toast('Running Deal Insight…');
+  setTimeout(()=>{ renderCCTab('jobi'); toast('Deal Insight ready'); }, 1200);
+}
+function showCommsPreview(type){
+  const panel = document.getElementById('commsPreview');
+  if(!panel) return;
+  const content = {
+    sms: `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <i class="bi bi-phone" style="color:#15803d;font-size:15px;"></i>
+            <b>SMS Generator</b>
+            <span style="font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;border-radius:20px;padding:1px 7px;">Coming in V2</span>
+          </div>
+          Generate a personalized SMS follow-up for Marcus based on deal stage, last activity, and tone preference. Jobi will draft 2–3 variants for you to choose from before sending via Twilio.`,
+    email: `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <i class="bi bi-envelope" style="color:#15803d;font-size:15px;"></i>
+              <b>Email Composer</b>
+              <span style="font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;border-radius:20px;padding:1px 7px;">Coming in V2</span>
+            </div>
+            Draft a personalized outbound email for this deal — proposal follow-up, check-in, or custom message — using deal context and customer history. Sends directly from the Inbox composer.`,
+    autofollowup: `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                     <i class="bi bi-arrow-repeat" style="color:#15803d;font-size:15px;"></i>
+                     <b>Auto-Follow Up</b>
+                     <span style="font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;border-radius:20px;padding:1px 7px;">Coming in V2</span>
+                   </div>
+                   Jobi monitors reply activity and suggests follow-up timing automatically. When a customer goes quiet after a proposal or drip reply, Jobi drafts and queues a follow-up for your approval before it sends.`
+  };
+  const isOpen = panel.style.display !== 'none' && panel.dataset.active === type;
+  if(isOpen){
+    panel.style.display = 'none';
+    panel.dataset.active = '';
+  } else {
+    panel.innerHTML = content[type] || '';
+    panel.style.display = 'block';
+    panel.dataset.active = type;
+  }
+}
+
+/* ---------------- Populate filter dropdowns ---------------- */
+(function initFilters(){
+  const s = document.getElementById('fSales');
+  Object.entries(SALES).forEach(([k,v])=> s.add(new Option(v,k)));
+  const p = document.getElementById('fPM');
+  Object.entries(PMS).forEach(([k,v])=> p.add(new Option(v,k)));
+})();
+
+/* ---------------- Filter panel ---------------- */
+let filterPanelOpen = false;
+function toggleFilterPanel(){
+  filterPanelOpen = !filterPanelOpen;
+  document.getElementById('filterPanel').classList.toggle('open', filterPanelOpen);
+}
+function closeFilterPanel(){
+  filterPanelOpen = false;
+  document.getElementById('filterPanel').classList.remove('open');
+}
+function updateFilterState(){
+  const fs  = document.getElementById('fSales').value;
+  const fp  = document.getElementById('fPM').value;
+  const fst = document.getElementById('fStatus').value;
+  const activeCount = [fs, fp, fst].filter(Boolean).length;
+  const btn = document.getElementById('filterBtn');
+  const dot = btn.querySelector('.filter-dot');
+  const cnt = btn.querySelector('.filter-count');
+  btn.classList.toggle('has-filters', activeCount > 0);
+  if(activeCount > 0){
+    cnt.textContent = activeCount;
+    cnt.style.display = 'inline-block';
+    dot.style.display = 'none';
+  } else {
+    cnt.style.display = 'none';
+    dot.style.display = 'none';
+  }
+  render();
+}
+function clearFilters(){
+  document.getElementById('fSales').value = '';
+  document.getElementById('fPM').value = '';
+  document.getElementById('fStatus').value = '';
+  updateFilterState();
+  closeFilterPanel();
+}
+// Close panel on outside click
+document.addEventListener('click', function(e){
+  const wrap = document.getElementById('filterBtn')?.closest('.filter-wrap');
+  if(filterPanelOpen && wrap && !wrap.contains(e.target)) closeFilterPanel();
+});
+
+/* ---------------- Derived helpers ---------------- */
+function passesFilters(m){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const fs = document.getElementById('fSales').value;
+  const fp = document.getElementById('fPM').value;
+  const fst = document.getElementById('fStatus').value;
+  // BR-10: salespeople only see their assigned threads
+  if(CURRENT_ROLE === 'salesperson' && m.sales !== 'mr') return false;
+  if(activeType === 'unmatched' && m.type !== 'unmatched') return false;
+  if(activeType === 'other' && !OTHER_TYPES.includes(m.type)) return false;
+  if(activeType !== 'all' && activeType !== 'other' && activeType !== 'unmatched' && m.type !== activeType) return false;
+  // unmatched threads only appear in All and Unmatched tabs
+  if(m.unmatched && activeType !== 'all' && activeType !== 'unmatched') return false;
+  if(fs && m.sales!==fs) return false;
+  if(fp && m.pm!==fp) return false;
+  if(fst==='unread' && !m.unread) return false;
+  if(fst==='read' && m.unread) return false;
+  if(q){
+    const hay = (m.name+' '+m.email+' '+m.subject+' '+m.thread.map(t=>t.text).join(' ')).toLowerCase();
+    if(!hay.includes(q)) return false;
+  }
+  return true;
+}
+function sortMails(a,b){
+  const mode = document.getElementById('fSort').value;
+  if(mode === 'unread'){
+    if(a.unread !== b.unread) return a.unread ? -1 : 1; // unread first
+  }
+  return a.ts - b.ts; // then/always newest first
+}
+
+/* ---------------- Renderers ---------------- */
+function renderTabs(){
+  const host = document.getElementById('typeTabs');
+  host.innerHTML = TYPES.map(t=>{
+    let cnt;
+    if(t.key === 'all')        cnt = MAILS.filter(m=>m.unread).length;
+    else if(t.key === 'other') cnt = MAILS.filter(m=>m.unread && OTHER_TYPES.includes(m.type)).length;
+    else                       cnt = MAILS.filter(m=>m.type===t.key && m.unread).length;
+    const badge = cnt>0 ? `<span class="cnt">${cnt}</span>` : '';
+    const isActive = activeType===t.key;
+    const isUnmatched = t.key === 'unmatched';
+    const tabStyle = isActive ? '' : (isUnmatched ? 'style="background:#fef3c7;color:#92400e;"' : '');
+    return `<div class="type-tab ${isActive?'active':''}" ${tabStyle} onclick="setType('${t.key}')">
+      <i class="bi ${t.icon}"></i> ${t.label} ${badge}</div>`;
+  }).join('');
+}
+function setType(k){ activeType=k; render(); }
+
+function renderEmptyState(){
+  const allThreads = MAILS.filter(m => !m.unmatched);
+  const visibleThreads = MAILS.filter(passesFilters);
+  const unread = visibleThreads.filter(m=>m.unread).length;
+  const firstUnread = visibleThreads.filter(m=>m.unread).sort(sortMails)[0];
+
+  // Branch 1: routing is off — no threads can exist yet
+  if(!routingEnabled){
+    document.getElementById('readPane').innerHTML = `
+      <div class="empty">
+        <i class="bi bi-envelope-slash" style="font-size:52px;color:#D6D2F5;margin-bottom:14px;"></i>
+        <div style="font-weight:800;font-size:16px;color:var(--ink);">Reply routing is off</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:8px;max-width:280px;text-align:center;line-height:1.6;">
+          Enable reply routing so customer email replies land here instead of a personal inbox.
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Branch 2: salesperson role with no assigned threads visible
+  if(CURRENT_ROLE === 'salesperson' && visibleThreads.length === 0 && allThreads.length > 0){
+    document.getElementById('readPane').innerHTML = `
+      <div class="empty">
+        <i class="bi bi-person-check" style="font-size:52px;color:#D6D2F5;margin-bottom:14px;"></i>
+        <div style="font-weight:800;font-size:16px;color:var(--ink);">No threads assigned to you</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:8px;max-width:300px;text-align:center;line-height:1.6;">
+          There are <b style="color:var(--ink);">${allThreads.length} thread${allThreads.length!==1?'s':''}</b> in this inbox, but none are assigned to your account.
+          Contact your admin if you're expecting to see conversations here.
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Branch 3: no threads at all — system is on but no replies have arrived yet
+  if(allThreads.length === 0){
+    document.getElementById('readPane').innerHTML = `
+      <div class="empty">
+        <i class="bi bi-inbox" style="font-size:52px;color:#D6D2F5;margin-bottom:14px;"></i>
+        <div style="font-weight:800;font-size:16px;color:var(--ink);">Waiting for replies</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:8px;max-width:280px;text-align:center;line-height:1.6;">
+          Reply routing is active. Threads will appear here when a customer replies to a drip, proposal, invoice, or change order.
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Branch 4: threads exist, none open — standard select state
+  const ctaHtml = firstUnread
+    ? `<button class="empty-unread-cta" onclick="openMail(${firstUnread.id})">
+        <i class="bi bi-envelope-open"></i> Open first unread
+       </button>`
+    : '';
+  const unreadLine = unread > 0
+    ? `<div style="font-size:13px;margin-top:6px;color:var(--brand-active);font-weight:700;">${unread} unread conversation${unread!==1?'s':''}</div>`
+    : `<div style="font-size:13px;margin-top:6px;">You're all caught up.</div>`;
+  document.getElementById('readPane').innerHTML = `
+    <div class="empty">
+      <i class="bi bi-inbox" style="font-size:52px;color:#D6D2F5;margin-bottom:14px;"></i>
+      <div style="font-weight:800;font-size:16px;color:var(--ink);">Select a conversation</div>
+      ${unreadLine}
+      <div style="font-size:12px;color:#94a3b8;margin-top:10px;max-width:280px;text-align:center;line-height:1.6;">
+        Threads appear here when a customer replies to a drip, proposal, invoice, or change order.
+      </div>
+      ${ctaHtml}
+    </div>`;
+}
+
+function openCompose(){
+  selectedId = null;
+  closeContactPanel();
+  document.getElementById('readPane').innerHTML = `
+    <div class="compose-pane">
+      <div class="compose-head">
+        <h2><i class="bi bi-pencil-square" style="color:var(--brand);margin-right:8px;"></i>New Email</h2>
+        <button class="btn-ghost" onclick="renderEmptyState()"><i class="bi bi-x-lg"></i> Discard</button>
+      </div>
+      <div class="compose-body">
+        <div class="compose-field">
+          <span class="compose-field-label">To</span>
+          <input id="composeTo" placeholder="Customer email address…" type="email">
+        </div>
+        <div class="compose-field">
+          <span class="compose-field-label">Subject</span>
+          <input id="composeSubject" placeholder="Email subject…">
+        </div>
+        <textarea class="compose-textarea" id="composeBody" placeholder="Write your message…"></textarea>
+      </div>
+      <div class="compose-footer">
+        <button class="icon-btn" title="Attach file" onclick="toast('Attachments: mockup')"><i class="bi bi-paperclip"></i></button>
+        <button class="icon-btn" title="Insert template" onclick="toast('Insert template: mockup')"><i class="bi bi-file-text"></i></button>
+        <button class="btn-brand" style="margin-left:auto;" onclick="submitCompose()"><i class="bi bi-send"></i> Send</button>
+      </div>
+    </div>`;
+}
+
+function submitCompose(){
+  const to = document.getElementById('composeTo')?.value.trim();
+  const subj = document.getElementById('composeSubject')?.value.trim();
+  const body = document.getElementById('composeBody')?.value.trim();
+  if(!to || !subj || !body){ toast('Please fill in To, Subject, and message.'); return; }
+  toast('Email sent to ' + to);
+  renderEmptyState();
+}
+
+function render(){
+  // counts
+  const unread = MAILS.filter(m=>m.unread).length;
+  document.getElementById('navUnread').textContent = unread;
+  document.getElementById('navUnread').style.display = unread? '' : 'none';
+  document.getElementById('headUnread').textContent = unread + ' unread';
+
+  renderTabs();
+
+  // refresh empty state if no thread is open
+  if(selectedId === null) renderEmptyState();
+
+  const rows = MAILS.filter(passesFilters).sort(sortMails);
+  const pane = document.getElementById('mailRows');
+  if(!rows.length){
+    pane.innerHTML = `<div class="empty" style="height:300px"><i class="bi bi-inbox"></i>
+      <div style="font-weight:700;color:#64748b;">No conversations match</div>
+      <div style="font-size:13px;">Try clearing a filter.</div></div>`;
+    return;
+  }
+  pane.innerHTML = rows.map(m=>{
+    const last = m.thread[m.thread.length-1];
+    const assign = SALES[m.sales] ? `<span class="tag tag-assign"><i class="bi bi-person"></i> ${SALES[m.sales].split(' ')[0]}</span>`:'';
+    const pm = PMS[m.pm] ? `<span class="tag tag-assign"><i class="bi bi-hammer"></i> ${PMS[m.pm].split(' ')[0]}</span>`:'';
+    const p = avPair(m.name);
+    const isDripReply = m.thread.some(t=>t.dir==='in' && t.replyTo==='drip');
+    const dripFlag = isDripReply ? `<span class="drip-flag"><i class="bi bi-robot"></i> Auto-drip reply</span>` : '';
+    const prevPrefix = last.dir==='note' ? 'Note: ' : (last.dir==='in' ? '' : 'You: ');
+    // Needs reply: last non-note message is inbound and thread is read (not just unread)
+    const lastNonNote = [...m.thread].reverse().find(t=>t.dir!=='note');
+    const needsReply = !m.unread && !m.unmatched && lastNonNote && lastNonNote.dir==='in';
+    const needsReplyBadge = needsReply ? `<span class="badge-needs-reply"><i class="bi bi-reply"></i> Reply needed</span>` : '';
+    const unmatchedTag = m.unmatched ? `<span class="tag tag-unmatched"><i class="bi bi-exclamation-circle"></i> Unmatched</span>` : '';
+    const typeTag = m.unmatched ? '' : `<span class="tag tag-${m.type}">${TYPE_LABEL[m.type]||m.type}</span>`;
+    const rowClass = `mail-row ${m.unread?'unread':''} ${m.unmatched?'unmatched':''} ${needsReply?'needs-reply':''} ${selectedIds.has(m.id)?'selected':''} ${selectedId===m.id?'active':''}`.trim().replace(/\s+/g,' ');
+    return `<div class="${rowClass}" onclick="openMail(${m.id})">
+      <div class="row-checkbox-wrap" onclick="event.stopPropagation()">
+        <input type="checkbox" class="row-checkbox" ${selectedIds.has(m.id)?'checked':''} onchange="toggleSelect(${m.id},this.checked)">
+      </div>
+      <div class="avatar" style="background:${m.unmatched?'#fef3c7':p.bg};color:${m.unmatched?'#92400e':p.fg}">${m.unmatched?'?':initials(m.name)}</div>
+      <div class="mail-body">
+        <div class="mail-top">
+          <span class="mail-name">${m.name}</span>
+          ${m.unread?'<span class="badge-new">New</span>':''}
+          <span class="mail-time">${relTime(m.ts)}</span>
+        </div>
+        <div class="mail-subj">${m.subject}</div>
+        <div class="mail-prev">${prevPrefix}${escapeHtml(last.text.replace(/\n/g,' '))}</div>
+        <div class="mail-tags">
+          ${unmatchedTag}${typeTag}${needsReplyBadge}${dripFlag}${assign}${pm}
+        </div>
+      </div>
+      <div class="row-menu-wrap">
+        <button class="row-menu-btn" title="More actions" onclick="event.stopPropagation();toggleRowMenu(${m.id},this)">
+          <i class="bi bi-three-dots-vertical"></i>
+        </button>
+        <div class="row-dropdown" id="rowMenu${m.id}">
+          ${m.unmatched ? `<div class="row-dd-item" onclick="event.stopPropagation();openAssocModal(${m.id});closeRowMenus()"><i class="bi bi-person-check"></i> Associate to contact</div>` : ''}
+          <div class="row-dd-item" onclick="event.stopPropagation();toggleUnread(${m.id});closeRowMenus()">
+            <i class="bi ${m.unread?'bi-envelope-open':'bi-envelope'}"></i>
+            ${m.unread?'Mark as read':'Mark as unread'}
+          </div>
+          <div class="row-dd-item danger" onclick="event.stopPropagation();archive(${m.id});closeRowMenus()">
+            <i class="bi bi-archive"></i> Archive
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function relTime(min){
+  if(min<60) return min+' min ago';
+  if(min<1440) return Math.floor(min/60)+' hr ago';
+  const d=Math.floor(min/1440); return d===1?'1 day ago':d+' days ago';
+}
+function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---------------- Open / read pane ---------------- */
+function openMail(id){
+  selectedId = id;
+  composeMode = 'reply';
+  drafts = { reply:'', note:'' };
+  const m = MAILS.find(x=>x.id===id);
+  if(m.unread){ m.unread=false; }  // reading clears unread
+  renderRead(m);
+  render();
+  if(panelOpen) openContactPanel(m);   // keep panel synced only if already open
+}
+
+/* ---------------- Contact slideout ---------------- */
+function dealCard(d, contactMail){
+  const s = STAGES[d.stage] || {bg:'#f1f5f9',fg:'#475569'};
+  // Find any inbox thread associated with this contact
+  const relatedThread = contactMail
+    ? MAILS.find(x => x.email === contactMail.email || x.id === contactMail.id)
+    : null;
+  const inboxLink = relatedThread
+    ? `<span class="deal-link" style="margin-left:auto;" onclick="openMail(${relatedThread.id});closeContactPanel();">
+        <i class="bi bi-inbox"></i> View in Inbox
+       </span>`
+    : '';
+  return `<div class="deal-card">
+    <div class="deal-name">${d.name}</div>
+    <div class="deal-meta">
+      <span class="deal-stage" style="background:${s.bg};color:${s.fg}">${d.stage}</span>
+      <span class="deal-val">${d.value}</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+      <span class="deal-link" onclick="toast('Open deal: mockup')">View deal <i class="bi bi-arrow-right-short"></i></span>
+      ${inboxLink}
+    </div>
+  </div>`;
+}
+function renderContactPanel(m){
+  const c = CONTACTS[m.id] || {tags:[],deals:[]};
+  const p = avPair(m.name);
+  const tags = (c.tags||[]).map(t=>`<span class="cp-tag ${t==='VIP'?'vip':''}">${t==='VIP'?'⭐ VIP':t}</span>`).join('');
+  const deals = (c.deals && c.deals.length)
+    ? c.deals.map(d=>dealCard(d, m)).join('')
+    : `<div class="cp-empty"><i class="bi bi-folder2-open"></i>No active deals</div>`;
+  document.getElementById('contactPanelBody').innerHTML = `
+    <div class="cp-head"><h3>Contact details</h3><button class="cp-close" onclick="closeContactPanel()">&times;</button></div>
+    <div class="cp-id">
+      <div class="cp-avatar" style="background:${p.bg};color:${p.fg}">${initials(m.name)}</div>
+      <div class="cp-name">${m.name}</div>
+      <div class="cp-sub">Customer since ${c.since||'—'}</div>
+      <div class="cp-actions">
+        <div class="cp-act" onclick="toast('New email: mockup')"><i class="bi bi-envelope"></i> Email</div>
+        <div class="cp-act" onclick="toast('Open profile: mockup')"><i class="bi bi-box-arrow-up-right"></i> Profile</div>
+      </div>
+    </div>
+    <div class="cp-section">
+      <div class="cp-field"><i class="bi bi-envelope"></i><div><div class="v">${m.email}</div><div class="l">Email</div></div></div>
+      <div class="cp-field"><i class="bi bi-telephone"></i><div><div class="v">${c.phone||'—'}</div><div class="l">Phone</div></div></div>
+      <div class="cp-field"><i class="bi bi-geo-alt"></i><div><div class="v">${c.address||'—'}</div><div class="l">Service address</div></div></div>
+      <div class="cp-field"><i class="bi bi-person"></i><div><div class="v">${SALES[m.sales]||'Unassigned'}</div><div class="l">Salesperson</div></div></div>
+      <div class="cp-field"><i class="bi bi-hammer"></i><div><div class="v">${PMS[m.pm]||'Unassigned'}</div><div class="l">Project manager</div></div></div>
+      <div class="cp-field"><i class="bi bi-cash-stack"></i><div><div class="v">${c.ltv||'$0'}</div><div class="l">Lifetime value</div></div></div>
+      ${tags?`<div class="cp-tags">${tags}</div>`:''}
+    </div>
+    <div class="cp-deals">
+      <h4>Active deals · ${c.deals?c.deals.length:0}</h4>
+      ${deals}
+    </div>`;
+}
+function openContactPanel(m){
+  renderContactPanel(m);
+  panelOpen = true;
+  document.getElementById('contactPanel').classList.add('open');
+  document.getElementById('panelBackdrop').classList.add('show');
+}
+function closeContactPanel(){
+  panelOpen = false;
+  document.getElementById('contactPanel').classList.remove('open');
+  document.getElementById('panelBackdrop').classList.remove('show');
+}
+function toggleContactPanel(id){ panelOpen ? closeContactPanel() : openContactPanel(MAILS.find(x=>x.id===id)); }
+
+function renderRead(m){
+  const pane = document.getElementById('readPane');
+  const assign = SALES[m.sales]?`<span class="tag tag-assign"><i class="bi bi-person"></i> ${SALES[m.sales]}</span>`:'';
+  const pm = PMS[m.pm]?`<span class="tag tag-assign"><i class="bi bi-hammer"></i> ${PMS[m.pm]}</span>`:'';
+
+  const cp = avPair(m.name);
+  const isDripReply = m.thread.some(t=>t.dir==='in' && t.replyTo==='drip');
+  const convDripFlag = isDripReply ? `<span class="drip-flag lg"><i class="bi bi-robot"></i> Customer replied to automated drip</span>` : '';
+
+  const msgs = m.thread.map(t=>{
+    if(t.dir==='note'){
+      return `<div class="msg note">
+        <div class="msg-head">
+          <div class="avatar" style="width:30px;height:30px;min-width:30px;font-size:11px;background:#fdf3d4;color:#a16207">${initials(t.from)}</div>
+          <div><div class="msg-from">${t.from}</div><div class="msg-email">${t.role||'Team member'}</div></div>
+          <span class="note-label"><i class="bi bi-lock-fill"></i> Internal note</span>
+          <span class="msg-time">${t.ts}</span>
+        </div>
+        <div class="msg-text">${escapeHtml(t.text)}</div>
+      </div>`;
+    }
+    const out = t.dir==='out';
+    const dripBadge = (t.dir==='in' && t.replyTo==='drip')
+      ? `<div style="margin-bottom:8px;"><span class="drip-flag"><i class="bi bi-robot"></i> This reply came from an automated drip message</span></div>` : '';
+    const sendStatus = out ? (()=>{
+      if(t.status === 'sending') return `<div class="msg-send-status sending"><i class="bi bi-arrow-up-circle"></i> Sending…</div>`;
+      if(t.status === 'failed')  return `<div class="msg-send-status failed" onclick="toast('Retry send: mockup')"><i class="bi bi-exclamation-circle"></i> Failed to send — tap to retry</div>`;
+      return `<div class="msg-send-status sent"><i class="bi bi-check2-all"></i> Sent</div>`;
+    })() : '';
+    return `<div class="msg ${out?'outbound':''}">
+      <div class="msg-head">
+        <div class="avatar" style="width:30px;height:30px;min-width:30px;font-size:11px;${out?'background:var(--brand-100);color:var(--brand-active)':`background:${cp.bg};color:${cp.fg}`}">
+          ${out?initials(TENANT_NAME):initials(m.name)}</div>
+        <div><div class="msg-from">${t.from}</div><div class="msg-email">${t.email}</div></div>
+        <span class="msg-time">${t.ts}</span>
+      </div>
+      ${dripBadge}
+      ${t.context?`<div style="font-size:11.5px;color:var(--brand);font-weight:700;margin-bottom:8px;"><i class="bi bi-link-45deg"></i> ${t.context}</div>`:''}
+      <div class="msg-text">${escapeHtml(t.text)}</div>
+      ${sendStatus}
+    </div>`;
+  }).join('');
+
+  const noteMode = composeMode==='note';
+  const unmatchedBanner = m.unmatched ? `
+    <div class="assoc-bar">
+      <i class="bi bi-exclamation-circle-fill" style="color:#f59e0b;font-size:16px;flex-shrink:0;"></i>
+      <div class="assoc-bar-text">No contact record found for <b>${m.email}</b>. This thread won't be assigned to a deal until it's manually associated.</div>
+      <button class="btn-assoc" onclick="openAssocModal(${m.id})"><i class="bi bi-person-check"></i> Associate to Contact</button>
+    </div>` : '';
+  const headerTag = m.unmatched
+    ? `<span class="tag tag-unmatched"><i class="bi bi-exclamation-circle"></i> Unmatched</span>`
+    : `<span class="tag tag-${m.type}">${TYPE_LABEL[m.type]||m.type}</span>`;
+  pane.innerHTML = `
+    <div class="read-head">
+      <div class="read-subj">${m.subject}</div>
+      <div class="read-meta">
+        ${headerTag}
+        ${convDripFlag}${assign}${pm}
+        <span style="font-size:12.5px;color:#94a3b8;"><i class="bi bi-person-circle"></i> ${m.name} &lt;${m.email}&gt;</span>
+        <div class="read-actions">
+          <button class="btn-ghost" onclick="toggleContactPanel(${m.id})"><i class="bi bi-person-lines-fill"></i> Contact</button>
+          <button class="btn-ghost" onclick="toggleUnread(${m.id},true)"><i class="bi bi-envelope"></i> Mark unread</button>
+          <div class="read-overflow-wrap">
+            <button class="btn-ghost" onclick="toggleReadOverflow('readOverflow${m.id}')"><i class="bi bi-three-dots"></i></button>
+            <div class="read-overflow-menu" id="readOverflow${m.id}">
+              <div class="read-overflow-item danger" onclick="archive(${m.id});closeReadOverflows()">
+                <i class="bi bi-archive"></i> Archive conversation
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${unmatchedBanner}
+    <div class="thread" id="threadBox">${msgs}</div>
+    ${m.unmatched ? `
+    <div style="border-top:1px solid var(--line);background:#fffbf0;padding:14px 24px;display:flex;align-items:center;gap:10px;">
+      <i class="bi bi-lock-fill" style="color:#f59e0b;font-size:14px;"></i>
+      <span style="font-size:13px;color:#92400e;flex:1;">Replies are locked until this thread is associated with a contact.</span>
+      <button class="btn-assoc" onclick="openAssocModal(${m.id})"><i class="bi bi-person-check"></i> Associate Now</button>
+    </div>` : `
+    <div class="composer ${noteMode?'note-mode':''}">
+      <div class="comp-tabs">
+        <div class="comp-tab ${noteMode?'':'active'}" onclick="setComposeMode('reply')"><i class="bi bi-reply"></i> Reply</div>
+        <div class="comp-tab note ${noteMode?'active':''}" onclick="setComposeMode('note')"><i class="bi bi-sticky"></i> Internal note</div>
+      </div>
+      <div class="composer-to">${noteMode
+        ? `<i class="bi bi-lock-fill" style="color:#a16207"></i> Internal note — <b>only your team can see this.</b> The customer is not notified.`
+        : `<span style="display:flex;flex-direction:column;gap:3px;">
+            <span><i class="bi bi-reply" style="color:var(--muted);margin-right:4px;"></i>Reply to <b>${m.name}</b> &lt;${m.email}&gt;</span>
+            <span style="font-size:11.5px;color:var(--muted);"><i class="bi bi-box-arrow-up-right" style="margin-right:4px;"></i>From <b style="color:var(--ink);">hello@sparrowsnestpainting.com</b> — this is what the customer will see</span>
+           </span>`}</div>
+      <textarea id="replyBox" rows="3" oninput="saveDraft()" placeholder="${noteMode?'Leave a note for your team…':'Type your reply…'}">${escapeHtml(drafts[composeMode]||'')}</textarea>
+      <div class="composer-bar">
+        <button class="icon-btn" title="Attach" onclick="toast('Attachments: mockup')"><i class="bi bi-paperclip"></i></button>
+        <button class="icon-btn" title="Template" onclick="toast('Insert template: mockup')"><i class="bi bi-file-text"></i></button>
+        <button class="icon-btn" title="Mention teammate" onclick="toast('@mention: mockup')"><i class="bi bi-at"></i></button>
+        ${noteMode
+          ? `<button class="btn-note" style="margin-left:auto;" onclick="submitComposer(${m.id})"><i class="bi bi-sticky"></i> Add Note</button>`
+          : `<button class="btn-brand" style="margin-left:auto;" onclick="submitComposer(${m.id})"><i class="bi bi-send"></i> Send Reply</button>`}
+      </div>
+    </div>`}`;
+  const tb = document.getElementById('threadBox'); tb.scrollTop = tb.scrollHeight;
+}
+
+/* ---------------- Actions ---------------- */
+function toggleUnread(id, fromRead){
+  const m = MAILS.find(x=>x.id===id);
+  m.unread = !m.unread;
+  if(fromRead && m.unread){ selectedId=null; closeContactPanel(); document.getElementById('readPane').innerHTML =
+    `<div class="empty"><i class="bi bi-envelope-open"></i><div style="font-weight:700;color:#64748b;">Marked as unread</div>
+     <div style="font-size:13px;">Select a conversation to read.</div></div>`; }
+  toast(m.unread?'Marked as unread':'Marked as read');
+  render();
+}
+function archive(id){
+  MAILS = MAILS.filter(x=>x.id!==id);
+  if(selectedId===id){ selectedId=null; closeContactPanel();
+    document.getElementById('readPane').innerHTML =
+      `<div class="empty"><i class="bi bi-archive"></i><div style="font-weight:700;color:#64748b;">Conversation archived</div></div>`; }
+  toast('Conversation archived');
+  render();
+}
+function saveDraft(){ const b=document.getElementById('replyBox'); if(b) drafts[composeMode]=b.value; }
+function setComposeMode(mode){ saveDraft(); composeMode=mode; renderRead(MAILS.find(x=>x.id===selectedId)); }
+function submitComposer(id){
+  const box = document.getElementById('replyBox');
+  const txt = box.value.trim();
+  if(!txt){ box.focus(); return; }
+  const m = MAILS.find(x=>x.id===id);
+  if(composeMode==='note'){
+    m.thread.push({dir:'note', from:CURRENT_USER, role:'Salesperson', ts:'Just now', text:txt});
+    toast('Internal note added');
+    drafts[composeMode] = '';
+    renderRead(m);
+    render();
+  } else {
+    const channel = ([...m.thread].reverse().find(t=>t.dir!=='note')||{}).channel || 'email';
+    const newMsg = {dir:'out', from:"Sparrow's Nest Painting", email:'hello@sparrowsnestpainting.com', channel, ts:'Just now', text:txt, status:'sending'};
+    m.thread.push(newMsg);
+    m.ts = 0;
+    drafts[composeMode] = '';
+    renderRead(m);
+    render();
+    // Simulate Postmark delivery confirmation after 1.4s
+    setTimeout(()=>{
+      newMsg.status = 'sent';
+      newMsg.ts = 'Just now';
+      if(selectedId === id) renderRead(m);
+    }, 1400);
+  }
+}
+
+/* ---------------- Row & read overflow menus ---------------- */
+function toggleRowMenu(id, btn){
+  closeReadOverflows();
+  const menu = document.getElementById('rowMenu'+id);
+  const isOpen = menu.classList.contains('open');
+  closeRowMenus();
+  if(!isOpen) menu.classList.add('open');
+}
+function closeRowMenus(){
+  document.querySelectorAll('.row-dropdown.open').forEach(m=>m.classList.remove('open'));
+}
+function toggleReadOverflow(id){
+  closeRowMenus();
+  const menu = document.getElementById(id);
+  if(menu) menu.classList.toggle('open');
+}
+function closeReadOverflows(){
+  document.querySelectorAll('.read-overflow-menu.open').forEach(m=>m.classList.remove('open'));
+}
+// Close all menus on outside click
+document.addEventListener('click', function(){
+  closeRowMenus();
+  closeReadOverflows();
+});
+
+/* ---------------- Associate modal ---------------- */
+let assocTargetId = null;
+function openAssocModal(id){
+  assocTargetId = id;
+  const m = MAILS.find(x=>x.id===id);
+  document.getElementById('assocEmail').textContent = m ? m.email : '—';
+  document.getElementById('assocContactSelect').value = '';
+  document.getElementById('assocModalBackdrop').classList.add('open');
+}
+function closeAssocModal(){
+  document.getElementById('assocModalBackdrop').classList.remove('open');
+  assocTargetId = null;
+}
+function handleAssocBackdropClick(e){
+  if(e.target === document.getElementById('assocModalBackdrop')) closeAssocModal();
+}
+function submitAssociation(){
+  const sel = document.getElementById('assocContactSelect').value;
+  if(!sel){ toast('Please select a contact to associate.'); return; }
+  const m = MAILS.find(x=>x.id===assocTargetId);
+  if(m){
+    const contactName = document.getElementById('assocContactSelect').selectedOptions[0].text.split(' — ')[0];
+    m.unmatched = false;
+    m.type = 'inbound';
+    m.name = contactName;
+    closeAssocModal();
+    toast('Thread associated with ' + contactName);
+    renderRead(m);
+    render();
+  }
+}
+
+let toastTimer;
+function toast(msg){
+  const host=document.getElementById('toastHost');
+  host.innerHTML=`<div class="toast-msg"><i class="bi bi-check-circle-fill" style="color:#34d399"></i>${msg}</div>`;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>host.innerHTML='',2200);
+}
+
+/* ---------------- Boot ---------------- */
+applyRouting();
+render();
+</script>
+</body>
+</html>
