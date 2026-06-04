@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Understanding Substrate Rate Configuration — DripJobs Help</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple-deep: #4A2D7A;
+    --purple-primary: #6B4C9A;
+    --purple-mid: #8B6BB1;
+    --purple-light: #C4AEDD;
+    --purple-pale: #EDE7F6;
+    --purple-faint: #F8F5FD;
+    --accent: #FF6B35;
+    --green: #2E7D52;
+    --green-light: #E8F5EE;
+    --red: #C0392B;
+    --red-light: #FDEDEC;
+    --yellow: #D4820A;
+    --yellow-light: #FEF9E7;
+    --ink: #1A1225;
+    --ink-mid: #3D2B5A;
+    --ink-light: #6B5A80;
+    --border: #DDD3EC;
+    --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--ink); line-height: 1.7; font-size: 16px; }
+
+  .topbar { background: var(--purple-deep); padding: 14px 48px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar-brand { font-family: 'DM Serif Display', serif; color: white; font-size: 20px; }
+  .topbar-tag { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; }
+
+  .hero { background: linear-gradient(135deg, var(--purple-deep) 0%, var(--purple-primary) 60%, var(--purple-mid) 100%); padding: 64px 48px 56px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 320px; height: 320px; border-radius: 50%; background: rgba(255,255,255,0.04); }
+  .hero-breadcrumb { color: var(--purple-light); font-size: 13px; font-weight: 500; margin-bottom: 20px; position: relative; }
+  .hero-breadcrumb span { color: rgba(255,255,255,0.4); margin: 0 6px; }
+  .hero h1 { font-family: 'DM Serif Display', serif; color: white; font-size: 36px; line-height: 1.2; max-width: 640px; margin-bottom: 20px; position: relative; }
+  .hero-sub { color: rgba(255,255,255,0.75); font-size: 16px; max-width: 580px; line-height: 1.6; position: relative; }
+  .hero-meta { margin-top: 32px; display: flex; gap: 24px; align-items: center; position: relative; flex-wrap: wrap; }
+  .hero-badge { display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 14px; color: rgba(255,255,255,0.85); font-size: 12.5px; font-weight: 500; }
+  .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #6DFFAA; flex-shrink: 0; }
+
+  .layout { max-width: 900px; margin: 0 auto; padding: 56px 48px 80px; }
+
+  .toc { background: var(--purple-faint); border: 1px solid var(--border); border-radius: 12px; padding: 28px 32px; margin-bottom: 56px; }
+  .toc-label { font-size: 11px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; color: var(--purple-mid); margin-bottom: 14px; }
+  .toc ol { list-style: none; counter-reset: toc; }
+  .toc li { counter-increment: toc; padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 10px; }
+  .toc li:last-child { border-bottom: none; }
+  .toc li::before { content: counter(toc, decimal-leading-zero); font-size: 11px; font-weight: 700; color: var(--purple-light); flex-shrink: 0; width: 22px; }
+  .toc a { color: var(--purple-primary); text-decoration: none; font-size: 14.5px; font-weight: 500; }
+  .toc a:hover { color: var(--purple-deep); text-decoration: underline; }
+
+  .section { margin-bottom: 56px; }
+  .section-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+  .section-num { background: var(--purple-primary); color: white; font-size: 12px; font-weight: 700; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 4px; }
+  h2 { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--ink); line-height: 1.2; }
+  h3 { font-size: 16px; font-weight: 600; color: var(--ink-mid); margin: 28px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  p { margin-bottom: 16px; color: var(--ink); }
+
+  .callout { border-radius: 10px; padding: 20px 24px; margin: 24px 0; display: flex; gap: 14px; align-items: flex-start; }
+  .callout-icon { font-size: 20px; flex-shrink: 0; line-height: 1.4; }
+  .callout-body { flex: 1; }
+  .callout-title { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout-body p { margin-bottom: 0; font-size: 14.5px; line-height: 1.6; }
+  .callout.info { background: var(--purple-pale); border: 1px solid var(--border); }
+  .callout.info .callout-title { color: var(--purple-primary); }
+  .callout.good { background: var(--green-light); border: 1px solid #A8D5BC; }
+  .callout.good .callout-title { color: var(--green); }
+  .callout.warn { background: var(--yellow-light); border: 1px solid #F0C060; }
+  .callout.warn .callout-title { color: var(--yellow); }
+
+  .table-wrap { overflow-x: auto; margin: 20px 0; border-radius: 10px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead tr { background: var(--purple-primary); }
+  thead th { color: white; font-weight: 600; padding: 12px 16px; text-align: left; font-size: 12.5px; }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) { background: var(--purple-faint); }
+  tbody td { padding: 11px 16px; vertical-align: top; line-height: 1.5; }
+  td.good { color: var(--green); font-weight: 600; }
+  td.bad { color: var(--red); font-weight: 600; }
+
+  .steps { list-style: none; margin: 16px 0; counter-reset: steps; }
+  .steps li { counter-increment: steps; display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+  .steps li::before { content: counter(steps); background: var(--purple-pale); color: var(--purple-primary); font-size: 12px; font-weight: 700; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; border: 1px solid var(--border); }
+  .steps li span { font-size: 14.5px; line-height: 1.6; }
+
+  .scenario-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 28px; }
+  .scenario-card-header { padding: 16px 24px; background: var(--purple-pale); border-bottom: 1px solid var(--border); }
+  .scenario-card-title { font-size: 15px; font-weight: 600; color: var(--ink); }
+  .scenario-card-body { padding: 20px 24px; background: white; }
+  .scenario-card-body p { font-size: 14.5px; }
+
+  hr.section-divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+  code { background: var(--purple-pale); color: var(--purple-deep); font-family: 'Courier New', monospace; font-size: 13px; padding: 2px 6px; border-radius: 4px; }
+
+  .footer { background: var(--purple-faint); border-top: 1px solid var(--border); padding: 32px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .footer-text { font-size: 13px; color: var(--ink-light); }
+  .footer-text strong { color: var(--ink-mid); }
+
+  @media (max-width: 640px) {
+    .topbar, .hero, .layout, .footer { padding-left: 24px; padding-right: 24px; }
+    .hero h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">dripjobs</div>
+  <div class="topbar-tag">Help Center</div>
+</div>
+
+<div class="hero">
+  <div class="hero-breadcrumb">Help Center <span>›</span> Production Rates <span>›</span> Configuration Guide</div>
+  <h1>Understanding Substrate Rate Configuration & Multi-Coat Pricing</h1>
+  <p class="hero-sub">Learn how DripJobs uses your production rate tables to calculate proposal prices, how coat counts affect line item costs, and how to verify your rates are set up correctly.</p>
+  <div class="hero-meta">
+    <div class="hero-badge"><div class="dot"></div>Applies to all accounts using Production Rates</div>
+    <div class="hero-badge"><div class="dot"></div>Account Owner Guide</div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <div class="toc">
+    <div class="toc-label">In This Article</div>
+    <ol>
+      <li><a href="#how-rates-work">How DripJobs Uses Your Rate Tables to Price Proposals</a></li>
+      <li><a href="#calculation-types">The Two Main Calculation Types and How They Behave</a></li>
+      <li><a href="#multi-coat">How Multi-Coat Rates Should Be Set Up</a></li>
+      <li><a href="#common-mistakes">Common Setup Mistakes and How to Spot Them</a></li>
+      <li><a href="#verifying">How to Verify Your Rates Are Configured Correctly</a></li>
+      <li><a href="#reference">Quick Reference: What Correct Rate Tables Look Like</a></li>
+    </ol>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="section" id="how-rates-work">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <h2>How DripJobs Uses Your Rate Tables to Price Proposals</h2>
+    </div>
+
+    <p>Every substrate in your Production Rates has a rate table with entries for 1 coat, 2 coats, and 3 coats. When you build a proposal and select a coat count for a substrate, DripJobs reads the corresponding rate value and uses it to calculate that substrate's labor cost.</p>
+
+    <p>This means the accuracy of your proposal pricing depends entirely on the accuracy of the values you've entered in your rate tables. <strong>If a rate value is entered incorrectly, the proposal price for that substrate will be calculated incorrectly — even though the math itself is working as intended.</strong></p>
+
+    <div class="callout info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <div class="callout-title">Think of It Like a Formula</div>
+        <p>DripJobs is doing exactly what you tell it to. If the values in your rate table accurately represent how long your work takes, your proposals will price accurately. If a value is off — even slightly — that error flows directly into every proposal that uses that substrate.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Section 2 -->
+  <div class="section" id="calculation-types">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <h2>The Two Main Calculation Types and How They Behave</h2>
+    </div>
+
+    <p>The most important thing to understand about substrate configuration is that different calculation types interpret rate values in opposite ways. Getting this wrong is the most common source of pricing surprises.</p>
+
+    <h3>Man Hour(s) — Time-Based</h3>
+    <p>The rate represents <strong>how many hours the work takes</strong>. A higher number means more time, which means a higher price.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rate Value</th><th>Meaning</th><th>Effect on Price</th></tr></thead>
+        <tbody>
+          <tr><td>0.5 hrs</td><td>Half an hour per unit</td><td>Lower price</td></tr>
+          <tr><td>1.0 hrs</td><td>One hour per unit</td><td>Higher price</td></tr>
+          <tr><td>1.5 hrs</td><td>One and a half hours per unit</td><td>Even higher price</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>For Man Hour(s) substrates:</strong> as coats increase, the rate should increase — more coats means more time.</p>
+
+    <h3>Linear Foot Per Man Hour / Square Foot Per Man Hour — Speed-Based</h3>
+    <p>The rate represents <strong>how fast a painter can work</strong> — how many linear or square feet they can complete in one hour. A higher number means the painter is faster, which means fewer total hours, which means a <em>lower</em> price.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Rate Value</th><th>Meaning</th><th>Effect on Price</th></tr></thead>
+        <tbody>
+          <tr><td>20 LF/hr</td><td>20 linear feet per hour — fast</td><td>Lower price (fewer hours)</td></tr>
+          <tr><td>10 LF/hr</td><td>10 linear feet per hour — slower</td><td>Higher price (more hours)</td></tr>
+          <tr><td>5 LF/hr</td><td>5 linear feet per hour — slow</td><td>Even higher price (many hours)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <div class="callout-title">Important: Speed-Based Types Work in Reverse — Usually</div>
+        <p>For <strong>Linear Foot Per Man Hour</strong> and <strong>Square Foot Per Man Hour</strong> substrates, <em>increasing</em> the rate value <em>decreases</em> the price — because a faster painter takes fewer hours. For multi-coat entries, rates should generally <em>decrease</em> as coats increase, since more coats typically means slower progress per hour.</p>
+        <p style="margin-top:10px; margin-bottom:0;"><strong>Real-world exception:</strong> Sometimes later coats genuinely are faster — for example, a second coat on a surface where the first coat sealed absorption and established edges, or a spray-only second coat after a slower spray-and-back-roll first coat. In these cases, a higher rate on coat 2 can be intentional and correct. What matters is that your rate table accurately reflects how your crew actually works.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Section 3 -->
+  <div class="section" id="multi-coat">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <h2>How Multi-Coat Rates Should Be Set Up</h2>
+    </div>
+
+    <p>The golden rule: <strong>as coat count increases, the cost to complete that substrate should increase.</strong> Your rate table values should reflect this in the direction appropriate for your calculation type.</p>
+
+    <h3>Man Hour(s) Substrates</h3>
+    <p>Rates should <em>increase</em> across coat columns, because more coats = more time.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coat</th><th>Rate</th><th>Direction</th></tr></thead>
+        <tbody>
+          <tr><td>1 Coat</td><td class="good">0.75 hrs</td><td>Baseline</td></tr>
+          <tr><td>2 Coat</td><td class="good">1.35 hrs</td><td>↑ Higher — more time for 2 coats</td></tr>
+          <tr><td>3 Coat</td><td class="good">1.95 hrs</td><td>↑ Higher still — even more time for 3 coats</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Linear Foot / Square Foot Per Man Hour Substrates</h3>
+    <p>Rates should <em>typically</em> decrease across coat columns, because more coats usually means slower production speed — more hours — higher price.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coat</th><th>Rate</th><th>Direction (Typical)</th></tr></thead>
+        <tbody>
+          <tr><td>1 Coat</td><td class="good">15.00 LF/hr</td><td>Baseline</td></tr>
+          <tr><td>2 Coat</td><td class="good">9.00 LF/hr</td><td>↓ Lower speed — more hours — higher price</td></tr>
+          <tr><td>3 Coat</td><td class="good">6.00 LF/hr</td><td>↓ Even lower — even more hours — higher price</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <div class="callout-title">Exception: When a Later Coat Is Genuinely Faster</div>
+        <p>In some real-world workflows, a second coat can be faster than the first — for example, when the first coat involves cutting in and sealing a porous surface while the second coat is a smooth continuous roll or spray-only pass. If that reflects how your crew works, a higher rate on coat 2 can be correct. What matters is that your rates produce the right proposal price — not that they follow a specific pattern.</p>
+      </div>
+    </div>
+
+    <h3>Prep Work Substrates — A Special Case</h3>
+    <p>Prep tasks (power washing, masking, caulking, scraping, etc.) are performed once before painting begins — they don't repeat for each coat. For these substrates, it's <strong>correct and expected</strong> to have 0.00 for both the 2-coat and 3-coat fields.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coat</th><th>Rate</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>1 Coat</td><td class="good">0.50 hrs</td><td>Prep is done once</td></tr>
+          <tr><td>2 Coat</td><td>0.00 hrs</td><td class="good">✓ Correct — prep doesn't repeat</td></tr>
+          <tr><td>3 Coat</td><td>0.00 hrs</td><td class="good">✓ Correct — prep doesn't repeat</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout good">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <div class="callout-title">Zero is Fine for Prep Work</div>
+        <p>Zeros in the 2-coat and 3-coat columns are only a concern on non-prep substrates. If you see zeros in your Prep Work category, that's correct behavior — don't change them.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Section 4 -->
+  <div class="section" id="common-mistakes">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <h2>Common Setup Mistakes and How to Spot Them</h2>
+    </div>
+
+    <p>These are the most common rate table entry errors that lead to unexpected pricing in proposals.</p>
+
+    <div class="scenario-card">
+      <div class="scenario-card-header">
+        <div class="scenario-card-title">Mistake #1 — Entering Speed-Based Rates in Increasing Order When They Shouldn't Be</div>
+      </div>
+      <div class="scenario-card-body">
+        <p><strong>What it looks like:</strong> A Linear Foot Per Man Hour or Square Foot Per Man Hour substrate where the 2-coat rate is <em>higher</em> than the 1-coat rate — and there's no intentional reason for it.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Coat</th><th>Rate (LF/hr)</th><th>Problem</th></tr></thead>
+            <tbody>
+              <tr><td>1 Coat</td><td>15.00</td><td>—</td></tr>
+              <tr><td>2 Coat</td><td class="bad">22.00 ← Review needed</td><td class="bad">Higher speed = fewer hours = lower price for more coats</td></tr>
+              <tr><td>3 Coat</td><td class="bad">28.00 ← Review needed</td><td class="bad">Even higher speed = price decreases further</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Why it usually happens:</strong> It's intuitive to enter increasing numbers across coat columns — that pattern is correct for Man Hour(s) substrates. But for speed-based types, more coats typically means slower production, so the rate usually needs to <em>decrease</em> as coats increase.</p>
+
+        <div class="callout info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-body">
+            <div class="callout-title">When Increasing Rates Can Be Intentional</div>
+            <p>There are real scenarios where a later coat genuinely is faster — for example, when the first coat involves significant cutting in, masking, and sealing a porous surface, while the second coat is a smooth continuous pass. Or when coat 1 is spray+back-roll and coat 2 is spray-only. If that matches your workflow, a higher rate on a later coat may be correct. The key question: does changing the coat count in a proposal produce the price you expect? If yes — you're set.</p>
+          </div>
+        </div>
+
+        <p><strong>How to fix an unintentional inversion:</strong> Reduce the 2-coat and 3-coat rates so they are progressively lower than the 1-coat rate. Or switch this substrate to the Man Hour(s) type and re-enter values as time (e.g., 0.5 hrs, 1.0 hrs, 1.5 hrs) — this eliminates the inversion risk entirely.</p>
+      </div>
+    </div>
+
+    <div class="scenario-card">
+      <div class="scenario-card-header">
+        <div class="scenario-card-title">Mistake #2 — Leaving 2-Coat and 3-Coat as Zero on Non-Prep Substrates</div>
+      </div>
+      <div class="scenario-card-body">
+        <p><strong>What it looks like:</strong> A Man Hour(s) substrate (outside of Prep Work) where the 1-coat rate has a value, but 2-coat and 3-coat are 0.00.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Coat</th><th>Rate (hrs)</th><th>Problem</th></tr></thead>
+            <tbody>
+              <tr><td>1 Coat</td><td>0.75</td><td>—</td></tr>
+              <tr><td>2 Coat</td><td class="bad">0.00 ← Incorrect</td><td class="bad">No labor cost calculated for this substrate at 2 coats</td></tr>
+              <tr><td>3 Coat</td><td class="bad">0.00 ← Incorrect</td><td class="bad">No labor cost calculated at 3 coats either</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Why it happens:</strong> This is common when substrates are set up quickly — only the first coat value is entered and the rest are left at their default of zero. It's easy to miss because the substrate appears to work fine when proposals use 1-coat pricing.</p>
+        <p><strong>How to fix it:</strong> Enter appropriate hour values for 2-coat and 3-coat. A general starting point: 2-coat ≈ 1.8× the 1-coat value, 3-coat ≈ 2.6× the 1-coat value. Adjust based on your actual production experience.</p>
+      </div>
+    </div>
+
+    <div class="scenario-card">
+      <div class="scenario-card-header">
+        <div class="scenario-card-title">Mistake #3 — Using an Inconsistent Calculation Type Within a Category</div>
+      </div>
+      <div class="scenario-card-body">
+        <p><strong>What it looks like:</strong> Most substrates in a category use <code>Man Hour(s)</code>, but one substrate uses <code>Linear Foot Per Man Hour</code> (or vice versa).</p>
+        <p><strong>Why it matters:</strong> Within a well-defined category (like Window Trim or Door Trim), all substrates should typically use the same calculation type. A mismatch often signals the substrate was added from a different context, and the rates may not have been adjusted to match the new type's logic.</p>
+        <p><strong>How to fix it:</strong> Review the outlier substrate. If the type is intentional, verify the rate values are appropriate for that type. If it was entered in error, switch it to match the category's standard type and re-enter the rates.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Section 5 -->
+  <div class="section" id="verifying">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <h2>How to Verify Your Rates Are Configured Correctly</h2>
+    </div>
+
+    <p>It's worth doing a periodic review of your substrate rate tables, especially for categories that include multi-coat work. Here's how.</p>
+
+    <h3>Navigating to Your Substrates</h3>
+    <ol class="steps">
+      <li><span>From the left sidebar, go to <strong>Company Settings</strong></span></li>
+      <li><span>Select <strong>Production Rates</strong></span></li>
+      <li><span>Choose your <strong>Area</strong> (Interior or Exterior)</span></li>
+      <li><span>Click the <strong>Substrates</strong> tab</span></li>
+      <li><span>Open each category and click the edit icon on any substrate to review its rate table</span></li>
+    </ol>
+
+    <h3>What to Check for Speed-Based Substrates (LF/hr or SqFt/hr)</h3>
+    <p>For each substrate using one of these types, confirm:</p>
+    <ul style="margin: 12px 0 16px 20px; font-size: 14.5px; line-height: 2;">
+      <li>The 2-coat rate is <strong>lower</strong> than the 1-coat rate</li>
+      <li>The 3-coat rate is <strong>lower</strong> than the 2-coat rate</li>
+    </ul>
+
+    <h3>What to Check for Man Hour(s) Substrates (Non-Prep)</h3>
+    <p>For each non-prep substrate using Man Hour(s), confirm:</p>
+    <ul style="margin: 12px 0 16px 20px; font-size: 14.5px; line-height: 2;">
+      <li>The 2-coat rate is <strong>greater than zero</strong> (unless this is intentionally a single-coat substrate)</li>
+      <li>The 3-coat rate is <strong>greater than zero</strong> (same rule)</li>
+      <li>Both multi-coat rates are <strong>higher</strong> than the 1-coat rate</li>
+    </ul>
+
+    <div class="callout info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <div class="callout-title">Quick Sanity Check in a Proposal</div>
+        <p>A fast way to verify a substrate's rates are working correctly: create a test proposal, add the substrate, and change the coat count from 1 to 2. The substrate's line item price should increase. If it stays the same or decreases, the rate table for that substrate needs to be reviewed.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Section 6 -->
+  <div class="section" id="reference">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <h2>Quick Reference: What Correct Rate Tables Look Like</h2>
+    </div>
+
+    <h3>✅ Man Hour(s) — Correct Pattern</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coat</th><th>Rate</th><th>Unit</th><th>Price Direction When Increasing Coats</th></tr></thead>
+        <tbody>
+          <tr><td>1 Coat</td><td class="good">0.75</td><td>Man Hour(s)</td><td>Baseline</td></tr>
+          <tr><td>2 Coat</td><td class="good">1.35</td><td>Man Hour(s)</td><td>↑ Price increases</td></tr>
+          <tr><td>3 Coat</td><td class="good">1.95</td><td>Man Hour(s)</td><td>↑ Price increases further</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>✅ Linear Foot Per Man Hour — Correct Pattern</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coat</th><th>Rate</th><th>Unit</th><th>Price Direction When Increasing Coats</th></tr></thead>
+        <tbody>
+          <tr><td>1 Coat</td><td class="good">15.00</td><td>LF Per Man Hour</td><td>Baseline</td></tr>
+          <tr><td>2 Coat</td><td class="good">9.00</td><td>LF Per Man Hour</td><td>↑ Price increases (slower speed = more hours)</td></tr>
+          <tr><td>3 Coat</td><td class="good">6.00</td><td>LF Per Man Hour</td><td>↑ Price increases further</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>✅ Prep Work Substrate — Zeros Are Correct</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coat</th><th>Rate</th><th>Unit</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>1 Coat</td><td class="good">0.50</td><td>Man Hour(s)</td><td>Prep performed once before painting</td></tr>
+          <tr><td>2 Coat</td><td>0.00</td><td>Man Hour(s)</td><td class="good">✓ Expected — prep does not repeat</td></tr>
+          <tr><td>3 Coat</td><td>0.00</td><td>Man Hour(s)</td><td class="good">✓ Expected — prep does not repeat</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">🙋</div>
+      <div class="callout-body">
+        <div class="callout-title">Need Help Reviewing Your Rates?</div>
+        <p>If you're unsure whether your production rates are set up correctly, or if you're seeing unexpected pricing in proposals, reach out to DripJobs Support. Our team can walk you through your configuration and help you identify anything that needs adjustment.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-text">
+    <strong>DripJobs Help Center</strong> · Production Rates · Substrate Configuration Guide<br>
+    Need help? Contact DripJobs Support.
+  </div>
+</div>
+
+</body>
+</html>
