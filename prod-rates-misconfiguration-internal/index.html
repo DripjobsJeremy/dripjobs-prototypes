@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[CS INTERNAL] Production Rates: Substrate Misconfiguration — Diagnosis & Resolution Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple-deep: #4A2D7A;
+    --purple-primary: #6B4C9A;
+    --purple-mid: #8B6BB1;
+    --purple-light: #C4AEDD;
+    --purple-pale: #EDE7F6;
+    --purple-faint: #F8F5FD;
+    --green: #2E7D52;
+    --green-light: #E8F5EE;
+    --red: #C0392B;
+    --red-light: #FDEDEC;
+    --yellow: #D4820A;
+    --yellow-light: #FEF9E7;
+    --ink: #1A1225;
+    --ink-mid: #3D2B5A;
+    --ink-light: #6B5A80;
+    --border: #DDD3EC;
+    --white: #FFFFFF;
+    --cs-banner: #1A1225;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--ink); line-height: 1.7; font-size: 16px; }
+
+  .cs-banner {
+    background: var(--cs-banner);
+    padding: 12px 48px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cs-badge {
+    background: #E53935;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .cs-banner-text { color: rgba(255,255,255,0.7); font-size: 13px; }
+  .cs-banner-text strong { color: white; }
+
+  .topbar { background: var(--purple-deep); padding: 14px 48px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar-brand { font-family: 'DM Serif Display', serif; color: white; font-size: 20px; }
+  .topbar-tag { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; }
+
+  .hero { background: linear-gradient(135deg, #1A1225 0%, #2D1F45 60%, var(--purple-deep) 100%); padding: 56px 48px 48px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 320px; height: 320px; border-radius: 50%; background: rgba(255,255,255,0.03); }
+  .hero-breadcrumb { color: var(--purple-light); font-size: 13px; font-weight: 500; margin-bottom: 20px; position: relative; }
+  .hero-breadcrumb span { color: rgba(255,255,255,0.4); margin: 0 6px; }
+  .hero-label { display: inline-flex; align-items: center; gap: 8px; background: rgba(229,57,53,0.25); border: 1px solid rgba(229,57,53,0.5); border-radius: 6px; padding: 5px 12px; margin-bottom: 16px; position: relative; }
+  .hero-label span { color: #FF8A80; font-size: 11.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .hero h1 { font-family: 'DM Serif Display', serif; color: white; font-size: 32px; line-height: 1.2; max-width: 680px; margin-bottom: 16px; position: relative; }
+  .hero-sub { color: rgba(255,255,255,0.65); font-size: 15px; max-width: 600px; line-height: 1.6; position: relative; }
+  .hero-meta { margin-top: 28px; display: flex; gap: 16px; flex-wrap: wrap; position: relative; }
+  .hero-badge { display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 5px 13px; color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 500; }
+  .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #FF8A80; flex-shrink: 0; }
+
+  .layout { max-width: 960px; margin: 0 auto; padding: 52px 48px 80px; }
+
+  .toc { background: var(--purple-faint); border: 1px solid var(--border); border-radius: 12px; padding: 28px 32px; margin-bottom: 52px; }
+  .toc-label { font-size: 11px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; color: var(--purple-mid); margin-bottom: 14px; }
+  .toc ol { list-style: none; counter-reset: toc; }
+  .toc li { counter-increment: toc; padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 10px; }
+  .toc li:last-child { border-bottom: none; }
+  .toc li::before { content: counter(toc, decimal-leading-zero); font-size: 11px; font-weight: 700; color: var(--purple-light); flex-shrink: 0; width: 22px; }
+  .toc a { color: var(--purple-primary); text-decoration: none; font-size: 14.5px; font-weight: 500; }
+  .toc a:hover { color: var(--purple-deep); text-decoration: underline; }
+  .toc .cs-only { font-size: 10.5px; font-weight: 700; color: #E53935; letter-spacing: 0.5px; text-transform: uppercase; margin-left: 6px; }
+
+  .section { margin-bottom: 52px; }
+  .section-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+  .section-num { background: var(--purple-primary); color: white; font-size: 12px; font-weight: 700; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 4px; }
+  .section-num.cs { background: #C0392B; }
+  h2 { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--ink); line-height: 1.2; }
+  h3 { font-size: 16px; font-weight: 600; color: var(--ink-mid); margin: 28px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  p { margin-bottom: 16px; color: var(--ink); }
+
+  .cs-section {
+    background: #FFF8F8;
+    border: 1.5px solid #FFCDD2;
+    border-radius: 14px;
+    padding: 32px 36px;
+    margin-bottom: 52px;
+  }
+  .cs-section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #E53935;
+    color: white;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+  .cs-section h2 { color: #B71C1C; }
+
+  .callout { border-radius: 10px; padding: 20px 24px; margin: 24px 0; display: flex; gap: 14px; align-items: flex-start; }
+  .callout-icon { font-size: 20px; flex-shrink: 0; line-height: 1.4; }
+  .callout-body { flex: 1; }
+  .callout-title { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout-body p { margin-bottom: 0; font-size: 14.5px; line-height: 1.6; }
+  .callout.info { background: var(--purple-pale); border: 1px solid var(--border); }
+  .callout.info .callout-title { color: var(--purple-primary); }
+  .callout.good { background: var(--green-light); border: 1px solid #A8D5BC; }
+  .callout.good .callout-title { color: var(--green); }
+  .callout.warn { background: var(--yellow-light); border: 1px solid #F0C060; }
+  .callout.warn .callout-title { color: var(--yellow); }
+  .callout.danger { background: var(--red-light); border: 1px solid #F0A89A; }
+  .callout.danger .callout-title { color: var(--red); }
+  .callout.cs-internal { background: #FFF3F3; border: 1px solid #FFCDD2; }
+  .callout.cs-internal .callout-title { color: #C0392B; }
+
+  .table-wrap { overflow-x: auto; margin: 20px 0; border-radius: 10px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead tr { background: var(--purple-primary); }
+  thead th { color: white; font-weight: 600; padding: 12px 16px; text-align: left; font-size: 12.5px; }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) { background: var(--purple-faint); }
+  tbody td { padding: 11px 16px; vertical-align: top; line-height: 1.5; }
+  td.good { color: var(--green); font-weight: 600; }
+  td.bad { color: var(--red); font-weight: 600; }
+  td.warn-cell { color: var(--yellow); font-weight: 600; }
+
+  .issue-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 28px; }
+  .issue-card-header { padding: 16px 24px; display: flex; align-items: center; gap: 14px; }
+  .issue-card-header.red { background: var(--red-light); border-bottom: 1px solid #F0A89A; }
+  .issue-card-header.yellow { background: var(--yellow-light); border-bottom: 1px solid #F0C060; }
+  .issue-card-sev { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; }
+  .sev-high { background: var(--red); color: white; }
+  .sev-med { background: var(--yellow); color: white; }
+  .issue-card-title { font-size: 15px; font-weight: 600; color: var(--ink); }
+  .issue-card-body { padding: 20px 24px; background: white; }
+  .issue-card-body p { font-size: 14.5px; }
+
+  .steps { list-style: none; margin: 16px 0; counter-reset: steps; }
+  .steps li { counter-increment: steps; display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+  .steps li::before { content: counter(steps); background: var(--purple-pale); color: var(--purple-primary); font-size: 12px; font-weight: 700; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; border: 1px solid var(--border); }
+  .steps li span { font-size: 14.5px; line-height: 1.6; }
+  .steps.cs-steps li::before { background: #FFEBEE; color: #C0392B; border-color: #FFCDD2; }
+
+  .checklist { list-style: none; margin: 16px 0; }
+  .checklist li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14.5px; line-height: 1.5; }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: '☐'; color: var(--purple-mid); font-size: 16px; flex-shrink: 0; line-height: 1.4; }
+
+  hr.section-divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+  code { background: var(--purple-pale); color: var(--purple-deep); font-family: 'Courier New', monospace; font-size: 13px; padding: 2px 6px; border-radius: 4px; }
+
+  .playbook-step {
+    border: 1px solid #FFCDD2;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .playbook-step-header {
+    background: #FFEBEE;
+    border-bottom: 1px solid #FFCDD2;
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .playbook-step-num {
+    background: #E53935;
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .playbook-step-title { font-size: 15px; font-weight: 600; color: #7B1010; }
+  .playbook-step-body { padding: 20px 24px; background: white; }
+  .playbook-step-body p { font-size: 14.5px; }
+
+  .footer { background: var(--cs-banner); border-top: 3px solid #E53935; padding: 28px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .footer-text { font-size: 13px; color: rgba(255,255,255,0.5); }
+  .footer-text strong { color: rgba(255,255,255,0.85); }
+  .footer-warn { font-size: 12px; color: #FF8A80; font-weight: 600; letter-spacing: 0.5px; }
+
+  @media (max-width: 640px) {
+    .cs-banner, .topbar, .hero, .layout, .footer { padding-left: 24px; padding-right: 24px; }
+    .hero h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cs-banner">
+  <div class="cs-badge">Internal Only</div>
+  <div class="cs-banner-text"><strong>CS Team Reference</strong> — Do not share with customers or include in customer-facing communications.</div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-brand">dripjobs</div>
+  <div class="topbar-tag">CS Knowledge Base</div>
+</div>
+
+<div class="hero">
+  <div class="hero-breadcrumb">CS Knowledge Base <span>›</span> Production Rates <span>›</span> Troubleshooting</div>
+  <div class="hero-label"><span>🔒 Internal Reference — Not for Customer Distribution</span></div>
+  <h1>Production Rates: Substrate Misconfiguration Diagnosis & Resolution</h1>
+  <p class="hero-sub">A complete internal reference for identifying, diagnosing, and resolving substrate rate configuration errors that cause proposal prices to decrease when coat counts increase.</p>
+  <div class="hero-meta">
+    <div class="hero-badge"><div class="dot"></div>CS Team Only</div>
+    <div class="hero-badge"><div class="dot"></div>Includes Support Playbook</div>
+    <div class="hero-badge"><div class="dot"></div>Development fix in progress</div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <div class="toc">
+    <div class="toc-label">In This Document</div>
+    <ol>
+      <li><a href="#background">Background: What's Happening and Why</a></li>
+      <li><a href="#how-rates-work">How DripJobs Calculates Substrate Prices</a></li>
+      <li><a href="#issue-types">The Three Issue Types — Full Diagnostic Detail</a></li>
+      <li><a href="#how-to-find">How to Audit an Account for These Issues</a></li>
+      <li><a href="#how-to-fix">How to Correct Each Issue</a></li>
+      <li><a href="#reference">Reference: Correct vs. Incorrect Rate Tables</a></li>
+      <li><a href="#playbook">CS Support Playbook <span class="cs-only">CS Only</span></a></li>
+    </ol>
+  </div>
+
+  <div class="section" id="background">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <h2>Background: What's Happening and Why</h2>
+    </div>
+
+    <p>Some accounts report that when they increase a substrate's coat count in the Proposal Builder, the proposal price <em>decreases</em> rather than increases. This is counterintuitive and erodes customer confidence in the tool.</p>
+
+    <div class="callout cs-internal">
+      <div class="callout-icon">🔒</div>
+      <div class="callout-body">
+        <div class="callout-title">CS Context: Root Cause</div>
+        <p>This is <strong>not a defect in DripJobs' calculation engine.</strong> The math is performing correctly against the data it receives. The root cause is <strong>incorrectly configured production rate tables</strong> — specifically, rate values that produce a decreasing cost when coat count is increased. The system currently has no built-in validation to catch these at entry time, and no runtime warning to surface them in the Proposal Builder. A development initiative is underway to address both gaps.</p>
+      </div>
+    </div>
+
+    <p>When communicating with customers, frame this as a <strong>configuration review</strong> — not a system error. The customer-facing help article positions this correctly. Do not share language that suggests the system has a validation gap or that development is working on a fix.</p>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <div class="callout-title">Customer Communication Guidance</div>
+        <p>Direct customers to the public-facing help article: <em>"Understanding Substrate Rate Configuration & Multi-Coat Pricing."</em> That article explains the behavior in a way that empowers them to audit their own rates without implying anything is wrong with the system. Do not share this internal document or reference the development tickets.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <div class="section" id="how-rates-work">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <h2>How DripJobs Calculates Substrate Prices</h2>
+    </div>
+
+    <p>Each substrate has a calculation type that determines how rate values translate into a labor cost. The two most important to understand for this issue:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Calculation Type</th><th>Rate Represents</th><th>Higher Value =</th><th>Lower Value =</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Man Hour(s)</strong></td><td>Time required per unit</td><td>More hours → Higher price</td><td>Less time → Lower price</td></tr>
+          <tr><td><strong>Linear Foot Per Man Hour</strong></td><td>Production <em>speed</em> (feet per hour)</td><td>Faster production → Fewer hours → <strong>Lower price</strong></td><td>Slower production → More hours → <strong>Higher price</strong></td></tr>
+          <tr><td><strong>Square Foot Per Man Hour</strong></td><td>Production <em>speed</em> (sq ft per hour)</td><td>Faster production → Fewer hours → <strong>Lower price</strong></td><td>Slower production → More hours → <strong>Higher price</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The critical takeaway: <strong>for speed-based types, rate and price move in opposite directions.</strong> A higher LF/hr value means faster work — and therefore a lower price. This is the mechanism behind Issue Type #1 below.</p>
+  </div>
+
+  <hr class="section-divider">
+
+  <div class="section" id="issue-types">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <h2>The Three Issue Types — Full Diagnostic Detail</h2>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-card-header red">
+        <span class="issue-card-sev sev-high">Review Required</span>
+        <span class="issue-card-title">Issue Type A — Speed-Based Rate Inversion (Usually an Error)</span>
+      </div>
+      <div class="issue-card-body">
+        <p><strong>Affected calculation types:</strong> Linear Foot Per Man Hour, Square Foot Per Man Hour</p>
+        <p><strong>Pattern:</strong> The 2-coat rate is equal to or higher than the 1-coat rate, and/or the 3-coat rate is equal to or higher than the 2-coat rate.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Coat</th><th>Flagged Rate (LF/hr)</th><th>What This Tells the System</th></tr></thead>
+            <tbody>
+              <tr><td>1 Coat</td><td>15.00</td><td>Painter does 15 LF/hr at 1 coat — baseline</td></tr>
+              <tr><td>2 Coat</td><td class="bad">22.00 ↑</td><td class="bad">Painter works faster at 2 coats → fewer hours → price decreases</td></tr>
+              <tr><td>3 Coat</td><td class="bad">28.00 ↑</td><td class="bad">Painter works even faster at 3 coats → price decreases further</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Mechanism:</strong> DripJobs divides the substrate's total measurement by the LF/hr rate to get total hours. If the rate increases across coats, total hours decrease — and price follows. The system is doing exactly what it's told.</p>
+        <p><strong>Common origin:</strong> Rates entered intuitively as increasing values (correct for Man Hour(s) substrates) without recognizing the speed-based type works in reverse. Also common when a substrate is copied from a Man Hour(s) template without adjusting for the new type's logic.</p>
+
+        <div class="callout cs-internal">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-body">
+            <div class="callout-title">CS Nuance: Not Always an Error — Confirm Before Correcting</div>
+            <p>A later coat being <em>faster</em> than an earlier coat is <strong>usually</strong> a misconfiguration — but legitimate real-world exceptions exist:</p>
+            <ul style="margin: 8px 0 8px 18px; font-size: 14px; line-height: 2.0;">
+              <li><strong>First coat includes hidden overhead:</strong> cutting in, masking, surface absorption on porous materials — second coat skips all of this</li>
+              <li><strong>Primer vs. finish coat:</strong> Primer is inherently slower (sealing, uneven absorption); finish coats are smoother and faster</li>
+              <li><strong>Application method changes:</strong> Coat 1 = spray + back-roll (slow); Coat 2 = spray only (fast)</li>
+              <li><strong>Color coverage dynamics:</strong> First coat = heavy effort; second coat = light uniform pass</li>
+              <li><strong>Crew workflow learning curve:</strong> First coat = logistics overhead; subsequent coats = optimized routine</li>
+            </ul>
+            <p style="margin-bottom:0;"><strong>CS approach:</strong> Flag it, explain the mechanics, then ask — <em>"When you increase the coat count in a proposal, does the price change look right?"</em> If the account owner confirms the behavior is intentional and accurate for their workflow, the configuration is valid. If they're surprised by a price decrease, rates need correction. Never correct without owner confirmation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-card-header red">
+        <span class="issue-card-sev sev-high">High Impact</span>
+        <span class="issue-card-title">Issue Type B — Zero Multi-Coat Rates on Non-Prep Substrates</span>
+      </div>
+      <div class="issue-card-body">
+        <p><strong>Affected calculation type:</strong> Man Hour(s) — in any category <em>except</em> Prep Work</p>
+        <p><strong>Pattern:</strong> 1-coat rate has a value; 2-coat and/or 3-coat rates are 0.00.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Coat</th><th>Incorrect Rate (hrs)</th><th>What This Tells the System</th></tr></thead>
+            <tbody>
+              <tr><td>1 Coat</td><td>0.75</td><td>0.75 hours labor — correct</td></tr>
+              <tr><td>2 Coat</td><td class="bad">0.00</td><td class="bad">Zero hours — this substrate contributes $0 at 2 coats</td></tr>
+              <tr><td>3 Coat</td><td class="bad">0.00</td><td class="bad">Zero hours — $0 contribution at 3 coats as well</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Mechanism:</strong> When the user increases coat count in the Proposal Builder, this substrate's entire labor contribution drops to $0. If a category has many affected substrates (e.g., an entire Carpentry category), the combined price drop can be substantial — hundreds of dollars.</p>
+        <p><strong>Common origin:</strong> Bulk account setup where only the 1-coat column was populated. Also occurs when accounts are onboarded via template import that only includes 1-coat data. These errors are invisible until a customer or CS member tries to change coat count in a proposal.</p>
+        <p><strong>Important — Prep Work is different:</strong> Prep Work substrates (power wash, masking, caulking, scraping, etc.) are performed once regardless of coat count. Zero values for 2-coat and 3-coat are <strong>intentional and correct</strong> for Prep Work. Do not flag or modify these.</p>
+      </div>
+    </div>
+
+    <div class="issue-card">
+      <div class="issue-card-header yellow">
+        <span class="issue-card-sev sev-med">Medium Impact</span>
+        <span class="issue-card-title">Issue Type C — Calculation Type Mismatch Within a Category</span>
+      </div>
+      <div class="issue-card-body">
+        <p><strong>Pattern:</strong> One or more substrates in a category use a different calculation type than the rest of the category's substrates.</p>
+        <p><strong>Example:</strong> A "Window Trim" category where 5 of 6 substrates use Man Hour(s), but one substrate uses Linear Foot Per Man Hour — and has inverted rates (Issue Type A).</p>
+        <p><strong>Why it matters:</strong> Type mismatch is often the diagnostic <em>signal</em> that leads to an Issue Type A finding. On its own it doesn't always cause incorrect pricing, but it's a reliable indicator that rates should be reviewed. Flag it and investigate the rate values on the outlier substrate.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <div class="section" id="how-to-find">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <h2>How to Audit an Account for These Issues</h2>
+    </div>
+
+    <h3>Navigation Path</h3>
+    <ol class="steps">
+      <li><span><strong>Company Settings</strong> → <strong>Production Rates</strong></span></li>
+      <li><span>Select the relevant <strong>Area</strong> (Interior / Exterior)</span></li>
+      <li><span>Click the <strong>Substrates</strong> tab</span></li>
+      <li><span>Work through each <strong>Category</strong>, clicking the edit icon on each substrate to view its full rate table</span></li>
+    </ol>
+
+    <h3>Issue Type A — Speed-Based Rate Inversion Checklist</h3>
+    <p>On any substrate using <strong>Linear Foot Per Man Hour</strong> or <strong>Square Foot Per Man Hour</strong>:</p>
+    <ul class="checklist">
+      <li>Is Coat 2 Rate <strong>strictly less than</strong> Coat 1 Rate?</li>
+      <li>Is Coat 3 Rate <strong>strictly less than</strong> Coat 2 Rate?</li>
+      <li>If either answer is No → flag for review. Then ask the account owner: <em>"Does the price change when you increase coat count look correct to you?"</em></li>
+      <li>If they confirm it's unintentional → correct the rates. If they confirm it's intentional → document and move on.</li>
+    </ul>
+
+    <h3>Issue Type B — Zero Multi-Coat Rate Checklist</h3>
+    <p>On any <strong>Man Hour(s)</strong> substrate in a <em>non-Prep Work</em> category:</p>
+    <ul class="checklist">
+      <li>Is Coat 2 Rate greater than 0?</li>
+      <li>Is Coat 3 Rate greater than 0?</li>
+      <li>If either is 0 → flag for Issue Type B correction</li>
+    </ul>
+
+    <h3>Issue Type C — Category Type Mismatch Checklist</h3>
+    <ul class="checklist">
+      <li>Do all substrates within the category use the same calculation type?</li>
+      <li>If a substrate's type differs from the rest of its category → flag for review, then apply the Type A checklist to that substrate</li>
+    </ul>
+
+    <div class="callout info">
+      <div class="callout-icon">🔍</div>
+      <div class="callout-body">
+        <div class="callout-title">Where to Focus First</div>
+        <p>Accounts with large numbers of custom substrates — especially those set up via bulk entry, copied templates, or CSV import — are highest risk. Prioritize: Carpentry, Trim/Door Trim/Window Trim, and any Miscellaneous catch-all category. These are the most common locations for Issue Types A and B. Prep Work zeros are expected — skip those.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <div class="section" id="how-to-fix">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <h2>How to Correct Each Issue</h2>
+    </div>
+
+    <h3>Correcting Issue Type A — Speed-Based Rate Inversion</h3>
+    <p><strong>First:</strong> Confirm with the account owner that the inversion is unintentional (see Issue Type A nuance in Section 3). If it's confirmed as a legitimate workflow difference (primer vs. finish, spray method changes, etc.), no correction is needed — document the conversation.</p>
+    <p>If correction is needed: multi-coat rates must <em>decrease</em> as coats increase. More coats = slower production = lower speed value = more hours = higher price.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coat</th><th>❌ Incorrect</th><th>✅ Correct</th><th>Logic</th></tr></thead>
+        <tbody>
+          <tr><td>1 Coat</td><td>15.00 LF/hr</td><td class="good">15.00 LF/hr</td><td>Baseline</td></tr>
+          <tr><td>2 Coat</td><td class="bad">22.00 LF/hr ↑</td><td class="good">~9.00 LF/hr ↓</td><td>Approx 60% of 1-coat speed</td></tr>
+          <tr><td>3 Coat</td><td class="bad">28.00 LF/hr ↑</td><td class="good">~6.00 LF/hr ↓</td><td>Approx 40% of 1-coat speed</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>Alternative fix:</strong> If it's simpler for the account owner, switch the substrate to <strong>Man Hour(s)</strong> and re-enter values as time (e.g., 0.5 hrs, 1.0 hrs, 1.5 hrs). This eliminates the inversion risk entirely and is appropriate for substrates that are counted by item rather than measured in feet.</p>
+
+    <h3>Correcting Issue Type B — Zero Multi-Coat Rates</h3>
+    <p>Enter appropriate hour values for the blank/zero fields. General rule of thumb (adjust based on account owner's actual production data):</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coat</th><th>Example Rate</th><th>Multiplier</th></tr></thead>
+        <tbody>
+          <tr><td>1 Coat</td><td>0.75 hrs (existing)</td><td>—</td></tr>
+          <tr><td>2 Coat</td><td class="good">1.35 hrs</td><td>~1.8× the 1-coat value</td></tr>
+          <tr><td>3 Coat</td><td class="good">1.95 hrs</td><td>~2.6× the 1-coat value</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Correcting Issue Type C — Type Mismatch</h3>
+    <p>Review with account owner. Change the calculation type to match the category standard, then re-enter rates using the correct logic for that type. If the different type is intentional and confirmed, document it and apply the Type A checklist to the outlier substrate's rate values.</p>
+
+    <div class="callout danger">
+      <div class="callout-icon">🚨</div>
+      <div class="callout-body">
+        <div class="callout-title">Always Involve the Account Owner Before Changing Rates</div>
+        <p>Rate values are business data. CS should not modify substrate rates without the account owner's explicit awareness and approval. Identify, explain, and confirm — then make the correction together or guide the owner through it themselves.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <div class="section" id="reference">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <h2>Reference: Correct vs. Incorrect Rate Tables</h2>
+    </div>
+
+    <h3>Man Hour(s) — Correct vs. Incorrect</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coat</th><th>✅ Correct</th><th>❌ Incorrect (Zero)</th></tr></thead>
+        <tbody>
+          <tr><td>1 Coat</td><td class="good">0.75 hrs</td><td class="bad">0.75 hrs (same)</td></tr>
+          <tr><td>2 Coat</td><td class="good">1.35 hrs ↑</td><td class="bad">0.00 → $0 labor at 2 coats</td></tr>
+          <tr><td>3 Coat</td><td class="good">1.95 hrs ↑</td><td class="bad">0.00 → $0 labor at 3 coats</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Linear Foot Per Man Hour — Correct vs. Incorrect</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coat</th><th>✅ Correct (Decreasing)</th><th>❌ Incorrect (Increasing)</th></tr></thead>
+        <tbody>
+          <tr><td>1 Coat</td><td class="good">15.00 LF/hr</td><td class="bad">15.00 LF/hr</td></tr>
+          <tr><td>2 Coat</td><td class="good">9.00 LF/hr ↓ → price ↑</td><td class="bad">22.00 LF/hr ↑ → price ↓</td></tr>
+          <tr><td>3 Coat</td><td class="good">6.00 LF/hr ↓ → price ↑</td><td class="bad">28.00 LF/hr ↑ → price ↓ further</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Prep Work Substrate — Zeros Are Correct Here</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Coat</th><th>Rate</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>1 Coat</td><td>0.50 hrs</td><td class="good">✓ Correct</td></tr>
+          <tr><td>2 Coat</td><td>0.00 hrs</td><td class="good">✓ Expected — prep is a one-time task</td></tr>
+          <tr><td>3 Coat</td><td>0.00 hrs</td><td class="good">✓ Expected — do not flag or modify</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <div class="cs-section" id="playbook">
+    <div class="cs-section-label">🔒 CS Team Only — Support Playbook</div>
+    <div class="section-header" style="margin-bottom:8px;">
+      <div class="section-num cs">7</div>
+      <h2>CS Support Playbook</h2>
+    </div>
+    <p style="margin-bottom:28px;">Use this flow when a customer reports that their proposal price decreases when they add more coats, or when you suspect production rate misconfiguration during an account audit.</p>
+
+    <div class="playbook-step">
+      <div class="playbook-step-header">
+        <div class="playbook-step-num">1</div>
+        <div class="playbook-step-title">Triage — Confirm the Symptom</div>
+      </div>
+      <div class="playbook-step-body">
+        <ol class="steps cs-steps">
+          <li><span>Ask: <em>"Which substrate or area shows the price decrease, and which coat count change triggers it?"</em></span></li>
+          <li><span>If they can't isolate it, ask them to duplicate the affected package and change only one substrate's coat count at a time to identify the culprit.</span></li>
+          <li><span>Confirm the symptom is isolated to specific substrates — not a global pricing issue.</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="playbook-step">
+      <div class="playbook-step-header">
+        <div class="playbook-step-num">2</div>
+        <div class="playbook-step-title">Audit the Identified Substrate</div>
+      </div>
+      <div class="playbook-step-body">
+        <ol class="steps cs-steps">
+          <li><span>Navigate to the account's Production Rates (with their permission, or guide them through it).</span></li>
+          <li><span>Locate the substrate they identified. Note its calculation type and all three coat rate values.</span></li>
+          <li><span>Apply the Issue Type A checklist (speed-based inversion) and Issue Type B checklist (zero multi-coat) from Section 4.</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="playbook-step">
+      <div class="playbook-step-header">
+        <div class="playbook-step-num">3</div>
+        <div class="playbook-step-title">Expand the Audit</div>
+      </div>
+      <div class="playbook-step-body">
+        <ol class="steps cs-steps">
+          <li><span>Once you find one issue, check the entire category — issues almost always appear in batches, especially for Issue Type B.</span></li>
+          <li><span>Prioritize: Carpentry, Window/Door Trim, and any Miscellaneous catch-all category. Skip Prep Work zeros — those are correct.</span></li>
+          <li><span>Flag every affected substrate before beginning any corrections.</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="playbook-step">
+      <div class="playbook-step-header">
+        <div class="playbook-step-num">4</div>
+        <div class="playbook-step-title">Explain and Correct</div>
+      </div>
+      <div class="playbook-step-body">
+        <ol class="steps cs-steps">
+          <li><span>Use plain language with the account owner. Reference the public help article to frame this as a configuration review. Do not use language suggesting a system gap.</span></li>
+          <li><span>Show them the specific rate values that are misconfigured and explain what they're telling the system (see Section 6 for reference tables).</span></li>
+          <li><span>Let them review and approve corrected values before you or they save anything.</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="playbook-step">
+      <div class="playbook-step-header">
+        <div class="playbook-step-num">5</div>
+        <div class="playbook-step-title">Verify the Fix</div>
+      </div>
+      <div class="playbook-step-body">
+        <ol class="steps cs-steps">
+          <li><span>After corrections are saved, return to the Proposal Builder and change the affected substrate's coat count. Confirm the price now increases as expected.</span></li>
+          <li><span>Repeat for all corrected substrates.</span></li>
+          <li><span>Alert the account owner that any <strong>previously sent proposals</strong> that used these substrates at 2+ coats should be reviewed for accurate pricing. Do not make changes to sent proposals — that decision belongs to the account owner.</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="callout danger" style="margin-top:28px;">
+      <div class="callout-icon">🚨</div>
+      <div class="callout-body">
+        <div class="callout-title">Already-Sent Proposals</div>
+        <p>If a customer sent proposals while the misconfiguration was in place, those proposals may have been underpriced. Surface this carefully and privately. Do not modify sent proposals without the account owner's explicit review and approval. This is a revenue impact conversation — handle with care.</p>
+      </div>
+    </div>
+
+    <div class="callout cs-internal" style="margin-top:20px;">
+      <div class="callout-icon">🔧</div>
+      <div class="callout-body">
+        <div class="callout-title">Development Status</div>
+        <p>Three enhancement tickets are in Active Triage to address this permanently: (1) a Proposal Builder warning when coat count increase causes a price decrease, (2) a Production Rates Health Check tool for account-wide auditing, and (3) inline validation on save in the substrate configuration form. Until these ship, manual audit is the recommended path — use this playbook.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-text">
+    <strong>DripJobs CS Knowledge Base</strong> · Production Rates · Substrate Misconfiguration Guide<br>
+    Questions? Escalate to Product or tag Jeremy in Slack.
+  </div>
+  <div class="footer-warn">🔒 Internal Only — Do Not Share with Customers</div>
+</div>
+
+</body>
+</html>
