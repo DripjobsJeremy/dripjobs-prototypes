@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DripJobs — Proposal Templates Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple: #7C3AED;
+    --purple-light: #EDE9FE;
+    --purple-mid: #6D28D9;
+    --green: #10B981;
+    --red: #EF4444;
+    --orange: #F97316;
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --gray-900: #111827;
+    --blue: #3B82F6;
+    --teal: #0891B2;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #f1f5f9;
+    color: var(--gray-800);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ─── SCREENS ─── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ─── APP SHELL ─── */
+  .app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .top-bar {
+    background: var(--purple);
+    height: 52px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(124,58,237,0.3);
+  }
+  .top-bar-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .top-bar-logo svg { width: 28px; height: 28px; }
+  .top-bar-spacer { flex: 1; }
+  .top-bar-user {
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .breadcrumb {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    padding: 10px 28px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--gray-500);
+  }
+  .breadcrumb a {
+    color: var(--purple);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .breadcrumb .sep { color: var(--gray-300); }
+  .breadcrumb .current { color: var(--gray-700); font-weight: 600; }
+
+  .main-content {
+    flex: 1;
+    padding: 28px;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* ─── PAGE HEADER ─── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--gray-900);
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--purple);
+    color: white;
+    border-color: var(--purple);
+  }
+  .btn-primary:hover { background: var(--purple-mid); border-color: var(--purple-mid); }
+  .btn-outline {
+    background: white;
+    color: var(--purple);
+    border-color: var(--purple);
+  }
+  .btn-outline:hover { background: var(--purple-light); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--gray-600);
+    border-color: var(--gray-300);
+  }
+  .btn-ghost:hover { background: var(--gray-50); }
+  .btn-danger {
+    background: var(--red);
+    color: white;
+    border-color: var(--red);
+  }
+  .btn-danger:hover { background: #DC2626; }
+  .btn-light-purple {
+    background: var(--purple-light);
+    color: var(--purple);
+    border-color: var(--purple-light);
+    width: 100%;
+    justify-content: center;
+    padding: 11px 16px;
+    font-size: 14px;
+  }
+  .btn-light-purple:hover { background: #DDD6FE; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .btn-xs { padding: 3px 10px; font-size: 11px; }
+
+  /* ─── TEMPLATES LIST TABLE ─── */
+  .templates-table-wrap {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--gray-100);
+    gap: 10px;
+  }
+  .search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--gray-500);
+    font-size: 13px;
+  }
+  .search-input {
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-family: 'Nunito', sans-serif;
+    outline: none;
+    width: 180px;
+    color: var(--gray-800);
+  }
+  .search-input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+  
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { border-bottom: 2px solid var(--gray-200); }
+  thead th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th:hover { color: var(--gray-700); }
+  thead th .sort-icon { opacity: 0.4; margin-left: 4px; }
+  tbody tr {
+    border-bottom: 1px solid var(--gray-100);
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--gray-50); }
+  tbody td { padding: 13px 16px; vertical-align: middle; }
+  
+  .template-name-link {
+    color: var(--purple);
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .template-name-link:hover { text-decoration: underline; }
+  .default-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #DCFCE7;
+    color: #166534;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .action-icons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .action-icon {
+    cursor: pointer;
+    transition: opacity 0.15s;
+    opacity: 0.6;
+  }
+  .action-icon:hover { opacity: 1; }
+  .action-icon.edit { color: var(--purple); }
+  .action-icon.copy { color: var(--gray-500); }
+  .action-icon.delete { color: var(--red); }
+
+  .templates-footer {
+    padding: 12px 18px;
+  }
+
+  /* ─── TEMPLATE EDIT SCREEN ─── */
+  .edit-header-label {
+    font-size: 13px;
+    color: var(--gray-500);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  /* ─── HELPER BANNER ─── */
+  .helper-banner {
+    background: linear-gradient(135deg, #EFF6FF 0%, #EDE9FE 100%);
+    border: 1px solid #BFDBFE;
+    border-left: 4px solid var(--purple);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    position: relative;
+    animation: bannerSlide 0.3s ease;
+  }
+  @keyframes bannerSlide {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .helper-banner-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--purple);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: white;
+    font-size: 16px;
+  }
+  .helper-banner-content { flex: 1; }
+  .helper-banner-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--purple);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .helper-banner-body {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
+  .helper-banner-body ul {
+    list-style: none;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .helper-banner-body ul li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .helper-banner-body ul li::before {
+    content: "→";
+    color: var(--purple);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .helper-banner-dismiss {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-400);
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.15s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .helper-banner-dismiss:hover { background: rgba(0,0,0,0.06); color: var(--gray-700); }
+  .helper-banner.hidden { display: none; }
+  .d-none { display: none !important; }
+
+  /* ─── TEMPLATE TITLE AREA ─── */
+  .template-title-area {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .template-name-display {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--gray-900);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .template-name-display .pencil-btn {
+    cursor: pointer;
+    color: var(--purple);
+    opacity: 0.6;
+    transition: opacity 0.15s;
+  }
+  .template-name-display .pencil-btn:hover { opacity: 1; }
+
+  /* ─── ACTIVE TOGGLE CARD ─── */
+  .toggle-card {
+    background: var(--gray-50);
+    border-radius: 10px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--gray-800);
+  }
+
+  /* ─── TOGGLE SWITCH ─── */
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: var(--gray-300);
+    border-radius: 12px;
+    transition: background 0.2s;
+  }
+  .toggle input:checked + .toggle-track { background: var(--purple); }
+  .toggle-thumb {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked ~ .toggle-thumb { transform: translateX(20px); }
+
+  /* ─── DEFAULT PROPOSAL CARD ─── */
+  .default-card {
+    background: var(--gray-50);
+    border-radius: 10px;
+    padding: 16px 20px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .default-card .radio-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 8px;
+  }
+  .default-card .radio-row input[type=radio] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--purple);
+    cursor: pointer;
+  }
+  .default-card .sub-text {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-bottom: 4px;
+  }
+  .default-card .current-default {
+    font-size: 13px;
+    color: var(--gray-700);
+  }
+  .default-card .current-default strong { color: var(--gray-800); }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-header {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--gray-900);
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--gray-200);
+    margin-bottom: 4px;
+  }
+
+  /* ─── LINE ITEMS TABLE ─── */
+  .line-items-section {
+    margin-bottom: 28px;
+  }
+  .li-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  .li-table thead tr { border-bottom: 1px solid var(--gray-200); }
+  .li-table thead th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .li-table thead th:not(:first-child) { text-align: right; }
+  .li-table tbody tr { border-bottom: 1px solid var(--gray-100); }
+  .li-table tbody tr:last-child { border-bottom: none; }
+  .li-table tbody td { padding: 11px 12px; vertical-align: middle; }
+  .li-table tbody td:not(:first-child) { text-align: right; }
+  
+  .drag-handle { color: var(--gray-300); margin-right: 6px; cursor: grab; }
+  .li-name { color: var(--purple); font-weight: 700; font-size: 13px; }
+  .li-actions { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; }
+  .li-action-btn {
+    color: var(--gray-400);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    transition: color 0.1s;
+  }
+  .li-action-btn:hover { color: var(--purple); }
+  .desc-only-badge {
+    background: #FED7AA;
+    color: #C2410C;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .li-total-row td {
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--gray-900);
+    padding: 13px 12px;
+    border-top: 2px solid var(--gray-200);
+  }
+  .total-dark {
+    background: var(--gray-700);
+    color: white !important;
+    padding: 13px 16px !important;
+    border-radius: 0 6px 6px 0;
+  }
+  .add-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-state {
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--gray-500);
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+  .empty-state svg { color: var(--gray-400); flex-shrink: 0; }
+
+  /* ─── PACKAGES SECTION ─── */
+  .packages-section { margin-bottom: 28px; }
+  .packages-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* ─── PACKAGE CARD ─── */
+  .package-card {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .package-card-header {
+    background: var(--gray-50);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .package-drag { color: var(--gray-300); cursor: grab; }
+  .package-title { 
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .package-name { font-size: 16px; font-weight: 800; color: var(--gray-900); }
+  .package-desc { font-size: 12px; color: var(--gray-500); }
+  .package-badge {
+    background: #DBEAFE;
+    color: #1D4ED8;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .package-price { font-size: 18px; font-weight: 800; color: var(--gray-900); }
+  .package-menu { color: var(--gray-400); cursor: pointer; font-size: 16px; padding: 4px 6px; }
+  .package-items-table { width: 100%; border-collapse: collapse; }
+  .package-items-table thead tr { border-bottom: 1px solid var(--gray-200); }
+  .package-items-table thead th {
+    text-align: left;
+    padding: 9px 16px;
+    font-size: 12px;
+    color: var(--gray-400);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+  }
+  .package-items-table thead th:not(:first-child) { text-align: right; }
+  .package-items-table tbody td { padding: 10px 16px; vertical-align: middle; border-bottom: 1px solid var(--gray-100); }
+  .package-items-table tbody td:not(:first-child) { text-align: right; }
+  .package-items-table tbody tr:last-child td { border-bottom: none; }
+  .pkg-total-row td { font-weight: 800; font-size: 13px; padding: 12px 16px !important; border-top: 1px solid var(--gray-200) !important; }
+  .pkg-total-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gray-700);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 800;
+  }
+  .pkg-total-badge svg { color: #67E8F9; }
+  .package-card-footer {
+    border-top: 1px solid var(--gray-100);
+    padding: 12px 16px;
+    display: flex;
+    gap: 10px;
+  }
+
+  /* ─── TOTALS SECTION ─── */
+  .totals-section {
+    margin-bottom: 20px;
+  }
+  .totals-section .section-header { margin-bottom: 16px; }
+  .totals-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .totals-table tr { border-bottom: 1px solid var(--gray-100); }
+  .totals-table td { padding: 10px 8px; font-size: 14px; }
+  .totals-table td:first-child { text-align: right; color: var(--gray-600); font-weight: 600; }
+  .totals-table td:last-child { text-align: right; font-weight: 600; color: var(--gray-800); padding-right: 0; min-width: 80px; }
+  .totals-total-row td { font-weight: 800 !important; }
+  .totals-dark-cell {
+    background: var(--gray-700);
+    color: white !important;
+    padding: 11px 16px !important;
+    border-radius: 4px;
+    font-size: 15px;
+  }
+  .apply-discount-wrap { display: flex; justify-content: flex-end; margin-bottom: 24px; }
+
+  /* ─── SETTINGS TABS ─── */
+  .settings-tabs-wrap { margin-bottom: 24px; }
+  .tabs-nav {
+    display: flex;
+    border-bottom: 2px solid var(--gray-200);
+    gap: 0;
+    overflow-x: auto;
+    margin-bottom: 20px;
+  }
+  .tab-btn {
+    padding: 10px 18px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--purple);
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+    transition: color 0.15s;
+    opacity: 0.6;
+  }
+  .tab-btn:hover { opacity: 1; }
+  .tab-btn.active {
+    opacity: 1;
+    color: var(--purple);
+  }
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--purple);
+    border-radius: 2px 2px 0 0;
+  }
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 700px) { .settings-grid { grid-template-columns: 1fr; } }
+  .settings-card {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .settings-card-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--gray-800);
+    margin-bottom: 14px;
+  }
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--gray-100);
+    gap: 10px;
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .settings-label .info-icon { 
+    width: 14px; height: 14px; background: var(--gray-300); color: white;
+    border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 900; cursor: help;
+  }
+  .settings-value { font-size: 13px; color: var(--gray-600); font-weight: 600; }
+  .settings-value.link { color: var(--purple); text-decoration: underline; cursor: pointer; }
+  .note-text {
+    font-size: 12px;
+    color: var(--gray-500);
+    padding: 8px 0 6px;
+  }
+  .note-text strong { color: var(--teal); }
+  .countersign-select {
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 13px;
+    font-family: 'Nunito', sans-serif;
+    color: var(--gray-700);
+    background: white;
+    cursor: pointer;
+    outline: none;
+  }
+  .payment-schedule-card {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .ps-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .ps-title { font-size: 14px; font-weight: 800; color: var(--gray-800); }
+  .financing-card {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    text-align: center;
+  }
+  .acorn-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .acorn-logo-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #0EA5E9, #7C3AED);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 22px;
+  }
+  .acorn-logo-text {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    color: var(--gray-800);
+  }
+  .acorn-logo-sub { font-size: 11px; letter-spacing: 0.2em; color: var(--gray-400); font-weight: 700; }
+  .acorn-note { font-size: 13px; font-weight: 700; color: var(--gray-600); }
+
+  /* ─── BOTTOM ACTIONS ─── */
+  .bottom-actions {
+    border-top: 1px solid var(--gray-200);
+    padding-top: 16px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .template-created-info {
+    background: var(--gray-50);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--gray-500);
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .payments-link {
+    display: block;
+    text-align: center;
+    color: var(--purple);
+    text-decoration: underline;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 12px;
+    margin-bottom: 20px;
+  }
+
+  /* ─── CENTER CONTAINER ─── */
+  .center-container {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  /* ─── TEMPLATE DEFAULT BADGE ─── */
+  .template-default-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #DCFCE7;
+    color: #166534;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    margin-left: 10px;
+  }
+
+  /* ─── TOAST NOTIFICATIONS ─── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--gray-900);
+    color: white;
+    padding: 12px 20px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.25s ease;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ─── SCROLLABLE EDIT AREA ─── */
+  .edit-scroll-area { padding-bottom: 40px; }
+
+  /* ─── TAB PANELS ─── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ─── NOTES TAB ─── */
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 900px) { .notes-grid { grid-template-columns: 1fr; } }
+  .notes-card {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .notes-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .notes-card-title { font-size: 16px; font-weight: 800; color: var(--gray-900); }
+  .notes-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .badge-teal  { background: #CCFBF1; color: #0F766E; }
+  .badge-red   { background: #FEE2E2; color: #B91C1C; }
+  .badge-green { background: #DCFCE7; color: #166534; }
+  .notes-edit-btn {
+    margin-left: auto;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    color: var(--gray-600);
+    font-family: 'Nunito', sans-serif;
+  }
+  .notes-edit-btn:hover { background: var(--gray-50); }
+  .notes-card-body { font-size: 13px; color: var(--gray-700); line-height: 1.6; }
+  .notes-card-body p { margin-bottom: 4px; }
+  .notes-card-body ul { list-style: disc; padding-left: 18px; margin-bottom: 12px; }
+  .notes-card-body ul li { margin-bottom: 2px; }
+
+  /* ─── CUSTOM SECTIONS TAB ─── */
+  .custom-section-card {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 16px;
+  }
+  .custom-section-header {
+    background: var(--gray-50);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .custom-section-name { font-size: 16px; font-weight: 800; color: var(--gray-900); }
+  .custom-section-body {
+    padding: 16px 20px;
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.7;
+  }
+  .custom-section-body p { margin-bottom: 10px; }
+  .custom-section-body p:last-child { margin-bottom: 0; }
+
+  /* ─── TWO-PATH GUIDE (list screen) ─── */
+  .two-path-guide {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 700px) { .two-path-guide { grid-template-columns: 1fr; } }
+  .path-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 18px 20px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+  }
+  .path-card.hidden { display: none; }
+  .path-card-step {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--purple);
+  }
+  .path-card-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .path-card-body {
+    font-size: 13px;
+    color: var(--gray-500);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .path-card-cta { border-color: var(--purple); border-left: 4px solid var(--purple); }
+  .path-card-action { margin-top: 10px; }
+
+  /* ─── NEXT STEP CTA (template screens) ─── */
+  .next-step-card {
+    background: linear-gradient(135deg, #F5F3FF 0%, #EFF6FF 100%);
+    border: 1px solid #DDD6FE;
+    border-left: 4px solid var(--purple);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .next-step-card-content { flex: 1; }
+  .next-step-card-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--purple);
+    margin-bottom: 4px;
+  }
+  .next-step-card-body { font-size: 13px; color: var(--gray-600); line-height: 1.5; }
+
+  /* ─── NEW PROPOSAL MODAL ─── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    overflow-y: auto;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal-box {
+    background: white;
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 500px;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .modal-title { font-size: 18px; font-weight: 800; color: var(--gray-900); }
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-400);
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: 'Nunito', sans-serif;
+  }
+  .modal-close:hover { color: var(--gray-700); background: var(--gray-100); }
+  .modal-body { max-height: calc(100vh - 220px); overflow-y: auto; }
+  .modal-section { padding: 18px 24px; border-bottom: 1px solid var(--gray-100); }
+  .modal-section-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--purple);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .modal-field { margin-bottom: 14px; }
+  .modal-field:last-child { margin-bottom: 0; }
+  .modal-label { font-size: 13px; font-weight: 700; color: var(--gray-700); margin-bottom: 6px; display: block; }
+  .modal-input, .modal-select {
+    width: 100%;
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: 'Nunito', sans-serif;
+    color: var(--gray-800);
+    outline: none;
+    background: white;
+  }
+  .modal-input:focus, .modal-select:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+  .modal-input::placeholder { color: var(--gray-400); }
+  .modal-select { cursor: pointer; }
+  .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .modal-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-200);
+  }
+  .modal-note {
+    font-size: 12px;
+    color: var(--gray-500);
+    background: var(--gray-50);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+  .modal-note strong { color: var(--teal); }
+  .modal-input-readonly { background: var(--gray-50); color: var(--gray-500); }
+  .modal-drips-row { display: flex; align-items: center; justify-content: space-between; }
+  .modal-drips-label { margin-bottom: 0; }
+  .modal-drips-disable { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--gray-600); }
+  .modal-label-blue { color: var(--blue); }
+  .modal-label-orange { color: var(--orange); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 640px) {
+    .main-content { padding: 16px; }
+    .template-name-display { font-size: 20px; }
+    .settings-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 1 — TEMPLATES LIST
+════════════════════════════════════════════════════════ -->
+<div id="screen-list" class="screen active">
+  <div class="app-shell">
+    <div class="top-bar">
+      <div class="top-bar-logo">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" fill="rgba(255,255,255,0.15)"/>
+          <path d="M14 12h8a6 6 0 0 1 0 12h-8V12zm0 0v16" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="26" cy="28" r="4" fill="#A78BFA"/>
+        </svg>
+        DripJobs
+      </div>
+      <div class="top-bar-spacer"></div>
+      <div class="top-bar-user">JH</div>
+    </div>
+    
+    <div class="breadcrumb">
+      <a>Proposals</a>
+      <span class="sep">›</span>
+      <span class="current">Templates</span>
+    </div>
+
+    <div class="main-content">
+      <div class="page-header">
+        <h1 class="page-title">Proposal Templates</h1>
+        <button class="btn btn-primary" onclick="showToast('New Template modal would open here')">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2.5" stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+          New Template
+        </button>
+      </div>
+
+      <!-- Welcome banner -->
+      <div class="helper-banner" id="helper-list-welcome">
+        <div class="helper-banner-icon">🎉</div>
+        <div class="helper-banner-content">
+          <div class="helper-banner-title">Welcome to your Proposal Templates!</div>
+          <div class="helper-banner-body">
+            Proposal Templates are reusable blueprints that speed up every bid — load one when creating a new proposal and your line items, packages, and settings are ready to go.
+            <ul>
+              <li><strong>Create a template</strong> for each service type you offer (e.g. Interior Painting, Exterior + Pressure Wash) so you're never starting from scratch.</li>
+              <li><strong>Set a default template</strong> and it will automatically pre-load whenever you start a new proposal.</li>
+              <li><strong>Add Packages</strong> (Good / Better / Best tiers) inside a template to give customers pricing options on a single proposal — proven to increase average ticket size.</li>
+              <li><strong>Click any template name</strong> below to edit its line items, packages, payment settings, and more.</li>
+            </ul>
+          </div>
+        </div>
+        <button type="button" class="helper-banner-dismiss" onclick="dismissBanner('helper-list-welcome')">✕ Got it</button>
+      </div>
+
+      <!-- Two-path guide -->
+      <div class="two-path-guide" id="two-path-guide">
+        <div class="path-card" id="path-step-1">
+          <button type="button" class="helper-banner-dismiss" onclick="dismissBanner('path-step-1')">✕ Got it</button>
+          <div class="path-card-step">Step 1 — Optional</div>
+          <div class="path-card-title">📋 Review a Template</div>
+          <div class="path-card-body">Click any template below to preview its line items, packages, and settings. We've added default verbiage to your <strong>Notes</strong> and a custom <strong>"About Us"</strong> section — feel free to update them to match your business, or keep what we've added for you.</div>
+        </div>
+        <div class="path-card path-card-cta" id="path-step-2">
+          <button type="button" class="helper-banner-dismiss" onclick="dismissBanner('path-step-2')">✕ Got it</button>
+          <div class="path-card-step">Step 2 — Ready to go?</div>
+          <div class="path-card-title">🚀 Start a New Proposal</div>
+          <div class="path-card-body">Head to the Sales Pipeline and click <strong>New Proposal</strong>. Your default template loads instantly — or pick a different one from the dropdown.</div>
+          <div class="path-card-action">
+            <button type="button" class="btn btn-primary btn-sm" onclick="openNewProposalModal()">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2.5" stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+              Start New Proposal
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="templates-table-wrap">
+        <div class="table-toolbar">
+          <div class="search-wrap">
+            <span>Search:</span>
+            <input type="text" class="search-input" placeholder="">
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name <span class="sort-icon">⇅</span></th>
+              <th>Deposit $ <span class="sort-icon">⇅</span></th>
+              <th>Deposit % <span class="sort-icon">⇅</span></th>
+              <th>Amount (With Opt. Items) <span class="sort-icon">⇅</span></th>
+              <th>Date <span class="sort-icon">⇅</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="openTemplate('ext-pressure-wash')">
+              <td>
+                <span class="template-name-link">EXT Paint + Pressure Wash</span>
+                <span class="default-badge" id="list-badge-ext-pw">DEFAULT</span>
+                <span class="action-icons" style="display:inline-flex;margin-left:10px;" onclick="event.stopPropagation()">
+                  <span class="action-icon edit" title="Edit" onclick="openTemplate('ext-pressure-wash')">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  </span>
+                  <span class="action-icon copy" title="Duplicate" onclick="showToast('Template duplicated')">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg>
+                  </span>
+                  <span class="action-icon delete" title="Delete" onclick="showToast('Delete confirmation would appear')">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/></svg>
+                  </span>
+                </span>
+              </td>
+              <td style="color:var(--gray-500)">—</td>
+              <td style="color:var(--gray-600)">50%</td>
+              <td style="color:var(--gray-800); font-weight:700;">$0.00</td>
+              <td style="color:var(--gray-500);">5/22/2025</td>
+            </tr>
+            <tr onclick="openTemplate('int-packages')">
+              <td>
+                <span class="template-name-link">INT Packages (Line Items)</span>
+                <span class="default-badge d-none" id="list-badge-int-packages">DEFAULT</span>
+                <span class="action-icons" style="display:inline-flex;margin-left:10px;" onclick="event.stopPropagation()">
+                  <span class="action-icon edit" title="Edit" onclick="openTemplate('int-packages')">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  </span>
+                  <span class="action-icon copy" title="Duplicate" onclick="showToast('Template duplicated')">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg>
+                  </span>
+                  <span class="action-icon delete" title="Delete" onclick="showToast('Delete confirmation would appear')">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/></svg>
+                  </span>
+                </span>
+              </td>
+              <td style="color:var(--gray-500)">—</td>
+              <td style="color:var(--gray-600)">0%</td>
+              <td style="color:var(--gray-800); font-weight:700;">$0.00</td>
+              <td style="color:var(--gray-500);">3/5/2026</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="templates-footer">
+        <button class="btn btn-outline btn-sm" onclick="showToast('Manage Custom Section Templates')">Manage Custom Section Templates</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 2 — EXT PAINT + PRESSURE WASH
+════════════════════════════════════════════════════════ -->
+<div id="screen-ext-pressure-wash" class="screen">
+  <div class="app-shell">
+    <div class="top-bar">
+      <div class="top-bar-logo">
+        <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" fill="rgba(255,255,255,0.15)"/><path d="M14 12h8a6 6 0 0 1 0 12h-8V12zm0 0v16" stroke="white" stroke-width="2.5" stroke-linecap="round"/><circle cx="26" cy="28" r="4" fill="#A78BFA"/></svg>
+        DripJobs
+      </div>
+      <div class="top-bar-spacer"></div>
+      <div class="top-bar-user">JH</div>
+    </div>
+    <div class="breadcrumb">
+      <a onclick="goBack()">Proposals</a>
+      <span class="sep">›</span>
+      <a onclick="goBack()">Templates</a>
+      <span class="sep">›</span>
+      <span class="current">EXT Paint + Pressure Wash</span>
+    </div>
+    <div class="main-content">
+      <div class="edit-scroll-area">
+        <div class="center-container">
+          <div class="edit-header-label">Add/Edit Proposal Template</div>
+
+          <!-- 🆕 HELPER BANNER -->
+          <div class="helper-banner" id="helper-ext-pw">
+            <div class="helper-banner-icon">💡</div>
+            <div class="helper-banner-content">
+              <div class="helper-banner-title">How Proposal Templates Work</div>
+              <div class="helper-banner-body">
+                Proposal templates are reusable starting points that appear in the template dropdown when creating a new proposal — saving you time on every bid.
+                <ul>
+                  <li>When starting a new proposal, select this template from the dropdown to load it instantly.</li>
+                  <li><strong>To price by square footage:</strong> Enter the sq ft as the quantity and your price per sq ft — DripJobs calculates the total automatically.</li>
+                  <li><strong>Want pre-set pricing?</strong> Update the price per unit in <strong>Products / Services</strong>, then edit this template to pull in those rates — so your template is always ready to send.</li>
+                </ul>
+              </div>
+            </div>
+            <button class="helper-banner-dismiss" onclick="dismissBanner('helper-ext-pw')">✕ Got it</button>
+          </div>
+
+          <div class="template-title-area">
+            <div class="template-name-display">
+              EXT Paint + Pressure Wash
+              <span class="pencil-btn" onclick="showToast('Template name edit mode')">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              </span>
+              <span class="template-default-badge" id="title-badge-ext-pw">DEFAULT</span>
+            </div>
+          </div>
+
+          <div class="toggle-card">
+            Active
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <div class="toggle-track"></div>
+              <div class="toggle-thumb"></div>
+            </label>
+          </div>
+
+          <div class="default-card">
+            <div class="radio-row">
+              <input type="radio" name="default-template" id="def-ext-pw" value="ext-pw" checked onclick="handleDefaultClick(this)">
+              <label for="def-ext-pw" style="cursor:pointer;font-weight:700;">Set as default proposal</label>
+            </div>
+            <div class="sub-text">This template automatically loads when creating new proposals.</div>
+            <div class="current-default" id="default-indicator-ext-pw" style="color:#166534;font-weight:700;">✓ This is your current default template.</div>
+          </div>
+
+          <button class="btn btn-light-purple" onclick="showToast('Template duplicated successfully')">Duplicate Template</button>
+
+          <div style="height:24px;"></div>
+
+          <div class="line-items-section">
+            <div class="section-header">Line Item Templates</div>
+            <table class="li-table">
+              <thead>
+                <tr>
+                  <th style="width:50%">Product / Service</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Subtotal</th>
+                  <th>Tax</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <span class="drag-handle">≡</span>
+                    <span class="li-name">EXT Painting (sq ft)</span>
+                    <span class="li-actions">
+                      <span class="li-action-btn" onclick="showToast('Copy line item')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span>
+                      <span class="li-action-btn" onclick="showToast('Add attachment')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span>
+                    </span>
+                  </td>
+                  <td>1.00</td>
+                  <td>—</td>
+                  <td>$0.00</td>
+                  <td>$0.00</td>
+                  <td>$0.00</td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="drag-handle">≡</span>
+                    <span class="li-name">Color Consultation</span>
+                    <span class="li-actions">
+                      <span class="li-action-btn"><svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span>
+                      <span class="li-action-btn"><svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span>
+                    </span>
+                  </td>
+                  <td colspan="5"><span class="desc-only-badge">Description only</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="drag-handle">≡</span>
+                    <span class="li-name">Pressure Washing</span>
+                    <span class="li-actions">
+                      <span class="li-action-btn"><svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span>
+                      <span class="li-action-btn"><svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span>
+                    </span>
+                  </td>
+                  <td colspan="5"><span class="desc-only-badge">Description only</span></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="li-total-row">
+                  <td colspan="3" style="font-weight:800;">Total</td>
+                  <td>$0.00</td>
+                  <td>$0.00</td>
+                  <td class="total-dark">$0.00</td>
+                </tr>
+              </tfoot>
+            </table>
+            <div class="add-buttons">
+              <button class="btn btn-outline btn-sm" onclick="showToast('Add Line Item')">Add Line Item</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Add Multiple Items')">Add Multi. Items</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Add Optional Item')">Add Optional Item</button>
+            </div>
+          </div>
+
+          <!-- Packages section -->
+          <div class="packages-section">
+            <div class="section-header" style="margin-bottom:14px;">Packages</div>
+            <div class="empty-state">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 8v4m0 4h.01"/></svg>
+              Start by adding a Package here...
+            </div>
+            <div class="add-buttons">
+              <button class="btn btn-outline btn-sm" onclick="showToast('Add Package')">Add Package</button>
+              <button class="btn btn-primary btn-sm" onclick="showToast('How It Works guide')">
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 8v4m0 4h.01"/></svg>
+                How It Works
+              </button>
+            </div>
+          </div>
+
+          <!-- Totals -->
+          <div class="totals-section">
+            <div class="section-header">Totals</div>
+            <table class="totals-table">
+              <tr><td>Subtotal</td><td>$0.00</td></tr>
+              <tr><td>Tax</td><td>$0.00</td></tr>
+              <tr class="totals-total-row">
+                <td style="text-align:right;font-weight:800;color:var(--gray-800);">Total</td>
+                <td><div class="totals-dark-cell">$0.00</div></td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="apply-discount-wrap">
+            <button class="btn btn-outline btn-sm" onclick="showToast('Apply Discount')">Apply Discount</button>
+          </div>
+
+          <!-- Settings Tabs -->
+          <div class="settings-tabs-wrap">
+            <div class="tabs-nav">
+              <button class="tab-btn active" onclick="setTab(this)" data-tab="settings">Settings</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="video">Video</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="notes">Notes</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="custom-sections">Custom Sections</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="production-rates">Production Rates</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="details">Details</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="color-chart">Color Chart</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="attachments">Attachments</button>
+            </div>
+            <div class="settings-grid">
+              <div class="settings-card">
+                <div class="settings-card-title">Payment Settings</div>
+                <div class="settings-row">
+                  <span class="settings-label">Deposit:</span>
+                  <span class="settings-value link">50.00% ($0.00)</span>
+                </div>
+                <div class="settings-row">
+                  <span class="settings-label">Allow Alternative Payment <span class="info-icon">i</span></span>
+                  <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                </div>
+                <div class="settings-row">
+                  <span class="settings-label">Company Tax Rate:</span>
+                  <span class="settings-value">5.000%</span>
+                </div>
+                <div class="settings-row">
+                  <span class="settings-label">Line Item Quantity Only <span class="info-icon">i</span></span>
+                  <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                </div>
+                <div class="settings-row">
+                  <span class="settings-label">Hide Bottom Proposal Total <span class="info-icon">i</span></span>
+                  <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                </div>
+                <div class="settings-row">
+                  <span class="settings-label">Hide Bottom Proposal Deposit <span class="info-icon">i</span></span>
+                  <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                </div>
+              </div>
+              <div class="settings-card">
+                <div class="settings-card-title">Proposal Settings</div>
+                <div class="settings-row">
+                  <span class="settings-label">Enable Countersign <span class="info-icon">i</span></span>
+                  <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                </div>
+                <div class="settings-row">
+                  <span class="settings-label">Countersign Signatory <span class="info-icon">i</span></span>
+                  <select class="countersign-select"><option>Jeremy Harrison</option></select>
+                </div>
+                <div class="note-text"><strong>Note:</strong> The options below appear to customer after proposal has been sent.</div>
+                <div class="settings-row">
+                  <span class="settings-label">Allow Customer Proposal Rejection <span class="info-icon">i</span></span>
+                  <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                </div>
+                <div class="settings-row">
+                  <span class="settings-label">Allow Customer Change Requests <span class="info-icon">i</span></span>
+                  <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+                </div>
+              </div>
+              <div class="payment-schedule-card">
+                <div class="ps-header">
+                  <div class="ps-title">Payment Schedule</div>
+                  <button class="btn btn-outline btn-xs" onclick="showToast('Add payment schedule milestone')">Add</button>
+                </div>
+                <div class="settings-row"><span class="settings-label">Remaining Balance:</span><span class="settings-value">(100.00%) - $0.00</span></div>
+                <div class="settings-row"><span class="settings-label">Show Schedule on Proposal:</span><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+                <div class="settings-row"><span class="settings-label">Show Schedule Percentages on Proposal:</span><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+              </div>
+              <div class="financing-card">
+                <div class="settings-card-title">Financing</div>
+                <div class="acorn-logo">
+                  <div class="acorn-logo-icon">🌿</div>
+                  <div class="acorn-logo-text">Acorn</div>
+                  <div class="acorn-logo-sub">FINANCE</div>
+                </div>
+                <div class="acorn-note">Acorn Financing widget won't show unless the amount is greater than $1000.</div>
+              </div>
+            </div>
+          </div>
+
+          <a class="payments-link" onclick="showToast('Click here to setup online payments')">Click here to setup online payments›</a>
+
+          <div class="template-created-info">Template created at 5/22/2025 11:50:04 AM by Jesus Rubio</div>
+
+          <div class="next-step-card">
+            <div class="next-step-card-content">
+              <div class="next-step-card-title">✅ Template looking good?</div>
+              <div class="next-step-card-body">Ready to send your first proposal using this template? Head to the Sales Pipeline and click <strong>New Proposal</strong> — this template will load automatically if it's set as your default, or select it from the dropdown.</div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="openNewProposalModal()">Start New Proposal →</button>
+          </div>
+
+          <div class="bottom-actions">
+            <button class="btn btn-ghost" onclick="showToast('View/Edit Terms & Conditions')">View/ Edit T&C's</button>
+            <button class="btn btn-danger" onclick="showToast('Delete confirmation would appear')">Delete Template</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 4 — INT PACKAGES (LINE ITEMS) - DEFAULT
+════════════════════════════════════════════════════════ -->
+<div id="screen-int-packages" class="screen">
+  <div class="app-shell">
+    <div class="top-bar">
+      <div class="top-bar-logo">
+        <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18" fill="rgba(255,255,255,0.15)"/><path d="M14 12h8a6 6 0 0 1 0 12h-8V12zm0 0v16" stroke="white" stroke-width="2.5" stroke-linecap="round"/><circle cx="26" cy="28" r="4" fill="#A78BFA"/></svg>
+        DripJobs
+      </div>
+      <div class="top-bar-spacer"></div>
+      <div class="top-bar-user">JH</div>
+    </div>
+    <div class="breadcrumb">
+      <a onclick="goBack()">Proposals</a>
+      <span class="sep">›</span>
+      <a onclick="goBack()">Templates</a>
+      <span class="sep">›</span>
+      <span class="current">INT Packages (Line Items)</span>
+    </div>
+    <div class="main-content">
+      <div class="edit-scroll-area">
+        <div class="center-container">
+          <div class="edit-header-label">Add/Edit Proposal Template</div>
+
+          <div class="helper-banner" id="helper-int-pkg">
+            <div class="helper-banner-icon">💡</div>
+            <div class="helper-banner-content">
+              <div class="helper-banner-title">How Package Templates Work</div>
+              <div class="helper-banner-body">
+                Packages let you present Good / Better / Best pricing tiers on a single proposal — giving customers a choice while increasing your average ticket.
+                <ul>
+                  <li>Each package (Bronze, Silver, Gold) loads as a selectable option when this template is used on a new proposal.</li>
+                  <li><strong>Set a fixed package price</strong> directly on each package card — this overrides individual line item totals and is what the customer sees.</li>
+                  <li><strong>Line items within each package</strong> serve as a scope-of-work checklist. Mark items as "Description only" to show what's included without breaking out pricing.</li>
+                  <li><strong>Tip:</strong> Use the "Recommended" badge on your best-value package to guide customers toward the option that's best for them — and best for your business.</li>
+                </ul>
+              </div>
+            </div>
+            <button class="helper-banner-dismiss" onclick="dismissBanner('helper-int-pkg')">✕ Got it</button>
+          </div>
+
+          <div class="template-title-area">
+            <div class="template-name-display">
+              INT Packages (Line Items)
+              <span class="pencil-btn" onclick="showToast('Template name edit mode')"><svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></span>
+              <span class="template-default-badge d-none" id="title-badge-int-packages">DEFAULT</span>
+            </div>
+          </div>
+
+          <div class="toggle-card">
+            Active
+            <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+
+          <div class="default-card">
+            <div class="radio-row">
+              <input type="radio" name="default-template" id="def-int-packages" value="int-packages" onclick="handleDefaultClick(this)">
+              <label for="def-int-packages" style="cursor:pointer;font-weight:700;">Set as default proposal</label>
+            </div>
+            <div class="sub-text">This template will automatically load when creating new proposals.</div>
+            <div class="current-default d-none" id="default-indicator-int-packages" style="color:#166534;font-weight:700;">✓ This is your current default template.</div>
+          </div>
+
+          <button class="btn btn-light-purple" onclick="showToast('Template duplicated successfully')">Duplicate Template</button>
+
+          <div style="height:24px;"></div>
+
+          <!-- Line Item Templates (empty) -->
+          <div class="line-items-section">
+            <div class="section-header">Line Item Templates</div>
+            <div class="empty-state"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 8v4m0 4h.01"/></svg><em>Start by adding a Line Items here...</em></div>
+            <div class="add-buttons">
+              <button class="btn btn-outline btn-sm" onclick="showToast('Add Line Item')">Add Line Item</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Add Multiple Items')">Add Multi. Items</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('Add Optional Item')">Add Optional Item</button>
+            </div>
+          </div>
+
+          <!-- Packages section with Bronze, Silver, Gold -->
+          <div class="packages-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <div class="section-header" style="border:none;padding:0;margin:0;">Packages</div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <button class="btn btn-outline btn-sm" onclick="showToast('Add Package')">+ Add Package</button>
+                <button class="btn btn-primary btn-sm" onclick="showToast('How It Works guide')"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 8v4m0 4h.01"/></svg>How It Works</button>
+                <span style="color:var(--gray-400);cursor:pointer;font-size:18px;padding:0 4px;" onclick="showToast('Package settings')" title="Settings">⚙</span>
+              </div>
+            </div>
+
+            <!-- Bronze Interior -->
+            <div class="package-card">
+              <div class="package-card-header">
+                <span class="package-drag">≡</span>
+                <div class="package-title">
+                  <div class="package-name">Bronze Interior</div>
+                  <div class="package-desc">Basic interior painting</div>
+                </div>
+                <div class="package-price">$1,199.99</div>
+                <span class="package-menu" onclick="showToast('Package options')">•••</span>
+              </div>
+              <table class="package-items-table">
+                <thead><tr><th style="width:50%">Product / Service</th><th>Quantity</th><th>Price</th><th>Subtotal</th><th>Total</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Interior Painting - Walls</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Interior Painting - Trim</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">General Prep</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Color Consultation</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">No Warranty</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                </tbody>
+                <tfoot><tr class="pkg-total-row"><td colspan="3" style="font-weight:800;">Package Total</td><td style="text-align:right;color:var(--gray-500);">$0.00</td><td style="text-align:right;"><span class="pkg-total-badge"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M7 7h.01M7 3h5l4.5 4.5-9 9L3 12l4-4z"/></svg>$1,199.99</span></td></tr></tfoot>
+              </table>
+              <div class="package-card-footer">
+                <button class="btn btn-outline btn-xs" onclick="showToast('Add item to Bronze package')">+ Add Item</button>
+                <button class="btn btn-outline btn-xs" onclick="showToast('Add area to Bronze package')">+ Add Area</button>
+              </div>
+            </div>
+
+            <!-- Silver Interior -->
+            <div class="package-card">
+              <div class="package-card-header">
+                <span class="package-drag">≡</span>
+                <div class="package-title">
+                  <div class="package-name">Silver Interior</div>
+                  <div class="package-desc">Upgraded, mid-tier, interior painting. Includes additional paint color selection and warranty.</div>
+                </div>
+                <div class="package-price">$1,400.00</div>
+                <span class="package-menu" onclick="showToast('Package options')">•••</span>
+              </div>
+              <table class="package-items-table">
+                <thead><tr><th style="width:50%">Product / Service</th><th>Quantity</th><th>Price</th><th>Subtotal</th><th>Total</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Interior Painting - Walls</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Interior Painting - Trim</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">General Prep</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Color Consultation</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Secondary Color Selection</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">5-Year Warranty</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                </tbody>
+                <tfoot><tr class="pkg-total-row"><td colspan="3" style="font-weight:800;">Package Total</td><td style="text-align:right;color:var(--gray-500);">$0.00</td><td style="text-align:right;"><span class="pkg-total-badge"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M7 7h.01M7 3h5l4.5 4.5-9 9L3 12l4-4z"/></svg>$1,400.00</span></td></tr></tfoot>
+              </table>
+              <div class="package-card-footer">
+                <button class="btn btn-outline btn-xs" onclick="showToast('Add item to Silver package')">+ Add Item</button>
+                <button class="btn btn-outline btn-xs" onclick="showToast('Add area to Silver package')">+ Add Area</button>
+              </div>
+            </div>
+
+            <!-- Gold Interior (Recommended) -->
+            <div class="package-card">
+              <div class="package-card-header">
+                <span class="package-drag">≡</span>
+                <div class="package-title">
+                  <div class="package-name" style="display:flex;align-items:center;gap:8px;">Gold Interior <span class="package-badge">Recommended</span></div>
+                  <div class="package-desc">Upgraded, Top Shelf, interior painting. Includes (3) paint color selections and extended 10-year warranty. + Doors & Ceilings</div>
+                </div>
+                <div class="package-price">$2,499.99</div>
+                <span class="package-menu" onclick="showToast('Package options')">•••</span>
+              </div>
+              <table class="package-items-table">
+                <thead><tr><th style="width:50%">Product / Service</th><th>Quantity</th><th>Price</th><th>Subtotal</th><th>Total</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Interior Painting - Walls</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Interior Painting - Trim</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Interior Painting - Doors</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Interior Painting - Ceiling</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Extensive Prep & Repair</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Color Consultation</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">Secondary Color Selection</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">+ 3rd Color Selection</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                  <tr><td><span class="drag-handle" style="font-size:12px;">≡</span><span class="li-name">10-Year Warranty</span><span class="li-actions"><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg></span><span class="li-action-btn"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M15.172 7l-6.586 6.586a2 2 0 1 0 2.828 2.828l6.414-6.586a4 4 0 0 0-5.656-5.656l-6.415 6.585a6 6 0 1 0 8.486 8.486L20.5 13"/></svg></span></span></td><td colspan="4"><span class="desc-only-badge">Description only</span></td></tr>
+                </tbody>
+                <tfoot><tr class="pkg-total-row"><td colspan="3" style="font-weight:800;">Package Total</td><td style="text-align:right;color:var(--gray-500);">$0.00</td><td style="text-align:right;"><span class="pkg-total-badge"><svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M7 7h.01M7 3h5l4.5 4.5-9 9L3 12l4-4z"/></svg>$2,499.99</span></td></tr></tfoot>
+              </table>
+              <div class="package-card-footer">
+                <button class="btn btn-outline btn-xs" onclick="showToast('Add item to Gold package')">+ Add Item</button>
+                <button class="btn btn-outline btn-xs" onclick="showToast('Add area to Gold package')">+ Add Area</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="totals-section">
+            <div class="section-header">Totals</div>
+            <table class="totals-table">
+              <tr><td>Subtotal</td><td>$0.00</td></tr>
+              <tr><td>Tax</td><td>$0.00</td></tr>
+              <tr class="totals-total-row"><td style="text-align:right;font-weight:800;color:var(--gray-800);">Total</td><td><div class="totals-dark-cell">$0.00</div></td></tr>
+            </table>
+          </div>
+
+          <div class="settings-tabs-wrap">
+            <div class="tabs-nav">
+              <button class="tab-btn active" onclick="setTab(this)" data-tab="settings">Settings</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="video">Video</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="notes">Notes</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="custom-sections">Custom Sections</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="production-rates">Production Rates</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="details">Details</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="color-chart">Color Chart</button>
+              <button class="tab-btn" onclick="setTab(this)" data-tab="attachments">Attachments</button>
+            </div>
+            <div class="settings-grid">
+              <div class="settings-card">
+                <div class="settings-card-title">Payment Settings</div>
+                <div class="settings-row"><span class="settings-label">Deposit:</span><span class="settings-value link">0.00% ($0.00)</span></div>
+                <div class="settings-row"><span class="settings-label">Allow Alternative Payment <span class="info-icon">i</span></span><label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+                <div class="settings-row"><span class="settings-label">Company Tax Rate:</span><span class="settings-value">5.000%</span></div>
+                <div class="settings-row"><span class="settings-label">Line Item Quantity Only <span class="info-icon">i</span></span><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+                <div class="settings-row"><span class="settings-label">Hide Bottom Proposal Total <span class="info-icon">i</span></span><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+                <div class="settings-row"><span class="settings-label">Hide Bottom Proposal Deposit <span class="info-icon">i</span></span><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+              </div>
+              <div class="settings-card">
+                <div class="settings-card-title">Proposal Settings</div>
+                <div class="settings-row"><span class="settings-label">Enable Countersign <span class="info-icon">i</span></span><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+                <div class="note-text"><strong>Note:</strong> The options below appear to customer after proposal has been sent.</div>
+                <div class="settings-row"><span class="settings-label">Allow Customer Proposal Rejection <span class="info-icon">i</span></span><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+                <div class="settings-row"><span class="settings-label">Allow Customer Change Requests <span class="info-icon">i</span></span><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div>
+              </div>
+              <div class="payment-schedule-card"><div class="ps-header"><div class="ps-title">Payment Schedule</div><button class="btn btn-outline btn-xs" onclick="showToast('Add milestone')">Add</button></div><div class="settings-row"><span class="settings-label">Remaining Balance:</span><span class="settings-value">(100.00%) - $0.00</span></div><div class="settings-row"><span class="settings-label">Show Schedule on Proposal:</span><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div><div class="settings-row"><span class="settings-label">Show Schedule Percentages on Proposal:</span><label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label></div></div>
+              <div class="financing-card"><div class="settings-card-title">Financing</div><div class="acorn-logo"><div class="acorn-logo-icon">🌿</div><div class="acorn-logo-text">Acorn</div><div class="acorn-logo-sub">FINANCE</div></div><div class="acorn-note">Acorn Financing widget won't show unless the amount is greater than $1000.</div></div>
+            </div>
+          </div>
+
+          <a class="payments-link" onclick="showToast('Click here to setup online payments')">Click here to setup online payments›</a>
+          <div class="template-created-info">Template created at 3/5/2026 by Jeremy Harrison</div>
+          <div class="next-step-card">
+            <div class="next-step-card-content">
+              <div class="next-step-card-title">✅ Template looking good?</div>
+              <div class="next-step-card-body">Ready to send your first proposal using this template? Head to the Sales Pipeline and click <strong>New Proposal</strong> — this template will load automatically if it's set as your default, or select it from the dropdown.</div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="openNewProposalModal()">Start New Proposal →</button>
+          </div>
+
+          <div class="bottom-actions">
+            <button class="btn btn-ghost" onclick="showToast('View/Edit Terms & Conditions')">View/ Edit T&C's</button>
+            <button class="btn btn-danger" onclick="showToast('Delete confirmation would appear')">Delete Template</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     NEW PROPOSAL MODAL
+════════════════════════════════════════════════════════ -->
+<div id="modal-new-proposal" class="modal-overlay hidden" onclick="if(event.target===this)closeNewProposalModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">New Proposal</div>
+      <button type="button" class="modal-close" onclick="closeNewProposalModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- TEMPLATE -->
+      <div class="modal-section">
+        <div class="modal-section-label">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+          Template
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Proposal Template</label>
+          <select class="modal-select" id="modal-template-select">
+            <option value="ext-pw" selected>EXT Paint + Pressure Wash (Default)</option>
+            <option value="int-packages">INT Packages (Line Items)</option>
+            <option value="blank">— Blank (no template) —</option>
+          </select>
+          <div class="modal-note"><strong>Note:</strong> If you remove the default from a template, <strong>Blank</strong> becomes the default — your team will build proposals from scratch. You can always select a template from this dropdown.</div>
+        </div>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="modal-section">
+        <div class="modal-section-label">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>
+          Contact Information
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Contact</label>
+          <select class="modal-select"><option>New Contact</option><option>Existing Contact...</option></select>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label class="modal-label">First Name</label>
+            <input type="text" class="modal-input" placeholder="Enter a first name">
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">Last Name</label>
+            <input type="text" class="modal-input" placeholder="Enter a last name">
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label class="modal-label">E-mail</label>
+            <input type="email" class="modal-input" placeholder="Enter an email">
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">Phone</label>
+            <input type="tel" class="modal-input" placeholder="Enter a phone number">
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label class="modal-label">Lead Source</label>
+            <select class="modal-select"><option>Google</option><option>Referral</option><option>Facebook</option><option>Door Hanger</option><option>Yard Sign</option></select>
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">Deal Name</label>
+            <input type="text" class="modal-input" placeholder="Deal name">
+          </div>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Stage</label>
+          <input type="text" class="modal-input modal-input-readonly" value="In Draft" readonly>
+        </div>
+      </div>
+
+      <!-- DRIPS -->
+      <div class="modal-section">
+        <div class="modal-drips-row">
+          <div class="modal-section-label modal-drips-label">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="#3B82F6" stroke-width="2" stroke-linecap="round" d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            <span class="modal-label-blue">Drips</span>
+          </div>
+          <div class="modal-drips-disable">
+            Disable
+            <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- JOB ADDRESS -->
+      <div class="modal-section">
+        <div class="modal-section-label">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="#F97316" stroke-width="2" stroke-linecap="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0z"/><path stroke="#F97316" stroke-width="2" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg>
+          <span class="modal-label-orange">Job Address</span>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Street</label>
+          <input type="text" class="modal-input" placeholder="Enter street">
+        </div>
+        <div class="modal-row-3">
+          <div class="modal-field">
+            <label class="modal-label">City</label>
+            <input type="text" class="modal-input" placeholder="Enter city">
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">State</label>
+            <input type="text" class="modal-input" placeholder="Enter state">
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">Postal Code</label>
+            <input type="text" class="modal-input" placeholder="Enter postal code">
+          </div>
+        </div>
+      </div>
+
+      <!-- ASSIGNMENT -->
+      <div class="modal-section">
+        <div class="modal-section-label">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Assignment
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <label class="modal-label">Salesperson</label>
+            <select class="modal-select"><option>Jeremy Harrison</option></select>
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">Project Manager</label>
+            <select class="modal-select"><option>Select a project manager...</option></select>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-ghost" onclick="closeNewProposalModal()">Close</button>
+      <button type="button" class="btn btn-primary" onclick="showToast('Proposal created — opening editor'); closeNewProposalModal();">Start</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── NAVIGATION ───
+  function openTemplate(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function goBack() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-list').classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  // ─── TABS ───
+  function setTab(el) {
+    const wrap = el.closest('.settings-tabs-wrap');
+    wrap.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    const tabId = el.dataset.tab;
+    wrap.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    const panel = wrap.querySelector('[data-panel="' + tabId + '"]');
+    if (panel) panel.classList.add('active');
+  }
+
+  // ─── NOTES & CUSTOM SECTIONS PANEL CONTENT ───
+  const NOTES_HTML = `
+    <div class="notes-grid">
+      <div class="notes-card">
+        <div class="notes-card-header">
+          <span class="notes-card-title">Crew Notes</span>
+          <span class="notes-badge badge-teal">Team view only</span>
+          <button class="notes-edit-btn" onclick="showToast('Edit Crew Notes')">Edit</button>
+        </div>
+        <div class="notes-card-body">
+          <p><strong>Prep</strong></p>
+          <ul>
+            <li>Confirm colors &amp; finishes with client.</li>
+            <li>Cover floors, furniture, and fixtures.</li>
+            <li>Tape off trim and edges.</li>
+          </ul>
+          <p><strong>Exterior</strong></p>
+          <ul>
+            <li>Wash, scrape, sand, prime as needed.</li>
+            <li>Check weather before starting.</li>
+          </ul>
+          <p><strong>Interior</strong></p>
+          <ul>
+            <li>Patch holes &amp; cracks.</li>
+            <li>Apply 2 coats unless noted.</li>
+            <li>Keep rooms ventilated.</li>
+          </ul>
+          <p><strong>Cleanup</strong></p>
+          <ul>
+            <li>Remove tape &amp; coverings.</li>
+            <li>Clear debris &amp; materials.</li>
+            <li>Walk through with client/site lead.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="notes-card">
+        <div class="notes-card-header">
+          <span class="notes-card-title">Client Notes</span>
+          <span class="notes-badge badge-red">Client visible</span>
+          <button class="notes-edit-btn" onclick="showToast('Edit Client Notes')">Edit</button>
+        </div>
+        <div class="notes-card-body">
+          <p><strong>Client Notes</strong></p>
+          <ul>
+            <li>Please confirm final paint colors before project start.</li>
+            <li>Move small/personal items out of work areas.</li>
+            <li>Larger furniture will be covered/protected by our crew.</li>
+            <li>Some prep work (patching, sanding, priming) may be needed before painting.</li>
+            <li>We recommend keeping pets and children clear of workspaces during the project.</li>
+            <li>A walk-through will be completed at the end to ensure satisfaction.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="notes-card">
+        <div class="notes-card-header">
+          <span class="notes-card-title">Company Notes</span>
+          <span class="notes-badge badge-green">Internal view only</span>
+          <button class="notes-edit-btn" onclick="showToast('Edit Company Notes')">Edit</button>
+        </div>
+        <div class="notes-card-body">
+          <p><strong>Company Notes</strong></p>
+          <ul>
+            <li>Confirm scope (interior/exterior, rooms/areas).</li>
+            <li>Verify square footage and ceiling height.</li>
+            <li>Double-check color selections are recorded.</li>
+            <li>Ensure materials/labor costs are updated in pricing.</li>
+            <li>Schedule estimated project duration and crew size.</li>
+            <li>Note any upsell opportunities (trim, cabinets, exterior touch-ups).</li>
+          </ul>
+        </div>
+      </div>
+    </div>`;
+
+  const CUSTOM_SECTIONS_HTML = `
+    <div style="margin-bottom:14px;">
+      <button class="btn btn-ghost btn-sm" onclick="showToast('Add Custom Section modal would open')">Add Custom Section</button>
+    </div>
+    <div class="custom-section-card">
+      <div class="custom-section-header">
+        <span class="drag-handle">&#8801;</span>
+        <span class="custom-section-name">About Us</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <span style="cursor:pointer;color:var(--purple);opacity:0.6;" onclick="showToast('Edit About Us section')" title="Edit">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          </span>
+          <button class="btn btn-danger btn-xs" onclick="showToast('Delete custom section')">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="custom-section-body">
+        <p><strong>About Us</strong></p>
+        <p>Welcome to <strong>Sparrow's Nest Painting</strong>, where we bring the power of bold, beautiful transformations to your home or business!</p>
+        <p>Our expert team is dedicated to delivering top-notch painting services that make a statement.</p>
+        <p>At <strong>Sparrow's Nest Painting</strong>, we believe that every space deserves to stand out. We use only the highest quality materials and techniques to ensure flawless finishes every time, handling everything with precision, speed, and an eye for perfection, so you can enjoy a refreshed, vibrant space without the hassle.</p>
+        <p>We&#39;re committed to your satisfaction, providing outstanding service, clean workspaces, and the kind of results that&#39;ll have everyone in awe.</p>
+        <p>Let <strong>Sparrow's Nest Painting</strong> unleash the power of color in your space!</p>
+      </div>
+    </div>`;
+
+  const PLACEHOLDER_HTML = (label) =>
+    `<div class="empty-state"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 8v4m0 4h.01"/></svg>No ${label} configured for this template.</div>`;
+
+  // ─── INIT TAB PANELS (runs once on load) ───
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.settings-tabs-wrap').forEach(function (wrap) {
+      // Wrap existing settings-grid in a Settings panel
+      const grid = wrap.querySelector('.settings-grid');
+      if (grid) {
+        const settingsPanel = document.createElement('div');
+        settingsPanel.className = 'tab-panel active';
+        settingsPanel.dataset.panel = 'settings';
+        grid.parentNode.insertBefore(settingsPanel, grid);
+        settingsPanel.appendChild(grid);
+      }
+      // Append remaining panels
+      [
+        { id: 'video',             html: PLACEHOLDER_HTML('video') },
+        { id: 'notes',             html: NOTES_HTML },
+        { id: 'custom-sections',   html: CUSTOM_SECTIONS_HTML },
+        { id: 'production-rates',  html: PLACEHOLDER_HTML('production rates') },
+        { id: 'details',           html: PLACEHOLDER_HTML('details') },
+        { id: 'color-chart',       html: PLACEHOLDER_HTML('color chart') },
+        { id: 'attachments',       html: PLACEHOLDER_HTML('attachments') },
+      ].forEach(function (t) {
+        const p = document.createElement('div');
+        p.className = 'tab-panel';
+        p.dataset.panel = t.id;
+        p.innerHTML = t.html;
+        wrap.appendChild(p);
+      });
+    });
+  });
+
+  // ─── DEFAULT TEMPLATE SWITCHING ───
+  const TEMPLATE_LABELS = {
+    'ext-pw':       'EXT Paint + Pressure Wash',
+    'int-packages': 'INT Packages (Line Items)',
+  };
+
+  let currentDefault = 'ext-pw'; // tracks the active default
+
+  function handleDefaultClick(radio) {
+    if (radio.value === currentDefault) {
+      // Clicking an already-selected radio → deselect it
+      radio.checked = false;
+      currentDefault = null;
+      applyDefault(null);
+    } else {
+      currentDefault = radio.value;
+      applyDefault(radio.value);
+    }
+  }
+
+  function applyDefault(value) {
+    const templates = ['ext-pw', 'int-packages'];
+
+    templates.forEach(tpl => {
+      const isDefault = (tpl === value);
+
+      // List screen badge
+      const listBadge = document.getElementById('list-badge-' + tpl);
+      if (listBadge) listBadge.classList.toggle('d-none', !isDefault);
+
+      // Title area badge on template screen
+      const titleBadge = document.getElementById('title-badge-' + tpl);
+      if (titleBadge) titleBadge.classList.toggle('d-none', !isDefault);
+
+      // "✓ This is your current default" indicator
+      const indicator = document.getElementById('default-indicator-' + tpl);
+      if (indicator) indicator.classList.toggle('d-none', !isDefault);
+    });
+
+    // Update modal dropdown
+    const sel = document.getElementById('modal-template-select');
+    if (!sel) return;
+    if (value) {
+      // Mark selected option with (Default) label
+      Array.from(sel.options).forEach(opt => {
+        if (opt.value === value) {
+          opt.text = TEMPLATE_LABELS[value] + ' (Default)';
+          opt.selected = true;
+        } else if (opt.value !== 'blank') {
+          opt.text = TEMPLATE_LABELS[opt.value] || opt.text.replace(' (Default)', '');
+        }
+      });
+    } else {
+      // No default — clear all (Default) labels, select Blank
+      Array.from(sel.options).forEach(opt => {
+        if (opt.value !== 'blank') {
+          opt.text = TEMPLATE_LABELS[opt.value] || opt.text.replace(' (Default)', '');
+        } else {
+          opt.selected = true;
+        }
+      });
+    }
+  }
+
+  // ─── NEW PROPOSAL MODAL ───
+  function openNewProposalModal() {
+    document.getElementById('modal-new-proposal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeNewProposalModal() {
+    document.getElementById('modal-new-proposal').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  // ─── HELPER BANNER ───
+  function dismissBanner(id) {
+    const banner = document.getElementById(id);
+    if (banner) {
+      banner.style.transition = 'opacity 0.2s, transform 0.2s';
+      banner.style.opacity = '0';
+      banner.style.transform = 'translateY(-8px)';
+      setTimeout(() => banner.classList.add('hidden'), 220);
+    }
+  }
+
+  // ─── TOAST ───
+  let toastTimer;
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    clearTimeout(toastTimer);
+    toast.textContent = msg;
+    toast.classList.add('show');
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+</script>
+</body>
+</html>
