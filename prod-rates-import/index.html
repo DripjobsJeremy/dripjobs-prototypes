@@ -1,0 +1,602 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Production Rates Import – DripJobs Prototype</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Inter',sans-serif;background:#F5F7FA;color:#333;font-size:14px;}.app{display:flex;min-height:100vh;}.sidebar{width:178px;background:#404E67;flex-shrink:0;}.sidebar-logo{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.1);}.sidebar-nav a{display:flex;align-items:center;gap:8px;padding:8px 16px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:12.5px;cursor:pointer;}.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,0.1);color:#fff;}.sidebar-nav a.highlight{background:#685AE8;color:#fff;}.sidebar-nav .lbl{color:rgba(255,255,255,0.4);font-size:10px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;padding:10px 16px 3px;}.sidebar-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,0.1);}.sidebar-footer a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:12.5px;}.main{flex:1;display:flex;flex-direction:column;min-width:0;}.topbar{height:52px;background:#fff;border-bottom:1px solid #e8edf2;display:flex;align-items:center;padding:0 20px;gap:12px;}.topbar-search{flex:1;max-width:320px;background:#F8FAFC;border:1px solid #e2e8f0;border-radius:20px;padding:6px 14px;display:flex;align-items:center;gap:8px;}.topbar-search input{background:none;border:none;outline:none;font-size:13px;color:#333;width:100%;}.topbar-right{display:flex;align-items:center;gap:12px;margin-left:auto;}.avatar{width:32px;height:32px;background:#685AE8;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;}.content{padding:24px;flex:1;}.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}.page-title{font-size:22px;font-weight:700;color:#1e293b;}.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;text-decoration:none;}.btn-primary{background:#685AE8;color:#fff;}.btn-primary:hover{background:#5a4dd4;}.btn-secondary{background:#fff;color:#32415B;border:1px solid #DFE1E6;}.btn-secondary:hover{background:#f8fafc;}.btn-outline{background:#fff;color:#685AE8;border:1.5px solid #685AE8;}.btn-outline:hover{background:#f5f3ff;}.btn-sm{padding:5px 11px;font-size:12.5px;}.btn-danger-sm,.btn-edit-sm,.btn-copy-sm{background:none;border:none;cursor:pointer;padding:3px 5px;font-size:14px;}.btn-danger-sm{color:#ef4444;}.btn-edit-sm{color:#685AE8;}.btn-copy-sm{color:#685AE8;}.card{background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06);}.tabs-bar{display:flex;border-bottom:2px solid #e8edf2;}.tabs-bar a{padding:12px 28px;color:#685AE8;text-decoration:none;font-size:14px;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;white-space:nowrap;}.tabs-bar a.active{border-bottom-color:#685AE8;font-weight:600;}.tabs-bar a:hover{background:#f5f3ff;}.tab-panel{display:none;}.tab-panel.active{display:block;}.data-table{width:100%;border-collapse:collapse;}.data-table thead tr{background:#F2F8FE;}.data-table th{padding:10px 12px;text-align:left;font-size:12.5px;color:#404E67;font-weight:500;}.data-table td{padding:9px 12px;border-bottom:1px solid #e3ebf3;font-size:13px;color:#333;vertical-align:middle;}.data-table tbody tr:last-child td{border-bottom:none;}.data-table tbody tr:hover{background:#fafbff;}.drag-handle{color:#c0c8d5;cursor:grab;}.actions-cell{display:flex;align-items:center;gap:2px;justify-content:flex-end;}.section-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;}.section-title{font-size:16px;font-weight:600;color:#1e293b;}.section-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600;}.badge-default{background:#e0f0ff;color:#0066cc;}.badge-warning{background:#fff3cd;color:#856404;}.badge-success{background:#d4edda;color:#155724;}.badge-danger{background:#fee2e2;color:#dc2626;}.table-scroll{overflow-x:auto;}.pagination-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;font-size:13px;color:#64748b;border-top:1px solid #e3ebf3;}.pagination-btns{display:flex;gap:4px;}.page-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:1px solid #DFE1E6;border-radius:6px;cursor:pointer;font-size:13px;background:#fff;}.page-btn.active{background:#685AE8;color:#fff;border-color:#685AE8;}.tooltip-icon{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:#cbd5e1;color:#fff;font-size:9px;cursor:help;margin-left:3px;}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;}.modal-overlay.open{display:flex;}.modal-box{background:#fff;border-radius:15px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);}.modal-box.modal-xl{width:940px;}.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1;}.modal-header h3{font-size:16px;font-weight:700;color:#1e293b;}.modal-close{background:none;border:none;font-size:22px;color:#94a3b8;cursor:pointer;line-height:1;}.modal-close:hover{color:#333;}.modal-body{padding:24px;}.modal-footer{padding:16px 24px;border-top:1px solid #eee;display:flex;align-items:center;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff;}.steps{display:flex;align-items:center;margin-bottom:24px;}.step{display:flex;align-items:center;gap:8px;font-size:12.5px;flex-shrink:0;}.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}.step.done .step-num{background:#685AE8;color:#fff;}.step.active .step-num{background:#685AE8;color:#fff;}.step.inactive .step-num{background:#e2e8f0;color:#94a3b8;}.step.done .step-label,.step.active .step-label{color:#685AE8;}.step.active .step-label{font-weight:600;}.step.inactive .step-label{color:#94a3b8;}.step-divider{flex:1;height:2px;background:#e2e8f0;margin:0 8px;min-width:16px;}.step-divider.done{background:#685AE8;}.upload-zone{border:2px dashed #c7d2fe;border-radius:12px;padding:36px 24px;text-align:center;background:#f5f3ff;cursor:pointer;transition:all 0.2s;}.upload-zone:hover{border-color:#685AE8;background:#ede9fe;}.upload-zone .upload-icon{font-size:36px;margin-bottom:10px;}.upload-zone h4{font-size:15px;font-weight:600;color:#1e293b;margin-bottom:6px;}.upload-zone p{font-size:13px;color:#64748b;margin-bottom:4px;}.upload-zone small{font-size:11.5px;color:#94a3b8;}.template-link{color:#685AE8;text-decoration:underline;cursor:pointer;font-size:13px;margin-top:10px;display:inline-block;}.file-chip{display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-top:12px;}.file-chip-icon{font-size:22px;}.file-chip-info{flex:1;}.file-chip-name{font-size:13px;font-weight:600;color:#166534;}.file-chip-size{font-size:12px;color:#16a34a;}.file-chip-remove{background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;}.map-table{width:100%;border-collapse:collapse;font-size:13px;}.map-table th{padding:8px 12px;background:#F2F8FE;color:#404E67;text-align:left;font-weight:500;font-size:11.5px;text-transform:uppercase;letter-spacing:0.5px;}.map-table td{padding:8px 10px;border-bottom:1px solid #f0f4f8;vertical-align:middle;}.col-from{font-family:monospace;font-size:12px;background:#f1f5f9;padding:3px 8px;border-radius:4px;color:#475569;}.col-note{font-size:11px;color:#94a3b8;display:block;margin-top:2px;}.map-select{width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:12.5px;background:#fff;outline:none;cursor:pointer;}.map-select:focus{border-color:#685AE8;}.required-badge{display:inline-block;padding:1px 6px;background:#fee2e2;color:#dc2626;border-radius:10px;font-size:10px;font-weight:600;margin-left:6px;}.preview-table{width:100%;border-collapse:collapse;font-size:12.5px;}.preview-table th{padding:8px 10px;background:#F2F8FE;color:#404E67;font-weight:500;font-size:11.5px;text-align:left;}.preview-table td{padding:7px 10px;border-bottom:1px solid #f0f4f8;vertical-align:middle;}.preview-table tr.row-duplicate{background:#fffbeb;}.preview-table tr.row-error{background:#fff5f5;}.conflict-select{border:1px solid #e2e8f0;border-radius:5px;padding:3px 8px;font-size:11.5px;background:#fff;}.import-summary{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px 16px;margin-bottom:14px;display:flex;gap:20px;font-size:13px;flex-wrap:wrap;}.stat{display:flex;align-items:center;gap:6px;}.stat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}.dot-green{background:#22c55e;}.dot-yellow{background:#f59e0b;}.dot-red{background:#ef4444;}.success-state{text-align:center;padding:28px 20px;}.success-icon{font-size:52px;margin-bottom:14px;}.success-title{font-size:20px;font-weight:700;color:#1e293b;margin-bottom:8px;}.success-subtitle{color:#64748b;font-size:14px;margin-bottom:6px;}.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:flex;align-items:flex-start;gap:8px;}.alert-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}.alert-warning{background:#fffbeb;border:1px solid #fde68a;color:#92400e;}.section-group{border:1px solid #e2e8f0;border-radius:10px;margin-bottom:14px;overflow:hidden;}.section-group-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f8fafc;cursor:pointer;border-bottom:1px solid #e2e8f0;}.section-group-header h4{font-size:13.5px;font-weight:600;color:#1e293b;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}.section-group-body{padding:16px;}.section-group-body.collapsed{display:none;}.chevron{transition:transform 0.2s;color:#94a3b8;font-size:12px;}.chevron.open{transform:rotate(180deg);}.sheet-option{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all 0.15s;}.sheet-option:hover{border-color:#685AE8;background:#fafafe;}.sheet-option.selected{border-color:#685AE8;background:#f5f3ff;}.sheet-option-left{display:flex;align-items:center;gap:12px;}.sheet-option-check{width:20px;height:20px;border-radius:5px;border:2px solid #cbd5e1;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all 0.15s;}.sheet-option.selected .sheet-option-check{background:#685AE8;border-color:#685AE8;color:#fff;}.sheet-option-title{font-size:13.5px;font-weight:500;color:#1e293b;}.sheet-option-desc{font-size:12px;color:#94a3b8;margin-top:2px;}.sheet-count{font-size:12px;color:#685AE8;background:#f0eeff;padding:2px 10px;border-radius:10px;font-weight:500;}.hidden{display:none!important;}.map-warn-row .map-select{border-color:#fde68a;background:#fffbeb;}.success-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0;}.success-card{border-radius:8px;padding:14px;text-align:left;}.success-card .num{font-size:22px;font-weight:700;}.success-card .lbl{font-size:11.5px;font-weight:500;margin-top:2px;}</style></head><body>
+<div class="app">
+<div class="sidebar">
+  <div class="sidebar-logo"><svg width="110" height="26" viewBox="0 0 110 26"><circle cx="11" cy="13" r="9" fill="#685AE8" opacity="0.3"/><circle cx="11" cy="13" r="5" fill="#685AE8"/><circle cx="11" cy="13" r="2.5" fill="#fff"/><text x="24" y="18" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="white">dripjobs</text></svg></div>
+  <div class="sidebar-nav">
+    <a href="#">📅 Job Schedule</a><a href="#">📋 Jobs List</a><a href="#">🔀 Pipeline</a><a href="#">🔧 Work Orders</a>
+    <div class="lbl">Daily Ops</div>
+    <a href="#">📆 Appointments <span style="background:#ef4444;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:auto;">11</span></a>
+    <a href="#">💬 Chat</a><a href="#">✅ Tasks</a>
+    <div class="lbl">Documents</div><a href="#">🧾 Invoices</a><a href="#">📄 Proposals</a>
+    <div class="lbl">Financials</div><a href="#">💼 Job Costing</a>
+    <a href="#" class="highlight">📊 Production Rates</a>
+    <a href="#">📈 Metrics</a>
+    <div class="lbl">Marketing</div><a href="#">📣 Activity</a><a href="#">📢 Blast</a><a href="#">💧 Drips</a>
+    <div class="lbl">Resources</div><a href="#">🎓 DJ Academy</a>
+  </div>
+  <div class="sidebar-footer"><a href="#">⚙ Settings</a></div>
+</div>
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-search"><span style="color:#94a3b8;font-size:14px;">🔍</span><input type="text" placeholder="Search leads, contacts, tags..."></div>
+    <div class="topbar-right"><span style="font-size:16px;color:#94a3b8;">⚠</span><span style="font-size:16px;color:#94a3b8;">🔔</span><div class="avatar">JH</div><span style="font-size:13px;color:#333;">Jeremy Harrison ▾</span></div>
+  </div>
+  <div class="content">
+    <div class="page-header">
+      <h1 class="page-title">Production Rates</h1>
+      <button class="btn btn-outline" onclick="openMasterImport()">⬆&nbsp; Import Data</button>
+    </div>
+    <div class="card" style="border-radius:10px 10px 0 0;border-bottom:none;">
+      <div class="tabs-bar">
+        <a onclick="switchTab('settings')" id="tab-settings">Settings</a>
+        <a onclick="switchTab('interior')" id="tab-interior" class="active">Interior Area</a>
+        <a onclick="switchTab('exterior')" id="tab-exterior">Exterior Area</a>
+        <a onclick="switchTab('substrates')" id="tab-substrates">Substrates</a>
+        <a onclick="switchTab('products')" id="tab-products">Products</a>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="tab-panel card" id="panel-settings" style="border-radius:0 0 10px 10px;padding:24px;">
+      <h3 style="font-size:15px;font-weight:600;margin-bottom:16px;">Proposal Defaults</h3>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:600px;">
+        <div><label style="font-size:12px;color:#64748b;display:block;margin-bottom:5px;">Hourly Cost Rate</label><div style="display:flex;align-items:center;border:1px solid #e2e8f0;border-radius:8px;padding:7px 12px;"><span style="color:#94a3b8;margin-right:4px;">$</span><input type="number" value="26.00" style="border:none;outline:none;width:100%;font-size:13.5px;"></div></div>
+        <div><label style="font-size:12px;color:#64748b;display:block;margin-bottom:5px;">Hourly Sell Rate</label><div style="display:flex;align-items:center;border:1px solid #e2e8f0;border-radius:8px;padding:7px 12px;"><span style="color:#94a3b8;margin-right:4px;">$</span><input type="number" value="60.00" style="border:none;outline:none;width:100%;font-size:13.5px;"></div></div>
+        <div><label style="font-size:12px;color:#64748b;display:block;margin-bottom:5px;">Product Markup</label><div style="display:flex;align-items:center;border:1px solid #e2e8f0;border-radius:8px;padding:7px 12px;"><input type="number" value="75" style="border:none;outline:none;width:100%;font-size:13.5px;"><span style="color:#94a3b8;margin-left:4px;">%</span></div></div>
+      </div>
+      <p style="font-size:12px;color:#94a3b8;margin-top:16px;">💡 Settings does not support bulk import — these are global single-value defaults.</p>
+    </div>
+
+    <!-- INTERIOR AREA -->
+    <div class="tab-panel card active" id="panel-interior" style="border-radius:0 0 10px 10px;">
+      <div class="section-header">
+        <h2 class="section-title">Interior <span class="tooltip-icon">i</span></h2>
+        <div class="section-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openTabImport('interior')">⬆ Import</button>
+          <button class="btn btn-primary btn-sm">+ Add Interior Area</button>
+        </div>
+      </div>
+      <div class="table-scroll"><table class="data-table"><thead><tr><th style="width:28px;"></th><th>Area Name</th><th>Default Categories</th><th>Dimensions, ft</th><th>Last Modified <span class="tooltip-icon">i</span></th><th style="text-align:right;">Actions</th></tr></thead>
+      <tbody id="interior-tbody">
+        <tr><td class="drag-handle">⠿</td><td>Office</td><td>Ceiling, Doors, Trim, Walls</td><td>16×12×9</td><td style="color:#94a3b8;font-size:12px;">Dec 11, 2025 3:41 PM</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Apt. Unit (1155 sq ft)</td><td>Ceiling, Doors, Trim, Walls</td><td>50×23×8.5</td><td style="color:#94a3b8;font-size:12px;">Dec 10, 2025 9:48 AM</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Whole House | Main Bed, Guest Bed, All Bathrooms</td><td>Ceiling, Trim, Walls</td><td>300×10</td><td style="color:#94a3b8;font-size:12px;">Dec 04, 2025 3:55 PM</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Living Room</td><td>Ceiling, Doors, Trim, Walls</td><td>24×18×8</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Kitchen</td><td>Cabinets, Ceiling, Doors, Trim, Walls</td><td>14×10×8</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Master Bedroom</td><td>Ceiling, Doors, Trim, Walls</td><td>18×15×8</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Master Bathroom</td><td>Ceiling, Doors, Trim, Walls</td><td>12×8×8</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Hallway</td><td>Ceiling, Doors, Trim, Walls</td><td>15×5×8</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Dining Room</td><td>Ceiling, Doors, Trim, Walls</td><td>12×12×8</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Basement</td><td>Ceiling, Doors, Trim, Walls</td><td>20×15×8</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+      </tbody></table></div>
+      <div class="pagination-bar"><span>Displaying: <strong>20 Areas</strong></span></div>
+    </div>
+    <!-- EXTERIOR -->
+    <div class="tab-panel card" id="panel-exterior" style="border-radius:0 0 10px 10px;">
+      <div class="section-header">
+        <h2 class="section-title">Exterior <span class="tooltip-icon">i</span></h2>
+        <div class="section-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openTabImport('exterior')">⬆ Import</button>
+          <button class="btn btn-primary btn-sm">+ Add Exterior Area</button>
+        </div>
+      </div>
+      <div class="table-scroll"><table class="data-table"><thead><tr><th style="width:28px;"></th><th>Area Name</th><th>Default Categories</th><th>Dimensions, ft</th><th>Last Modified <span class="tooltip-icon">i</span></th><th style="text-align:right;">Actions</th></tr></thead>
+      <tbody>
+        <tr><td class="drag-handle">⠿</td><td>Hoover Dam</td><td>Power Washing</td><td>1244×660×726</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Whole House</td><td>Doors, Trim, Power Washing, Siding, Ceiling</td><td>250×9</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Exterior Body</td><td>Siding, Trim</td><td>48×8</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Exterior Decking</td><td>Floor</td><td>20×20</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Exterior Porch</td><td>Floor</td><td>12×9×8</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Soffit and Fascia</td><td>Trim</td><td>90×5</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Exterior Gable</td><td>Siding</td><td>15×12×8</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+      </tbody></table></div>
+      <div class="pagination-bar"><span>Displaying: <strong>9 Areas</strong></span></div>
+    </div>
+
+    <!-- SUBSTRATES -->
+    <div class="tab-panel card" id="panel-substrates" style="border-radius:0 0 10px 10px;">
+      <div class="section-header" style="border-bottom:1px solid #f0f4f8;">
+        <h2 class="section-title">Categories</h2>
+        <div class="section-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openTabImport('substrate-categories')">⬆ Import Categories</button>
+          <button class="btn btn-primary btn-sm">+ Add Category</button>
+        </div>
+      </div>
+      <div style="padding:10px 20px;border-bottom:1px solid #f0f4f8;">
+        <button onclick="this.style.background='#685AE8';this.style.color='#fff';document.getElementById('ext-sub-btn').style.background='#fff';document.getElementById('ext-sub-btn').style.color='#64748b';" style="padding:5px 14px;border:1px solid #685AE8;border-radius:20px;font-size:12.5px;background:#685AE8;color:#fff;cursor:pointer;margin-right:4px;">Interior</button>
+        <button id="ext-sub-btn" onclick="this.style.background='#685AE8';this.style.color='#fff';document.querySelector('#panel-substrates .section-header + div button:first-child').style.background='#fff';document.querySelector('#panel-substrates .section-header + div button:first-child').style.color='#64748b';" style="padding:5px 14px;border:1px solid #e2e8f0;border-radius:20px;font-size:12.5px;background:#fff;color:#64748b;cursor:pointer;">Exterior</button>
+      </div>
+      <div class="table-scroll"><table class="data-table"><thead><tr><th style="width:28px;"></th><th>Categories</th><th>Calculation Type</th><th>Default Substrate</th><th>Last Modified <span class="tooltip-icon">i</span></th><th style="text-align:right;">Actions</th></tr></thead>
+      <tbody>
+        <tr><td class="drag-handle">⠿</td><td>Window</td><td>Price Per Item</td><td>Window Frame &amp; Sill</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Walls</td><td>Square Foot (Walls)</td><td>9FT Heavy Texture</td><td style="color:#94a3b8;font-size:12px;">Dec 15, 2025 8:21 PM</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Ceiling</td><td>Square Foot (Ceiling)</td><td>(Roll) One-Story No Texture</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Trim</td><td>Linear Foot</td><td>(Brush) 5-Inch Baseboard</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Doors</td><td>Price Per Item</td><td>Door(s) &amp; Frame (1-Side)</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Cabinets</td><td>Hours Per Item</td><td>Cabinet Drawers - Prime</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Stairs</td><td>Hours Per Item</td><td>Stringers</td><td style="color:#94a3b8;font-size:12px;">Dec 09, 2025 11:51 AM</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+      </tbody></table></div>
+      <div class="pagination-bar"><span>Displaying: <strong>11 Categories</strong></span></div>
+
+      <div class="section-header" style="border-top:2px solid #f0f4f8;border-bottom:1px solid #f0f4f8;margin-top:4px;">
+        <h2 class="section-title">Area Substrates</h2>
+        <div class="section-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openTabImport('substrate-areas')">⬆ Import Area Substrates</button>
+          <button class="btn btn-primary btn-sm">+ Add Area Substrate</button>
+        </div>
+      </div>
+      <div style="padding:8px 20px;overflow-x:auto;border-bottom:1px solid #f0f4f8;">
+        <div style="display:flex;gap:2px;flex-wrap:nowrap;min-width:max-content;">
+          <button style="padding:5px 12px;border:none;border-bottom:2px solid #685AE8;font-size:12.5px;background:none;color:#685AE8;font-weight:600;cursor:pointer;">Walls</button>
+          <button style="padding:5px 12px;border:none;border-bottom:2px solid transparent;font-size:12.5px;background:none;color:#64748b;cursor:pointer;">Ceiling</button>
+          <button style="padding:5px 12px;border:none;border-bottom:2px solid transparent;font-size:12.5px;background:none;color:#64748b;cursor:pointer;">Trim</button>
+          <button style="padding:5px 12px;border:none;border-bottom:2px solid transparent;font-size:12.5px;background:none;color:#64748b;cursor:pointer;">Doors</button>
+          <button style="padding:5px 12px;border:none;border-bottom:2px solid transparent;font-size:12.5px;background:none;color:#64748b;cursor:pointer;">Window</button>
+          <button style="padding:5px 12px;border:none;border-bottom:2px solid transparent;font-size:12.5px;background:none;color:#64748b;cursor:pointer;">Stairs</button>
+        </div>
+      </div>
+      <div class="table-scroll"><table class="data-table"><thead><tr><th style="width:28px;"></th><th>Area Substrates</th><th>Client Label</th><th>Default Product</th><th>Details</th><th>Last Modified <span class="tooltip-icon">i</span></th><th style="text-align:right;">Actions</th></tr></thead>
+      <tbody>
+        <tr><td class="drag-handle">⠿</td><td>9FT Heavy Texture <span class="badge badge-default">DEFAULT</span></td><td>9FT Heavy Texture</td><td>Sherwin Williams SuperPaint Interior (Satin)</td><td style="font-size:11.5px;color:#64748b;">1C-200 · 2C-175 · 3C-103 sqft/hr</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>8FT No Texture</td><td>8FT No Texture</td><td>Behr Premium Plus Ultra Interior (Satin)</td><td style="font-size:11.5px;color:#64748b;">1C-175 · 2C-125 · 3C-85 sqft/hr</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Lead Renovation (Lead Block)</td><td>Lead Block Application</td><td>Garage Floor Coating</td><td style="font-size:11.5px;color:#64748b;">1C-120 · 2C-110 · 3C-95 sqft/hr</td><td style="color:#94a3b8;font-size:12px;">Dec 15, 2025</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Lead Renovation (Prep)</td><td>Plastic Sheeting Protection</td><td>10 M Plastic</td><td style="font-size:11.5px;color:#64748b;">$120.00 ea.</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+      </tbody></table></div>
+      <div class="pagination-bar"><span>Displaying area substrates for <strong>Walls</strong></span></div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="tab-panel card" id="panel-products" style="border-radius:0 0 10px 10px;">
+      <div class="section-header">
+        <h2 class="section-title">Products</h2>
+        <div class="section-actions">
+          <input type="text" placeholder="Type here..." style="border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:12.5px;width:160px;outline:none;">
+          <button class="btn btn-secondary btn-sm">Search</button>
+          <button class="btn btn-secondary btn-sm" onclick="openTabImport('products')">⬆ Import</button>
+          <button class="btn btn-secondary btn-sm">Sort By</button>
+          <button class="btn btn-primary btn-sm">+ Add Product</button>
+        </div>
+      </div>
+      <div class="table-scroll"><table class="data-table"><thead><tr><th style="width:28px;"></th><th>Product Name</th><th>Sheen</th><th>Price / Unit</th><th>Last Modified <span class="tooltip-icon">i</span></th><th style="text-align:right;">Actions</th></tr></thead>
+      <tbody id="products-tbody">
+        <tr><td class="drag-handle">⠿</td><td>Benjamin Moore Aura Exterior (Satin)</td><td></td><td>$55.99 / Gallon</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Test Product</td><td>Low-Sheen</td><td>$99.99 / Item</td><td style="color:#94a3b8;font-size:12px;">Feb 04, 2026 5:46 PM</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Sherwin-Williams Emerald Urethane (Satin)</td><td>TBD</td><td>$56.99 / Gallon</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>SWP Fast Dry Oil Primer (Modified)</td><td>TBD</td><td>$38.00 / Gallon</td><td style="color:#94a3b8;font-size:12px;">Nov 28, 2025 3:18 PM</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Discount</td><td>TBD</td><td>$0.00 / Item</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Benjamin Moore Palatial Skies 800</td><td>Semi-Gloss</td><td>$98.76 / Gallon</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>10 M Plastic</td><td>Clear</td><td>$120.00 / Item</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Sherwin-Williams Duration Exterior (Satin)</td><td></td><td>$38.99 / Gallon</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Behr Premium Plus Ultra Interior (Satin)</td><td></td><td>$44.99 / Gallon</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Sherwin Williams SuperPaint Interior (Satin)</td><td></td><td>$34.99 / Gallon</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+        <tr><td class="drag-handle">⠿</td><td>Garage Floor Coating</td><td>TBD</td><td>$19.99 / Gallon</td><td></td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-copy-sm">⧉</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+      </tbody></table></div>
+      <div class="pagination-bar">
+        <div style="display:flex;align-items:center;gap:8px;"><span>Showing:</span><select style="border:1px solid #e2e8f0;border-radius:6px;padding:3px 8px;font-size:12.5px;"><option>15</option><option>25</option><option>50</option></select><span>Items Per Page</span></div>
+        <span>Showing 1 to 15 of 24 entries</span>
+        <div class="pagination-btns"><div class="page-btn">&lt;</div><div class="page-btn active">1</div><div class="page-btn">2</div><div class="page-btn">&gt;</div></div>
+      </div>
+    </div>
+
+  </div></div></div>
+<!-- ===== TAB IMPORT MODAL ===== -->
+<div class="modal-overlay" id="tab-import-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="tab-import-title">Import Interior Areas</h3>
+      <button class="modal-close" onclick="closeModal('tab-import-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="steps">
+        <div class="step active" id="tab-step-1"><div class="step-num">1</div><div class="step-label">Upload</div></div>
+        <div class="step-divider" id="tab-div-1"></div>
+        <div class="step inactive" id="tab-step-2"><div class="step-num">2</div><div class="step-label">Map Columns</div></div>
+        <div class="step-divider" id="tab-div-2"></div>
+        <div class="step inactive" id="tab-step-3"><div class="step-num">3</div><div class="step-label">Preview</div></div>
+        <div class="step-divider" id="tab-div-3"></div>
+        <div class="step inactive" id="tab-step-4"><div class="step-num">4</div><div class="step-label">Done</div></div>
+      </div>
+
+      <div id="tab-step-content-1">
+        <p style="font-size:13px;color:#64748b;margin-bottom:16px;" id="tab-import-subtitle">Upload a CSV or Excel file from your previous platform.</p>
+        <div class="upload-zone" id="tab-upload-zone" onclick="simulateFileUpload('tab')">
+          <div class="upload-icon">📁</div>
+          <h4>Drag &amp; drop your file here</h4>
+          <p>or click to browse</p>
+          <small>Supports .CSV and .XLSX · Max 10MB</small><br>
+          <span class="template-link" onclick="event.stopPropagation();">⬇ Download sample template</span>
+        </div>
+        <div id="tab-file-chip" class="file-chip hidden">
+          <div class="file-chip-icon">📄</div>
+          <div class="file-chip-info"><div class="file-chip-name" id="tab-file-name">paint_data_export.csv</div><div class="file-chip-size">48 rows detected · 142 KB</div></div>
+          <button class="file-chip-remove" onclick="removeFile('tab')">×</button>
+        </div>
+      </div>
+
+      <div id="tab-step-content-2" class="hidden">
+        <div class="alert alert-info"><span>ℹ</span><div>We detected <strong id="tab-col-count">6 columns</strong>. Match each to a DripJobs field or choose <em>Do Not Import</em> to skip it.</div></div>
+        <div class="table-scroll"><table class="map-table">
+          <thead><tr><th>Your File Column</th><th>Sample Value</th><th>Maps To (DripJobs Field) <span class="required-badge">★ required</span></th></tr></thead>
+          <tbody id="tab-mapping-body"></tbody>
+        </table></div>
+        <div class="alert alert-warning hidden" id="tab-map-warning" style="margin-top:10px;"><span>⚠</span><div id="tab-map-warning-text">One or more required fields are not mapped.</div></div>
+      </div>
+
+      <div id="tab-step-content-3" class="hidden">
+        <div class="import-summary"><div class="stat"><div class="stat-dot dot-green"></div><strong id="tab-new-count">5 new</strong></div><div class="stat"><div class="stat-dot dot-yellow"></div><strong id="tab-dup-count">2 duplicates</strong></div><div class="stat"><div class="stat-dot dot-red"></div><strong id="tab-err-count">0 errors</strong></div></div>
+        <div class="table-scroll"><table class="preview-table"><thead><tr id="tab-preview-header"></tr></thead><tbody id="tab-preview-body"></tbody></table></div>
+      </div>
+
+      <div id="tab-step-content-4" class="hidden">
+        <div class="success-state">
+          <div class="success-icon">✅</div>
+          <h3 class="success-title">Import Complete!</h3>
+          <p class="success-subtitle" id="tab-success-msg">Records were added to your Production Rates.</p>
+          <p style="font-size:12.5px;color:#94a3b8;margin-bottom:20px;" id="tab-skip-msg"></p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="tab-btn-cancel" onclick="closeModal('tab-import-modal')">Cancel</button>
+      <button class="btn btn-secondary hidden" id="tab-btn-back" onclick="tabImportBack()">← Back</button>
+      <button class="btn btn-primary" id="tab-btn-next" onclick="tabImportNext()">Next →</button>
+      <button class="btn btn-primary hidden" id="tab-btn-done" onclick="closeModal('tab-import-modal')">View Imported Records</button>
+    </div>
+  </div>
+</div>
+<!-- ===== MASTER IMPORT MODAL ===== -->
+<div class="modal-overlay" id="master-import-modal">
+  <div class="modal-box modal-xl">
+    <div class="modal-header">
+      <h3>Import Production Rates Data</h3>
+      <button class="modal-close" onclick="closeModal('master-import-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="steps">
+        <div class="step active" id="master-step-1"><div class="step-num">1</div><div class="step-label">Upload</div></div>
+        <div class="step-divider" id="master-div-1"></div>
+        <div class="step inactive" id="master-step-2"><div class="step-num">2</div><div class="step-label">Select Sections</div></div>
+        <div class="step-divider" id="master-div-2"></div>
+        <div class="step inactive" id="master-step-3"><div class="step-num">3</div><div class="step-label">Map Columns</div></div>
+        <div class="step-divider" id="master-div-3"></div>
+        <div class="step inactive" id="master-step-4"><div class="step-num">4</div><div class="step-label">Preview</div></div>
+        <div class="step-divider" id="master-div-4"></div>
+        <div class="step inactive" id="master-step-5"><div class="step-num">5</div><div class="step-label">Done</div></div>
+      </div>
+
+      <!-- Step 1 Upload -->
+      <div id="master-step-content-1">
+        <p style="font-size:13px;color:#64748b;margin-bottom:16px;">Upload a single master file with all your production rate data. Use our Excel template (one sheet per section) for the smoothest import experience.</p>
+        <div class="upload-zone" id="master-upload-zone" onclick="simulateFileUpload('master')">
+          <div class="upload-icon">📊</div>
+          <h4>Drag &amp; drop your master file here</h4>
+          <p>Excel (.xlsx) with multiple sheets recommended for full migration</p>
+          <small>Also accepts .CSV · Max 10MB</small><br>
+          <span class="template-link" onclick="event.stopPropagation();">⬇ Download master Excel template (.xlsx)</span>
+        </div>
+        <div id="master-file-chip" class="file-chip hidden">
+          <div class="file-chip-icon">📊</div>
+          <div class="file-chip-info"><div class="file-chip-name">production_rates_export.xlsx</div><div class="file-chip-size">5 sheets detected · 287 KB</div></div>
+          <button class="file-chip-remove" onclick="removeFile('master')">×</button>
+        </div>
+      </div>
+
+      <!-- Step 2 Select Sections -->
+      <div id="master-step-content-2" class="hidden">
+        <p style="font-size:13px;color:#64748b;margin-bottom:14px;">We found <strong>5 sheets</strong> in your file. Select which sections to import.</p>
+        <div class="sheet-option selected" onclick="this.classList.toggle('selected');this.querySelector('.sheet-option-check').textContent=this.classList.contains('selected')?'✓':'';">
+          <div class="sheet-option-left"><div class="sheet-option-check">✓</div><div><div class="sheet-option-title">Interior Areas</div><div class="sheet-option-desc">Sheet: "Interior_Areas" · 12 rows detected</div></div></div>
+          <span class="sheet-count">12 rows</span>
+        </div>
+        <div class="sheet-option selected" onclick="this.classList.toggle('selected');this.querySelector('.sheet-option-check').textContent=this.classList.contains('selected')?'✓':'';">
+          <div class="sheet-option-left"><div class="sheet-option-check">✓</div><div><div class="sheet-option-title">Exterior Areas</div><div class="sheet-option-desc">Sheet: "Exterior_Areas" · 8 rows detected</div></div></div>
+          <span class="sheet-count">8 rows</span>
+        </div>
+        <div class="sheet-option selected" onclick="this.classList.toggle('selected');this.querySelector('.sheet-option-check').textContent=this.classList.contains('selected')?'✓':'';">
+          <div class="sheet-option-left"><div class="sheet-option-check">✓</div><div><div class="sheet-option-title">Substrate Categories</div><div class="sheet-option-desc">Sheet: "Categories" · 11 rows detected</div></div></div>
+          <span class="sheet-count">11 rows</span>
+        </div>
+        <div class="sheet-option selected" onclick="this.classList.toggle('selected');this.querySelector('.sheet-option-check').textContent=this.classList.contains('selected')?'✓':'';">
+          <div class="sheet-option-left"><div class="sheet-option-check">✓</div><div><div class="sheet-option-title">Area Substrates</div><div class="sheet-option-desc">Sheet: "Area_Substrates" · 24 rows detected</div></div></div>
+          <span class="sheet-count">24 rows</span>
+        </div>
+        <div class="sheet-option selected" onclick="this.classList.toggle('selected');this.querySelector('.sheet-option-check').textContent=this.classList.contains('selected')?'✓':'';">
+          <div class="sheet-option-left"><div class="sheet-option-check">✓</div><div><div class="sheet-option-title">Products</div><div class="sheet-option-desc">Sheet: "Products" · 18 rows detected</div></div></div>
+          <span class="sheet-count">18 rows</span>
+        </div>
+      </div>
+
+      <!-- Step 3 Map Columns (multi-section) -->
+      <div id="master-step-content-3" class="hidden">
+        <p style="font-size:13px;color:#64748b;margin-bottom:14px;">Map each section's columns to DripJobs fields. Click a section header to expand or collapse it.</p>
+        <div class="section-group">
+          <div class="section-group-header" onclick="toggleSG(this)">
+            <h4>🏠 Interior Areas <span class="badge badge-success">12 rows · Auto-mapped ✓</span></h4><span class="chevron open">▼</span>
+          </div>
+          <div class="section-group-body">
+            <table class="map-table"><thead><tr><th>Your Column</th><th>Sample</th><th>Maps To</th></tr></thead><tbody>
+              <tr><td><span class="col-from">room_name</span></td><td style="font-size:12px;color:#94a3b8;">Living Room</td><td><select class="map-select"><option>Area Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">length_ft</span></td><td style="font-size:12px;color:#94a3b8;">24</td><td><select class="map-select"><option>Default Length (ft)</option><option>Area Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">width_ft</span></td><td style="font-size:12px;color:#94a3b8;">18</td><td><select class="map-select"><option>Default Width (ft)</option><option>Area Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">height_ft</span></td><td style="font-size:12px;color:#94a3b8;">8</td><td><select class="map-select"><option>Default Height (ft)</option><option>Area Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">area_types</span></td><td style="font-size:12px;color:#94a3b8;">Ceiling, Walls</td><td><select class="map-select"><option>Default Categories</option><option>Area Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">measure</span></td><td style="font-size:12px;color:#94a3b8;">Area</td><td><select class="map-select"><option>Measurement Type</option><option>Area Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="section-group">
+          <div class="section-group-header" onclick="toggleSG(this)">
+            <h4>🏡 Exterior Areas <span class="badge badge-success">8 rows · Auto-mapped ✓</span></h4><span class="chevron open">▼</span>
+          </div>
+          <div class="section-group-body">
+            <table class="map-table"><thead><tr><th>Your Column</th><th>Sample</th><th>Maps To</th></tr></thead><tbody>
+              <tr><td><span class="col-from">area_name</span></td><td style="font-size:12px;color:#94a3b8;">Whole House</td><td><select class="map-select"><option>Area Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">l</span></td><td style="font-size:12px;color:#94a3b8;">250</td><td><select class="map-select"><option>Default Length (ft)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">w</span></td><td style="font-size:12px;color:#94a3b8;">9</td><td><select class="map-select"><option>Default Width (ft)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">categories</span></td><td style="font-size:12px;color:#94a3b8;">Siding, Trim</td><td><select class="map-select"><option>Default Categories</option><option>Do Not Import</option></select></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="section-group">
+          <div class="section-group-header" onclick="toggleSG(this)">
+            <h4>🎨 Products <span class="badge badge-warning">18 rows · 1 unmapped column</span></h4><span class="chevron open">▼</span>
+          </div>
+          <div class="section-group-body">
+            <table class="map-table"><thead><tr><th>Your Column</th><th>Sample</th><th>Maps To</th></tr></thead><tbody>
+              <tr><td><span class="col-from">product_name</span></td><td style="font-size:12px;color:#94a3b8;">SW Duration Exterior</td><td><select class="map-select"><option>Product Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">price</span></td><td style="font-size:12px;color:#94a3b8;">38.99</td><td><select class="map-select"><option>Product Price ($)</option><option>Product Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">unit_type</span></td><td style="font-size:12px;color:#94a3b8;">gallon</td><td><select class="map-select"><option>Product Type</option><option>Product Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">finish</span></td><td style="font-size:12px;color:#94a3b8;">Satin</td><td><select class="map-select"><option>Sheen</option><option>Product Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+              <tr class="map-warn-row"><td><span class="col-from">internal_sku</span><span class="col-note">No matching field in DripJobs</span></td><td style="font-size:12px;color:#94a3b8;">BM-AUR-001</td><td><select class="map-select" style="border-color:#fde68a;"><option>— Do Not Import —</option><option>Product Name ★ (required)</option></select></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="section-group">
+          <div class="section-group-header" onclick="toggleSG(this)">
+            <h4>🧱 Substrate Categories <span class="badge badge-success">11 rows · Auto-mapped ✓</span></h4><span class="chevron">▼</span>
+          </div>
+          <div class="section-group-body collapsed">
+            <table class="map-table"><thead><tr><th>Your Column</th><th>Sample</th><th>Maps To</th></tr></thead><tbody>
+              <tr><td><span class="col-from">category</span></td><td style="font-size:12px;color:#94a3b8;">Walls</td><td><select class="map-select"><option>Category Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">calc_type</span></td><td style="font-size:12px;color:#94a3b8;">Square Foot (Walls)</td><td><select class="map-select"><option>Default Calculation Type</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">default_coats</span></td><td style="font-size:12px;color:#94a3b8;">1</td><td><select class="map-select"><option>Default Coats</option><option>Do Not Import</option></select></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="section-group">
+          <div class="section-group-header" onclick="toggleSG(this)">
+            <h4>🖌 Area Substrates <span class="badge badge-success">24 rows · Auto-mapped ✓</span></h4><span class="chevron">▼</span>
+          </div>
+          <div class="section-group-body collapsed">
+            <table class="map-table"><thead><tr><th>Your Column</th><th>Sample</th><th>Maps To</th></tr></thead><tbody>
+              <tr><td><span class="col-from">substrate_name</span></td><td style="font-size:12px;color:#94a3b8;">9FT Heavy Texture</td><td><select class="map-select"><option>Substrate Name ★ (required)</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">client_label</span></td><td style="font-size:12px;color:#94a3b8;">9FT Heavy Texture</td><td><select class="map-select"><option>Substrate Client Label</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">spreadrate_1coat</span></td><td style="font-size:12px;color:#94a3b8;">200</td><td><select class="map-select"><option>Spreadrate - 1 Coat</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">spreadrate_2coat</span></td><td style="font-size:12px;color:#94a3b8;">175</td><td><select class="map-select"><option>Spreadrate - 2 Coats</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">spreadrate_3coat</span></td><td style="font-size:12px;color:#94a3b8;">103</td><td><select class="map-select"><option>Spreadrate - 3 Coats</option><option>Do Not Import</option></select></td></tr>
+              <tr><td><span class="col-from">coverage_gal</span></td><td style="font-size:12px;color:#94a3b8;">350</td><td><select class="map-select"><option>Per Gal. Coverage (sqft)</option><option>Do Not Import</option></select></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 Preview -->
+      <div id="master-step-content-4" class="hidden">
+        <div class="import-summary">
+          <div class="stat"><div class="stat-dot dot-green"></div><strong>68 new records</strong> across 5 sections</div>
+          <div class="stat"><div class="stat-dot dot-yellow"></div><strong>5 duplicates</strong></div>
+          <div class="stat"><div class="stat-dot dot-red"></div><strong>0 errors</strong></div>
+        </div>
+        <p style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:8px;">Interior Areas — first 5 of 12</p>
+        <div class="table-scroll"><table class="preview-table"><thead><tr><th>Area Name</th><th>Type</th><th>L</th><th>W</th><th>H</th><th>Categories</th><th>Status</th></tr></thead><tbody>
+          <tr><td>Living Room</td><td>Area</td><td>24</td><td>18</td><td>8</td><td>Ceiling, Walls, Trim</td><td><span class="badge badge-success">New</span></td></tr>
+          <tr><td>Dining Room</td><td>Area</td><td>14</td><td>12</td><td>8</td><td>Ceiling, Walls, Trim, Doors</td><td><span class="badge badge-success">New</span></td></tr>
+          <tr class="row-duplicate"><td>Office</td><td>Area</td><td>16</td><td>12</td><td>9</td><td>Ceiling, Doors, Trim, Walls</td><td><select class="conflict-select"><option>Skip (keep existing)</option><option>Overwrite</option></select></td></tr>
+          <tr><td>Study</td><td>Area</td><td>12</td><td>10</td><td>8</td><td>Walls, Trim</td><td><span class="badge badge-success">New</span></td></tr>
+          <tr><td>Laundry Room</td><td>Area</td><td>8</td><td>6</td><td>8</td><td>Walls</td><td><span class="badge badge-success">New</span></td></tr>
+        </tbody></table></div>
+        <p style="font-size:13px;font-weight:600;color:#1e293b;margin:14px 0 8px;">Products — first 5 of 18</p>
+        <div class="table-scroll"><table class="preview-table"><thead><tr><th>Product Name</th><th>Price</th><th>Type</th><th>Sheen</th><th>Status</th></tr></thead><tbody>
+          <tr class="row-duplicate"><td>Sherwin-Williams Duration Exterior (Satin)</td><td>$38.99</td><td>Gallon</td><td>Satin</td><td><select class="conflict-select"><option>Skip (keep existing)</option><option>Overwrite</option></select></td></tr>
+          <tr><td>Behr Marquee Interior (Flat)</td><td>$52.99</td><td>Gallon</td><td>Flat</td><td><span class="badge badge-success">New</span></td></tr>
+          <tr><td>PPG Timeless Exterior (Satin)</td><td>$47.50</td><td>Gallon</td><td>Satin</td><td><span class="badge badge-success">New</span></td></tr>
+          <tr><td>Primer Coat Ultra</td><td>$29.00</td><td>Gallon</td><td>—</td><td><span class="badge badge-success">New</span></td></tr>
+          <tr class="row-duplicate"><td>10 M Plastic</td><td>$120.00</td><td>Item</td><td>Clear</td><td><select class="conflict-select"><option>Skip (keep existing)</option><option>Overwrite</option></select></td></tr>
+        </tbody></table></div>
+        <p style="font-size:12px;color:#94a3b8;margin-top:10px;">Substrate Categories, Exterior Areas, and Area Substrates are clean — no duplicates found.</p>
+      </div>
+
+      <!-- Step 5 Done -->
+      <div id="master-step-content-5" class="hidden">
+        <div class="success-state">
+          <div class="success-icon">✅</div>
+          <h3 class="success-title">Import Complete!</h3>
+          <p class="success-subtitle">Your Production Rates data has been successfully imported across all sections.</p>
+          <div class="success-grid">
+            <div class="success-card" style="background:#f0fdf4;border:1px solid #bbf7d0;"><div class="num" style="color:#166534;">12</div><div class="lbl" style="color:#16a34a;">Interior Areas</div></div>
+            <div class="success-card" style="background:#f0fdf4;border:1px solid #bbf7d0;"><div class="num" style="color:#166534;">8</div><div class="lbl" style="color:#16a34a;">Exterior Areas</div></div>
+            <div class="success-card" style="background:#f0fdf4;border:1px solid #bbf7d0;"><div class="num" style="color:#166534;">16</div><div class="lbl" style="color:#16a34a;">Products Added</div></div>
+            <div class="success-card" style="background:#f0fdf4;border:1px solid #bbf7d0;"><div class="num" style="color:#166534;">11</div><div class="lbl" style="color:#16a34a;">Substrate Categories</div></div>
+            <div class="success-card" style="background:#f0fdf4;border:1px solid #bbf7d0;"><div class="num" style="color:#166534;">24</div><div class="lbl" style="color:#16a34a;">Area Substrates</div></div>
+            <div class="success-card" style="background:#fffbeb;border:1px solid #fde68a;"><div class="num" style="color:#92400e;">5</div><div class="lbl" style="color:#d97706;">Duplicates Skipped</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="master-btn-cancel" onclick="closeModal('master-import-modal')">Cancel</button>
+      <button class="btn btn-secondary hidden" id="master-btn-back" onclick="masterImportBack()">← Back</button>
+      <button class="btn btn-primary" id="master-btn-next" onclick="masterImportNext()">Next →</button>
+      <button class="btn btn-primary hidden" id="master-btn-import" onclick="masterDoImport()">⬆ Import All Selected</button>
+      <button class="btn btn-primary hidden" id="master-btn-done" onclick="closeModal('master-import-modal')">View Production Rates</button>
+    </div>
+  </div>
+</div><script>
+var currentTab='interior';
+function switchTab(t){
+  currentTab=t;
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tabs-bar a').forEach(a=>a.classList.remove('active'));
+  var p=document.getElementById('panel-'+t),tb=document.getElementById('tab-'+t);
+  if(p)p.classList.add('active');
+  if(tb)tb.classList.add('active');
+}
+function toggleSG(h){
+  var b=h.nextElementSibling,c=h.querySelector('.chevron');
+  b.classList.toggle('collapsed');
+  c.classList.toggle('open');
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+/* ---- TAB IMPORT ---- */
+var tabType='interior',tabStep=1;
+var CFG={
+  interior:{title:'Import Interior Areas',sub:'Upload a CSV or Excel file with your interior room data.',cols:[
+    {f:'room_name',s:'Living Room',m:['Area Name ★ (required)','Do Not Import']},
+    {f:'length_ft',s:'24',m:['Default Length (ft)','Area Name ★ (required)','Do Not Import']},
+    {f:'width_ft',s:'18',m:['Default Width (ft)','Area Name ★ (required)','Do Not Import']},
+    {f:'height_ft',s:'8',m:['Default Height (ft)','Area Name ★ (required)','Do Not Import']},
+    {f:'area_types',s:'Ceiling, Walls',m:['Default Categories','Area Name ★ (required)','Do Not Import']},
+    {f:'measure',s:'Area',m:['Measurement Type','Area Name ★ (required)','Do Not Import']},
+  ],ph:['Area Name','Type','L','W','H','Categories','Status'],
+  pr:[['Foyer','Area','10','7','15','Ceiling, Walls, Trim','new'],['Sun Room','Area','18','14','9','Ceiling, Walls','new'],['Mud Room','Area','8','6','8','Walls, Doors','new'],['Office','Area','16','12','9','Ceiling, Doors, Trim, Walls','dup'],['Library','Area','14','12','9','Ceiling, Walls, Trim','new']],
+  sc:'5',sl:'Interior Areas',sk:'1 duplicate record was skipped.'},
+  exterior:{title:'Import Exterior Areas',sub:'Upload a CSV or Excel file with your exterior area data.',cols:[
+    {f:'area_name',s:'Garage Exterior',m:['Area Name ★ (required)','Do Not Import']},
+    {f:'l',s:'24',m:['Default Length (ft)','Area Name ★ (required)','Do Not Import']},
+    {f:'w',s:'8',m:['Default Width (ft)','Area Name ★ (required)','Do Not Import']},
+    {f:'categories',s:'Siding, Trim',m:['Default Categories','Area Name ★ (required)','Do Not Import']},
+  ],ph:['Area Name','L','W','Categories','Status'],
+  pr:[['Garage Exterior','24','8','Siding, Trim','new'],['Fence Line','60','6','Floor','new'],['Whole House','250','9','Siding, Trim, Doors','dup']],
+  sc:'2',sl:'Exterior Areas',sk:'1 duplicate record was skipped.'},
+  'substrate-categories':{title:'Import Substrate Categories',sub:'Upload a CSV with your substrate category data.',cols:[
+    {f:'category_name',s:'Walls',m:['Category Name ★ (required)','Do Not Import']},
+    {f:'calc_type',s:'Square Foot (Walls)',m:['Default Calculation Type','Category Name ★ (required)','Do Not Import']},
+    {f:'default_sub',s:'9FT Heavy Texture',m:['Default Substrate','Do Not Import']},
+    {f:'default_coats',s:'1',m:['Default Coats','Do Not Import']},
+  ],ph:['Category Name','Calculation Type','Default Substrate','Coats','Status'],
+  pr:[['Ceilings (High)','Square Foot (Ceiling)','(Roll) Two-Story Smooth','1','new'],['Walls','Square Foot (Walls)','9FT Heavy Texture','1','dup'],['Siding','Square Foot (Walls)','Siding Substrate','2','new']],
+  sc:'2',sl:'Substrate Categories',sk:'1 duplicate record was skipped.'},
+  'substrate-areas':{title:'Import Area Substrates',sub:'Upload a CSV with your area substrate production rate data.',cols:[
+    {f:'substrate_name',s:'9FT Heavy Texture',m:['Substrate Name ★ (required)','Do Not Import']},
+    {f:'client_label',s:'9FT Heavy Texture',m:['Substrate Client Label','Do Not Import']},
+    {f:'product',s:'SW SuperPaint Interior',m:['Default Product','Do Not Import']},
+    {f:'category',s:'Walls',m:['Category','Do Not Import']},
+    {f:'spreadrate_1',s:'200',m:['Spreadrate - 1 Coat','Do Not Import']},
+    {f:'spreadrate_2',s:'175',m:['Spreadrate - 2 Coats','Do Not Import']},
+    {f:'spreadrate_3',s:'103',m:['Spreadrate - 3 Coats','Do Not Import']},
+    {f:'coverage_gal',s:'350',m:['Per Gal. Coverage (sqft)','Do Not Import']},
+  ],ph:['Substrate Name','Client Label','Category','1-Coat','2-Coat','3-Coat','Status'],
+  pr:[['10FT Smooth','10FT Smooth','Walls','190','160','110','new'],['9FT Heavy Texture','9FT Heavy Texture','Walls','200','175','103','dup'],['Popcorn Ceiling','Popcorn Ceiling','Ceiling','120','100','85','new']],
+  sc:'2',sl:'Area Substrates',sk:'1 duplicate record was skipped.'},
+  products:{title:'Import Products',sub:'Upload a CSV with your paint and materials product list.',cols:[
+    {f:'product_name',s:'SW Duration Exterior (Satin)',m:['Product Name ★ (required)','Do Not Import']},
+    {f:'price',s:'38.99',m:['Product Price ($)','Product Name ★ (required)','Do Not Import']},
+    {f:'unit_type',s:'gallon',m:['Product Type','Product Name ★ (required)','Do Not Import']},
+    {f:'finish',s:'Satin',m:['Sheen','Product Name ★ (required)','Do Not Import']},
+    {f:'sku',s:'BM-AUR-001',m:['— Do Not Import —','Product Name ★ (required)']},
+  ],ph:['Product Name','Price','Type','Sheen','Status'],
+  pr:[['Behr Marquee Interior (Flat)','$52.99','Gallon','Flat','new'],['PPG Timeless Exterior (Satin)','$47.50','Gallon','Satin','new'],['Primer Coat Ultra','$29.00','Gallon','—','new'],['Sherwin-Williams Duration Exterior (Satin)','$38.99','Gallon','Satin','dup'],['10 M Plastic','$120.00','Item','Clear','dup']],
+  sc:'3',sl:'Products',sk:'2 duplicate records were skipped.'}
+};
+
+function openTabImport(type){
+  tabType=type;tabStep=1;
+  var c=CFG[type];
+  document.getElementById('tab-import-title').textContent=c.title;
+  document.getElementById('tab-import-subtitle').textContent=c.sub;
+  document.getElementById('tab-upload-zone').classList.remove('hidden');
+  document.getElementById('tab-file-chip').classList.add('hidden');
+  showTabStep(1);
+  document.getElementById('tab-import-modal').classList.add('open');
+}
+function showTabStep(s){
+  for(var i=1;i<=4;i++){
+    var el=document.getElementById('tab-step-content-'+i);if(el)el.classList.add('hidden');
+    var st=document.getElementById('tab-step-'+i);if(st)st.className='step '+(i<s?'done':i===s?'active':'inactive');
+    var dv=document.getElementById('tab-div-'+i);if(dv)dv.className='step-divider'+(i<s?' done':'');
+  }
+  var c=document.getElementById('tab-step-content-'+s);if(c)c.classList.remove('hidden');
+  tabStep=s;
+  document.getElementById('tab-btn-cancel').classList.toggle('hidden',s===4);
+  document.getElementById('tab-btn-back').classList.toggle('hidden',s<=1);
+  document.getElementById('tab-btn-next').classList.toggle('hidden',s>=4);
+  document.getElementById('tab-btn-done').classList.toggle('hidden',s<4);
+  document.getElementById('tab-btn-next').textContent=s===3?'Import Records →':'Next →';
+}
+function simulateFileUpload(ctx){
+  if(ctx==='tab'){document.getElementById('tab-upload-zone').classList.add('hidden');document.getElementById('tab-file-chip').classList.remove('hidden');}
+  else{document.getElementById('master-upload-zone').classList.add('hidden');document.getElementById('master-file-chip').classList.remove('hidden');}
+}
+function removeFile(ctx){
+  if(ctx==='tab'){document.getElementById('tab-upload-zone').classList.remove('hidden');document.getElementById('tab-file-chip').classList.add('hidden');}
+  else{document.getElementById('master-upload-zone').classList.remove('hidden');document.getElementById('master-file-chip').classList.add('hidden');}
+}
+function tabImportNext(){
+  var c=CFG[tabType];
+  if(tabStep===1){buildMapTable(c);showTabStep(2);}
+  else if(tabStep===2){buildPreview(c);showTabStep(3);}
+  else if(tabStep===3){
+    document.getElementById('tab-success-msg').textContent=c.sc+' '+c.sl+' were added to your Production Rates.';
+    document.getElementById('tab-skip-msg').textContent=c.sk;
+    showTabStep(4);
+  }
+}
+function tabImportBack(){if(tabStep>1)showTabStep(tabStep-1);}
+function buildMapTable(c){
+  var tb=document.getElementById('tab-mapping-body');tb.innerHTML='';
+  document.getElementById('tab-col-count').textContent=c.cols.length+' columns';
+  c.cols.forEach(function(col){
+    var opts=col.m.map(function(m,i){return'<option'+(i===0?' selected':'')+'>'+m+'</option>';}).join('');
+    tb.innerHTML+='<tr><td><span class="col-from">'+col.f+'</span></td><td style="font-size:12px;color:#94a3b8;">'+col.s+'</td><td><select class="map-select">'+opts+'</select></td></tr>';
+  });
+}
+function buildPreview(c){
+  var th=document.getElementById('tab-preview-header');var tb=document.getElementById('tab-preview-body');
+  th.innerHTML=c.ph.map(function(h){return'<th>'+h+'</th>';}).join('');
+  tb.innerHTML='';var nw=0,dp=0,er=0;
+  c.pr.forEach(function(row){
+    var st=row[row.length-1];
+    if(st==='new')nw++;else if(st==='dup')dp++;else er++;
+    var cells=row.slice(0,-1).map(function(v){return'<td>'+v+'</td>';}).join('');
+    var sc=st==='new'?'<td><span class="badge badge-success">New</span></td>':st==='dup'?'<td><select class="conflict-select"><option>Skip</option><option>Overwrite</option></select></td>':'<td><span class="badge badge-danger">Error</span></td>';
+    tb.innerHTML+='<tr class="'+(st==='dup'?'row-duplicate':st==='err'?'row-error':'')+'">'+cells+sc+'</tr>';
+  });
+  document.getElementById('tab-new-count').textContent=nw+' new';
+  document.getElementById('tab-dup-count').textContent=dp+' duplicates';
+  document.getElementById('tab-err-count').textContent=er+' errors';
+}
+
+/* ---- MASTER IMPORT ---- */
+var masterStep=1;
+function openMasterImport(){
+  masterStep=1;showMasterStep(1);
+  document.getElementById('master-upload-zone').classList.remove('hidden');
+  document.getElementById('master-file-chip').classList.add('hidden');
+  document.getElementById('master-import-modal').classList.add('open');
+}
+function showMasterStep(s){
+  for(var i=1;i<=5;i++){
+    var el=document.getElementById('master-step-content-'+i);if(el)el.classList.add('hidden');
+    var st=document.getElementById('master-step-'+i);if(st)st.className='step '+(i<s?'done':i===s?'active':'inactive');
+    var dv=document.getElementById('master-div-'+i);if(dv)dv.className='step-divider'+(i<s?' done':'');
+  }
+  var c=document.getElementById('master-step-content-'+s);if(c)c.classList.remove('hidden');
+  masterStep=s;
+  document.getElementById('master-btn-cancel').classList.toggle('hidden',s===5);
+  document.getElementById('master-btn-back').classList.toggle('hidden',s<=1);
+  document.getElementById('master-btn-next').classList.toggle('hidden',s>=4);
+  document.getElementById('master-btn-import').classList.toggle('hidden',s!==4);
+  document.getElementById('master-btn-done').classList.toggle('hidden',s<5);
+  if(s===3)document.getElementById('master-btn-next').textContent='Next: Preview →';
+  else document.getElementById('master-btn-next').textContent='Next →';
+}
+function masterImportNext(){if(masterStep<4)showMasterStep(masterStep+1);}
+function masterImportBack(){if(masterStep>1)showMasterStep(masterStep-1);}
+function masterDoImport(){
+  var btn=document.getElementById('master-btn-import');
+  btn.disabled=true;btn.textContent='Importing…';
+  setTimeout(function(){showMasterStep(5);},1200);
+}
+switchTab('interior');
+</script></body></html>
