@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DripJobs — Void Invoice Confirmation Prototype</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+* { box-sizing: border-box; }
+body { background: #f0f0f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; }
+.sidebar { width: 220px; min-height: 100vh; background: white; border-right: 1px solid #e5e7eb; padding: 0; position: fixed; left: 0; top: 0; overflow-y: auto; }
+.main-content { margin-left: 220px; padding: 24px; }
+.sidebar-logo { padding: 16px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 10px; }
+.sidebar-logo span { font-weight: 700; font-size: 18px; color: #7C3AED; }
+.sidebar-section-label { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; padding: 12px 16px 4px; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 13px; color: #374151; cursor: pointer; text-decoration: none; }
+.sidebar-item:hover { background: #f3f0ff; color: #7C3AED; }
+.sidebar-item.active { background: #f3f0ff; color: #7C3AED; font-weight: 600; }
+.sidebar-item i { width: 16px; text-align: center; font-size: 13px; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.page-title { font-size: 20px; font-weight: 700; color: #111827; }
+.badge-count { background: #7C3AED; color: white; font-size: 11px; padding: 2px 7px; border-radius: 10px; margin-left: 8px; }
+.table-container { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
+.proposal-table { width: 100%; }
+.proposal-table th { background: #f9fafb; padding: 10px 14px; font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
+.proposal-table td { padding: 12px 14px; font-size: 13px; color: #374151; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+.proposal-table tr:hover { background: #fafafa; }
+.status-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.status-accepted { background: #d1fae5; color: #065f46; }
+.status-invoiced { background: #dbeafe; color: #1e40af; }
+.status-open { background: #fef3c7; color: #92400e; }
+.status-partial { background: #fee2e2; color: #991b1b; }
+.action-dropdown { position: relative; display: inline-block; }
+.action-dots { background: none; border: 1px solid #e5e7eb; border-radius: 6px; padding: 5px 10px; cursor: pointer; color: #6b7280; }
+.action-dots:hover { background: #f3f0ff; border-color: #7C3AED; color: #7C3AED; }
+.dropdown-menu-custom { position: absolute; right: 0; top: 100%; background: white; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); min-width: 160px; z-index: 1000; padding: 4px 0; display: none; }
+.dropdown-menu-custom.show { display: block; }
+.dropdown-item-custom { padding: 8px 14px; font-size: 13px; color: #374151; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.dropdown-item-custom:hover { background: #f9fafb; }
+.dropdown-item-custom.danger { color: #dc2626; }
+.dropdown-item-custom.danger:hover { background: #fef2f2; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal-box { background: white; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); max-width: 460px; width: 100%; margin: 16px; overflow: hidden; }
+.modal-header { padding: 18px 24px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
+.modal-header h5 { margin: 0; font-size: 16px; font-weight: 700; color: #111827; }
+.modal-close { background: none; border: none; font-size: 18px; color: #9ca3af; cursor: pointer; padding: 2px; line-height: 1; }
+.modal-close:hover { color: #374151; }
+.modal-body { padding: 20px 24px; }
+.modal-message { font-size: 14px; color: #374151; line-height: 1.6; margin-bottom: 14px; }
+.invoice-info-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px 14px; margin-bottom: 14px; }
+.invoice-info-box .label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+.invoice-info-box .value { font-size: 14px; font-weight: 600; color: #111827; }
+.jc-notice { background: #f3f0ff; border: 1px solid #e0d7ff; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #5b21b6; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; transition: opacity 0.2s ease; }
+.jc-notice.hidden { display: none; }
+.partial-warning { background: #fef3c7; border: 1px solid #fde68a; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #78350f; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 10px; background: #f9fafb; }
+.btn-cancel { padding: 9px 20px; border: 1px solid #d1d5db; border-radius: 6px; background: white; color: #374151; font-size: 14px; font-weight: 500; cursor: pointer; min-height: 40px; }
+.btn-cancel:hover { border-color: #9ca3af; }
+.btn-no { padding: 9px 20px; border: 1px solid #d1d5db; border-radius: 6px; background: white; color: #374151; font-size: 14px; font-weight: 500; cursor: pointer; min-height: 40px; }
+.btn-no:hover { background: #f9fafb; }
+.btn-yes { padding: 9px 20px; border: none; border-radius: 6px; background: #7C3AED; color: white; font-size: 14px; font-weight: 600; cursor: pointer; min-height: 40px; }
+.btn-yes:hover { background: #6d28d9; }
+.btn-yes.danger { background: #dc2626; }
+.btn-yes.danger:hover { background: #b91c1c; }
+.processing-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; align-items: center; justify-content: center; }
+.processing-overlay.active { display: flex; }
+.processing-box { background: white; border-radius: 10px; padding: 32px 40px; text-align: center; max-width: 340px; }
+.spinner { width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: #7C3AED; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.processing-label { font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 6px; }
+.processing-sub { font-size: 13px; color: #6b7280; }
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 4000; display: flex; flex-direction: column; gap: 10px; }
+.toast { background: white; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px; max-width: 360px; transform: translateX(400px); transition: transform 0.3s ease; }
+.toast.show { transform: translateX(0); }
+.toast-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+.toast-icon.success { background: #d1fae5; color: #065f46; }
+.toast-icon.info { background: #dbeafe; color: #1e40af; }
+.toast-title { font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 2px; }
+.toast-msg { font-size: 12px; color: #6b7280; line-height: 1.4; }
+
+/* ── Scenario nav ── */
+.scenario-nav { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 14px 18px; margin-bottom: 20px; }
+.scenario-nav-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.scenario-nav .label { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.04em; margin-right: 4px; flex-shrink: 0; }
+.scenario-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #e5e7eb; background: white; font-size: 12px; font-weight: 500; color: #374151; cursor: pointer; }
+.scenario-btn:hover { border-color: #7C3AED; color: #7C3AED; }
+.scenario-btn.active { background: #7C3AED; border-color: #7C3AED; color: white; }
+.scenario-desc { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f3f4f6; font-size: 12px; color: #6b7280; display: flex; align-items: flex-start; gap: 6px; }
+.scenario-desc strong { color: #374151; }
+
+/* ── JC toggle ── */
+.jc-toggle-wrap { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.jc-toggle-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+.jc-pill { position: relative; width: 44px; height: 24px; border-radius: 12px; background: #d1d5db; border: none; cursor: pointer; transition: background 0.2s ease; padding: 0; flex-shrink: 0; }
+.jc-pill.on { background: #7C3AED; }
+.jc-pill-knob { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.jc-pill.on .jc-pill-knob { transform: translateX(20px); }
+.jc-pill-text { font-size: 10px; font-weight: 700; color: #6b7280; letter-spacing: 0.04em; min-width: 20px; }
+.jc-pill.on + .jc-pill-text { color: #7C3AED; }
+
+/* ── Success banners ── */
+.success-state { display: none; }
+.success-state.show { display: block; }
+.success-banner { border-radius: 8px; padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.success-banner-green { background: #d1fae5; border: 1px solid #6ee7b7; }
+.success-banner-blue { background: #dbeafe; border: 1px solid #93c5fd; }
+.success-banner-body { flex: 1; }
+.success-title { font-size: 14px; font-weight: 700; }
+.success-msg { font-size: 12px; margin-top: 2px; line-height: 1.5; }
+.success-banner-green .success-title { color: #065f46; }
+.success-banner-green .success-msg { color: #047857; }
+.success-banner-blue .success-title { color: #1e40af; }
+.success-banner-blue .success-msg { color: #1d4ed8; }
+.reset-link { margin-top: 8px; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: inherit; opacity: 0.7; cursor: pointer; background: none; border: none; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
+.reset-link:hover { opacity: 1; }
+.reset-link i { font-size: 10px; }
+
+/* ── Archived row ── */
+.fading-row td { transition: opacity 0.35s ease, background-color 0.35s ease; opacity: 0.45; background-color: #f9fafb !important; }
+.archived-row td { color: #9ca3af; text-decoration: line-through; }
+.archived-row td .void-tag, .archived-row td .status-badge { text-decoration: none; }
+.void-tag { display: inline-block; background: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+
+/* ── Prototype watermark ── */
+.proto-badge {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  background: rgba(17,24,39,0.7);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  border-radius: 20px;
+  z-index: 9999;
+  text-transform: uppercase;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+</style>
+</head>
+<body>
+
+<!-- PROTOTYPE WATERMARK -->
+<div class="proto-badge">Prototype · Not for Production</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div style="width:28px;height:28px;background:#7C3AED;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+      <i class="fas fa-tint" style="color:white;font-size:14px;"></i>
+    </div>
+    <span>dripjobs</span>
+  </div>
+  <div style="padding:10px 16px 6px;"><span style="font-size:11px;color:#9ca3af;font-weight:600;">The Nest</span></div>
+  <div class="sidebar-section-label">SALES</div>
+  <a class="sidebar-item"><i class="fas fa-user-friends"></i> Contacts</a>
+  <a class="sidebar-item"><i class="fas fa-list"></i> Sales List</a>
+  <a class="sidebar-item"><i class="fas fa-columns"></i> Sales Pipeline</a>
+  <div class="sidebar-section-label">JOBS</div>
+  <a class="sidebar-item"><i class="fas fa-exchange-alt"></i> Change Orders</a>
+  <a class="sidebar-item"><i class="fas fa-calendar-alt"></i> Job Schedule</a>
+  <a class="sidebar-item"><i class="fas fa-list-ul"></i> Jobs List</a>
+  <a class="sidebar-item"><i class="fas fa-columns"></i> Jobs Pipeline</a>
+  <a class="sidebar-item"><i class="fas fa-file-alt"></i> Work Orders</a>
+  <div class="sidebar-section-label">DAILY OPERATIONS</div>
+  <a class="sidebar-item"><i class="fas fa-calendar-check"></i> Appointments</a>
+  <a class="sidebar-item"><i class="fas fa-comment"></i> Chat</a>
+  <a class="sidebar-item"><i class="fas fa-check-square"></i> Tasks</a>
+  <div class="sidebar-section-label">DOCUMENTS</div>
+  <a class="sidebar-item"><i class="fas fa-file-invoice-dollar"></i> Invoices</a>
+  <a class="sidebar-item active"><i class="fas fa-file-alt"></i> Proposals</a>
+  <div class="sidebar-section-label">FINANCIALS</div>
+  <a class="sidebar-item"><i class="fas fa-calculator"></i> Job Costing</a>
+  <a class="sidebar-item"><i class="fas fa-chart-line"></i> Production Rates</a>
+  <a class="sidebar-item"><i class="fas fa-chart-bar"></i> Metrics</a>
+  <div class="sidebar-section-label">MARKETING</div>
+  <a class="sidebar-item"><i class="fas fa-history"></i> Activity</a>
+  <a class="sidebar-item"><i class="fas fa-bullhorn"></i> Blast</a>
+  <a class="sidebar-item"><i class="fas fa-water"></i> Drips</a>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <!-- Scenario Switcher -->
+  <div class="scenario-nav">
+    <div class="scenario-nav-top">
+      <span class="label">Scenario:</span>
+      <button type="button" class="scenario-btn active" onclick="setScenario('A')">A — Open Invoice + Job Costing</button>
+      <button type="button" class="scenario-btn" onclick="setScenario('B')">B — Partial Payment + Job Costing</button>
+      <button type="button" class="scenario-btn" onclick="setScenario('C')">C — No Invoice</button>
+      <!-- JC Toggle -->
+      <div class="jc-toggle-wrap">
+        <span class="jc-toggle-label">Job Costing Add-On</span>
+        <button type="button" class="jc-pill on" id="jcPill" onclick="toggleJC()" title="Toggle Job Costing Add-On">
+          <span class="jc-pill-knob"></span>
+        </button>
+        <span class="jc-pill-text" id="jcPillText">ON</span>
+      </div>
+    </div>
+    <div class="scenario-desc" id="scenarioDesc">
+      <i class="fas fa-info-circle" style="color:#9ca3af;margin-top:1px;flex-shrink:0;"></i>
+      <span id="scenarioDescText"></span>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Proposals <span class="badge-count" id="proposalCount">12</span></div>
+    </div>
+    <button class="btn" style="background:#7C3AED;color:white;font-size:13px;border-radius:6px;padding:8px 16px;border:none;font-weight:600;">
+      <i class="fas fa-plus mr-1"></i> New Proposal
+    </button>
+  </div>
+
+  <!-- Proposals Table -->
+  <div class="table-container">
+    <table class="proposal-table">
+      <thead>
+        <tr>
+          <th>STATUS</th>
+          <th>CUSTOMER</th>
+          <th>CREATED</th>
+          <th>PROPOSAL/JOB</th>
+          <th>PROPOSAL #</th>
+          <th>JOB ADDRESS</th>
+          <th>AMOUNT</th>
+          <th>DATE</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="status-badge status-accepted">Accepted</span></td>
+          <td><span style="width:26px;height:26px;background:#7C3AED;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;margin-right:6px;">VH</span>Virginia Harrison</td>
+          <td>3/01/2025</td>
+          <td>Proposal #4103884</td>
+          <td>#4103884</td>
+          <td>4820 N Oak St, Citrus...</td>
+          <td>$1,352.00</td>
+          <td>3/01/2025</td>
+          <td>
+            <div class="action-dropdown">
+              <button class="action-dots" onclick="toggleDropdown('dd1')"><i class="fas fa-ellipsis-h"></i></button>
+              <div class="dropdown-menu-custom" id="dd1">
+                <div class="dropdown-item-custom"><i class="fas fa-eye" style="color:#7C3AED;"></i> View Proposal</div>
+                <div class="dropdown-item-custom"><i class="fas fa-edit" style="color:#6b7280;"></i> Edit Proposal</div>
+                <div class="dropdown-item-custom"><i class="fas fa-copy" style="color:#6b7280;"></i> Duplicate</div>
+                <div class="dropdown-item-custom danger" onclick="triggerArchive()"><i class="fas fa-archive"></i> Archive Proposal</div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr id="targetRow">
+          <td><span class="status-badge status-invoiced">Invoiced</span></td>
+          <td><span style="width:26px;height:26px;background:#10b981;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;margin-right:6px;">JH</span>Jeremy Harrison</td>
+          <td>2/12/2025</td>
+          <td>Proposal #2265789</td>
+          <td>#2265789</td>
+          <td>412 Sunrise Blvd, Cit...</td>
+          <td>$3,850.00</td>
+          <td>2/12/2025</td>
+          <td>
+            <div class="action-dropdown">
+              <button class="action-dots" onclick="toggleDropdown('dd2')"><i class="fas fa-ellipsis-h"></i></button>
+              <div class="dropdown-menu-custom" id="dd2">
+                <div class="dropdown-item-custom"><i class="fas fa-eye" style="color:#7C3AED;"></i> View Proposal</div>
+                <div class="dropdown-item-custom"><i class="fas fa-edit" style="color:#6b7280;"></i> Edit Proposal</div>
+                <div class="dropdown-item-custom"><i class="fas fa-copy" style="color:#6b7280;"></i> Duplicate</div>
+                <div class="dropdown-item-custom danger" onclick="handleArchiveClick()"><i class="fas fa-archive"></i> Archive Proposal</div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="status-badge status-accepted">Accepted</span></td>
+          <td><span style="width:26px;height:26px;background:#f59e0b;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;margin-right:6px;">MR</span>Michael Reynolds</td>
+          <td>1/28/2025</td>
+          <td>Twin Oaks - Bldg B</td>
+          <td>#3871654</td>
+          <td>889 Twin Oaks Dr, ...</td>
+          <td>$12,450.00</td>
+          <td>1/28/2025</td>
+          <td>
+            <div class="action-dropdown">
+              <button class="action-dots" onclick="toggleDropdown('dd3')"><i class="fas fa-ellipsis-h"></i></button>
+              <div class="dropdown-menu-custom" id="dd3">
+                <div class="dropdown-item-custom"><i class="fas fa-eye" style="color:#7C3AED;"></i> View Proposal</div>
+                <div class="dropdown-item-custom"><i class="fas fa-edit" style="color:#6b7280;"></i> Edit Proposal</div>
+                <div class="dropdown-item-custom"><i class="fas fa-copy" style="color:#6b7280;"></i> Duplicate</div>
+                <div class="dropdown-item-custom danger" onclick="triggerArchive()"><i class="fas fa-archive"></i> Archive Proposal</div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="status-badge status-open">Open</span></td>
+          <td><span style="width:26px;height:26px;background:#6366f1;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;margin-right:6px;">FS</span>Fred Smith</td>
+          <td>1/20/2025</td>
+          <td>Invoice Only</td>
+          <td>#2141672</td>
+          <td>55 Oak Lane, Citrus...</td>
+          <td>$2,100.00</td>
+          <td>1/20/2025</td>
+          <td>
+            <div class="action-dropdown">
+              <button class="action-dots" onclick="toggleDropdown('dd4')"><i class="fas fa-ellipsis-h"></i></button>
+              <div class="dropdown-menu-custom" id="dd4">
+                <div class="dropdown-item-custom"><i class="fas fa-eye" style="color:#7C3AED;"></i> View Proposal</div>
+                <div class="dropdown-item-custom danger" onclick="triggerArchive()"><i class="fas fa-archive"></i> Archive Proposal</div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="status-badge status-accepted">Accepted</span></td>
+          <td><span style="width:26px;height:26px;background:#ec4899;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;margin-right:6px;">AB</span>Aaron Blankfields</td>
+          <td>1/15/2025</td>
+          <td>Proposal #2265789</td>
+          <td>#2237871</td>
+          <td>220 Sunflower Ave...</td>
+          <td>$1,800.00</td>
+          <td>1/15/2025</td>
+          <td>
+            <div class="action-dropdown">
+              <button class="action-dots" onclick="toggleDropdown('dd5')"><i class="fas fa-ellipsis-h"></i></button>
+              <div class="dropdown-menu-custom" id="dd5">
+                <div class="dropdown-item-custom"><i class="fas fa-eye" style="color:#7C3AED;"></i> View Proposal</div>
+                <div class="dropdown-item-custom danger" onclick="triggerArchive()"><i class="fas fa-archive"></i> Archive Proposal</div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── SUCCESS: Yes — Void Invoice (+ optional JC removal) ── -->
+  <div id="successVoid" class="success-state" style="margin-top:16px;">
+    <div class="success-banner success-banner-green">
+      <i class="fas fa-check-circle" style="color:#065f46;font-size:18px;flex-shrink:0;margin-top:2px;"></i>
+      <div class="success-banner-body">
+        <div class="success-title" id="successVoidTitle">Proposal Archived + Invoice Voided + Job Costing Record Removed</div>
+        <div class="success-msg" id="successVoidMsg">Proposal #2265789 has been archived. Invoice #INV-2265789 has been voided. The associated Job Costing record has been removed.</div>
+        <button type="button" class="reset-link" onclick="setScenario(currentScenario)"><i class="fas fa-redo-alt"></i> Reset scenario</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SUCCESS: No — Archive Only (invoice stays active) ── -->
+  <div id="successArchiveOnly" class="success-state" style="margin-top:16px;">
+    <div class="success-banner success-banner-blue">
+      <i class="fas fa-info-circle" style="color:#1e40af;font-size:18px;flex-shrink:0;margin-top:2px;"></i>
+      <div class="success-banner-body">
+        <div class="success-title">Proposal Archived — Invoice Untouched</div>
+        <div class="success-msg">Proposal #2265789 has been archived. Invoice #INV-2265789 remains active and can be found under Invoices.</div>
+        <button type="button" class="reset-link" onclick="setScenario(currentScenario)"><i class="fas fa-redo-alt"></i> Reset scenario</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SUCCESS: Scenario C — No Invoice Found ── -->
+  <div id="successNoInvoice" class="success-state" style="margin-top:16px;">
+    <div class="success-banner success-banner-green">
+      <i class="fas fa-check-circle" style="color:#065f46;font-size:18px;flex-shrink:0;margin-top:2px;"></i>
+      <div class="success-banner-body">
+        <div class="success-title">Proposal Archived Successfully</div>
+        <div class="success-msg">Proposal #2265789 has been archived. No associated invoice was found — no further action required.</div>
+        <button type="button" class="reset-link" onclick="setScenario(currentScenario)"><i class="fas fa-redo-alt"></i> Reset scenario</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- MODAL A: Open Invoice                  -->
+<!-- ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="modalA">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h5><i class="fas fa-exclamation-triangle" style="color:#f59e0b;margin-right:8px;font-size:15px;"></i> Archive Proposal</h5>
+      <button class="modal-close" onclick="closeModal('modalA')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-message">
+        The proposal you are archiving has an associated invoice. Would you like to void the invoice as well?
+      </div>
+      <div class="invoice-info-box">
+        <div class="label">Associated Invoice</div>
+        <div class="value">Invoice #INV-2265789 &nbsp;<span style="font-size:12px;font-weight:500;color:#6b7280;">· Jeremy Harrison</span></div>
+        <div style="margin-top:6px;display:flex;gap:16px;">
+          <div><span style="font-size:11px;color:#9ca3af;font-weight:600;">AMOUNT</span><br><span style="font-size:13px;font-weight:600;color:#111827;">$3,850.00</span></div>
+          <div><span style="font-size:11px;color:#9ca3af;font-weight:600;">STATUS</span><br><span class="status-badge status-invoiced" style="font-size:11px;">Open</span></div>
+          <div><span style="font-size:11px;color:#9ca3af;font-weight:600;">DATE</span><br><span style="font-size:13px;color:#374151;">2/12/2025</span></div>
+        </div>
+      </div>
+      <div class="jc-notice" id="jcNoticeA">
+        <i class="fas fa-calculator" style="flex-shrink:0;margin-top:1px;"></i>
+        <div><strong>Job Costing Add-On Active:</strong> Selecting "Yes" will also remove the associated Job Costing record for this invoice.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modalA')">Cancel</button>
+      <button class="btn-no" onclick="handleNo()">No — Archive Only</button>
+      <button class="btn-yes" onclick="handleYes()">Yes — Void Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- MODAL B: Partial Payment Invoice             -->
+<!-- ════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalB">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h5><i class="fas fa-exclamation-triangle" style="color:#f59e0b;margin-right:8px;font-size:15px;"></i> Archive Proposal</h5>
+      <button class="modal-close" onclick="closeModal('modalB')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-message">
+        The proposal you are archiving has an associated invoice. Would you like to void the invoice as well?
+      </div>
+      <div class="invoice-info-box">
+        <div class="label">Associated Invoice</div>
+        <div class="value">Invoice #INV-2265789 &nbsp;<span style="font-size:12px;font-weight:500;color:#6b7280;">· Jeremy Harrison</span></div>
+        <div style="margin-top:6px;display:flex;gap:16px;">
+          <div><span style="font-size:11px;color:#9ca3af;font-weight:600;">AMOUNT</span><br><span style="font-size:13px;font-weight:600;color:#111827;">$3,850.00</span></div>
+          <div><span style="font-size:11px;color:#9ca3af;font-weight:600;">STATUS</span><br><span class="status-badge status-partial" style="font-size:11px;">Partial</span></div>
+          <div><span style="font-size:11px;color:#9ca3af;font-weight:600;">PAID</span><br><span style="font-size:13px;font-weight:600;color:#065f46;">$1,200.00</span></div>
+          <div><span style="font-size:11px;color:#9ca3af;font-weight:600;">BALANCE</span><br><span style="font-size:13px;font-weight:600;color:#dc2626;">$2,650.00</span></div>
+        </div>
+      </div>
+      <div class="partial-warning">
+        <i class="fas fa-exclamation-circle" style="flex-shrink:0;margin-top:1px;color:#d97706;"></i>
+        <div><strong>Partial Payment Recorded:</strong> This invoice has a partial payment of $1,200.00. Voiding will mark the invoice as void. Previously collected payments are not automatically refunded.</div>
+      </div>
+      <div class="jc-notice" id="jcNoticeB">
+        <i class="fas fa-calculator" style="flex-shrink:0;margin-top:1px;"></i>
+        <div><strong>Job Costing Add-On Active:</strong> Selecting "Yes" will also remove the associated Job Costing record for this invoice.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modalB')">Cancel</button>
+      <button class="btn-no" onclick="handleNo()">No — Archive Only</button>
+      <button class="btn-yes danger" onclick="handleYes()">Yes — Void Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROCESSING OVERLAY -->
+<div class="processing-overlay" id="processingOverlay">
+  <div class="processing-box">
+    <div class="spinner"></div>
+    <div class="processing-label" id="processingLabel">Voiding Invoice…</div>
+    <div class="processing-sub" id="processingSub">Please wait while we update your records.</div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  let currentScenario = 'A';
+  let jcEnabled = true;
+
+  const SCENARIO_DESCS = {
+    A: '<strong>Expected flow:</strong> Modal opens showing open invoice ($3,850 unpaid). "Yes" voids invoice and (if JC on) removes Job Costing record, then archives. "No" archives only.',
+    B: '<strong>Expected flow:</strong> Modal opens with partial payment warning ($1,200 of $3,850 paid). "Yes" button is red — voiding still records prior payment. "No" archives only.',
+    C: '<strong>Expected flow:</strong> No invoice attached — proposal archives directly with a spinner, no modal shown.'
+  };
+
+  function setScenario(s) {
+    currentScenario = s;
+    document.querySelectorAll('.scenario-btn').forEach((b, i) => {
+      b.classList.toggle('active', ['A','B','C'][i] === s);
+    });
+    // Update description
+    document.getElementById('scenarioDescText').innerHTML = SCENARIO_DESCS[s];
+    // Hide all success states
+    ['successVoid','successArchiveOnly','successNoInvoice'].forEach(id => {
+      document.getElementById(id).classList.remove('show');
+    });
+    // Reset target row
+    const row = document.getElementById('targetRow');
+    row.classList.remove('archived-row', 'fading-row');
+    row.innerHTML = buildTargetRow(s);
+    document.getElementById('proposalCount').textContent = '12';
+  }
+
+  function toggleJC() {
+    jcEnabled = !jcEnabled;
+    const pill = document.getElementById('jcPill');
+    const text = document.getElementById('jcPillText');
+    pill.classList.toggle('on', jcEnabled);
+    text.textContent = jcEnabled ? 'ON' : 'OFF';
+    // Show/hide JC notices in both modals
+    document.querySelectorAll('.jc-notice').forEach(el => {
+      el.classList.toggle('hidden', !jcEnabled);
+    });
+  }
+
+  function buildTargetRow(s) {
+    const statusBadge = s === 'C'
+      ? '<span class="status-badge status-accepted">Accepted</span>'
+      : '<span class="status-badge status-invoiced">Invoiced</span>';
+    return `
+      <td>${statusBadge}</td>
+      <td><span style="width:26px;height:26px;background:#10b981;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;margin-right:6px;">JH</span>Jeremy Harrison</td>
+      <td>2/12/2025</td>
+      <td>Proposal #2265789</td>
+      <td>#2265789</td>
+      <td>412 Sunrise Blvd, Cit...</td>
+      <td>$3,850.00</td>
+      <td>2/12/2025</td>
+      <td>
+        <div class="action-dropdown">
+          <button class="action-dots" onclick="toggleDropdown('dd2')"><i class="fas fa-ellipsis-h"></i></button>
+          <div class="dropdown-menu-custom" id="dd2">
+            <div class="dropdown-item-custom"><i class="fas fa-eye" style="color:#7C3AED;"></i> View Proposal</div>
+            <div class="dropdown-item-custom"><i class="fas fa-edit" style="color:#6b7280;"></i> Edit Proposal</div>
+            <div class="dropdown-item-custom"><i class="fas fa-copy" style="color:#6b7280;"></i> Duplicate</div>
+            <div class="dropdown-item-custom danger" onclick="handleArchiveClick()"><i class="fas fa-archive"></i> Archive Proposal</div>
+          </div>
+        </div>
+      </td>`;
+  }
+
+  function toggleDropdown(id) {
+    document.querySelectorAll('.dropdown-menu-custom').forEach(d => {
+      if (d.id !== id) d.classList.remove('show');
+    });
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('show');
+  }
+
+  function handleArchiveClick() {
+    document.querySelectorAll('.dropdown-menu-custom').forEach(d => d.classList.remove('show'));
+    if (currentScenario === 'A') {
+      openModal('modalA');
+    } else if (currentScenario === 'B') {
+      openModal('modalB');
+    } else if (currentScenario === 'C') {
+      runProcessing('Archiving Proposal…', 'No invoice found — archiving directly.', () => {
+        archiveRow('plain');
+        showToast('success', 'Proposal Archived', 'No associated invoice. Proposal #2265789 archived successfully.');
+        document.getElementById('successNoInvoice').classList.add('show');
+        document.getElementById('proposalCount').textContent = '11';
+      });
+    }
+  }
+
+  function triggerArchive() {
+    document.querySelectorAll('.dropdown-menu-custom').forEach(d => d.classList.remove('show'));
+    showToast('success', 'Proposal Archived', 'Proposal archived successfully.');
+  }
+
+  function openModal(id) {
+    document.getElementById(id).classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function handleYes() {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+    document.body.style.overflow = '';
+
+    // Build steps based on JC toggle
+    const steps = jcEnabled
+      ? [
+          { label: 'Voiding Invoice…', sub: 'Marking Invoice #INV-2265789 as void.' },
+          { label: 'Removing Job Costing Record…', sub: 'Cleaning up Job Costing entry for this invoice.' },
+          { label: 'Archiving Proposal…', sub: 'Finalizing proposal archive.' }
+        ]
+      : [
+          { label: 'Voiding Invoice…', sub: 'Marking Invoice #INV-2265789 as void.' },
+          { label: 'Archiving Proposal…', sub: 'Finalizing proposal archive.' }
+        ];
+
+    let step = 0;
+    const proc = document.getElementById('processingOverlay');
+    proc.classList.add('active');
+    document.getElementById('processingLabel').textContent = steps[0].label;
+    document.getElementById('processingSub').textContent = steps[0].sub;
+
+    const advance = () => {
+      step++;
+      if (step < steps.length) {
+        document.getElementById('processingLabel').textContent = steps[step].label;
+        document.getElementById('processingSub').textContent = steps[step].sub;
+        setTimeout(advance, 900);
+      } else {
+        proc.classList.remove('active');
+        archiveRow('void');
+        // Update success banner text to match JC state
+        if (jcEnabled) {
+          document.getElementById('successVoidTitle').textContent = 'Proposal Archived + Invoice Voided + Job Costing Record Removed';
+          document.getElementById('successVoidMsg').textContent = 'Proposal #2265789 has been archived. Invoice #INV-2265789 has been voided. The associated Job Costing record has been removed.';
+          showToast('success', 'Completed', 'Invoice voided, Job Costing record removed, proposal archived.');
+        } else {
+          document.getElementById('successVoidTitle').textContent = 'Proposal Archived + Invoice Voided';
+          document.getElementById('successVoidMsg').textContent = 'Proposal #2265789 has been archived. Invoice #INV-2265789 has been voided.';
+          showToast('success', 'Completed', 'Invoice voided, proposal archived.');
+        }
+        document.getElementById('successVoid').classList.add('show');
+        document.getElementById('proposalCount').textContent = '11';
+      }
+    };
+    setTimeout(advance, 900);
+  }
+
+  function handleNo() {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+    document.body.style.overflow = '';
+    runProcessing('Archiving Proposal…', 'Invoice will remain active.', () => {
+      archiveRow('plain');
+      showToast('info', 'Proposal Archived', 'Invoice #INV-2265789 remains active.');
+      document.getElementById('successArchiveOnly').classList.add('show');
+      document.getElementById('proposalCount').textContent = '11';
+    });
+  }
+
+  function runProcessing(label, sub, callback) {
+    const proc = document.getElementById('processingOverlay');
+    document.getElementById('processingLabel').textContent = label;
+    document.getElementById('processingSub').textContent = sub;
+    proc.classList.add('active');
+    setTimeout(() => {
+      proc.classList.remove('active');
+      if (callback) callback();
+    }, 1400);
+  }
+
+  function archiveRow(type) {
+    const row = document.getElementById('targetRow');
+    // Fade first
+    row.classList.add('fading-row');
+    setTimeout(() => {
+      row.classList.remove('fading-row');
+      row.classList.add('archived-row');
+      if (type === 'void') {
+        row.querySelector('td:first-child').innerHTML = '<span class="void-tag">Voided + Archived</span>';
+      } else {
+        row.querySelector('td:first-child').innerHTML = '<span style="display:inline-block;background:#f3f4f6;color:#6b7280;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;">Archived</span>';
+      }
+      const actionCell = row.querySelector('td:last-child');
+      if (actionCell) actionCell.innerHTML = '<span style="font-size:11px;color:#9ca3af;">—</span>';
+    }, 380);
+  }
+
+  function showToast(type, title, msg) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    const icon = type === 'success' ? 'fa-check' : 'fa-info';
+    toast.innerHTML = `
+      <div class="toast-icon ${type}"><i class="fas ${icon}"></i></div>
+      <div>
+        <div class="toast-title">${title}</div>
+        <div class="toast-msg">${msg}</div>
+      </div>`;
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 50);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => container.removeChild(toast), 300);
+    }, 4000);
+  }
+
+  // Close dropdowns on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.action-dropdown')) {
+      document.querySelectorAll('.dropdown-menu-custom').forEach(d => d.classList.remove('show'));
+    }
+  });
+
+  // Close modal on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+
+  // ESC closes modals
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+      document.body.style.overflow = '';
+    }
+  });
+
+  // Init description on load
+  document.getElementById('scenarioDescText').innerHTML = SCENARIO_DESCS['A'];
+</script>
+</body>
+</html>
