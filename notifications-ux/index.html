@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DripJobs — Company Settings: Notifications</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css">
+<style>
+  :root {
+    --purple: #7C3AED;
+    --purple-light: #EDE9FE;
+    --purple-mid: #6D28D9;
+    --teal: #0DCECE;
+    --teal-light: #E0FAFA;
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-400: #9CA3AF;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --success: #10B981;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+  }
+
+  * { font-family: 'Nunito', sans-serif; }
+
+  body {
+    background: var(--gray-50);
+    color: var(--gray-900);
+    font-size: 14px;
+  }
+
+  /* ── HEADER ── */
+  .dj-header {
+    background: #fff;
+    border-bottom: 1px solid var(--gray-200);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,.07);
+  }
+  .dj-logo {
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--purple);
+    letter-spacing: -0.5px;
+  }
+  .dj-logo span { color: var(--teal); }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .header-icon-btn {
+    width: 36px; height: 36px; border-radius: 8px;
+    border: 1px solid var(--gray-200);
+    background: #fff; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative; color: var(--gray-600); font-size: 15px;
+    transition: all .15s;
+  }
+  .header-icon-btn:hover { background: var(--gray-100); color: var(--purple); }
+  .notif-badge {
+    position: absolute; top: 4px; right: 4px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--danger); border: 1.5px solid #fff;
+  }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--purple); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; cursor: pointer;
+  }
+
+  /* ── PAGE LAYOUT ── */
+  .page-container { display: flex; min-height: calc(100vh - 56px); }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 220px; min-width: 220px;
+    background: #fff;
+    border-right: 1px solid var(--gray-200);
+    padding: 16px 0;
+  }
+  .sidebar-section-label {
+    padding: 6px 16px;
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .8px;
+    color: var(--gray-400);
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 16px; cursor: pointer;
+    color: var(--gray-600); font-weight: 600; font-size: 13.5px;
+    border-left: 3px solid transparent;
+    transition: all .12s;
+  }
+  .sidebar-item:hover { background: var(--gray-50); color: var(--purple); }
+  .sidebar-item.active {
+    color: var(--purple); background: var(--purple-light);
+    border-left-color: var(--purple);
+  }
+  .sidebar-item i { width: 16px; text-align: center; font-size: 13px; }
+
+  /* ── MAIN CONTENT ── */
+  .main-content { flex: 1; padding: 28px 32px 48px; max-width: 900px; }
+
+  .page-title {
+    font-size: 22px; font-weight: 800;
+    color: var(--gray-900); margin-bottom: 4px;
+  }
+  .page-subtitle { color: var(--gray-400); font-size: 13px; margin-bottom: 24px; }
+
+  /* ── SETTINGS TABS ── */
+  .settings-tabs {
+    display: flex; gap: 0;
+    border-bottom: 2px solid var(--gray-200);
+    margin-bottom: 28px;
+    overflow-x: auto;
+  }
+  .settings-tabs::-webkit-scrollbar { height: 0; }
+  .tab-item {
+    padding: 10px 16px;
+    font-size: 13px; font-weight: 700;
+    color: var(--gray-400); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px; white-space: nowrap;
+    transition: all .15s;
+  }
+  .tab-item:hover { color: var(--gray-700); }
+  .tab-item.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+  /* ── CARD ── */
+  .settings-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card-header-row {
+    display: flex; align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .card-title {
+    font-size: 15px; font-weight: 800;
+    color: var(--gray-900); margin: 0;
+  }
+  .card-subtitle {
+    font-size: 12.5px; color: var(--gray-400);
+    margin-top: 3px; margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .card-subtitle a {
+    color: var(--purple); text-decoration: underline; cursor: pointer;
+  }
+
+  /* ── SCOPE BANNER ── */
+  .scope-banner {
+    background: var(--purple-light);
+    border: 1px solid #C4B5FD;
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 20px;
+    font-size: 12.5px; color: #5B21B6; line-height: 1.5;
+  }
+  .scope-banner i { margin-top: 1px; flex-shrink: 0; }
+
+  /* ── BULK ROW ── */
+  .bulk-row {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-100);
+    margin-bottom: 8px;
+  }
+  .bulk-label { font-size: 12px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .6px; }
+  .bulk-actions { display: flex; gap: 12px; }
+  .bulk-btn {
+    font-size: 12px; font-weight: 700;
+    color: var(--purple); background: none; border: none;
+    cursor: pointer; padding: 0; text-decoration: underline;
+    transition: color .12s;
+  }
+  .bulk-btn:hover { color: var(--purple-mid); }
+
+  /* ── TOGGLE ROW ── */
+  .toggle-row {
+    display: flex; align-items: center;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--gray-100);
+    gap: 12px;
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-label-group { flex: 1; }
+  .toggle-label-text {
+    font-size: 14px; font-weight: 700;
+    color: var(--gray-900); display: flex; align-items: center; gap: 6px;
+  }
+  .toggle-label-sub {
+    font-size: 12px; color: var(--gray-400);
+    margin-top: 1px; line-height: 1.4;
+  }
+  .new-badge {
+    font-size: 9px; font-weight: 800;
+    background: var(--teal); color: #fff;
+    padding: 1px 6px; border-radius: 999px;
+    text-transform: uppercase; letter-spacing: .4px;
+  }
+
+  /* tooltip icon */
+  .info-icon {
+    color: var(--gray-400); font-size: 12px; cursor: help;
+    position: relative; display: inline-block;
+  }
+  .info-icon:hover { color: var(--purple); }
+  .tooltip-bubble {
+    display: none;
+    position: absolute; bottom: 100%; left: 0; transform: translateX(-12px);
+    background: var(--gray-900); color: #fff;
+    font-size: 12px; font-weight: 400;
+    border-radius: 8px; padding: 10px 14px;
+    width: 320px;
+    z-index: 200; line-height: 1.6;
+    box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    margin-bottom: 8px;
+    pointer-events: none;
+  }
+  .tooltip-bubble::after {
+    content: ''; position: absolute; top: 100%; left: 18px;
+    border: 5px solid transparent; border-top-color: var(--gray-900);
+  }
+  .tooltip-bubble::after {
+    content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border: 5px solid transparent; border-top-color: var(--gray-900);
+  }
+  .info-icon:hover .tooltip-bubble { display: block; }
+
+  /* TOGGLE SWITCH */
+  .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #D1D5DB; border-radius: 999px;
+    transition: .2s;
+  }
+  .toggle-slider:before {
+    position: absolute; content: '';
+    height: 18px; width: 18px;
+    left: 3px; bottom: 3px;
+    background: #fff; border-radius: 50%;
+    transition: .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .toggle-switch input:checked + .toggle-slider { background: var(--purple); }
+  .toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+  .toggle-state-label {
+    font-size: 11px; font-weight: 700; width: 24px;
+    color: var(--gray-400); flex-shrink: 0;
+  }
+  .toggle-switch input:checked ~ .toggle-state-label { color: var(--purple); }
+
+  /* ── FORM ACTIONS ── */
+  .form-actions {
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 24px;
+  }
+  .btn-save {
+    background: var(--purple); color: #fff;
+    border: none; border-radius: 8px;
+    padding: 10px 22px; font-size: 13.5px; font-weight: 700;
+    cursor: pointer; transition: background .15s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .btn-save:hover { background: var(--purple-mid); }
+  .btn-cancel {
+    background: #fff; color: var(--gray-600);
+    border: 1px solid var(--gray-200); border-radius: 8px;
+    padding: 10px 22px; font-size: 13.5px; font-weight: 700;
+    cursor: pointer; transition: all .15s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .btn-cancel:hover { background: var(--gray-100); }
+
+  /* ── ABOUT CARD ── */
+  .about-card {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .about-card-title { font-weight: 800; font-size: 13.5px; color: var(--gray-700); margin-bottom: 10px; }
+  .about-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 12.5px; color: var(--gray-600); line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .about-row i { margin-top: 2px; color: var(--purple); width: 14px; flex-shrink: 0; }
+
+  /* ── TOAST ── */
+  #toast-container {
+    position: fixed; bottom: 24px; right: 24px;
+    z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+  }
+  .toast-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 16px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 700;
+    min-width: 260px; max-width: 340px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.14);
+    animation: slideUp .25s ease;
+  }
+  .toast-success { background: #fff; border-left: 4px solid var(--success); }
+  .toast-error   { background: #fff; border-left: 4px solid var(--danger); }
+  .toast-item i { font-size: 16px; }
+  .toast-success i { color: var(--success); }
+  .toast-error   i { color: var(--danger); }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 1050; display: flex;
+    align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: #fff; border-radius: 14px;
+    width: 100%; max-width: 480px; max-height: 90vh;
+    overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    transform: translateY(16px); transition: transform .2s;
+  }
+  .modal-overlay.open .modal-box { transform: translateY(0); }
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .modal-title { font-size: 16px; font-weight: 800; margin: 0; color: var(--gray-900); }
+  .modal-scope-label {
+    font-size: 12px; color: var(--gray-400); margin-top: 3px;
+    line-height: 1.4;
+  }
+  .modal-scope-label strong { color: var(--purple); }
+  .modal-close {
+    background: none; border: none; cursor: pointer;
+    color: var(--gray-400); font-size: 18px; padding: 0; margin-left: 12px;
+  }
+  .modal-close:hover { color: var(--gray-700); }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer {
+    padding: 16px 24px; border-top: 1px solid var(--gray-200);
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+  .btn-sm-save {
+    background: var(--purple); color: #fff;
+    border: none; border-radius: 7px;
+    padding: 9px 20px; font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: 'Nunito', sans-serif;
+    transition: background .15s;
+  }
+  .btn-sm-save:hover { background: var(--purple-mid); }
+  .btn-sm-cancel {
+    background: #fff; color: var(--gray-600);
+    border: 1px solid var(--gray-200); border-radius: 7px;
+    padding: 9px 20px; font-size: 13px; font-weight: 700;
+    cursor: pointer; font-family: 'Nunito', sans-serif;
+    transition: all .15s;
+  }
+  .btn-sm-cancel:hover { background: var(--gray-100); }
+
+  /* dirty-state indicator */
+  .dirty-indicator {
+    display: none; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--warning); font-weight: 700;
+  }
+  .dirty-indicator.visible { display: flex; }
+
+  /* notification bell dropdown preview */
+  .bell-dropdown {
+    position: absolute; top: 52px; right: 16px;
+    width: 340px;
+    background: #fff; border: 1px solid var(--gray-200);
+    border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,.12);
+    z-index: 300; display: none;
+  }
+  .bell-dropdown.open { display: block; }
+  .bell-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .bell-header-title { font-size: 14px; font-weight: 800; }
+  .bell-actions { display: flex; gap: 8px; }
+  .bell-action-btn {
+    background: none; border: none; font-size: 11.5px;
+    font-weight: 700; color: var(--purple); cursor: pointer;
+    font-family: 'Nunito', sans-serif; padding: 0;
+  }
+  .bell-action-btn:hover { text-decoration: underline; }
+  .notif-item {
+    padding: 12px 16px; border-bottom: 1px solid var(--gray-100);
+    display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
+  }
+  .notif-item:hover { background: var(--gray-50); }
+  .notif-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+  .notif-icon.purple { background: var(--purple-light); color: var(--purple); }
+  .notif-icon.teal   { background: var(--teal-light); color: var(--teal); }
+  .notif-icon.green  { background: #D1FAE5; color: var(--success); }
+  .notif-text { font-size: 12.5px; color: var(--gray-700); line-height: 1.4; }
+  .notif-time { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+  .bell-footer {
+    padding: 12px 16px; text-align: center;
+  }
+  .bell-footer a { font-size: 12.5px; font-weight: 700; color: var(--purple); cursor: pointer; }
+  .bell-manage-btn {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 700; color: var(--gray-400);
+    cursor: pointer; border: none; background: none;
+    font-family: 'Nunito', sans-serif; padding: 0 16px 12px;
+  }
+  .bell-manage-btn:hover { color: var(--purple); }
+
+  /* responsive */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main-content { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="dj-header">
+  <div class="dj-logo">drip<span>jobs</span></div>
+  <div class="header-right">
+    <div class="header-icon-btn" id="bellBtn" onclick="toggleBell()">
+      <i class="fas fa-bell"></i>
+      <span class="notif-badge"></span>
+    </div>
+    <!-- Bell Dropdown -->
+    <div class="bell-dropdown" id="bellDropdown">
+      <div class="bell-header">
+        <span class="bell-header-title">Notifications</span>
+        <div class="bell-actions">
+          <button class="bell-action-btn" onclick="markAllRead()">Mark all read</button>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon purple"><i class="fas fa-user-plus"></i></div>
+        <div>
+          <div class="notif-text"><strong>New lead received</strong> — Sarah Mitchell submitted your booking form.</div>
+          <div class="notif-time">2 minutes ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon green"><i class="fas fa-check-circle"></i></div>
+        <div>
+          <div class="notif-text"><strong>Proposal #2671136 accepted</strong> by Aaron Blankfields.</div>
+          <div class="notif-time">14 minutes ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon teal"><i class="fas fa-eye"></i></div>
+        <div>
+          <div class="notif-text">Proposal #2671140 was viewed by customer (James Torres).</div>
+          <div class="notif-time">1 hour ago</div>
+        </div>
+      </div>
+      <button class="bell-manage-btn" onclick="openManageModal()">
+        <i class="fas fa-cog"></i> Manage Notification Preferences
+      </button>
+      <div class="bell-footer"><a>View all notifications</a></div>
+    </div>
+
+    <div class="header-icon-btn"><i class="fas fa-search"></i></div>
+    <div class="avatar">JH</div>
+  </div>
+</div>
+
+<!-- PAGE -->
+<div class="page-container">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section-label">Main</div>
+    <div class="sidebar-item"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
+    <div class="sidebar-item"><i class="fas fa-users"></i> Contacts</div>
+    <div class="sidebar-item"><i class="fas fa-briefcase"></i> Jobs</div>
+    <div class="sidebar-item"><i class="fas fa-calendar-alt"></i> Calendar</div>
+    <div class="sidebar-item"><i class="fas fa-file-invoice-dollar"></i> Proposals</div>
+    <div class="sidebar-section-label" style="margin-top:12px;">Admin</div>
+    <div class="sidebar-item active"><i class="fas fa-cog"></i> Settings</div>
+    <div class="sidebar-item"><i class="fas fa-chart-bar"></i> Reports</div>
+    <div class="sidebar-item"><i class="fas fa-puzzle-piece"></i> Add-Ons</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="page-title">Company Settings</div>
+    <div class="page-subtitle">Manage your account, notifications, billing, and integrations.</div>
+
+    <!-- TABS -->
+    <div class="settings-tabs">
+      <div class="tab-item">Company Info</div>
+      <div class="tab-item">Email</div>
+      <div class="tab-item active">Notifications</div>
+      <div class="tab-item">Payments</div>
+      <div class="tab-item">Integrations</div>
+      <div class="tab-item">Users</div>
+      <div class="tab-item">Templates</div>
+      <div class="tab-item">Billing</div>
+    </div>
+
+    <!-- NOTIFICATION SETTINGS CARD -->
+    <div class="settings-card">
+      <div class="card-header-row">
+        <div>
+          <div class="card-title">Enabled In-App Notifications</div>
+        </div>
+      </div>
+      <div class="card-subtitle">
+        These control which events appear in your notification center (<i class="fas fa-bell" style="font-size:11px;color:var(--purple);"></i>). 
+        To manage email alerts, visit <a onclick="switchTab('Email')">Email Settings</a>.
+      </div>
+
+      <!-- SCOPE BANNER -->
+      <div class="scope-banner">
+        <i class="fas fa-building"></i>
+        <div><strong>Company Defaults</strong> — these settings apply to all users in your organization unless individually overridden. Each user can customize their own preferences via the <a style="color:#5B21B6;text-decoration:underline;cursor:pointer;" onclick="openManageModal()">Manage Notification Preferences</a> panel.</div>
+      </div>
+
+      <!-- BULK ACTIONS -->
+      <div class="bulk-row">
+        <span class="bulk-label">Notifications</span>
+        <div class="bulk-actions">
+          <button class="bulk-btn" onclick="setAll(true)">Enable All</button>
+          <button class="bulk-btn" onclick="setAll(false)">Disable All</button>
+        </div>
+      </div>
+
+      <!-- TOGGLE LIST -->
+      <div id="toggleList">
+
+        <!-- New Lead -->
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="tog_lead" checked onchange="markDirty()">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">
+              New Lead
+              <span class="new-badge">New</span>
+              <span class="info-icon">
+                <i class="fas fa-info-circle"></i>
+                <div class="tooltip-bubble">Triggered when a potential customer submits your booking form, is captured via the Contacts system, or is added by a team member as a new lead.</div>
+              </span>
+            </div>
+            <div class="toggle-label-sub">A new lead or contact has entered your pipeline.</div>
+          </div>
+        </div>
+
+        <!-- New Appointment -->
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="tog_appt" checked onchange="markDirty()">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">
+              New Appointment
+              <span class="info-icon">
+                <i class="fas fa-info-circle"></i>
+                <div class="tooltip-bubble">Triggered when a customer books through your booking form or when a team member schedules a new appointment in the calendar.</div>
+              </span>
+            </div>
+            <div class="toggle-label-sub">A new appointment has been booked or scheduled.</div>
+          </div>
+        </div>
+
+        <!-- Proposal Accepted -->
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="tog_prop_accepted" checked onchange="markDirty()">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">
+              Proposal Accepted
+              <span class="info-icon">
+                <i class="fas fa-info-circle"></i>
+                <div class="tooltip-bubble">Triggered when a customer digitally signs and accepts a proposal you've sent. This is a high-value event — ensure this stays enabled.</div>
+              </span>
+            </div>
+            <div class="toggle-label-sub">A customer accepted a proposal you sent them.</div>
+          </div>
+        </div>
+
+        <!-- Proposal Rejected -->
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="tog_prop_rejected" checked onchange="markDirty()">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">
+              Proposal Rejected
+              <span class="info-icon">
+                <i class="fas fa-info-circle"></i>
+                <div class="tooltip-bubble">Triggered when a customer explicitly declines a proposal by clicking the "Reject" option on the customer portal.</div>
+              </span>
+            </div>
+            <div class="toggle-label-sub">A customer rejected a proposal you sent them.</div>
+          </div>
+        </div>
+
+        <!-- Proposal Viewed -->
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="tog_prop_viewed" checked onchange="markDirty()">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">
+              Proposal Viewed
+              <span class="info-icon">
+                <i class="fas fa-info-circle"></i>
+                <div class="tooltip-bubble">Triggered when a customer opens a proposal link. By default, this fires on first view only. You can adjust frequency below.</div>
+              </span>
+            </div>
+            <div class="toggle-label-sub">A customer opened a proposal link.</div>
+            <!-- Sub-option: once only -->
+            <div id="prop_viewed_sub" style="margin-top:8px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gray-600);">
+              <input type="checkbox" id="tog_prop_viewed_once" checked onchange="markDirty()" style="accent-color:var(--purple);width:14px;height:14px;cursor:pointer;">
+              <label for="tog_prop_viewed_once" style="margin:0;cursor:pointer;font-weight:600;">Notify on first view only</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invoice Viewed -->
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="tog_inv_viewed" checked onchange="markDirty()">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">
+              Invoice Viewed
+              <span class="info-icon">
+                <i class="fas fa-info-circle"></i>
+                <div class="tooltip-bubble">Triggered when a customer opens an invoice link. By default, this fires on first view only to reduce notification noise.</div>
+              </span>
+            </div>
+            <div class="toggle-label-sub">A customer opened an invoice link.</div>
+            <div id="inv_viewed_sub" style="margin-top:8px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--gray-600);">
+              <input type="checkbox" id="tog_inv_viewed_once" checked onchange="markDirty()" style="accent-color:var(--purple);width:14px;height:14px;cursor:pointer;">
+              <label for="tog_inv_viewed_once" style="margin:0;cursor:pointer;font-weight:600;">Notify on first view only</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invoice Paid -->
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="tog_inv_paid" checked onchange="markDirty()">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">
+              Invoice Paid
+              <span class="info-icon">
+                <i class="fas fa-info-circle"></i>
+                <div class="tooltip-bubble">Triggered when a customer completes a payment on an invoice, either online via Stripe or marked as paid manually by a team member.</div>
+              </span>
+            </div>
+            <div class="toggle-label-sub">A customer paid an invoice — online or manually marked as paid.</div>
+          </div>
+        </div>
+
+        <!-- Chat Message Received -->
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" id="tog_chat" checked onchange="markDirty()">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">
+              Chat Message Received
+              <span class="info-icon">
+                <i class="fas fa-info-circle"></i>
+                <div class="tooltip-bubble">Triggered when a customer or team member sends a new message in the DripJobs chat or messaging system.</div>
+              </span>
+            </div>
+            <div class="toggle-label-sub">A new message was received in the DripJobs chat.</div>
+          </div>
+        </div>
+
+      </div><!-- /toggleList -->
+
+      <!-- FORM ACTIONS -->
+      <div class="form-actions">
+        <button class="btn-save" onclick="saveSettings()">Save Changes</button>
+        <button class="btn-cancel" onclick="cancelChanges()">Cancel</button>
+        <div class="dirty-indicator" id="dirtyIndicator">
+          <i class="fas fa-circle" style="font-size:8px;"></i> Unsaved changes
+        </div>
+      </div>
+    </div>
+
+    <!-- ABOUT CARD -->
+    <div class="about-card">
+      <div class="about-card-title"><i class="fas fa-info-circle" style="color:var(--purple);margin-right:6px;"></i>About Notifications</div>
+      <div class="about-row"><i class="fas fa-bell"></i> <span>These notifications appear in the <strong>notification center</strong> (the 🔔 bell in the top right). They are in-app only and do not send emails or SMS.</span></div>
+      <div class="about-row"><i class="fas fa-user-shield"></i> <span>The settings on this page are <strong>company-wide defaults</strong>. Each user can override them in their personal preferences via the bell → gear icon.</span></div>
+      <div class="about-row"><i class="fas fa-envelope"></i> <span>To set up <strong>email notifications</strong>, visit <a style="color:var(--purple);cursor:pointer;" onclick="switchTab('Email')">Email Settings</a>.</span></div>
+      <div class="about-row"><i class="fas fa-question-circle"></i> <span>Need help? Visit <a style="color:var(--purple);cursor:pointer;" target="_blank">intercom.help/dripjobs</a> or contact support.</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: Manage Notification Preferences (Per-User) -->
+<div class="modal-overlay" id="manageModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Manage Notification Preferences</div>
+        <div class="modal-scope-label">
+          <strong>Your personal preferences</strong> — overrides company defaults for your account only.
+          <br>Company defaults are managed in <a style="color:var(--purple);cursor:pointer;" onclick="closeManageModal()">Settings → Notifications</a>.
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeManageModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Scope banner -->
+      <div class="scope-banner" style="margin-bottom:16px;">
+        <i class="fas fa-user"></i>
+        <div>Changes here apply to <strong>your account only</strong> (Jeremy Harrison) and will override the company defaults set by your administrator.</div>
+      </div>
+
+      <!-- Bulk -->
+      <div class="bulk-row" style="padding-bottom:10px;margin-bottom:4px;">
+        <span class="bulk-label">Notifications</span>
+        <div class="bulk-actions">
+          <button class="bulk-btn" onclick="setAllModal(true)">Enable All</button>
+          <button class="bulk-btn" onclick="setAllModal(false)">Disable All</button>
+        </div>
+      </div>
+
+      <!-- Modal toggles -->
+      <div id="modalToggleList">
+        <div class="toggle-row">
+          <label class="toggle-switch"><input type="checkbox" id="m_lead" checked><span class="toggle-slider"></span></label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">New Lead <span class="new-badge">New</span></div>
+            <div class="toggle-label-sub">A new lead entered your pipeline.</div>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-switch"><input type="checkbox" id="m_appt" checked><span class="toggle-slider"></span></label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">New Appointment</div>
+            <div class="toggle-label-sub">A new appointment was booked or scheduled.</div>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-switch"><input type="checkbox" id="m_prop_accepted" checked><span class="toggle-slider"></span></label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">Proposal Accepted</div>
+            <div class="toggle-label-sub">A customer accepted a proposal.</div>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-switch"><input type="checkbox" id="m_prop_rejected" checked><span class="toggle-slider"></span></label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">Proposal Rejected</div>
+            <div class="toggle-label-sub">A customer rejected a proposal.</div>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-switch"><input type="checkbox" id="m_prop_viewed" checked><span class="toggle-slider"></span></label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">Proposal Viewed</div>
+            <div class="toggle-label-sub">A customer opened a proposal link.</div>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-switch"><input type="checkbox" id="m_inv_viewed" checked><span class="toggle-slider"></span></label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">Invoice Viewed</div>
+            <div class="toggle-label-sub">A customer opened an invoice link.</div>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-switch"><input type="checkbox" id="m_inv_paid" checked><span class="toggle-slider"></span></label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">Invoice Paid</div>
+            <div class="toggle-label-sub">A customer paid an invoice.</div>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-switch"><input type="checkbox" id="m_chat" checked><span class="toggle-slider"></span></label>
+          <div class="toggle-label-group">
+            <div class="toggle-label-text">Chat Message Received</div>
+            <div class="toggle-label-sub">A new chat message was received.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm-cancel" onclick="closeManageModal()">Cancel</button>
+      <button class="btn-sm-save" onclick="saveModal()">Save Preferences</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<script>
+  // ── STATE ──
+  let isDirty = false;
+  let savedState = {};
+
+  const toggleIds = ['tog_lead','tog_appt','tog_prop_accepted','tog_prop_rejected',
+                     'tog_prop_viewed','tog_prop_viewed_once','tog_inv_viewed',
+                     'tog_inv_viewed_once','tog_inv_paid','tog_chat'];
+
+  function captureState() {
+    const s = {};
+    toggleIds.forEach(id => { s[id] = document.getElementById(id).checked; });
+    return s;
+  }
+
+  function restoreState(s) {
+    toggleIds.forEach(id => { document.getElementById(id).checked = s[id]; });
+  }
+
+  // Capture initial saved state
+  window.addEventListener('DOMContentLoaded', () => {
+    savedState = captureState();
+  });
+
+  function markDirty() {
+    isDirty = true;
+    document.getElementById('dirtyIndicator').classList.add('visible');
+  }
+
+  function clearDirty() {
+    isDirty = false;
+    document.getElementById('dirtyIndicator').classList.remove('visible');
+  }
+
+  // ── BULK TOGGLES ──
+  function setAll(state) {
+    toggleIds.forEach(id => {
+      document.getElementById(id).checked = state;
+    });
+    markDirty();
+  }
+
+  function setAllModal(state) {
+    ['m_lead','m_appt','m_prop_accepted','m_prop_rejected',
+     'm_prop_viewed','m_inv_viewed','m_inv_paid','m_chat'].forEach(id => {
+      document.getElementById(id).checked = state;
+    });
+  }
+
+  // ── SAVE ──
+  function saveSettings() {
+    // Simulate async save
+    const btn = document.querySelector('.btn-save');
+    btn.textContent = 'Saving…'; btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = 'Save Changes'; btn.disabled = false;
+      savedState = captureState();
+      clearDirty();
+      showToast('success', 'Notification settings saved successfully.');
+    }, 600);
+  }
+
+  // ── CANCEL ──
+  function cancelChanges() {
+    if (isDirty) {
+      if (confirm('You have unsaved changes. Discard them?')) {
+        restoreState(savedState);
+        clearDirty();
+      }
+    }
+  }
+
+  // ── TOAST ──
+  function showToast(type, message) {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = `toast-item toast-${type}`;
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    el.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+    container.appendChild(el);
+    setTimeout(() => {
+      el.style.opacity = '0'; el.style.transition = 'opacity .3s';
+      setTimeout(() => el.remove(), 300);
+    }, 3500);
+  }
+
+  // ── BELL ──
+  function toggleBell() {
+    const dd = document.getElementById('bellDropdown');
+    dd.classList.toggle('open');
+    document.getElementById('bellBtn').querySelector('.notif-badge').style.display = 'none';
+  }
+
+  function markAllRead() {
+    showToast('success', 'All notifications marked as read.');
+    document.getElementById('bellDropdown').classList.remove('open');
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#bellBtn') && !e.target.closest('#bellDropdown')) {
+      document.getElementById('bellDropdown').classList.remove('open');
+    }
+  });
+
+  // ── MODAL ──
+  function openManageModal() {
+    document.getElementById('bellDropdown').classList.remove('open');
+    document.getElementById('manageModal').classList.add('open');
+  }
+
+  function closeManageModal() {
+    document.getElementById('manageModal').classList.remove('open');
+  }
+
+  function saveModal() {
+    const btn = document.querySelector('.btn-sm-save');
+    btn.textContent = 'Saving…'; btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = 'Save Preferences'; btn.disabled = false;
+      closeManageModal();
+      showToast('success', 'Your notification preferences have been saved.');
+    }, 500);
+  }
+
+  document.getElementById('manageModal').addEventListener('click', function(e) {
+    if (e.target === this) closeManageModal();
+  });
+
+  // ── TAB SWITCH (cosmetic) ──
+  function switchTab(name) {
+    document.querySelectorAll('.tab-item').forEach(t => {
+      t.classList.toggle('active', t.textContent.trim() === name);
+    });
+  }
+</script>
+</body>
+</html>
