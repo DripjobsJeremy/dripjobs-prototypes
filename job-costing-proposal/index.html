@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proposal #2906315 | DripJobs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --dj: #6366f1;
+      --dj-dark: #4f46e5;
+      --dj-soft: #eef2ff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --bg: #f3f4f6;
+      --green: #16a34a;
+      --red: #dc2626;
+      --orange: #f97316;
+      --amber: #f59e0b;
+    }
+    body { background: var(--bg); color: var(--ink); font-size: .925rem; }
+    .page-wrap { max-width: 1100px; }
+    @media (max-width: 575px) {
+      .container { padding-left: .75rem; padding-right: .75rem; }
+      .tab-panel { padding: 1rem .875rem; }
+      .jc-card-body { padding: .875rem 1rem; }
+      .jc-card-header { padding: .75rem 1rem; }
+      .py-4 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+    }
+
+    /* ── Proposal card ── */
+    .proposal-card {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      border-left: 4px solid var(--orange);
+      overflow: hidden;
+    }
+    .proposal-card-body { padding: 1.25rem 1.5rem; }
+    @media (max-width: 575px) {
+      .proposal-card-body { padding: 1rem; }
+      .proposal-header-row {
+        flex-direction: column; gap: .75rem;
+      }
+      .proposal-header-row > div:last-child {
+        text-align: left !important;
+      }
+      .proposal-header-row .justify-content-end {
+        justify-content: flex-start !important;
+      }
+      .proposal-number { font-size: 1.1rem; }
+    }
+    .client-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: #6366f1; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1rem; flex-shrink: 0;
+    }
+    .proposal-number { font-size: 1.35rem; font-weight: 800; }
+    .badge-pending {
+      display: inline-flex; align-items: center; gap: .35rem;
+      border: 1.5px solid var(--amber); color: var(--amber);
+      border-radius: 20px; padding: .2rem .75rem; font-weight: 600; font-size: .8rem;
+    }
+    .add-display { color: var(--dj); font-size: .8rem; cursor: pointer; }
+    .action-btn {
+      border: 1px solid var(--border); background: #fff; border-radius: 8px;
+      padding: .35rem .85rem; font-size: .85rem; font-weight: 500; color: var(--ink);
+      cursor: pointer; display: inline-flex; align-items: center; gap: .3rem;
+      min-height: 36px;
+    }
+    .action-btn:hover { background: var(--bg); }
+    .meta-bar {
+      background: #fafafa; border-top: 1px solid var(--border);
+      padding: .6rem 1.5rem; font-size: .8rem; color: var(--muted);
+      display: flex; gap: 2rem; flex-wrap: wrap;
+    }
+    @media (max-width: 575px) {
+      .meta-bar {
+        padding: .625rem 1rem; gap: .5rem .75rem;
+        display: grid; grid-template-columns: 1fr 1fr;
+      }
+    }
+    .meta-bar strong { color: var(--ink); }
+    .financing-badge {
+      background: #f3f4f6; border: 1px solid var(--border);
+      border-radius: 20px; padding: .15rem .65rem; font-size: .75rem; font-weight: 600;
+    }
+
+    /* ── Section cards (Line Items, Areas) ── */
+    .section-card {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+      flex-wrap: wrap; gap: .625rem;
+    }
+    .section-btn-group {
+      display: flex; gap: .5rem; align-items: center; flex-wrap: wrap;
+    }
+    @media (max-width: 575px) {
+      .section-header { padding: .875rem 1rem; align-items: flex-start; }
+      .section-btn-group { gap: .4rem; }
+      .btn-add-opt, .btn-add-item { font-size: .8rem; padding: .3rem .75rem; min-height: 36px; }
+    }
+    .section-header h2 { font-size: 1.1rem; font-weight: 700; margin: 0; }
+    .btn-add-item {
+      background: var(--dj); color: #fff; border: none; border-radius: 8px;
+      padding: .35rem .9rem; font-size: .85rem; font-weight: 600; cursor: pointer;
+    }
+    .btn-add-item:hover { background: var(--dj-dark); }
+    .btn-add-opt {
+      border: 1px solid var(--border); background: #fff; border-radius: 8px;
+      padding: .35rem .9rem; font-size: .85rem; font-weight: 500; cursor: pointer;
+    }
+    .proposal-table { width: 100%; border-collapse: collapse; }
+    .proposal-table thead th {
+      font-size: .72rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .04em; color: var(--muted);
+      padding: .6rem 1.5rem; border-bottom: 1px solid var(--border); background: #fafafa;
+    }
+    .proposal-table tbody td { padding: .75rem 1.5rem; border-bottom: 1px solid #f3f4f6; }
+    @media (max-width: 575px) {
+      .proposal-table thead th { padding: .5rem .875rem; }
+      .proposal-table tbody td { padding: .75rem .875rem; }
+      .tfoot-row td { padding: .75rem .875rem; }
+    }
+    .proposal-table tbody tr:last-child td { border-bottom: none; }
+    .proposal-table tbody tr:hover td { background: #fafafa; }
+    .item-name { color: var(--dj); font-weight: 500; cursor: pointer; }
+    .item-name:hover { text-decoration: underline; }
+    .drag-handle { color: #d1d5db; margin-right: .5rem; cursor: grab; }
+    .icon-btn { color: #9ca3af; cursor: pointer; font-size: .85rem; }
+    .icon-btn:hover { color: var(--ink); }
+    .tfoot-row td {
+      padding: .75rem 1.5rem; font-weight: 700;
+      border-top: 2px solid var(--border); background: #fafafa;
+    }
+    .total-highlight { color: var(--dj); font-size: 1rem; }
+    .num { font-variant-numeric: tabular-nums; text-align: right; }
+
+    /* ── Tab strip ── */
+    .tab-strip-wrap {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    .tab-strip-outer {
+      position: relative; border-bottom: 1px solid var(--border);
+    }
+    .tab-strip {
+      display: flex; overflow-x: auto; gap: .35rem;
+      padding: .625rem 2.5rem;
+      scrollbar-width: none; align-items: center;
+    }
+    .tab-strip::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      border: 1.5px solid var(--border); background: #fff;
+      border-radius: 20px; padding: .35rem 1rem;
+      font-size: .85rem; font-weight: 500; color: var(--muted);
+      white-space: nowrap; cursor: pointer; transition: .15s;
+      line-height: 1.4; flex-shrink: 0;
+    }
+    .tab-btn:hover { border-color: var(--dj); color: var(--dj); }
+    .tab-btn.active {
+      background: var(--dj); color: #fff;
+      border-color: var(--dj); font-weight: 600;
+    }
+    /* Scroll arrow buttons */
+    .tab-scroll-btn {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #fff; border: 1.5px solid var(--border);
+      color: var(--ink); cursor: pointer; z-index: 2;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; box-shadow: 0 1px 4px rgba(0,0,0,.1);
+      transition: .15s; opacity: 0; pointer-events: none;
+    }
+    .tab-scroll-btn:hover { border-color: var(--dj); color: var(--dj); }
+    .tab-scroll-btn.visible { opacity: 1; pointer-events: auto; }
+    .tab-scroll-btn.scroll-left  { left:  .4rem; }
+    .tab-scroll-btn.scroll-right { right: .4rem; }
+    /* Fade edge gradients to hint overflow */
+    .tab-strip-outer::before,
+    .tab-strip-outer::after {
+      content: ''; position: absolute; top: 0; bottom: 1px;
+      width: 2.5rem; pointer-events: none; z-index: 1; transition: opacity .2s;
+    }
+    .tab-strip-outer::before { left: 0; background: linear-gradient(to right, #fff 40%, transparent); opacity: 0; }
+    .tab-strip-outer::after  { right: 0; background: linear-gradient(to left,  #fff 40%, transparent); opacity: 0; }
+    .tab-strip-outer.fade-left::before  { opacity: 1; }
+    .tab-strip-outer.fade-right::after  { opacity: 1; }
+    .tab-panel { display: none; padding: 1.5rem; }
+    .tab-panel.active { display: block; }
+
+    /* ── Reports tab ── */
+    .report-card { background: #f9fafb; border: 1px solid var(--border); border-radius: 10px; }
+    .report-stat-box {
+      background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: .875rem 1rem;
+    }
+    .report-stat-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .report-stat-value { font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .report-stat-value.profit { color: var(--green); }
+    .report-margin { background: #f0fdf4; color: var(--green); border: 1px solid #bbf7d0; border-radius: 20px; padding: .25rem .75rem; font-size: .8rem; font-weight: 700; }
+    .report-margin.amber { background: #fffbeb; color: #92400e; border-color: #fcd34d; }
+    .report-table { width: 100%; font-size: .875rem; border-collapse: collapse; }
+    .report-table th { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: .5rem .75rem; border-bottom: 1px solid var(--border); }
+    .report-table td { padding: .6rem .75rem; border-bottom: 1px solid #f3f4f6; }
+    .report-table tfoot td { font-weight: 700; border-top: 2px solid var(--border); background: #f9fafb; }
+    .report-table .profit-col { color: var(--green); font-weight: 700; }
+
+    /* ── Job Costing tab ── */
+    .jc-wrap { max-width: 100%; }
+    .jc-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; }
+    .jc-card-header {
+      padding: .875rem 1.25rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: .6rem;
+    }
+    .step-badge {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--dj); color: #fff;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .85rem; flex-shrink: 0;
+    }
+    .jc-card-body { padding: 1rem 1.25rem; }
+    .mode-tabs { display: flex; border-bottom: 2px solid var(--border); margin-bottom: 1rem; gap: 0; }
+    .mode-tab {
+      border: none; background: transparent; padding: .5rem 1rem;
+      font-weight: 600; font-size: .875rem; color: var(--muted);
+      border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; transition: .15s;
+    }
+    .mode-tab.active { color: var(--dj); border-bottom-color: var(--dj); }
+    .mode-tab:hover:not(.active) { color: var(--ink); }
+    .suggested-banner {
+      background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 8px;
+      padding: .6rem 1rem; font-size: .875rem; margin-bottom: 1rem;
+    }
+    @media (max-width: 575px) {
+      .suggested-banner .d-flex { flex-direction: column; gap: .5rem !important; }
+      #jc-suggestedHrs { width: 100px !important; }
+    }
+    .line-row .form-control, .line-row .form-select { font-size: .9rem; }
+    .line-total-cell { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+    .remove-btn { color: var(--muted); }
+    .remove-btn:hover { color: var(--red); }
+    .li-block {
+      background: #fafafa; border: 1px solid var(--border); border-radius: 8px;
+      padding: .75rem; margin-bottom: .625rem;
+    }
+    .auto-tag {
+      display: inline-block; background: #dcfce7; color: #15803d;
+      font-size: .68rem; font-weight: 700; padding: .1rem .35rem;
+      border-radius: 4px; text-transform: uppercase; letter-spacing: .03em;
+    }
+    .service-tag {
+      display: inline-block; background: #f3f4f6; color: var(--muted);
+      font-size: .68rem; font-weight: 700; padding: .1rem .35rem;
+      border-radius: 4px; text-transform: uppercase; letter-spacing: .03em;
+    }
+    .jc-summary-box { background: #fafafa; border: 1px solid var(--border); border-radius: 10px; }
+    .summary-num { font-variant-numeric: tabular-nums; }
+    .profit-pos { color: var(--green); }
+    .profit-neg { color: var(--red); }
+    .price-card { border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: .15s; }
+    .price-card.selected-tier { border-color: var(--dj); background: var(--dj-soft); }
+    .price-card:hover { border-color: var(--dj); background: var(--dj-soft); }
+    .price-card .price { font-size: 1.4rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .hint { color: var(--muted); font-size: .8rem; }
+    .hrs-ok   { color: var(--green); font-weight: 600; }
+    .hrs-warn { color: #d97706;     font-weight: 600; }
+    .hrs-over { color: var(--red);  font-weight: 600; }
+    .source-badge {
+      display: inline-flex; align-items: center; gap: .3rem;
+      background: #eef2ff; color: var(--dj); border: 1px solid #c7d2fe;
+      border-radius: 6px; padding: .2rem .55rem; font-size: .75rem; font-weight: 600;
+    }
+    /* Before/After tax toggle */
+    .profit-toggle-btn {
+      border: none; background: transparent; border-radius: 6px;
+      padding: .25rem .65rem; font-size: .78rem; font-weight: 600; color: var(--muted);
+      cursor: pointer; transition: .15s; white-space: nowrap;
+    }
+    .profit-toggle-btn.active { background: #fff; color: var(--dj); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+    /* Price tier cards — ensure text fits */
+    .price-card { border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: .15s; overflow: hidden; }
+    .price-card.selected-tier { border-color: var(--dj); background: var(--dj-soft); }
+    .price-card:hover { border-color: var(--dj); background: var(--dj-soft); }
+    .price-card .price { font-size: 1.1rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.2; }
+    @media (max-width: 575px) {
+      .price-card { border-radius: 8px; }
+      .price-card .price { font-size: .95rem; }
+      .price-card .tier-label { font-size: .62rem; }
+      .price-card .tier-profit { font-size: .66rem; }
+    }
+    .price-card .tier-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+    .price-card .tier-profit { font-size: .72rem; }
+    .price-card .tier-selected { font-size: .65rem; font-weight: 700; color: var(--dj); text-transform: uppercase; letter-spacing: .04em; }
+
+    /* ── Mobile: summary sticky only on xl+ ── */
+    .jc-summary-sticky { position: sticky; top: 1rem; }
+    @media (max-width: 1199px) { .jc-summary-sticky { position: static; } }
+
+    /* ── T1-3: Profit prominence ── */
+    .profit-display {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: .75rem; flex-wrap: wrap; padding: .5rem 0 .25rem;
+    }
+    .profit-display-label { font-weight: 700; font-size: .95rem; color: var(--ink); }
+    .profit-amount {
+      font-size: 1.75rem; font-weight: 800;
+      font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    .margin-badge {
+      display: inline-flex; align-items: center;
+      border-radius: 20px; padding: .2rem .65rem;
+      font-size: .78rem; font-weight: 700;
+      border: 1.5px solid; white-space: nowrap;
+    }
+    .margin-badge.mb-pos  { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+    .margin-badge.mb-warn { background: #fffbeb; color: #92400e; border-color: #fcd34d; }
+    .margin-badge.mb-neg  { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+    .margin-badge.mb-none { background: #f3f4f6; color: var(--muted); border-color: var(--border); }
+    @media (max-width: 575px) {
+      /* Proposal tables: hide all columns except Name and Total on mobile */
+      .proposal-table thead { display: none; }
+      .proposal-table .num { display: none; }
+      .proposal-table td:first-child { padding-right: .5rem; }
+      /* Show only the last td (Total column) */
+      .proposal-table tbody td:last-child,
+      .proposal-table tfoot td:last-child { display: table-cell !important; }
+      .proposal-table tbody td:not(:first-child):not(:last-child) { display: none; }
+      .proposal-table tfoot td:not(:first-child):not(:last-child) { display: none; }
+      /* Tfoot total row — keep label + total only */
+      .tfoot-row td:first-child { display: table-cell; }
+    }
+
+    /* ── Selling price input — full-width on mobile ── */
+    .jc-sell-input { max-width: 220px; }
+    @media (max-width: 575px) { .jc-sell-input { max-width: 100%; } }
+
+    /* ── Phase 6: Materials tax tooltip ── */
+    .jc-tax-tooltip {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #e0e7ff; color: var(--dj);
+      font-size: .78rem; font-weight: 700; cursor: pointer;
+      border: 1px solid #c7d2fe; flex-shrink: 0; user-select: none;
+      transition: .15s;
+    }
+    .jc-tax-tooltip:hover { background: var(--dj); color: #fff; }
+    .jc-tax-tip-box {
+      display: none; margin-top: .5rem;
+      background: #f0fafa; border-left: 4px solid #0DCECE;
+      border-radius: 0 6px 6px 0; padding: .6rem .875rem;
+      font-size: .8rem; color: #1e3a3a; line-height: 1.5;
+      max-width: 460px;
+    }
+    .jc-tax-tip-box.visible { display: block; }
+
+    /* ── T1-2: Mobile labor row labels ── */
+    .labor-field-label {
+      display: none;
+      font-size: .72rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .04em; color: var(--muted); margin-bottom: .2rem;
+    }
+    @media (max-width: 575px) {
+      .labor-field-label { display: block; }
+      .line-row [data-f="hours"],
+      .line-row [data-f="rate"] { font-size: .95rem; min-height: 44px; }
+      .line-row .form-select    { font-size: .95rem; min-height: 44px; }
+      .line-row .input-group-text { min-height: 44px; }
+      .labor-cost-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding-top: .35rem; border-top: 1px solid var(--border); margin-top: .25rem;
+      }
+      /* Material rows: name full-width, qty+cost on one row, total+remove on next */
+      .line-row[data-type="prmat"] .col-5 { width: 45%; flex: 0 0 45%; }
+      .line-row[data-type="prmat"] .col-2 {
+        width: 100%; flex: 0 0 100%;
+        display: flex; justify-content: space-between; align-items: center;
+        padding-top: .25rem;
+      }
+      .line-row[data-type="prmat"] .line-total-cell { font-size: .9rem; }
+      .remove-btn { min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; }
+    }
+    @media (min-width: 576px) {
+      .labor-cost-row { display: contents; }
+    }
+
+    /* ── Stale data banner ── */
+    .stale-banner {
+      display: none;
+      background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px;
+      padding: .75rem 1rem; margin-bottom: 1rem;
+      gap: .75rem; align-items: flex-start;
+    }
+    .stale-banner.visible { display: flex; }
+    .stale-banner-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .05rem; }
+    .stale-banner-body { flex: 1; }
+    .stale-banner-title { font-weight: 700; color: #92400e; font-size: .875rem; }
+    .stale-banner-text { color: #78350f; font-size: .8rem; margin-top: .15rem; }
+    .stale-banner-action {
+      background: #f59e0b; color: #fff; border: none; border-radius: 6px;
+      padding: .3rem .75rem; font-size: .8rem; font-weight: 600; cursor: pointer;
+      white-space: nowrap; flex-shrink: 0; align-self: center;
+    }
+    .stale-banner-action:hover { background: #d97706; }
+
+    /* ── Sync bar (button + badge) ── */
+    .jc-sync-bar {
+      display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+    }
+    @media (max-width: 575px) {
+      .jc-workbench-header { flex-direction: column; gap: .5rem; }
+      .jc-workbench-header > div:first-child { flex: 1 1 100%; }
+      .jc-sync-bar { flex-direction: row; align-items: center; gap: .5rem; flex-wrap: wrap; }
+      .btn-sync { flex-shrink: 0; }
+      .sync-badge { font-size: .78rem; height: auto; padding: .25rem .65rem; flex: 1; }
+    }
+    .btn-sync {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: var(--dj); color: #fff; border: none; border-radius: 8px;
+      padding: 0 .9rem; font-size: .85rem; font-weight: 600; cursor: pointer;
+      transition: .15s; height: 36px;
+    }
+    .btn-sync:hover { background: var(--dj-dark); }
+    .sync-badge {
+      display: inline-flex; align-items: center; gap: .3rem;
+      background: #eef2ff; color: var(--dj); border: 1px solid #c7d2fe;
+      border-radius: 8px; padding: 0 .75rem; font-size: .85rem; font-weight: 600;
+      height: 36px;
+    }
+    .sync-badge .sync-ts { font-weight: 400; color: #4338ca; }
+
+    /* ── Sync Merge Modal ── */
+    .sync-modal-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.45); z-index: 1050;
+      align-items: center; justify-content: center;
+    }
+    .sync-modal-backdrop.open { display: flex; }
+    .sync-modal {
+      background: #fff; border-radius: 14px;
+      width: 100%; max-width: 640px; max-height: 90vh;
+      overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      margin: 1rem;
+    }
+    @media (max-width: 575px) {
+      .sync-modal-backdrop { align-items: flex-end; }
+      .sync-modal {
+        margin: 0; border-radius: 16px 16px 0 0;
+        max-height: 88vh; max-width: 100%;
+      }
+      .sync-modal-body { padding: 1rem; }
+      .sync-modal-header { padding: 1rem; }
+      .sync-modal-footer { padding: .75rem 1rem; }
+    }
+    .sync-modal-header {
+      padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sync-modal-header h5 { font-weight: 800; font-size: 1rem; margin: 0; }
+    .sync-modal-close {
+      background: transparent; border: none; font-size: 1.25rem; color: var(--muted);
+      cursor: pointer; line-height: 1; padding: .2rem .4rem; border-radius: 4px;
+    }
+    .sync-modal-close:hover { background: #f3f4f6; color: var(--ink); }
+    .sync-modal-body { overflow-y: auto; padding: 1.25rem 1.5rem; flex: 1; }
+    .sync-modal-footer {
+      padding: .9rem 1.5rem; border-top: 1px solid var(--border);
+      display: flex; gap: .75rem; justify-content: flex-end;
+    }
+    .sync-uptodate {
+      text-align: center; padding: 2rem 1rem; color: var(--muted);
+    }
+    .sync-uptodate-icon { font-size: 2.5rem; margin-bottom: .5rem; }
+    .sync-uptodate-title { font-weight: 700; color: var(--ink); font-size: 1rem; margin-bottom: .25rem; }
+
+    /* Diff category rows */
+    .diff-category {
+      border: 1px solid var(--border); border-radius: 10px;
+      margin-bottom: .875rem; overflow: hidden;
+    }
+    .diff-cat-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .65rem 1rem; background: #fafafa; border-bottom: 1px solid var(--border);
+      gap: .5rem;
+    }
+    .diff-cat-label { font-weight: 700; font-size: .875rem; display: flex; align-items: center; gap: .5rem; }
+    .diff-cat-badge {
+      font-size: .68rem; font-weight: 700; padding: .1rem .45rem; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: .03em;
+    }
+    .diff-cat-badge.added   { background: #dcfce7; color: #15803d; }
+    .diff-cat-badge.removed { background: #fee2e2; color: #991b1b; }
+    .diff-cat-badge.changed { background: #fef9c3; color: #78350f; }
+    .diff-cat-body { padding: .75rem 1rem; }
+    .diff-item { font-size: .82rem; color: var(--ink); margin-bottom: .3rem; padding: .3rem 0; border-bottom: 1px solid #f3f4f6; }
+    .diff-item:last-child { border-bottom: none; margin-bottom: 0; }
+    .diff-old { color: var(--red); text-decoration: line-through; }
+    .diff-new { color: var(--green); font-weight: 600; }
+    .diff-action-row {
+      display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin-top: .625rem; padding-top: .625rem; border-top: 1px solid #f3f4f6;
+    }
+    .diff-action-label { font-size: .75rem; color: var(--muted); font-weight: 600; white-space: nowrap; }
+    .diff-radio-group { display: flex; gap: .5rem; flex-wrap: wrap; }
+    @media (max-width: 575px) {
+      .diff-radio-group { flex-direction: column; gap: .4rem; }
+      .diff-radio-btn { width: 100%; justify-content: center; }
+    }
+    .diff-radio-btn {
+      border: 1.5px solid var(--border); background: #fff; border-radius: 8px;
+      padding: .5rem .9rem; font-size: .82rem; font-weight: 600; color: var(--muted);
+      cursor: pointer; transition: .15s; min-height: 44px;
+      display: inline-flex; align-items: center; gap: .35rem; line-height: 1;
+    }
+    .diff-radio-btn:hover:not(.sel-add):not(.sel-overwrite):not(.sel-skip) {
+      border-color: var(--muted); color: var(--ink);
+    }
+    /* Selected states — filled backgrounds, white text, checkmark */
+    .diff-radio-btn.sel-add::before      { content: "✓ "; }
+    .diff-radio-btn.sel-overwrite::before { content: "✓ "; }
+    .diff-radio-btn.sel-skip::before     { content: "✓ "; }
+    .diff-radio-btn.sel-add {
+      border-color: #15803d; background: #16a34a; color: #fff;
+    }
+    .diff-radio-btn.sel-overwrite {
+      border-color: var(--dj-dark); background: var(--dj); color: #fff;
+    }
+    .diff-radio-btn.sel-skip {
+      border-color: #4b5563; background: #6b7280; color: #fff;
+    }
+
+    /* Confirm / Cancel buttons (Phase 7: 44px min-height, footer space-between) */
+    .sync-modal-footer { justify-content: space-between; }
+    .btn-confirm-sync {
+      background: var(--dj); color: #fff; border: none; border-radius: 8px;
+      padding: .6rem 1.4rem; font-weight: 700; font-size: .9rem; cursor: pointer;
+      min-height: 44px; display: inline-flex; align-items: center;
+    }
+    .btn-confirm-sync:hover { background: var(--dj-dark); }
+    .btn-cancel-sync {
+      background: #fff; color: var(--ink); border: 1.5px solid var(--border); border-radius: 8px;
+      padding: .6rem 1.2rem; font-weight: 600; font-size: .9rem; cursor: pointer;
+      min-height: 44px; display: inline-flex; align-items: center;
+    }
+    .btn-cancel-sync:hover { background: #f3f4f6; }
+
+    /* Demo trigger for stale state */
+    .demo-bar {
+      position: fixed; bottom: 1rem; right: 1rem; z-index: 900;
+      background: #1e293b; color: #e2e8f0; border-radius: 10px;
+      padding: .625rem .875rem; font-size: .78rem; display: flex; flex-direction: column; gap: .4rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,.3);
+    }
+    .demo-bar-label { font-weight: 700; font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; }
+    .demo-bar button {
+      background: #334155; color: #e2e8f0; border: none; border-radius: 6px;
+      padding: .25rem .6rem; font-size: .76rem; cursor: pointer; text-align: left;
+    }
+    .demo-bar button:hover { background: #475569; }
+    /* Mobile: move demo bar to bottom-left, collapse label */
+    @media (max-width: 575px) {
+      .demo-bar {
+        bottom: .5rem; left: .5rem; right: auto;
+        padding: .375rem .5rem; max-width: 180px;
+      }
+      .demo-bar-label { display: none; }
+      .demo-bar button { font-size: .68rem; padding: .2rem .45rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    }
+  </style>
+</head>
+<body>
+<div class="container page-wrap py-4">
+
+  <!-- ═══════════════════════════════════════
+       PROPOSAL CARD
+  ═══════════════════════════════════════ -->
+  <div class="proposal-card mb-3">
+    <div class="proposal-card-body">
+      <div class="d-flex justify-content-between align-items-start gap-3 proposal-header-row">
+        <!-- Client info -->
+        <div class="d-flex gap-3 align-items-start">
+          <div class="client-avatar">AC</div>
+          <div>
+            <div class="fw-bold fs-6 mb-1">
+              Alex Calderon
+              <button class="action-btn ms-2" style="font-size:.75rem; padding:.15rem .6rem;">
+                ✉ Message
+              </button>
+            </div>
+            <div class="text-secondary small">📍 Fake Rd, Yorkana, PA, 17406 &nbsp;
+              <span class="icon-btn">⧉</span></div>
+            <div class="text-secondary small">✉ alex.calderon@dripjobs.com</div>
+            <div class="text-secondary small">☏ (222) 222-2222</div>
+          </div>
+        </div>
+        <!-- Proposal number -->
+        <div class="text-end">
+          <div class="proposal-number">Proposal #2906315</div>
+          <div class="add-display mb-2">+ Add display name</div>
+          <div class="d-flex gap-2 align-items-center justify-content-end">
+            <span class="badge-pending">⏱ Pending</span>
+            <button class="action-btn" style="padding:.3rem .55rem;">⬇</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="d-flex gap-2 flex-wrap mt-3">
+        <button class="action-btn">View Deal</button>
+        <button class="action-btn">Work Order ▾</button>
+        <button class="action-btn">👤 Customer View</button>
+        <button class="action-btn">⧉ Copy Link</button>
+      </div>
+    </div>
+    <div class="meta-bar">
+      <span>CREATED <strong>5/29/2026</strong></span>
+      <span>EXP. DATE <strong>—</strong></span>
+      <span>SALESPERSON <strong>Laura Cuadros</strong></span>
+      <span>FINANCING <span class="financing-badge">NOT INITIATED</span></span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       LINE ITEMS
+  ═══════════════════════════════════════ -->
+  <div class="section-card mb-3">
+    <div class="section-header">
+      <h2>Line Items</h2>
+      <div class="section-btn-group">
+        <button class="btn-add-opt">Add Optional</button>
+        <button class="btn-add-opt">Add Multiple</button>
+        <button class="btn-add-item">Add Item</button>
+      </div>
+    </div>
+    <table class="proposal-table">
+      <thead>
+        <tr>
+          <th style="width:40%">Product / Service</th>
+          <th class="num">Quantity</th>
+          <th class="num">Price</th>
+          <th class="num">Subtotal</th>
+          <th class="num">Tax</th>
+          <th class="num">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <span class="drag-handle">≡</span>
+            <span class="item-name">Flooring Consultation</span>
+            <span class="icon-btn ms-2">⧉</span>
+            <span class="icon-btn ms-1">✏</span>
+          </td>
+          <td class="num">1.00</td>
+          <td class="num">$150.00</td>
+          <td class="num">$150.00</td>
+          <td class="num">$0.00</td>
+          <td class="num">$150.00</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="drag-handle">≡</span>
+            <span class="item-name">Sherwin-Williams Super Paint</span>
+            <span class="icon-btn ms-2">⧉</span>
+            <span class="icon-btn ms-1">✏</span>
+          </td>
+          <td class="num">5.00</td>
+          <td class="num">$33.00</td>
+          <td class="num">$165.00</td>
+          <td class="num">$16.50</td>
+          <td class="num">$181.50</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr class="tfoot-row">
+          <td colspan="3"><strong>Total</strong></td>
+          <td class="num">$315.00</td>
+          <td class="num">$16.50</td>
+          <td class="num total-highlight">$331.50</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       AREAS
+  ═══════════════════════════════════════ -->
+  <div class="section-card mb-3">
+    <div class="section-header">
+      <h2>Areas</h2>
+      <div class="section-btn-group">
+        <button class="btn-add-opt">Add Optional Area</button>
+        <button class="btn-add-item">Add Area</button>
+      </div>
+    </div>
+    <table class="proposal-table">
+      <thead>
+        <tr>
+          <th style="width:40%">Area</th>
+          <th class="num">Quantity</th>
+          <th class="num">Price</th>
+          <th class="num">Subtotal</th>
+          <th class="num">Tax</th>
+          <th class="num">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <span class="drag-handle">≡</span>
+            <span class="item-name">Primary Bedroom – Walls</span>
+            <span class="icon-btn ms-2">⧉</span>
+            <span class="icon-btn ms-1">✏</span>
+          </td>
+          <td class="num">1.00</td>
+          <td class="num">$1,305.89</td>
+          <td class="num">$1,305.89</td>
+          <td class="num">$130.59</td>
+          <td class="num">$1,436.48</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="drag-handle">≡</span>
+            <span class="item-name">Primary Bedroom – Ceiling</span>
+            <span class="icon-btn ms-2">⧉</span>
+            <span class="icon-btn ms-1">✏</span>
+          </td>
+          <td class="num">1.00</td>
+          <td class="num">$595.62</td>
+          <td class="num">$595.62</td>
+          <td class="num">$59.57</td>
+          <td class="num">$655.19</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="drag-handle">≡</span>
+            <span class="item-name">Living Room</span>
+            <span class="icon-btn ms-2">⧉</span>
+            <span class="icon-btn ms-1">✏</span>
+          </td>
+          <td class="num">1.00</td>
+          <td class="num">$881.92</td>
+          <td class="num">$881.92</td>
+          <td class="num">$88.19</td>
+          <td class="num">$970.11</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr class="tfoot-row">
+          <td colspan="3"><strong>Total</strong></td>
+          <td class="num">$2,783.43</td>
+          <td class="num">$278.35</td>
+          <td class="num total-highlight">$3,061.78</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       TAB STRIP + PANELS
+  ═══════════════════════════════════════ -->
+  <div class="tab-strip-wrap">
+    <div class="tab-strip-outer" id="tabStripOuter">
+      <button class="tab-scroll-btn scroll-left"  id="tabScrollLeft"  aria-label="Scroll tabs left">&#8249;</button>
+      <button class="tab-scroll-btn scroll-right" id="tabScrollRight" aria-label="Scroll tabs right">&#8250;</button>
+      <div class="tab-strip" id="tabStrip">
+        <button class="tab-btn" data-tab="settings">Settings</button>
+        <button class="tab-btn" data-tab="jobcosting">Profitability</button>
+        <button class="tab-btn" data-tab="reports">Reports</button>
+        <button class="tab-btn" data-tab="attachments">Attachments</button>
+        <button class="tab-btn" data-tab="notes">Notes</button>
+        <button class="tab-btn" data-tab="activity">Activity Log</button>
+        <button class="tab-btn" data-tab="video">Video</button>
+        <button class="tab-btn" data-tab="custom">Custom Sections</button>
+        <button class="tab-btn" data-tab="prodrates">Production Rates</button>
+        <button class="tab-btn" data-tab="details">Details</button>
+        <button class="tab-btn" data-tab="color">Color Chart</button>
+        <button class="tab-btn" data-tab="booking">Booking Form</button>
+      </div>
+    </div>
+
+    <!-- ── REPORTS panel ── -->
+    <div class="tab-panel" id="panel-reports">
+
+      <!-- Product Report -->
+      <div class="report-card p-3 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="h6 fw-bold mb-0">Product Report</h3>
+          <span class="report-margin">25.4% margin</span>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-6 col-md-3"><div class="report-stat-box"><div class="report-stat-label">Gallons</div><div class="report-stat-value">19.34</div></div></div>
+          <div class="col-6 col-md-3"><div class="report-stat-box"><div class="report-stat-label">Product Cost</div><div class="report-stat-value">$827.45</div></div></div>
+          <div class="col-6 col-md-3"><div class="report-stat-box"><div class="report-stat-label">Cost + Markup</div><div class="report-stat-value">$1,108.78</div></div></div>
+          <div class="col-6 col-md-3"><div class="report-stat-box"><div class="report-stat-label">Profit</div><div class="report-stat-value profit">$281.33</div></div></div>
+        </div>
+        <table class="report-table">
+          <thead><tr>
+            <th>Product Name</th><th class="num">Est. Gallons</th>
+            <th class="num">Est. Product Cost</th><th class="num">Est. Cost + Markup</th><th class="num">Est. Profit</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>Sherwin Williams Pro-Classic Interior</td><td class="num">2</td><td class="num">$99.98</td><td class="num">$133.97</td><td class="num profit-col">$33.99</td></tr>
+            <tr><td>Sherwin-Williams Duration Exterior</td><td class="num">11.94</td><td class="num">$596.92</td><td class="num">$799.88</td><td class="num profit-col">$202.95</td></tr>
+            <tr><td>Sherwin Williams ProMar 400 Interior</td><td class="num">5.2</td><td class="num">$119.55</td><td class="num">$160.19</td><td class="num profit-col">$40.65</td></tr>
+            <tr><td>Sherwin-Williams Emerald Interior</td><td class="num">0.2</td><td class="num">$11.00</td><td class="num">$14.74</td><td class="num profit-col">$3.74</td></tr>
+          </tbody>
+          <tfoot><tr>
+            <td><strong>Total</strong></td><td class="num">19.34</td>
+            <td class="num">$827.45</td><td class="num">$1,108.78</td><td class="num profit-col">$281.33</td>
+          </tr></tfoot>
+        </table>
+      </div>
+
+      <!-- Job Report -->
+      <div class="report-card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="h6 fw-bold mb-0">Job Report</h3>
+          <span class="report-margin">59.2% margin</span>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-6 col-md-3"><div class="report-stat-box"><div class="report-stat-label">Total Hours</div><div class="report-stat-value">22.78 hrs</div></div></div>
+          <div class="col-6 col-md-3"><div class="report-stat-box"><div class="report-stat-label">Labor Cost</div><div class="report-stat-value">$683.41</div></div></div>
+          <div class="col-6 col-md-3"><div class="report-stat-box"><div class="report-stat-label">Labor Price</div><div class="report-stat-value">$1,674.63</div></div></div>
+          <div class="col-6 col-md-3"><div class="report-stat-box"><div class="report-stat-label">Profit</div><div class="report-stat-value profit">$991.22</div></div></div>
+        </div>
+        <table class="report-table">
+          <thead><tr>
+            <th>Substrate</th><th>Unit</th><th>Lin Ft</th><th>Coats</th>
+            <th class="num">Gallons</th><th class="num">Paint Hrs</th><th class="num">Prep Hrs</th>
+            <th class="num">Labor Cost</th><th class="num">Labor Price</th><th class="num">Profit</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>(Spray) 6-Panel Door - 2 Sides</td><td>2x</td><td>-</td><td>2</td><td class="num">2</td><td class="num">1</td><td class="num">-</td><td class="num">$30.00</td><td class="num">$150.00</td><td class="num profit-col">$120.00</td></tr>
+            <tr><td>8FT Light Texture</td><td>1940sqft</td><td>-</td><td>6</td><td class="num">12</td><td class="num">12.93</td><td class="num">-</td><td class="num">$388.00</td><td class="num">$905.33</td><td class="num profit-col">$517.33</td></tr>
+            <tr><td>(Roll) Two-Story Heavy Texture</td><td>780sqft</td><td>-</td><td>6</td><td class="num">6</td><td class="num">5.2</td><td class="num">2</td><td class="num">$216.00</td><td class="num">$504.00</td><td class="num profit-col">$288.00</td></tr>
+            <tr><td>(Brush) 3-Inch Baseboard</td><td>35sqft</td><td>140ft</td><td>4</td><td class="num">1</td><td class="num">1.65</td><td class="num">-</td><td class="num">$49.41</td><td class="num">$115.29</td><td class="num profit-col">$65.88</td></tr>
+          </tbody>
+          <tfoot><tr>
+            <td colspan="4"><strong>Total</strong></td>
+            <td class="num"></td><td class="num"><strong>20.78</strong></td><td class="num"><strong>2</strong></td>
+            <td class="num"><strong>$683.41</strong></td><td class="num"><strong>$1,674.63</strong></td>
+            <td class="num profit-col"><strong>$991.22</strong></td>
+          </tr></tfoot>
+        </table>
+      </div>
+    </div><!-- /reports panel -->
+
+    <!-- ── JOB COSTING panel ── -->
+    <div class="tab-panel" id="panel-jobcosting">
+    <!-- ── SYNC MERGE MODAL ── -->
+    <div class="sync-modal-backdrop" id="syncModalBackdrop">
+      <div class="sync-modal" role="dialog" aria-modal="true" aria-labelledby="syncModalTitle">
+        <div class="sync-modal-header">
+          <h5 id="syncModalTitle">⟳ Sync Proposal Data</h5>
+          <button class="sync-modal-close" id="syncModalClose" aria-label="Close">×</button>
+        </div>
+        <div class="sync-modal-body" id="syncModalBody">
+          <!-- populated by JS -->
+        </div>
+        <div class="sync-modal-footer" id="syncModalFooter">
+          <button class="btn-cancel-sync" id="syncCancelBtn">Cancel</button>
+          <button class="btn-confirm-sync" id="syncConfirmBtn">Apply Selected Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Demo control bar ── -->
+    <div class="demo-bar">
+      <div class="demo-bar-label">🎛 Demo Controls</div>
+      <button id="demoTriggerStale">Simulate: Proposal Edited</button>
+      <button id="demoTriggerCO">Simulate: Change Order Accepted</button>
+      <button id="demoResetStale">Reset to In-Sync</button>
+    </div>
+
+    <div class="d-flex align-items-start justify-content-between mb-3 gap-2 jc-workbench-header">
+        <div>
+          <h3 class="h5 fw-bold mb-0">Profitability</h3>
+          <p class="hint mb-0">Pre-loaded from Proposal #2906315 · edit any value to adjust.</p>
+        </div>
+        <!-- Sync bar: button + last-sync badge -->
+        <div class="jc-sync-bar">
+          <button class="btn-sync" id="jcSyncBtn">⟳ Sync</button>
+          <span class="sync-badge" id="jcSyncBadge">
+            Synced from proposal · <span class="sync-ts" id="jcSyncTs">Today, 9:14 AM</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Stale data banner (BR-3) -->
+      <div class="stale-banner" id="jcStaleBanner" role="alert">
+        <div class="stale-banner-icon">⚠️</div>
+        <div class="stale-banner-body">
+          <div class="stale-banner-title">Proposal updated since last sync</div>
+          <div class="stale-banner-text" id="jcStaleMsg">The proposal has been edited. Review the changes and sync to keep your workbench up to date.</div>
+        </div>
+        <button class="stale-banner-action" id="jcStaleSyncBtn">Review &amp; Sync</button>
+      </div>
+
+      <div class="row g-3">
+        <!-- LEFT: inputs -->
+        <div class="col-xl-7">
+
+          <!-- SELLING PRICE: Context-setter (Phase 5) -->
+          <div class="jc-card mb-3">
+            <div class="jc-card-header d-flex align-items-center justify-content-between">
+              <h4 class="h6 fw-bold mb-0">Selling Price</h4>
+              <span class="source-badge">From proposal</span>
+            </div>
+            <div class="jc-card-body">
+              <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div class="input-group input-group-lg jc-sell-input">
+                  <span class="input-group-text">$</span>
+                  <input type="number" class="form-control" id="jc-sellPrice" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+                </div>
+                <p class="hint mb-0">Your proposal total. Edit to model a different price — this never changes the proposal.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 1: LABOR -->
+          <div class="jc-card mb-3">
+            <div class="jc-card-header">
+              <span class="step-badge">1</span>
+              <h4 class="h6 fw-bold mb-0">Labor &amp; Subcontractors</h4>
+            </div>
+            <div class="jc-card-body">
+
+              <!-- Suggested hours banner (production rate mode) -->
+              <div id="jc-suggestedBanner" class="suggested-banner" style="display:none;">
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="fw-semibold" style="color:var(--dj);">Job Report estimate:</span>
+                    <input type="number" id="jc-suggestedHrs" class="form-control form-control-sm d-inline-block"
+                           style="width:80px;" min="0" step="0.25" inputmode="decimal">
+                  </div>
+                  <div class="text-secondary">
+                    Assigned: <span id="jc-assignedHrs" class="fw-semibold">0.00</span> hrs
+                    <span id="jc-hrsStatus" class="ms-1"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-none d-sm-flex row g-2 px-1 mb-1">
+                <div class="col-4"><span class="small text-secondary">Employee / Subcontractor</span></div>
+                <div class="col-3"><span class="small text-secondary">Hours</span></div>
+                <div class="col-3"><span class="small text-secondary">Rate / hr</span></div>
+                <div class="col-2 text-end"><span class="small text-secondary">Cost</span></div>
+              </div>
+              <div id="jc-laborRows"></div>
+              <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="jc-addLaborBtn">+ Add labor</button>
+              <p class="hint mb-0 mt-1">Rate auto-fills from employee/sub profile. Enter hours only.</p>
+            </div>
+          </div>
+
+          <!-- STEP 2: MATERIALS -->
+          <div class="jc-card mb-3">
+            <div class="jc-card-header">
+              <span class="step-badge">2</span>
+              <h4 class="h6 fw-bold mb-0">Materials</h4>
+            </div>
+            <div class="jc-card-body">
+              <!-- Mode tabs -->
+              <div class="mode-tabs">
+                <button class="mode-tab active" data-jcmode="production">Production Rate</button>
+                <button class="mode-tab" data-jcmode="lineitems">Line Items (Products)</button>
+              </div>
+
+              <!-- Production Rate panel -->
+              <div id="jc-panelPR">
+                <p class="hint mb-2">Pulled from the <strong>Product Report</strong> of this proposal. Edit if needed.</p>
+                <div class="d-none d-sm-flex row g-2 px-1 mb-1">
+                  <div class="col-4"><span class="small text-secondary">Material</span></div>
+                  <div class="col-3"><span class="small text-secondary">Qty (gal)</span></div>
+                  <div class="col-3"><span class="small text-secondary">Unit cost</span></div>
+                  <div class="col-2 text-end"><span class="small text-secondary">Total</span></div>
+                </div>
+                <div id="jc-prRows"></div>
+                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="jc-addPRRowBtn">+ Add material</button>
+              </div>
+
+              <!-- Line Items panel -->
+              <div id="jc-panelLI" class="d-none">
+                <p class="hint mb-2">
+                  Products from this proposal's <strong>Line Items</strong>.
+                  Products with a coverage rate auto-fill material quantities.
+                  Services show no material cost.
+                </p>
+                <div id="jc-liBlocks"></div>
+              </div>
+
+              <!-- Tax (Phase 6: explained + sourced from company rate) -->
+              <div class="mt-3 pt-3 border-top">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <label class="form-check-label d-flex align-items-center gap-2" for="jc-taxToggle">
+                    <input class="form-check-input mt-0" type="checkbox" id="jc-taxToggle">
+                    <span>Apply sales tax to materials</span>
+                  </label>
+                  <span class="jc-tax-tooltip" id="jc-taxTooltipBtn" tabindex="0" aria-label="About material tax" title="">&#9432;</span>
+                  <div class="col-auto" id="jc-taxWrap" style="display:none;">
+                    <div class="input-group input-group-sm" style="width:130px;">
+                      <input type="number" class="form-control" id="jc-taxRate" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+                      <span class="input-group-text">%</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Tooltip popover -->
+                <div class="jc-tax-tip-box" id="jc-taxTipBox" role="tooltip">
+                  <strong>What is this?</strong> Your local sales tax rate on paint and materials — separate from the tax collected on this proposal. Pre-filled from your Company Tax Rate (5%). This is a <em>cost</em> input only and never affects the proposal.
+                </div>
+                <p class="hint mt-1 mb-0" id="jc-taxHint" style="display:none;">
+                  Pre-filled from your Company Tax Rate · adjust if your supplier applies a different rate
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /left -->
+
+        <!-- RIGHT: summary -->
+        <div class="col-xl-5">
+          <div class="jc-summary-sticky">
+
+            <div class="jc-card mb-3">
+              <div class="jc-card-header">
+                <h4 class="h6 fw-bold mb-0">Summary</h4>
+              </div>
+              <div class="jc-card-body">
+                <!-- Cost breakdown -->
+                <div class="d-flex justify-content-between py-1">
+                  <span class="text-secondary">Labor &amp; subs</span>
+                  <span class="summary-num" id="jc-sumLabor">$0.00</span>
+                </div>
+                <div class="d-flex justify-content-between py-1">
+                  <span class="text-secondary">Materials</span>
+                  <span class="summary-num" id="jc-sumMaterials">$0.00</span>
+                </div>
+                <div class="d-flex justify-content-between py-1" id="jc-sumTaxRow" style="display:none;">
+                  <span class="text-secondary">Tax (materials)</span>
+                  <span class="summary-num" id="jc-sumTax">$0.00</span>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between py-1">
+                  <span class="fw-bold">Total cost</span>
+                  <span class="summary-num fw-bold" id="jc-sumTotalCost">$0.00</span>
+                </div>
+
+                <!-- Before / After tax toggle — hidden when no taxes -->
+                <div id="jc-taxToggleWrap" class="d-flex align-items-center gap-2 mt-3 mb-2">
+                  <span class="small fw-semibold text-secondary">View profit:</span>
+                  <div class="d-flex" style="background:#f3f4f6;border-radius:8px;padding:3px;gap:3px;">
+                    <button id="jc-toggleBefore" class="profit-toggle-btn active" data-mode="before">Before tax</button>
+                    <button id="jc-toggleAfter"  class="profit-toggle-btn"        data-mode="after">After tax</button>
+                  </div>
+                </div>
+
+                <!-- Profit box -->
+                <div class="jc-summary-box p-3 rounded">
+                  <div class="d-flex justify-content-between py-1">
+                    <span class="text-secondary small">Selling price</span>
+                    <span class="summary-num" id="jc-sumPrice">$0.00</span>
+                  </div>
+                  <div class="justify-content-between py-1" id="jc-taxCollectedRow" style="display:flex;">
+                    <span class="text-secondary small">Tax collected</span>
+                    <span class="summary-num text-secondary" id="jc-sumTaxCollected">− $0.00</span>
+                  </div>
+                  <div class="justify-content-between py-1" id="jc-netRevenueRow" style="display:flex;">
+                    <span class="text-secondary small">Net revenue</span>
+                    <span class="summary-num" id="jc-sumNetRevenue">$0.00</span>
+                  </div>
+                  <div class="d-flex justify-content-between py-1">
+                    <span class="text-secondary small">Costs</span>
+                    <span class="summary-num text-secondary" id="jc-sumCosts">− $0.00</span>
+                  </div>
+                  <hr class="my-3">
+                  <div class="profit-display">
+                    <span class="profit-display-label">Profit</span>
+                    <div class="d-flex align-items-baseline gap-2 flex-wrap justify-content-end">
+                      <span class="profit-amount profit-pos" id="jc-sumProfit">$0.00</span>
+                      <span class="margin-badge mb-none" id="jc-sumMargin">—</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Suggested prices -->
+            <div class="jc-card">
+              <div class="jc-card-header">
+                <h4 class="h6 fw-bold mb-0">Suggested prices</h4>
+              </div>
+              <div class="jc-card-body">
+                <p class="hint mb-3">Prices to hit common profit margins on total cost. Tap to load.</p>
+                <div class="row g-2" id="jc-priceTiers"></div>
+              </div>
+            </div>
+
+          </div>
+        </div><!-- /right -->
+      </div><!-- /row -->
+    </div><!-- /job costing panel -->
+
+    <!-- ── Placeholder panels ── -->
+    <div class="tab-panel text-center text-secondary py-5" id="panel-settings">Settings coming soon.</div>
+    <div class="tab-panel text-center text-secondary py-5" id="panel-attachments">Attachments coming soon.</div>
+    <div class="tab-panel text-center text-secondary py-5" id="panel-notes">Notes coming soon.</div>
+    <div class="tab-panel text-center text-secondary py-5" id="panel-activity">Activity Log coming soon.</div>
+    <div class="tab-panel text-center text-secondary py-5" id="panel-video">Video coming soon.</div>
+    <div class="tab-panel text-center text-secondary py-5" id="panel-custom">Custom Sections coming soon.</div>
+    <div class="tab-panel text-center text-secondary py-5" id="panel-prodrates">Production Rates coming soon.</div>
+    <div class="tab-panel text-center text-secondary py-5" id="panel-details">Details coming soon.</div>
+    <div class="tab-panel text-center text-secondary py-5" id="panel-color">Color Chart coming soon.</div>
+    <div class="tab-panel text-center text-secondary py-5" id="panel-booking">Booking Form coming soon.</div>
+
+  </div><!-- /tab-strip-wrap -->
+</div><!-- /page-wrap -->
+
+<script>
+(function () {
+  'use strict';
+
+  /* ─── Proposal data ───────────────────────────────────────── */
+  var PROPOSAL = {
+    grandTotal: 3393.28,   // line items ($331.50) + areas ($3061.78)
+    taxCollected: 294.85,  // $16.50 (line items) + $278.35 (areas)
+    companyTaxRate: 5.0,   // from Company Settings (used as materials tax default)
+    jobReport: { totalHours: 22.78 },
+    productReport: [
+      { name: 'Sherwin Williams Pro-Classic Interior', gallons: 2,     costEach: 49.99 },
+      { name: 'Sherwin-Williams Duration Exterior',    gallons: 11.94, costEach: 49.99 },
+      { name: 'Sherwin Williams ProMar 400 Interior',  gallons: 5.2,   costEach: 22.99 },
+      { name: 'Sherwin-Williams Emerald Interior',     gallons: 0.2,   costEach: 55.00 },
+    ],
+    lineItems: [
+      { name: 'Flooring Consultation', isProduct: false, qty: 1, unitCost: 0, sellPrice: 150.00, taxRate: 0 },
+      { name: 'Sherwin-Williams Super Paint', isProduct: true,  qty: 5, unitCost: 16.50, sellPrice: 33.00, taxRate: 0.10,
+        coverage: 350, coverageUnit: 'sqft_per_gal' },
+    ]
+  };
+
+  /* ─── Sample team ─────────────────────────────────────────── */
+  var TEAM = [
+    { id: 'e1', name: 'John Smith',        type: 'employee', rate: 35.00 },
+    { id: 'e2', name: 'Maria Garcia',      type: 'employee', rate: 28.00 },
+    { id: 'e3', name: 'Mike Johnson',      type: 'employee', rate: 42.00 },
+    { id: 's1', name: 'ABC Drywall Co.',   type: 'sub',      rate: 75.00 },
+    { id: 's2', name: 'Pro Painters Inc.', type: 'sub',      rate: 85.00 },
+  ];
+
+  var jcMode = 'production';
+  var profitMode = 'before'; // 'before' | 'after'
+  var TARGET_MARGINS = [0.40, 0.50, 0.60];
+
+  var fmt = function (n) {
+    return '$' + (isFinite(n) ? n : 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  var num = function (v) { var n = parseFloat(v); return isFinite(n) ? n : 0; };
+
+  /* ─── Tab switching ───────────────────────────────────────── */
+  document.getElementById('tabStrip').addEventListener('click', function (e) {
+    var btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    var tabId = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    var panel = document.getElementById('panel-' + tabId);
+    if (panel) panel.classList.add('active');
+  });
+
+  /* ─── Tab strip scroll arrows (Phase 4) ─────────────────── */
+  (function () {
+    var strip  = document.getElementById('tabStrip');
+    var outer  = document.getElementById('tabStripOuter');
+    var btnL   = document.getElementById('tabScrollLeft');
+    var btnR   = document.getElementById('tabScrollRight');
+    var STEP   = 160; // px per arrow click
+
+    function updateArrows() {
+      var atStart = strip.scrollLeft <= 2;
+      var atEnd   = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 2;
+      btnL.classList.toggle('visible', !atStart);
+      btnR.classList.toggle('visible', !atEnd);
+      outer.classList.toggle('fade-left',  !atStart);
+      outer.classList.toggle('fade-right', !atEnd);
+    }
+
+    btnL.addEventListener('click', function () {
+      strip.scrollBy({ left: -STEP, behavior: 'smooth' });
+    });
+    btnR.addEventListener('click', function () {
+      strip.scrollBy({ left:  STEP, behavior: 'smooth' });
+    });
+
+    strip.addEventListener('scroll', updateArrows, { passive: true });
+    // Run once on load and again after fonts settle
+    updateArrows();
+    setTimeout(updateArrows, 200);
+  }());
+
+  /* ─── Build team options ──────────────────────────────────── */
+  function buildTeamOpts() {
+    var h = '<option value="">— Select —</option>';
+    h += '<optgroup label="Employees">';
+    TEAM.filter(function (t) { return t.type === 'employee'; }).forEach(function (t) {
+      h += '<option value="' + t.id + '" data-rate="' + t.rate + '">' + t.name + ' ($' + t.rate.toFixed(2) + '/hr)</option>';
+    });
+    h += '</optgroup><optgroup label="Subcontractors">';
+    TEAM.filter(function (t) { return t.type === 'sub'; }).forEach(function (t) {
+      h += '<option value="' + t.id + '" data-rate="' + t.rate + '">' + t.name + ' ($' + t.rate.toFixed(2) + '/hr)</option>';
+    });
+    h += '</optgroup>';
+    return h;
+  }
+
+  /* ─── Add labor row + auto-distribute hours ──────────────── */
+  function addLaborRow() {
+    var row = document.createElement('div');
+    row.className = 'row g-2 line-row align-items-center mb-2 pb-2 border-bottom';
+    row.dataset.type = 'labor';
+    row.dataset.manualHours = '0'; // track if user has manually overridden
+    row.innerHTML =
+      // Person selector — full width on mobile, 4-col on sm+
+      '<div class="col-12 col-sm-4">'
+        + '<div class="labor-field-label">Employee / Subcontractor</div>'
+        + '<select class="form-select form-select-sm" data-f="person">' + buildTeamOpts() + '</select>'
+      + '</div>'
+      // Hours — labeled on mobile, col-5 on mobile / col-3 on sm+
+      + '<div class="col-6 col-sm-3">'
+        + '<div class="labor-field-label">Hours</div>'
+        + '<input type="number" class="form-control form-control-sm" placeholder="0" min="0" step="0.25" inputmode="decimal" data-f="hours">'
+      + '</div>'
+      // Rate — labeled on mobile
+      + '<div class="col-6 col-sm-3">'
+        + '<div class="labor-field-label">Rate / hr</div>'
+        + '<div class="input-group input-group-sm">'
+          + '<span class="input-group-text">$</span>'
+          + '<input type="number" class="form-control" placeholder="0.00" min="0" step="0.01" inputmode="decimal" data-f="rate">'
+        + '</div>'
+      + '</div>'
+      // Cost + remove — on mobile sits in its own labeled row; on sm+ stays in col-2
+      + '<div class="col-12 col-sm-2 labor-cost-row">'
+        + '<span class="labor-field-label">Cost</span>'
+        + '<div class="d-flex align-items-center justify-content-between justify-content-sm-end gap-1 w-100">'
+          + '<span class="line-total-cell" data-f="lineTotal">$0.00</span>'
+          + '<button type="button" class="btn btn-sm btn-link remove-btn p-0 ms-2" aria-label="Remove row">&times;</button>'
+        + '</div>'
+      + '</div>';
+    document.getElementById('jc-laborRows').appendChild(row);
+    redistributeHours();
+    jcRecalc();
+  }
+
+  /* ─── Redistribute suggested hours equally across all rows ── */
+  function redistributeHours() {
+    var suggested = num(document.getElementById('jc-suggestedHrs').value);
+    if (suggested <= 0) return;
+    var rows = document.querySelectorAll('#jc-laborRows [data-type="labor"]');
+    if (!rows.length) return;
+    var share = Math.round((suggested / rows.length) * 100) / 100; // round to 2 decimal places
+    rows.forEach(function (row) {
+      if (row.dataset.manualHours === '0') {
+        row.querySelector('[data-f="hours"]').value = share;
+      }
+    });
+  }
+
+  /* ─── Add production rate material row ───────────────────── */
+  function addPRRow(name, gallons, costEach) {
+    var row = document.createElement('div');
+    row.className = 'row g-2 line-row align-items-center mb-2';
+    row.dataset.type = 'prmat';
+    row.innerHTML =
+      '<div class="col-12 col-sm-4">'
+        + '<input type="text" class="form-control form-control-sm" placeholder="Material name" data-f="name" value="' + (name || '') + '">'
+      + '</div>'
+      + '<div class="col-5 col-sm-3">'
+        + '<input type="number" class="form-control form-control-sm" placeholder="Qty" min="0" step="0.01" inputmode="decimal" data-f="qty" value="' + (gallons || '') + '">'
+      + '</div>'
+      + '<div class="col-5 col-sm-3">'
+        + '<div class="input-group input-group-sm">'
+          + '<span class="input-group-text">$</span>'
+          + '<input type="number" class="form-control" placeholder="Each" min="0" step="0.01" inputmode="decimal" data-f="cost" value="' + (costEach || '') + '">'
+        + '</div>'
+      + '</div>'
+      + '<div class="col-2 d-flex align-items-center justify-content-end gap-1">'
+        + '<span class="line-total-cell" data-f="lineTotal">$0.00</span>'
+        + '<button type="button" class="btn btn-sm btn-link remove-btn p-0 ms-1" aria-label="Remove">&times;</button>'
+      + '</div>';
+    document.getElementById('jc-prRows').appendChild(row);
+    jcRecalc();
+  }
+
+  /* ─── Build line item blocks from proposal ────────────────── */
+  function buildLineItemBlocks() {
+    var container = document.getElementById('jc-liBlocks');
+    container.innerHTML = '';
+    PROPOSAL.lineItems.forEach(function (item) {
+      var block = document.createElement('div');
+      block.className = 'li-block';
+      block.dataset.type = 'liblock';
+
+      if (!item.isProduct) {
+        // Service — no materials
+        block.innerHTML =
+          '<div class="d-flex align-items-center gap-2">'
+            + '<span class="fw-semibold">' + item.name + '</span>'
+            + '<span class="service-tag">Service</span>'
+          + '</div>'
+          + '<p class="hint mb-0 mt-1">No material cost — service item.</p>';
+        block.dataset.matCost = '0';
+      } else {
+        // Product with coverage
+        var totalCost = item.qty * item.unitCost;
+        block.dataset.matCost = totalCost.toFixed(2);
+        block.innerHTML =
+          '<div class="d-flex align-items-center justify-content-between gap-2 mb-2">'
+            + '<div>'
+              + '<span class="fw-semibold">' + item.name + '</span>'
+              + '<span class="auto-tag ms-2">Product</span>'
+            + '</div>'
+            + '<span class="line-total-cell">' + fmt(totalCost) + '</span>'
+          + '</div>'
+          + '<div class="row g-2 text-secondary small ps-1">'
+            + '<div class="col-auto">Qty: <strong>' + item.qty + '</strong></div>'
+            + '<div class="col-auto">Unit cost: <strong>' + fmt(item.unitCost) + '</strong></div>'
+          + '</div>';
+      }
+      container.appendChild(block);
+    });
+    jcRecalc();
+  }
+
+  /* ─── Mode switch ─────────────────────────────────────────── */
+  function switchJCMode(mode) {
+    jcMode = mode;
+    document.querySelectorAll('.mode-tab').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.jcmode === mode);
+    });
+    document.getElementById('jc-panelPR').classList.toggle('d-none', mode !== 'production');
+    document.getElementById('jc-panelLI').classList.toggle('d-none', mode !== 'lineitems');
+    // Phase 8: hours tracker visibility is NOT tied to materials mode —
+    // it stays visible in the Labor card regardless of which mode is active.
+    jcRecalc();
+  }
+
+  /* ─── Recalculate ─────────────────────────────────────────── */
+  function jcRecalc() {
+    var laborTotal = 0;
+    var assignedHrs = 0;
+
+    document.querySelectorAll('#jc-laborRows [data-type="labor"]').forEach(function (row) {
+      var hrs  = num(row.querySelector('[data-f="hours"]').value);
+      var rate = num(row.querySelector('[data-f="rate"]').value);
+      var line = hrs * rate;
+      assignedHrs += hrs;
+      row.querySelector('[data-f="lineTotal"]').textContent = fmt(line);
+      laborTotal += line;
+    });
+
+    // Hrs tracker
+    var suggested = num(document.getElementById('jc-suggestedHrs').value);
+    document.getElementById('jc-assignedHrs').textContent = assignedHrs.toFixed(2);
+    var statusEl = document.getElementById('jc-hrsStatus');
+    if (suggested > 0) {
+      var diff = suggested - assignedHrs;
+      if (Math.abs(diff) < 0.01) {
+        statusEl.innerHTML = '<span class="hrs-ok">✓ Fully assigned</span>';
+      } else if (diff > 0) {
+        statusEl.innerHTML = '<span class="hrs-warn">(' + diff.toFixed(2) + ' hrs remaining)</span>';
+      } else {
+        statusEl.innerHTML = '<span class="hrs-over">(' + Math.abs(diff).toFixed(2) + ' over)</span>';
+      }
+    } else {
+      statusEl.textContent = '';
+    }
+
+    var materialsBase = 0;
+
+    if (jcMode === 'production') {
+      document.querySelectorAll('#jc-prRows [data-type="prmat"]').forEach(function (row) {
+        var qty  = num(row.querySelector('[data-f="qty"]').value);
+        var cost = num(row.querySelector('[data-f="cost"]').value);
+        var line = qty * cost;
+        row.querySelector('[data-f="lineTotal"]').textContent = fmt(line);
+        materialsBase += line;
+      });
+    } else {
+      document.querySelectorAll('#jc-liBlocks [data-type="liblock"]').forEach(function (block) {
+        materialsBase += num(block.dataset.matCost);
+      });
+    }
+
+    var taxOn   = document.getElementById('jc-taxToggle').checked;
+    var taxRate = taxOn ? num(document.getElementById('jc-taxRate').value) / 100 : 0;
+    var tax     = materialsBase * taxRate;
+    var totalCost = laborTotal + materialsBase + tax;
+
+    document.getElementById('jc-sumLabor').textContent     = fmt(laborTotal);
+    document.getElementById('jc-sumMaterials').textContent = fmt(materialsBase);
+    document.getElementById('jc-sumTaxRow').style.display  = taxOn ? '' : 'none';
+    document.getElementById('jc-sumTax').textContent       = fmt(tax);
+    document.getElementById('jc-sumTotalCost').textContent = fmt(totalCost);
+
+    var price        = num(document.getElementById('jc-sellPrice').value);
+    var taxCollected = PROPOSAL.taxCollected;
+    var hasTax   = taxCollected > 0;
+    var isBefore = hasTax ? (profitMode === 'before') : false;
+
+    // Show/hide toggle based on whether proposal has taxes
+    document.getElementById('jc-taxToggleWrap').style.display = hasTax ? '' : 'none';
+
+    // Always calculate profit before tax (consistent base)
+    var netRevenue = hasTax ? (price - taxCollected) : price;
+    var profit     = netRevenue - totalCost;
+    var margin     = netRevenue > 0 ? (profit / netRevenue) * 100 : null;
+
+    document.getElementById('jc-sumPrice').textContent          = fmt(price);
+    document.getElementById('jc-taxCollectedRow').style.display = (hasTax && isBefore) ? 'flex' : 'none';
+    document.getElementById('jc-sumTaxCollected').textContent   = '− ' + fmt(taxCollected);
+    document.getElementById('jc-netRevenueRow').style.display   = (hasTax && isBefore) ? 'flex' : 'none';
+    document.getElementById('jc-sumNetRevenue').textContent     = fmt(netRevenue);
+    document.getElementById('jc-sumCosts').textContent          = '− ' + fmt(totalCost);
+
+    // T1-3: Prominent profit number
+    var profEl = document.getElementById('jc-sumProfit');
+    profEl.textContent = fmt(profit);
+    profEl.className = 'profit-amount' + (profit > 0 ? ' profit-pos' : profit < 0 ? ' profit-neg' : '');
+
+    var marginEl = document.getElementById('jc-sumMargin');
+    if (margin === null) {
+      marginEl.textContent = '—';
+      marginEl.className = 'margin-badge mb-none';
+    } else {
+      marginEl.textContent = margin.toFixed(1) + '%';
+      marginEl.className = 'margin-badge' + (margin >= 50 ? ' mb-pos' : margin >= 30 ? ' mb-warn' : ' mb-neg');
+    }
+
+    renderTiers(totalCost, price);
+  }
+
+  function renderTiers(totalCost, currentPrice) {
+    var wrap = document.getElementById('jc-priceTiers');
+    wrap.innerHTML = '';
+    var taxCollected = PROPOSAL.taxCollected;
+    var isBefore     = (profitMode === 'before');
+    TARGET_MARGINS.forEach(function (m) {
+      // margin = (netRevenue - totalCost) / netRevenue  →  netRevenue = totalCost / (1 - m)
+      // price = netRevenue + taxCollected  (always)
+      var netRevenue = totalCost > 0 ? totalCost / (1 - m) : 0;
+      var tierPrice  = netRevenue + taxCollected;
+      var tierProfit = isBefore ? (netRevenue - totalCost) : (tierPrice - totalCost);
+      var tierBase   = isBefore ? netRevenue : tierPrice;
+      var isSelected = currentPrice > 0 && Math.abs(currentPrice - tierPrice) < 0.02;
+      var col = document.createElement('div');
+      col.className = 'col-4';
+      col.innerHTML =
+        '<div class="price-card text-center p-2' + (isSelected ? ' selected-tier' : '') + '" data-price="' + tierPrice.toFixed(2) + '">'
+          + '<div class="tier-selected" style="min-height:1rem;">' + (isSelected ? '✓ Selected' : '') + '</div>'
+          + '<div class="tier-label text-secondary">' + Math.round(m * 100) + '% margin</div>'
+          + '<div class="price my-1">' + fmt(tierPrice) + '</div>'
+          + '<div class="tier-profit text-secondary">+' + fmt(tierProfit) + '</div>'
+        + '</div>';
+      wrap.appendChild(col);
+    });
+  }
+
+  /* ─── Events ──────────────────────────────────────────────── */
+  // Phase 6: Tax tooltip toggle
+  document.getElementById('jc-taxTooltipBtn').addEventListener('click', function () {
+    document.getElementById('jc-taxTipBox').classList.toggle('visible');
+  });
+  document.getElementById('jc-taxTooltipBtn').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      document.getElementById('jc-taxTipBox').classList.toggle('visible');
+    }
+  });
+  // Show hint line when tax toggle is turned on
+  document.getElementById('jc-taxToggle').addEventListener('change', function () {
+    document.getElementById('jc-taxWrap').style.display = this.checked ? '' : 'none';
+    document.getElementById('jc-taxHint').style.display = this.checked ? '' : 'none';
+    jcRecalc();
+  });
+
+  document.getElementById('jc-addLaborBtn').addEventListener('click', addLaborRow);
+  document.getElementById('jc-addPRRowBtn').addEventListener('click', function () { addPRRow('', '', ''); });
+  // jc-taxToggle change listener moved to Phase 6 block above
+
+  // Before / After tax toggle
+  document.querySelectorAll('.profit-toggle-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      profitMode = btn.dataset.mode;
+      document.querySelectorAll('.profit-toggle-btn').forEach(function (b) {
+        b.classList.toggle('active', b.dataset.mode === profitMode);
+      });
+      jcRecalc();
+    });
+  });
+
+  document.querySelectorAll('.mode-tab').forEach(function (btn) {
+    btn.addEventListener('click', function () { switchJCMode(btn.dataset.jcmode); });
+  });
+
+  // Person select → auto-fill rate
+  document.getElementById('jc-laborRows').addEventListener('change', function (e) {
+    var row = e.target.closest('[data-type="labor"]');
+    if (row && e.target.dataset.f === 'person') {
+      var opt = e.target.options[e.target.selectedIndex];
+      row.querySelector('[data-f="rate"]').value = (opt && opt.dataset.rate) ? opt.dataset.rate : '';
+      jcRecalc();
+    }
+  });
+
+  // Input changes — mark manual hours override
+  document.body.addEventListener('input', function (e) {
+    var t = e.target;
+    // If user manually edits hours, mark that row as overridden
+    if (t.dataset.f === 'hours' && t.closest('[data-type="labor"]')) {
+      t.closest('[data-type="labor"]').dataset.manualHours = '1';
+    }
+    // Suggested hours changed → redistribute non-manual rows
+    if (t.id === 'jc-suggestedHrs') {
+      redistributeHours();
+    }
+    if (t.closest('#jc-laborRows') || t.closest('#jc-prRows') ||
+        t.id === 'jc-sellPrice' || t.id === 'jc-taxRate' || t.id === 'jc-suggestedHrs') {
+      jcRecalc();
+    }
+  });
+
+  // Remove + price tier clicks
+  document.body.addEventListener('click', function (e) {
+    if (e.target.classList.contains('remove-btn')) {
+      var r = e.target.closest('.line-row');
+      if (r) {
+        r.remove();
+        // After removal, reset manual flag on remaining rows and redistribute
+        document.querySelectorAll('#jc-laborRows [data-type="labor"]').forEach(function (row) {
+          row.dataset.manualHours = '0';
+        });
+        redistributeHours();
+        jcRecalc();
+      }
+      return;
+    }
+    var tier = e.target.closest('[data-price]');
+    if (tier) {
+      document.getElementById('jc-sellPrice').value = tier.dataset.price;
+      jcRecalc();
+    }
+  });
+
+  /* ─── Initialize Profitability with proposal data ─────────── */
+  function initJobCosting() {
+    // Pre-fill suggested hours FIRST so distribution works when rows are added
+    document.getElementById('jc-suggestedHrs').value = PROPOSAL.jobReport.totalHours;
+
+    // Pre-fill selling price from proposal grand total
+    document.getElementById('jc-sellPrice').value = PROPOSAL.grandTotal.toFixed(2);
+
+    // Pre-fill materials from Product Report
+    PROPOSAL.productReport.forEach(function (item) {
+      addPRRow(item.name, item.gallons, item.costEach.toFixed(2));
+    });
+
+    // Build line item blocks
+    buildLineItemBlocks();
+
+    // Phase 6: Pre-fill tax rate from company settings, show hint
+    document.getElementById('jc-taxRate').value = PROPOSAL.companyTaxRate.toFixed(2);
+    document.getElementById('jc-taxToggle').checked = true;
+    document.getElementById('jc-taxWrap').style.display = '';
+    document.getElementById('jc-taxHint').style.display = '';
+
+    // Start in production rate mode
+    switchJCMode('production');
+
+    // Phase 8: Show hours tracker now that suggested hours are set;
+    // stays visible regardless of which materials mode is active.
+    document.getElementById('jc-suggestedBanner').style.display = '';
+
+    // Add one labor row — hours auto-distributed to full suggested amount
+    addLaborRow();
+
+    // Set default profit mode to before-tax
+    profitMode = 'before';
+    document.getElementById('jc-toggleBefore').classList.add('active');
+    document.getElementById('jc-toggleAfter').classList.remove('active');
+  }
+
+  /* ─── Sync state ─────────────────────────────────────────── */
+  // Snapshot of what the workbench was last synced FROM
+  var lastSyncedProposal = {
+    grandTotal:    PROPOSAL.grandTotal,
+    taxCollected:  PROPOSAL.taxCollected,
+    totalHours:    PROPOSAL.jobReport.totalHours,
+    productReport: PROPOSAL.productReport.map(function (r) {
+      return { name: r.name, gallons: r.gallons, costEach: r.costEach };
+    })
+  };
+
+  // "Live" proposal state that can drift (simulated by demo controls)
+  var liveProposal = {
+    grandTotal:    PROPOSAL.grandTotal,
+    taxCollected:  PROPOSAL.taxCollected,
+    totalHours:    PROPOSAL.jobReport.totalHours,
+    productReport: PROPOSAL.productReport.map(function (r) {
+      return { name: r.name, gallons: r.gallons, costEach: r.costEach };
+    })
+  };
+
+  function fmtNow() {
+    var d = new Date();
+    var h = d.getHours(), m = d.getMinutes(), ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return 'Today, ' + h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+  }
+
+  function checkStale() {
+    var stale = false;
+    var reasons = [];
+
+    if (liveProposal.grandTotal !== lastSyncedProposal.grandTotal) {
+      stale = true; reasons.push('selling price changed');
+    }
+    if (liveProposal.totalHours !== lastSyncedProposal.totalHours) {
+      stale = true; reasons.push('suggested hours updated');
+    }
+    // Check product report diff
+    var liveNames  = liveProposal.productReport.map(function (r) { return r.name; });
+    var syncNames  = lastSyncedProposal.productReport.map(function (r) { return r.name; });
+    var added      = liveNames.filter(function (n) { return syncNames.indexOf(n) === -1; });
+    var removed    = syncNames.filter(function (n) { return liveNames.indexOf(n) === -1; });
+    var modified   = liveProposal.productReport.filter(function (r) {
+      var prev = lastSyncedProposal.productReport.find(function (s) { return s.name === r.name; });
+      return prev && (prev.gallons !== r.gallons || prev.costEach !== r.costEach);
+    });
+    if (added.length || removed.length || modified.length) {
+      stale = true; reasons.push('materials changed');
+    }
+
+    var banner = document.getElementById('jcStaleBanner');
+    if (stale) {
+      banner.classList.add('visible');
+      document.getElementById('jcStaleMsg').textContent =
+        'The proposal has been updated (' + reasons.join(', ') + '). Review and sync to keep your workbench current.';
+    } else {
+      banner.classList.remove('visible');
+    }
+    return stale;
+  }
+
+  /* ─── Build diff for Sync Modal ─────────────────────────── */
+  function buildDiff() {
+    var diff = [];
+
+    // Selling price
+    if (liveProposal.grandTotal !== lastSyncedProposal.grandTotal) {
+      diff.push({
+        key: 'price', label: 'Selling Price', type: 'changed',
+        detail: [{ old: fmt(lastSyncedProposal.grandTotal), new: fmt(liveProposal.grandTotal) }],
+        actions: ['overwrite', 'skip']
+      });
+    }
+
+    // Suggested hours
+    if (liveProposal.totalHours !== lastSyncedProposal.totalHours) {
+      diff.push({
+        key: 'hours', label: 'Suggested Hours', type: 'changed',
+        detail: [{ old: lastSyncedProposal.totalHours + ' hrs', new: liveProposal.totalHours + ' hrs' }],
+        actions: ['overwrite', 'skip']
+      });
+    }
+
+    // Materials added
+    var liveNames = liveProposal.productReport.map(function (r) { return r.name; });
+    var syncNames = lastSyncedProposal.productReport.map(function (r) { return r.name; });
+    var matAdded  = liveProposal.productReport.filter(function (r) { return syncNames.indexOf(r.name) === -1; });
+    var matRemoved = lastSyncedProposal.productReport.filter(function (r) { return liveNames.indexOf(r.name) === -1; });
+    var matModified = liveProposal.productReport.filter(function (r) {
+      var prev = lastSyncedProposal.productReport.find(function (s) { return s.name === r.name; });
+      return prev && (prev.gallons !== r.gallons || prev.costEach !== r.costEach);
+    });
+
+    if (matAdded.length) {
+      diff.push({
+        key: 'matAdded', label: 'Materials Added', type: 'added',
+        detail: matAdded.map(function (r) { return { text: r.name + ' — ' + r.gallons + ' gal @ ' + fmt(r.costEach) + '/gal' }; }),
+        actions: ['add', 'skip']
+      });
+    }
+    if (matModified.length) {
+      diff.push({
+        key: 'matModified', label: 'Materials Modified', type: 'changed',
+        detail: matModified.map(function (r) {
+          var prev = lastSyncedProposal.productReport.find(function (s) { return s.name === r.name; });
+          return { label: r.name, old: prev.gallons + ' gal @ ' + fmt(prev.costEach), new: r.gallons + ' gal @ ' + fmt(r.costEach) };
+        }),
+        actions: ['overwrite', 'skip']
+      });
+    }
+    if (matRemoved.length) {
+      diff.push({
+        key: 'matRemoved', label: 'Materials Removed', type: 'removed',
+        detail: matRemoved.map(function (r) { return { text: r.name }; }),
+        actions: ['overwrite', 'skip'],
+        overwriteLabel: 'Remove from workbench'
+      });
+    }
+
+    return diff;
+  }
+
+  /* ─── Render Sync Modal ──────────────────────────────────── */
+  var syncSelections = {}; // key → chosen action
+
+  function openSyncModal() {
+    var diff = buildDiff();
+    var body = document.getElementById('syncModalBody');
+    var footer = document.getElementById('syncModalFooter');
+    syncSelections = {};
+
+    if (!diff.length) {
+      body.innerHTML =
+        '<div class="sync-uptodate">'
+          + '<div class="sync-uptodate-icon">✅</div>'
+          + '<div class="sync-uptodate-title">Workbench is up to date</div>'
+          + '<p class="text-secondary" style="font-size:.875rem;">No changes detected in the proposal since your last sync.</p>'
+        + '</div>';
+      footer.innerHTML = '<button class="btn-cancel-sync" id="syncCancelBtn">Close</button>';
+    } else {
+      var html = '<p class="text-secondary mb-3" style="font-size:.85rem;">Choose how to handle each changed category. Manually entered labor rows and rates are always preserved.</p>';
+      diff.forEach(function (cat) {
+        // Default selection
+        syncSelections[cat.key] = cat.actions[0];
+
+        var badgeHtml = '<span class="diff-cat-badge ' + cat.type + '">' + cat.type + '</span>';
+        var detailHtml = cat.detail.map(function (d) {
+          if (d.old && d.label) {
+            return '<div class="diff-item"><strong>' + d.label + '</strong><br><span class="diff-old">' + d.old + '</span> → <span class="diff-new">' + d.new + '</span></div>';
+          } else if (d.old) {
+            return '<div class="diff-item"><span class="diff-old">' + d.old + '</span> → <span class="diff-new">' + d.new + '</span></div>';
+          } else {
+            return '<div class="diff-item">' + d.text + '</div>';
+          }
+        }).join('');
+
+        var actionsHtml = '<div class="diff-action-row"><span class="diff-action-label">Action:</span><div class="diff-radio-group">';
+        cat.actions.forEach(function (a) {
+          var label = a === 'add' ? 'Add new items only' : a === 'overwrite' ? (cat.overwriteLabel || 'Overwrite') : 'Skip';
+          var selClass = a === syncSelections[cat.key] ? ('sel-' + a) : '';
+          actionsHtml += '<button class="diff-radio-btn ' + selClass + '" data-catkey="' + cat.key + '" data-action="' + a + '">' + label + '</button>';
+        });
+        actionsHtml += '</div></div>';
+
+        html +=
+          '<div class="diff-category" data-catkey="' + cat.key + '">'
+            + '<div class="diff-cat-header">'
+              + '<span class="diff-cat-label">' + cat.label + ' ' + badgeHtml + '</span>'
+            + '</div>'
+            + '<div class="diff-cat-body">' + detailHtml + actionsHtml + '</div>'
+          + '</div>';
+      });
+      body.innerHTML = html;
+      footer.innerHTML =
+        '<button class="btn-cancel-sync" id="syncCancelBtn">Cancel</button>'
+        + '<button class="btn-confirm-sync" id="syncConfirmBtn">Apply Selected Changes</button>';
+
+      // Action button selection
+      body.addEventListener('click', function (e) {
+        var btn = e.target.closest('.diff-radio-btn');
+        if (!btn) return;
+        var key = btn.dataset.catkey;
+        var action = btn.dataset.action;
+        syncSelections[key] = action;
+        body.querySelectorAll('[data-catkey="' + key + '"].diff-radio-btn').forEach(function (b) {
+          b.className = 'diff-radio-btn';
+        });
+        btn.classList.add('sel-' + action);
+      });
+    }
+
+    // Wire close/cancel/confirm inside modal
+    document.getElementById('syncModalBackdrop').classList.add('open');
+
+    var closeBtn = document.getElementById('syncModalClose');
+    var cancelBtn = document.getElementById('syncCancelBtn');
+    if (closeBtn) closeBtn.onclick = closeSyncModal;
+    if (cancelBtn) cancelBtn.onclick = closeSyncModal;
+
+    var confirmBtn = document.getElementById('syncConfirmBtn');
+    if (confirmBtn) confirmBtn.onclick = applySync;
+  }
+
+  function closeSyncModal() {
+    document.getElementById('syncModalBackdrop').classList.remove('open');
+  }
+
+  function applySync() {
+    var diff = buildDiff();
+    diff.forEach(function (cat) {
+      var action = syncSelections[cat.key];
+      if (!action || action === 'skip') return;
+
+      if (cat.key === 'price' && action === 'overwrite') {
+        document.getElementById('jc-sellPrice').value = liveProposal.grandTotal.toFixed(2);
+      }
+      if (cat.key === 'hours' && action === 'overwrite') {
+        document.getElementById('jc-suggestedHrs').value = liveProposal.totalHours;
+        // Reset manual flags so hours redistribute
+        document.querySelectorAll('#jc-laborRows [data-type="labor"]').forEach(function (r) {
+          r.dataset.manualHours = '0';
+        });
+        redistributeHours();
+      }
+      if (cat.key === 'matAdded' && action === 'add') {
+        // Append new material rows without touching existing ones
+        liveProposal.productReport.forEach(function (r) {
+          var exists = lastSyncedProposal.productReport.find(function (s) { return s.name === r.name; });
+          if (!exists) addPRRow(r.name, r.gallons, r.costEach.toFixed(2));
+        });
+      }
+      if (cat.key === 'matModified' && action === 'overwrite') {
+        // Update matching rows in the PR table
+        document.querySelectorAll('#jc-prRows [data-type="prmat"]').forEach(function (row) {
+          var nameInput = row.querySelector('[data-f="name"]');
+          var match = liveProposal.productReport.find(function (r) { return r.name === nameInput.value; });
+          if (match) {
+            row.querySelector('[data-f="qty"]').value = match.gallons;
+            row.querySelector('[data-f="cost"]').value = match.costEach.toFixed(2);
+          }
+        });
+      }
+      if (cat.key === 'matRemoved' && action === 'overwrite') {
+        var liveNames = liveProposal.productReport.map(function (r) { return r.name; });
+        document.querySelectorAll('#jc-prRows [data-type="prmat"]').forEach(function (row) {
+          var nameInput = row.querySelector('[data-f="name"]');
+          if (liveNames.indexOf(nameInput.value) === -1) row.remove();
+        });
+      }
+    });
+
+    // Advance lastSynced snapshot to live state
+    lastSyncedProposal = {
+      grandTotal:    liveProposal.grandTotal,
+      taxCollected:  liveProposal.taxCollected,
+      totalHours:    liveProposal.totalHours,
+      productReport: liveProposal.productReport.map(function (r) {
+        return { name: r.name, gallons: r.gallons, costEach: r.costEach };
+      })
+    };
+
+    // Update timestamp badge (BR-14, BR-20)
+    document.getElementById('jcSyncTs').textContent = fmtNow();
+
+    // Dismiss stale banner
+    document.getElementById('jcStaleBanner').classList.remove('visible');
+
+    jcRecalc();
+    closeSyncModal();
+  }
+
+  /* ─── Wire Sync triggers ─────────────────────────────────── */
+  document.getElementById('jcSyncBtn').addEventListener('click', openSyncModal);
+  document.getElementById('jcStaleSyncBtn').addEventListener('click', openSyncModal);
+  // Close on backdrop click
+  document.getElementById('syncModalBackdrop').addEventListener('click', function (e) {
+    if (e.target === this) closeSyncModal();
+  });
+
+  /* ─── Demo controls ─────────────────────────────────────── */
+  document.getElementById('demoTriggerStale').addEventListener('click', function () {
+    // Simulate proposal pre-acceptance edit: price increase + hours change
+    liveProposal.grandTotal   = 3750.00;
+    liveProposal.taxCollected = 340.91;
+    liveProposal.totalHours   = 26.50;
+    // Add a new material
+    var already = liveProposal.productReport.find(function (r) { return r.name === 'Benjamin Moore Aura'; });
+    if (!already) {
+      liveProposal.productReport.push({ name: 'Benjamin Moore Aura', gallons: 3, costEach: 68.00 });
+    }
+    checkStale();
+  });
+  document.getElementById('demoTriggerCO').addEventListener('click', function () {
+    // Simulate accepted Change Order: modified existing material qty
+    liveProposal.grandTotal   = 4100.00;
+    liveProposal.taxCollected = 372.73;
+    liveProposal.productReport = liveProposal.productReport.map(function (r) {
+      if (r.name === 'Sherwin-Williams Duration Exterior') return { name: r.name, gallons: 16.5, costEach: r.costEach };
+      return r;
+    });
+    checkStale();
+  });
+  document.getElementById('demoResetStale').addEventListener('click', function () {
+    liveProposal = {
+      grandTotal:   lastSyncedProposal.grandTotal,
+      taxCollected: lastSyncedProposal.taxCollected,
+      totalHours:   lastSyncedProposal.totalHours,
+      productReport: lastSyncedProposal.productReport.map(function (r) {
+        return { name: r.name, gallons: r.gallons, costEach: r.costEach };
+      })
+    };
+    document.getElementById('jcStaleBanner').classList.remove('visible');
+  });
+
+  initJobCosting();
+
+  // T1-1: Default-activate the Profitability tab on load
+  (function () {
+    var defaultTab = document.querySelector('.tab-btn[data-tab="jobcosting"]');
+    if (defaultTab) {
+      document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+      defaultTab.classList.add('active');
+      var panel = document.getElementById('panel-jobcosting');
+      if (panel) panel.classList.add('active');
+    }
+  }());
+
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
