@@ -1,188 +1,1135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Prototype Name — DripJobs</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposal Section Reordering — DripJobs Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* =========================================================
+   CSS CUSTOM PROPERTIES (Design System tokens)
+   ========================================================= */
+:root {
+  --color-primary:        #8B85EA;
+  --color-primary-hover:  #736BE3;
+  --color-primary-active: #5C53DC;
+  --color-primary-rgb:    139, 133, 234;
+  --color-brand:          #7C3AED;
+  --color-teal:           #0DCECE;
+  --color-text:           #32415B;
+  --color-text-muted:     #80879A;
+  --color-border:         #DAD8E3;
+  --color-card-bg:        #FFFFFF;
+  --color-page-bg:        #F4F3F8;
+  --color-danger-bg:      #FEF2F2;
+  --color-danger-border:  #FECACA;
+  --color-danger-text:    #991B1B;
+  --color-success-bg:     #F0FDF4;
+  --color-success-border: #BBF7D0;
+  --color-success-text:   #166534;
+  --color-warn-bg:        #FFFBEB;
+  --color-warn-border:    #FDE68A;
+  --color-warn-text:      #92400E;
+  --radius-card:          10px;
+  --radius-btn:           10px;
+  --radius-btn-sm:        8px;
+  --radius-pill:          14px;
+  --font:                 'Nunito', sans-serif;
+  --shadow-sm:            0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:            0 4px 12px rgba(0,0,0,0.08);
+}
 
-  :root {
-    --color-primary:        #8B85EA;
-    --color-primary-hover:  #736BE3;
-    --color-primary-active: #5C53DC;
-    --color-primary-rgb:    139, 133, 234;
-    --color-bg:             #F3F1FC;
-    --color-text:           #32415B;
-    --color-text-muted:     #80879A;
-    --color-border:         #DAD8E3;
-    --color-card:           #FFFFFF;
-  }
+/* =========================================================
+   RESET & BASE
+   ========================================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--color-page-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--color-bg);
-    color: var(--color-text);
-    min-height: 100vh;
-  }
+/* =========================================================
+   TOP NAV (Chrome — not interactive)
+   ========================================================= */
+.top-nav {
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.top-nav-logo {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-brand);
+  letter-spacing: -0.5px;
+}
+.top-nav-logo span { color: var(--color-teal); }
+.top-nav-sep { flex: 1; }
+.top-nav-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-brand));
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
 
-  /* ── Top bar ── */
-  .proto-bar {
-    background: var(--color-card);
-    border-bottom: 1px solid var(--color-border);
-    padding: 12px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .proto-bar-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .back-link {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--color-text-muted);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: color 0.15s;
-  }
-  .back-link:hover { color: var(--color-primary); }
-  .divider { color: var(--color-border); font-size: 16px; }
-  .proto-bar-title { font-size: 14px; font-weight: 600; }
-  .proto-bar-ticket {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--color-primary);
-    text-decoration: none;
-    padding: 4px 10px;
-    border: 1px solid #D6D2F5;
-    background: #E8E6FA;
-    border-radius: 999px;
-    letter-spacing: 0.2px;
-  }
-  .proto-bar-ticket:hover { background: var(--color-primary); color: #fff; }
+/* =========================================================
+   SETTINGS TAB BAR
+   ========================================================= */
+.settings-tabs-wrap {
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.settings-tabs-wrap::-webkit-scrollbar { display: none; }
+.settings-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 8px 0;
+  white-space: nowrap;
+}
+.settings-tab {
+  padding: 6px 16px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+.settings-tab:hover { background: #F4F3F8; color: var(--color-text); }
+.settings-tab.active {
+  background: #E8E6FA;
+  color: var(--color-primary-active);
+  box-shadow: inset 0 0 0 2px var(--color-primary));
+}
+/* Fix — just use solid border for active tab */
+.settings-tab.active {
+  background: #E8E6FA;
+  color: var(--color-primary-active);
+  border: 2px solid var(--color-primary);
+}
+.settings-tab:not(.active) { border: 2px solid transparent; }
 
-  /* ── Prototype content area ── */
-  .proto-content {
-    max-width: 960px;
-    margin: 32px auto;
-    padding: 0 24px;
-  }
+/* =========================================================
+   PAGE LAYOUT
+   ========================================================= */
+.page-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+.page-header {
+  margin-bottom: 20px;
+}
+.page-header h1 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+.page-header p {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
 
-  /* ── Placeholder message ── */
-  .proto-placeholder {
-    background: var(--color-card);
-    border: 2px dashed var(--color-border);
-    border-radius: 12px;
-    padding: 60px 40px;
-    text-align: center;
-  }
-  .proto-placeholder-icon { font-size: 40px; margin-bottom: 12px; }
-  .proto-placeholder h2 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
-  .proto-placeholder p  { font-size: 13px; color: var(--color-text-muted); line-height: 1.6; max-width: 420px; margin: 0 auto; }
+/* =========================================================
+   SECTION CARD
+   ========================================================= */
+.settings-section {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.settings-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+.settings-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+.settings-section-subtitle {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+.btn-ghost-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: var(--radius-btn-sm);
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+.btn-ghost-sm:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-active);
+  background: #F4F3FF;
+}
+.btn-ghost-sm i { font-size: 11px; }
 
-  .proto-placeholder code {
-    display: inline-block;
-    background: #F3F1FC;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    padding: 2px 8px;
-    font-size: 12px;
-    font-family: 'DM Mono', monospace;
-    color: var(--color-primary-active);
-    margin-top: 16px;
-  }
+/* =========================================================
+   SECTION ORDER LIST
+   ========================================================= */
+.section-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
 
-  /* ── Section card (reuse these in your prototype) ── */
-  .section-card {
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-  }
-  .section-title {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 14px;
-  }
-  .section-subtitle {
-    font-size: 12px;
-    color: var(--color-text-muted);
-    margin-top: -10px;
-    margin-bottom: 14px;
-  }
+/* Each row */
+.section-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fff;
+  margin-bottom: 6px;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  position: relative;
+}
+.section-row:last-child { margin-bottom: 0; }
+.section-row.is-anchor {
+  background: #FAFAFA;
+  border-style: dashed;
+  border-color: #D4D0E8;
+}
+.section-row.is-locked {
+  background: #F9F8FF;
+}
+.section-row.move-active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+  z-index: 10;
+}
+.section-row.highlighted {
+  border-color: var(--color-teal);
+  box-shadow: 0 0 0 3px rgba(13, 206, 206, 0.15);
+}
 
-  /* ── Button helpers ── */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 36px;
-    padding: 0 18px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    text-decoration: none;
-    border: none;
-    transition: all 0.15s;
-  }
-  .btn-primary  { background: var(--color-primary); color: #fff; }
-  .btn-primary:hover { background: var(--color-primary-hover); }
-  .btn-outline  { background: transparent; border: 1px solid var(--color-border); color: var(--color-text-muted); }
-  .btn-outline:hover { border-color: var(--color-primary); color: var(--color-primary); }
-  .btn-sm { height: 30px; padding: 0 14px; border-radius: 8px; font-size: 12px; }
+/* Position number */
+.section-pos {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #EFEFF3;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.section-row.is-anchor .section-pos {
+  background: transparent;
+  color: #C4BFD8;
+}
+
+/* Section icon */
+.section-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+/* Section labels */
+.section-info {
+  flex: 1;
+  min-width: 0;
+}
+.section-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+.section-desc {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 1px;
+}
+
+/* Lock badge */
+.badge-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: #F0EDF9;
+  color: var(--color-primary-active);
+  border: 1px solid #D6D2F5;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.badge-lock i { font-size: 9px; }
+.badge-anchor {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: #EFEFF3;
+  color: var(--color-text-muted);
+  border: 1px solid #DAD8E3;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Move button */
+.btn-move {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: var(--radius-btn-sm);
+  border: 1px solid var(--color-primary);
+  background: #F4F3FF;
+  color: var(--color-primary-active);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  min-height: 32px;
+  min-width: 44px; /* touch-target */
+}
+.btn-move:hover, .btn-move.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+.btn-move i { font-size: 11px; }
+
+/* =========================================================
+   PLACEMENT POPOVER
+   ========================================================= */
+.placement-panel {
+  display: none;
+  margin-top: 6px;
+  margin-bottom: 2px;
+  background: #fff;
+  border: 1px solid var(--color-primary);
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.14);
+  position: relative;
+  z-index: 20;
+}
+.placement-panel.open { display: block; }
+.placement-panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+.placement-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.btn-placement {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: #FAFAFA;
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 36px; /* touch target */
+}
+.btn-placement:hover {
+  border-color: var(--color-primary);
+  background: #F4F3FF;
+  color: var(--color-primary-active);
+}
+.btn-placement i { font-size: 10px; color: var(--color-text-muted); }
+.btn-placement:hover i { color: var(--color-primary); }
+.placement-cancel {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #FECACA;
+  background: #FFF5F5;
+  color: #991B1B;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 4px;
+  min-height: 36px;
+}
+.placement-cancel:hover { background: #FEF2F2; }
+
+/* =========================================================
+   SECTION ROW WRAPPER (holds row + panel together)
+   ========================================================= */
+.section-row-wrap {
+  margin-bottom: 6px;
+}
+.section-row-wrap:last-child { margin-bottom: 0; }
+.section-row-wrap .section-row { margin-bottom: 0; }
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: #1C2333;
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.25s ease;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { background: #0F4C1F; border-left: 3px solid #34D399; }
+.toast.info { background: #1C2333; border-left: 3px solid var(--color-primary); }
+.toast i { font-size: 14px; }
+
+/* =========================================================
+   SAVE FOOTER
+   ========================================================= */
+.save-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 4px;
+}
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 22px;
+  border-radius: var(--radius-btn);
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 40px;
+}
+.btn-primary:hover { background: var(--color-primary-hover); }
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 20px;
+  border-radius: var(--radius-btn);
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 40px;
+}
+.btn-secondary:hover { border-color: var(--color-primary); color: var(--color-primary-active); }
+
+/* =========================================================
+   LEGEND PANEL (Dev Annotations)
+   ========================================================= */
+.legend-toggle {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--color-brand);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: all 0.15s;
+}
+.legend-toggle:hover { background: #6D28D9; }
+.legend-panel {
+  position: fixed;
+  bottom: 60px;
+  left: 20px;
+  z-index: 8999;
+  width: 320px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+  padding: 16px;
+  display: none;
+}
+.legend-panel.open { display: block; }
+.legend-panel h3 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-brand);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+.legend-rule {
+  padding: 8px 0;
+  border-bottom: 1px solid #F0EFF5;
+  font-size: 12px;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+.legend-rule:last-child { border-bottom: none; padding-bottom: 0; }
+.legend-rule strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary-active);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 2px;
+}
+
+/* =========================================================
+   PROTOTYPE BADGE
+   ========================================================= */
+.proto-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #FFF7ED;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.proto-badge i { font-size: 10px; }
+
+/* =========================================================
+   ICON COLORS PER SECTION TYPE
+   ========================================================= */
+.icon-hero    { background: #FEF3C7; color: #D97706; }
+.icon-trust   { background: #DBEAFE; color: #1D4ED8; }
+.icon-details { background: #D1FAE5; color: #065F46; }
+.icon-pricing { background: #FCE7F3; color: #9D174D; }
+.icon-lineitems { background: #EDE9FE; color: #5B21B6; }
+.icon-areas   { background: #CFFAFE; color: #0E7490; }
+.icon-media   { background: #FEF9C3; color: #854D0E; }
+.icon-custom  { background: #F0FDF4; color: #166534; }
+.icon-aboutus { background: #F5F3FF; color: var(--color-primary-active); }
+.icon-terms   { background: #FEE2E2; color: #991B1B; }
+
+/* =========================================================
+   ABOUT US TOGGLE ROW
+   ========================================================= */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #FAFAFA;
+  margin-top: 16px;
+}
+.toggle-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.toggle-desc {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 1px;
+}
+/* Switchery-style toggle */
+.switch-wrap { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+.switch-input { opacity: 0; width: 0; height: 0; position: absolute; }
+.switch-track {
+  width: 42px; height: 24px;
+  background: #D4D2DF;
+  border-radius: 999px;
+  transition: background 0.2s ease;
+  position: relative;
+  display: block;
+}
+.switch-input:checked + .switch-track { background: #8B85EA; }
+.switch-track::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
+}
+.switch-input:checked + .switch-track::after { transform: translateX(18px); }
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 600px) {
+  .page-wrap { padding: 16px 12px 80px; }
+  .section-row { padding: 10px 10px; gap: 8px; }
+  .legend-panel { width: calc(100vw - 40px); }
+  .badge-lock, .badge-anchor { display: none; }
+  .settings-tabs-wrap { padding: 0 12px; }
+  .top-nav { padding: 0 12px; }
+}
 </style>
 </head>
 <body>
 
-<!-- Top bar — update PROTOTYPE NAME and TICKET ID -->
+<!-- PROTO HUB BAR -->
+<style>
+  .proto-bar {
+    background: #fff;
+    border-bottom: 1px solid #DAD8E3;
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: 'Nunito', sans-serif;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; }
+  .proto-bar .back-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: #80879A;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .proto-bar .back-link:hover { color: #8B85EA; }
+  .proto-bar .divider { color: #DAD8E3; font-size: 14px; }
+  .proto-bar-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #32415B;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .proto-bar-ticket {
+    font-size: 11px;
+    font-weight: 700;
+    color: #8B85EA;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    padding: 4px 10px;
+    border: 1px solid #DAD8E3;
+    border-radius: 6px;
+    transition: border-color 0.15s;
+  }
+  .proto-bar-ticket:hover { border-color: #8B85EA; }
+</style>
 <div class="proto-bar">
   <div class="proto-bar-left">
     <a class="back-link" href="../index.html">← Hub</a>
     <span class="divider">|</span>
-    <span class="proto-bar-title">PROPOSAL SECTION REORDER</span>
+    <span class="proto-bar-title">Proposal Section Reorder</span>
   </div>
-  <a class="proto-bar-ticket" href="https://app.clickup.com/t/86ba9yaaq" target="_blank">TICKET-ID</a>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/86ba9yaaq" target="_blank">86ba9yaaq</a>
 </div>
 
-<!-- Prototype content — replace the placeholder below with your actual prototype HTML -->
-<div class="proto-content">
+<!-- TOP NAV CHROME -->
+<nav class="top-nav">
+  <span class="top-nav-logo">Drip<span>Jobs</span></span>
+  <span class="top-nav-sep"></span>
+  <span class="top-nav-avatar">JH</span>
+</nav>
 
-  <div class="proto-placeholder">
-    <div class="proto-placeholder-icon">🛠️</div>
-    <h2>Prototype goes here</h2>
-    <p>Replace this placeholder with your prototype HTML. Use the <code>.section-card</code> pattern and the CSS variables above to stay on-brand automatically.</p>
-    <code>_template/index.html</code>
+<!-- SETTINGS TAB BAR -->
+<div class="settings-tabs-wrap">
+  <div class="settings-tabs">
+    <a class="settings-tab" href="#">Company Info</a>
+    <a class="settings-tab" href="#">Brand</a>
+    <a class="settings-tab" href="#">Email Settings</a>
+    <a class="settings-tab" href="#">App Settings</a>
+    <a class="settings-tab" href="#">Material</a>
+    <a class="settings-tab" href="#">Templates</a>
+    <a class="settings-tab" href="#">Notifications</a>
+    <a class="settings-tab" href="#">Payments</a>
+    <a class="settings-tab" href="#">Integrations</a>
+    <a class="settings-tab active" href="#">Customer Portal</a>
+    <a class="settings-tab" href="#">Add-Ons</a>
+  </div>
+</div>
+
+<!-- PAGE -->
+<div class="page-wrap">
+
+  <div class="proto-badge">
+    <i class="fas fa-flask"></i> Prototype · Ticket 86ba9yaaq
   </div>
 
-  <!--
-  ═══════════════════════════════════════════════
-  STARTER SECTION CARD — copy/paste and modify
-  ═══════════════════════════════════════════════
+  <div class="page-header">
+    <h1>Customer Portal</h1>
+    <p>Control how your proposals appear to customers.</p>
+  </div>
 
-  <div class="section-card">
-    <div class="section-title">Section Title</div>
-    <div class="section-subtitle">Optional subtitle</div>
-
-    Add your prototype content here.
-
-    <div style="margin-top:16px; display:flex; gap:8px; justify-content:flex-end;">
-      <button class="btn btn-outline">Cancel</button>
-      <button class="btn btn-primary">Save</button>
+  <!-- PROPOSAL SECTION ORDERING CARD -->
+  <section class="settings-section">
+    <div class="settings-section-header">
+      <div>
+        <h4 class="settings-section-title">Proposal Section Order</h4>
+        <p class="settings-section-subtitle">Set the order in which proposal sections appear to your customers. Fixed sections cannot be moved.</p>
+      </div>
+      <button class="btn-ghost-sm" id="restoreBtn" onclick="restoreDefault()">
+        <i class="fas fa-undo"></i> Restore Default
+      </button>
     </div>
-  </div>
-  -->
 
+    <!-- SECTION ORDER LIST -->
+    <div class="section-order-list" id="sectionList">
+      <!-- Rows are rendered by JS -->
+    </div>
+
+    <!-- ABOUT US VISIBILITY TOGGLE -->
+    <div class="toggle-row" id="aboutUsToggleRow">
+      <div>
+        <div class="toggle-label">Show About Us Section</div>
+        <div class="toggle-desc">When disabled, About Us will not render on the proposal but remains in position order above.</div>
+      </div>
+      <label class="switch-wrap" title="Toggle About Us visibility">
+        <input class="switch-input" type="checkbox" id="aboutUsToggle" checked onchange="handleAboutUsToggle(this)">
+        <span class="switch-track"></span>
+      </label>
+    </div>
+
+  </section>
+
+  <!-- SAVE FOOTER -->
+  <div class="save-footer">
+    <button class="btn-primary" onclick="handleSave()">
+      <i class="fas fa-check"></i> Save Changes
+    </button>
+    <button class="btn-secondary" onclick="handleCancel()">Cancel</button>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- DEV ANNOTATION LEGEND -->
+<button class="legend-toggle" onclick="toggleLegend()">
+  <i class="fas fa-code"></i> Dev Notes
+</button>
+<div class="legend-panel" id="legendPanel">
+  <h3>Developer Annotations</h3>
+  <div class="legend-rule">
+    <strong>BR-1 — Eligible Sections</strong>
+    Trust Builders, Details, Media, Custom Section(s), About Us are individually moveable with the Move button.
+  </div>
+  <div class="legend-rule">
+    <strong>BR-2 — Locked Groups</strong>
+    Line Items (Line Items + Optional Line Items) and Areas (Areas + Optional Areas) always move together as a single unit. Packages is a separate moveable row.
+  </div>
+  <div class="legend-rule">
+    <strong>BR-3 — Fixed Anchors</strong>
+    Hero Image is always position 1; Your Investment / Financing is always position 10; Terms and Conditions is always last. No Move button shown on any of these.
+  </div>
+  <div class="legend-rule">
+    <strong>BR-4 — Move Interaction</strong>
+    Clicking Move on an eligible row opens an inline placement panel showing "Before [Section]" options for all other moveable positions. Selecting one closes the panel and reorders the list.
+  </div>
+  <div class="legend-rule">
+    <strong>BR-5 — Restore Default</strong>
+    "Restore Default" button resets all rows to BR-6 order. Shows confirmation toast.
+  </div>
+  <div class="legend-rule">
+    <strong>BR-6 — Default Order</strong>
+    Hero Image → Trust Builders → Details → Packages → Line Items → Areas → Media → Custom Section(s) → About Us → Your Investment / Financing → Terms and Conditions
+  </div>
+  <div class="legend-rule">
+    <strong>BR-7 — Scope</strong>
+    Company-level setting. Applied to all proposals for the tenant.
+  </div>
+  <div class="legend-rule">
+    <strong>BR-8 — About Us Integration</strong>
+    Existing standalone About Us Move control is superseded. About Us is a moveable row here. Toggle below the list controls its visibility (does not remove it from order list).
+  </div>
+  <div class="legend-rule">
+    <strong>Edge Case: About Us toggled off</strong>
+    Row still appears in position list. Toggle state is separate from position. Section does not render on proposal when disabled.
+  </div>
+  <div class="legend-rule">
+    <strong>Out of Scope V1</strong>
+    Drag-and-drop, per-proposal overrides, hiding other sections.
+  </div>
 </div>
 
+<script>
+/* =========================================================
+   DATA MODEL
+   ========================================================= */
+
+// Section definitions
+const SECTIONS = {
+  hero:       { id: 'hero',       name: 'Hero Image',                icon: 'fa-image',        iconClass: 'icon-hero',     type: 'anchor',   desc: 'Always position 1 — fixed' },
+  trust:      { id: 'trust',      name: 'Trust Builders',            icon: 'fa-star',          iconClass: 'icon-trust',    type: 'free',     desc: 'Customer reviews & certifications' },
+  details:    { id: 'details',    name: 'Details',                   icon: 'fa-file-alt',      iconClass: 'icon-details',  type: 'free',     desc: 'Project scope and description' },
+  investment: { id: 'investment', name: 'Your Investment / Financing', icon: 'fa-dollar-sign',   iconClass: 'icon-pricing',  type: 'anchor',   desc: 'Always position 10 — fixed' },
+  packages:   { id: 'packages',   name: 'Packages',                  icon: 'fa-box-open',      iconClass: 'icon-lineitems',type: 'free',     desc: 'Packaged + Tiered Pricing' },
+  pricing:    { id: 'pricing',    name: 'Line Items',                icon: 'fa-list-alt',      iconClass: 'icon-lineitems',type: 'locked',   desc: 'Line Items + Optional Line Items', lockedWith: 'Line Items + Optional Line Items' },
+  areas:      { id: 'areas',      name: 'Areas',                     icon: 'fa-map',           iconClass: 'icon-areas',    type: 'locked',   desc: 'Areas + Optional Areas', lockedWith: 'Areas + Optional Areas' },
+  media:      { id: 'media',      name: 'Media',                     icon: 'fa-photo-video',   iconClass: 'icon-media',    type: 'free',     desc: 'Photos and videos' },
+  custom:     { id: 'custom',     name: 'Custom Section(s)',         icon: 'fa-puzzle-piece',  iconClass: 'icon-custom',   type: 'free',     desc: 'Your custom content blocks' },
+  aboutus:    { id: 'aboutus',    name: 'About Us',                  icon: 'fa-building',      iconClass: 'icon-aboutus',  type: 'free',     desc: 'Company introduction' },
+  terms:      { id: 'terms',      name: 'Terms and Conditions',      icon: 'fa-file-contract', iconClass: 'icon-terms',    type: 'anchor',   desc: 'Always last — fixed' },
+};
+
+// BR-6 Default order
+const DEFAULT_ORDER = ['hero','trust','details','packages','pricing','areas','media','custom','aboutus','investment','terms'];
+
+// Current order (mutable)
+let currentOrder = [...DEFAULT_ORDER];
+
+// Which row has Move open
+let activeMoveId = null;
+
+// About Us visibility
+let aboutUsVisible = true;
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+function render() {
+  const list = document.getElementById('sectionList');
+  list.innerHTML = '';
+
+  const moveables = currentOrder.filter(id => SECTIONS[id].type !== 'anchor');
+
+  currentOrder.forEach((id, idx) => {
+    const sec = SECTIONS[id];
+    const isAnchor = sec.type === 'anchor';
+    const isLocked = sec.type === 'locked';
+    const isActive = activeMoveId === id;
+
+    // Wrapper div
+    const wrap = document.createElement('div');
+    wrap.className = 'section-row-wrap';
+    wrap.setAttribute('data-id', id);
+
+    // Main row
+    const row = document.createElement('div');
+    row.className = 'section-row' +
+      (isAnchor ? ' is-anchor' : '') +
+      (isLocked ? ' is-locked' : '') +
+      (isActive  ? ' move-active' : '');
+
+    // Position number — skip for anchors
+    const pos = document.createElement('div');
+    pos.className = 'section-pos';
+    pos.textContent = isAnchor ? (id === 'hero' ? '1' : '—') : (idx); // rough display; anchors show fixed indicators
+    // Actually compute display position
+    pos.textContent = (idx + 1);
+    if (isAnchor) pos.style.background = 'transparent';
+
+    // Icon
+    const icon = document.createElement('div');
+    icon.className = 'section-icon ' + sec.iconClass;
+    icon.innerHTML = `<i class="fas ${sec.icon}"></i>`;
+
+    // Info
+    const info = document.createElement('div');
+    info.className = 'section-info';
+    let nameHtml = `<div class="section-name">${sec.name}`;
+    if (id === 'aboutus' && !aboutUsVisible) {
+      nameHtml += ` <span style="font-size:10px;color:#80879A;font-weight:600;">(hidden on proposal)</span>`;
+    }
+    nameHtml += `</div>`;
+    info.innerHTML = nameHtml + `<div class="section-desc">${sec.lockedWith || sec.desc}</div>`;
+
+    // Right side controls
+    const controls = document.createElement('div');
+    controls.style.cssText = 'display:flex;align-items:center;gap:8px;flex-shrink:0;';
+
+    if (isAnchor) {
+      const badge = document.createElement('span');
+      badge.className = 'badge-anchor';
+      badge.innerHTML = `<i class="fas fa-thumbtack"></i> Fixed`;
+      controls.appendChild(badge);
+    } else if (isLocked) {
+      const badge = document.createElement('span');
+      badge.className = 'badge-lock';
+      badge.innerHTML = `<i class="fas fa-link"></i> Locked group`;
+      controls.appendChild(badge);
+      const btn = makeMoveBtnElement(id, isActive);
+      controls.appendChild(btn);
+    } else {
+      const btn = makeMoveBtnElement(id, isActive);
+      controls.appendChild(btn);
+    }
+
+    row.appendChild(pos);
+    row.appendChild(icon);
+    row.appendChild(info);
+    row.appendChild(controls);
+    wrap.appendChild(row);
+
+    // Placement panel (if this row is active)
+    if (isActive) {
+      const panel = buildPlacementPanel(id, moveables);
+      wrap.appendChild(panel);
+    }
+
+    list.appendChild(wrap);
+  });
+
+  // Sync about us toggle visibility note
+  document.getElementById('aboutUsToggle').checked = aboutUsVisible;
+}
+
+function makeMoveBtnElement(id, isActive) {
+  const btn = document.createElement('button');
+  btn.className = 'btn-move' + (isActive ? ' active' : '');
+  btn.innerHTML = isActive
+    ? `<i class="fas fa-times"></i> Cancel`
+    : `<i class="fas fa-arrows-alt-v"></i> Move`;
+  btn.onclick = (e) => { e.stopPropagation(); toggleMove(id); };
+  return btn;
+}
+
+function buildPlacementPanel(activeId, moveables) {
+  const panel = document.createElement('div');
+  panel.className = 'placement-panel open';
+
+  const title = document.createElement('div');
+  title.className = 'placement-panel-title';
+  title.textContent = `Move "${SECTIONS[activeId].name}" — choose position:`;
+  panel.appendChild(title);
+
+  const opts = document.createElement('div');
+  opts.className = 'placement-options';
+
+  // Build valid placement targets
+  // Can place "Before X" for each other moveable (not itself, not before Hero anchor, not after Terms anchor)
+  moveables.forEach(targetId => {
+    if (targetId === activeId) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-placement';
+    btn.innerHTML = `<i class="fas fa-arrow-right"></i> Before ${SECTIONS[targetId].name}`;
+    btn.onclick = () => moveTo(activeId, targetId, 'before');
+    opts.appendChild(btn);
+  });
+
+  // Also "After [last moveable]"
+  const lastMoveable = moveables[moveables.length - 1];
+  if (lastMoveable !== activeId) {
+    const btn = document.createElement('button');
+    btn.className = 'btn-placement';
+    btn.innerHTML = `<i class="fas fa-arrow-right"></i> After ${SECTIONS[lastMoveable].name}`;
+    btn.onclick = () => moveTo(activeId, lastMoveable, 'after');
+    opts.appendChild(btn);
+  }
+
+  panel.appendChild(opts);
+  return panel;
+}
+
+/* =========================================================
+   INTERACTIONS
+   ========================================================= */
+function toggleMove(id) {
+  if (activeMoveId === id) {
+    activeMoveId = null;
+  } else {
+    activeMoveId = id;
+  }
+  render();
+}
+
+function moveTo(movingId, targetId, position) {
+  // Remove moving item
+  const newOrder = currentOrder.filter(id => id !== movingId);
+  // Find target index in new order
+  const targetIdx = newOrder.indexOf(targetId);
+
+  if (position === 'before') {
+    newOrder.splice(targetIdx, 0, movingId);
+  } else {
+    newOrder.splice(targetIdx + 1, 0, movingId);
+  }
+
+  // Enforce anchors: hero must be first, investment must be second-to-last, terms must be last
+  const heroIdx = newOrder.indexOf('hero');
+  if (heroIdx !== 0) {
+    newOrder.splice(heroIdx, 1);
+    newOrder.unshift('hero');
+  }
+  const termsIdx = newOrder.indexOf('terms');
+  if (termsIdx !== newOrder.length - 1) {
+    newOrder.splice(termsIdx, 1);
+    newOrder.push('terms');
+  }
+  // investment is fixed at position 10 (index 9, just before terms)
+  const invIdx = newOrder.indexOf('investment');
+  if (invIdx !== newOrder.length - 2) {
+    newOrder.splice(invIdx, 1);
+    newOrder.splice(newOrder.length - 1, 0, 'investment');
+  }
+
+  currentOrder = newOrder;
+  activeMoveId = null;
+  render();
+  showToast(`"${SECTIONS[movingId].name}" moved ${position} "${SECTIONS[targetId].name}"`, 'info');
+}
+
+function restoreDefault() {
+  currentOrder = [...DEFAULT_ORDER];
+  activeMoveId = null;
+  render();
+  showToast('Section order restored to default', 'success');
+}
+
+function handleAboutUsToggle(el) {
+  aboutUsVisible = el.checked;
+  render();
+  const msg = aboutUsVisible ? 'About Us will show on proposals' : 'About Us hidden from proposals (still in position order)';
+  showToast(msg, 'info');
+}
+
+function handleSave() {
+  activeMoveId = null;
+  render();
+  showToast('Proposal section order saved', 'success');
+}
+
+function handleCancel() {
+  restoreDefault();
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  const icon = type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
+  toast.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { toast.classList.add('show'); });
+  });
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 2800);
+}
+
+/* =========================================================
+   LEGEND
+   ========================================================= */
+function toggleLegend() {
+  document.getElementById('legendPanel').classList.toggle('open');
+}
+
+// Close move panel if clicking outside
+document.addEventListener('click', (e) => {
+  if (activeMoveId && !e.target.closest('.section-row-wrap')) {
+    activeMoveId = null;
+    render();
+  }
+});
+
+/* =========================================================
+   INIT
+   ========================================================= */
+render();
+</script>
 </body>
 </html>
