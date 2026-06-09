@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DripJobs — Inline Tax Rate Entry Prototype</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" rel="stylesheet">
+<style>
+  /* ═══════════════════════════════════════════════════════
+     DRIPJOBS DESIGN SYSTEM TOKENS — scoped to #proposals-page
+  ════════════════════════════════════════════════════════ */
+  #proposals-page {
+    --st-color-primary:        #8B85EA;
+    --st-color-primary-hover:  #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb:    139, 133, 234;
+    --st-color-text:           #32415B;
+    --st-color-text-muted:     #80879A;
+    --st-color-border:         #DAD8E3;
+    --st-color-card-bg:        #FFFFFF;
+  }
+
+  * { font-family: 'Nunito', sans-serif; box-sizing: border-box; }
+  body { background: #f8f9fc; color: #32415B; font-size: 14px; margin: 0; padding-right: 210px; }
+
+  /* ─────────────────────────────────────
+     FIXED PROTOTYPE SIDEBAR (outside design system scope)
+  ───────────────────────────────────── */
+  .proto-sidebar {
+    position: fixed; top: 0; right: 0; width: 210px; height: 100vh;
+    background: #1e1b4b; color: #fff; z-index: 200;
+    display: flex; flex-direction: column;
+    box-shadow: -3px 0 16px rgba(0,0,0,.25); overflow-y: auto;
+  }
+  .proto-sidebar-header {
+    background: #7C3AED; padding: 14px 14px 10px;
+    border-bottom: 1px solid rgba(255,255,255,.15);
+  }
+  .proto-sidebar-header .proto-title {
+    font-size: 10px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .07em; color: rgba(255,255,255,.7); margin-bottom: 2px;
+  }
+  .proto-sidebar-header .ticket-ref { font-size: 12px; font-weight: 700; color: #fff; line-height: 1.4; }
+  .proto-section { padding: 14px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .proto-section-label {
+    font-size: 10px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .07em; color: rgba(255,255,255,.4); margin-bottom: 8px;
+  }
+  .demo-btn {
+    display: flex; align-items: flex-start; width: 100%;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+    color: rgba(255,255,255,.85); padding: 7px 10px; border-radius: 6px;
+    font-size: 12px; cursor: pointer; font-family: 'Nunito', sans-serif;
+    font-weight: 600; margin-bottom: 6px; transition: background .15s; line-height: 1.35; text-align: left;
+  }
+  .demo-btn:last-child { margin-bottom: 0; }
+  .demo-btn:hover { background: rgba(255,255,255,.14); }
+  .demo-btn.active { background: #7C3AED; border-color: #7C3AED; color: #fff; }
+  .state-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 17px; height: 17px; min-width: 17px;
+    background: rgba(255,255,255,.18); border-radius: 50%;
+    font-size: 10px; margin-right: 7px; margin-top: 1px;
+  }
+  .demo-btn.active .state-num { background: rgba(255,255,255,.3); }
+  .legend-item { display: flex; align-items: flex-start; gap: 7px; font-size: 11px; color: rgba(255,255,255,.65); margin-bottom: 7px; line-height: 1.35; }
+  .legend-item:last-child { margin-bottom: 0; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
+  .br-list { font-size: 11px; color: rgba(255,255,255,.5); line-height: 1.75; }
+
+  /* ─────────────────────────────────────
+     PAGE LAYOUT
+  ───────────────────────────────────── */
+  .page-wrapper { max-width: 980px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  /* ─────────────────────────────────────
+     CUSTOMER HEADER
+  ───────────────────────────────────── */
+  #proposals-page .customer-name { color: var(--st-color-primary); font-weight: 700; font-size: 14px; }
+  #proposals-page .info-row { display: flex; align-items: center; gap: 6px; font-size: 13px; margin-bottom: 3px; }
+  #proposals-page .info-row i { color: var(--st-color-primary); width: 14px; text-align: center; }
+  #proposals-page .info-row a { color: var(--st-color-primary); text-decoration: underline; }
+  #proposals-page .send-msg-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--st-color-border); border-radius: 10px; padding: 5px 12px;
+    font-size: 12px; color: var(--st-color-text); background: #fff; cursor: pointer; margin-top: 6px;
+  }
+  #proposals-page .send-msg-btn i { color: var(--st-color-primary); }
+  #proposals-page .project-select {
+    display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--st-color-border); border-radius: 10px; padding: 5px 12px;
+    font-size: 12px; color: var(--st-color-text); background: #fff; cursor: pointer; margin-top: 4px;
+  }
+  #proposals-page .proposal-title { font-size: 22px; font-weight: 700; color: var(--st-color-text); margin-bottom: 6px; }
+  #proposals-page .status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fffbeb; border: 1px solid #fde68a; color: #92400e;
+    border-radius: 999px; padding: 5px 16px; font-size: 13px; font-weight: 600;
+  }
+  #proposals-page .proposal-meta { text-align: right; font-size: 13px; line-height: 1.8; }
+  #proposals-page .proposal-meta .meta-label { color: var(--st-color-text-muted); }
+  #proposals-page .proposal-meta a { color: var(--st-color-primary); }
+
+  /* ─────────────────────────────────────
+     ACTION BAR — btn-outline-primary style
+  ───────────────────────────────────── */
+  #proposals-page .action-bar { display: flex; justify-content: center; gap: 8px; margin: 16px 0 24px; flex-wrap: wrap; }
+  #proposals-page .action-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--st-color-border); background: #fff; color: var(--st-color-text);
+    border-radius: 10px; padding: 7px 16px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'Nunito', sans-serif; transition: background .15s, border-color .15s;
+  }
+  #proposals-page .action-btn i { color: var(--st-color-primary); }
+  #proposals-page .action-btn:hover { border-color: var(--st-color-primary); background: #f5f4fd; }
+
+  /* ─────────────────────────────────────
+     SECTION CARDS — 10px radius, 18px padding, #DAD8E3 border
+  ───────────────────────────────────── */
+  #proposals-page .section-wrap {
+    background: var(--st-color-card-bg); border: 1px solid var(--st-color-border);
+    border-radius: 10px; padding: 18px; margin-bottom: 18px;
+  }
+  #proposals-page .section-header {
+    font-size: 14px; font-weight: 600; color: var(--st-color-text);
+    padding-bottom: 10px; border-bottom: 1px solid var(--st-color-border); margin-bottom: 14px;
+  }
+
+  /* ─────────────────────────────────────
+     LINE ITEMS TABLE
+  ───────────────────────────────────── */
+  #proposals-page .line-items-table { width: 100%; }
+  #proposals-page .line-items-table thead th { font-size: 11px; font-weight: 600; color: var(--st-color-text-muted); padding: 6px 8px; border-bottom: 1px solid var(--st-color-border); letter-spacing: 0.2px; }
+  #proposals-page .line-items-table td { padding: 10px 8px; border-bottom: 1px solid #f0f0f5; vertical-align: middle; font-size: 14px; }
+  #proposals-page .drag-handle { color: #ccc; cursor: grab; }
+  #proposals-page .item-name { color: var(--st-color-primary); font-weight: 600; }
+  #proposals-page .icon-btn { color: var(--st-color-text-muted); font-size: 13px; cursor: pointer; margin-right: 4px; }
+  #proposals-page .icon-btn:hover { color: var(--st-color-primary); }
+  #proposals-page .total-row td { font-weight: 700; padding-top: 12px; border-top: 1px solid var(--st-color-border); border-bottom: none; font-size: 14px; }
+  #proposals-page .total-amount { background: var(--st-color-text); color: #fff; padding: 6px 12px; border-radius: 8px; display: inline-block; }
+  #proposals-page .add-item-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  #proposals-page .add-item-btn {
+    border: 1px solid var(--st-color-border); background: #fff; color: var(--st-color-text);
+    border-radius: 10px; padding: 6px 14px; font-size: 13px;
+    cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 600;
+    transition: border-color .15s, background .15s;
+  }
+  #proposals-page .add-item-btn:hover { border-color: var(--st-color-primary); background: #f5f4fd; }
+  #proposals-page .empty-state {
+    border: 1px solid var(--st-color-border); border-radius: 8px;
+    padding: 14px 16px; color: var(--st-color-text-muted); font-size: 13px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  #proposals-page .empty-state i { color: var(--st-color-primary); }
+
+  /* ─────────────────────────────────────
+     TOTALS (read-only display)
+  ───────────────────────────────────── */
+  #proposals-page .totals-table { width: 100%; }
+  #proposals-page .totals-table td { padding: 7px 8px; font-size: 14px; vertical-align: middle; }
+  #proposals-page .t-label { color: var(--st-color-text); text-align: right; width: 55%; }
+  #proposals-page .t-value { text-align: right; font-weight: 600; }
+  #proposals-page .t-total-row { border-top: 1px solid var(--st-color-border); }
+  #proposals-page .t-total-row .t-label { font-weight: 700; font-size: 15px; }
+  #proposals-page .total-pill { background: var(--st-color-text); color: #fff; padding: 7px 16px; border-radius: 8px; font-weight: 700; display: inline-block; }
+  #proposals-page .tax-display-row { display: none; }
+  #proposals-page .tax-display-row.visible { display: table-row; }
+  #proposals-page .apply-discount-wrap { text-align: right; margin-top: 12px; }
+  /* Apply Discount — btn-primary style */
+  #proposals-page .apply-discount-btn {
+    background: var(--st-color-primary); color: #fff; border: none; border-radius: 10px;
+    padding: 7px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: 'Nunito', sans-serif; transition: background .15s;
+  }
+  #proposals-page .apply-discount-btn:hover { background: var(--st-color-primary-hover); }
+
+  /* ─────────────────────────────────────
+     TABS — pill/chip style with pastels (design system §6)
+  ───────────────────────────────────── */
+  #proposals-page .proposal-tabs {
+    display: flex; gap: 6px; flex-wrap: nowrap;
+    overflow-x: auto; padding-bottom: 14px; margin-bottom: 18px;
+    scrollbar-width: none;
+  }
+  #proposals-page .proposal-tabs::-webkit-scrollbar { display: none; }
+  #proposals-page .proposal-tab {
+    padding: 6px 14px; font-size: 12px; font-weight: 500; color: var(--st-color-text);
+    border-radius: 16px; cursor: pointer; white-space: nowrap;
+    border: 1px solid transparent; transition: box-shadow .15s, font-weight .1s;
+  }
+  /* Pastel backgrounds cycling through 11 colors */
+  #proposals-page .proposal-tab:nth-child(1)  { background: #E8E6FA; }
+  #proposals-page .proposal-tab:nth-child(2)  { background: #FAF0E6; }
+  #proposals-page .proposal-tab:nth-child(3)  { background: #E6FAF0; }
+  #proposals-page .proposal-tab:nth-child(4)  { background: #E6F3FA; }
+  #proposals-page .proposal-tab:nth-child(5)  { background: #FAF7E6; }
+  #proposals-page .proposal-tab:nth-child(6)  { background: #FAE6E6; }
+  #proposals-page .proposal-tab:nth-child(7)  { background: #F0FAE6; }
+  #proposals-page .proposal-tab:nth-child(8)  { background: #E6FAFA; }
+  #proposals-page .proposal-tab:nth-child(9)  { background: #FAEAE6; }
+  #proposals-page .proposal-tab:nth-child(10) { background: #EFEFF3; }
+  #proposals-page .proposal-tab:nth-child(11) { background: #FAE6F0; }
+  #proposals-page .proposal-tab.active {
+    font-weight: 600; color: var(--st-color-primary-active);
+    box-shadow: inset 0 0 0 2px var(--st-color-primary);
+  }
+  #proposals-page .tab-panel { display: none; }
+  #proposals-page .tab-panel.active { display: block; }
+
+  /* ─────────────────────────────────────
+     SETTINGS CARDS — 10px radius, 18px padding
+  ───────────────────────────────────── */
+  #proposals-page .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 600px) { #proposals-page .settings-grid { grid-template-columns: 1fr; } }
+  #proposals-page .settings-card {
+    background: var(--st-color-card-bg); border: 1px solid var(--st-color-border);
+    border-radius: 10px; padding: 18px;
+  }
+  #proposals-page .settings-card-title { font-size: 14px; font-weight: 600; color: var(--st-color-text); margin-bottom: 14px; }
+  #proposals-page .settings-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid #f0eef8; font-size: 14px;
+  }
+  #proposals-page .settings-row:last-child { border-bottom: none; }
+  #proposals-page .s-label { color: var(--st-color-text); font-weight: 500; display: flex; align-items: center; gap: 5px; }
+  #proposals-page .s-value { color: var(--st-color-text); display: flex; align-items: center; gap: 8px; }
+  #proposals-page .s-info { color: var(--st-color-text-muted); cursor: pointer; font-size: 13px; }
+  /* Toggles — Switchery-style, #8B85EA on */
+  #proposals-page .toggle-off { display: inline-block; width: 36px; height: 20px; background: #D1D5DB; border-radius: 999px; position: relative; cursor: pointer; flex-shrink: 0; }
+  #proposals-page .toggle-on  { display: inline-block; width: 36px; height: 20px; background: var(--st-color-primary); border-radius: 999px; position: relative; cursor: pointer; flex-shrink: 0; }
+  #proposals-page .toggle-off::after, #proposals-page .toggle-on::after { content: ''; position: absolute; top: 3px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: left .15s; }
+  #proposals-page .toggle-off::after { left: 3px; }
+  #proposals-page .toggle-on::after  { left: 19px; }
+  /* Small inline action buttons (matches "Add" beside Deposit) */
+  #proposals-page .deposit-add-btn {
+    background: var(--st-color-primary); color: #fff; border: none;
+    border-radius: 8px; padding: 3px 12px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: 'Nunito', sans-serif; transition: background .15s;
+  }
+  #proposals-page .deposit-add-btn:hover { background: var(--st-color-primary-hover); }
+  #proposals-page .countersign-select {
+    border: 1px solid var(--st-color-border); border-radius: 8px; padding: 5px 10px;
+    font-size: 14px; font-family: 'Nunito', sans-serif; color: var(--st-color-text);
+    height: 40px;
+  }
+  #proposals-page .note-text { font-size: 12px; color: var(--st-color-primary-active); padding: 6px 0; font-weight: 400; }
+
+  /* ── Save confirmation toast — §5 success alert variant ── */
+  @keyframes savedFade {
+    0%   { opacity: 0; transform: translateY(10px);  }
+    10%  { opacity: 1; transform: translateY(0);     }
+    78%  { opacity: 1; transform: translateY(0);     }
+    100% { opacity: 0; transform: translateY(-8px);  }
+  }
+  #proposals-page .save-confirm {
+    display: none; flex-direction: column; gap: 2px;
+    background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px;
+    padding: 8px 12px; margin-top: 6px; min-width: 200px;
+  }
+  #proposals-page .save-confirm.playing {
+    display: flex;
+    animation: savedFade 4.5s ease forwards;
+  }
+  #proposals-page .save-confirm-headline {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 700; color: #166534;
+  }
+  #proposals-page .save-confirm-detail {
+    font-size: 11px; font-weight: 400; color: #166534; opacity: .85;
+    padding-left: 18px;
+  }
+
+  /* ── Source Rate Toggle (BR-19, BR-20) ── */
+  .source-toggle-section { display: none; margin-bottom: 16px; }
+  .source-toggle-section.visible { display: block; }
+  .source-toggle-label {
+    font-size: 10px; font-weight: 700; color: #80879A;
+    text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; display: block;
+  }
+  .source-toggle-group { display: flex; gap: 8px; }
+  .source-toggle-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: flex-start;
+    border: 1px solid var(--st-color-border, #DAD8E3); border-radius: 8px; padding: 9px 12px;
+    background: #fff; cursor: pointer; font-family: 'Nunito', sans-serif;
+    transition: border-color .15s, background .15s; text-align: left;
+  }
+  .source-toggle-btn:hover { border-color: var(--st-color-primary, #8B85EA); background: #f8f7fe; }
+  .source-toggle-btn.selected {
+    border-color: var(--st-color-primary, #8B85EA); background: #f3f1fd;
+    box-shadow: 0 0 0 1px var(--st-color-primary, #8B85EA);
+  }
+  .source-toggle-btn .stb-label { font-size: 10px; font-weight: 700; color: #80879A; text-transform: uppercase; letter-spacing: .05em; }
+  .source-toggle-btn .stb-value { font-size: 15px; font-weight: 700; color: #32415B; margin-top: 3px; }
+  .source-toggle-btn .stb-desc  { font-size: 10px; font-weight: 400; color: #80879A; margin-top: 4px; line-height: 1.35; }
+  .source-toggle-btn.selected .stb-label { color: var(--st-color-primary, #8B85EA); }
+  .source-toggle-btn.selected .stb-value { color: var(--st-color-primary, #8B85EA); }
+  .source-toggle-btn.selected .stb-desc  { color: var(--st-color-primary, #8B85EA); opacity: .75; }
+  .source-toggle-divider {
+    display: flex; align-items: center; gap: 8px; margin: 12px 0 0;
+    color: #80879A; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  }
+  .source-toggle-divider::before, .source-toggle-divider::after { content: ''; flex: 1; height: 1px; background: var(--st-color-border, #DAD8E3); }
+
+  /* ── "Changing from" rate indicator (BR-4a) ── */
+  /* Sits inline on the same row as the field label — label left, pill right */
+  .modal-field-label-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .modal-field-label-text {
+    font-size: 12px; font-weight: 600; color: #32415B;
+  }
+  .modal-from-rate {
+    display: none; align-items: center; gap: 5px;
+    font-size: 11px; color: #80879A;
+  }
+  .modal-from-rate.visible { display: flex; }
+  .modal-from-rate .from-value {
+    background: #EEF2FF; color: var(--st-color-primary-active, #5C53DC);
+    font-weight: 700; font-size: 11px; border-radius: 6px;
+    padding: 1px 8px; border: 1px solid #C7D2FE;
+  }
+
+  /* ── Annotation markers ── */
+  .ann-wrap { position: relative; display: inline-flex; align-items: center; }
+  .ann-marker {
+    display: none; align-items: center; justify-content: center;
+    width: 17px; height: 17px; border-radius: 50%;
+    font-size: 10px; font-weight: 700; cursor: help; margin-left: 5px; flex-shrink: 0;
+  }
+  .annotations-visible .ann-marker { display: inline-flex; }
+  .ann-tip {
+    display: none; position: absolute; right: 24px; top: -4px; z-index: 300;
+    background: #1e1b4b; color: #fff; border-radius: 8px;
+    padding: 9px 12px; font-size: 12px; line-height: 1.4;
+    width: 220px; box-shadow: 0 4px 14px rgba(0,0,0,.3);
+  }
+  .ann-wrap:hover .ann-tip { display: block; }
+
+  /* ─────────────────────────────────────
+     BOTTOM BAR
+  ───────────────────────────────────── */
+  #proposals-page .setup-link { color: var(--st-color-primary); font-size: 13px; text-decoration: underline; cursor: pointer; }
+  #proposals-page .bottom-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 0; flex-wrap: wrap; gap: 8px;
+    border-top: 1px solid var(--st-color-border); margin-top: 18px;
+  }
+  /* Send Proposal — btn-primary */
+  #proposals-page .send-proposal-btn {
+    background: var(--st-color-primary); color: #fff; border: none; border-radius: 10px;
+    padding: 9px 22px; font-size: 14px; font-weight: 600; cursor: pointer;
+    font-family: 'Nunito', sans-serif; transition: background .15s;
+  }
+  #proposals-page .send-proposal-btn:hover { background: var(--st-color-primary-hover); }
+  #proposals-page .bottom-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  /* Bottom action buttons — btn-outline-primary sm */
+  #proposals-page .bottom-action-btn {
+    border: 1px solid var(--st-color-border); background: #fff; color: var(--st-color-text);
+    border-radius: 10px; padding: 7px 14px; font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: 'Nunito', sans-serif; transition: border-color .15s, background .15s;
+  }
+  #proposals-page .bottom-action-btn:hover { border-color: var(--st-color-primary); background: #f5f4fd; }
+  #proposals-page .bottom-action-btn.danger { color: #991B1B; border-color: #FECACA; background: #FEF2F2; }
+  #proposals-page .bottom-action-btn.danger:hover { border-color: #f87171; }
+  #proposals-page .acorn-logo { font-size: 15px; font-weight: 600; color: #4a90d9; }
+
+  /* ─────────────────────────────────────
+     EDIT TAX RATE MODAL — design system inputs (§3)
+  ───────────────────────────────────── */
+  .modal-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(30,27,75,.4); z-index: 400;
+  }
+  .modal-card {
+    display: none; flex-direction: column;
+    position: fixed; top: 50%; left: calc(50% - 105px);
+    transform: translate(-50%, -50%);
+    background: #fff; border-radius: 10px;
+    width: 380px; z-index: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    overflow: hidden;
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid #DAD8E3;
+  }
+  .modal-title { font-size: 14px; font-weight: 600; color: #32415B; }
+  .modal-close {
+    background: none; border: none; font-size: 20px; color: #80879A;
+    cursor: pointer; line-height: 1; padding: 0 2px; font-family: 'Nunito', sans-serif;
+  }
+  .modal-close:hover { color: #32415B; }
+  .modal-body { padding: 20px; }
+  /* Floating label field (design system §3) */
+  .modal-field { position: relative; display: flex; flex-direction: column; }
+  /* Field group with % suffix */
+  .modal-field-group {
+    display: flex; align-items: center;
+    border: 1px solid #DAD8E3; border-radius: 8px; overflow: hidden;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .modal-field-group:focus-within {
+    border-color: #8B85EA;
+    box-shadow: 0 0 0 3px rgba(139,133,234,.18);
+  }
+  .modal-field-group.is-invalid {
+    border-color: #FECACA;
+    box-shadow: 0 0 0 3px rgba(220,53,69,.1);
+  }
+  .modal-rate-input {
+    flex: 1; height: 40px; padding: 0 14px;
+    border: none; background: #fff;
+    font-size: 14px; font-family: 'Nunito', sans-serif; color: #32415B;
+    -moz-appearance: textfield; outline: none;
+  }
+  .modal-rate-input::-webkit-outer-spin-button,
+  .modal-rate-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .modal-rate-suffix {
+    padding: 0 14px; font-size: 14px; color: #80879A;
+    background: #f8f7fe; border-left: 1px solid #DAD8E3;
+    height: 40px; display: flex; align-items: center;
+  }
+  /* Helper + error text (design system §9) */
+  .modal-helper { font-size: 12px; color: #80879A; margin-top: 8px; font-weight: 400; }
+  .modal-error { display: none; font-size: 12px; color: #991B1B; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 7px 10px; margin-top: 8px; }
+  .modal-error.visible { display: flex; align-items: center; gap: 6px; }
+  .modal-footer {
+    display: flex; justify-content: flex-end; gap: 10px;
+    padding: 14px 20px; border-top: 1px solid #DAD8E3; background: #fafafa;
+  }
+  /* Cancel — btn-outline-primary */
+  .modal-cancel-btn {
+    background: #fff; border: 1px solid #DAD8E3; color: #32415B;
+    border-radius: 10px; padding: 7px 20px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'Nunito', sans-serif; transition: border-color .15s, background .15s;
+  }
+  .modal-cancel-btn:hover { border-color: #8B85EA; background: #f5f4fd; }
+  /* Save — btn-primary */
+  .modal-save-btn {
+    background: #8B85EA; border: none; color: #fff;
+    border-radius: 10px; padding: 7px 20px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'Nunito', sans-serif; transition: background .15s;
+  }
+  .modal-save-btn:hover { background: #736BE3; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════
+     PROTOTYPE SIDEBAR (outside proposal UI)
+════════════════════════════════ -->
+<div class="proto-sidebar">
+  <div class="proto-sidebar-header">
+    <div class="proto-title">Prototype · Enhancement</div>
+    <div class="ticket-ref">Inline Tax Rate Entry<br>
+      <span style="font-weight:400;color:rgba(255,255,255,.6);font-size:11px;">#86b7u2fr9</span>
+    </div>
+  </div>
+
+  <div class="proto-section">
+    <div class="proto-section-label">Demo States</div>
+    <button class="demo-btn active" onclick="setDemo('empty', this)">
+      <span class="state-num">1</span>No Tax (Default)
+    </button>
+    <button class="demo-btn" onclick="setDemo('filled', this)">
+      <span class="state-num">2</span>Tax Rate Entered (5%)
+    </button>
+    <button class="demo-btn" onclick="setDemo('invalid', this)">
+      <span class="state-num">3</span>Invalid Rate (&gt;100)
+    </button>
+    <button class="demo-btn" onclick="setDemo('settings', this)">
+      <span class="state-num">4</span>Settings Tab Focus
+    </button>
+    <button class="demo-btn" onclick="setDemo('toggle-builder', this)">
+      <span class="state-num">5</span>BR-19 — Builder, Template Conflict
+    </button>
+    <button class="demo-btn" onclick="setDemo('toggle-template', this)">
+      <span class="state-num">6</span>BR-20 — Template Editor Conflict
+    </button>
+    <button class="demo-btn" onclick="setDemo('toggle-suppressed', this)">
+      <span class="state-num">7</span>BR-21 — Toggle Suppressed
+    </button>
+  </div>
+
+  <div class="proto-section">
+    <div class="proto-section-label">Annotations</div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#7C3AED;"></div>
+      <span><strong style="color:#fff;">①</strong> Tax Rate % input — BR-1, BR-3, BR-11</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#0DCECE;"></div>
+      <span><strong style="color:#fff;">②</strong> Tax row in Totals — BR-4 (read-only)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#0DCECE;"></div>
+      <span><strong style="color:#fff;">③</strong> Grand Total — live update</span>
+    </div>
+  </div>
+
+  <div class="proto-section">
+    <div class="proto-section-label">BRs Covered</div>
+    <div class="br-list">
+      BR-1 · Tax Rate row location<br>
+      BR-2 · Read-only display state<br>
+      BR-3 · Edit button → modal<br>
+      BR-4 · Modal fields &amp; Enter key<br>
+      BR-4a · "Changing from" indicator<br>
+      BR-5 · Inline validation (0–100)<br>
+      BR-6 · Save behavior + recalc<br>
+      BR-7 · Cancel = no change<br>
+      BR-8 · Toast: headline + detail<br>
+      BR-10 · Tax row auto-show/hide<br>
+      BR-11 · Totals read-only<br>
+      BR-13 · No tax default (—)<br>
+      BR-18 · Label = "Tax Rate"<br>
+      BR-19 · Source toggle: Builder<br>
+      BR-20 · Source toggle: Template<br>
+      BR-21 · Toggle suppression
+    </div>
+  </div>
+</div><!-- /proto-sidebar -->
+
+
+<!-- ═══════════════════════════════
+     PROPOSAL PAGE
+════════════════════════════════ -->
+<div id="proposals-page" class="page-wrapper">
+
+  <!-- CUSTOMER HEADER -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="customer-name"><i class="fas fa-lock" style="font-size:11px;"></i> Dripjobs Harrison</div>
+      <div class="info-row mt-1"><i class="fas fa-map-marker-alt"></i><a href="#">221 N Nashville Ave, Hernando, FL 34442</a> <i class="far fa-copy" style="color:#80879A;font-size:11px;cursor:pointer;"></i></div>
+      <div class="info-row"><i class="far fa-envelope"></i> jeremy@dripjobs.com</div>
+      <div class="info-row"><i class="fas fa-phone"></i> (727) 250-8869</div>
+      <div class="mt-2"><button class="send-msg-btn"><i class="fas fa-comment-alt"></i> Send Message</button></div>
+      <div class="mt-1"><button class="project-select"><i class="fas fa-th" style="color:#7C3AED;"></i> [ Select a project ] <i class="fas fa-chevron-down" style="font-size:10px;"></i></button></div>
+    </div>
+    <div class="col-md-4 text-center">
+      <div class="proposal-title">Proposal #2786240 <i class="fas fa-download" style="font-size:14px;color:#80879A;cursor:pointer;"></i></div>
+      <div class="mt-2"><span class="status-badge"><i class="fas fa-clock"></i> PENDING</span></div>
+    </div>
+    <div class="col-md-4 proposal-meta">
+      <div><span class="meta-label">Created On:</span> 4/30/2026</div>
+      <div><span class="meta-label">Display Name:</span> <a href="#">Proposal #2786240</a></div>
+      <div><span class="meta-label">Exp. Date:</span> Not Set</div>
+      <div><span class="meta-label">Salesperson:</span> Jeremy Harrison</div>
+    </div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div class="action-bar">
+    <button class="action-btn"><i class="far fa-eye"></i> View Deal</button>
+    <button class="action-btn"><i class="fas fa-file-alt"></i> Work Order <i class="fas fa-chevron-down" style="font-size:10px;color:#80879A;"></i></button>
+    <button class="action-btn"><i class="far fa-user"></i> Customer View</button>
+    <button class="action-btn" style="padding:7px 10px;"><i class="far fa-copy"></i></button>
+  </div>
+
+  <!-- LINE ITEMS -->
+  <div class="section-wrap">
+    <div class="section-header">Line Items</div>
+    <table class="line-items-table">
+      <thead>
+        <tr>
+          <th style="width:26px;"></th>
+          <th>Product / Service</th>
+          <th class="text-right">Quantity</th>
+          <th class="text-right">Price</th>
+          <th class="text-right">Subtotal</th>
+          <th class="text-right">Tax</th>
+          <th class="text-right">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><i class="fas fa-grip-vertical drag-handle"></i></td>
+          <td><span class="item-name">10-Year Warranty</span> <i class="far fa-copy icon-btn"></i><i class="fas fa-pencil-alt icon-btn"></i></td>
+          <td class="text-right">10.00</td><td class="text-right">$10.00 / yr</td>
+          <td class="text-right">$100.00</td>
+          <td class="text-right" id="li-tax-1">$0.00</td>
+          <td class="text-right" id="li-total-1">$100.00</td>
+        </tr>
+        <tr>
+          <td><i class="fas fa-grip-vertical drag-handle"></i></td>
+          <td><span class="item-name">Interior Painting - Walls</span> <i class="far fa-copy icon-btn"></i><i class="fas fa-pencil-alt icon-btn"></i></td>
+          <td class="text-right">4.00</td><td class="text-right">$1,000.00 / Ea</td>
+          <td class="text-right">$4,000.00</td>
+          <td class="text-right" id="li-tax-2">$0.00</td>
+          <td class="text-right" id="li-total-2">$4,000.00</td>
+        </tr>
+        <tr>
+          <td><i class="fas fa-grip-vertical drag-handle"></i></td>
+          <td><span class="item-name">Paint Brushes (3 Pack)</span> <i class="far fa-copy icon-btn"></i><i class="fas fa-pencil-alt icon-btn"></i></td>
+          <td class="text-right">1.00</td><td class="text-right">$15.00 / Ea</td>
+          <td class="text-right">$15.00</td>
+          <td class="text-right" id="li-tax-3">$0.00</td>
+          <td class="text-right" id="li-total-3">$15.00</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="2"><strong>Total</strong></td><td></td><td></td>
+          <td class="text-right"><strong>$4,115.00</strong></td>
+          <td class="text-right"><strong id="li-tax-total">$0.00</strong></td>
+          <td class="text-right"><span class="total-amount" id="li-grand-total">$4,115.00</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="add-item-row mt-3">
+      <button class="add-item-btn">+ Add Item</button>
+      <button class="add-item-btn">+ Add Multiple Items</button>
+      <button class="add-item-btn">+ Add Optional Item</button>
+    </div>
+  </div>
+
+  <!-- AREAS -->
+  <div class="section-wrap">
+    <div class="section-header">Areas</div>
+    <div class="empty-state"><i class="fas fa-info-circle"></i> Start by adding an Area here...</div>
+    <div class="add-item-row mt-3">
+      <button class="add-item-btn">+ Add Area</button>
+      <button class="add-item-btn">+ Add Optional Area</button>
+    </div>
+  </div>
+
+  <!-- PACKAGES -->
+  <div class="section-wrap">
+    <div class="section-header">Packages</div>
+    <div class="empty-state"><i class="fas fa-info-circle"></i> Start by adding a Package here...</div>
+    <div class="add-item-row mt-3">
+      <button class="add-item-btn">+ Add Package</button>
+      <button class="add-item-btn" style="background:#7C3AED;color:#fff;border-color:#7C3AED;">
+        <i class="fas fa-question-circle"></i> How It Works
+      </button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       TOTALS — read-only, driven by Settings
+  ════════════════════════════════ -->
+  <div class="section-wrap" id="totals-wrap">
+    <div class="section-header">Totals</div>
+    <table class="totals-table">
+      <tbody>
+        <tr>
+          <td class="t-label">Subtotal</td>
+          <td class="t-value">$4,115.00</td>
+        </tr>
+
+        <!-- ② Tax row: hidden until rate > 0 (BR-4, BR-6) -->
+        <tr class="tax-display-row" id="tax-display-row">
+          <td class="t-label">
+            <div class="ann-wrap" style="justify-content:flex-end;">
+              Tax
+              <span class="ann-marker" style="background:#0DCECE;color:#fff;">②</span>
+              <div class="ann-tip">
+                <strong>BR-4 · BR-6</strong><br>
+                Hidden by default. Appears automatically when a Tax Rate is entered in Payment Settings below. Read-only.
+              </div>
+            </div>
+          </td>
+          <td class="t-value" id="tax-amount-display"></td>
+        </tr>
+
+        <!-- ③ Grand Total -->
+        <tr class="t-total-row">
+          <td class="t-label" style="font-weight:800;font-size:15px;">
+            <div class="ann-wrap" style="justify-content:flex-end;">
+              Total
+              <span class="ann-marker" style="background:#0DCECE;color:#fff;">③</span>
+              <div class="ann-tip">
+                <strong>BR-4</strong><br>
+                Grand total updates live as Tax Rate is edited in Payment Settings.
+              </div>
+            </div>
+          </td>
+          <td class="t-value">
+            <span class="total-pill" id="grand-total-display">$4,115.00</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="apply-discount-wrap">
+      <button class="apply-discount-btn">Apply Discount</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       TABS + SETTINGS
+  ════════════════════════════════ -->
+  <div class="section-wrap">
+    <div class="proposal-tabs">
+      <div class="proposal-tab active" id="tab-btn-settings" onclick="switchTab('settings', this)">Settings</div>
+      <div class="proposal-tab" onclick="switchTab('reports', this)">Reports</div>
+      <div class="proposal-tab" onclick="switchTab('attachments', this)">Attachments</div>
+      <div class="proposal-tab" onclick="switchTab('notes', this)">Notes</div>
+      <div class="proposal-tab" onclick="switchTab('activity', this)">Activity Log</div>
+      <div class="proposal-tab" onclick="switchTab('video', this)">Video</div>
+      <div class="proposal-tab" onclick="switchTab('custom', this)">Custom Sections</div>
+      <div class="proposal-tab" onclick="switchTab('production', this)">Production Rates</div>
+      <div class="proposal-tab" onclick="switchTab('details', this)">Details</div>
+      <div class="proposal-tab" onclick="switchTab('color', this)">Color Chart</div>
+      <div class="proposal-tab" onclick="switchTab('booking', this)">Booking Form</div>
+    </div>
+
+    <!-- SETTINGS TAB PANEL -->
+    <div class="tab-panel active" id="tab-settings">
+      <div class="settings-grid">
+
+        <!-- ── Payment Settings ── -->
+        <div class="settings-card" id="payment-settings-card">
+          <div class="settings-card-title">Payment Settings</div>
+
+          <div class="settings-row">
+            <span class="s-label">Deposit:</span>
+            <span class="s-value">0.00% ($0.00) <button class="deposit-add-btn">Add</button></span>
+          </div>
+
+          <div class="settings-row">
+            <span class="s-label">Allow Alternative Payment <i class="fas fa-info-circle s-info"></i></span>
+            <span class="s-value"><span class="toggle-on"></span></span>
+          </div>
+
+          <!-- ★ ① UPDATED: "Tax Rate" — display + Edit button (BR-1, BR-3, BR-11) -->
+          <div class="settings-row row-highlight" id="tax-rate-row">
+            <span class="s-label">
+              Tax Rate
+              <div class="ann-wrap">
+                <span class="ann-marker" style="background:#7C3AED;color:#fff;">①</span>
+                <div class="ann-tip">
+                  <strong>BR-1 · BR-3 · BR-11</strong><br>
+                  Label updated: <em>"Company Tax Rate"</em> → <em>"Tax Rate"</em>.<br><br>
+                  Edit opens a modal. Rate 0–100, up to 2 decimal places. Saves on confirm, cascades to all totals.
+                </div>
+              </div>
+            </span>
+            <span class="s-value" style="flex-direction:column; align-items:flex-end; gap:2px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span id="tax-rate-display" style="color:#32415B; font-size:13px;">—</span>
+                <button class="deposit-add-btn" onclick="openTaxModal(modalContext)">Edit</button>
+              </div>
+              <div class="save-confirm" id="save-confirm">
+                <div class="save-confirm-headline">
+                  <i class="fas fa-check-circle"></i>
+                  <span id="save-confirm-rate">Tax rate saved — 5.000%</span>
+                </div>
+                <div class="save-confirm-detail" id="save-confirm-detail">
+                  All taxable items updated · Tax: $200.75
+                </div>
+              </div>
+            </span>
+          </div>
+
+          <div class="settings-row">
+            <span class="s-label">Line Item Quantity Only <i class="fas fa-info-circle s-info"></i></span>
+            <span class="s-value"><span class="toggle-off"></span></span>
+          </div>
+          <div class="settings-row">
+            <span class="s-label">Hide Bottom Proposal Total <i class="fas fa-info-circle s-info"></i></span>
+            <span class="s-value"><span class="toggle-off"></span></span>
+          </div>
+          <div class="settings-row">
+            <span class="s-label">Hide Top Proposal Deposit <i class="fas fa-info-circle s-info"></i></span>
+            <span class="s-value"><span class="toggle-off"></span></span>
+          </div>
+          <div class="settings-row">
+            <span class="s-label">Hide Bottom Proposal Deposit <i class="fas fa-info-circle s-info"></i></span>
+            <span class="s-value"><span class="toggle-off"></span></span>
+          </div>
+        </div>
+
+        <!-- Proposal Settings -->
+        <div class="settings-card">
+          <div class="settings-card-title">Proposal Settings</div>
+          <div class="settings-row">
+            <span class="s-label">Enable Countersign <i class="fas fa-info-circle s-info"></i></span>
+            <span class="s-value"><span class="toggle-on"></span></span>
+          </div>
+          <div class="settings-row">
+            <span class="s-label">Countersign Signatory <i class="fas fa-info-circle s-info"></i></span>
+            <span class="s-value">
+              <select class="countersign-select"><option>Jeremy Harrison</option></select>
+            </span>
+          </div>
+          <div class="note-text">Note: The options below appear to customer after proposal has been sent.</div>
+          <div class="settings-row">
+            <span class="s-label">Allow Customer Proposal Rejection <i class="fas fa-info-circle s-info"></i></span>
+            <span class="s-value"><span class="toggle-off"></span></span>
+          </div>
+          <div class="settings-row">
+            <span class="s-label">Allow Customer Change Requests <i class="fas fa-info-circle s-info"></i></span>
+            <span class="s-value"><span class="toggle-off"></span></span>
+          </div>
+        </div>
+
+        <!-- Payment Schedule -->
+        <div class="settings-card">
+          <div class="settings-card-title">
+            Payment Schedule
+            <button class="deposit-add-btn" style="margin-left:8px;">Add</button>
+          </div>
+          <div class="settings-row">
+            <span class="s-label">Remaining Balance:</span>
+            <span class="s-value" id="ps-remaining">(100.00%) – $4,115.00</span>
+          </div>
+          <div class="settings-row">
+            <span class="s-label">Show Schedule on Proposal:</span>
+            <span class="s-value"><span class="toggle-off"></span></span>
+          </div>
+          <div class="settings-row">
+            <span class="s-label">Show Schedule Percentages on Proposal:</span>
+            <span class="s-value"><span class="toggle-off"></span></span>
+          </div>
+        </div>
+
+        <!-- Financing -->
+        <div class="settings-card">
+          <div class="settings-card-title">Financing</div>
+          <div class="settings-row">
+            <span class="s-label">Display Acorn Finance Widget</span>
+            <span class="s-value"><span class="toggle-off"></span></span>
+          </div>
+          <div class="text-center mt-3"><div class="acorn-logo">🌰 Acorn Finance</div></div>
+        </div>
+
+      </div>
+    </div><!-- /tab-settings -->
+
+    <div class="tab-panel" id="tab-reports"><p class="text-muted py-4">Reports content.</p></div>
+    <div class="tab-panel" id="tab-attachments"><p class="text-muted py-4">Attachments content.</p></div>
+    <div class="tab-panel" id="tab-notes"><p class="text-muted py-4">Notes content.</p></div>
+    <div class="tab-panel" id="tab-activity"><p class="text-muted py-4">Activity Log content.</p></div>
+    <div class="tab-panel" id="tab-video"><p class="text-muted py-4">Video content.</p></div>
+    <div class="tab-panel" id="tab-custom"><p class="text-muted py-4">Custom Sections content.</p></div>
+    <div class="tab-panel" id="tab-production"><p class="text-muted py-4">Production Rates content.</p></div>
+    <div class="tab-panel" id="tab-details"><p class="text-muted py-4">Details content.</p></div>
+    <div class="tab-panel" id="tab-color"><p class="text-muted py-4">Color Chart content.</p></div>
+    <div class="tab-panel" id="tab-booking"><p class="text-muted py-4">Booking Form content.</p></div>
+  </div><!-- /section-wrap tabs -->
+
+  <!-- BOTTOM BAR -->
+  <div><a class="setup-link" href="#">Click here to setup online payments ›</a></div>
+  <div class="bottom-bar">
+    <button class="send-proposal-btn">Send Proposal</button>
+    <div class="bottom-actions">
+      <button class="bottom-action-btn">View / Edit T&amp;C's</button>
+      <button class="bottom-action-btn">Approve Without Signature</button>
+      <button class="bottom-action-btn">Duplicate Proposal</button>
+      <button class="bottom-action-btn">Archive</button>
+      <button class="bottom-action-btn danger">Delete Proposal</button>
+    </div>
+  </div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+  // ── Stored rate (source of truth, replaces inline input) ────
+  let currentRate = '';
+
+  // ── Simulated external rates for BR-19 / BR-20 prototype ────
+  const COMPANY_RATE  = '8.5';  // Company Settings > Company Information
+  const TEMPLATE_RATE = '5';    // Rate saved on the Proposal Template at creation
+  let   modalContext  = 'builder-no-template';
+
+  // ── Line item data ───────────────────────────────────────────
+  const LINE_ITEMS = [
+    { id: 1, subtotal: 100.00,  taxable: false }, // 10-Year Warranty
+    { id: 2, subtotal: 4000.00, taxable: true  }, // Interior Painting - Walls
+    { id: 3, subtotal: 15.00,   taxable: true  }, // Paint Brushes (3 Pack)
+  ];
+  const SUBTOTAL_TOTAL = LINE_ITEMS.reduce((s, i) => s + i.subtotal, 0); // 4115.00
+
+  function fmt(n) {
+    return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  // ── Core recalculation — reads currentRate ──────────────────
+  function recalculate() {
+    const rateStr = currentRate;
+    const rate    = parseFloat(rateStr);
+    const valid   = rateStr !== '' && !isNaN(rate) && rate > 0 && rate <= 100;
+
+    const taxRow        = document.getElementById('tax-display-row');
+    const taxAmtDisplay = document.getElementById('tax-amount-display');
+    const grandTotal    = document.getElementById('grand-total-display');
+    const psRemain      = document.getElementById('ps-remaining');
+
+    if (!valid) {
+      applyLineItemTaxes(0);
+      taxRow.classList.remove('visible');
+      grandTotal.textContent = fmt(SUBTOTAL_TOTAL);
+      psRemain.textContent   = '(100.00%) – ' + fmt(SUBTOTAL_TOTAL);
+      return;
+    }
+
+    const totalTax = applyLineItemTaxes(rate);
+    const total    = SUBTOTAL_TOTAL + totalTax;
+    taxRow.classList.add('visible');
+    taxAmtDisplay.textContent = fmt(totalTax);
+    grandTotal.textContent    = fmt(total);
+    psRemain.textContent      = '(100.00%) – ' + fmt(total);
+  }
+
+  // Updates each line item's Tax and Total cells; returns total tax.
+  function applyLineItemTaxes(rate) {
+    let totalTax = 0;
+    LINE_ITEMS.forEach(item => {
+      const itemTax   = item.taxable ? item.subtotal * (rate / 100) : 0;
+      const itemTotal = item.subtotal + itemTax;
+      totalTax += itemTax;
+      document.getElementById('li-tax-' + item.id).textContent   = fmt(itemTax);
+      document.getElementById('li-total-' + item.id).textContent = fmt(itemTotal);
+    });
+    document.getElementById('li-tax-total').textContent   = fmt(totalTax);
+    document.getElementById('li-grand-total').textContent = fmt(SUBTOTAL_TOTAL + totalTax);
+    return totalTax;
+  }
+
+  // Updates the display text in the Tax Rate settings row.
+  function updateRateDisplay() {
+    const display = document.getElementById('tax-rate-display');
+    const rate    = parseFloat(currentRate);
+    display.textContent = (currentRate === '' || isNaN(rate) || rate === 0)
+      ? '—'
+      : rate.toFixed(3) + '%';
+  }
+
+  // ── Modal ────────────────────────────────────────────────────
+  function openTaxModal(context) {
+    modalContext = context || 'builder-no-template';
+
+    const input         = document.getElementById('modal-rate-input');
+    const group         = document.getElementById('modal-field-group');
+    const toggleSection = document.getElementById('source-toggle-section');
+    const toggleLabel   = document.getElementById('source-toggle-label');
+    const toggleLabelTemplate = document.getElementById('toggle-label-template');
+
+    input.value = currentRate;
+    group.classList.remove('is-invalid');
+    document.getElementById('modal-error').classList.remove('visible');
+
+    // Reset toggle selection
+    document.getElementById('toggle-btn-template').classList.remove('selected');
+    document.getElementById('toggle-btn-company').classList.remove('selected');
+
+    // ── BR-21: Toggle suppression rules ──────────────────────────
+    const companyRateNum = parseFloat(COMPANY_RATE);
+    const companyExists  = COMPANY_RATE !== '' && !isNaN(companyRateNum) && companyRateNum > 0;
+    const ratesMatch     = companyExists && (COMPANY_RATE === TEMPLATE_RATE);
+    const isFromTemplate = (context === 'builder-from-template' || context === 'template-editor');
+    const showToggle     = companyExists && isFromTemplate && !ratesMatch;
+
+    if (showToggle) {
+      document.getElementById('toggle-value-template').textContent = parseFloat(TEMPLATE_RATE).toFixed(3) + '%';
+      document.getElementById('toggle-value-company').textContent  = parseFloat(COMPANY_RATE).toFixed(3) + '%';
+
+      if (context === 'template-editor') {
+        toggleLabelTemplate.textContent = 'Current Template Rate';
+        toggleLabel.textContent = 'Reset to a different rate';
+        document.getElementById('toggle-desc-template').textContent = 'Currently saved on this template';
+      } else {
+        toggleLabelTemplate.textContent = 'Template Rate';
+        toggleLabel.textContent = 'Quick fill from';
+        document.getElementById('toggle-desc-template').textContent = 'Inherited from the Proposal Template';
+      }
+      toggleSection.classList.add('visible');
+    } else {
+      toggleSection.classList.remove('visible');
+    }
+
+    // ── "Changing from" indicator ─────────────────────────────────
+    // Visible when a rate is saved AND the toggle is not showing
+    const fromEl    = document.getElementById('modal-from-rate');
+    const fromValue = document.getElementById('modal-from-value');
+    const savedRate = parseFloat(currentRate);
+    const hasSaved  = currentRate !== '' && !isNaN(savedRate) && savedRate > 0;
+
+    if (hasSaved && !showToggle) {
+      fromValue.textContent = savedRate.toFixed(3) + '%';
+      fromEl.classList.add('visible');
+    } else {
+      fromEl.classList.remove('visible');
+    }
+
+    document.getElementById('modal-backdrop').style.display = 'block';
+    document.getElementById('modal-card').style.display     = 'flex';
+    setTimeout(() => input.focus(), 50);
+  }
+
+  // ── BR-19 / BR-20: Selecting a source pre-fills the input ────
+  function selectSource(source) {
+    const input       = document.getElementById('modal-rate-input');
+    const btnTemplate = document.getElementById('toggle-btn-template');
+    const btnCompany  = document.getElementById('toggle-btn-company');
+    const group       = document.getElementById('modal-field-group');
+
+    if (source === 'template') {
+      input.value = parseFloat(TEMPLATE_RATE).toFixed(2);
+      btnTemplate.classList.add('selected');
+      btnCompany.classList.remove('selected');
+    } else {
+      input.value = parseFloat(COMPANY_RATE).toFixed(2);
+      btnCompany.classList.add('selected');
+      btnTemplate.classList.remove('selected');
+    }
+
+    group.classList.remove('is-invalid');
+    document.getElementById('modal-error').classList.remove('visible');
+  }
+
+  function closeTaxModal() {
+    document.getElementById('modal-backdrop').style.display = 'none';
+    document.getElementById('modal-card').style.display     = 'none';
+  }
+
+  function validateModalInput() {
+    const input   = document.getElementById('modal-rate-input');
+    const group   = document.getElementById('modal-field-group');
+    const errorEl = document.getElementById('modal-error');
+    const rateStr = input.value;
+    const rate    = parseFloat(rateStr);
+    const invalid = rateStr !== '' && (isNaN(rate) || rate < 0 || rate > 100);
+    group.classList.toggle('is-invalid', invalid);
+    errorEl.classList.toggle('visible', invalid);
+  }
+
+  function saveTaxRate() {
+    const input   = document.getElementById('modal-rate-input');
+    const group   = document.getElementById('modal-field-group');
+    const errorEl = document.getElementById('modal-error');
+    const rateStr = input.value;
+    const rate    = parseFloat(rateStr);
+
+    if (rateStr !== '' && (isNaN(rate) || rate < 0 || rate > 100)) {
+      group.classList.add('is-invalid');
+      errorEl.classList.add('visible');
+      return;
+    }
+
+    currentRate = rateStr;
+    updateRateDisplay();
+    recalculate();
+    closeTaxModal();
+
+    // Build toast content from the saved values
+    const taxAmt  = (rateStr === '' || isNaN(rate) || rate === 0)
+      ? 0
+      : LINE_ITEMS.filter(i => i.taxable).reduce((s, i) => s + i.subtotal, 0) * (rate / 100);
+    const rateLabel = (rateStr === '' || isNaN(rate) || rate === 0)
+      ? 'Tax rate cleared'
+      : 'Tax rate saved — ' + rate.toFixed(3) + '%';
+    const detailLabel = (rateStr === '' || isNaN(rate) || rate === 0)
+      ? 'Tax removed from all line items'
+      : 'All taxable items updated · Tax: ' + fmt(taxAmt);
+
+    document.getElementById('save-confirm-rate').textContent   = rateLabel;
+    document.getElementById('save-confirm-detail').textContent = detailLabel;
+
+    const saveConfirm = document.getElementById('save-confirm');
+    saveConfirm.classList.remove('playing');
+    void saveConfirm.offsetWidth;
+    saveConfirm.classList.add('playing');
+    saveConfirm.addEventListener('animationend', () => {
+      saveConfirm.classList.remove('playing');
+    }, { once: true });
+  }
+
+  // ── Tabs ─────────────────────────────────────────────────────
+  function switchTab(id, el) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.proposal-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    el.classList.add('active');
+  }
+
+  // ── Demo states ──────────────────────────────────────────────
+  function setDemo(state, btn) {
+    const wrapper      = document.querySelector('.page-wrapper');
+    const alreadyActive = btn.classList.contains('active');
+
+    if (alreadyActive) {
+      btn.classList.remove('active');
+      wrapper.classList.remove('annotations-visible');
+      return;
+    }
+
+    document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    wrapper.classList.add('annotations-visible');
+
+    function openSettings() {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.proposal-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-settings').classList.add('active');
+      document.getElementById('tab-btn-settings').classList.add('active');
+    }
+
+    if (state === 'empty') {
+      currentRate = '';
+      modalContext = 'builder-no-template';
+      updateRateDisplay(); recalculate();
+      document.getElementById('totals-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    else if (state === 'filled') {
+      currentRate = '5';
+      modalContext = 'builder-no-template';
+      updateRateDisplay(); recalculate();
+      document.getElementById('totals-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    else if (state === 'invalid') {
+      modalContext = 'builder-no-template';
+      openSettings();
+      setTimeout(() => {
+        openTaxModal('builder-no-template');
+        const input = document.getElementById('modal-rate-input');
+        input.value = '150';
+        validateModalInput();
+        document.getElementById('tax-rate-row').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 200);
+    }
+    else if (state === 'settings') {
+      currentRate = '5';
+      modalContext = 'builder-no-template';
+      updateRateDisplay(); recalculate();
+      openSettings();
+      setTimeout(() => {
+        document.getElementById('payment-settings-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 200);
+    }
+    else if (state === 'toggle-builder') {
+      currentRate = '5';
+      modalContext = 'builder-from-template';
+      updateRateDisplay(); recalculate();
+      openSettings();
+      setTimeout(() => {
+        openTaxModal('builder-from-template');
+        document.getElementById('payment-settings-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 200);
+    }
+    else if (state === 'toggle-template') {
+      currentRate = '5';
+      modalContext = 'template-editor';
+      updateRateDisplay(); recalculate();
+      openSettings();
+      setTimeout(() => {
+        openTaxModal('template-editor');
+        document.getElementById('payment-settings-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 200);
+    }
+    else if (state === 'toggle-suppressed') {
+      currentRate = '5';
+      modalContext = 'builder-no-template';
+      updateRateDisplay(); recalculate();
+      openSettings();
+      setTimeout(() => {
+        openTaxModal('builder-no-template');
+        document.getElementById('payment-settings-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 200);
+    }
+  } // end setDemo
+
+  // Init
+  updateRateDisplay();
+  recalculate();
+</script>
+<!-- ═══════════════════════════════
+     EDIT TAX RATE MODAL
+════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="closeTaxModal()"></div>
+<div class="modal-card" id="modal-card">
+  <div class="modal-header">
+    <span class="modal-title">Edit Tax Rate</span>
+    <button class="modal-close" onclick="closeTaxModal()">&#215;</button>
+  </div>
+  <div class="modal-body">
+
+    <!-- BR-19 / BR-20: Source toggle — shown only when conditions met (BR-21) -->
+    <div class="source-toggle-section" id="source-toggle-section">
+      <span class="source-toggle-label" id="source-toggle-label">Quick fill from</span>
+      <div class="source-toggle-group">
+        <button class="source-toggle-btn" id="toggle-btn-template" onclick="selectSource('template')">
+          <span class="stb-label" id="toggle-label-template">Template Rate</span>
+          <span class="stb-value" id="toggle-value-template">5.000%</span>
+          <span class="stb-desc"  id="toggle-desc-template">Inherited from the Proposal Template</span>
+        </button>
+        <button class="source-toggle-btn" id="toggle-btn-company" onclick="selectSource('company')">
+          <span class="stb-label">Company Rate</span>
+          <span class="stb-value" id="toggle-value-company">8.500%</span>
+          <span class="stb-desc">From Company Settings &rsaquo; Company Information</span>
+        </button>
+      </div>
+      <div class="source-toggle-divider">or enter a custom rate</div>
+    </div>
+
+    <!-- "Changing from" indicator — inline with label, right-aligned (BR-4a) -->
+    <!-- Hidden when toggle is showing (BR-4a suppression) -->
+    <div class="modal-field-label-row">
+      <span class="modal-field-label-text">Tax Rate</span>
+      <div class="modal-from-rate" id="modal-from-rate">
+        Changing from <span class="from-value" id="modal-from-value">5.000%</span>
+      </div>
+    </div>
+
+    <div class="modal-field">
+      <div class="modal-field-group" id="modal-field-group">
+        <input
+          type="number"
+          id="modal-rate-input"
+          class="modal-rate-input"
+          placeholder="0.00"
+          min="0" max="100" step="0.01"
+          oninput="validateModalInput()"
+          onkeydown="if(event.key==='Enter') saveTaxRate()"
+        />
+        <span class="modal-rate-suffix">%</span>
+      </div>
+    </div>
+    <div class="modal-helper">Enter the tax percentage to apply to the proposal total.</div>
+    <div class="modal-error" id="modal-error"><i class="fas fa-exclamation-circle"></i> Please enter a valid tax percentage between 0 and 100.</div>
+  </div>
+  <div class="modal-footer">
+    <button class="modal-cancel-btn" onclick="closeTaxModal()">Cancel</button>
+    <button class="modal-save-btn" onclick="saveTaxRate()">Save</button>
+  </div>
+</div>
+
+</body>
+</html>
