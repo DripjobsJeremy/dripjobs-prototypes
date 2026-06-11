@@ -603,6 +603,7 @@ body {
 .icon-media   { background: #FEF9C3; color: #854D0E; }
 .icon-custom  { background: #F0FDF4; color: #166534; }
 .icon-aboutus { background: #F5F3FF; color: var(--color-primary-active); }
+.icon-notes   { background: #FFF7ED; color: #C2410C; }
 .icon-terms   { background: #FEE2E2; color: #991B1B; }
 
 /* =========================================================
@@ -667,60 +668,6 @@ body {
 </style>
 </head>
 <body>
-
-<!-- PROTO HUB BAR -->
-<style>
-  .proto-bar {
-    background: #fff;
-    border-bottom: 1px solid #DAD8E3;
-    padding: 10px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    font-family: 'Nunito', sans-serif;
-    position: sticky;
-    top: 0;
-    z-index: 200;
-  }
-  .proto-bar-left { display: flex; align-items: center; gap: 10px; }
-  .proto-bar .back-link {
-    font-size: 12px;
-    font-weight: 600;
-    color: #80879A;
-    text-decoration: none;
-    transition: color 0.15s;
-  }
-  .proto-bar .back-link:hover { color: #8B85EA; }
-  .proto-bar .divider { color: #DAD8E3; font-size: 14px; }
-  .proto-bar-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: #32415B;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-  }
-  .proto-bar-ticket {
-    font-size: 11px;
-    font-weight: 700;
-    color: #8B85EA;
-    text-decoration: none;
-    letter-spacing: 0.3px;
-    padding: 4px 10px;
-    border: 1px solid #DAD8E3;
-    border-radius: 6px;
-    transition: border-color 0.15s;
-  }
-  .proto-bar-ticket:hover { border-color: #8B85EA; }
-</style>
-<div class="proto-bar">
-  <div class="proto-bar-left">
-    <a class="back-link" href="../index.html">← Hub</a>
-    <span class="divider">|</span>
-    <span class="proto-bar-title">Proposal Section Reorder</span>
-  </div>
-  <a class="proto-bar-ticket" href="https://app.clickup.com/t/86ba9yaaq" target="_blank">86ba9yaaq</a>
-</div>
 
 <!-- TOP NAV CHROME -->
 <nav class="top-nav">
@@ -810,7 +757,7 @@ body {
   <h3>Developer Annotations</h3>
   <div class="legend-rule">
     <strong>BR-1 — Eligible Sections</strong>
-    Trust Builders, Details, Media, Custom Section(s), About Us are individually moveable with the Move button.
+    Trust Builders, Client Notes, Details, Packages, Media, Custom Section(s), About Us are individually moveable with the Move button.
   </div>
   <div class="legend-rule">
     <strong>BR-2 — Locked Groups</strong>
@@ -818,35 +765,47 @@ body {
   </div>
   <div class="legend-rule">
     <strong>BR-3 — Fixed Anchors</strong>
-    Hero Image is always position 1; Your Investment / Financing is always position 10; Terms and Conditions is always last. No Move button shown on any of these.
+    Hero Image is always position 1; Your Investment / Financing is always position 11 (second-to-last in 12-section order); Terms and Conditions is always last (position 12). No Move button shown on any of these.
   </div>
   <div class="legend-rule">
     <strong>BR-4 — Move Interaction</strong>
-    Clicking Move on an eligible row opens an inline placement panel showing "Before [Section]" options for all other moveable positions. Selecting one closes the panel and reorders the list.
+    Clicking Move on an eligible row opens an inline placement panel showing "Before [Section]" options for all other moveable positions. Selecting one closes the panel and reorders the list. Only one panel open at a time.
   </div>
   <div class="legend-rule">
     <strong>BR-5 — Restore Default</strong>
-    "Restore Default" button resets all rows to BR-6 order. Shows confirmation toast.
+    "Restore Default" button resets all rows to BR-6 order immediately. Shows toast confirmation.
   </div>
   <div class="legend-rule">
-    <strong>BR-6 — Default Order</strong>
-    Hero Image → Trust Builders → Details → Packages → Line Items → Areas → Media → Custom Section(s) → About Us → Your Investment / Financing → Terms and Conditions
+    <strong>BR-6 — Default Order (12 sections)</strong>
+    Hero Image → Trust Builders → Client Notes → Details → Packages → Line Items → Areas → Media → Custom Section(s) → About Us → Your Investment / Financing → Terms and Conditions
   </div>
   <div class="legend-rule">
     <strong>BR-7 — Scope</strong>
-    Company-level setting. Applied to all proposals for the tenant.
+    Company-level setting. Applied to all proposals for the tenant — including previously sent ones — immediately upon saving.
   </div>
   <div class="legend-rule">
     <strong>BR-8 — About Us Integration</strong>
     Existing standalone About Us Move control is superseded. About Us is a moveable row here. Toggle below the list controls its visibility (does not remove it from order list).
   </div>
   <div class="legend-rule">
+    <strong>BR-9 — Save Behavior</strong>
+    User must explicitly click "Save Changes" to persist. Clicking "Cancel" restores to last saved state (same as Restore Default if no prior save made).
+  </div>
+  <div class="legend-rule">
+    <strong>BR-10 — Client Notes Section</strong>
+    Client Notes is moveable (default position 3). When a Client Note has been added to a proposal, the section renders at its configured position. When no Client Note is present on a proposal, Client Notes silently skips rendering — regardless of position in the order list. The row is always visible in Settings.
+  </div>
+  <div class="legend-rule">
     <strong>Edge Case: About Us toggled off</strong>
-    Row still appears in position list. Toggle state is separate from position. Section does not render on proposal when disabled.
+    Row still appears in position list. Toggle state stored independently from position. Section does not render on proposal when disabled.
+  </div>
+  <div class="legend-rule">
+    <strong>Edge Case: Client Notes — no note present</strong>
+    Section silently skips rendering on a per-proposal basis. Position setting is preserved in Settings.
   </div>
   <div class="legend-rule">
     <strong>Out of Scope V1</strong>
-    Drag-and-drop, per-proposal overrides, hiding other sections.
+    Drag-and-drop, per-proposal overrides, hiding sections other than About Us, section-level visibility toggles beyond About Us.
   </div>
 </div>
 
@@ -857,21 +816,22 @@ body {
 
 // Section definitions
 const SECTIONS = {
-  hero:       { id: 'hero',       name: 'Hero Image',                icon: 'fa-image',        iconClass: 'icon-hero',     type: 'anchor',   desc: 'Always position 1 — fixed' },
-  trust:      { id: 'trust',      name: 'Trust Builders',            icon: 'fa-star',          iconClass: 'icon-trust',    type: 'free',     desc: 'Customer reviews & certifications' },
-  details:    { id: 'details',    name: 'Details',                   icon: 'fa-file-alt',      iconClass: 'icon-details',  type: 'free',     desc: 'Project scope and description' },
-  investment: { id: 'investment', name: 'Your Investment / Financing', icon: 'fa-dollar-sign',   iconClass: 'icon-pricing',  type: 'anchor',   desc: 'Always position 10 — fixed' },
-  packages:   { id: 'packages',   name: 'Packages',                  icon: 'fa-box-open',      iconClass: 'icon-lineitems',type: 'free',     desc: 'Packaged + Tiered Pricing' },
-  pricing:    { id: 'pricing',    name: 'Line Items',                icon: 'fa-list-alt',      iconClass: 'icon-lineitems',type: 'locked',   desc: 'Line Items + Optional Line Items', lockedWith: 'Line Items + Optional Line Items' },
-  areas:      { id: 'areas',      name: 'Areas',                     icon: 'fa-map',           iconClass: 'icon-areas',    type: 'locked',   desc: 'Areas + Optional Areas', lockedWith: 'Areas + Optional Areas' },
-  media:      { id: 'media',      name: 'Media',                     icon: 'fa-photo-video',   iconClass: 'icon-media',    type: 'free',     desc: 'Photos and videos' },
-  custom:     { id: 'custom',     name: 'Custom Section(s)',         icon: 'fa-puzzle-piece',  iconClass: 'icon-custom',   type: 'free',     desc: 'Your custom content blocks' },
-  aboutus:    { id: 'aboutus',    name: 'About Us',                  icon: 'fa-building',      iconClass: 'icon-aboutus',  type: 'free',     desc: 'Company introduction' },
-  terms:      { id: 'terms',      name: 'Terms and Conditions',      icon: 'fa-file-contract', iconClass: 'icon-terms',    type: 'anchor',   desc: 'Always last — fixed' },
+  hero:        { id: 'hero',        name: 'Hero Image',                  icon: 'fa-image',        iconClass: 'icon-hero',     type: 'anchor',   desc: 'Always position 1 — fixed' },
+  trust:       { id: 'trust',       name: 'Trust Builders',              icon: 'fa-star',          iconClass: 'icon-trust',    type: 'free',     desc: 'Customer reviews & certifications' },
+  clientnotes: { id: 'clientnotes', name: 'Client Notes',                icon: 'fa-sticky-note',   iconClass: 'icon-notes',    type: 'free',     desc: 'Skips rendering if no note added to proposal' },
+  details:     { id: 'details',     name: 'Details',                     icon: 'fa-file-alt',      iconClass: 'icon-details',  type: 'free',     desc: 'Project scope and description' },
+  investment:  { id: 'investment',  name: 'Your Investment / Financing', icon: 'fa-dollar-sign',   iconClass: 'icon-pricing',  type: 'anchor',   desc: 'Always position 11 — fixed' },
+  packages:    { id: 'packages',    name: 'Packages',                    icon: 'fa-box-open',      iconClass: 'icon-lineitems',type: 'free',     desc: 'Packaged + Tiered Pricing' },
+  pricing:     { id: 'pricing',     name: 'Line Items',                  icon: 'fa-list-alt',      iconClass: 'icon-lineitems',type: 'locked',   desc: 'Line Items + Optional Line Items', lockedWith: 'Line Items + Optional Line Items' },
+  areas:       { id: 'areas',       name: 'Areas',                       icon: 'fa-map',           iconClass: 'icon-areas',    type: 'locked',   desc: 'Areas + Optional Areas', lockedWith: 'Areas + Optional Areas' },
+  media:       { id: 'media',       name: 'Media',                       icon: 'fa-photo-video',   iconClass: 'icon-media',    type: 'free',     desc: 'Photos and videos' },
+  custom:      { id: 'custom',      name: 'Custom Section(s)',           icon: 'fa-puzzle-piece',  iconClass: 'icon-custom',   type: 'free',     desc: 'Your custom content blocks' },
+  aboutus:     { id: 'aboutus',     name: 'About Us',                    icon: 'fa-building',      iconClass: 'icon-aboutus',  type: 'free',     desc: 'Company introduction' },
+  terms:       { id: 'terms',       name: 'Terms and Conditions',        icon: 'fa-file-contract', iconClass: 'icon-terms',    type: 'anchor',   desc: 'Always last — fixed' },
 };
 
-// BR-6 Default order
-const DEFAULT_ORDER = ['hero','trust','details','packages','pricing','areas','media','custom','aboutus','investment','terms'];
+// BR-6 Default order (12 sections)
+const DEFAULT_ORDER = ['hero','trust','clientnotes','details','packages','pricing','areas','media','custom','aboutus','investment','terms'];
 
 // Current order (mutable)
 let currentOrder = [...DEFAULT_ORDER];
