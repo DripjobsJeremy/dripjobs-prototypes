@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Package Templates — DripJobs Prototype · 86b848td9</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#32415B; font-size:14px; }
+
+/* ── SHELL ── */
+.app-shell { display:flex; min-height:100vh; }
+
+/* ── REAL DRIPJOBS SIDEBAR ── */
+.sidebar {
+  width:160px; min-width:160px;
+  background:#fff; border-right:1px solid #e8e8ec;
+  display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.sidebar-logo {
+  padding:12px 14px 10px;
+  border-bottom:1px solid #f0f0f3;
+  display:flex; align-items:center; gap:8px;
+}
+.sidebar-logo img { width:28px; }
+.dj-logo-text { font-weight:800; font-size:14px; color:#7C3AED; letter-spacing:-.3px; }
+.sidebar-section-lbl {
+  font-size:9.5px; font-weight:700; color:#b0b5c0; text-transform:uppercase;
+  letter-spacing:.6px; padding:14px 14px 4px;
+}
+.nav-item {
+  display:flex; align-items:center; gap:8px;
+  padding:7px 14px; color:#5a6277; font-size:12.5px; cursor:pointer;
+  border-left:3px solid transparent; transition:all .14s; text-decoration:none;
+}
+.nav-item:hover { background:#f5f4ff; color:#7C3AED; }
+.nav-item.active { background:#f0eeff; color:#7C3AED; font-weight:700; border-left-color:#7C3AED; }
+.nav-item i { width:14px; text-align:center; font-size:12px; }
+.nav-sub { padding-left:34px; font-size:12px; }
+.nav-sub.active { background:#ede9ff; color:#7C3AED; font-weight:700; border-left-color:#7C3AED; }
+.nav-badge {
+  margin-left:auto; background:#7C3AED; color:#fff;
+  font-size:9px; font-weight:700; padding:1px 6px; border-radius:8px;
+}
+
+/* ── TOP BAR (real DripJobs) ── */
+.topbar {
+  background:#fff; border-bottom:1px solid #e8e8ec;
+  height:50px; padding:0 20px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+}
+.topbar-left { display:flex; align-items:center; gap:10px; }
+.search-global {
+  display:flex; align-items:center; gap:6px;
+  background:#f5f5f8; border:1px solid #e8e8ec; border-radius:20px;
+  padding:5px 12px; width:240px; font-size:12.5px; color:#9aa0b0;
+  cursor:text;
+}
+.search-global i { font-size:11px; }
+.topbar-right { display:flex; align-items:center; gap:12px; }
+.topbar-icon { color:#9aa0b0; font-size:14px; cursor:pointer; }
+.topbar-icon:hover { color:#7C3AED; }
+.topbar-user { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer; }
+.avatar-sm { width:30px; height:30px; background:#7C3AED; border-radius:50%; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+
+/* ── MAIN ── */
+.main-content { flex:1; display:flex; flex-direction:column; min-width:0; }
+
+/* ── NEW TEMPLATE BUTTON (real pattern) ── */
+.page-action-bar { padding:16px 20px 0; }
+.btn-new-template {
+  background:#7C3AED; color:#fff; border:none;
+  padding:8px 16px; border-radius:6px; font-size:13px; font-weight:600;
+  cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+  transition:background .15s;
+}
+.btn-new-template:hover { background:#6d2fd4; }
+
+/* ── DATATABLE SHELL ── */
+.page-body { padding:14px 20px 40px; }
+
+/* Tab nav above table — like real Templates page */
+.page-tabs {
+  display:flex; border-bottom:2px solid #e8e8ec; margin-bottom:0;
+}
+.page-tab {
+  padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer;
+  color:#9aa0b0; border-bottom:2px solid transparent; margin-bottom:-2px;
+  transition:all .14s;
+}
+.page-tab.active { color:#7C3AED; border-bottom-color:#7C3AED; }
+.page-tab:hover:not(.active) { color:#5a6277; }
+
+/* DataTable */
+.dt-wrapper {
+  background:#fff; border:1px solid #e8e8ec; border-radius:8px;
+  overflow:hidden; margin-top:14px;
+}
+.dt-toolbar {
+  padding:12px 14px; display:flex; align-items:center; justify-content:flex-end;
+  border-bottom:1px solid #f0f0f4;
+}
+.dt-search-wrap { display:flex; align-items:center; gap:6px; font-size:13px; color:#5a6277; }
+.dt-search-input {
+  height:32px; padding:0 10px; border:1px solid #ddd; border-radius:5px;
+  font-size:13px; width:180px;
+}
+.dt-search-input:focus { outline:none; border-color:#7C3AED; box-shadow:0 0 0 2px rgba(124,58,237,.12); }
+table.dt { width:100%; border-collapse:collapse; }
+table.dt thead th {
+  background:#fafafa; padding:10px 12px; text-align:left;
+  font-size:12px; font-weight:700; color:#7a8099;
+  border-bottom:1px solid #eee; white-space:nowrap; cursor:pointer;
+}
+table.dt thead th .sort-icon { margin-left:4px; color:#ccc; font-size:10px; }
+table.dt tbody tr { border-bottom:1px solid #f4f4f7; transition:background .1s; }
+table.dt tbody tr:hover { background:#faf9ff; }
+table.dt tbody td { padding:9px 12px; font-size:13px; vertical-align:middle; }
+.td-name { color:#7C3AED; font-weight:600; cursor:pointer; }
+.td-name:hover { text-decoration:underline; }
+.dt-actions { display:flex; align-items:center; gap:6px; }
+.dt-action-btn {
+  width:28px; height:28px; border:none; background:none; cursor:pointer;
+  border-radius:5px; display:flex; align-items:center; justify-content:center;
+  font-size:13px; transition:all .12s;
+}
+.dt-action-btn.edit { color:#7C3AED; }
+.dt-action-btn.edit:hover { background:#ede9ff; }
+.dt-action-btn.dup { color:#2196f3; }
+.dt-action-btn.dup:hover { background:#e3f2fd; }
+.dt-action-btn.del { color:#e53e3e; }
+.dt-action-btn.del:hover { background:#fee2e2; }
+
+/* Badges — real DripJobs style */
+.badge-default { background:#e8f5e9; color:#2e7d32; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; margin-left:6px; border:1px solid #a5d6a7; }
+.badge-inactive { background:#f5f5f5; color:#777; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; margin-left:6px; border:1px solid #e0e0e0; }
+
+/* Manage Custom Section Templates link */
+.manage-link {
+  display:inline-flex; align-items:center; gap:5px;
+  margin-top:14px; font-size:12.5px; color:#7C3AED; cursor:pointer;
+  padding:4px 10px; border:1px solid #ede9ff; border-radius:5px; background:#f8f7ff;
+}
+.manage-link:hover { background:#ede9ff; }
+
+/* ── EDITOR VIEW ── */
+#view-editor { display:none; }
+.editor-wrap { padding:0 20px 40px; }
+
+/* Editor header block */
+.editor-page-header {
+  padding:14px 0 10px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.editor-back { display:flex; align-items:center; gap:6px; color:#7C3AED; font-size:13px; cursor:pointer; }
+.editor-back:hover { text-decoration:underline; }
+
+/* Template title inline edit — matches screenshot "Package Template 🖊 ⚙" */
+.template-title-row {
+  text-align:center; padding:10px 0 16px;
+}
+.template-title-text {
+  font-size:20px; font-weight:700; color:#32415B; display:inline-flex; align-items:center; gap:8px;
+}
+.title-icon-btn {
+  background:none; border:none; cursor:pointer; color:#7C3AED; font-size:14px; padding:2px 4px;
+}
+.title-icon-btn:hover { opacity:.7; }
+
+/* Description textarea */
+.desc-area {
+  width:100%; border:1px solid #DAD8E3; border-radius:8px;
+  padding:10px 12px; font-size:14px; font-family:inherit;
+  min-height:72px; resize:vertical; color:#32415B;
+}
+.desc-area:focus { outline:none; border-color:#7C3AED; box-shadow:0 0 0 3px rgba(124,58,237,.12); }
+
+/* Active toggle row — matches screenshot */
+.active-row {
+  background:#fff; border:1px solid #DAD8E3; border-radius:8px;
+  padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
+  margin:12px 0;
+}
+.active-row-label { font-weight:700; font-size:14px; }
+
+/* Switchery CSS toggle */
+.switchery-wrap { position:relative; width:48px; height:26px; }
+.switchery-wrap input { opacity:0; width:0; height:0; }
+.sw-track {
+  position:absolute; inset:0; border-radius:13px;
+  background:#DAD8E3; cursor:pointer; transition:background .2s;
+}
+.sw-track::before {
+  content:''; position:absolute;
+  width:20px; height:20px; left:3px; top:3px;
+  background:#fff; border-radius:50%;
+  transition:transform .2s;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.switchery-wrap input:checked + .sw-track { background:#8B85EA; }
+.switchery-wrap input:checked + .sw-track::before { transform:translateX(22px); }
+
+/* Duplicate button */
+.btn-dup-template {
+  width:100%; border:1px solid #7C3AED; color:#7C3AED; background:#fff;
+  padding:9px; border-radius:7px; font-size:13px; font-weight:600;
+  cursor:pointer; margin-bottom:18px; display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.btn-dup-template:hover { background:#f8f5ff; }
+
+/* Section headings inside editor */
+.editor-section-head {
+  font-size:14px; font-weight:700; color:#32415B;
+  border-bottom:2px solid #e8e8ec; padding-bottom:8px; margin:20px 0 12px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+
+/* Info placeholder row */
+.info-placeholder {
+  background:#f5f5f8; border:1px solid #e8e8ec; border-radius:6px;
+  padding:10px 14px; font-size:13px; color:#9aa0b0;
+  display:flex; align-items:center; gap:8px; margin-bottom:10px;
+}
+.info-placeholder i { color:#aab0c0; }
+
+/* Line item row */
+.li-row {
+  background:#fff; border:1px solid #e8e8ec; border-radius:6px;
+  padding:10px 12px; display:flex; align-items:center; gap:10px;
+  margin-bottom:6px; transition:box-shadow .12s;
+}
+.li-row:hover { box-shadow:0 2px 8px rgba(0,0,0,.06); }
+.li-drag { color:#c8ccd4; cursor:grab; font-size:12px; }
+.li-name { flex:1; font-size:13px; font-weight:600; }
+.li-meta { font-size:12px; color:#9aa0b0; }
+.li-price { font-size:13px; font-weight:700; min-width:72px; text-align:right; }
+.li-actions { display:flex; gap:3px; }
+.li-action-btn {
+  width:26px; height:26px; border:none; background:none; cursor:pointer;
+  border-radius:4px; color:#9aa0b0; font-size:12px;
+  display:flex; align-items:center; justify-content:center;
+}
+.li-action-btn:hover { background:#f0eeff; color:#7C3AED; }
+.li-action-btn.danger:hover { background:#fee2e2; color:#e53e3e; }
+
+/* Add buttons */
+.btn-add-item {
+  border:1px solid #ddd; background:#fff; color:#5a6277;
+  padding:7px 13px; border-radius:6px; font-size:12.5px; font-weight:600;
+  cursor:pointer; display:inline-flex; align-items:center; gap:5px;
+}
+.btn-add-item:hover { border-color:#7C3AED; color:#7C3AED; background:#f9f7ff; }
+
+/* Editor footer */
+.editor-footer {
+  background:#fff; border-top:1px solid #e8e8ec;
+  padding:12px 20px; display:flex; align-items:center; justify-content:space-between;
+  position:sticky; bottom:0; z-index:50;
+}
+.editor-footer-meta { font-size:12px; color:#9aa0b0; }
+.btn-delete-template {
+  background:#e53e3e; color:#fff; border:none;
+  padding:7px 14px; border-radius:6px; font-size:12.5px; font-weight:600;
+  cursor:pointer; display:inline-flex; align-items:center; gap:5px;
+}
+.btn-delete-template:hover { background:#c53030; }
+
+/* ── PROPOSAL BUILDER VIEW ── */
+#view-proposal { display:none; }
+
+/* ── MODAL OVERLAY ── */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.45);
+  display:flex; align-items:center; justify-content:center;
+  z-index:1000; opacity:0; pointer-events:none; transition:opacity .2s;
+}
+.modal-overlay.open { opacity:1; pointer-events:all; }
+
+/* Modal shell — matches real DripJobs modal (white, rounded-top, header separator) */
+.modal-shell {
+  background:#fff; border-radius:10px;
+  box-shadow:0 16px 50px rgba(0,0,0,.22);
+  width:100%; max-width:540px;
+  max-height:90vh; overflow-y:auto;
+  transform:translateY(10px); transition:transform .2s;
+}
+.modal-overlay.open .modal-shell { transform:translateY(0); }
+.modal-lg { max-width:660px; }
+
+/* Modal header — real DripJobs: title left, × right */
+.modal-header {
+  padding:14px 18px;
+  border-bottom:1px solid #e8e8ec;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.modal-title { font-size:15px; font-weight:700; color:#1a1a2e; }
+.modal-x {
+  background:none; border:none; cursor:pointer;
+  color:#888; font-size:18px; line-height:1; padding:2px 5px; border-radius:4px;
+}
+.modal-x:hover { background:#f0f0f4; color:#333; }
+
+/* Modal body */
+.modal-body { padding:18px; }
+
+/* Two-column form row — matches Add Item screenshot exactly */
+.form-row {
+  display:flex; align-items:flex-start;
+  margin-bottom:14px; gap:0;
+}
+.form-lbl {
+  width:145px; min-width:145px;
+  font-size:13px; font-weight:600; color:#32415B;
+  padding-top:9px; display:flex; align-items:flex-start; gap:4px;
+}
+.form-lbl .info-icon { color:#aaa; font-size:11px; cursor:help; }
+.form-ctrl { flex:1; }
+.form-input {
+  width:100%; height:36px; padding:0 10px;
+  border:1px solid #ddd; border-radius:5px; font-size:13px; color:#32415B;
+  font-family:inherit;
+}
+.form-input:focus { outline:none; border-color:#7C3AED; box-shadow:0 0 0 2px rgba(124,58,237,.12); }
+.form-select {
+  width:100%; height:36px; padding:0 10px;
+  border:1px solid #ddd; border-radius:5px; font-size:13px; color:#32415B;
+  background:#fff; cursor:pointer;
+}
+.form-select:focus { outline:none; border-color:#7C3AED; }
+.char-count { font-size:11px; color:#bbb; text-align:right; margin-top:2px; }
+
+/* Description only toggle row */
+.desc-only-row { display:flex; align-items:center; gap:8px; }
+
+/* Qty with unit suffix — "0  Ea" */
+.qty-group { display:flex; align-items:center; border:1px solid #ddd; border-radius:5px; overflow:hidden; }
+.qty-input { flex:1; height:36px; padding:0 10px; border:none; font-size:13px; color:#32415B; }
+.qty-input:focus { outline:none; }
+.qty-unit { padding:0 12px; background:#f5f5f8; font-size:13px; color:#5a6277; border-left:1px solid #ddd; height:36px; display:flex; align-items:center; }
+
+/* Price group — "$  0" */
+.price-group { display:flex; align-items:center; border:1px solid #ddd; border-radius:5px; overflow:hidden; }
+.price-prefix { padding:0 10px; background:#f5f5f8; font-size:13px; color:#5a6277; border-right:1px solid #ddd; height:36px; display:flex; align-items:center; }
+.price-input { flex:1; height:36px; padding:0 10px; border:none; font-size:13px; color:#32415B; }
+.price-input:focus { outline:none; }
+
+/* Description field header with AI button */
+.desc-field-header { display:flex; align-items:center; justify-content:space-between; width:100%; }
+.btn-ai-generate {
+  background:#7C3AED; color:#fff; border:none;
+  padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600;
+  cursor:pointer; display:flex; align-items:center; gap:5px; white-space:nowrap;
+}
+.btn-ai-generate:hover { background:#6d2fd4; }
+
+/* AI Panel — purple expansion box */
+.ai-panel {
+  background:#faf5ff; border:1px solid #d6bcfa; border-radius:8px;
+  padding:14px; margin-bottom:10px; display:none;
+}
+.ai-panel.open { display:block; }
+.ai-panel-title { font-size:12.5px; font-weight:700; color:#7C3AED; margin-bottom:4px; }
+.ai-panel-hint { font-size:12px; color:#6b46c1; margin-bottom:10px; font-style:italic; }
+.ai-textarea {
+  width:100%; min-height:72px; padding:8px 10px;
+  border:1px solid #c084fc; border-radius:6px; font-size:13px;
+  font-family:inherit; resize:vertical; background:#fff;
+}
+.ai-textarea:focus { outline:none; border-color:#7C3AED; }
+.ai-panel-footer { display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
+.btn-ai-cancel { background:none; border:none; font-size:12px; color:#6b46c1; cursor:pointer; }
+.btn-ai-run {
+  background:#7C3AED; color:#fff; border:none;
+  padding:5px 14px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;
+  display:flex; align-items:center; gap:5px;
+}
+.btn-ai-run:hover { background:#6d2fd4; }
+
+/* CKEditor-style rich text area */
+.ck-toolbar {
+  border:1px solid #ddd; border-bottom:none; border-radius:5px 5px 0 0;
+  padding:4px 8px; display:flex; align-items:center; gap:2px; flex-wrap:wrap;
+  background:#fafafa;
+}
+.ck-btn { background:none; border:none; cursor:pointer; padding:3px 5px; border-radius:3px; color:#555; font-size:12px; }
+.ck-btn:hover { background:#ede9ff; color:#7C3AED; }
+.ck-divider { width:1px; height:16px; background:#e0e0e0; margin:0 3px; }
+.ck-select { height:26px; font-size:11.5px; border:1px solid #ddd; border-radius:3px; padding:0 5px; background:#fff; color:#555; }
+.ck-body {
+  border:1px solid #ddd; border-top:none; border-radius:0 0 5px 5px;
+  min-height:100px; padding:8px 10px; font-size:13px; color:#32415B;
+  background:#fff; cursor:text;
+}
+
+/* Tax Rate row — inline label + input + % */
+.tax-rate-group { display:flex; align-items:center; border:1px solid #ddd; border-radius:5px; overflow:hidden; }
+.tax-rate-input { flex:1; height:36px; padding:0 10px; border:none; font-size:13px; color:#32415B; }
+.tax-rate-input:focus { outline:none; }
+.tax-rate-suffix { padding:0 12px; background:#f5f5f8; font-size:13px; color:#5a6277; border-left:1px solid #ddd; height:36px; display:flex; align-items:center; }
+
+/* Toggle (Switchery small style) */
+.sw-sm { position:relative; width:40px; height:22px; }
+.sw-sm input { opacity:0; width:0; height:0; }
+.sw-sm-track {
+  position:absolute; inset:0; border-radius:11px;
+  background:#DAD8E3; cursor:pointer; transition:background .2s;
+}
+.sw-sm-track::before {
+  content:''; position:absolute;
+  width:16px; height:16px; left:3px; top:3px;
+  background:#fff; border-radius:50%;
+  transition:transform .2s;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.sw-sm input:checked + .sw-sm-track { background:#8B85EA; }
+.sw-sm input:checked + .sw-sm-track::before { transform:translateX(18px); }
+
+/* Need help link row */
+.help-row { font-size:12.5px; color:#5a6277; text-align:center; margin:10px 0 6px; }
+.help-row a { color:#7C3AED; }
+
+/* Save as new product toggle row */
+.save-product-row {
+  display:flex; align-items:center; justify-content:flex-end; gap:8px;
+  font-size:12.5px; color:#5a6277; margin-bottom:12px;
+}
+
+/* Total bar */
+.total-bar {
+  border-top:1px solid #e8e8ec; padding:10px 0 4px;
+  text-align:center; font-size:14px; font-weight:700; color:#32415B;
+}
+.total-bar a { color:#32415B; }
+
+/* Modal footer */
+.modal-footer {
+  padding:12px 18px; border-top:1px solid #e8e8ec;
+  display:flex; justify-content:flex-end; gap:8px;
+  background:#fafafa; border-radius:0 0 10px 10px;
+}
+.btn-save {
+  background:#7C3AED; color:#fff; border:none;
+  padding:8px 22px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;
+}
+.btn-save:hover { background:#6d2fd4; }
+.btn-close {
+  background:#fff; color:#5a6277; border:1px solid #ddd;
+  padding:8px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;
+}
+.btn-close:hover { border-color:#7C3AED; color:#7C3AED; }
+
+/* ── ADD MULTI ITEMS modal ── */
+.multi-info-bar {
+  background:#e8f4fd; border:1px solid #bee3f8; border-radius:6px;
+  padding:8px 12px; font-size:12.5px; color:#2b6cb0;
+  display:flex; align-items:center; gap:6px; margin-bottom:12px;
+}
+.multi-selected-count { text-align:right; font-size:12px; font-weight:700; color:#5a6277; margin-bottom:6px; }
+.multi-table { width:100%; border-collapse:collapse; }
+.multi-table thead th {
+  font-size:11.5px; font-weight:700; color:#7a8099; padding:6px 8px;
+  border-bottom:1px solid #eee; text-align:left;
+}
+.multi-table thead th:last-child, .multi-table thead th:nth-child(3) { text-align:right; }
+.multi-table tbody tr:hover { background:#faf9ff; }
+.multi-table tbody td { padding:8px 8px; border-bottom:1px solid #f5f5f8; vertical-align:middle; }
+.multi-cb { width:16px; height:16px; cursor:pointer; accent-color:#7C3AED; }
+.multi-qty, .multi-price {
+  width:70px; height:30px; border:1px solid #ddd; border-radius:4px;
+  text-align:right; padding:0 7px; font-size:12.5px;
+}
+.multi-qty:focus, .multi-price:focus { outline:none; border-color:#7C3AED; }
+
+/* ── CONFIRM MODALS ── */
+.confirm-body { font-size:13.5px; line-height:1.6; color:#32415B; }
+.btn-danger { background:#e53e3e; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
+.btn-danger:hover { background:#c53030; }
+.btn-ghost { background:#fff; color:#5a6277; border:1px solid #ddd; padding:8px 16px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
+.btn-ghost:hover { border-color:#7C3AED; color:#7C3AED; }
+.btn-primary { background:#7C3AED; color:#fff; border:none; padding:8px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
+.btn-primary:hover { background:#6d2fd4; }
+.btn-primary:disabled { background:#c4b5fd; cursor:not-allowed; }
+
+/* Add Package options dropdown */
+.options-menu {
+  position:absolute; top:calc(100% + 4px); left:0;
+  background:#fff; border:1px solid #e0e0e4; border-radius:8px;
+  box-shadow:0 4px 20px rgba(0,0,0,.12); z-index:200; min-width:210px;
+  overflow:hidden; display:none;
+}
+.options-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 14px; cursor:pointer; font-size:13px; transition:background .1s;
+}
+.options-item:hover { background:#f8f5ff; }
+.options-item i { color:#7C3AED; width:16px; }
+.options-item-detail { font-size:11px; color:#9aa0b0; }
+
+/* 2-step step indicator */
+.step-row { display:flex; align-items:center; gap:0; margin-bottom:16px; }
+.step-circle { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; border:2px solid #ddd; background:#f5f5f8; color:#aaa; transition:all .2s; }
+.step-circle.active { background:#7C3AED; color:#fff; border-color:#7C3AED; }
+.step-circle.done { background:#dcfce7; color:#166534; border-color:#86efac; }
+.step-line { flex:1; height:2px; background:#e8e8ec; transition:background .2s; }
+.step-line.done { background:#7C3AED; }
+
+/* Library list item */
+.lib-row { border:1px solid #e8e8ec; border-radius:7px; padding:11px 13px; margin-bottom:7px; cursor:pointer; display:flex; align-items:center; gap:11px; transition:all .14s; }
+.lib-row:hover { border-color:#7C3AED; background:#faf9ff; }
+.lib-row.selected { border-color:#7C3AED; background:#f5f0ff; }
+.lib-radio { width:17px; height:17px; border:2px solid #ddd; border-radius:50%; flex-shrink:0; transition:all .14s; display:flex; align-items:center; justify-content:center; }
+.lib-row.selected .lib-radio { border-color:#7C3AED; background:#7C3AED; }
+.lib-row.selected .lib-radio::after { content:''; width:6px; height:6px; background:#fff; border-radius:50%; }
+.lib-name { font-size:13px; font-weight:700; }
+.lib-desc { font-size:12px; color:#9aa0b0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lib-meta { font-size:11px; color:#bbb; display:flex; gap:10px; margin-top:2px; }
+
+/* Preview */
+.preview-box { background:#f9f7ff; border:1px solid #d6bcfa; border-radius:8px; padding:13px 15px; margin-bottom:14px; }
+.preview-li { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f0f0f5; font-size:13px; }
+.preview-li:last-child { border:none; }
+.preview-section-lbl { font-size:11px; font-weight:700; color:#9aa0b0; text-transform:uppercase; letter-spacing:.4px; margin-bottom:7px; }
+.alert-info { background:#ebf8ff; border:1px solid #bee3f8; border-radius:6px; padding:9px 12px; font-size:12.5px; color:#2b6cb0; display:flex; gap:7px; margin-bottom:12px; }
+.alert-warn { background:#fffbeb; border:1px solid #f6e05e; border-radius:6px; padding:9px 12px; font-size:12.5px; color:#744210; display:flex; gap:7px; margin-bottom:12px; }
+
+/* Add/Edit Area modal — matching past prototype */
+.area-type-tabs { display:flex; border:1px solid #ddd; border-radius:6px; overflow:hidden; margin-bottom:14px; }
+.area-type-tab { flex:1; padding:8px; text-align:center; font-size:13px; font-weight:600; cursor:pointer; background:#f5f5f8; color:#7a8099; transition:all .14s; }
+.area-type-tab.active { background:#7C3AED; color:#fff; }
+.substrate-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #f5f5f8; }
+.substrate-cb { accent-color:#7C3AED; width:15px; height:15px; cursor:pointer; }
+.substrate-name { flex:1; font-size:13px; }
+.substrate-cat { font-size:11.5px; color:#9aa0b0; }
+.qty-stepper { display:flex; align-items:center; gap:0; }
+.qty-step-btn { width:26px; height:26px; border:1px solid #ddd; background:#f5f5f8; cursor:pointer; font-size:15px; color:#555; display:flex; align-items:center; justify-content:center; }
+.qty-step-btn:first-child { border-radius:4px 0 0 4px; }
+.qty-step-btn:last-child { border-radius:0 4px 4px 0; }
+.qty-step-val { width:32px; height:26px; border-top:1px solid #ddd; border-bottom:1px solid #ddd; border-left:none; border-right:none; text-align:center; font-size:13px; }
+
+/* Name modal */
+.name-input { width:100%; height:38px; padding:0 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; color:#32415B; font-family:inherit; }
+.name-input:focus { outline:none; border-color:#7C3AED; box-shadow:0 0 0 2px rgba(124,58,237,.12); }
+.err-msg { font-size:12px; color:#e53e3e; margin-top:4px; display:none; }
+
+/* Toast */
+.toast { position:fixed; bottom:22px; right:22px; background:#1a1a2e; color:#fff; padding:11px 16px; border-radius:8px; font-size:13px; font-weight:500; box-shadow:0 4px 16px rgba(0,0,0,.2); display:flex; align-items:center; gap:7px; z-index:2000; transform:translateY(16px); opacity:0; transition:all .22s; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast i { color:#86efac; }
+
+/* Demo nav */
+.demo-nav { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#fff; border:1px solid #e0e0e4; border-radius:50px; padding:5px 7px; display:flex; gap:5px; box-shadow:0 4px 18px rgba(0,0,0,.1); z-index:500; }
+.demo-nav-btn { border:none; background:none; padding:6px 13px; border-radius:50px; font-size:12.5px; font-weight:600; cursor:pointer; color:#5a6277; transition:all .14s; }
+.demo-nav-btn:hover { background:#f0eeff; color:#7C3AED; }
+.demo-nav-btn.active { background:#7C3AED; color:#fff; }
+
+/* BR annotation */
+.br-chip { position:relative; display:inline-flex; align-items:center; cursor:default; }
+.br-badge { font-size:9.5px; font-weight:700; background:#ede9ff; color:#7C3AED; border:1px solid #c4b5fd; border-radius:9px; padding:1px 6px; margin-left:5px; cursor:help; }
+.br-tip { position:absolute; bottom:calc(100%+5px); left:0; background:#32415B; color:#fff; font-size:11px; padding:4px 9px; border-radius:5px; white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .14s; z-index:99; }
+.br-chip:hover .br-tip { opacity:1; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+<!-- ── SIDEBAR (real DripJobs patterns) ── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="28" height="28" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#7C3AED"/><circle cx="16" cy="16" r="7" fill="none" stroke="#fff" stroke-width="2.5"/><circle cx="16" cy="16" r="2" fill="#fff"/></svg>
+    <span class="dj-logo-text">dripjobs</span>
+  </div>
+
+  <div class="sidebar-section-lbl">Daily Operations</div>
+  <div class="nav-item" onclick="toast('Navigating...')"><i class="fas fa-calendar-check"></i> Appointments <span class="nav-badge">10 new</span></div>
+  <div class="nav-item" onclick="toast('Navigating...')"><i class="fas fa-comment-alt"></i> Chat</div>
+  <div class="nav-item" onclick="toast('Navigating...')"><i class="fas fa-tasks"></i> Tasks</div>
+
+  <div class="sidebar-section-lbl">Documents</div>
+  <div class="nav-item" onclick="toast('Navigating...')"><i class="fas fa-file-invoice-dollar"></i> Invoices</div>
+  <div class="nav-item" onclick="toast('Navigating...')"><i class="fas fa-file-contract"></i> Proposals</div>
+  <div class="nav-item nav-sub" onclick="toast('Navigating...')"><i class="fas fa-file-alt"></i> Proposals</div>
+  <div class="nav-item nav-sub" onclick="switchView('library')"><i class="fas fa-layer-group"></i> Templates</div>
+  <div class="nav-item nav-sub" onclick="toast('Navigating...')"><i class="fas fa-dollar-sign"></i> Financing</div>
+
+  <div class="sidebar-section-lbl">Financials</div>
+  <div class="nav-item" onclick="toast('Navigating...')"><i class="fas fa-chart-line"></i> Job Costing</div>
+  <div class="nav-item" onclick="toast('Navigating...')"><i class="fas fa-tachometer-alt"></i> Production Rates</div>
+  <div class="nav-item" onclick="toast('Navigating...')"><i class="fas fa-chart-bar"></i> Metrics</div>
+
+  <div class="sidebar-section-lbl">Marketing</div>
+  <div class="nav-item" onclick="toast('Navigating...')"><i class="fas fa-bolt"></i> Activity</div>
+  <div class="nav-item" onclick="toast('Navigating...')"><i class="fas fa-bullhorn"></i> Blast</div>
+  <div class="nav-item" onclick="toast('Navigating...')"><i class="fas fa-water"></i> Drips</div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="main-content">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="search-global">
+        <i class="fas fa-search"></i>
+        Search leads, contacts, tags...
+        <i class="fas fa-arrow-right" style="margin-left:auto;font-size:10px;"></i>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <i class="fas fa-exclamation-circle topbar-icon" style="color:#f6ad55;"></i>
+      <i class="fas fa-bell topbar-icon"></i>
+      <div class="topbar-user">
+        <div class="avatar-sm">JH</div>
+        Jeremy Harrison <i class="fas fa-chevron-down" style="font-size:10px;color:#aaa;"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ VIEW: LIBRARY (Proposal Templates tab) ══════════════ -->
+  <div id="view-library">
+    <div class="page-action-bar">
+      <!-- New Template button matches real UI -->
+      <button class="btn-new-template" onclick="openNameModal()">
+        New Template
+      </button>
+    </div>
+
+    <div class="page-body">
+      <!-- Tab nav — Proposal Templates / Package Templates -->
+      <div class="page-tabs">
+        <div class="page-tab" onclick="switchView('library')">Proposal Templates</div>
+        <div class="page-tab active">Package Templates
+          <span class="br-chip"><span class="br-badge">BR-1</span><span class="br-tip">Dedicated nav node under Proposals > Proposal Templates</span></span>
+        </div>
+      </div>
+
+      <div class="dt-wrapper">
+        <div class="dt-toolbar">
+          <div class="dt-search-wrap">
+            Search: <input type="text" class="dt-search-input" id="lib-search" oninput="filterTable()" placeholder="">
+          </div>
+        </div>
+
+        <table class="dt" id="lib-table">
+          <thead>
+            <tr>
+              <th>Name <i class="fas fa-sort sort-icon"></i></th>
+              <th>Deposit $ <i class="fas fa-sort sort-icon"></i></th>
+              <th>Deposit % <i class="fas fa-sort sort-icon"></i></th>
+              <th>Amount (With Opt. Items) <i class="fas fa-sort sort-icon"></i></th>
+              <th>Date <i class="fas fa-sort sort-icon"></i></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="lib-tbody">
+            <tr data-name="Exterior Painting — Full Service">
+              <td><span class="td-name" onclick="openEditorConfirm('Exterior Painting — Full Service')">Exterior Painting — Full Service</span><span class="badge-default">ACTIVE</span></td>
+              <td>$0.00</td><td>0%</td><td>$0.00</td><td>6/5/2026</td>
+              <td><div class="dt-actions">
+                <button class="dt-action-btn edit" onclick="openEditorConfirm('Exterior Painting — Full Service')" title="Edit"><i class="fas fa-pencil-alt"></i></button>
+                <button class="dt-action-btn dup" onclick="openDupConfirm('Exterior Painting — Full Service')" title="Duplicate"><i class="fas fa-clone"></i></button>
+                <button class="dt-action-btn del" onclick="openDelConfirm('Exterior Painting — Full Service')" title="Delete"><i class="fas fa-trash"></i></button>
+              </div></td>
+            </tr>
+            <tr data-name="Interior Repaint — Standard">
+              <td><span class="td-name" onclick="openEditorConfirm('Interior Repaint — Standard')">Interior Repaint — Standard</span><span class="badge-default">ACTIVE</span></td>
+              <td>$0.00</td><td>0%</td><td>$0.00</td><td>6/1/2026</td>
+              <td><div class="dt-actions">
+                <button class="dt-action-btn edit" onclick="openEditorConfirm('Interior Repaint — Standard')" title="Edit"><i class="fas fa-pencil-alt"></i></button>
+                <button class="dt-action-btn dup" onclick="openDupConfirm('Interior Repaint — Standard')" title="Duplicate"><i class="fas fa-clone"></i></button>
+                <button class="dt-action-btn del" onclick="openDelConfirm('Interior Repaint — Standard')" title="Delete"><i class="fas fa-trash"></i></button>
+              </div></td>
+            </tr>
+            <tr data-name="Garage Floor Epoxy">
+              <td><span class="td-name" onclick="openEditorConfirm('Garage Floor Epoxy')">Garage Floor Epoxy</span><span class="badge-inactive">INACTIVE</span></td>
+              <td>$0.00</td><td>—</td><td>$0.00</td><td>5/20/2026</td>
+              <td><div class="dt-actions">
+                <button class="dt-action-btn edit" onclick="openEditorConfirm('Garage Floor Epoxy')" title="Edit"><i class="fas fa-pencil-alt"></i></button>
+                <button class="dt-action-btn dup" onclick="openDupConfirm('Garage Floor Epoxy')" title="Duplicate"><i class="fas fa-clone"></i></button>
+                <button class="dt-action-btn del" onclick="openDelConfirm('Garage Floor Epoxy')" title="Delete"><i class="fas fa-trash"></i></button>
+              </div></td>
+            </tr>
+            <tr id="row-copy" data-name="Copy of Exterior Painting — Full Service" style="display:none;">
+              <td><span class="td-name">Copy of Exterior Painting — Full Service</span><span class="badge-default">ACTIVE</span></td>
+              <td>$0.00</td><td>0%</td><td>$0.00</td><td>6/12/2026</td>
+              <td><div class="dt-actions">
+                <button class="dt-action-btn edit" onclick="openEditorConfirm('Copy of Exterior Painting — Full Service')" title="Edit"><i class="fas fa-pencil-alt"></i></button>
+                <button class="dt-action-btn dup" onclick="openDupConfirm('Copy of Exterior Painting — Full Service')" title="Duplicate"><i class="fas fa-clone"></i></button>
+                <button class="dt-action-btn del" onclick="openDelConfirm('Copy of Exterior Painting — Full Service')" title="Delete"><i class="fas fa-trash"></i></button>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add Package Template button — BR-2, Admin only -->
+      <div style="margin-top:14px;">
+        <button class="btn-new-template" onclick="openNameModal()">
+          <i class="fas fa-plus"></i>
+          Add Package Template
+          <span class="br-chip"><span class="br-badge">BR-2</span><span class="br-tip">Admin only. Prompts for Package Name first (BR-3).</span></span>
+        </button>
+      </div>
+
+      <div class="manage-link" onclick="toast('Manage Custom Section Templates — not in scope')">
+        Manage Custom Section Templates
+      </div>
+    </div>
+  </div><!-- /view-library -->
+
+
+  <!-- ══════════════ VIEW: EDITOR ══════════════ -->
+  <div id="view-editor">
+    <div class="editor-wrap">
+      <div class="editor-page-header">
+        <div class="editor-back" onclick="promptUnsaved()">
+          <i class="fas fa-chevron-left"></i> Back to Package Templates
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-save" onclick="toast('Package Template saved')">Save Template</button>
+        </div>
+      </div>
+
+      <!-- Title row — "Package Template  ✎  ⚙" matching screenshot -->
+      <div class="template-title-row">
+        <div class="template-title-text">
+          <span id="editor-title-display">Exterior Painting — Full Service</span>
+          <button class="title-icon-btn" onclick="startEditTitle()" title="Rename"><i class="fas fa-pencil-alt"></i></button>
+          <button class="title-icon-btn" onclick="openModal('modal-pkg-settings')" style="color:#5a6277;" title="Package Settings">
+            <span style="position:relative;display:inline-flex;">
+              <i class="fas fa-cog"></i>
+              <!-- tooltip handled via title attribute -->
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <textarea class="desc-area" placeholder="Package description...">Complete exterior package with prep, prime, and 2-coat finish. Includes pressure wash and trim detail.</textarea>
+
+      <!-- Active toggle -->
+      <div class="active-row">
+        <span class="active-row-label">Active <span class="br-chip"><span class="br-badge">BR-21</span><span class="br-tip">Controls visibility in Select from Library</span></span></span>
+        <label class="switchery-wrap">
+          <input type="checkbox" checked>
+          <span class="sw-track"></span>
+        </label>
+      </div>
+
+      <!-- Duplicate -->
+      <button class="btn-dup-template" onclick="openDupConfirm(document.getElementById('editor-title-display').textContent)">
+        <i class="fas fa-clone"></i> Duplicate Package Template
+      </button>
+
+      <!-- ── Line Item Templates ── -->
+      <div class="editor-section-head">
+        <span>Line Item Templates <span class="br-chip"><span class="br-badge">BR-5</span><span class="br-tip">Retained from Proposal Template editor</span></span></span>
+      </div>
+      <div class="info-placeholder"><i class="fas fa-info-circle"></i> Start by adding a Line Items here...</div>
+      <div id="li-list">
+        <div class="li-row">
+          <i class="fas fa-grip-vertical li-drag"></i>
+          <div style="flex:1;">
+            <div class="li-name">Pressure Wash</div>
+            <div class="li-meta">Labor · per sq ft</div>
+          </div>
+          <div class="li-price">$0.18/sqft</div>
+          <div class="li-actions">
+            <button class="li-action-btn" onclick="openAddItemModal('edit')"><i class="fas fa-pencil-alt"></i></button>
+            <button class="li-action-btn danger" onclick="this.closest('.li-row').remove()"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+        <div class="li-row">
+          <i class="fas fa-grip-vertical li-drag"></i>
+          <div style="flex:1;">
+            <div class="li-name">Primer Application</div>
+            <div class="li-meta">Material + Labor</div>
+          </div>
+          <div class="li-price">$1.20/sqft</div>
+          <div class="li-actions">
+            <button class="li-action-btn" onclick="openAddItemModal('edit')"><i class="fas fa-pencil-alt"></i></button>
+            <button class="li-action-btn danger" onclick="this.closest('.li-row').remove()"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+        <div class="li-row">
+          <i class="fas fa-grip-vertical li-drag"></i>
+          <div style="flex:1;">
+            <div class="li-name">Paint — 2 Coats</div>
+            <div class="li-meta">Benjamin Moore Exterior</div>
+          </div>
+          <div class="li-price">$2.50/sqft</div>
+          <div class="li-actions">
+            <button class="li-action-btn" onclick="openAddItemModal('edit')"><i class="fas fa-pencil-alt"></i></button>
+            <button class="li-action-btn danger" onclick="this.closest('.li-row').remove()"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="btn-add-item" onclick="openAddItemModal('add')"><i class="fas fa-plus"></i> Add Line Item</button>
+        <button class="btn-add-item" onclick="openModal('modal-multi-items')"><i class="fas fa-layer-group"></i> Add Multi. Items</button>
+      </div>
+
+      <!-- ── Area Templates ── -->
+      <div class="editor-section-head" style="margin-top:28px;">
+        <span>Area Templates <span class="br-chip"><span class="br-badge">BR-5</span><span class="br-tip">Retained from Proposal Template editor</span></span></span>
+      </div>
+      <div class="info-placeholder"><i class="fas fa-info-circle"></i> Start by adding an Area here...</div>
+      <div id="area-list">
+        <div class="li-row">
+          <i class="fas fa-grip-vertical li-drag"></i>
+          <div style="flex:1;">
+            <div class="li-name">Front Elevation</div>
+            <div class="li-meta">Exterior · 1,200 sqft</div>
+          </div>
+          <div class="li-actions">
+            <button class="li-action-btn" onclick="openAddAreaModal()"><i class="fas fa-pencil-alt"></i></button>
+            <button class="li-action-btn danger" onclick="this.closest('.li-row').remove()"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+        <div class="li-row">
+          <i class="fas fa-grip-vertical li-drag"></i>
+          <div style="flex:1;">
+            <div class="li-name">Trim &amp; Fascia</div>
+            <div class="li-meta">Exterior · LF basis</div>
+          </div>
+          <div class="li-actions">
+            <button class="li-action-btn" onclick="openAddAreaModal()"><i class="fas fa-pencil-alt"></i></button>
+            <button class="li-action-btn danger" onclick="this.closest('.li-row').remove()"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:8px;">
+        <button class="btn-add-item" onclick="openAddAreaModal()"><i class="fas fa-plus"></i> Add Area</button>
+      </div>
+
+      <div style="height:70px;"></div><!-- spacer for sticky footer -->
+    </div>
+
+    <!-- Sticky footer -->
+    <div class="editor-footer">
+      <div class="editor-footer-meta">Template created at 6/5/2026 9:14:00 AM by Jeremy Harrison</div>
+      <button class="btn-delete-template" onclick="openDelConfirm(document.getElementById('editor-title-display').textContent)">
+        <i class="fas fa-trash"></i> Delete Template
+      </button>
+    </div>
+  </div><!-- /view-editor -->
+
+
+  <!-- ══════════════ VIEW: PROPOSAL BUILDER DEMO ══════════════ -->
+  <div id="view-proposal">
+    <div class="page-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-size:18px;font-weight:700;">Johnson Residence — Exterior Repaint</div>
+          <div style="font-size:13px;color:#9aa0b0;">Proposal Builder demo — click "+ Add Package" to trigger the 2-step flow (BR-9)</div>
+        </div>
+        <button class="btn-ghost" onclick="switchView('library')" style="font-size:12.5px;"><i class="fas fa-chevron-left"></i> Back</button>
+      </div>
+
+      <div style="background:#fff;border:1px solid #e8e8ec;border-radius:8px;padding:22px;text-align:center;">
+        <div style="position:relative;display:inline-block;">
+          <button class="btn-new-template" id="add-pkg-btn" onclick="toggleAddPkgMenu()" style="gap:6px;">
+            <i class="fas fa-plus"></i> Add Package
+            <span class="br-chip"><span class="br-badge">BR-9</span><span class="br-tip">Two options: Create New / Select from Library</span></span>
+          </button>
+          <div class="options-menu" id="add-pkg-menu">
+            <div class="options-item" onclick="closeAddPkgMenu();toast('Create New Package — existing flow')">
+              <i class="fas fa-pen-square"></i>
+              <div><div style="font-weight:700;">Create New Package</div><div class="options-item-detail">Build from scratch</div></div>
+            </div>
+            <div class="options-item" onclick="closeAddPkgMenu();openSelectLibraryModal()">
+              <i class="fas fa-layer-group"></i>
+              <div><div style="font-weight:700;">Select from Library</div><div class="options-item-detail">Browse saved templates</div></div>
+            </div>
+          </div>
+        </div>
+        <div id="inserted-pkgs"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-content -->
+</div><!-- /app-shell -->
+
+
+<!-- ══════════════════════════════════
+     MODALS
+══════════════════════════════════ -->
+
+<!-- 1. NEW PACKAGE NAME (BR-3) -->
+<div class="modal-overlay" id="modal-name">
+  <div class="modal-shell" style="max-width:440px;">
+    <div class="modal-header">
+      <span class="modal-title">New Package Template</span>
+      <button class="modal-x" onclick="closeModal('modal-name')">×</button>
+    </div>
+    <div class="modal-body">
+      <label style="font-size:12.5px;font-weight:600;color:#5a6277;display:block;margin-bottom:6px;">Package Name <span style="color:#e53e3e;">*</span></label>
+      <input type="text" class="name-input" id="new-pkg-name-input" placeholder="e.g. Exterior Painting — Premium" oninput="clearNameErr()">
+      <div class="err-msg" id="name-err"><i class="fas fa-exclamation-circle"></i> Package Name is required.</div>
+      <div style="margin-top:10px;font-size:12px;color:#9aa0b0;">You'll be taken to the editor after entering a name.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-name')">Cancel</button>
+      <button class="btn-primary" onclick="createTemplate()">Continue <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. DELETE CONFIRM (BR-18) -->
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal-shell" style="max-width:440px;">
+    <div class="modal-header">
+      <span class="modal-title" style="color:#e53e3e;">Delete Package Template</span>
+      <button class="modal-x" onclick="closeModal('modal-delete')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-body">
+        Are you sure you want to delete <strong id="del-pkg-name">"Exterior Painting — Full Service"</strong>?<br><br>
+        This will remove it from your Package Library but will not affect existing Proposals. <strong>This action cannot be undone.</strong>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-delete')">Cancel</button>
+      <button class="btn-danger" onclick="confirmDelete()"><i class="fas fa-trash"></i> Delete Template</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3. DUPLICATE CONFIRM (BR-16) -->
+<div class="modal-overlay" id="modal-dup">
+  <div class="modal-shell" style="max-width:440px;">
+    <div class="modal-header">
+      <span class="modal-title">Duplicate Package Template</span>
+      <button class="modal-x" onclick="closeModal('modal-dup')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-body">
+        A copy of <strong id="dup-pkg-name">"Exterior Painting — Full Service"</strong> will be created named:<br><br>
+        <div style="background:#f8f7ff;border:1px solid #c4b5fd;border-radius:7px;padding:10px 14px;font-weight:700;color:#7C3AED;">Copy of Exterior Painting — Full Service</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-dup')">Cancel</button>
+      <button class="btn-primary" onclick="confirmDup()"><i class="fas fa-clone"></i> Duplicate</button>
+    </div>
+  </div>
+</div>
+
+<!-- 4. EDIT CONFIRM (BR-17) -->
+<div class="modal-overlay" id="modal-edit-confirm">
+  <div class="modal-shell" style="max-width:440px;">
+    <div class="modal-header">
+      <span class="modal-title">Edit Package Template</span>
+      <button class="modal-x" onclick="closeModal('modal-edit-confirm')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-body">
+        Changes to this Package Template will apply to future Proposals.<br><br>
+        <strong>Existing Proposals using this Package will not be affected.</strong>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-edit-confirm')">Cancel</button>
+      <button class="btn-primary" onclick="proceedToEditor()">Continue to Editor</button>
+    </div>
+  </div>
+</div>
+
+<!-- 5. UNSAVED CHANGES (EC-3) -->
+<div class="modal-overlay" id="modal-unsaved">
+  <div class="modal-shell" style="max-width:400px;">
+    <div class="modal-header">
+      <span class="modal-title">Unsaved Changes</span>
+      <button class="modal-x" onclick="closeModal('modal-unsaved')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-body">You have unsaved changes to this Package Template. Would you like to save before leaving?</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-unsaved');switchView('library')">Discard</button>
+      <button class="btn-ghost" onclick="closeModal('modal-unsaved')">Cancel</button>
+      <button class="btn-primary" onclick="toast('Template saved');closeModal('modal-unsaved');switchView('library')">Save &amp; Leave</button>
+    </div>
+  </div>
+</div>
+
+<!-- 6. PACKAGE SETTINGS GEAR -->
+<div class="modal-overlay" id="modal-pkg-settings">
+  <div class="modal-shell" style="max-width:440px;">
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-cog" style="color:#7C3AED;margin-right:6px;"></i> Package Settings</span>
+      <button class="modal-x" onclick="closeModal('modal-pkg-settings')">×</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="active-row" style="margin:0;">
+        <span style="font-weight:600;font-size:13.5px;">Show pricing to customer</span>
+        <label class="switchery-wrap"><input type="checkbox" checked><span class="sw-track"></span></label>
+      </div>
+      <div class="active-row" style="margin:0;">
+        <span style="font-weight:600;font-size:13.5px;">Allow customer to choose tier</span>
+        <label class="switchery-wrap"><input type="checkbox" checked><span class="sw-track"></span></label>
+      </div>
+      <div class="active-row" style="margin:0;">
+        <span style="font-weight:600;font-size:13.5px;">Show line item breakdown</span>
+        <label class="switchery-wrap"><input type="checkbox"><span class="sw-track"></span></label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-pkg-settings')">Cancel</button>
+      <button class="btn-primary" onclick="closeModal('modal-pkg-settings');toast('Package Settings saved')">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- 7. ADD ITEM MODAL (matches screenshots exactly) -->
+<div class="modal-overlay" id="modal-add-item">
+  <div class="modal-shell">
+    <div class="modal-header">
+      <span class="modal-title" id="add-item-title">Add Item</span>
+      <button class="modal-x" onclick="closeModal('modal-add-item')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Product or Service -->
+      <div class="form-row">
+        <div class="form-lbl">Product or Service</div>
+        <div class="form-ctrl">
+          <select class="form-select">
+            <option value="">Select a product or service...</option>
+            <option>Interior Painting - Ceiling</option>
+            <option>Pressure Washing</option>
+            <option>General Prep</option>
+            <option>Paint Brushes (3 Pack)</option>
+            <option>Premium Paint</option>
+            <option>Color Consultation</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Name -->
+      <div class="form-row">
+        <div class="form-lbl">Name</div>
+        <div class="form-ctrl">
+          <input type="text" class="form-input" id="item-name-input" maxlength="75" oninput="updateCharCount()">
+          <div class="char-count" id="char-count">0/75</div>
+        </div>
+      </div>
+
+      <!-- Description Only -->
+      <div class="form-row">
+        <div class="form-lbl">Description Only <i class="fas fa-info-circle info-icon"></i></div>
+        <div class="form-ctrl" style="padding-top:7px;">
+          <label class="sw-sm"><input type="checkbox" id="desc-only-toggle" onchange="toggleDescOnly()"><span class="sw-sm-track"></span></label>
+        </div>
+      </div>
+
+      <!-- Quantity (hidden when Description Only) -->
+      <div class="form-row" id="qty-row">
+        <div class="form-lbl">Quantity <i class="fas fa-table info-icon"></i></div>
+        <div class="form-ctrl">
+          <div class="qty-group">
+            <input type="number" class="qty-input" value="0">
+            <span class="qty-unit">Ea</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price (hidden when Description Only) -->
+      <div class="form-row" id="price-row">
+        <div class="form-lbl">Price</div>
+        <div class="form-ctrl">
+          <div class="price-group">
+            <span class="price-prefix">$</span>
+            <input type="number" class="price-input" value="0" id="item-price">
+          </div>
+        </div>
+      </div>
+
+      <!-- Description with AI -->
+      <div class="form-row" style="flex-direction:column;gap:6px;">
+        <div class="desc-field-header">
+          <span class="form-lbl" style="width:auto;padding-top:0;">Description <i class="fas fa-info-circle info-icon"></i></span>
+          <button class="btn-ai-generate" onclick="toggleAiPanel()">
+            <i class="fas fa-magic"></i> ✨ Generate with AI
+          </button>
+        </div>
+
+        <!-- AI Panel -->
+        <div class="ai-panel" id="ai-panel">
+          <div class="ai-panel-title">✨ DESCRIBE THIS LINE ITEM</div>
+          <div class="ai-panel-hint">The more detail you provide, the better your AI description will be. Example: Interior walls, living room, two coats, customer-supplied Sherwin Williams Emerald Satin. We will also make sure to enhance the Name of the Product / Service. Make sure to review the suggestions.</div>
+          <textarea class="ai-textarea" placeholder='Describe "your line item"...'></textarea>
+          <div class="ai-panel-footer">
+            <button class="btn-ai-cancel" onclick="toggleAiPanel()">✕ Cancel</button>
+            <button class="btn-ai-run" onclick="toast('AI generating description...')">🪄✨ Generate</button>
+          </div>
+        </div>
+
+        <!-- CKEditor stub -->
+        <div style="width:100%;">
+          <div class="ck-toolbar">
+            <select class="ck-select">Styles</select>
+            <div class="ck-divider"></div>
+            <select class="ck-select" style="width:70px;">Font</select>
+            <div class="ck-divider"></div>
+            <select class="ck-select" style="width:55px;">Size</select>
+            <div class="ck-divider"></div>
+            <button class="ck-btn"><b>B</b></button>
+            <button class="ck-btn"><i>I</i></button>
+            <button class="ck-btn"><u>U</u></button>
+            <button class="ck-btn"><s>S</s></button>
+            <div class="ck-divider"></div>
+            <button class="ck-btn"><i class="fas fa-list-ol"></i></button>
+            <button class="ck-btn"><i class="fas fa-list-ul"></i></button>
+            <button class="ck-btn"><i class="fas fa-align-left"></i></button>
+            <button class="ck-btn"><i class="fas fa-align-center"></i></button>
+            <button class="ck-btn"><i class="fas fa-align-right"></i></button>
+            <button class="ck-btn"><i class="fas fa-align-justify"></i></button>
+            <button class="ck-btn"><i class="fas fa-link"></i></button>
+            <button class="ck-btn"><i class="fas fa-unlink"></i></button>
+          </div>
+          <div style="border:1px solid #ddd;border-top:none;padding:4px 8px;background:#fafafa;display:flex;gap:4px;">
+            <button class="ck-btn"><i class="fas fa-image"></i></button>
+            <button class="ck-btn"><i class="fas fa-table"></i></button>
+            <button class="ck-btn"><i class="fas fa-code"></i></button>
+            <button class="ck-btn"><i class="fas fa-smile"></i> ▾</button>
+          </div>
+          <div class="ck-body" contenteditable="true"></div>
+        </div>
+      </div>
+
+      <!-- Tax Rate -->
+      <div class="form-row">
+        <div class="form-lbl">Tax Rate</div>
+        <div class="form-ctrl">
+          <div class="tax-rate-group">
+            <input type="number" class="tax-rate-input" value="9.100">
+            <span class="tax-rate-suffix">%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Taxable -->
+      <div class="form-row">
+        <div class="form-lbl">Taxable</div>
+        <div class="form-ctrl" style="padding-top:7px;">
+          <label class="sw-sm"><input type="checkbox"><span class="sw-sm-track"></span></label>
+        </div>
+      </div>
+
+      <!-- Optional Item -->
+      <div class="form-row">
+        <div class="form-lbl">Optional Item</div>
+        <div class="form-ctrl" style="padding-top:7px;">
+          <label class="sw-sm"><input type="checkbox"><span class="sw-sm-track"></span></label>
+        </div>
+      </div>
+
+      <div class="help-row">Need help? <a href="#" onclick="return false">Click here</a> to add / edit your products and services</div>
+
+      <!-- Save as new product toggle -->
+      <div class="save-product-row">
+        <span>Save as new product/service</span>
+        <label class="sw-sm"><input type="checkbox"><span class="sw-sm-track"></span></label>
+      </div>
+
+      <!-- Total -->
+      <div class="total-bar">
+        <a href="#" onclick="return false">Total = $0.00</a>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="closeModal('modal-add-item');toast('Line item saved')">Save</button>
+      <button class="btn-close" onclick="closeModal('modal-add-item')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- 8. ADD MULTIPLE ITEMS (matches screenshot) -->
+<div class="modal-overlay" id="modal-multi-items">
+  <div class="modal-shell modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">Add Multiple Items to Package</span>
+      <button class="modal-x" onclick="closeModal('modal-multi-items')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="multi-info-bar">
+        <i class="fas fa-info-circle"></i> Optional items are not available within Packages.
+      </div>
+      <div class="multi-selected-count" id="multi-count">0 Selected</div>
+      <table class="multi-table">
+        <thead>
+          <tr><th></th><th>Product/Service</th><th style="text-align:right;">Qty</th><th style="text-align:right;">Price</th></tr>
+        </thead>
+        <tbody id="multi-tbody">
+          <!-- rows injected by JS -->
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="addMultiItems()">Save</button>
+      <button class="btn-close" onclick="closeModal('modal-multi-items')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- 9. ADD / EDIT AREA MODAL -->
+<div class="modal-overlay" id="modal-add-area">
+  <div class="modal-shell" style="max-width:520px;">
+    <div class="modal-header">
+      <span class="modal-title" id="area-modal-title">Add Area</span>
+      <button class="modal-x" onclick="closeModal('modal-add-area')">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- Interior / Exterior tabs -->
+      <div class="area-type-tabs">
+        <div class="area-type-tab active" onclick="setAreaType(this,'Interior')">Interior</div>
+        <div class="area-type-tab" onclick="setAreaType(this,'Exterior')">Exterior</div>
+      </div>
+
+      <!-- Area Name -->
+      <div class="form-row">
+        <div class="form-lbl">Area Name <span style="color:#e53e3e;">*</span></div>
+        <div class="form-ctrl">
+          <input type="text" class="form-input" placeholder="e.g. Living Room" value="Front Elevation">
+        </div>
+      </div>
+
+      <!-- Dimensions -->
+      <div class="form-row">
+        <div class="form-lbl">Length (ft)</div>
+        <div class="form-ctrl"><input type="number" class="form-input" value="60"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-lbl">Width / Height (ft)</div>
+        <div class="form-ctrl"><input type="number" class="form-input" value="20"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-lbl">Calculated sqft</div>
+        <div class="form-ctrl">
+          <input type="number" class="form-input" value="1200" style="background:#fafafa;color:#9aa0b0;" readonly>
+        </div>
+      </div>
+
+      <!-- Prep hours -->
+      <div class="form-row">
+        <div class="form-lbl">Prep Hours</div>
+        <div class="form-ctrl"><input type="number" class="form-input" value="0.00" step="0.25"></div>
+      </div>
+
+      <!-- Substrates -->
+      <div style="font-size:12.5px;font-weight:700;color:#5a6277;margin-bottom:8px;">Per Item Substrates:</div>
+      <div style="max-height:180px;overflow-y:auto;border:1px solid #e8e8ec;border-radius:7px;padding:4px 12px;">
+        <div class="substrate-row">
+          <input type="checkbox" class="substrate-cb" checked>
+          <div style="flex:1;"><div class="substrate-name">Siding — Lap (Spray)</div><div class="substrate-cat">Siding</div></div>
+          <div class="qty-stepper">
+            <button class="qty-step-btn" onclick="stepQty(this,-1)">−</button>
+            <input class="qty-step-val" type="number" value="1">
+            <button class="qty-step-btn" onclick="stepQty(this,1)">+</button>
+          </div>
+        </div>
+        <div class="substrate-row">
+          <input type="checkbox" class="substrate-cb">
+          <div style="flex:1;"><div class="substrate-name">Trim — Brush</div><div class="substrate-cat">Trim</div></div>
+          <div class="qty-stepper">
+            <button class="qty-step-btn" onclick="stepQty(this,-1)">−</button>
+            <input class="qty-step-val" type="number" value="1">
+            <button class="qty-step-btn" onclick="stepQty(this,1)">+</button>
+          </div>
+        </div>
+        <div class="substrate-row">
+          <input type="checkbox" class="substrate-cb">
+          <div style="flex:1;"><div class="substrate-name">Soffit — Spray</div><div class="substrate-cat">Soffit</div></div>
+          <div class="qty-stepper">
+            <button class="qty-step-btn" onclick="stepQty(this,-1)">−</button>
+            <input class="qty-step-val" type="number" value="1">
+            <button class="qty-step-btn" onclick="stepQty(this,1)">+</button>
+          </div>
+        </div>
+        <div class="substrate-row" style="border:none;">
+          <input type="checkbox" class="substrate-cb">
+          <div style="flex:1;"><div class="substrate-name">Fascia — Brush</div><div class="substrate-cat">Fascia</div></div>
+          <div class="qty-stepper">
+            <button class="qty-step-btn" onclick="stepQty(this,-1)">−</button>
+            <input class="qty-step-val" type="number" value="1">
+            <button class="qty-step-btn" onclick="stepQty(this,1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recalculate substrates -->
+      <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
+        <span style="font-size:13px;font-weight:600;color:#5a6277;">Recalculate Substrates:</span>
+        <label class="sw-sm"><input type="checkbox"><span class="sw-sm-track"></span></label>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="closeModal('modal-add-area');toast('Area saved')">Save</button>
+      <button class="btn-close" onclick="closeModal('modal-add-area')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- 10. SELECT FROM LIBRARY 2-step (BR-10) -->
+<div class="modal-overlay" id="modal-select-lib">
+  <div class="modal-shell modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Select Package from Library</div>
+        <div style="font-size:11.5px;color:#9aa0b0;margin-top:2px;" id="select-step-lbl">Step 1 of 2 — Choose a template</div>
+      </div>
+      <button class="modal-x" onclick="closeModal('modal-select-lib');resetSelect()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="step-row">
+        <div class="step-circle active" id="sc1">1</div>
+        <div class="step-line" id="sl1"></div>
+        <div class="step-circle" id="sc2">2</div>
+      </div>
+
+      <!-- Step 1 -->
+      <div id="sel-step1">
+        <input type="text" class="form-input" style="margin-bottom:10px;" placeholder="Search by name or description..." oninput="filterSelLib(this.value)">
+        <div id="sel-lib-list">
+          <div class="lib-row" id="lr0" onclick="selLibItem(0)">
+            <div class="lib-radio"></div>
+            <div style="flex:1;min-width:0;">
+              <div class="lib-name">Exterior Painting — Full Service</div>
+              <div class="lib-desc">Complete exterior package with prep, prime, and 2-coat finish...</div>
+              <div class="lib-meta"><span><i class="fas fa-layer-group"></i> 3 tiers</span><span><i class="fas fa-list"></i> 7 line items</span><span><i class="fas fa-clock"></i> Modified 2d ago</span></div>
+            </div>
+          </div>
+          <div class="lib-row" id="lr1" onclick="selLibItem(1)">
+            <div class="lib-radio"></div>
+            <div style="flex:1;min-width:0;">
+              <div class="lib-name">Interior Repaint — Standard</div>
+              <div class="lib-desc">Walls and ceilings in up to 4 rooms. Two coats Benjamin Moore...</div>
+              <div class="lib-meta"><span><i class="fas fa-layer-group"></i> 2 tiers</span><span><i class="fas fa-list"></i> 5 line items</span><span><i class="fas fa-clock"></i> Modified 5d ago</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div id="sel-step2" style="display:none;">
+        <div class="alert-info"><i class="fas fa-eye"></i> <span><strong>Read-only preview.</strong> You can edit the Package after insertion. (BR-10)</span></div>
+        <div class="preview-box">
+          <div style="font-size:16px;font-weight:700;margin-bottom:4px;" id="prev-pkg-name">Exterior Painting — Full Service</div>
+          <div style="font-size:12.5px;color:#9aa0b0;">Complete exterior package with prep, prime, and 2-coat finish.</div>
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+            <span style="background:#ede9ff;color:#7C3AED;font-size:11px;font-weight:600;padding:2px 9px;border-radius:10px;"><i class="fas fa-layer-group"></i> Good · Better · Best</span>
+            <span style="background:#dcfce7;color:#166534;font-size:11px;font-weight:600;padding:2px 9px;border-radius:10px;"><i class="fas fa-check"></i> Active</span>
+          </div>
+        </div>
+        <div class="preview-section-lbl">Line Items</div>
+        <div class="preview-li"><span>Pressure Wash</span><span style="color:#9aa0b0;">$0.18/sqft</span></div>
+        <div class="preview-li"><span>Primer Application</span><span style="color:#9aa0b0;">$1.20/sqft</span></div>
+        <div class="preview-li"><span>Paint — 2 Coats</span><span style="color:#9aa0b0;">$2.50/sqft</span></div>
+        <div class="preview-li" style="border:none;"><span>Caulking &amp; Sealing</span><span style="color:#9aa0b0;">$0.35/LF</span></div>
+        <div class="preview-section-lbl" style="margin-top:10px;">Areas</div>
+        <div class="preview-li"><span>Front Elevation</span><span style="color:#9aa0b0;">1,200 sqft</span></div>
+        <div class="preview-li" style="border:none;"><span>Trim &amp; Fascia</span><span style="color:#9aa0b0;">LF basis</span></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div id="sel-footer1" style="display:flex;gap:8px;width:100%;justify-content:flex-end;">
+        <button class="btn-ghost" onclick="closeModal('modal-select-lib');resetSelect()">Cancel</button>
+        <button class="btn-primary" id="btn-preview" disabled onclick="goPreview()">Preview Selected <i class="fas fa-arrow-right"></i></button>
+      </div>
+      <div id="sel-footer2" style="display:none;gap:8px;width:100%;justify-content:space-between;align-items:center;">
+        <button class="btn-ghost" onclick="backToStep1()"><i class="fas fa-arrow-left"></i> Back</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-ghost" onclick="closeModal('modal-select-lib');resetSelect()">Cancel</button>
+          <button class="btn-primary" onclick="insertPkg()"><i class="fas fa-check"></i> Insert Package into Proposal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toast-msg"></span></div>
+
+<!-- DEMO NAV -->
+<div class="demo-nav">
+  <button class="demo-nav-btn active" id="nav-library" onclick="switchView('library')">📚 Library</button>
+  <button class="demo-nav-btn" id="nav-editor" onclick="openEditorConfirm('Exterior Painting — Full Service')">✏️ Editor</button>
+  <button class="demo-nav-btn" id="nav-proposal" onclick="switchView('proposal')">📄 Proposal Builder</button>
+</div>
+
+<script>
+// ─── STATE ───
+let pendingName = '';
+let selIdx = -1;
+
+// ─── MULTI-ITEMS DATA ───
+const multiItems = [
+  {name:'Interior Painting - Ceiling',qty:1,price:800},
+  {name:'No Warranty',qty:1,price:0},
+  {name:'Promotional Discount',qty:1,price:0},
+  {name:'5-Year Warranty',qty:1,price:0},
+  {name:'Basic Paint',qty:1,price:0},
+  {name:'Product / Service',qty:1,price:0},
+  {name:'10-Year Warranty',qty:1,price:10},
+  {name:'Color Consultation',qty:1,price:200},
+  {name:'Cabinet Refinishing - Drawers',qty:1,price:0},
+  {name:'Premium Paint',qty:1,price:0},
+  {name:'Secondary Color Selection',qty:1,price:0},
+  {name:'Garage Floors',qty:1,price:20},
+  {name:'Processing Fee',qty:1,price:5},
+  {name:'Pressure Washing',qty:1,price:3.5},
+  {name:'General Prep',qty:1,price:200},
+  {name:'Paint Brushes (3 Pack)',qty:1,price:15},
+  {name:'+ 3rd Color Selection',qty:1,price:0},
+];
+function buildMultiTable() {
+  const tbody = document.getElementById('multi-tbody');
+  tbody.innerHTML = multiItems.map((item,i)=>`
+    <tr>
+      <td><input type="checkbox" class="multi-cb" onchange="updateMultiCount()" id="mc${i}"></td>
+      <td style="font-size:13px;">${item.name}</td>
+      <td style="text-align:right;"><input type="number" class="multi-qty" value="${item.qty}"></td>
+      <td style="text-align:right;"><input type="number" class="multi-price" value="${item.price}"></td>
+    </tr>
+  `).join('');
+}
+function updateMultiCount() {
+  const n = document.querySelectorAll('.multi-cb:checked').length;
+  document.getElementById('multi-count').textContent = n + ' Selected';
+}
+function addMultiItems() {
+  const n = document.querySelectorAll('.multi-cb:checked').length;
+  closeModal('modal-multi-items');
+  if(n) toast(n + ' item(s) added to Package Template');
+  else toast('No items selected');
+}
+buildMultiTable();
+
+// ─── VIEW SWITCH ───
+function switchView(v) {
+  ['library','editor','proposal'].forEach(id=>{
+    document.getElementById('view-'+id).style.display = id===v ? 'block' : 'none';
+  });
+  ['library','editor','proposal'].forEach(id=>{
+    const b = document.getElementById('nav-'+id);
+    if(b) b.classList.toggle('active', id===v);
+  });
+  // sidebar highlight
+  document.querySelectorAll('.nav-sub').forEach(el=>{
+    el.classList.remove('active');
+    if(v==='library' && el.textContent.trim().startsWith('Templates')) el.classList.add('active');
+  });
+}
+
+// ─── MODALS ───
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ─── NAME MODAL ───
+function openNameModal() {
+  document.getElementById('new-pkg-name-input').value='';
+  document.getElementById('name-err').style.display='none';
+  openModal('modal-name');
+  setTimeout(()=>document.getElementById('new-pkg-name-input').focus(),200);
+}
+function clearNameErr() { document.getElementById('name-err').style.display='none'; }
+function createTemplate() {
+  const v = document.getElementById('new-pkg-name-input').value.trim();
+  if(!v){ document.getElementById('name-err').style.display='block'; return; }
+  closeModal('modal-name');
+  document.getElementById('editor-title-display').textContent = v;
+  switchView('editor');
+  toast('Package Template "'+v+'" created');
+}
+
+// ─── EDITOR ───
+let pendingEditorName = '';
+function openEditorConfirm(name) {
+  pendingEditorName = name;
+  openModal('modal-edit-confirm');
+}
+function proceedToEditor() {
+  closeModal('modal-edit-confirm');
+  document.getElementById('editor-title-display').textContent = pendingEditorName;
+  switchView('editor');
+}
+function startEditTitle() {
+  const el = document.getElementById('editor-title-display');
+  const old = el.textContent;
+  const inp = document.createElement('input');
+  inp.type='text'; inp.value=old;
+  inp.style.cssText='font-size:18px;font-weight:700;color:#32415B;border:none;border-bottom:2px solid #7C3AED;outline:none;background:transparent;padding:0;min-width:200px;';
+  el.replaceWith(inp); inp.focus(); inp.select();
+  function done(){
+    const nv = inp.value.trim()||old;
+    const sp = document.createElement('span');
+    sp.id='editor-title-display'; sp.className=''; sp.style.fontSize='inherit'; sp.style.fontWeight='inherit';
+    sp.textContent=nv; inp.replaceWith(sp);
+  }
+  inp.addEventListener('blur',done);
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') done(); if(e.key==='Escape'){inp.value=old;done();} });
+}
+function promptUnsaved() { openModal('modal-unsaved'); }
+
+// ─── DELETE ───
+let pendingDelName = '';
+function openDelConfirm(name) {
+  pendingDelName = name;
+  document.getElementById('del-pkg-name').textContent = '"'+name+'"';
+  openModal('modal-delete');
+}
+function confirmDelete() {
+  closeModal('modal-delete');
+  toast('"'+pendingDelName+'" deleted');
+  if(document.getElementById('view-editor').style.display!=='none') switchView('library');
+}
+
+// ─── DUPLICATE ───
+function openDupConfirm(name) {
+  document.getElementById('dup-pkg-name').textContent = '"'+name+'"';
+  openModal('modal-dup');
+}
+function confirmDup() {
+  closeModal('modal-dup');
+  document.getElementById('row-copy').style.display='';
+  toast('Duplicate created: "Copy of '+document.getElementById('dup-pkg-name').textContent.replace(/"/g,'')+'"');
+}
+
+// ─── LIBRARY FILTER ───
+function filterTable() {
+  const q = document.getElementById('lib-search').value.toLowerCase();
+  document.querySelectorAll('#lib-tbody tr').forEach(tr=>{
+    tr.style.display = tr.dataset.name && tr.dataset.name.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ─── ADD ITEM ───
+function openAddItemModal(mode) {
+  document.getElementById('add-item-title').textContent = mode==='edit'?'Edit Item':'Add Item';
+  openModal('modal-add-item');
+}
+function updateCharCount() {
+  const v = document.getElementById('item-name-input').value.length;
+  document.getElementById('char-count').textContent = v+'/75';
+}
+function toggleDescOnly() {
+  const on = document.getElementById('desc-only-toggle').checked;
+  document.getElementById('qty-row').style.display = on?'none':'flex';
+  document.getElementById('price-row').style.display = on?'none':'flex';
+}
+function toggleAiPanel() {
+  const p = document.getElementById('ai-panel');
+  p.classList.toggle('open');
+}
+
+// ─── ADD AREA ───
+function openAddAreaModal() {
+  document.getElementById('area-modal-title').textContent = 'Edit Area';
+  openModal('modal-add-area');
+}
+function setAreaType(el,type) {
+  document.querySelectorAll('.area-type-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+function stepQty(btn,dir) {
+  const inp = btn.parentElement.querySelector('.qty-step-val');
+  inp.value = Math.max(1, parseInt(inp.value)||1) + dir;
+}
+
+// ─── ADD PKG MENU (BR-9) ───
+function toggleAddPkgMenu() {
+  const m = document.getElementById('add-pkg-menu');
+  m.style.display = m.style.display==='block'?'none':'block';
+}
+function closeAddPkgMenu() { document.getElementById('add-pkg-menu').style.display='none'; }
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#add-pkg-btn')&&!e.target.closest('#add-pkg-menu')) closeAddPkgMenu();
+});
+
+// ─── SELECT LIBRARY 2-STEP ───
+function openSelectLibraryModal() { resetSelect(); openModal('modal-select-lib'); }
+function resetSelect() {
+  selIdx=-1;
+  document.querySelectorAll('.lib-row').forEach(r=>r.classList.remove('selected'));
+  document.getElementById('sel-step1').style.display='block';
+  document.getElementById('sel-step2').style.display='none';
+  document.getElementById('sel-footer1').style.display='flex';
+  document.getElementById('sel-footer2').style.display='none';
+  document.getElementById('btn-preview').disabled=true;
+  document.getElementById('sc1').className='step-circle active'; document.getElementById('sc1').innerHTML='1';
+  document.getElementById('sc2').className='step-circle'; document.getElementById('sc2').innerHTML='2';
+  document.getElementById('sl1').className='step-line';
+  document.getElementById('select-step-lbl').textContent='Step 1 of 2 — Choose a template';
+}
+function selLibItem(idx) {
+  selIdx=idx;
+  document.querySelectorAll('.lib-row').forEach((r,i)=>r.classList.toggle('selected',i===idx));
+  document.getElementById('btn-preview').disabled=false;
+}
+function filterSelLib(q) {
+  document.querySelectorAll('#sel-lib-list .lib-row').forEach(r=>{
+    r.style.display=r.querySelector('.lib-name').textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
+}
+function goPreview() {
+  document.getElementById('sel-step1').style.display='none';
+  document.getElementById('sel-step2').style.display='block';
+  document.getElementById('sel-footer1').style.display='none';
+  document.getElementById('sel-footer2').style.display='flex';
+  document.getElementById('sc1').className='step-circle done';
+  document.getElementById('sc1').innerHTML='<i class="fas fa-check" style="font-size:10px;"></i>';
+  document.getElementById('sc2').className='step-circle active';
+  document.getElementById('sl1').className='step-line done';
+  document.getElementById('select-step-lbl').textContent='Step 2 of 2 — Preview & Confirm';
+  const names=['Exterior Painting — Full Service','Interior Repaint — Standard'];
+  document.getElementById('prev-pkg-name').textContent = names[selIdx]||names[0];
+}
+function backToStep1() { resetSelect(); }
+function insertPkg() {
+  const name = document.getElementById('prev-pkg-name').textContent;
+  closeModal('modal-select-lib'); resetSelect();
+  const c = document.getElementById('inserted-pkgs');
+  const d = document.createElement('div');
+  d.style.cssText='margin-top:18px;border:1px solid #e8e8ec;border-radius:8px;overflow:hidden;text-align:left;';
+  d.innerHTML=`<div style="background:#f8f5ff;border-bottom:1px solid #e8e8ec;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+    <div><div style="font-weight:700;font-size:13.5px;">${name}</div><div style="font-size:11.5px;color:#9aa0b0;margin-top:2px;">Inserted from Package Template · Independent instance (BR-11, BR-12)</div></div>
+    <span style="background:#dcfce7;color:#166534;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;"><i class="fas fa-unlink"></i> Unlinked</span>
+  </div>
+  <div style="padding:12px 14px;font-size:12.5px;color:#9aa0b0;">Fully editable and independent from the saved template. <button onclick="toast('Package editing — not in scope')" style="background:none;border:1px solid #ddd;padding:3px 10px;border-radius:5px;font-size:12px;color:#7C3AED;cursor:pointer;"><i class="fas fa-pencil-alt"></i> Edit Package</button></div>`;
+  c.appendChild(d);
+  toast('"'+name+'" inserted into Proposal');
+}
+
+// ─── TOAST ───
+function toast(msg) {
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=' '+msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+// Init
+switchView('library');
+</script>
+</body>
+</html>
