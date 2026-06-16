@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QBO State of Integration — DripJobs</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --color-primary:        #8B85EA;
+    --color-primary-hover:  #736BE3;
+    --color-primary-active: #5C53DC;
+    --color-primary-rgb:    139, 133, 234;
+    --color-bg:             #F3F1FC;
+    --color-text:           #32415B;
+    --color-text-muted:     #80879A;
+    --color-border:         #DAD8E3;
+    --color-card:           #FFFFFF;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* Proto bar */
+  .proto-bar {
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; }
+  .back-link {
+    font-size: 12px; font-weight: 500; color: var(--color-text-muted);
+    text-decoration: none; display: flex; align-items: center; gap: 4px; transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--color-primary); }
+  .divider { color: var(--color-border); font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; }
+  .proto-bar-ticket {
+    font-size: 11px; font-weight: 600; color: var(--color-primary);
+    text-decoration: none; padding: 4px 10px;
+    border: 1px solid #D6D2F5; background: #E8E6FA;
+    border-radius: 999px; letter-spacing: 0.2px;
+  }
+  .proto-bar-ticket:hover { background: var(--color-primary); color: #fff; }
+
+  /* Body */
+  .page-body { max-width: 860px; margin: 0 auto; padding: 32px 24px 0; }
+
+  /* Doc header */
+  .doc-header {
+    background: var(--color-primary);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    color: #fff;
+  }
+  .doc-header-eyebrow {
+    font-size: 11px; font-weight: 500; opacity: .75;
+    letter-spacing: .8px; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .doc-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px; font-weight: 400; line-height: 1.25; margin-bottom: 6px;
+  }
+  .doc-header-sub { font-size: 13px; opacity: .8; line-height: 1.5; margin-bottom: 14px; }
+  .doc-header-meta {
+    display: flex; gap: 20px; flex-wrap: wrap;
+    font-size: 12px; opacity: .7; border-top: 1px solid rgba(255,255,255,.2);
+    padding-top: 12px; margin-top: 4px;
+  }
+  .doc-header-meta span { display: flex; align-items: center; gap: 5px; }
+
+  /* Section label */
+  .section-label {
+    font-size: 11px; font-weight: 600; color: var(--color-primary-active);
+    letter-spacing: .6px; text-transform: uppercase;
+    margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: .5px; background: var(--color-border); }
+
+  .section { margin-bottom: 28px; }
+
+  /* Cards */
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 10px;
+  }
+
+  p { font-size: 13px; line-height: 1.7; color: var(--color-text); margin-bottom: 8px; }
+  p:last-child { margin-bottom: 0; }
+
+  /* Timeline */
+  .timeline { display: flex; flex-direction: column; }
+  .tl-item { display: flex; gap: 14px; position: relative; }
+  .tl-item:not(:last-child)::before {
+    content: ''; position: absolute; left: 11px; top: 28px; bottom: -4px;
+    width: .5px; background: var(--color-border); z-index: 0;
+  }
+  .tl-dot {
+    width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1; margin-top: 2px; font-size: 11px;
+    border: 1.5px solid;
+  }
+  .tl-dot.neutral { background: #E8E6FA; border-color: #CECBF6; color: #5C53DC; }
+  .tl-dot.ship    { background: #EAF3DE; border-color: #C0DD97; color: #3B6D11; }
+  .tl-dot.risk    { background: #FCEBEB; border-color: #F7C1C1; color: #A32D2D; }
+  .tl-dot.warn    { background: #FAEEDA; border-color: #FAC775; color: #854F0B; }
+  .tl-content { padding: 0 0 18px; flex: 1; }
+  .tl-date { font-size: 11px; font-weight: 500; color: var(--color-text-muted); letter-spacing: .3px; margin-bottom: 3px; }
+  .tl-title { font-size: 13px; font-weight: 600; color: var(--color-text); margin-bottom: 4px; }
+  .tl-body { font-size: 12.5px; color: var(--color-text-muted); line-height: 1.65; }
+  .tl-tickets { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+  .tl-ticket {
+    font-size: 11px; font-weight: 600; background: #E8E6FA;
+    color: #5C53DC; border: .5px solid #CECBF6;
+    border-radius: 4px; padding: 2px 7px;
+    text-decoration: none;
+  }
+  .tl-ticket:hover { background: var(--color-primary); color: #fff; }
+
+  /* Gap items */
+  .gap-list { display: flex; flex-direction: column; gap: 8px; }
+  .gap-item {
+    border-radius: 8px; padding: 12px 14px;
+    font-size: 13px; line-height: 1.6;
+    border: .5px solid;
+  }
+  .gap-item.resolved  { background: #EAF3DE; border-color: #C0DD97; color: #3B6D11; }
+  .gap-item.open      { background: #FAEEDA; border-color: #FAC775; color: #854F0B; }
+  .gap-item.process   { background: #E6F1FB; border-color: #B5D4F4; color: #185FA5; }
+  .gap-label { font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; opacity: .7; margin-bottom: 2px; }
+  .gap-title { font-weight: 600; margin-bottom: 3px; }
+  .gap-desc  { font-size: 12.5px; opacity: .85; }
+
+  /* Callout */
+  .callout {
+    border-radius: 8px; padding: 13px 15px; font-size: 13px;
+    line-height: 1.6; margin-bottom: 14px;
+    display: flex; gap: 10px; align-items: flex-start;
+    border: .5px solid;
+  }
+  .callout-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .callout-body { flex: 1; }
+  .callout-title { font-weight: 600; margin-bottom: 2px; }
+  .callout.info    { background: #E6F1FB; border-color: #B5D4F4; color: #185FA5; }
+  .callout.success { background: #EAF3DE; border-color: #C0DD97; color: #3B6D11; }
+  .callout.warn    { background: #FAEEDA; border-color: #FAC775; color: #854F0B; }
+  .callout.danger  { background: #FCEBEB; border-color: #F7C1C1; color: #A32D2D; }
+
+  /* Ticket table */
+  .ticket-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .ticket-table th {
+    font-size: 11px; font-weight: 600; color: var(--color-text-muted);
+    text-align: left; padding: 6px 12px; border-bottom: 1px solid var(--color-border);
+    letter-spacing: .3px; text-transform: uppercase;
+  }
+  .ticket-table td { padding: 9px 12px; border-bottom: .5px solid var(--color-border); vertical-align: top; }
+  .ticket-table tr:last-child td { border-bottom: none; }
+  .ticket-table a { color: var(--color-primary); text-decoration: none; font-weight: 600; font-family: monospace; font-size: 12px; }
+  .ticket-table a:hover { text-decoration: underline; }
+  .badge {
+    display: inline-flex; align-items: center; font-size: 11px; font-weight: 600;
+    border-radius: 4px; padding: 2px 8px; white-space: nowrap; border: .5px solid;
+  }
+  .badge.prod     { background: #EAF3DE; color: #3B6D11; border-color: #C0DD97; }
+  .badge.triage   { background: #E6F1FB; color: #185FA5; border-color: #B5D4F4; }
+  .badge.dev      { background: #E8E6FA; color: #5C53DC; border-color: #CECBF6; }
+  .badge.parked   { background: #F1EFE8; color: #5F5E5A; border-color: #D3D1C7; }
+  .badge.risk     { background: #FCEBEB; color: #A32D2D; border-color: #F7C1C1; }
+
+  /* Competitor grid */
+  .comp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .comp-card {
+    background: var(--color-card); border: 1px solid var(--color-border);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .comp-card.highlight { border-color: var(--color-primary); background: #EEEDFE; }
+  .comp-name { font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--color-text); }
+  .comp-row-item { font-size: 12px; color: var(--color-text-muted); display: flex; gap: 6px; align-items: flex-start; margin-bottom: 5px; line-height: 1.5; }
+  .comp-row-item:last-child { margin-bottom: 0; }
+  .ci { font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+  .ci.yes  { color: #3B6D11; }
+  .ci.no   { color: #A32D2D; }
+  .ci.part { color: #854F0B; }
+
+  /* Path forward */
+  .path-list { display: flex; flex-direction: column; gap: 12px; }
+  .path-step { display: flex; gap: 14px; align-items: flex-start; }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--color-primary); color: #fff;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .step-body { flex: 1; }
+  .step-title { font-size: 13px; font-weight: 600; color: var(--color-text); margin-bottom: 3px; }
+  .step-desc  { font-size: 12.5px; color: var(--color-text-muted); line-height: 1.65; }
+</style>
+</head>
+<body>
+
+<!-- Proto bar -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">
+      &#8592; Hub
+    </a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">QBO State of Integration Report</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/86b8nxcm2" target="_blank">86b8nxcm2</a>
+</div>
+
+<div class="page-body">
+
+  <!-- Header -->
+  <div class="doc-header">
+    <div class="doc-header-eyebrow">Integration Health Report</div>
+    <h1>DripJobs &times; QuickBooks Online</h1>
+    <div class="doc-header-sub">State of the integration — historical timeline, Jason's June 2026 engineering pass, open UX gaps, competitor benchmark, and V1 path forward.</div>
+    <div class="doc-header-meta">
+      <span>&#128197; June 16, 2026</span>
+      <span>&#128100; Jeremy Harrison, PM</span>
+      <span>&#128336; V1 Scope</span>
+    </div>
+  </div>
+
+  <!-- Historical Timeline -->
+  <div class="section">
+    <div class="section-label">Historical Timeline</div>
+    <div class="timeline">
+
+      <div class="tl-item">
+        <div class="tl-dot risk">&#9651;</div>
+        <div class="tl-content">
+          <div class="tl-date">Pre-2025</div>
+          <div class="tl-title">Recurring failures with no resolution path</div>
+          <div class="tl-body">Multiple separate tickets logged for sync failures, connection issues, and initial sync problems. Most resolved as "flight delayed," "resolved without fix," or "no fix needed." Rick Schott owned earlier connection work. No systemic fix shipped.</div>
+          <div class="tl-tickets">
+            <a class="tl-ticket" href="https://app.clickup.com/t/86b27j7ae" target="_blank">86b27j7ae</a>
+            <a class="tl-ticket" href="https://app.clickup.com/t/86b04hp3h" target="_blank">86b04hp3h</a>
+            <a class="tl-ticket" href="https://app.clickup.com/t/86b0wkxeg" target="_blank">86b0wkxeg</a>
+            <a class="tl-ticket" href="https://app.clickup.com/t/86b0nhdpu" target="_blank">86b0nhdpu</a>
+            <a class="tl-ticket" href="https://app.clickup.com/t/86b09cqyr" target="_blank">86b09cqyr</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot neutral">&#128196;</div>
+        <div class="tl-content">
+          <div class="tl-date">Late 2024</div>
+          <div class="tl-title">Stopgap spec written — never shipped to dev</div>
+          <div class="tl-body">Full V1 stopgap ticket drafted covering two-way sync, conflict resolution UI, sync scheduling, and error logging. Too large in scope for V1 and never moved to dev. Contained an honest PM note: "I'm not sure we can control duplicate records — this is the root of a lot of our issues."</div>
+          <div class="tl-tickets"><a class="tl-ticket" href="https://app.clickup.com/t/86b70bayf" target="_blank">86b70bayf — Airport Parking</a></div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot ship">&#10003;</div>
+        <div class="tl-content">
+          <div class="tl-date">January 2026</div>
+          <div class="tl-title">First confirmed fixes reach production</div>
+          <div class="tl-body">January 2026 release shipped corrected sync indicators in the invoices list, removal of confusing status labels (Due, Late), and improved Invoices page load performance. Cosmetic and structural improvements only — not reliability fixes.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot warn">&#8857;</div>
+        <div class="tl-content">
+          <div class="tl-date">February 2026</div>
+          <div class="tl-title">GoForward Strategy flags QBO as Priority 4</div>
+          <div class="tl-body">Feb 25 GoForward doc listed "QuickBooks Sync Improvements" as a top-5 product priority with active customer escalations, targeting April 11, 2026.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot ship">&#10003;</div>
+        <div class="tl-content">
+          <div class="tl-date">May 2026</div>
+          <div class="tl-title">401 error visibility fix shipped</div>
+          <div class="tl-body">Ticket 86b9npap7 addressed the specific case where users saw a raw 401 error with no explanation. TJ shipped PR #1934. Tested by Michael on staging. First actionable error message added to the integration.</div>
+          <div class="tl-tickets"><a class="tl-ticket" href="https://app.clickup.com/t/86b9npap7" target="_blank">86b9npap7 — Pushed to Production</a></div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot ship">&#128296;</div>
+        <div class="tl-content">
+          <div class="tl-date">June 2026 — Current</div>
+          <div class="tl-title">Jason's engineering pass: root causes addressed</div>
+          <div class="tl-body">Jason made a substantive undocumented pass fixing three root causes: invoice duplication, silent sync failures, and connection instability. Changes built and staged, pending QA against a test QBO account.</div>
+          <div class="tl-tickets"><a class="tl-ticket" href="https://app.clickup.com/t/86bafbg7r" target="_blank">86bafbg7r — Send to Dev (QA gate)</a></div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot risk">&#9888;</div>
+        <div class="tl-content">
+          <div class="tl-date">On record</div>
+          <div class="tl-title">Cancellation caused by sync + CS resync nightmare</div>
+          <div class="tl-body">One company cancelled citing doubled entries in QBO that led to a mis-filed GST return. A CS-initiated resync worsened the situation. Most severe documented churn cost from the QBO integration to date.</div>
+          <div class="tl-tickets"><a class="tl-ticket" href="https://app.clickup.com/t/86b8nxcm2" target="_blank">86b8nxcm2 — Cancellation log</a></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Jason's Pass -->
+  <div class="section">
+    <div class="section-label">Jason's Engineering Pass (June 2026)</div>
+    <div class="callout success">
+      <span class="callout-icon">&#10003;</span>
+      <div class="callout-body">
+        <div class="callout-title">Most significant backend work to date — pending QA confirmation</div>
+        Three of the longest-standing root causes were addressed. These are backend reliability fixes. The user-facing experience layer (Phase 2) remains unbuilt on top of them.
+      </div>
+    </div>
+    <div class="gap-list">
+      <div class="gap-item resolved">
+        <div class="gap-label">Fixed</div>
+        <div class="gap-title">Invoice duplication stopped at the source</div>
+        <div class="gap-desc">Duplicate invoices were being re-created in QBO on every sync. Safeguards added so the same record cannot be sent twice concurrently.</div>
+      </div>
+      <div class="gap-item resolved">
+        <div class="gap-label">Fixed</div>
+        <div class="gap-title">Name / email matching smarter — near-identical records no longer duplicate</div>
+        <div class="gap-desc">Fuzzy matching improved so slight spacing or spelling differences in customer names no longer create new duplicate QBO records.</div>
+      </div>
+      <div class="gap-item resolved">
+        <div class="gap-label">Fixed</div>
+        <div class="gap-title">Sync errors now logged and alerted internally</div>
+        <div class="gap-desc">Previously, sync failures disappeared silently. Errors are now logged with visibility for engineering, making future diagnosis possible.</div>
+      </div>
+      <div class="gap-item resolved">
+        <div class="gap-label">Fixed</div>
+        <div class="gap-title">Connection refresh reworked — self-recovers instead of staying broken</div>
+        <div class="gap-desc">OAuth token refresh was running too aggressively, breaking the QBO link and forcing manual reconnects. Connection now self-recovers from temporary hiccups.</div>
+      </div>
+      <div class="gap-item resolved">
+        <div class="gap-label">Fixed</div>
+        <div class="gap-title">Automatic retry on QBO rate limits and temporary slowdowns</div>
+        <div class="gap-desc">Temporary QBO API slowdowns or rate limit hits previously caused permanent sync failures. Automatic retry logic added.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open Gaps -->
+  <div class="section">
+    <div class="section-label">Open Gaps After Jason's Pass</div>
+    <p style="color:var(--color-text-muted);font-size:13px;margin-bottom:14px;">Jason's pass fixes the plumbing. These gaps represent the user-facing experience layer that remains unbuilt.</p>
+    <div class="gap-list">
+      <div class="gap-item open">
+        <div class="gap-label">Open</div>
+        <div class="gap-title">Users cannot see sync failure indicators on their records</div>
+        <div class="gap-desc">Errors are now logged internally, but nothing surfaces to the tenant. A failed invoice sync is still invisible to the user.</div>
+      </div>
+      <div class="gap-item open">
+        <div class="gap-label">Open</div>
+        <div class="gap-title">No plain-language error messages exposed to users</div>
+        <div class="gap-desc">The 401 fix was a narrow exception. Broader sync failures still produce no actionable message for the tenant — only internal logs.</div>
+      </div>
+      <div class="gap-item open">
+        <div class="gap-label">Open</div>
+        <div class="gap-title">No manual retry at the record level</div>
+        <div class="gap-desc">A tenant cannot self-serve a failed sync record. CS or engineering intervention still required for individual record failures.</div>
+      </div>
+      <div class="gap-item open">
+        <div class="gap-label">Open</div>
+        <div class="gap-title">No connection status visible in Company Settings</div>
+        <div class="gap-desc">Users have no way to confirm whether their QBO connection is active, expired, or disconnected from any normal workflow surface.</div>
+      </div>
+      <div class="gap-item open">
+        <div class="gap-label">Open</div>
+        <div class="gap-title">No sync history visible to users or admins</div>
+        <div class="gap-desc">There is no way for a tenant to see what synced, when it synced, and what failed — even after the fact.</div>
+      </div>
+      <div class="gap-item process">
+        <div class="gap-label">Process gap</div>
+        <div class="gap-title">No safe CS resync protocol documented</div>
+        <div class="gap-desc">The documented cancellation was partially caused by a CS-initiated resync creating duplicates. A written internal procedure defining when and how CS can safely trigger a resync does not exist.</div>
+      </div>
+      <div class="gap-item process">
+        <div class="gap-label">Architecture — communicate or reverse</div>
+        <div class="gap-title">QBO-to-DripJobs sync direction was disabled — users not informed</div>
+        <div class="gap-desc">The inbound sync direction was turned off at some point to prevent a data problem. Date and trigger undocumented. Users expecting two-way sync have no explanation. Needs a help article update and UI note, or a reversal with safeguards.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket Inventory -->
+  <div class="section">
+    <div class="section-label">Ticket Inventory</div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="ticket-table">
+        <thead>
+          <tr>
+            <th>Ticket</th>
+            <th>Description</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="https://app.clickup.com/t/86bafbg7r" target="_blank">86bafbg7r</a></td>
+            <td>QBO Sync — Improvements Update (Jason's pass, QA gate)</td>
+            <td><span class="badge dev">Send to Dev</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://app.clickup.com/t/86b8nxcm2" target="_blank">86b8nxcm2</a></td>
+            <td>V1 Sync Phase 2: Reliability &amp; Error Visibility (user-facing layer)</td>
+            <td><span class="badge triage">Needs PM Analysis</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://app.clickup.com/t/86b9npap7" target="_blank">86b9npap7</a></td>
+            <td>401 Error Actionable Messaging</td>
+            <td><span class="badge prod">Pushed to Production</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://app.clickup.com/t/86b70bayf" target="_blank">86b70bayf</a></td>
+            <td>V1 Stopgap Enhancement (full spec — too large as written)</td>
+            <td><span class="badge parked">Airport Parking</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://app.clickup.com/t/86b2tvjt7" target="_blank">86b2tvjt7</a></td>
+            <td>V2 Native QBO Integration Platform (two-way sync, data model)</td>
+            <td><span class="badge triage">Needs PM Analysis</span></td>
+          </tr>
+          <tr>
+            <td><a href="https://app.clickup.com/t/86b9y60qc" target="_blank">86b9y60qc</a></td>
+            <td>Top Shelf Painting — Invoice not syncing</td>
+            <td><span class="badge risk">Resolved Without Fix</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Competitor Benchmark -->
+  <div class="section">
+    <div class="section-label">Competitor Benchmark</div>
+    <div class="comp-grid">
+      <div class="comp-card highlight">
+        <div class="comp-name">DripJobs (current)</div>
+        <div class="comp-row-item"><span class="ci part">&#8211;</span><span>One-way sync (DripJobs to QBO)</span></div>
+        <div class="comp-row-item"><span class="ci no">&#10005;</span><span>No user-visible error messages</span></div>
+        <div class="comp-row-item"><span class="ci no">&#10005;</span><span>No manual retry on records</span></div>
+        <div class="comp-row-item"><span class="ci no">&#10005;</span><span>No connection status in UI</span></div>
+        <div class="comp-row-item"><span class="ci part">&#8211;</span><span>Internal error logging (new — Jason)</span></div>
+        <div class="comp-row-item"><span class="ci part">&#8211;</span><span>Duplication fixed (new — Jason)</span></div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-name">PaintScout</div>
+        <div class="comp-row-item"><span class="ci yes">&#10003;</span><span>Clean invoice push to QBO</span></div>
+        <div class="comp-row-item"><span class="ci yes">&#10003;</span><span>Canadian QBO user toggle</span></div>
+        <div class="comp-row-item"><span class="ci yes">&#10003;</span><span>Manual send per estimate / invoice</span></div>
+        <div class="comp-row-item"><span class="ci no">&#10005;</span><span>No two-way sync documented</span></div>
+        <div class="comp-row-item"><span class="ci part">&#8211;</span><span>Positioned as "no double entry"</span></div>
+      </div>
+      <div class="comp-card">
+        <div class="comp-name">Jobber</div>
+        <div class="comp-row-item"><span class="ci yes">&#10003;</span><span>Bidirectional sync (clients, invoices, payments)</span></div>
+        <div class="comp-row-item"><span class="ci yes">&#10003;</span><span>Documented dominance rules per entity</span></div>
+        <div class="comp-row-item"><span class="ci yes">&#10003;</span><span>Configurable sync settings per entity type</span></div>
+        <div class="comp-row-item"><span class="ci yes">&#10003;</span><span>Explicit first-sync duplicate guidance</span></div>
+        <div class="comp-row-item"><span class="ci part">&#8211;</span><span>QBO dominant for clients / addresses</span></div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--color-text-muted);margin-top:10px;">Both competitors treat QBO as a first-class integration with clear sync rules and predictable behavior. DripJobs' gap is primarily in the user-facing experience layer — which Jason's pass has now substantially improved on the backend side.</p>
+  </div>
+
+  <!-- V1 Path Forward -->
+  <div class="section">
+    <div class="section-label">V1 Path Forward</div>
+    <div class="path-list">
+      <div class="path-step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">QA Jason's pass — 86bafbg7r</div>
+          <div class="step-desc">Run a structured smoke test against a fresh QBO company: connect flow, day-to-day saves, reconnect, invoice sync, customer matching. Michael and Jesus are aligned. A brief from Jason confirming exact scope should be attached to the ticket before QA begins.</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">CS consultation before Phase 2 moves to dev — 86b8nxcm2</div>
+          <div class="step-desc">The Phase 2 pre-dev note requires Juan, Laura, or David to identify the specific sync failure types generating the most current escalations. That list drives which error messages and retry flows to prioritize first.</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Advance Phase 2 to dev — 86b8nxcm2</div>
+          <div class="step-desc">After QA confirms backend stability and CS surfaces top failure modes, Phase 2 moves to dev. Scope: sync failure indicators on records, plain-language error messages with resolution paths, manual retry on failed records, connection status in Company Settings.</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">Harvest the stopgap spec — 86b70bayf</div>
+          <div class="step-desc">Extract the 2–3 achievable V1 items (connection status badge, last sync timestamp, sync history table) and formally defer the rest — conflict resolution UI, sync scheduling, bidirectional sync — to the V2 epic (86b2tvjt7).</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-title">Write the safe CS resync protocol (internal process, not a ticket)</div>
+          <div class="step-desc">Before the next CS-triggered resync, Rick or TJ should define guardrails: what conditions require a resync, what pre-checks must be completed, and the step-by-step procedure. The documented cancellation makes this a priority process item.</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <div class="step-title">Communicate the one-way sync to users</div>
+          <div class="step-desc">If the QBO-to-DripJobs direction remains intentionally disabled, users need to know. A help article update and a visible note in the integration settings panel prevents the trust breakdown that occurs when users expect behavior that was quietly removed.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Closing callout -->
+  <div class="callout info" style="margin-top:4px;">
+    <span class="callout-icon">&#128161;</span>
+    <div class="callout-body">
+      <div class="callout-title">Central pattern to break</div>
+      The QBO integration has historically shipped fixes, failed silently, received a tactical patch, and then surfaced the same class of problem again. Jason's pass is the most substantive backend work to date. Phase 2 (86b8nxcm2) adds the user-facing visibility layer that prevents the next silent failure from becoming the next churn event.
+    </div>
+  </div>
+
+</div><!-- /page-body -->
+
+</body>
+</html>
