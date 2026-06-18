@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unsubscribe Toggles — CS Reference Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #F4F3F8;
+    color: #32415B;
+    padding: 32px 16px 64px;
+  }
+
+  .page-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .guide-header {
+    background: #32415B;
+    border-radius: 12px;
+    padding: 28px 32px 24px;
+    margin-bottom: 28px;
+    color: #fff;
+  }
+  .guide-header-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #8B85EA;
+    margin-bottom: 6px;
+  }
+  .guide-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .guide-header p {
+    font-size: 13px;
+    color: #B0AECA;
+    line-height: 1.6;
+  }
+
+  /* Section card */
+  .card {
+    background: #fff;
+    border: 1px solid #DAD8E3;
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #8B85EA;
+    margin-bottom: 16px;
+  }
+
+  /* Toggle rows */
+  .toggle-block {
+    border: 1px solid #DAD8E3;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .toggle-block:last-child { margin-bottom: 0; }
+
+  .toggle-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: #F9F8FC;
+    border-bottom: 1px solid #DAD8E3;
+  }
+  .toggle-visual {
+    flex-shrink: 0;
+    width: 42px;
+    height: 24px;
+    border-radius: 999px;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .toggle-visual::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    top: 3px;
+    transition: left 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  }
+  .toggle-visual.off { background: #CBD5E0; }
+  .toggle-visual.off::after { left: 3px; }
+  .toggle-visual.on { background: #8B85EA; }
+  .toggle-visual.on::after { left: 21px; }
+
+  .toggle-label-wrap { flex: 1; }
+  .toggle-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #32415B;
+  }
+  .toggle-flag-wrap { display: flex; gap: 6px; align-items: center; }
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 3px 10px;
+    white-space: nowrap;
+  }
+  .badge-db { background: #E8E6FA; color: #5C53DC; }
+  .badge-warn { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+
+  .toggle-body { padding: 16px 18px; }
+
+  .plain-english {
+    font-size: 14px;
+    line-height: 1.65;
+    color: #32415B;
+    margin-bottom: 14px;
+  }
+
+  .blocks-list, .passes-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .blocks-list li, .passes-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .icon-block { color: #DC2626; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .icon-pass  { color: #166534; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+  .gotcha {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #92400E;
+    line-height: 1.55;
+    margin-top: 4px;
+  }
+  .gotcha strong { font-weight: 600; }
+
+  /* Hierarchy callout */
+  .info-box {
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #1E40AF;
+    line-height: 1.6;
+  }
+  .info-box strong { font-weight: 600; }
+
+  /* Scenario table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    background: #F4F3F8;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #80879A;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #DAD8E3;
+  }
+  tbody tr { border-bottom: 1px solid #DAD8E3; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td {
+    padding: 10px 12px;
+    vertical-align: middle;
+    color: #32415B;
+  }
+  .cell-label { font-weight: 600; }
+  .chip-block { background: #FEF2F2; color: #991B1B; border-radius: 999px; padding: 2px 9px; font-size: 11px; font-weight: 600; display: inline-block; }
+  .chip-send  { background: #F0FDF4; color: #166534;  border-radius: 999px; padding: 2px 9px; font-size: 11px; font-weight: 600; display: inline-block; }
+
+  /* CS How-to-check section */
+  .step-list { list-style: none; counter-reset: steps; display: flex; flex-direction: column; gap: 12px; }
+  .step-list li {
+    counter-increment: steps;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    background: #8B85EA;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+
+  /* Footer */
+  .guide-footer {
+    text-align: center;
+    font-size: 11px;
+    color: #80879A;
+    margin-top: 32px;
+  }
+
+  /* Divider label */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #80879A;
+    margin: 24px 0 10px;
+  }
+
+  hr.rule { border: none; border-top: 1px solid #DAD8E3; margin: 18px 0; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Header -->
+  <div class="guide-header">
+    <div class="guide-header-eyebrow">CS Internal Reference</div>
+    <h1>Contact Email Unsubscribe Toggles</h1>
+    <p>A plain-language guide to the three opt-out toggles on the Customer Portal unsubscribe page. Use this to explain toggle behavior to customers and to verify whether a contact is correctly opted in or out.</p>
+  </div>
+
+  <!-- Toggle 1 -->
+  <div class="section-label">Toggle 1 of 3</div>
+  <div class="toggle-block">
+    <div class="toggle-header">
+      <div class="toggle-visual on"></div>
+      <div class="toggle-label-wrap">
+        <div class="toggle-label">Unsubscribe from marketing emails</div>
+      </div>
+      <div class="toggle-flag-wrap">
+        <span class="badge badge-db">OptOutOfNewsletters</span>
+      </div>
+    </div>
+    <div class="toggle-body">
+      <p class="plain-english">Turning this on stops <strong>broadcast-style marketing messages</strong> sent to groups of contacts, like newsletters or email blasts. It has no effect on anything related to a specific job or deal.</p>
+      <ul class="blocks-list">
+        <li><span class="icon-block">✕</span> Newsletters</li>
+        <li><span class="icon-block">✕</span> Email blast campaigns</li>
+      </ul>
+      <ul class="passes-list">
+        <li><span class="icon-pass">✓</span> Drip sequences still send</li>
+        <li><span class="icon-pass">✓</span> Proposals, invoices, payment receipts still send</li>
+        <li><span class="icon-pass">✓</span> Appointment reminders still send</li>
+        <li><span class="icon-pass">✓</span> Password resets and security emails still send</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Toggle 2 -->
+  <div class="section-label">Toggle 2 of 3</div>
+  <div class="toggle-block">
+    <div class="toggle-header">
+      <div class="toggle-visual on"></div>
+      <div class="toggle-label-wrap">
+        <div class="toggle-label">Unsubscribe from job related messages</div>
+      </div>
+      <div class="toggle-flag-wrap">
+        <span class="badge badge-db">OptOutOfDrips</span>
+        <span class="badge badge-warn">⚠ Label is misleading</span>
+      </div>
+    </div>
+    <div class="toggle-body">
+      <p class="plain-english">Despite being called "job related messages," this toggle <strong>only stops automated drip sequences</strong> — the lifecycle follow-up emails that fire as a deal moves through pipeline stages. It does <em>not</em> block proposals, invoices, or reminders.</p>
+      <ul class="blocks-list">
+        <li><span class="icon-block">✕</span> Automated drip sequence emails</li>
+      </ul>
+      <ul class="passes-list">
+        <li><span class="icon-pass">✓</span> Proposals still send</li>
+        <li><span class="icon-pass">✓</span> Invoices still send</li>
+        <li><span class="icon-pass">✓</span> Appointment confirmations and reminders still send</li>
+        <li><span class="icon-pass">✓</span> Payment notifications still send</li>
+        <li><span class="icon-pass">✓</span> Password resets still send</li>
+      </ul>
+      <div class="gotcha">
+        <strong>Common CS scenario:</strong> A customer says "I unsubscribed from job messages but I'm still getting my proposal." That is correct behavior — this toggle only stops drips, not transactional documents. Only Toggle 3 stops those.
+      </div>
+    </div>
+  </div>
+
+  <!-- Toggle 3 -->
+  <div class="section-label">Toggle 3 of 3</div>
+  <div class="toggle-block">
+    <div class="toggle-header">
+      <div class="toggle-visual on"></div>
+      <div class="toggle-label-wrap">
+        <div class="toggle-label">Unsubscribe from all emails</div>
+      </div>
+      <div class="toggle-flag-wrap">
+        <span class="badge badge-db">OptOutOfAllEmails</span>
+        <span class="badge badge-warn">⚠ Master kill-switch</span>
+      </div>
+    </div>
+    <div class="toggle-body">
+      <p class="plain-english">This is the <strong>master kill-switch</strong>. When turned on, it overrides the other two toggles and stops everything customer-facing — including drips, newsletters, proposals, invoices, and appointment reminders.</p>
+      <ul class="blocks-list">
+        <li><span class="icon-block">✕</span> Drip sequences</li>
+        <li><span class="icon-block">✕</span> Newsletters and blasts</li>
+        <li><span class="icon-block">✕</span> Proposals</li>
+        <li><span class="icon-block">✕</span> Invoices</li>
+        <li><span class="icon-block">✕</span> Appointment confirmations and reminders</li>
+        <li><span class="icon-block">✕</span> Payment notifications</li>
+      </ul>
+      <ul class="passes-list">
+        <li><span class="icon-pass">✓</span> Password resets always send (no opt-out, by design)</li>
+        <li><span class="icon-pass">✓</span> Account security alerts always send</li>
+      </ul>
+      <div class="gotcha">
+        <strong>Important:</strong> If a contact is not receiving proposals or invoices, check this toggle first. When it is on, no documents will reach them regardless of Toggle 1 or Toggle 2.
+      </div>
+    </div>
+  </div>
+
+  <!-- Hierarchy -->
+  <div class="card" style="margin-top:28px;">
+    <div class="card-title">How They Work Together</div>
+    <div class="info-box" style="margin-bottom:16px;">
+      Toggles 1 and 2 are <strong>independent</strong> — each only affects its own category. Toggle 3 <strong>overrides both</strong>. When Toggle 3 is on, Toggles 1 and 2 are irrelevant — nothing customer-facing sends.
+    </div>
+    <hr class="rule">
+    <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#80879A;margin-bottom:12px;">Quick Scenario Reference</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Customer has turned on...</th>
+          <th>Newsletters / Blasts</th>
+          <th>Drips</th>
+          <th>Proposals / Invoices / Reminders</th>
+          <th>Password Resets</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="cell-label">Toggle 1 only (Marketing)</td>
+          <td><span class="chip-block">Blocked</span></td>
+          <td><span class="chip-send">Sends</span></td>
+          <td><span class="chip-send">Sends</span></td>
+          <td><span class="chip-send">Sends</span></td>
+        </tr>
+        <tr>
+          <td class="cell-label">Toggle 2 only (Job related)</td>
+          <td><span class="chip-send">Sends</span></td>
+          <td><span class="chip-block">Blocked</span></td>
+          <td><span class="chip-send">Sends</span></td>
+          <td><span class="chip-send">Sends</span></td>
+        </tr>
+        <tr>
+          <td class="cell-label">Toggle 3 (All emails)</td>
+          <td><span class="chip-block">Blocked</span></td>
+          <td><span class="chip-block">Blocked</span></td>
+          <td><span class="chip-block">Blocked</span></td>
+          <td><span class="chip-send">Sends</span></td>
+        </tr>
+        <tr>
+          <td class="cell-label">None turned on</td>
+          <td><span class="chip-send">Sends</span></td>
+          <td><span class="chip-send">Sends</span></td>
+          <td><span class="chip-send">Sends</span></td>
+          <td><span class="chip-send">Sends</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CS Troubleshooting -->
+  <div class="card">
+    <div class="card-title">CS Troubleshooting Checklist</div>
+    <p style="font-size:13px;color:#80879A;margin-bottom:16px;">When a contact reports not receiving emails, work through these steps in order.</p>
+    <ol class="step-list">
+      <li>
+        <div class="step-num">1</div>
+        <div>Check <strong>Toggle 3 (Unsubscribe from all emails)</strong> first. If it is on, nothing customer-facing will send. This is the most common cause of missing proposals and invoices.</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div>If the contact says they are missing <strong>drip sequence emails</strong>, check Toggle 2. If it is on, drips are blocked — but proposals and invoices are not affected.</div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div>If the contact says they are missing <strong>newsletters or blast campaigns</strong>, check Toggle 1. If it is on, broadcast marketing is blocked — drips and job documents are not affected.</div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div>If all three toggles are off and the contact still is not receiving emails, the issue is elsewhere (spam filtering, incorrect email address, Postmark delivery failure). Escalate accordingly.</div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div><strong>Password resets</strong> can never be blocked by any toggle. If a contact is not receiving a reset email, the cause is outside these settings.</div>
+      </li>
+    </ol>
+  </div>
+
+  <div class="guide-footer">DripJobs Internal CS Reference &nbsp;|&nbsp; June 2026 &nbsp;|&nbsp; Do not share externally</div>
+
+</div>
+</body>
+</html>
