@@ -667,13 +667,16 @@ body {
   const overlay = document.getElementById('popupOverlay');
   const closeBtn = document.getElementById('popupClose');
 
-  // Show on first click anywhere (or immediately — show on load)
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      overlay.classList.add('visible');
-      launchConfetti();
-    }, 300);
-  });
+  // Show popup on first click anywhere on the page
+  let welcomed = false;
+  document.body.addEventListener('click', function onFirstClick(e) {
+    if (welcomed) return;
+    if (e.target === overlay || e.target === closeBtn) return;
+    welcomed = true;
+    document.body.removeEventListener('click', onFirstClick);
+    overlay.classList.add('visible');
+    launchConfetti();
+  }, { capture: true });
 
   function closePopup() {
     overlay.classList.remove('visible');
