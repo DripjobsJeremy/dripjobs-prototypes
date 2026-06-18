@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DripJobs Product Roadmap — June 20, 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --purple-dark:   #6B21A8;
+  --purple-mid:    #9333EA;
+  --purple-light:  #EEEDFE;
+  --purple-text:   #534AB7;
+  --green-light:   #EAF3DE;
+  --green-text:    #3B6D11;
+  --green-mid:     #1D9E75;
+  --gray-light:    #F1EFE8;
+  --gray-text:     #5F5E5A;
+  --teal-light:    #E1F5EE;
+  --teal-text:     #0F6E56;
+  --blue-light:    #E6F1FB;
+  --blue-text:     #185FA5;
+  --amber-light:   #FAEEDA;
+  --amber-text:    #854F0B;
+  --pink-light:    #FBEAF0;
+  --pink-text:     #993556;
+  --red-border:    #E24B4A;
+
+  --bg:            #F5F3FC;
+  --surface:       #FFFFFF;
+  --border:        rgba(0,0,0,0.08);
+  --border-hover:  rgba(107,33,168,0.3);
+  --text-primary:  #1C1B22;
+  --text-secondary:#60586F;
+  --text-muted:    #9991A8;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--purple-dark);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.header-logo {
+  width: 38px; height: 38px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.header-logo svg { width: 22px; height: 22px; }
+.header-title { font-size: 16px; font-weight: 600; color: #fff; }
+.header-sub { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 1px; }
+.header-right { font-size: 12px; color: rgba(255,255,255,0.65); text-align: right; }
+.header-right strong { color: #fff; font-weight: 600; }
+
+/* ── BODY ── */
+.body {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 32px 20px 0;
+}
+
+/* ── STAT BAND ── */
+.stat-band {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  cursor: default;
+}
+.stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107,33,168,0.1);
+}
+.stat-num { font-size: 26px; font-weight: 600; color: var(--purple-dark); }
+.stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .04em; }
+
+/* ── SECTION ── */
+.section { margin-bottom: 20px; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s, border-color 0.15s;
+  margin-bottom: 0;
+}
+.section-header:hover { background: #FAF8FF; border-color: var(--border-hover); }
+.section-header.open { border-radius: 10px 10px 0 0; border-bottom: 1px solid var(--border); }
+
+.section-pill {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 20px;
+  flex-shrink: 0;
+}
+.pill-shipped { background: var(--teal-light); color: var(--teal-text); }
+.pill-now     { background: var(--purple-light); color: var(--purple-text); }
+.pill-next    { background: var(--green-light); color: var(--green-text); }
+.pill-later   { background: var(--gray-light); color: var(--gray-text); }
+
+.section-title { font-size: 14px; font-weight: 500; color: var(--text-primary); flex: 1; }
+.section-count { font-size: 12px; color: var(--text-muted); }
+.section-chevron {
+  width: 18px; height: 18px;
+  color: var(--text-muted);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+.section-header.open .section-chevron { transform: rotate(180deg); }
+
+/* ── COLLAPSIBLE BODY ── */
+.section-body {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+}
+.section-body.open { max-height: 4000px; }
+.section-body-inner { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+/* ── SHIPPED GRID ── */
+.shipped-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.shipped-item {
+  background: #F9F7FF;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--text-primary); line-height: 1.4;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.shipped-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(107,33,168,0.09);
+  border-color: var(--border-hover);
+}
+.shipped-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green-mid); flex-shrink: 0; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex; align-items: flex-start; gap: 12px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107,33,168,0.1);
+  border-color: var(--border-hover);
+}
+.card-accent {
+  border-left: 2px solid var(--purple-mid);
+  border-radius: 0 8px 8px 0;
+}
+.card-blocked {
+  border-left: 2px solid var(--red-border);
+  border-radius: 0 8px 8px 0;
+}
+
+.card-left {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; flex-shrink: 0; width: 30px;
+}
+.card-icon { font-size: 17px; line-height: 1; }
+.card-bar { width: 2px; border-radius: 2px; flex: 1; min-height: 12px; }
+.bar-purple { background: var(--purple-mid); }
+.bar-green  { background: var(--green-mid); }
+.bar-gray   { background: var(--border); }
+
+.card-body { flex: 1; min-width: 0; }
+.card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; line-height: 1.3; }
+.card-desc  { font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+
+.badge {
+  display: inline-block; font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 20px; margin-left: 6px;
+  vertical-align: middle; white-space: nowrap;
+}
+.badge-qa      { background: var(--blue-light);  color: var(--blue-text); }
+.badge-pr      { background: var(--amber-light); color: var(--amber-text); }
+.badge-design  { background: var(--blue-light);  color: var(--blue-text); }
+.badge-review  { background: var(--gray-light);  color: var(--gray-text); }
+.badge-mary    { background: var(--pink-light);  color: var(--pink-text); }
+
+/* ── SUB-TICKETS ── */
+.sub-tickets { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.sub-ticket {
+  background: #F9F7FF;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  display: flex; gap: 10px;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+.sub-ticket:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(107,33,168,0.08);
+}
+.sub-num { font-size: 11px; font-weight: 600; color: var(--text-muted); white-space: nowrap; padding-top: 1px; min-width: 32px; }
+.sub-content {}
+.sub-title { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+.sub-desc  { font-size: 12px; color: var(--text-secondary); line-height: 1.45; }
+.sub-arrow { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 32px;
+  padding: 0 20px;
+}
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="header-logo">
+      <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="8" height="8" rx="2" fill="white" opacity="0.9"/>
+        <rect x="12" y="2" width="8" height="8" rx="2" fill="white" opacity="0.55"/>
+        <rect x="2" y="12" width="8" height="8" rx="2" fill="white" opacity="0.55"/>
+        <rect x="12" y="12" width="8" height="8" rx="2" fill="white" opacity="0.9"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title">DripJobs Product Roadmap</div>
+      <div class="header-sub">Your Friday CS Meeting · June 20, 2026</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <strong>Jeremy is OOO Friday</strong><br/>Questions → he's back Monday 👋
+  </div>
+</header>
+
+<div class="body">
+
+  <!-- Stats -->
+  <div class="stat-band">
+    <div class="stat"><div class="stat-num">10</div><div class="stat-label">Shipped this week</div></div>
+    <div class="stat"><div class="stat-num">7</div><div class="stat-label">In testing / PR</div></div>
+    <div class="stat"><div class="stat-num">3</div><div class="stat-label">In progress</div></div>
+  </div>
+
+  <!-- ── SECTION: SHIPPED ── -->
+  <div class="section">
+    <div class="section-header open" data-target="shipped">
+      <span class="section-pill pill-shipped">✅ Just Shipped</span>
+      <span class="section-title">This week — Jun 16 &amp; 18</span>
+      <span class="section-count">10 items</span>
+      <svg class="section-chevron" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="section-body open" id="shipped">
+      <div class="section-body-inner">
+        <div class="shipped-grid">
+          <div class="shipped-item"><div class="shipped-dot"></div>Schedule modal speed fix (large accounts)</div>
+          <div class="shipped-item"><div class="shipped-dot"></div>Appointment edit — type &amp; custom questions preserved</div>
+          <div class="shipped-item"><div class="shipped-dot"></div>Work order share &amp; secret link rendering fixed</div>
+          <div class="shipped-item"><div class="shipped-dot"></div>PDF settings — duplicate toggle switches removed</div>
+          <div class="shipped-item"><div class="shipped-dot"></div>Mobile task save button in deal card fixed</div>
+          <div class="shipped-item"><div class="shipped-dot"></div>Client notes no longer overflow proposal window</div>
+          <div class="shipped-item"><div class="shipped-dot"></div>"Generate Invoice" restored on accepted proposals</div>
+          <div class="shipped-item"><div class="shipped-dot"></div>Mobile drag &amp; drop for areas/items in packages</div>
+          <div class="shipped-item"><div class="shipped-dot"></div>Round gallons toggle applies retroactively</div>
+          <div class="shipped-item"><div class="shipped-dot"></div>DripJobs email backend improvements</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION: NOW ── -->
+  <div class="section">
+    <div class="section-header open" data-target="now">
+      <span class="section-pill pill-now">NOW</span>
+      <span class="section-title">Almost out the door</span>
+      <span class="section-count">6 items</span>
+      <svg class="section-chevron" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="section-body open" id="now">
+      <div class="section-body-inner">
+
+        <div class="card">
+          <div class="card-left"><div class="card-icon">🧾</div><div class="card-bar bar-purple"></div></div>
+          <div class="card-body">
+            <div class="card-title">QuickBooks Integration Improvements <span class="badge badge-qa">In QA</span></div>
+            <div class="card-desc">Jason addressed the backend root causes of QBO sync failures. Michael is cleaning up UX-level gaps. Jeremy running full QA this week. High impact for any customers using QBO.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-left"><div class="card-icon">📱</div><div class="card-bar bar-purple"></div></div>
+          <div class="card-body">
+            <div class="card-title">Multiple Phone Numbers, Emails &amp; Addresses on Contacts <span class="badge badge-qa">In QA</span></div>
+            <div class="card-desc">Contacts can now store multiple phones, emails, and addresses. Address autofill confirmed working. Long-requested — big deal for contractors managing multiple job sites per client.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-left"><div class="card-icon">📊</div><div class="card-bar bar-purple"></div></div>
+          <div class="card-body">
+            <div class="card-title">Metrics Drill-Down — Reports Page Navigation <span class="badge badge-pr">PR Created</span></div>
+            <div class="card-desc">Clicking any metric card navigates to a detailed drill-down report. Makes the Metrics dashboard actionable, not just informational.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-left"><div class="card-icon">📄</div><div class="card-bar bar-purple"></div></div>
+          <div class="card-body">
+            <div class="card-title">Signed Proposal PDF — Point-in-Time Capture <span class="badge badge-qa">In QA</span></div>
+            <div class="card-desc">DripJobs stores a permanent copy of the proposal exactly as it looked when signed — protecting contractors if a proposal is later edited.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-left"><div class="card-icon">🔖</div><div class="card-bar bar-purple"></div></div>
+          <div class="card-body">
+            <div class="card-title">Booking Form Embed Code &amp; "Send to Developer" Email <span class="badge badge-pr">PR Created</span></div>
+            <div class="card-desc">Copy an embed snippet or email it to a web developer — removing the biggest friction point for getting booking forms live on customer websites.</div>
+          </div>
+        </div>
+
+        <div class="card card-blocked">
+          <div class="card-left"><div class="card-icon">📞</div><div class="card-bar bar-gray"></div></div>
+          <div class="card-body">
+            <div class="card-title">Call from Quo — Deep Link (iOS) <span class="badge badge-qa">In QA</span></div>
+            <div class="card-desc">Tap a phone number in DripJobs to launch Quo directly. TJ's dev work is done — waiting on Zee to provide an iOS build for final QA.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION: NEXT ── -->
+  <div class="section">
+    <div class="section-header open" data-target="next">
+      <span class="section-pill pill-next">NEXT</span>
+      <span class="section-title">What's queued up after current work clears</span>
+      <span class="section-count">5 items</span>
+      <svg class="section-chevron" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="section-body open" id="next">
+      <div class="section-body-inner">
+
+        <div class="card card-accent">
+          <div class="card-left"><div class="card-icon">🖥️</div><div class="card-bar bar-purple"></div></div>
+          <div class="card-body">
+            <div class="card-title">Activation Dashboard — Health Score Expansion <span class="badge badge-mary">Your input 💡</span></div>
+            <div class="card-desc">The core dashboard expansion is scoped and moving — adding all-tenant visibility, legacy account support, new data columns, and a totals row. Mary's feedback this week helped shape three follow-up backend tickets that help unlock knowing when a customer last logged in and who's actually using the product.</div>
+            <div class="sub-tickets">
+              <div class="sub-ticket">
+                <div class="sub-num">1 of 3</div>
+                <div class="sub-content">
+                  <div class="sub-title">Auth Session: Impersonation Context Marker</div>
+                  <div class="sub-desc">DripJobs support can log into a customer account to troubleshoot. Right now there's no way to tell those sessions apart from a real customer login — making any "last login" data unreliable. This ticket adds a marker so support sessions are never counted as customer activity.</div>
+                  <div class="sub-arrow">↓ prerequisite for #2</div>
+                </div>
+              </div>
+              <div class="sub-ticket">
+                <div class="sub-num">2 of 3</div>
+                <div class="sub-content">
+                  <div class="sub-title">User Login Timestamp Tracking</div>
+                  <div class="sub-desc">DripJobs doesn't currently record when users log in at all — the data simply doesn't exist yet. This ticket builds the infrastructure to capture a per-user login timestamp each time someone signs in, filtered through the impersonation marker from ticket 1.</div>
+                  <div class="sub-arrow">↓ prerequisite for #3</div>
+                </div>
+              </div>
+              <div class="sub-ticket">
+                <div class="sub-num">3 of 3</div>
+                <div class="sub-content">
+                  <div class="sub-title">Activation Dashboard: Last Login &amp; Last Active User Columns</div>
+                  <div class="sub-desc">Once login data exists, this surfaces it on the dashboard — last login date and most recently active user per account. CS, Sales, Retention, and Billing get a real signal for which accounts are engaged and which need attention.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-left"><div class="card-icon">📦</div><div class="card-bar bar-green"></div></div>
+          <div class="card-body">
+            <div class="card-title">Save &amp; Reuse Packages in Proposal Builder <span class="badge badge-design">Design in Progress</span></div>
+            <div class="card-desc">Save proposal packages and reapply them in future proposals — huge time saver for repeat job types. Next major feature after current in-flight tickets clear.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-left"><div class="card-icon">💵</div><div class="card-bar bar-green"></div></div>
+          <div class="card-body">
+            <div class="card-title">Inline Tax Rate Entry in Proposal Builder <span class="badge badge-review">Kickback</span></div>
+            <div class="card-desc">Enter tax rates directly inside the proposal instead of navigating to settings. Currently in kickback — alignment check in progress before returning to dev.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-left"><div class="card-icon">⚡</div><div class="card-bar bar-green"></div></div>
+          <div class="card-body">
+            <div class="card-title">Zapier Enhancement Suite <span class="badge badge-review">In Review</span></div>
+            <div class="card-desc">Smart Contact &amp; Deal Lookup actions plus a new trigger for incoming text messages. Powers more automation for customers who use Zapier to connect DripJobs to other tools.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-left"><div class="card-icon">💼</div><div class="card-bar bar-green"></div></div>
+          <div class="card-body">
+            <div class="card-title">Ottri Financing Partner Integration <span class="badge badge-review">In Review</span></div>
+            <div class="card-desc">Embed financing options directly in DripJobs proposals. Reviewing partnership and integration scope — could be a meaningful conversion driver for larger jobs.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION: LATER ── -->
+  <div class="section">
+    <div class="section-header open" data-target="later">
+      <span class="section-pill pill-later">LATER</span>
+      <span class="section-title">On the horizon</span>
+      <span class="section-count">3 items</span>
+      <svg class="section-chevron" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="section-body open" id="later">
+      <div class="section-body-inner">
+
+        <div class="card">
+          <div class="card-left"><div class="card-icon">🤖</div><div class="card-bar bar-gray"></div></div>
+          <div class="card-body">
+            <div class="card-title">Jobi AI — Workflow Suite &amp; Natural Language Metrics</div>
+            <div class="card-desc">Q3/Q4 target. AI-powered sales trend predictions, drip sequence writing, and product/service description generation. First AI feature (description assistant) is already live.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-left"><div class="card-icon">👥</div><div class="card-bar bar-gray"></div></div>
+          <div class="card-body">
+            <div class="card-title">Contact Merging (V1 → V2 Bridge)</div>
+            <div class="card-desc">User-controlled merge UI for duplicate contacts, matching on name + email. Key step toward V2's Contact &amp; Business entity model.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-left"><div class="card-icon">👍</div><div class="card-bar bar-gray"></div></div>
+          <div class="card-body">
+            <div class="card-title">Thumbtack &amp; Google LSA Lead Integration</div>
+            <div class="card-desc">Real-time lead import from Thumbtack and Google Local Services Ads directly into DripJobs. Closes a major top-of-funnel gap for contractors on these platforms.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">DripJobs Product &nbsp;·&nbsp; June 20, 2026 &nbsp;·&nbsp; Questions for Jeremy? He's back Monday 👋</div>
+
+</div><!-- /body -->
+
+<script>
+  document.querySelectorAll('.section-header').forEach(header => {
+    const targetId = header.dataset.target;
+    const body = document.getElementById(targetId);
+
+    header.addEventListener('click', () => {
+      const isOpen = header.classList.contains('open');
+      header.classList.toggle('open', !isOpen);
+      body.classList.toggle('open', !isOpen);
+    });
+  });
+</script>
+</body>
+</html>
