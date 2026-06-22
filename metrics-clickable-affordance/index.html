@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metrics — Clickable Affordance | DripJobs Prototype</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', 'Segoe UI', sans-serif;
+      background: #F4F3F8;
+      color: #32415B;
+      min-height: 100vh;
+    }
+
+    /* ── Top nav bar ── */
+    .top-bar {
+      background: #fff;
+      border-bottom: 1px solid #DAD8E3;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .top-bar-left { display: flex; align-items: center; gap: 12px; }
+    .logo { font-size: 18px; font-weight: 700; color: #8B85EA; letter-spacing: -0.3px; }
+    .page-title { font-size: 14px; font-weight: 700; color: #32415B; }
+    .top-bar-right { display: flex; align-items: center; gap: 8px; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #EEEDFE; display: flex; align-items: center;
+      justify-content: center; font-size: 12px; font-weight: 700; color: #8B85EA;
+    }
+    .ticket-badge {
+      font-size: 11px; font-weight: 700;
+      background: #EEEDFE; color: #534AB7;
+      padding: 3px 10px; border-radius: 20px;
+      text-decoration: none;
+    }
+
+    /* ── Annotation chip ── */
+    .annotation {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #FF6B00; color: #fff;
+      font-size: 10px; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px;
+      cursor: default;
+      position: relative;
+    }
+    .annotation:hover .annotation-tooltip { opacity: 1; pointer-events: auto; }
+    .annotation-tooltip {
+      position: absolute;
+      bottom: calc(100% + 7px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #32415B;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 11px;
+      border-radius: 7px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 200;
+      pointer-events: none;
+      max-width: 280px;
+      white-space: normal;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .annotation-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #32415B;
+    }
+
+    /* ── Main shell ── */
+    .metrics-shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+    .metrics-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .metrics-title { font-size: 17px; font-weight: 700; }
+    .metrics-period-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px;
+      border: 1px solid #DAD8E3;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 13px; color: #32415B;
+      cursor: pointer; font-weight: 600;
+      font-family: inherit;
+    }
+    .metrics-period-btn i { color: #8B85EA; }
+
+    /* ── Affordance hint ── */
+    .affordance-hint {
+      display: flex; align-items: center; gap: 8px;
+      background: #EEEDFE;
+      border-left: 3px solid #8B85EA;
+      border-radius: 0 8px 8px 0;
+      padding: 9px 14px;
+      margin-bottom: 18px;
+      font-size: 12.5px; color: #3C3489; font-weight: 600;
+      line-height: 1.5;
+    }
+    .affordance-hint i { font-size: 15px; flex-shrink: 0; align-self: flex-start; margin-top: 1px; }
+    .affordance-hint a { color: #534AB7; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+    .affordance-hint a:hover { color: #736BE3; }
+
+    /* ── Summary strip ── */
+    .summary-strip {
+      display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .summary-chip {
+      background: #fff; border: 1px solid #DAD8E3;
+      border-radius: 10px; padding: 10px 16px;
+      flex: 1; min-width: 120px;
+      cursor: pointer;
+      transition: box-shadow 0.15s, border-color 0.15s;
+      position: relative;
+    }
+    .summary-chip:hover { border-color: #8B85EA; box-shadow: 0 0 0 3px rgba(139,133,234,0.12); }
+    .summary-chip:hover .chip-nav { opacity: 1; }
+    .chip-label { font-size: 11px; color: #80879A; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
+    .chip-val { font-size: 20px; font-weight: 700; color: #32415B; }
+    .chip-sub { font-size: 11px; color: #22a862; font-weight: 600; margin-top: 2px; }
+    .chip-nav { position: absolute; top: 10px; right: 12px; opacity: 0; transition: opacity 0.15s; }
+    .chip-nav i { font-size: 14px; color: #8B85EA; }
+
+    /* ── Card grid ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 640px) { .cards-grid { grid-template-columns: 1fr; } }
+
+    .metric-card {
+      background: #fff;
+      border: 1px solid #DAD8E3;
+      border-radius: 10px;
+      overflow: visible;
+      cursor: pointer;
+      transition: box-shadow 0.18s, border-color 0.18s, transform 0.15s;
+      position: relative;
+    }
+    .metric-card:hover {
+      border-color: #8B85EA;
+      box-shadow: 0 0 0 3px rgba(139,133,234,0.13);
+      transform: translateY(-1px);
+    }
+    .metric-card:hover .card-nav-hint { opacity: 1; }
+
+    .card-header {
+      padding: 13px 16px 10px;
+      border-bottom: 1px solid #DAD8E3;
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 8px;
+      border-radius: 10px 10px 0 0; overflow: hidden;
+    }
+    .card-header-left { display: flex; align-items: flex-start; gap: 8px; }
+    .card-icon {
+      width: 26px; height: 26px; border-radius: 6px;
+      background: #EEEDFE; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .card-icon i { font-size: 14px; color: #8B85EA; }
+    .card-title { font-size: 13px; font-weight: 700; color: #32415B; }
+    .card-subtitle { font-size: 11px; color: #80879A; margin-top: 1px; line-height: 1.4; }
+
+    .card-nav-hint {
+      position: absolute; top: 12px; right: 12px;
+      display: flex; align-items: center; gap: 4px;
+      background: #8B85EA; color: #fff;
+      font-size: 11px; font-weight: 700;
+      padding: 3px 8px 3px 6px; border-radius: 20px;
+      opacity: 0; transition: opacity 0.18s;
+      pointer-events: none; z-index: 2;
+    }
+    .card-nav-hint i { font-size: 12px; }
+
+    /* ── Data rows ── */
+    .card-body { padding: 0; overflow: visible; position: relative; }
+
+    .data-row {
+      display: flex; align-items: center;
+      padding: 9px 16px;
+      border-bottom: 1px solid #F2F0F8;
+      cursor: pointer;
+      transition: background 0.12s;
+      position: relative; gap: 10px; overflow: visible;
+    }
+    .data-row:last-of-type { border-bottom: none; }
+    .data-row:hover { background: #F6F5FD; }
+    .data-row:hover .row-chevron { opacity: 1; transform: translateX(0); }
+    .data-row:hover .row-label { color: #8B85EA; }
+    .data-row:hover .row-tooltip { opacity: 1; }
+    .data-row:hover .row-pct { background: #8B85EA; color: #fff; }
+
+    .row-tooltip {
+      position: absolute;
+      bottom: calc(100% + 7px); left: 50%;
+      transform: translateX(-50%);
+      background: #32415B; color: #fff;
+      font-size: 11.5px; font-weight: 600;
+      padding: 5px 11px; border-radius: 7px;
+      white-space: nowrap; opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 100; pointer-events: none;
+    }
+    .row-tooltip::after {
+      content: '';
+      position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #32415B;
+    }
+
+    .row-swatch { width: 3px; height: 22px; border-radius: 2px; flex-shrink: 0; }
+    .row-label { font-size: 12.5px; color: #32415B; font-weight: 600; flex: 1; transition: color 0.12s; }
+    .row-value { font-size: 12.5px; font-weight: 700; color: #32415B; white-space: nowrap; }
+    .row-pct {
+      font-size: 11px; font-weight: 700;
+      padding: 2px 7px; border-radius: 20px;
+      background: #EEEDFE; color: #534AB7;
+      white-space: nowrap; transition: background 0.12s, color 0.12s;
+    }
+    .row-chevron {
+      font-size: 13px; color: #8B85EA;
+      opacity: 0; transform: translateX(-4px);
+      transition: opacity 0.12s, transform 0.12s; flex-shrink: 0;
+    }
+
+    .card-footer {
+      padding: 9px 16px; border-top: 1px solid #DAD8E3;
+      display: flex; align-items: center; justify-content: space-between;
+      border-radius: 0 0 10px 10px; overflow: hidden;
+    }
+    .total-row { font-size: 12px; font-weight: 700; color: #32415B; }
+    .pdf-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 12px; background: #fff;
+      border: 1px solid #DAD8E3; border-radius: 8px;
+      font-size: 12px; font-weight: 700; color: #80879A;
+      cursor: pointer; transition: border-color 0.12s, color 0.12s;
+      font-family: inherit;
+    }
+    .pdf-btn:hover { border-color: #8B85EA; color: #8B85EA; }
+    .pdf-btn i { font-size: 13px; }
+
+    /* ── BR annotation row ── */
+    .annotation-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 18px; flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top nav -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="logo">dripjobs</span>
+      <span style="color:#DAD8E3;">|</span>
+      <span class="page-title">Metrics — Clickable Affordance</span>
+    </div>
+    <div class="top-bar-right">
+      <a class="ticket-badge" href="#" target="_blank">Prototype</a>
+      <div class="avatar">JH</div>
+    </div>
+  </div>
+
+  <div class="metrics-shell">
+
+    <!-- Annotation row -->
+    <div class="annotation-row">
+      <span class="annotation">
+        BR-1
+        <span class="annotation-tooltip">Persistent hint banner — always visible. Tells users cards and rows are navigable without relying on discovery.</span>
+      </span>
+      <span class="annotation">
+        BR-2
+        <span class="annotation-tooltip">Card hover state — indigo border + halo + "View report" pill fades in. Entire card is a nav target to the full report.</span>
+      </span>
+      <span class="annotation">
+        BR-3
+        <span class="annotation-tooltip">Row hover state — background tints, label shifts to indigo, chevron slides in, tooltip shows "Drill into [Source] — [Report Name]". Row navigates to the source-specific drill-down, NOT the card-level report.</span>
+      </span>
+    </div>
+
+    <div class="metrics-top-bar">
+      <span class="metrics-title">Metrics</span>
+      <button class="metrics-period-btn">
+        <i class="ti ti-calendar"></i>
+        12/14/2025 – 01/14/2026
+        <i class="ti ti-chevron-down"></i>
+      </button>
+    </div>
+
+    <!-- Affordance hint banner -->
+    <div class="affordance-hint">
+      <i class="ti ti-info-circle"></i>
+      <span>Go directly to <a href="#">Reports</a>, or click any card title to open its full report. Hover a row to drill into that specific data point.</span>
+    </div>
+
+    <!-- Summary strip -->
+    <div class="summary-strip">
+      <div class="summary-chip">
+        <div class="chip-label">Total</div>
+        <div class="chip-val">$2,912.84</div>
+        <div class="chip-sub">↑ Closing Rate 6.29%</div>
+        <div class="chip-nav"><i class="ti ti-arrow-right"></i></div>
+      </div>
+      <div class="summary-chip">
+        <div class="chip-label">Appts Booked</div>
+        <div class="chip-val">0</div>
+        <div class="chip-nav"><i class="ti ti-arrow-right"></i></div>
+      </div>
+      <div class="summary-chip">
+        <div class="chip-label">Set Rate</div>
+        <div class="chip-val">0%</div>
+        <div class="chip-nav"><i class="ti ti-arrow-right"></i></div>
+      </div>
+      <div class="summary-chip">
+        <div class="chip-label">Close Rate</div>
+        <div class="chip-val">1</div>
+        <div class="chip-nav"><i class="ti ti-arrow-right"></i></div>
+      </div>
+    </div>
+
+    <!-- Card grid -->
+    <div class="cards-grid">
+
+      <!-- Leads by Source -->
+      <div class="metric-card">
+        <div class="card-nav-hint"><i class="ti ti-chart-bar"></i> View report</div>
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon"><i class="ti ti-users"></i></div>
+            <div>
+              <div class="card-title">Leads by Source</div>
+              <div class="card-subtitle">Total Leads: 4</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="data-row">
+            <span class="row-tooltip">Drill into A Little Bird — Leads by Source</span>
+            <div class="row-swatch" style="background:#8B85EA"></div>
+            <span class="row-label">A Little Bird</span>
+            <span class="row-pct">25.00%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+          <div class="data-row">
+            <span class="row-tooltip">Drill into Came to me in a Dream — Leads by Source</span>
+            <div class="row-swatch" style="background:#0DCECE"></div>
+            <span class="row-label">Came to me in a Dream</span>
+            <span class="row-pct">25.00%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+          <div class="data-row">
+            <span class="row-tooltip">Drill into None of Your Business — Leads by Source</span>
+            <div class="row-swatch" style="background:#f5a623"></div>
+            <span class="row-label">None of Your Business</span>
+            <span class="row-pct">25.00%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+          <div class="data-row">
+            <span class="row-tooltip">Drill into Skywriting — Leads by Source</span>
+            <div class="row-swatch" style="background:#e55c6c"></div>
+            <span class="row-label">Skywriting</span>
+            <span class="row-pct">25.00%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="total-row">Total: 4</span>
+          <button class="pdf-btn" onclick="event.stopPropagation()"><i class="ti ti-file-text"></i> PDF</button>
+        </div>
+      </div>
+
+      <!-- Leads to Appointments -->
+      <div class="metric-card">
+        <div class="card-nav-hint"><i class="ti ti-chart-bar"></i> View report</div>
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon"><i class="ti ti-calendar"></i></div>
+            <div>
+              <div class="card-title">Leads to Appointments</div>
+              <div class="card-subtitle">Total Booked: 0</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="data-row">
+            <span class="row-tooltip">Drill into A Little Bird — Leads to Appointments</span>
+            <div class="row-swatch" style="background:#8B85EA"></div>
+            <span class="row-label">A Little Bird</span>
+            <span class="row-pct">0.00%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+          <div class="data-row">
+            <span class="row-tooltip">Drill into Came to me in a Dream — Leads to Appointments</span>
+            <div class="row-swatch" style="background:#0DCECE"></div>
+            <span class="row-label">Came to me in a Dream</span>
+            <span class="row-pct">0.00%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+          <div class="data-row">
+            <span class="row-tooltip">Drill into None of Your Business — Leads to Appointments</span>
+            <div class="row-swatch" style="background:#f5a623"></div>
+            <span class="row-label">None of Your Business</span>
+            <span class="row-pct">0.00%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+          <div class="data-row">
+            <span class="row-tooltip">Drill into Skywriting — Leads to Appointments</span>
+            <div class="row-swatch" style="background:#e55c6c"></div>
+            <span class="row-label">Skywriting</span>
+            <span class="row-pct">0.00%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="total-row">Total Booked: 0</span>
+          <button class="pdf-btn" onclick="event.stopPropagation()"><i class="ti ti-file-text"></i> PDF</button>
+        </div>
+      </div>
+
+      <!-- Sales by Source -->
+      <div class="metric-card">
+        <div class="card-nav-hint"><i class="ti ti-chart-bar"></i> View report</div>
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon"><i class="ti ti-currency-dollar"></i></div>
+            <div>
+              <div class="card-title">Sales by Source</div>
+              <div class="card-subtitle">Total: $3,261.84</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="data-row">
+            <span class="row-tooltip">Drill into Facebook — Sales by Source</span>
+            <div class="row-swatch" style="background:#8B85EA"></div>
+            <span class="row-label">Facebook</span>
+            <span class="row-value">$2,261.84</span>
+            <span class="row-pct">69.3%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+          <div class="data-row">
+            <span class="row-tooltip">Drill into Instagram — Sales by Source</span>
+            <div class="row-swatch" style="background:#0DCECE"></div>
+            <span class="row-label">Instagram</span>
+            <span class="row-value">$1,000.00</span>
+            <span class="row-pct">30.7%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="total-row">Total: $3,261.84</span>
+          <button class="pdf-btn" onclick="event.stopPropagation()"><i class="ti ti-file-text"></i> PDF</button>
+        </div>
+      </div>
+
+      <!-- Closing Ratio by Salesperson -->
+      <div class="metric-card">
+        <div class="card-nav-hint"><i class="ti ti-chart-bar"></i> View report</div>
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon"><i class="ti ti-user-check"></i></div>
+            <div>
+              <div class="card-title">Closing Ratio by Salesperson</div>
+              <div class="card-subtitle">Total Jobs Won: 1</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="data-row">
+            <span class="row-tooltip">Drill into Jeremy Harrison — Closing Ratio by Salesperson</span>
+            <div class="row-swatch" style="background:#8B85EA"></div>
+            <span class="row-label">Jeremy Harrison</span>
+            <span class="row-value">$2,912.84</span>
+            <span class="row-pct">100%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+          <div class="data-row">
+            <span class="row-tooltip">Drill into Troy (demo) — Closing Ratio by Salesperson</span>
+            <div class="row-swatch" style="background:#DAD8E3"></div>
+            <span class="row-label">Troy (demo)</span>
+            <span class="row-value">—</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="total-row">Total: 1</span>
+          <button class="pdf-btn" onclick="event.stopPropagation()"><i class="ti ti-file-text"></i> PDF</button>
+        </div>
+      </div>
+
+      <!-- Sales by Salesperson -->
+      <div class="metric-card">
+        <div class="card-nav-hint"><i class="ti ti-chart-bar"></i> View report</div>
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon"><i class="ti ti-users"></i></div>
+            <div>
+              <div class="card-title">Sales by Salesperson</div>
+              <div class="card-subtitle">Total: $2,912.84</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="data-row">
+            <span class="row-tooltip">Drill into Jeremy Harrison — Sales by Salesperson</span>
+            <div class="row-swatch" style="background:#8B85EA"></div>
+            <span class="row-label">Jeremy Harrison</span>
+            <span class="row-value">$2,912.84</span>
+            <span class="row-pct">100%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="total-row">Total: $2,912.84</span>
+          <button class="pdf-btn" onclick="event.stopPropagation()"><i class="ti ti-file-text"></i> PDF</button>
+        </div>
+      </div>
+
+      <!-- Jobs by Zip Code -->
+      <div class="metric-card">
+        <div class="card-nav-hint"><i class="ti ti-chart-bar"></i> View report</div>
+        <div class="card-header">
+          <div class="card-header-left">
+            <div class="card-icon"><i class="ti ti-map-pin"></i></div>
+            <div>
+              <div class="card-title">Jobs by Zip Code</div>
+              <div class="card-subtitle">Total: $2,912.84</div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="data-row">
+            <span class="row-tooltip">Drill into 30451 — Jobs by Zip Code</span>
+            <div class="row-swatch" style="background:#8B85EA"></div>
+            <span class="row-label">30451</span>
+            <span class="row-value">$2,912.84</span>
+            <span class="row-pct">100%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+          <div class="data-row">
+            <span class="row-tooltip">Drill into Troy — Jobs by Zip Code</span>
+            <div class="row-swatch" style="background:#0DCECE"></div>
+            <span class="row-label">Troy</span>
+            <span class="row-value">$2,912.84</span>
+            <span class="row-pct">100%</span>
+            <i class="ti ti-chevron-right row-chevron"></i>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="total-row">Total: $2,912.84</span>
+          <button class="pdf-btn" onclick="event.stopPropagation()"><i class="ti ti-file-text"></i> PDF</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
