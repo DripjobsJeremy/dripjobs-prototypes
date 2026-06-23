@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prototype · Item Product Type & Multi-Product Substrates · #8678pm74f</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+:root {
+  --purple:       #7C3AED;
+  --purple-light: #8B85EA;
+  --purple-pale:  #EDE9FE;
+  --purple-mid:   #6D28D9;
+  --teal:         #0DCECE;
+  --teal-pale:    #f0fafa;
+  --text:         #32415B;
+  --text-muted:   #6B7280;
+  --border:       #DAD8E3;
+  --bg:           #F5F5F8;
+  --card:         #FFFFFF;
+  --red:          #EF4444;
+  --red-pale:     #FEF2F2;
+  --orange:       #F97316;
+  --green:        #10B981;
+  --green-pale:   #F0FDF4;
+  --blue:         #3B82F6;
+  --blue-pale:    #EFF6FF;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; font-size: 14px; color: var(--text); background: var(--bg); }
+
+/* ── SHELL ── */
+.shell { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 200px; background: #fff; border-right: 1px solid var(--border); flex-shrink: 0; overflow-y: auto; }
+.sidebar-logo { padding: 14px 16px 12px; border-bottom: 1px solid var(--border); }
+.sidebar-logo span { font-size: 17px; font-weight: 800; color: var(--purple); }
+.nav-section { padding: 8px 0 2px; }
+.nav-label { font-size: 10px; font-weight: 700; color: var(--text-muted); padding: 6px 16px 3px; text-transform: uppercase; letter-spacing: .07em; }
+.nav-item { display: flex; align-items: center; gap: 9px; padding: 7px 16px; font-size: 13px; color: var(--text-muted); cursor: pointer; transition: background .12s; }
+.nav-item:hover { background: var(--bg); color: var(--text); }
+.nav-item.active { background: var(--purple-pale); color: var(--purple); font-weight: 600; }
+.nav-item i { width: 15px; text-align: center; font-size: 12px; }
+.nav-sub { padding-left: 28px; }
+
+/* ── MAIN ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { height: 48px; background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 0; flex-shrink: 0; overflow: hidden; }
+.topbar-breadcrumb { font-size: 13px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+.topbar-breadcrumb strong { color: var(--text); }
+.content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+.proposal-content { max-width: 860px; margin: 0 auto; }
+
+/* ── SCREEN NAV ── */
+.screen-nav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; align-items: center; }
+.snav-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-right: 4px; text-transform: uppercase; letter-spacing: .06em; }
+.snav-pill { padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); color: var(--text-muted); background: #fff; transition: all .12s; white-space: nowrap; flex-shrink: 0; }
+.snav-pill.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+.snav-pill:hover:not(.active) { border-color: var(--purple-light); color: var(--purple); }
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: background .12s, box-shadow .12s; }
+.btn-primary { background: var(--purple); color: #fff; }
+.btn-primary:hover { background: var(--purple-mid); }
+.btn-secondary { background: #fff; color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--bg); }
+.btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--bg); color: var(--text); }
+.btn-sm { padding: 5px 11px; font-size: 12px; border-radius: 7px; }
+.btn-xs { padding: 3px 9px; font-size: 11px; border-radius: 6px; }
+
+/* ── ANNOTATION CHIPS ── */
+.chip { display: inline-flex; align-items: center; background: var(--orange); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 99px; cursor: help; position: relative; vertical-align: middle; margin-left: 3px; }
+.chip:hover .chip-tip { display: block; }
+.chip-tip { display: none; position: absolute; bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%); background: #1e293b; color: #fff; font-size: 11px; font-weight: 400; padding: 7px 10px; border-radius: 6px; white-space: nowrap; z-index: 9999; pointer-events: none; min-width: 240px; text-align: left; box-shadow: 0 4px 14px rgba(0,0,0,.22); line-height: 1.4; }
+.chip-tip::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:#1e293b; }
+
+/* ── HELPER BANNER ── */
+.helper { background: var(--teal-pale); border-left: 4px solid var(--teal); border-radius: 0 6px 6px 0; padding: 9px 13px; display: flex; align-items: flex-start; gap: 9px; font-size: 12px; color: var(--text); margin-bottom: 16px; }
+.helper-dot { width: 17px; height: 17px; background: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.helper-dot i { color: #fff; font-size: 9px; }
+
+/* ── BADGE ── */
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.badge-item   { background: #D1FAE5; color: #065F46; }
+.badge-gallon { background: var(--purple-pale); color: var(--purple); }
+.badge-gray   { background: #F1F5F9; color: #475569; }
+
+/* ── CARD ── */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.card-title { font-size: 15px; font-weight: 700; }
+.card-body { padding: 18px; }
+
+/* ── PROPOSAL PAGE CHROME ── */
+.proposal-meta { display: flex; gap: 20px; padding: 10px 0 16px; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; align-items: center; }
+.proposal-meta strong { color: var(--text); }
+.status-pill { padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+
+/* ── SECTION BLOCK (Line Items / Areas / Packages) ── */
+.proposal-section { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; }
+.proposal-section-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--border); }
+.proposal-section-title { font-size: 15px; font-weight: 700; }
+.proposal-section-empty { display: flex; align-items: center; gap: 8px; padding: 16px 18px; font-size: 13px; color: var(--blue); background: #EFF6FF; margin: 12px; border-radius: 8px; border: 1px solid #BFDBFE; }
+.proposal-section-empty i { color: var(--blue); }
+
+/* ── PACKAGE CARD ── */
+.pkg-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 0; }
+.pkg-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #fff; border-bottom: 1px solid var(--border); }
+.pkg-name { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.pkg-total { font-size: 13px; font-weight: 400; color: var(--text); margin-right: 4px; }
+.pkg-table { width: 100%; border-collapse: collapse; }
+.pkg-table th { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; padding: 7px 14px; border-bottom: 1px solid var(--border); background: #fff; text-align: left; }
+.pkg-table th:not(:first-child) { text-align: right; }
+.pkg-table td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.pkg-table td:not(:first-child) { text-align: right; vertical-align: middle; white-space: nowrap; }
+.pkg-table tr:last-child td { border-bottom: none; }
+.pkg-table tbody tr:hover { background: #FAFAF9; }
+.pkg-row-name { color: var(--purple); font-weight: 600; display: block; margin-bottom: 4px; }
+.pkg-row-name.plain { color: var(--text); }
+.pkg-row-meta { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.pkg-row-actions { display: inline-flex; gap: 3px; }
+.row-icon { width: 20px; height: 20px; border-radius: 4px; border: 1px solid var(--border); background: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted); }
+.row-icon:hover { background: var(--bg); color: var(--text); }
+.drag-handle { color: #CBD5E1; font-size: 11px; cursor: grab; margin-right: 2px; flex-shrink: 0; }
+.pkg-total-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 14px; background: #FAFAF9; border-top: 1px solid var(--border); }
+.pkg-total-label { font-size: 13px; color: var(--text-muted); }
+.pkg-total-vals { display: flex; align-items: center; gap: 16px; font-size: 13px; }
+.pkg-total-sub { color: var(--text-muted); }
+.pkg-total-val { font-weight: 700; color: var(--purple); font-size: 14px; }
+.pkg-actions-bar { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 14px 14px; }
+
+/* ── AREA CARD (after area is added) ── */
+.area-card { border: 1px solid var(--border); border-radius: 8px; margin: 12px; overflow: hidden; }
+.area-card-header { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; background: var(--purple-pale); cursor: pointer; }
+.area-card-name { font-size: 14px; font-weight: 700; color: var(--purple); }
+.area-card-meta { font-size: 12px; color: var(--text-muted); }
+.area-card-right { display: flex; align-items: center; gap: 10px; }
+.area-card-total { font-size: 14px; font-weight: 700; color: var(--purple); }
+
+/* ── MODAL ── */
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 1000; align-items: center; justify-content: center; }
+.modal-backdrop.open { display: flex; }
+.modal { background: #fff; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.2); width: 560px; max-width: 96vw; max-height: 92vh; overflow-y: auto; position: relative; }
+.modal-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 16px 20px 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: #fff; z-index: 10; }
+.modal-title { font-size: 15px; font-weight: 700; }
+.modal-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.modal-close { background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer; line-height: 1; padding: 0; margin-top: 2px; }
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 20px; }
+.modal-footer { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-top: 1px solid var(--border); position: sticky; bottom: 0; background: #fff; }
+
+/* ── PROGRESS BAR ── */
+.progress-bar { display: flex; align-items: center; padding: 16px 20px 14px; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 0; overflow-x: auto; flex-wrap: nowrap; }
+.progress-step { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.progress-dot { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; transition: all .2s; }
+.progress-dot.done { background: var(--purple); color: #fff; }
+.progress-dot.done::after { content: ''; display: block; width: 10px; height: 10px; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 5l3 4L11 1' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: contain; }
+.progress-dot.active { background: var(--purple); color: #fff; box-shadow: 0 0 0 3px rgba(124,58,237,.18); font-size: 11px; }
+.progress-dot.pending { background: #E5E7EB; color: var(--text-muted); font-size: 11px; }
+.progress-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.progress-label.active { color: var(--purple); }
+.progress-label.done { color: var(--text-muted); }
+.progress-label.pending { color: var(--text-muted); }
+.progress-line { flex: 1; min-width: 18px; height: 2px; background: var(--border); flex-shrink: 0; }
+.progress-line.done { background: var(--purple); }
+
+/* ── FORM ── */
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+.form-control { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; color: var(--text); outline: none; transition: border .12s; background: #fff; }
+.form-control:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(124,58,237,.1); }
+.form-control-sm { padding: 6px 10px; font-size: 12px; }
+select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2380879A'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; padding-right: 30px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.input-suffix { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.input-suffix input { border: none; flex: 1; padding: 9px 10px; font-size: 13px; font-family: inherit; outline: none; }
+.input-suffix span { padding: 0 10px; background: #F9FAFB; border-left: 1px solid var(--border); font-size: 12px; color: var(--text-muted); height: 100%; display: flex; align-items: center; white-space: nowrap; }
+.input-prefix { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.input-prefix span { padding: 0 10px; background: #F9FAFB; border-right: 1px solid var(--border); font-size: 13px; color: var(--text-muted); }
+.input-prefix input { border: none; flex: 1; padding: 9px 10px; font-size: 13px; font-family: inherit; outline: none; }
+.calc-display { display: flex; align-items: center; justify-content: center; gap: 6px; background: #F8F7FF; border: 1px solid #DDD6FE; border-radius: 8px; padding: 12px 16px; flex-wrap: wrap; }
+.calc-box { background: var(--purple); color: #fff; border-radius: 6px; padding: 6px 10px; text-align: center; min-width: 64px; }
+.calc-box.muted { background: #E5E7EB; color: var(--text); }
+.calc-box-val { font-size: 13px; font-weight: 700; }
+.calc-box-label { font-size: 10px; opacity: .85; margin-top: 1px; }
+.calc-op { font-size: 16px; color: var(--text-muted); font-weight: 400; }
+.calc-eq { font-size: 16px; color: var(--text-muted); }
+
+/* ── MEASUREMENT TOGGLE ── */
+.mtype-group { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.mtype-btn { flex: 1; padding: 8px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--text-muted); background: #fff; border: none; font-family: inherit; transition: background .12s, color .12s; }
+.mtype-btn.active { background: var(--purple); color: #fff; }
+.mtype-btn:hover:not(.active) { background: var(--bg); }
+
+/* ── CATEGORY PILLS ── */
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cat-pill { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; background: #fff; transition: all .12s; user-select: none; }
+.cat-pill:hover { border-color: var(--purple-light); background: var(--purple-pale); }
+.cat-pill.selected { border-color: var(--purple); background: var(--purple-pale); color: var(--purple); }
+.cat-check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cat-pill.selected .cat-check { background: var(--purple); border-color: var(--purple); }
+.cat-pill.selected .cat-check::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; }
+
+/* ── SUBSTRATE LIST ── */
+.sub-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+.sub-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; background: #fff; }
+.sub-row:last-child { border-bottom: none; }
+.sub-row:hover { background: #FAFAF9; }
+.sub-row.active { background: var(--purple-pale); border-left: 3px solid var(--purple); }
+.sub-row-left { display: flex; align-items: center; gap: 8px; }
+.sub-row-chevron { color: var(--text-muted); font-size: 11px; transition: transform .15s; }
+.sub-row-chevron.open { transform: rotate(90deg); }
+.sub-row-name { font-weight: 700; font-size: 13px; }
+.sub-row-label { font-size: 12px; color: var(--text-muted); }
+.sub-row-right { display: flex; align-items: center; gap: 10px; }
+.sub-row-measure { font-size: 12px; color: var(--text-muted); }
+.sub-row-actions { display: flex; gap: 5px; }
+.icon-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-muted); transition: background .1s; }
+.icon-btn:hover { background: var(--bg); color: var(--text); }
+.icon-btn-del { color: var(--red); border-color: #FECACA; background: var(--red-pale); }
+.icon-btn-del:hover { background: #FEE2E2; }
+
+/* ── SUBSTRATE INLINE EDIT PANEL ── */
+.sub-edit-panel { border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 14px; background: #FAFAF9; }
+.sub-edit-header { font-size: 13px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.coat-tabs { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+.coat-tab { flex: 1; padding: 8px; text-align: center; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--text-muted); background: #fff; border: none; font-family: inherit; border-right: 1px solid var(--border); transition: background .12s; }
+.coat-tab:last-child { border-right: none; }
+.coat-tab.active { background: var(--purple-pale); color: var(--purple); }
+.coat-tab:hover:not(.active) { background: var(--bg); }
+.rate-formula { display: flex; align-items: center; justify-content: flex-start; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+
+/* ── PRODUCT TAB SECTION ── */
+.product-tab-bar { display: flex; gap: 2px; margin-bottom: 14px; flex-wrap: wrap; }
+.ptab { padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); color: var(--text-muted); background: #fff; transition: all .12s; display: flex; align-items: center; }
+.ptab.active { background: var(--purple-pale); color: var(--purple); border-color: var(--purple-light); }
+.ptab:hover:not(.active) { background: var(--bg); }
+.ptab-remove { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 99px; transition: background .1s, opacity .1s; opacity: .5; }
+.ptab-remove:hover { background: rgba(0,0,0,.1); opacity: 1; }
+.ptab.active .ptab-remove:hover { background: rgba(124,58,237,.15); }
+
+/* ── PRODUCT ASSIGNMENT IN SUBSTRATE PANEL ── */
+.product-row-assigned { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
+.product-row-name { flex: 1; font-weight: 600; font-size: 13px; }
+.product-row-meta { font-size: 12px; color: var(--text-muted); }
+.add-product-row { display: flex; align-items: center; gap: 8px; padding: 8px 0 4px; }
+
+/* ── QUANTITY STEPPER ── */
+.qty-stepper { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; width: 120px; }
+.qty-btn { width: 32px; height: 36px; border: none; background: #F9FAFB; cursor: pointer; font-size: 16px; color: var(--text-muted); border-right: 1px solid var(--border); display: flex; align-items: center; justify-content: center; transition: background .1s; }
+.qty-btn:last-child { border-right: none; border-left: 1px solid var(--border); }
+.qty-btn:hover { background: var(--bg); color: var(--text); }
+.qty-input { flex: 1; border: none; text-align: center; font-size: 14px; font-weight: 600; font-family: inherit; outline: none; padding: 6px 2px; }
+
+/* ── FIELD HIDDEN INDICATOR ── */
+.field-hidden-note { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #92400E; background: #FEF9C3; border: 1px solid #FDE68A; border-radius: 6px; padding: 6px 10px; }
+.field-hidden-note.show { display: flex; }
+
+/* ── TOGGLE ── */
+.toggle-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; }
+.toggle-checkbox { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--border); appearance: none; cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+.toggle-checkbox:checked { background: var(--purple); border-color: var(--purple); background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 12 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 5l3 4L11 1' stroke='white' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; }
+.toggle-label { font-size: 13px; font-weight: 600; }
+.toggle-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+.section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+
+/* ── UTIL ── */
+.d-flex { display: flex; }
+.align-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.flex-1 { flex: 1; }
+.mb-0 { margin-bottom: 0 !important; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.text-muted { color: var(--text-muted); }
+.text-sm { font-size: 12px; }
+.text-xs { font-size: 11px; }
+.fw-bold { font-weight: 700; }
+.text-purple { color: var(--purple); }
+.calculated-badge { font-size: 10px; font-weight: 700; background: #E5E7EB; color: var(--text-muted); padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: .06em; }
+.chips-hidden .chip { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo"><span>dripjobs</span></div>
+    <div class="nav-section">
+      <div class="nav-label">Daily Ops</div>
+      <div class="nav-item"><i class="fas fa-calendar"></i> Appointments</div>
+      <div class="nav-item"><i class="fas fa-file-alt"></i> Proposals</div>
+      <div class="nav-item nav-sub active"><i class="fas fa-circle" style="font-size:6px;"></i> Proposals</div>
+      <div class="nav-item nav-sub"><i class="fas fa-circle" style="font-size:6px;"></i> Templates</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Financials</div>
+      <div class="nav-item"><i class="fas fa-briefcase"></i> Job Costing</div>
+      <div class="nav-item"><i class="fas fa-chart-bar"></i> Production Rates</div>
+      <div class="nav-item"><i class="fas fa-chart-line"></i> Metrics</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-breadcrumb">Adam Addams II — <strong>Proposal #A-1042</strong></span>
+      <div style="display:flex;align-items:center;gap:4px;margin-left:12px;border-left:1px solid var(--border);padding-left:12px;flex-shrink:0;">
+        <span style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;margin-right:2px;">PROTOTYPE:</span>
+        <div class="snav-pill active" onclick="switchScreen('s-proposal')">① Proposal Builder</div>
+        <div class="snav-pill" onclick="switchScreen('s-area-wizard')">② Add Area Wizard</div>
+        <div class="snav-pill" onclick="switchScreen('s-substrates-step')">③ Substrates Step</div>
+        <div class="snav-pill" onclick="switchScreen('s-pr-products')">④ PR › Products</div>
+        <div class="snav-pill" onclick="switchScreen('s-pr-substrates')">⑤ PR › Substrates</div>
+      </div>
+      <div style="flex:1;"></div>
+      <button id="br-toggle" onclick="toggleBRChips()" style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;border:1.5px solid var(--orange);background:#fff;color:var(--orange);font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">
+        👁 BR Tags: <span id="br-toggle-state">ON</span>
+      </button>
+      <span class="status-pill" style="margin-left:8px;flex-shrink:0;">NOT INITIATED</span>
+    </div>
+    <div class="content">
+
+      <!-- ══════════════════════════════════
+           SCREEN 1 — PROPOSAL BUILDER
+      ══════════════════════════════════ -->
+      <div id="s-proposal" class="screen active">
+        <div class="proposal-content">
+        <div class="helper">
+          <div class="helper-dot"><i class="fas fa-info"></i></div>
+          <div><strong>Screen 1 — Proposal Builder.</strong> The existing Packages section shows the current flat line-item pattern (Product/Service, Quantity, Price, Subtotal, Total). Click <em>Add Area</em> to launch the Area wizard (Screen 2). The "Dining Room" area below reflects what the UI looks like after an area with multi-product substrates is added.</div>
+        </div>
+
+        <div class="proposal-meta">
+          <span>CREATED <strong>6/22/2026</strong></span>
+          <span>EXP. DATE <strong>Not Set</strong></span>
+          <span>SALESPERSON <strong>Jeremy Harrison</strong></span>
+          <span class="status-pill">NOT INITIATED</span>
+        </div>
+
+        <!-- LINE ITEMS -->
+        <div class="proposal-section">
+          <div class="proposal-section-header">
+            <div class="proposal-section-title">Line Items</div>
+            <div class="d-flex gap-8">
+              <button class="btn btn-ghost btn-sm">Add Multiple</button>
+              <button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Item</button>
+            </div>
+          </div>
+          <div class="proposal-section-empty">
+            <i class="fas fa-info-circle"></i> Start by adding a Line Item here...
+          </div>
+        </div>
+
+        <!-- AREAS -->
+        <div class="proposal-section">
+          <div class="proposal-section-header">
+            <div class="proposal-section-title">Areas</div>
+            <div class="d-flex gap-8">
+              <button class="btn btn-ghost btn-sm">Add Optional Area</button>
+              <button class="btn btn-primary btn-sm" onclick="openModal('modal-area-type')"><i class="fas fa-plus"></i> Add Area</button>
+            </div>
+          </div>
+          <!-- Areas flat table — matches real UI: Area | Quantity | Price | Subtotal | Tax | Total -->
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border);">
+                <th style="padding:9px 18px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:left;">AREA</th>
+                <th style="padding:9px 18px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:right;">QUANTITY</th>
+                <th style="padding:9px 18px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:right;">PRICE</th>
+                <th style="padding:9px 18px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:right;">SUBTOTAL</th>
+                <th style="padding:9px 18px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:right;">TAX</th>
+                <th style="padding:9px 18px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:right;">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:11px 18px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <i class="fas fa-grip-vertical" style="color:var(--text-muted);font-size:12px;cursor:grab;"></i>
+                    <span style="color:var(--purple);font-weight:600;cursor:pointer;">Dining Room</span>
+                    <span class="row-icon" style="cursor:pointer;" title="Duplicate"><i class="fas fa-copy"></i></span>
+                    <span class="row-icon" style="cursor:pointer;" title="Edit"><i class="fas fa-pencil-alt"></i></span>
+                  </div>
+                </td>
+                <td style="padding:11px 18px;text-align:right;">1.00</td>
+                <td style="padding:11px 18px;text-align:right;">$552.47</td>
+                <td style="padding:11px 18px;text-align:right;">$552.47</td>
+                <td style="padding:11px 18px;text-align:right;">$49.72</td>
+                <td style="padding:11px 18px;text-align:right;font-weight:700;">$602.19</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="border-top:1px solid var(--border);">
+                <td style="padding:11px 18px;font-weight:700;">Total</td>
+                <td></td>
+                <td style="padding:11px 18px;text-align:right;font-weight:700;">$552.47</td>
+                <td style="padding:11px 18px;text-align:right;font-weight:700;">$552.47</td>
+                <td style="padding:11px 18px;text-align:right;font-weight:700;">$49.72</td>
+                <td style="padding:11px 18px;text-align:right;font-weight:700;color:var(--purple);">$602.19</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- PACKAGES — substrate line-item detail, matches real Packages section -->
+        <div class="proposal-section">
+          <div class="proposal-section-header">
+            <div class="proposal-section-title">Packages <span style="background:#E5E7EB;border-radius:99px;padding:1px 7px;font-size:11px;font-weight:700;color:var(--text-muted);margin-left:4px;">1</span></div>
+            <button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Package</button>
+          </div>
+
+          <!-- Substrate: Walls — multi-product (Gallon + 2 Items) -->
+          <div class="pkg-card" style="margin:12px 12px 0;">
+            <div class="pkg-header">
+              <div class="pkg-name">
+                <i class="fas fa-grip-vertical drag-handle"></i>
+                Walls
+                <span class="badge badge-gallon">Paint</span>
+                <span class="badge badge-item">Caulk</span>
+                <span class="badge badge-item">Tape</span>
+                <span class="chip">BR-6<span class="chip-tip">BR-6: Substrate with both Gallon and Item products. Each product shows its own type-appropriate line in the proposal.</span></span>
+              </div>
+              <div class="d-flex align-center gap-8">
+                <span class="pkg-total">$436.47</span>
+                <button class="icon-btn"><i class="fas fa-pencil-alt"></i></button>
+                <button class="icon-btn"><i class="fas fa-ellipsis-v"></i></button>
+              </div>
+            </div>
+            <table class="pkg-table">
+              <thead>
+                <tr>
+                  <th>PRODUCT / SERVICE</th>
+                  <th>QUANTITY</th>
+                  <th>PRICE</th>
+                  <th>SUBTOTAL</th>
+                  <th>TOTAL</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <i class="fas fa-grip-vertical drag-handle"></i>
+                    <span class="pkg-row-name">BM Aura Exterior — Satin</span>
+                    <div class="pkg-row-meta">
+                      <span class="badge badge-gallon">Gallon · 2 Coats</span>
+                      <span class="pkg-row-actions"><span class="row-icon"><i class="fas fa-copy"></i></span><span class="row-icon"><i class="fas fa-link"></i></span></span>
+                      <span class="text-xs text-muted">3.57 gal est.</span>
+                    </div>
+                  </td>
+                  <td>1.00</td><td>$200.00</td><td>$200.00</td><td>$200.00</td>
+                </tr>
+                <tr>
+                  <td>
+                    <i class="fas fa-grip-vertical drag-handle"></i>
+                    <span class="pkg-row-name">Caulk (White)</span>
+                    <div class="pkg-row-meta">
+                      <span class="badge badge-item">Item</span>
+                      <span class="pkg-row-actions"><span class="row-icon"><i class="fas fa-copy"></i></span><span class="row-icon"><i class="fas fa-link"></i></span></span>
+                      <span class="chip">BR-5<span class="chip-tip">BR-5: Item-type product shows quantity × price per item. No coat count or volume fields.</span></span>
+                      <span class="text-xs text-muted">3 units × $6.49</span>
+                    </div>
+                  </td>
+                  <td>3.00</td><td>$6.49</td><td>$19.47</td><td>$19.47</td>
+                </tr>
+                <tr>
+                  <td>
+                    <i class="fas fa-grip-vertical drag-handle"></i>
+                    <span class="pkg-row-name">Painter's Tape 1.5"</span>
+                    <div class="pkg-row-meta">
+                      <span class="badge badge-item">Item</span>
+                      <span class="pkg-row-actions"><span class="row-icon"><i class="fas fa-copy"></i></span><span class="row-icon"><i class="fas fa-link"></i></span></span>
+                      <span class="text-xs text-muted">4 units × $4.25</span>
+                    </div>
+                  </td>
+                  <td>4.00</td><td>$4.25</td><td>$17.00</td><td>$17.00</td>
+                </tr>
+                <tr>
+                  <td>
+                    <i class="fas fa-grip-vertical drag-handle"></i>
+                    <span class="pkg-row-name plain">General Prep</span>
+                    <div class="pkg-row-meta">
+                      <span class="pkg-row-actions"><span class="row-icon"><i class="fas fa-copy"></i></span><span class="row-icon"><i class="fas fa-link"></i></span></span>
+                    </div>
+                  </td>
+                  <td>1.00</td><td>$200.00</td><td>$200.00</td><td>$200.00</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="pkg-total-row">
+              <span class="pkg-total-label">Area Total</span>
+              <div class="pkg-total-vals">
+                <span class="pkg-total-sub">$436.47</span>
+                <span class="pkg-total-val">$458.22</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Substrate: Trim — single Gallon product (BR-8 unchanged) -->
+          <div class="pkg-card" style="margin:8px 12px 12px;">
+            <div class="pkg-header">
+              <div class="pkg-name">
+                <i class="fas fa-grip-vertical drag-handle"></i>
+                Trim
+                <span class="badge badge-gallon">SW ProClassic</span>
+                <span class="chip">BR-8<span class="chip-tip">BR-8: Single-product substrates are unaffected. Behavior and display unchanged.</span></span>
+              </div>
+              <div class="d-flex align-center gap-8">
+                <span class="pkg-total">$94.48</span>
+                <button class="icon-btn"><i class="fas fa-pencil-alt"></i></button>
+                <button class="icon-btn"><i class="fas fa-ellipsis-v"></i></button>
+              </div>
+            </div>
+            <table class="pkg-table">
+              <thead><tr><th>PRODUCT / SERVICE</th><th>QUANTITY</th><th>PRICE</th><th>SUBTOTAL</th><th>TOTAL</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <i class="fas fa-grip-vertical drag-handle"></i>
+                    <span class="pkg-row-name">SW ProClassic — Semi-Gloss</span>
+                    <div class="pkg-row-meta">
+                      <span class="badge badge-gallon">Gallon · 2 Coats</span>
+                      <span class="pkg-row-actions"><span class="row-icon"><i class="fas fa-copy"></i></span><span class="row-icon"><i class="fas fa-link"></i></span></span>
+                    </div>
+                  </td>
+                  <td>1.00</td><td>$94.48</td><td>$94.48</td><td>$94.48</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="pkg-total-row">
+              <span class="pkg-total-label">Area Total</span>
+              <div class="pkg-total-vals">
+                <span class="pkg-total-sub">$94.48</span>
+                <span class="pkg-total-val">$94.48</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pkg-actions-bar">
+            <button class="btn btn-ghost btn-sm">Add Area</button>
+            <button class="btn btn-ghost btn-sm">Add Multiple Items</button>
+            <button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Item</button>
+          </div>
+        </div>
+        </div><!-- /proposal-content -->
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 2 — ADD AREA WIZARD (Steps 1-4)
+      ══════════════════════════════════ -->
+      <div id="s-area-wizard" class="screen">
+        <div class="proposal-content">
+        <div class="helper">
+          <div class="helper-dot"><i class="fas fa-info"></i></div>
+          <div><strong>Screen 2 — Area Wizard (Steps 1–4).</strong> Matches the real 6-step "Area Details" modal exactly. Use the Next/Back buttons to walk through TYPE → AREA → DETAILS → CATEGORIES. Step 5 (Substrates) is Screen 3.</div>
+        </div>
+
+        <!-- Inline wizard simulation -->
+        <div class="card">
+          <div id="wiz-step-1">
+            <!-- PROGRESS -->
+            <div class="progress-bar" style="padding:16px 20px 14px;">
+              <div class="progress-step"><div class="progress-dot active">1</div><span class="progress-label active">TYPE</span></div>
+              <div class="progress-line"></div>
+              <div class="progress-step"><div class="progress-dot pending">2</div><span class="progress-label pending">AREA</span></div>
+              <div class="progress-line"></div>
+              <div class="progress-step"><div class="progress-dot pending">3</div><span class="progress-label pending">DETAILS</span></div>
+              <div class="progress-line"></div>
+              <div class="progress-step"><div class="progress-dot pending">4</div><span class="progress-label pending">CATEGORIES</span></div>
+              <div class="progress-line"></div>
+              <div class="progress-step"><div class="progress-dot pending">5</div><span class="progress-label pending">SUBSTRATES</span></div>
+              <div class="progress-line"></div>
+              <div class="progress-step"><div class="progress-dot pending">6</div><span class="progress-label pending">REVIEW</span></div>
+            </div>
+            <div class="card-body" style="text-align:center;padding:28px 40px;">
+              <div style="font-size:18px;font-weight:700;margin-bottom:6px;">What kind of area is this?</div>
+              <div class="text-muted text-sm mb-12">Choose the area type to load the right substrate templates and rates.</div>
+              <div class="d-flex gap-12 justify-between" style="max-width:360px;margin:20px auto 0;">
+                <div class="cat-pill selected" style="flex:1;flex-direction:column;align-items:center;gap:8px;padding:20px;" onclick="selectType(this)">
+                  <i class="fas fa-sun" style="font-size:24px;color:var(--purple);"></i>
+                  <span>Exterior</span>
+                </div>
+                <div class="cat-pill" style="flex:1;flex-direction:column;align-items:center;gap:8px;padding:20px;" onclick="selectType(this)">
+                  <i class="fas fa-home" style="font-size:24px;color:var(--text-muted);"></i>
+                  <span>Interior</span>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer" style="position:static;border-top:1px solid var(--border);padding:12px 20px;">
+              <button class="btn btn-ghost">Cancel</button>
+              <button class="btn btn-primary" onclick="goWizStep(2)">Next</button>
+            </div>
+          </div>
+
+          <!-- STEP 3: DETAILS (shown directly for prototype) -->
+          <div id="wiz-step-3" style="display:none;">
+            <div class="progress-bar" style="padding:16px 20px 14px;">
+              <div class="progress-step"><div class="progress-dot done"></div><span class="progress-label done">TYPE</span></div>
+              <div class="progress-line done"></div>
+              <div class="progress-step"><div class="progress-dot done"></div><span class="progress-label done">AREA</span></div>
+              <div class="progress-line done"></div>
+              <div class="progress-step"><div class="progress-dot active">3</div><span class="progress-label active">DETAILS</span></div>
+              <div class="progress-line"></div>
+              <div class="progress-step"><div class="progress-dot pending">4</div><span class="progress-label pending">CATEGORIES</span></div>
+              <div class="progress-line"></div>
+              <div class="progress-step"><div class="progress-dot pending">5</div><span class="progress-label pending">SUBSTRATES</span></div>
+              <div class="progress-line"></div>
+              <div class="progress-step"><div class="progress-dot pending">6</div><span class="progress-label pending">REVIEW</span></div>
+            </div>
+            <div class="card-body">
+              <div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:4px;">Area details</div>
+              <div class="text-muted text-sm mb-12" style="text-align:center;">Name this area, set the measurement style, and capture its dimensions.</div>
+              <div class="form-row mb-12">
+                <div class="form-group mb-0"><div class="form-label">Area name *</div><input class="form-control" value="Dining Room"></div>
+                <div class="form-group mb-0"><div class="form-label">Client label *</div><input class="form-control" value="Dining Room"></div>
+              </div>
+              <div class="section-label" style="text-align:center;margin-bottom:8px;">MEASUREMENT STYLE</div>
+              <div class="mtype-group mb-12" style="max-width:300px;margin:0 auto 14px;">
+                <button class="mtype-btn active">Area</button>
+                <button class="mtype-btn">Wall</button>
+                <button class="mtype-btn">Surface</button>
+              </div>
+              <div class="form-row-3 mb-12">
+                <div class="form-group mb-0"><div class="form-label">Length (ft)</div><div class="input-suffix"><input value="12.00"><span>ft</span></div></div>
+                <div class="form-group mb-0"><div class="form-label">Width (ft)</div><div class="input-suffix"><input value="12.00"><span>ft</span></div></div>
+                <div class="form-group mb-0"><div class="form-label">Height (ft)</div><div class="input-suffix"><input value="8.00"><span>ft</span></div></div>
+              </div>
+              <div class="form-row mb-12">
+                <div class="form-group mb-0"><div class="form-label">Prep</div><div class="input-suffix"><input value="0"><span>hrs</span></div></div>
+                <div></div>
+              </div>
+              <div style="background:#F9FAFB;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:12px;">
+                <div class="d-flex align-center gap-8 mb-8"><span class="calculated-badge">CALCULATED</span><span class="text-xs text-muted">Auto-derived from your dimensions.</span></div>
+                <div class="form-row">
+                  <div class="form-group mb-0"><div class="form-label">Linear ft</div><div class="input-suffix"><input value="48" style="background:#F9FAFB;color:var(--text-muted);" readonly><span>ft</span></div></div>
+                  <div class="form-group mb-0"><div class="form-label">Walls</div><div class="input-suffix"><input value="384" style="background:#F9FAFB;color:var(--text-muted);" readonly><span>sqft</span></div></div>
+                </div>
+                <div class="form-row mt-8">
+                  <div class="form-group mb-0"><div class="form-label">Ceiling</div><div class="input-suffix"><input value="144" style="background:#F9FAFB;color:var(--text-muted);" readonly><span>sqft</span></div></div>
+                  <div class="form-group mb-0"><div class="form-label">Floor</div><div class="input-suffix"><input value="144" style="background:#F9FAFB;color:var(--text-muted);" readonly><span>sqft</span></div></div>
+                </div>
+              </div>
+              <div class="toggle-row"><input type="checkbox" class="toggle-checkbox"><div><div class="toggle-label">Optional area</div><div class="toggle-desc">Customer can choose to add or remove this area from the proposal.</div></div></div>
+              <div class="toggle-row"><input type="checkbox" class="toggle-checkbox"><div><div class="toggle-label">Round gallons up</div><div class="toggle-desc">Rounds all substrate gallons in this area up to the nearest whole gallon. You can override per substrate in the next step.</div></div></div>
+            </div>
+            <div class="modal-footer" style="position:static;border-top:1px solid var(--border);padding:12px 20px;">
+              <button class="btn btn-ghost" onclick="goWizStep(1)">Back</button>
+              <div class="d-flex gap-8">
+                <button class="btn btn-ghost">Cancel</button>
+                <button class="btn btn-primary" onclick="goWizStep(4)">Next</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 4: CATEGORIES -->
+          <div id="wiz-step-4" style="display:none;">
+            <div class="progress-bar" style="padding:16px 20px 14px;">
+              <div class="progress-step"><div class="progress-dot done"></div><span class="progress-label done">TYPE</span></div>
+              <div class="progress-line done"></div>
+              <div class="progress-step"><div class="progress-dot done"></div><span class="progress-label done">AREA</span></div>
+              <div class="progress-line done"></div>
+              <div class="progress-step"><div class="progress-dot done"></div><span class="progress-label done">DETAILS</span></div>
+              <div class="progress-line done"></div>
+              <div class="progress-step"><div class="progress-dot active">4</div><span class="progress-label active">CATEGORIES</span></div>
+              <div class="progress-line"></div>
+              <div class="progress-step"><div class="progress-dot pending">5</div><span class="progress-label pending">SUBSTRATES</span></div>
+              <div class="progress-line"></div>
+              <div class="progress-step"><div class="progress-dot pending">6</div><span class="progress-label pending">REVIEW</span></div>
+            </div>
+            <div class="card-body">
+              <div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:4px;">Which categories apply?</div>
+              <div class="text-muted text-sm mb-12" style="text-align:center;">Pick everything you'll be working on in this area — you can select more than one.</div>
+              <div class="cat-grid">
+                <div class="cat-pill" onclick="toggleCat(this)"><span>Countertop Resurfacing...</span><span class="cat-check"></span></div>
+                <div class="cat-pill" onclick="toggleCat(this)"><span>Window</span><span class="cat-check"></span></div>
+                <div class="cat-pill selected" onclick="toggleCat(this)"><span>Ceiling</span><span class="cat-check"></span></div>
+                <div class="cat-pill selected" onclick="toggleCat(this)"><span>Walls</span><span class="cat-check"></span></div>
+                <div class="cat-pill selected" onclick="toggleCat(this)"><span>Trim</span><span class="cat-check"></span></div>
+                <div class="cat-pill selected" onclick="toggleCat(this)"><span>Doors</span><span class="cat-check"></span></div>
+                <div class="cat-pill" onclick="toggleCat(this)"><span>Prep Work</span><span class="cat-check"></span></div>
+                <div class="cat-pill" onclick="toggleCat(this)"><span>Garage Floor Coating</span><span class="cat-check"></span></div>
+                <div class="cat-pill" onclick="toggleCat(this)"><span>Walls (10 × 10)</span><span class="cat-check"></span></div>
+                <div class="cat-pill" onclick="toggleCat(this)"><span>Stairs</span><span class="cat-check"></span></div>
+                <div class="cat-pill" onclick="toggleCat(this)"><span>Cabinets</span><span class="cat-check"></span></div>
+                <div class="cat-pill" onclick="toggleCat(this)"><span>Barn Doors</span><span class="cat-check"></span></div>
+              </div>
+            </div>
+            <div class="modal-footer" style="position:static;border-top:1px solid var(--border);padding:12px 20px;">
+              <button class="btn btn-ghost" onclick="goWizStep(3)">Back</button>
+              <div class="d-flex gap-8">
+                <button class="btn btn-ghost">Cancel</button>
+                <button class="btn btn-primary" onclick="switchScreen('s-substrates-step'); document.querySelectorAll('.topbar .snav-pill').forEach((p,i)=>{p.classList.toggle('active',i===2)})">Next</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        </div><!-- /proposal-content -->
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 3 — SUBSTRATES STEP (Step 5)
+      ══════════════════════════════════ -->
+      <div id="s-substrates-step" class="screen">
+        <div class="proposal-content">
+        <div class="helper">
+          <div class="helper-dot"><i class="fas fa-info"></i></div>
+          <div><strong>Screen 3 — Step 5: Substrates.</strong> This is the key new screen. Click a substrate row to expand its inline edit panel. The <strong>Walls</strong> substrate shows multi-product assignment (Paint + Caulk + Tape). The <strong>Trim</strong> substrate shows the Item-type flow (Quantity + Price Per Item with Sheen hidden). Toggle the Product tab to see product formula and options.</div>
+        </div>
+
+        <div class="card">
+          <!-- Progress -->
+          <div class="progress-bar" style="padding:14px 20px 12px;">
+            <div class="progress-step"><div class="progress-dot done"></div><span class="progress-label done">TYPE</span></div>
+            <div class="progress-line done"></div>
+            <div class="progress-step"><div class="progress-dot done"></div><span class="progress-label done">AREA</span></div>
+            <div class="progress-line done"></div>
+            <div class="progress-step"><div class="progress-dot done"></div><span class="progress-label done">DETAILS</span></div>
+            <div class="progress-line done"></div>
+            <div class="progress-step"><div class="progress-dot done"></div><span class="progress-label done">CATEGORIES</span></div>
+            <div class="progress-line done"></div>
+            <div class="progress-step"><div class="progress-dot active">5</div><span class="progress-label active">SUBSTRATES</span></div>
+            <div class="progress-line"></div>
+            <div class="progress-step"><div class="progress-dot pending">6</div><span class="progress-label pending">REVIEW</span></div>
+          </div>
+          <div style="padding:4px 20px 6px;font-size:13px;font-weight:600;color:var(--text-muted);">Dining Room · 12L × 12W × 8H ft · 384sqft <i class="fas fa-edit text-sm" style="cursor:pointer;"></i></div>
+
+          <div class="card-body">
+            <div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:4px;">Substrates</div>
+            <div class="text-muted text-sm mb-12" style="text-align:center;">Add the substrates you'll be working on. Click a row to edit its dimensions and pricing below.</div>
+
+            <div class="d-flex justify-between align-center mb-8" style="">
+              <span class="text-sm fw-bold text-muted">4 SUBSTRATES</span>
+              <button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add substrate</button>
+            </div>
+
+            <!-- Substrate list -->
+            <div class="sub-list">
+              <!-- Trim row -->
+              <div class="sub-row" id="srow-trim" onclick="selectSubstrate('trim')">
+                <div class="sub-row-left">
+                  <i class="fas fa-chevron-right sub-row-chevron" id="chev-trim"></i>
+                  <div>
+                    <div class="d-flex align-center gap-8"><span class="sub-row-name">Trim</span><span class="text-xs text-muted">Trim</span></div>
+                    <div class="sub-row-label">Trim</div>
+                  </div>
+                </div>
+                <div class="sub-row-right">
+                  <span class="sub-row-measure">48 ft</span>
+                  <div class="sub-row-actions">
+                    <button class="icon-btn" onclick="event.stopPropagation()"><i class="fas fa-edit"></i></button>
+                    <button class="icon-btn" onclick="event.stopPropagation()"><i class="fas fa-copy"></i></button>
+                    <button class="icon-btn icon-btn-del" onclick="event.stopPropagation()"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ceilings row -->
+              <div class="sub-row" id="srow-ceiling" onclick="selectSubstrate('ceiling')">
+                <div class="sub-row-left">
+                  <i class="fas fa-chevron-right sub-row-chevron" id="chev-ceiling"></i>
+                  <div>
+                    <div class="d-flex align-center gap-8"><span class="sub-row-name">Ceilings</span><span class="text-xs text-muted">Ceiling</span></div>
+                    <div class="sub-row-label">Ceilings</div>
+                  </div>
+                </div>
+                <div class="sub-row-right">
+                  <span class="sub-row-measure">144 sqft</span>
+                  <div class="sub-row-actions">
+                    <button class="icon-btn" onclick="event.stopPropagation()"><i class="fas fa-edit"></i></button>
+                    <button class="icon-btn" onclick="event.stopPropagation()"><i class="fas fa-copy"></i></button>
+                    <button class="icon-btn icon-btn-del" onclick="event.stopPropagation()"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Walls row — ACTIVE (multi-product) -->
+              <div class="sub-row active" id="srow-walls" onclick="selectSubstrate('walls')">
+                <div class="sub-row-left">
+                  <i class="fas fa-chevron-right sub-row-chevron open" id="chev-walls"></i>
+                  <div>
+                    <div class="d-flex align-center gap-8">
+                      <span class="sub-row-name">Walls</span><span class="text-xs text-muted">Walls</span>
+                      <span class="badge badge-gallon" style="font-size:10px;">Paint</span>
+                      <span class="badge badge-item" style="font-size:10px;">Caulk</span>
+                      <span class="badge badge-item" style="font-size:10px;">Tape</span>
+                      <span class="chip">BR-3/BR-4<span class="chip-tip">BR-3 & BR-4: Multiple products assigned to this substrate. Each is independently editable and removable.</span></span>
+                    </div>
+                    <div class="sub-row-label">Walls</div>
+                  </div>
+                </div>
+                <div class="sub-row-right">
+                  <span class="sub-row-measure">384 sqft</span>
+                  <div class="sub-row-actions">
+                    <button class="icon-btn" onclick="event.stopPropagation()"><i class="fas fa-edit"></i></button>
+                    <button class="icon-btn" onclick="event.stopPropagation()"><i class="fas fa-copy"></i></button>
+                    <button class="icon-btn icon-btn-del" onclick="event.stopPropagation()"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Doors row -->
+              <div class="sub-row" id="srow-doors" onclick="selectSubstrate('doors')">
+                <div class="sub-row-left">
+                  <i class="fas fa-chevron-right sub-row-chevron" id="chev-doors"></i>
+                  <div>
+                    <div class="d-flex align-center gap-8"><span class="sub-row-name">Doors</span><span class="text-xs text-muted">Doors</span></div>
+                    <div class="sub-row-label">Doors</div>
+                  </div>
+                </div>
+                <div class="sub-row-right">
+                  <span class="sub-row-measure">1x</span>
+                  <div class="sub-row-actions">
+                    <button class="icon-btn" onclick="event.stopPropagation()"><i class="fas fa-edit"></i></button>
+                    <button class="icon-btn" onclick="event.stopPropagation()"><i class="fas fa-copy"></i></button>
+                    <button class="icon-btn icon-btn-del" onclick="event.stopPropagation()"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- INLINE EDIT PANEL: Walls (multi-product, Gallon default) -->
+            <div id="panel-walls" class="sub-edit-panel">
+              <div class="form-row mb-12">
+                <div class="form-group mb-0">
+                  <div class="form-label">Substrate</div>
+                  <select class="form-control form-control-sm">
+                    <option selected>Walls</option><option>Trim</option><option>Ceiling</option>
+                  </select>
+                </div>
+                <div class="form-group mb-0">
+                  <div class="form-label">Client label</div>
+                  <input class="form-control form-control-sm" value="Walls">
+                  <div class="text-xs text-muted mt-8">Adjusts the substrate name the client sees.</div>
+                </div>
+              </div>
+
+              <div class="form-row mb-12">
+                <div class="form-group mb-0">
+                  <div class="form-label">Prep</div>
+                  <div class="input-suffix"><input value="1.00"><span>hrs</span></div>
+                  <div class="text-xs text-muted mt-8">Extra prep time (multiplied by hourly sell rate).</div>
+                </div>
+                <div class="form-group mb-0">
+                  <div class="form-label">Measurement</div>
+                  <div class="input-suffix"><input value="384.00"><span>sqft</span></div>
+                </div>
+              </div>
+              <div class="form-row mb-12">
+                <div class="form-group mb-0">
+                  <div class="form-label">Substrate width</div>
+                  <div class="input-suffix"><input value="0.00"><span>in</span></div>
+                </div>
+                <div></div>
+              </div>
+
+              <!-- Product tabs -->
+              <div class="divider"></div>
+              <div class="product-tab-bar" id="prod-tab-bar" style="">
+                <div class="ptab active" id="ptab-btn-paint" onclick="switchProdTab(this, 'ptab-paint')">
+                  <i class="fas fa-paint-roller" style="margin-right:4px;"></i> Paint (Gallon)
+                  <span class="ptab-remove" onclick="event.stopPropagation(); removeProductTab('ptab-btn-paint','ptab-paint')" title="Remove product from substrate" style="margin-left:6px;opacity:.55;font-size:11px;cursor:pointer;line-height:1;">✕</span>
+                  <span class="chip" style="margin-left:2px;">BR-4<span class="chip-tip">BR-4: Each product on a multi-product substrate is independently removable. Removing one does not affect the others.</span></span>
+                </div>
+                <div class="ptab" id="ptab-btn-caulk" onclick="switchProdTab(this, 'ptab-caulk')">
+                  Caulk (Item)
+                  <span class="ptab-remove" onclick="event.stopPropagation(); removeProductTab('ptab-btn-caulk','ptab-caulk')" title="Remove product from substrate" style="margin-left:6px;opacity:.55;font-size:11px;cursor:pointer;line-height:1;">✕</span>
+                </div>
+                <div class="ptab" id="ptab-btn-tape" onclick="switchProdTab(this, 'ptab-tape')">
+                  Tape (Item)
+                  <span class="ptab-remove" onclick="event.stopPropagation(); removeProductTab('ptab-btn-tape','ptab-tape')" title="Remove product from substrate" style="margin-left:6px;opacity:.55;font-size:11px;cursor:pointer;line-height:1;">✕</span>
+                </div>
+                <div class="ptab" style="color:var(--teal);border-color:var(--teal);" onclick="addProductTab()"><i class="fas fa-plus"></i> Add</div>
+              </div>
+
+              <!-- PRODUCT TAB: Paint (Gallon) -->
+              <div id="ptab-paint">
+                <div class="coat-tabs">
+                  <button class="coat-tab">1 Coat</button>
+                  <button class="coat-tab active">2 Coats</button>
+                  <button class="coat-tab">3 Coats</button>
+                </div>
+                <div class="form-row mb-8">
+                  <div class="form-group mb-0">
+                    <div class="form-label">Spread rate</div>
+                    <div class="input-suffix"><input value="180.00"><span>ft/hr</span></div>
+                    <div class="text-xs text-muted mt-8">Coverage one painter does in 1 hour.</div>
+                  </div>
+                  <div></div>
+                </div>
+                <div class="form-group mb-8">
+                  <div class="form-label">Product <span class="chip">BR-2<span class="chip-tip">BR-2: Gallon-type product — coat count and volume fields remain visible.</span></span></div>
+                  <select class="form-control"><option selected>BM Aura Exterior (Satin)</option><option>SW ProClassic</option><option>SW Emerald</option></select>
+                </div>
+                <div class="form-row mb-8">
+                  <div class="form-group mb-0">
+                    <div class="form-label">Unit price</div>
+                    <div class="input-prefix"><span>$</span><input value="55.99"></div>
+                  </div>
+                  <div class="form-group mb-0">
+                    <div class="form-label">Usage per coat</div>
+                    <div class="input-suffix"><input value="1.07"><span>gal</span></div>
+                    <div class="text-xs text-muted mt-8">Gallons of paint used for 1 coat of this surface.</div>
+                  </div>
+                </div>
+                <div style="cursor:pointer;font-size:12px;color:var(--purple);font-weight:600;margin-bottom:8px;" onclick="toggleFormula('formula-rate')"><i class="fas fa-check-square" style="color:var(--purple);"></i> Show rate formula</div>
+                <div id="formula-rate" class="calc-display mb-12">
+                  <div class="calc-box muted"><div class="calc-box-val">384.00</div><div class="calc-box-label">Surface (SQFT)</div></div>
+                  <span class="calc-op">/</span>
+                  <div class="calc-box muted"><div class="calc-box-val">180.00</div><div class="calc-box-label">Rate (FT/HR)</div></div>
+                  <span class="calc-op">×</span>
+                  <div class="calc-box muted"><div class="calc-box-val">$135.00</div><div class="calc-box-label">Labor ($/HR)</div></div>
+                  <span class="calc-op">+</span>
+                  <div class="calc-box muted"><div class="calc-box-val">$0.00</div><div class="calc-box-label">Prep</div></div>
+                  <span class="calc-eq">=</span>
+                  <div class="calc-box"><div class="calc-box-val">$288.00</div><div class="calc-box-label">Total</div></div>
+                </div>
+                <div style="cursor:pointer;font-size:12px;color:var(--purple);font-weight:600;margin-bottom:8px;" onclick="toggleFormula('formula-product')"><i class="fas fa-check-square" style="color:var(--purple);"></i> Show product formula</div>
+                <div id="formula-product" class="calc-display mb-12">
+                  <div class="calc-box muted"><div class="calc-box-val">$55.99</div><div class="calc-box-label">Price (product)</div></div>
+                  <span class="calc-op">×</span>
+                  <div class="calc-box muted"><div class="calc-box-val">2</div><div class="calc-box-label">Volume (gal)</div></div>
+                  <span class="calc-op">+</span>
+                  <div class="calc-box muted"><div class="calc-box-val">$8.82</div><div class="calc-box-label">Markup</div></div>
+                  <span class="calc-eq">=</span>
+                  <div class="calc-box"><div class="calc-box-val">$120.80</div><div class="calc-box-label">Total</div></div>
+                </div>
+                <div class="toggle-row"><input type="checkbox" class="toggle-checkbox"><div><div class="toggle-label">Round gallons up</div><div class="toggle-desc">Rounds estimated gallons up to the nearest whole gallon.</div></div></div>
+                <div class="toggle-row"><input type="checkbox" class="toggle-checkbox"><div><div class="toggle-label">No product</div><div class="toggle-desc">Hide the product selector and skip product cost for this substrate.</div></div></div>
+                <div class="toggle-row"><input type="checkbox" class="toggle-checkbox"><div><div class="toggle-label">Optional substrate</div><div class="toggle-desc">Customer can choose to add or remove this substrate from the proposal.</div></div></div>
+              </div>
+
+              <!-- PRODUCT TAB: Caulk (Item) — hidden by default -->
+              <div id="ptab-caulk" style="display:none;">
+                <div class="helper" style="margin-bottom:12px;">
+                  <div class="helper-dot"><i class="fas fa-info"></i></div>
+                  <div class="text-sm"><strong>Item-type product.</strong> Quantity and Price Per Item fields replace coat count and volume. <span class="chip">BR-5<span class="chip-tip">BR-5: Item-type product on a substrate shows quantity (unit count) + price per item. Coat count and volume must not appear.</span></span></div>
+                </div>
+                <div class="form-group mb-8">
+                  <div class="form-label">Product</div>
+                  <select class="form-control"><option selected>Caulk (White)</option><option>DAP Alex Plus</option></select>
+                </div>
+                <div class="field-hidden-note mb-8">
+                  <i class="fas fa-eye-slash"></i>
+                  <span><strong>Sheen</strong> is hidden — not applicable to Item-type products.</span>
+                  <span class="chip">BR-1<span class="chip-tip">BR-1: When product type is Item, Sheen field is hidden in both the Product modal and the substrate panel.</span></span>
+                </div>
+                <div class="form-group mb-8">
+                  <div class="form-label">Quantity</div>
+                  <div class="qty-stepper">
+                    <button class="qty-btn" onclick="stepQty(-1, 'qty-caulk')">−</button>
+                    <input class="qty-input" id="qty-caulk" value="3">
+                    <button class="qty-btn" onclick="stepQty(1, 'qty-caulk')">+</button>
+                  </div>
+                </div>
+                <div class="form-group mb-12">
+                  <div class="form-label">Price per item</div>
+                  <div class="input-prefix"><span>$</span><input id="price-caulk" value="6.49"></div>
+                </div>
+                <div style="cursor:pointer;font-size:12px;color:var(--purple);font-weight:600;margin-bottom:8px;" onclick="toggleFormula('formula-caulk')"><i class="fas fa-check-square" style="color:var(--purple);"></i> Show product formula</div>
+                <div id="formula-caulk" class="calc-display mb-12">
+                  <div class="calc-box muted"><div class="calc-box-val">3</div><div class="calc-box-label">Quantity</div></div>
+                  <span class="calc-op">×</span>
+                  <div class="calc-box muted"><div class="calc-box-val">$6.49</div><div class="calc-box-label">Per Item</div></div>
+                  <span class="calc-op">+</span>
+                  <div class="calc-box muted"><div class="calc-box-val">$0.00</div><div class="calc-box-label">Prep</div></div>
+                  <span class="calc-eq">=</span>
+                  <div class="calc-box"><div class="calc-box-val">$19.47</div><div class="calc-box-label">Total</div></div>
+                </div>
+                <div class="toggle-row"><input type="checkbox" class="toggle-checkbox"><div><div class="toggle-label">Optional substrate</div><div class="toggle-desc">Customer can choose to add or remove this substrate from the proposal.</div></div></div>
+              </div>
+
+              <!-- PRODUCT TAB: Tape (Item) — hidden by default -->
+              <div id="ptab-tape" style="display:none;">
+                <div class="helper" style="margin-bottom:12px;">
+                  <div class="helper-dot"><i class="fas fa-info"></i></div>
+                  <div class="text-sm"><strong>Item-type product.</strong> Quantity and Price Per Item fields.</div>
+                </div>
+                <div class="form-group mb-8">
+                  <div class="form-label">Product</div>
+                  <select class="form-control"><option selected>Painter's Tape 1.5"</option><option>Frog Tape</option></select>
+                </div>
+                <div class="field-hidden-note mb-8">
+                  <i class="fas fa-eye-slash"></i>
+                  <span><strong>Sheen</strong> is hidden — not applicable to Item-type products.</span>
+                </div>
+                <div class="form-group mb-8">
+                  <div class="form-label">Quantity</div>
+                  <div class="qty-stepper">
+                    <button class="qty-btn" onclick="stepQty(-1, 'qty-tape')">−</button>
+                    <input class="qty-input" id="qty-tape" value="4">
+                    <button class="qty-btn" onclick="stepQty(1, 'qty-tape')">+</button>
+                  </div>
+                </div>
+                <div class="form-group mb-12">
+                  <div class="form-label">Price per item</div>
+                  <div class="input-prefix"><span>$</span><input value="4.25"></div>
+                </div>
+                <div style="cursor:pointer;font-size:12px;color:var(--purple);font-weight:600;margin-bottom:8px;" onclick="toggleFormula('formula-tape')"><i class="fas fa-check-square" style="color:var(--purple);"></i> Show product formula</div>
+                <div id="formula-tape" class="calc-display mb-12">
+                  <div class="calc-box muted"><div class="calc-box-val">4</div><div class="calc-box-label">Quantity</div></div>
+                  <span class="calc-op">×</span>
+                  <div class="calc-box muted"><div class="calc-box-val">$4.25</div><div class="calc-box-label">Per Item</div></div>
+                  <span class="calc-op">+</span>
+                  <div class="calc-box muted"><div class="calc-box-val">$0.00</div><div class="calc-box-label">Prep</div></div>
+                  <span class="calc-eq">=</span>
+                  <div class="calc-box"><div class="calc-box-val">$17.00</div><div class="calc-box-label">Total</div></div>
+                </div>
+                <div class="toggle-row"><input type="checkbox" class="toggle-checkbox"><div><div class="toggle-label">Optional substrate</div><div class="toggle-desc">Customer can choose to add or remove this substrate from the proposal.</div></div></div>
+              </div>
+
+            </div><!-- /panel-walls -->
+
+            <!-- Other panels (collapsed) -->
+            <div id="panel-trim" style="display:none;" class="sub-edit-panel">
+              <div class="sub-edit-header">Trim <span class="badge badge-gray">Linear Foot</span></div>
+              <div class="form-row mb-12">
+                <div class="form-group mb-0"><div class="form-label">Prep</div><div class="input-suffix"><input value="0.00"><span>hrs</span></div></div>
+                <div class="form-group mb-0"><div class="form-label">Spread rate</div><div class="input-suffix"><input value="180.00"><span>ft/hr</span></div></div>
+              </div>
+              <div class="form-group"><div class="form-label">Measurement</div><div class="input-suffix"><input value="48.00"><span>ft</span></div></div>
+            </div>
+            <div id="panel-ceiling" style="display:none;" class="sub-edit-panel">
+              <div class="sub-edit-header">Ceilings <span class="badge badge-gallon">Gallon</span></div>
+              <div class="coat-tabs"><button class="coat-tab">1 Coat</button><button class="coat-tab active">2 Coats</button><button class="coat-tab">3 Coats</button></div>
+              <div class="form-row"><div class="form-group mb-0"><div class="form-label">Prep</div><div class="input-suffix"><input value="0.00"><span>hrs</span></div></div><div class="form-group mb-0"><div class="form-label">Spread rate</div><div class="input-suffix"><input value="180.00"><span>ft/hr</span></div></div></div>
+            </div>
+            <div id="panel-doors" style="display:none;" class="sub-edit-panel">
+              <div class="sub-edit-header">Doors <span class="badge badge-gray">Price Per Item</span></div>
+              <div class="form-group"><div class="form-label">Quantity</div><div class="qty-stepper"><button class="qty-btn">−</button><input class="qty-input" value="1"><button class="qty-btn">+</button></div></div>
+              <div class="form-group"><div class="form-label">Price per item</div><div class="input-prefix"><span>$</span><input value="85.00"></div></div>
+            </div>
+
+          </div><!-- /card-body -->
+
+          <div class="modal-footer" style="position:static;border-top:1px solid var(--border);padding:12px 20px;">
+            <button class="btn btn-ghost" onclick="switchScreen('s-area-wizard'); document.querySelectorAll('.topbar .snav-pill').forEach((p,i)=>{p.classList.toggle('active',i===1)}); goWizStep(4)">Back</button>
+            <div class="d-flex gap-8">
+              <button class="btn btn-ghost">Cancel</button>
+              <button class="btn btn-primary">Next</button>
+            </div>
+          </div>
+        </div>
+        </div><!-- /proposal-content -->
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 4 — PR › PRODUCTS
+      ══════════════════════════════════ -->
+      <div id="s-pr-products" class="screen">
+        <div class="proposal-content">
+        <div class="helper">
+          <div class="helper-dot"><i class="fas fa-info"></i></div>
+          <div><strong>Screen 4 — PR › Products.</strong> Click <em>Add Product</em> or the edit pencil on Caulk to see the Add/Edit Product modal. Toggle Product Type between Gallon and Item to watch the <strong>Sheen field hide</strong> (BR-1 / BR-2).</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Products</div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-product')"><i class="fas fa-plus"></i> Add Product</button>
+          </div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:#FAFAF9;border-bottom:1px solid var(--border);">
+              <th style="padding:9px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:left;">Product Name</th>
+              <th style="padding:9px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:left;">Sheen</th>
+              <th style="padding:9px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:left;">Price / Unit</th>
+              <th style="padding:9px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:left;">Last Modified</th>
+              <th style="padding:9px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:11px 16px;"><strong>BM Aura Exterior</strong> <span class="badge badge-gallon">Gallon</span></td>
+                <td style="padding:11px 16px;">Satin</td>
+                <td style="padding:11px 16px;">$55.99 / Gal</td>
+                <td style="padding:11px 16px;color:var(--text-muted);font-size:12px;">—</td>
+                <td style="padding:11px 16px;"><div class="d-flex gap-8 justify-center"><button class="icon-btn" onclick="openModal('modal-edit-gallon')"><i class="fas fa-pencil-alt"></i></button><button class="icon-btn icon-btn-del"><i class="fas fa-trash"></i></button></div></td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:11px 16px;"><strong>Caulk (White)</strong> <span class="badge badge-item">Item</span></td>
+                <td style="padding:11px 16px;color:var(--text-muted);">— <span class="chip">BR-1<span class="chip-tip">BR-1: Sheen hidden for Item-type products.</span></span></td>
+                <td style="padding:11px 16px;">$6.49 / Item</td>
+                <td style="padding:11px 16px;color:var(--text-muted);font-size:12px;">Jun 17, 2026</td>
+                <td style="padding:11px 16px;"><div class="d-flex gap-8 justify-center"><button class="icon-btn" onclick="openModal('modal-edit-item')"><i class="fas fa-pencil-alt"></i></button><button class="icon-btn icon-btn-del"><i class="fas fa-trash"></i></button></div></td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:11px 16px;"><strong>Painter's Tape 1.5"</strong> <span class="badge badge-item">Item</span></td>
+                <td style="padding:11px 16px;color:var(--text-muted);">—</td>
+                <td style="padding:11px 16px;">$4.25 / Item</td>
+                <td style="padding:11px 16px;color:var(--text-muted);font-size:12px;">—</td>
+                <td style="padding:11px 16px;"><div class="d-flex gap-8 justify-center"><button class="icon-btn"><i class="fas fa-pencil-alt"></i></button><button class="icon-btn icon-btn-del"><i class="fas fa-trash"></i></button></div></td>
+              </tr>
+              <tr>
+                <td style="padding:11px 16px;"><strong>SW ProClassic</strong> <span class="badge badge-gallon">Gallon</span></td>
+                <td style="padding:11px 16px;">Semi-Gloss</td>
+                <td style="padding:11px 16px;">$44.99 / Gal</td>
+                <td style="padding:11px 16px;color:var(--text-muted);font-size:12px;">—</td>
+                <td style="padding:11px 16px;"><div class="d-flex gap-8 justify-center"><button class="icon-btn"><i class="fas fa-pencil-alt"></i></button><button class="icon-btn icon-btn-del"><i class="fas fa-trash"></i></button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        </div><!-- /proposal-content -->
+      </div>
+
+      <!-- ══════════════════════════════════
+           SCREEN 5 — PR › SUBSTRATES
+      ══════════════════════════════════ -->
+      <div id="s-pr-substrates" class="screen">
+        <div class="proposal-content">
+        <div class="helper">
+          <div class="helper-dot"><i class="fas fa-info"></i></div>
+          <div><strong>Screen 5 — PR › Substrates (Settings).</strong> Click <em>Add Area Substrate</em> to open the configuration modal. The "Drywall (Walls)" row shows 3 assigned products in the new multi-product badge pattern.</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Area Substrates</div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-substrate')"><i class="fas fa-plus"></i> Add Area Substrate</button>
+          </div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:#FAFAF9;border-bottom:1px solid var(--border);">
+              <th style="padding:9px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:left;">Substrate Name</th>
+              <th style="padding:9px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:left;">Client Label</th>
+              <th style="padding:9px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:left;">Products Assigned</th>
+              <th style="padding:9px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;text-align:left;">Last Modified</th>
+              <th style="padding:9px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Actions</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:11px 16px;"><strong>Drywall (Walls)</strong></td>
+                <td style="padding:11px 16px;">Walls</td>
+                <td style="padding:11px 16px;">
+                  <span class="badge badge-gallon">Paint (Gallon)</span>
+                  <span class="badge badge-item" style="margin-left:4px;">Caulk (Item)</span>
+                  <span class="badge badge-item" style="margin-left:4px;">Tape (Item)</span>
+                  <span class="chip">BR-3<span class="chip-tip">BR-3: Substrate with multiple products assigned independently.</span></span>
+                </td>
+                <td style="padding:11px 16px;color:var(--text-muted);font-size:12px;">Jun 17, 2026</td>
+                <td style="padding:11px 16px;"><div class="d-flex gap-8 justify-center"><button class="icon-btn" onclick="openModal('modal-add-substrate')"><i class="fas fa-pencil-alt"></i></button><button class="icon-btn"><i class="fas fa-copy"></i></button><button class="icon-btn icon-btn-del"><i class="fas fa-trash"></i></button></div></td>
+              </tr>
+              <tr>
+                <td style="padding:11px 16px;"><strong>Trim (Walls)</strong></td>
+                <td style="padding:11px 16px;">Trim</td>
+                <td style="padding:11px 16px;"><span class="badge badge-gallon">SW ProClassic (Gallon)</span></td>
+                <td style="padding:11px 16px;color:var(--text-muted);font-size:12px;">Dec 9, 2025</td>
+                <td style="padding:11px 16px;"><div class="d-flex gap-8 justify-center"><button class="icon-btn"><i class="fas fa-pencil-alt"></i></button><button class="icon-btn"><i class="fas fa-copy"></i></button><button class="icon-btn icon-btn-del"><i class="fas fa-trash"></i></button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        </div><!-- /proposal-content -->
+      </div>
+
+    </div><!-- /content -->
+  </div>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Area Type Modal -->
+<div id="modal-area-type" class="modal-backdrop">
+  <div class="modal" style="width:520px;">
+    <div class="modal-header">
+      <div><div class="modal-title">Area Details</div></div>
+      <button class="modal-close" onclick="closeModal('modal-area-type')">&times;</button>
+    </div>
+    <div class="progress-bar" style="padding:14px 20px 12px;border-bottom:1px solid var(--border);">
+      <div class="progress-step"><div class="progress-dot active">1</div><span class="progress-label active">TYPE</span></div>
+      <div class="progress-line"></div>
+      <div class="progress-step"><div class="progress-dot pending">2</div><span class="progress-label pending">AREA</span></div>
+      <div class="progress-line"></div>
+      <div class="progress-step"><div class="progress-dot pending">3</div><span class="progress-label pending">DETAILS</span></div>
+      <div class="progress-line"></div>
+      <div class="progress-step"><div class="progress-dot pending">4</div><span class="progress-label pending">CATEGORIES</span></div>
+      <div class="progress-line"></div>
+      <div class="progress-step"><div class="progress-dot pending">5</div><span class="progress-label pending">SUBSTRATES</span></div>
+      <div class="progress-line"></div>
+      <div class="progress-step"><div class="progress-dot pending">6</div><span class="progress-label pending">REVIEW</span></div>
+    </div>
+    <div class="modal-body" style="text-align:center;padding:28px 40px;">
+      <div style="font-size:18px;font-weight:700;margin-bottom:6px;">What kind of area is this?</div>
+      <div class="text-muted text-sm mb-12">Choose the area type to load the right substrate templates and rates.</div>
+      <div class="d-flex gap-12" style="max-width:340px;margin:20px auto 0;">
+        <div class="cat-pill selected" style="flex:1;flex-direction:column;align-items:center;gap:10px;padding:22px;" onclick="selectType(this)">
+          <i class="fas fa-sun" style="font-size:26px;color:var(--purple);"></i><span>Exterior</span>
+        </div>
+        <div class="cat-pill" style="flex:1;flex-direction:column;align-items:center;gap:10px;padding:22px;" onclick="selectType(this)">
+          <i class="fas fa-home" style="font-size:26px;color:var(--text-muted);"></i><span>Interior</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-area-type')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-area-type'); switchScreen('s-area-wizard'); document.querySelectorAll('.topbar .snav-pill').forEach((p,i)=>{p.classList.toggle('active',i===1)}); goWizStep(3)">Next</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Product Modal -->
+<div id="modal-add-product" class="modal-backdrop">
+  <div class="modal" style="width:440px;">
+    <div class="modal-header">
+      <div class="modal-title">Add Product</div>
+      <button class="modal-close" onclick="closeModal('modal-add-product')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><div class="form-label">Product Name</div><input class="form-control" placeholder="e.g. Caulk (White)"></div>
+      <div class="form-group"><div class="form-label">Product Price ($)</div><div class="input-prefix"><span>$</span><input value="0.00"></div></div>
+      <div class="form-group">
+        <div class="form-label">Choose Product Type <span class="chip">BR-1/BR-2<span class="chip-tip">Selecting "Item" hides the Sheen field. Selecting "Gallon" keeps it visible.</span></span></div>
+        <select class="form-control" id="new-prod-type" onchange="toggleSheen('new-sheen-group','new-sheen-hidden',this.value)">
+          <option value="gallon">Gallon</option>
+          <option value="item">Item</option>
+        </select>
+      </div>
+      <div id="new-sheen-group" class="form-group">
+        <div class="form-label">Choose Sheen</div>
+        <select class="form-control"><option>TBD</option><option>Flat</option><option>Eggshell</option><option>Satin</option><option>Semi-Gloss</option><option>Gloss</option></select>
+      </div>
+      <div id="new-sheen-hidden" class="field-hidden-note" style="display:none;"><i class="fas fa-eye-slash"></i><span><strong>Sheen</strong> is hidden — not applicable to Item-type products.</span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-product')">Close</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-add-product')">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Gallon Product -->
+<div id="modal-edit-gallon" class="modal-backdrop">
+  <div class="modal" style="width:440px;">
+    <div class="modal-header"><div class="modal-title">Edit Product</div><button class="modal-close" onclick="closeModal('modal-edit-gallon')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><div class="form-label">Product Name</div><input class="form-control" value="BM Aura Exterior"></div>
+      <div class="form-group"><div class="form-label">Product Price ($)</div><div class="input-prefix"><span>$</span><input value="55.99"></div></div>
+      <div class="form-group">
+        <div class="form-label">Choose Product Type</div>
+        <select class="form-control" onchange="toggleSheen('eg-sheen-group','eg-sheen-hidden',this.value)"><option value="gallon" selected>Gallon</option><option value="item">Item</option></select>
+      </div>
+      <div id="eg-sheen-group" class="form-group"><div class="form-label">Choose Sheen <span class="chip">BR-2<span class="chip-tip">BR-2: Gallon type — Sheen field remains visible.</span></span></div><select class="form-control"><option>Flat</option><option>Eggshell</option><option selected>Satin</option><option>Semi-Gloss</option><option>Gloss</option></select></div>
+      <div id="eg-sheen-hidden" class="field-hidden-note" style="display:none;"><i class="fas fa-eye-slash"></i><span><strong>Sheen</strong> is hidden — not applicable to Item-type products.</span></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-edit-gallon')">Close</button><button class="btn btn-primary">Save</button></div>
+  </div>
+</div>
+
+<!-- Edit Item Product -->
+<div id="modal-edit-item" class="modal-backdrop">
+  <div class="modal" style="width:440px;">
+    <div class="modal-header"><div class="modal-title">Edit Product</div><button class="modal-close" onclick="closeModal('modal-edit-item')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><div class="form-label">Product Name</div><input class="form-control" value="Caulk (White)"></div>
+      <div class="form-group"><div class="form-label">Product Price ($)</div><div class="input-prefix"><span>$</span><input value="6.49"></div></div>
+      <div class="form-group">
+        <div class="form-label">Choose Product Type</div>
+        <select class="form-control" onchange="toggleSheen('ei-sheen-group','ei-sheen-hidden',this.value)"><option value="gallon">Gallon</option><option value="item" selected>Item</option></select>
+      </div>
+      <div id="ei-sheen-group" class="form-group" style="display:none;"><div class="form-label">Choose Sheen</div><select class="form-control"><option>TBD</option></select></div>
+      <div id="ei-sheen-hidden" class="field-hidden-note" style="display:flex;"><i class="fas fa-eye-slash"></i><span><strong>Sheen</strong> is hidden — not applicable to Item-type products. <span class="chip">BR-1<span class="chip-tip">BR-1: Item type — Sheen is hidden both here and in the substrate edit panel.</span></span></span></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-edit-item')">Close</button><button class="btn btn-primary">Save</button></div>
+  </div>
+</div>
+
+<!-- Add Substrate Modal (PR settings) -->
+<div id="modal-add-substrate" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header"><div><div class="modal-title">Area Substrate Configuration</div><div class="modal-subtitle">Assign products independently. Each product keeps its own type-appropriate inputs.</div></div><button class="modal-close" onclick="closeModal('modal-add-substrate')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><div class="form-label">Substrate Name</div><input class="form-control" value="Drywall (Walls)"></div><div class="form-group"><div class="form-label">Client Label</div><input class="form-control" value="Walls"></div></div>
+      <div class="form-row"><div class="form-group"><div class="form-label">Category</div><select class="form-control"><option selected>Walls (10 × 10)</option><option>Trim</option><option>Ceiling</option></select></div><div class="form-group"><div class="form-label">Calculation Type</div><select class="form-control"><option selected>Sq Ft (Walls)</option><option>Sq Ft (Floor)</option><option>Linear Foot</option><option>Price Per Item</option></select></div></div>
+      <div class="divider"></div>
+      <div class="d-flex justify-between align-center mb-8">
+        <div class="section-label" style="margin:0;">Products Assigned <span class="chip">BR-3<span class="chip-tip">BR-3: Multiple products can be assigned. Each is independently removable.</span></span></div>
+        <button class="btn btn-sm" style="border:1px solid var(--teal);color:var(--teal);background:transparent;"><i class="fas fa-plus"></i> Add Product</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="product-row-assigned"><span class="badge badge-gallon">Gallon</span><span class="product-row-name">BM Aura Exterior — Satin</span><span class="product-row-meta">$55.99/gal</span><button class="icon-btn icon-btn-del" style="width:26px;height:26px;font-size:11px;"><i class="fas fa-times"></i></button></div>
+        <div class="product-row-assigned"><span class="badge badge-item">Item</span><span class="product-row-name">Caulk (White)</span><span class="product-row-meta">$6.49/item</span><button class="icon-btn icon-btn-del" style="width:26px;height:26px;font-size:11px;"><i class="fas fa-times"></i></button></div>
+        <div class="product-row-assigned"><span class="badge badge-item">Item</span><span class="product-row-name">Painter's Tape 1.5"</span><span class="product-row-meta">$4.25/item</span><button class="icon-btn icon-btn-del" style="width:26px;height:26px;font-size:11px;"><i class="fas fa-times"></i></button></div>
+      </div>
+      <div class="helper" style="margin-top:12px;margin-bottom:0;"><div class="helper-dot"><i class="fas fa-info"></i></div><div class="text-sm">To edit a product's name or price, go to the <strong>Products</strong> tab. Here you can only add or remove products from this substrate.</div></div>
+      <div class="divider"></div>
+      <div class="form-row"><div class="form-group"><div class="form-label">Per Gal. Coverage (sqft)</div><input class="form-control" value="350"></div><div class="form-group"><div class="form-label">Default Prep</div><input class="form-control" value="1.0"></div></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-add-substrate')">Close</button><button class="btn btn-primary" onclick="closeModal('modal-add-substrate')">Save</button></div>
+  </div>
+</div>
+
+<script>
+function toggleBRChips() {
+  const body = document.body;
+  const hidden = body.classList.toggle('chips-hidden');
+  const state = document.getElementById('br-toggle-state');
+  const btn = document.getElementById('br-toggle');
+  state.textContent = hidden ? 'OFF' : 'ON';
+  btn.style.background = hidden ? '#FFF7ED' : '#fff';
+  btn.style.opacity = hidden ? '.6' : '1';
+}
+
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.topbar .snav-pill').forEach(p => p.classList.remove('active'));
+  const map = {'s-proposal':0,'s-area-wizard':1,'s-substrates-step':2,'s-pr-products':3,'s-pr-substrates':4};
+  if (map[id] !== undefined) document.querySelectorAll('.topbar .snav-pill')[map[id]].classList.add('active');
+}
+document.querySelectorAll('.topbar .snav-pill').forEach((p,i) => {
+  p.addEventListener('click', function() {
+    const screens = ['s-proposal','s-area-wizard','s-substrates-step','s-pr-products','s-pr-substrates'];
+    switchScreen(screens[i]);
+  });
+});
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-backdrop').forEach(bd => {
+  bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); });
+});
+
+function goWizStep(n) {
+  [1,3,4].forEach(s => { const el = document.getElementById('wiz-step-'+s); if(el) el.style.display = 'none'; });
+  const target = document.getElementById('wiz-step-'+n);
+  if (target) target.style.display = 'block';
+}
+
+function toggleCat(el) { el.classList.toggle('selected'); }
+
+function selectType(el) {
+  el.closest('.d-flex').querySelectorAll('.cat-pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function toggleAreaCard(header) {
+  const body = document.getElementById('area-body');
+  if (!body) return;
+  const icon = header.querySelector('i');
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  icon.style.transform = open ? 'rotate(-90deg)' : '';
+}
+
+function selectSubstrate(name) {
+  ['trim','ceiling','walls','doors'].forEach(n => {
+    const row = document.getElementById('srow-'+n);
+    const panel = document.getElementById('panel-'+n);
+    const chev = document.getElementById('chev-'+n);
+    const active = n === name;
+    if (row) row.classList.toggle('active', active);
+    if (panel) panel.style.display = active ? 'block' : 'none';
+    if (chev) chev.classList.toggle('open', active);
+  });
+}
+
+function switchProdTab(btn, targetId) {
+  btn.closest('.product-tab-bar').querySelectorAll('.ptab').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  ['ptab-paint','ptab-caulk','ptab-tape'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = id === targetId ? 'block' : 'none';
+  });
+}
+
+function removeProductTab(btnId, panelId) {
+  const btn = document.getElementById(btnId);
+  const panel = document.getElementById(panelId);
+  const bar = document.getElementById('prod-tab-bar');
+  if (!btn || !panel || !bar) return;
+
+  // If this tab is active, switch to first remaining tab
+  const wasActive = btn.classList.contains('active');
+  btn.remove();
+  panel.remove();
+
+  if (wasActive) {
+    // activate the first remaining real tab (not the +Add)
+    const firstTab = bar.querySelector('.ptab:not([style*="teal"])');
+    if (firstTab) {
+      firstTab.classList.add('active');
+      const newPanelId = firstTab.id.replace('ptab-btn-', 'ptab-');
+      ['ptab-paint','ptab-caulk','ptab-tape'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = id === newPanelId ? 'block' : 'none';
+      });
+    }
+  }
+
+  // Update substrate row badges in sub list
+  const wallRow = document.getElementById('srow-walls');
+  if (wallRow) {
+    const badgeMap = {'ptab-btn-paint': 'Paint', 'ptab-btn-caulk': 'Caulk', 'ptab-btn-tape': 'Tape'};
+    const label = badgeMap[btnId];
+    if (label) {
+      wallRow.querySelectorAll('.badge').forEach(b => {
+        if (b.textContent.trim() === label) b.remove();
+      });
+    }
+  }
+}
+
+function addProductTab() {
+  alert('In production: opens a product picker to add another product to this substrate.');
+}
+
+function toggleFormula(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+function toggleSheen(groupId, hiddenId, type) {
+  const grp = document.getElementById(groupId);
+  const hid = document.getElementById(hiddenId);
+  if (grp) grp.style.display = type === 'item' ? 'none' : 'block';
+  if (hid) hid.style.display = type === 'item' ? 'flex' : 'none';
+}
+
+function stepQty(delta, inputId) {
+  const inp = document.getElementById(inputId);
+  if (!inp) return;
+  let v = parseInt(inp.value) || 0;
+  v = Math.max(0, v + delta);
+  inp.value = v;
+}
+</script>
+</body>
+</html>
