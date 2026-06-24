@@ -529,31 +529,39 @@ function generateCompanies(total){
         cancelReason=ri(CANCEL_REASONS);
       }
     }
+    var wasEverActive=(lifecycleStatus==='Active'||lifecycleStatus==='Paused'||lifecycleStatus==='Cancelled');
     var plan=null;
-    if(isActive){var r=Math.random();if(isLegacy){if(r<0.55)plan='Advanced';else plan='Pro';}else{if(r<0.78)plan='Pro';}}
+    if(lifecycleStatus==='Active'){var r=Math.random();if(isLegacy){if(r<0.55)plan='Advanced';else plan='Pro';}else{if(r<0.78)plan='Pro';}}
+    else if(lifecycleStatus==='Paused'){/* Paused accounts had a plan when they stopped — most had Pro or Advanced */var r=Math.random();if(r<0.60)plan='Pro';else if(r<0.85)plan='Advanced';}
+    /* Cancelled: no current plan (subscription ended) */
     /* planCost sourced from Company Settings > Company Information > Account Status (local DB field) */
     var planCost=plan?PLAN_COSTS[plan]:null;
     var totalSales=0;
-    if(isActive&&daysAgo>14){var sf=Math.random(),base=isLegacy?40000:0;if(sf<0.18)totalSales=base+rd(0,5000);else if(sf<0.42)totalSales=base+rd(5000,35000);else if(sf<0.68)totalSales=base+rd(35000,150000);else if(sf<0.88)totalSales=base+rd(150000,650000);else totalSales=base+rd(650000,3500000);}
-    var activeUsers=!isActive?(Math.random()<0.2?1:0):(totalSales>500000?rd(8,25):totalSales>100000?rd(4,15):totalSales>25000?rd(2,8):rd(1,4));
-    var contacts=!isActive?rd(0,20):(totalSales>500000?rd(300,5000):totalSales>100000?rd(80,800):totalSales>25000?rd(20,200):totalSales>5000?rd(5,80):rd(0,30));
+    if(daysAgo>14){
+      var sf=Math.random(),base=isLegacy?40000:0;
+      if(lifecycleStatus==='Active'){if(sf<0.18)totalSales=base+rd(0,5000);else if(sf<0.42)totalSales=base+rd(5000,35000);else if(sf<0.68)totalSales=base+rd(35000,150000);else if(sf<0.88)totalSales=base+rd(150000,650000);else totalSales=base+rd(650000,3500000);}
+      else if(lifecycleStatus==='Paused'){/* Paused accounts have real historical sales — likely a mid-range established business */if(sf<0.10)totalSales=base+rd(0,5000);else if(sf<0.35)totalSales=base+rd(5000,35000);else if(sf<0.65)totalSales=base+rd(35000,150000);else if(sf<0.88)totalSales=base+rd(150000,650000);else totalSales=base+rd(650000,2000000);}
+      else{/* Cancelled: full range, skewed slightly lower — some left early */if(sf<0.25)totalSales=base+rd(0,5000);else if(sf<0.52)totalSales=base+rd(5000,35000);else if(sf<0.74)totalSales=base+rd(35000,150000);else if(sf<0.90)totalSales=base+rd(150000,650000);else totalSales=base+rd(650000,1500000);}
+    }
+    var activeUsers=wasEverActive?(totalSales>500000?rd(8,25):totalSales>100000?rd(4,15):totalSales>25000?rd(2,8):rd(1,4)):0;
+    var contacts=wasEverActive?(totalSales>500000?rd(300,5000):totalSales>100000?rd(80,800):totalSales>25000?rd(20,200):totalSales>5000?rd(5,80):rd(0,30)):0;
     var reached10k=totalSales>=10000;
-    var a2pApplied=isActive&&(daysAgo>7?Math.random()<0.78:Math.random()<0.25);
+    var a2pApplied=wasEverActive&&(daysAgo>7?Math.random()<0.78:Math.random()<0.25);
     var a2pActivated=a2pApplied&&(daysAgo>14?Math.random()<0.87:Math.random()<0.42);
-    var daysRemaining=(!isLegacy&&isActive)?Math.max(0,90-daysAgo):null;
+    var daysRemaining=(!isLegacy&&lifecycleStatus==='Active')?Math.max(0,90-daysAgo):null;
     var industry=Math.random()<0.70?ri(INDUSTRIES):null;
     var obcss=ri(OBCSS_TEAM);
-    var estimateSent=isActive&&daysAgo>3&&Math.random()<0.76;
+    var estimateSent=wasEverActive&&daysAgo>3&&Math.random()<0.76;
     var daysSinceEst=estimateSent?(Math.random()<0.72?rd(0,13):rd(14,50)):null;
     var estimateGoneQuiet=estimateSent&&daysSinceEst!=null&&daysSinceEst>=14;
-    /* Add-on status only (no cost display) */
-    function mkAddon(){if(!isActive||!plan)return{active:false};return{active:Math.random()<(plan==='Advanced'?0.52:0.28)};}
+    /* Add-on status: Paused accounts retain what they had; Cancelled had add-ons while active */
+    function mkAddon(){if(!wasEverActive||!plan)return{active:false};return{active:Math.random()<(plan==='Advanced'?0.52:0.28)};}
     var prodRates=mkAddon(),jobCost=mkAddon(),textMsg=mkAddon(),jobiAi=mkAddon();
-    /* Integration flags */
-    var googleInt=isActive&&Math.random()<0.42,qboInt=isActive&&Math.random()<0.31,qbtInt=isActive&&Math.random()<0.18;
-    var acornInt=isActive&&Math.random()<0.14,quoInt=isActive&&Math.random()<0.22;
-    var companyCamInt=isActive&&Math.random()<0.28,routemizeInt=isActive&&Math.random()<0.12;
-    var zapierInt=isActive&&Math.random()<0.19,angiInt=isActive&&Math.random()<0.16;
+    /* Integration flags: Paused/Cancelled retain historical integrations they had */
+    var googleInt=wasEverActive&&Math.random()<0.42,qboInt=wasEverActive&&Math.random()<0.31,qbtInt=wasEverActive&&Math.random()<0.18;
+    var acornInt=wasEverActive&&Math.random()<0.14,quoInt=wasEverActive&&Math.random()<0.22;
+    var companyCamInt=wasEverActive&&Math.random()<0.28,routemizeInt=wasEverActive&&Math.random()<0.12;
+    var zapierInt=wasEverActive&&Math.random()<0.19,angiInt=wasEverActive&&Math.random()<0.16;
     /* --- Login event model (prototype — not yet tracked in production) ---
        Three distinct event types:
        1. True Login:        real tenant user authenticating
@@ -564,30 +572,29 @@ function generateCompanies(total){
     var lastAdminAccessDate=null,lastAdminAccessUser=null;
     var lastImpersonateDate=null,lastImpersonateUser=null,lastImpersonateAdminUser=null;
     var ADMIN_TEAM=['Ximena Jimenez','Matt Fournier','Juan Quintero','Daniel Lee','Kennedy Smith','Alexis Calderon'];
-    if(isActive){
-      /* True login */
+    if(wasEverActive){
+      /* True login: Active = recent; Paused = last login likely before pause (30–180d ago); Cancelled = stale (60–365d ago) */
       var tl=Math.random();
       if(tl>=0.05){
         var tlDays;
-        if(tl<0.30)tlDays=rd(0,1);
-        else if(tl<0.60)tlDays=rd(1,7);
-        else if(tl<0.80)tlDays=rd(7,30);
-        else tlDays=rd(30,180);
+        if(lifecycleStatus==='Active'){if(tl<0.30)tlDays=rd(0,1);else if(tl<0.60)tlDays=rd(1,7);else if(tl<0.80)tlDays=rd(7,30);else tlDays=rd(30,180);}
+        else if(lifecycleStatus==='Paused'){if(tl<0.25)tlDays=rd(7,30);else if(tl<0.65)tlDays=rd(30,90);else tlDays=rd(90,180);}
+        else{if(tl<0.30)tlDays=rd(60,120);else if(tl<0.70)tlDays=rd(120,240);else tlDays=rd(240,365);}
         lastTrueLoginDate=new Date(now.getTime()-tlDays*86400000-rd(0,86400000));
         lastTrueLoginUser=ri(FN)+' '+ri(LN);
       }
-      /* Admin access — ~55% of active accounts have had CS access at some point */
-      if(Math.random()<0.55){
+      /* Admin access — CS checks in on paused/cancelled accounts too */
+      if(Math.random()<(lifecycleStatus==='Active'?0.55:0.70)){
         var adDays=rd(0,60);
         lastAdminAccessDate=new Date(now.getTime()-adDays*86400000-rd(0,86400000));
         lastAdminAccessUser=ri(ADMIN_TEAM);
       }
-      /* Impersonation — ~28% of active accounts */
-      if(Math.random()<0.28){
+      /* Impersonation — less common on inactive accounts */
+      if(Math.random()<(lifecycleStatus==='Active'?0.28:0.12)){
         var impDays=rd(0,45);
         lastImpersonateDate=new Date(now.getTime()-impDays*86400000-rd(0,86400000));
-        lastImpersonateUser=ri(FN)+' '+ri(LN); /* the tenant user being impersonated */
-        lastImpersonateAdminUser=ri(ADMIN_TEAM); /* the CS user doing the impersonating */
+        lastImpersonateUser=ri(FN)+' '+ri(LN);
+        lastImpersonateAdminUser=ri(ADMIN_TEAM);
       }
     }
     /* Health — based on signals the system tracks:
@@ -596,7 +603,8 @@ function generateCompanies(total){
        Needs Attention: Active but not all signals green
        Inactive: Account not active */
     var health;
-    if(!isActive){health='Inactive';}
+    if(lifecycleStatus==='Cancelled'){health='Inactive';}
+    else if(lifecycleStatus==='Paused'){health='Inactive';}
     else if((!a2pApplied&&daysAgo>14)||(totalSales===0&&daysAgo>60)||estimateGoneQuiet){health='At Risk';}
     else if(estimateSent&&a2pActivated&&totalSales>0){health='On Track';}
     else{health='Needs Attention';}
