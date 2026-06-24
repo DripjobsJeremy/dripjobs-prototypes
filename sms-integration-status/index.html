@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Text Messaging Integration Card – Status States · DripJobs Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<style>
+/* ─── Reset & Base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #F4F5F8;
+  color: #32415B;
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* ─── Design tokens ─────────────────────────────────────────────── */
+:root {
+  --primary:        #8B85EA;
+  --primary-hover:  #736BE3;
+  --primary-active: #5C53DC;
+  --primary-rgb:    139, 133, 234;
+  --text:           #32415B;
+  --text-muted:     #80879A;
+  --border:         #DAD8E3;
+  --card-bg:        #FFFFFF;
+  --danger-bg:      #FEF2F2;
+  --danger-border:  #FECACA;
+  --danger-text:    #991B1B;
+  --warn-bg:        #FFFBEB;
+  --warn-border:    #FDE68A;
+  --warn-text:      #92400E;
+  --info-bg:        #EFF6FF;
+  --info-border:    #BFDBFE;
+  --info-text:      #1E40AF;
+  --success-bg:     #F0FDF4;
+  --success-border: #BBF7D0;
+  --success-text:   #166534;
+  --teal:           #0DCECE;
+}
+
+/* ─── Demo banner ────────────────────────────────────────────────── */
+.demo-banner {
+  background: #32415B;
+  color: #fff;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.demo-banner-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #0DCECE;
+  white-space: nowrap;
+}
+.demo-banner-title {
+  font-size: 13px;
+  font-weight: 600;
+  flex: 1;
+}
+.demo-state-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.demo-states {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.demo-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.demo-btn:hover { background: rgba(255,255,255,0.2); }
+.demo-btn.active { background: var(--teal); border-color: var(--teal); color: #32415B; }
+
+/* ─── BR annotation chip system ─────────────────────────────────── */
+.br-chip {
+  display: none;
+  position: absolute;
+  top: -9px;
+  right: -6px;
+  background: #F97316;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  z-index: 10;
+  white-space: nowrap;
+  pointer-events: none;
+}
+body.show-br .br-chip { display: block; }
+.br-anchor { position: relative; }
+
+/* ─── Page scaffold ──────────────────────────────────────────────── */
+.page-shell {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 18px 60px;
+}
+
+/* ─── Page header ────────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.page-header h1 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+.page-back {
+  color: var(--text-muted);
+  font-size: 13px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s;
+}
+.page-back:hover { color: var(--primary); }
+
+/* ─── Top-of-page alert banner (existing, unchanged) ────────────── */
+.page-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--warn-text);
+}
+.page-alert i { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.page-alert-body { flex: 1; }
+.page-alert-title { font-weight: 600; margin-bottom: 2px; }
+.page-alert-action {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--warn-text);
+  text-decoration: underline;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* ─── Section ────────────────────────────────────────────────────── */
+.settings-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+.settings-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: var(--text);
+}
+.settings-section-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0 0 14px 0;
+}
+
+/* ─── Integration card grid ─────────────────────────────────────── */
+.integrations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+/* ─── Integration card ──────────────────────────────────────────── */
+.integ-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  transition: box-shadow 0.15s;
+}
+.integ-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+
+.integ-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.integ-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #F4F5F8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.integ-logo-sms {
+  background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+  color: #fff;
+}
+.integ-logo-zapier { background: #FF4A00; color: #fff; }
+.integ-logo-qb { background: #2CA01C; color: #fff; }
+
+.integ-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.integ-vendor {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.integ-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.integ-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ─── Status badges (new) ────────────────────────────────────────── */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 3px 9px;
+  border-radius: 14px;
+}
+.status-badge i { font-size: 12px; }
+
+.status-badge--active {
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
+}
+.status-badge--pending {
+  background: var(--info-bg);
+  color: var(--info-text);
+  border: 1px solid var(--info-border);
+}
+.status-badge--rejected {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-border);
+}
+.status-badge--setup {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  border: 1px solid var(--warn-border);
+}
+
+/* ─── Card action buttons ────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  text-decoration: none;
+  line-height: 1;
+  white-space: nowrap;
+}
+.btn-sm {
+  font-size: 12px;
+  padding: 5px 11px;
+  border-radius: 8px;
+}
+.btn-outline-primary {
+  background: transparent;
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
+}
+.btn-outline-primary:hover {
+  background: var(--primary);
+  color: #fff;
+}
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border: 1.5px solid var(--primary);
+}
+.btn-primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+.btn-warning {
+  background: #F59E0B;
+  color: #fff;
+  border: 1.5px solid #F59E0B;
+}
+.btn-warning:hover { background: #D97706; border-color: #D97706; }
+.btn-danger {
+  background: transparent;
+  border: 1.5px solid #EF4444;
+  color: #EF4444;
+}
+.btn-danger:hover { background: #EF4444; color: #fff; }
+
+/* Manage / Settings link (existing pattern, no change) */
+.integ-manage-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transition: color 0.15s;
+}
+.integ-manage-link:hover { color: var(--primary); }
+
+/* ─── State: not enabled — muted card ────────────────────────────── */
+.integ-card--disabled {
+  opacity: 0.6;
+}
+
+/* ─── Helper text block ──────────────────────────────────────────── */
+.helper-text {
+  background: #f0fafa;
+  border-left: 4px solid var(--teal);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.helper-text strong { color: var(--text); font-weight: 600; }
+
+/* ─── State label (demo control) ────────────────────────────────── */
+.state-label-pill {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  background: #F4F5F8;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+
+/* ─── Other cards (grayed, for context) ─────────────────────────── */
+.integ-card--other {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .integrations-grid { grid-template-columns: 1fr; }
+  .integ-card-footer { flex-direction: column; align-items: flex-start; }
+  .demo-banner { gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Demo control banner ──────────────────────────────────────── -->
+<div class="demo-banner">
+  <span class="demo-banner-label">Prototype</span>
+  <span class="demo-banner-title">Text Messaging Integration Card — Status States</span>
+  <span class="demo-state-label">State:</span>
+  <div class="demo-states">
+    <button class="demo-btn" onclick="setState('not-enabled')">Not Enabled</button>
+    <button class="demo-btn active" onclick="setState('setup-needed')">Setup Needed</button>
+    <button class="demo-btn" onclick="setState('pending')">Pending Approval</button>
+    <button class="demo-btn" onclick="setState('active')">Active / Approved</button>
+    <button class="demo-btn" onclick="setState('rejected')">Rejected</button>
+  </div>
+  <button class="demo-btn" id="brToggleBtn" onclick="toggleBR()" style="margin-left:auto;">BRs Off</button>
+</div>
+
+<!-- ── Page shell ────────────────────────────────────────────────── -->
+<div class="page-shell">
+
+  <!-- Back nav -->
+  <div class="page-header">
+    <a href="#" class="page-back"><i class="ti ti-chevron-left"></i> Settings</a>
+    <h1>Integrations</h1>
+  </div>
+
+  <!-- Top-of-page banner (existing; hidden when not relevant to state) -->
+  <div class="page-alert" id="topBanner" style="display:none;">
+    <i class="ti ti-alert-triangle"></i>
+    <div class="page-alert-body">
+      <div class="page-alert-title">Text Messages Are Disabled</div>
+      Your A2P registration is incomplete. Text messaging features are unavailable until setup is complete.
+    </div>
+    <a class="page-alert-action" href="#">Complete Setup &rsaquo;</a>
+  </div>
+
+  <!-- Integrations section -->
+  <div class="settings-section">
+    <div class="settings-section-title">Connected Services</div>
+    <div class="settings-section-subtitle">Manage your integrations and add-ons.</div>
+
+    <div class="integrations-grid">
+
+      <!-- ── TEXT MESSAGING CARD (focus of this ticket) ───────────── -->
+      <div class="integ-card br-anchor" id="smsCard">
+        <span class="br-chip" id="brChip1">BR 1 · BR 2</span>
+
+        <div class="integ-card-header">
+          <div class="integ-logo integ-logo-sms">
+            <i class="ti ti-message-circle-2" style="font-size:18px;"></i>
+          </div>
+          <div>
+            <div class="integ-name">Text Messaging</div>
+            <div class="integ-vendor">Powered by Twilio</div>
+          </div>
+        </div>
+
+        <div class="integ-desc">
+          Send automated appointment reminders, follow-ups, and marketing messages via SMS.
+        </div>
+
+        <!-- Status area — swapped by JS ───── -->
+        <div id="smsStatusArea"></div>
+
+        <!-- Footer actions ─────────────────── -->
+        <div class="integ-card-footer br-anchor" id="smsFooter">
+          <span class="br-chip" id="brChip2">BR 3</span>
+          <!-- populated by JS -->
+        </div>
+      </div>
+      <!-- /sms card -->
+
+      <!-- Other cards for context -->
+      <div class="integ-card integ-card--other">
+        <div class="integ-card-header">
+          <div class="integ-logo integ-logo-zapier">
+            <i class="ti ti-bolt" style="font-size:18px;"></i>
+          </div>
+          <div>
+            <div class="integ-name">Zapier</div>
+            <div class="integ-vendor">Automation</div>
+          </div>
+        </div>
+        <div class="integ-desc">Connect DripJobs to thousands of apps with automated workflows.</div>
+        <div class="integ-card-footer">
+          <span class="status-badge status-badge--active"><i class="ti ti-check"></i>Active</span>
+          <a href="#" class="integ-manage-link">Manage <i class="ti ti-chevron-right" style="font-size:11px;"></i></a>
+        </div>
+      </div>
+
+      <div class="integ-card integ-card--other">
+        <div class="integ-card-header">
+          <div class="integ-logo integ-logo-qb">
+            <i class="ti ti-calculator" style="font-size:18px;"></i>
+          </div>
+          <div>
+            <div class="integ-name">QuickBooks Online</div>
+            <div class="integ-vendor">Accounting</div>
+          </div>
+        </div>
+        <div class="integ-desc">Sync invoices, customers, and payments with QuickBooks Online.</div>
+        <div class="integ-card-footer">
+          <span class="status-badge status-badge--active"><i class="ti ti-check"></i>Active</span>
+          <a href="#" class="integ-manage-link">Manage <i class="ti ti-chevron-right" style="font-size:11px;"></i></a>
+        </div>
+      </div>
+
+    </div><!-- /integrations-grid -->
+  </div><!-- /settings-section -->
+
+  <!-- Helper / annotation text (shown when BRs active) -->
+  <div class="helper-text" id="helperText" style="display:none;">
+    <strong>Annotation mode active.</strong> Orange chips identify the Business Rule each element satisfies. Toggle BRs off to see the clean UI. Use the state buttons above to switch between all 5 A2P registration states defined in the ticket.
+  </div>
+
+</div><!-- /page-shell -->
+
+<script>
+/* ─── State definitions ────────────────────────────────────────── */
+const STATES = {
+  'not-enabled': {
+    showBanner: false,
+    cardClass: 'integ-card--disabled',
+    statusHTML: '',  // no badge
+    footerHTML: `
+      <span></span>
+      <button class="btn btn-sm btn-outline-primary" onclick="noop()">Enable Add-On</button>
+    `,
+    br1: 'BR 1',
+    br2: 'BR 1 · BR 2',
+    annotation: 'State: Add-on not enabled — no change to card behavior. Card is shown muted for illustration only (state is identical to current production behavior).'
+  },
+  'setup-needed': {
+    showBanner: true,
+    cardClass: '',
+    statusHTML: `
+      <div class="br-anchor">
+        <span class="br-chip" id="brChip3">BR 2 (row 3)</span>
+        <span class="status-badge status-badge--setup">
+          <i class="ti ti-settings"></i>&nbsp;Setup Required
+        </span>
+      </div>`,
+    footerHTML: `
+      <a href="#" class="integ-manage-link">Manage <i class="ti ti-chevron-right" style="font-size:11px;"></i></a>
+      <button class="btn btn-sm btn-primary br-anchor" onclick="noop()">
+        <span class="br-chip" style="top:-8px;right:-4px;">BR 2 · BR 3</span>
+        <i class="ti ti-clipboard-check"></i>&nbsp;Complete Setup
+      </button>`,
+    annotation: 'State: Add-on enabled, setup not started — prominent "Complete Setup" CTA on card (BR 2 row 3, BR 3). Top-of-page warning banner also visible (existing).'
+  },
+  'pending': {
+    showBanner: false,
+    cardClass: '',
+    statusHTML: `
+      <div class="br-anchor">
+        <span class="br-chip" id="brChip3">BR 2 (row 4)</span>
+        <span class="status-badge status-badge--pending">
+          <i class="ti ti-clock"></i>&nbsp;Pending Approval
+        </span>
+      </div>`,
+    footerHTML: `
+      <a href="#" class="integ-manage-link">View Details <i class="ti ti-chevron-right" style="font-size:11px;"></i></a>
+    `,
+    annotation: 'State: Registration submitted, pending A2P approval — status badge displayed, no action button required. Top banner hidden (user has taken action).'
+  },
+  'active': {
+    showBanner: false,
+    cardClass: '',
+    statusHTML: `
+      <div class="br-anchor">
+        <span class="br-chip" id="brChip3">BR 2 (row 5)</span>
+        <span class="status-badge status-badge--active">
+          <i class="ti ti-check"></i>&nbsp;Active
+        </span>
+      </div>`,
+    footerHTML: `
+      <a href="#" class="integ-manage-link">Manage <i class="ti ti-chevron-right" style="font-size:11px;"></i></a>
+    `,
+    annotation: 'State: Registration approved (SMS Verified) — green "Active" badge. No action CTA needed. Top banner hidden.'
+  },
+  'rejected': {
+    showBanner: false,
+    cardClass: '',
+    statusHTML: `
+      <div class="br-anchor">
+        <span class="br-chip" id="brChip3">BR 2 (row 6)</span>
+        <span class="status-badge status-badge--rejected">
+          <i class="ti ti-x"></i>&nbsp;Rejected
+        </span>
+      </div>`,
+    footerHTML: `
+      <a href="#" class="integ-manage-link">View Details <i class="ti ti-chevron-right" style="font-size:11px;"></i></a>
+      <button class="btn btn-sm btn-danger br-anchor" onclick="noop()">
+        <span class="br-chip" style="top:-8px;right:-4px;">BR 2 · BR 3</span>
+        <i class="ti ti-refresh"></i>&nbsp;Review &amp; Resubmit
+      </button>`,
+    annotation: 'State: Registration rejected — red "Rejected" badge and prominent "Review & Resubmit" action button (BR 2 row 6, BR 3). Navigates to existing A2P setup flow.'
+  }
+};
+
+let currentState = 'setup-needed';
+let brActive = false;
+
+function setState(key) {
+  currentState = key;
+  const s = STATES[key];
+  const card = document.getElementById('smsCard');
+  const statusArea = document.getElementById('smsStatusArea');
+  const footer = document.getElementById('smsFooter');
+  const topBanner = document.getElementById('topBanner');
+  const helperText = document.getElementById('helperText');
+
+  // Remove all state classes
+  card.classList.remove('integ-card--disabled');
+  if (s.cardClass) card.classList.add(s.cardClass);
+
+  statusArea.innerHTML = s.statusHTML;
+  // Re-inject BR chip placeholder for footer (will be set by footer HTML directly)
+  footer.innerHTML = s.footerHTML;
+
+  // Show/hide top banner
+  topBanner.style.display = s.showBanner ? 'flex' : 'none';
+
+  // Update demo state buttons
+  document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.demo-btn').forEach(b => {
+    if (b.textContent.trim().toLowerCase().replace(/ /g,'').includes(key.replace(/-/g,''))) {
+      b.classList.add('active');
+    }
+  });
+
+  // Apply BR visibility
+  applyBR();
+
+  // Annotation helper
+  helperText.style.display = brActive ? 'block' : 'none';
+  if (brActive) helperText.innerHTML = `<strong>State annotation:</strong> ${s.annotation}`;
+}
+
+function toggleBR() {
+  brActive = !brActive;
+  document.body.classList.toggle('show-br', brActive);
+  const btn = document.getElementById('brToggleBtn');
+  btn.textContent = brActive ? 'BRs On' : 'BRs Off';
+  btn.classList.toggle('active', brActive);
+  const helperText = document.getElementById('helperText');
+  helperText.style.display = brActive ? 'block' : 'none';
+  if (brActive) helperText.innerHTML = `<strong>State annotation:</strong> ${STATES[currentState].annotation}`;
+}
+
+function applyBR() {
+  // chips are already in the DOM from innerHTML; show-br class on body controls visibility
+}
+
+function noop() {
+  // CTA navigates to existing A2P setup flow (out of scope for this prototype)
+  const toasts = document.getElementById('toastArea') || (() => {
+    const t = document.createElement('div');
+    t.id = 'toastArea';
+    t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;';
+    document.body.appendChild(t);
+    return t;
+  })();
+  const msg = document.createElement('div');
+  msg.style.cssText = 'background:#32415B;color:#fff;font-family:Nunito,sans-serif;font-size:12px;font-weight:600;padding:10px 16px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.18);animation:slideIn .2s ease;';
+  msg.innerHTML = '<i class="ti ti-arrow-right" style="margin-right:6px;"></i>Navigates to A2P registration form (existing flow)';
+  toasts.appendChild(msg);
+  setTimeout(() => msg.remove(), 2800);
+}
+
+// Init
+setState('setup-needed');
+</script>
+</body>
+</html>
