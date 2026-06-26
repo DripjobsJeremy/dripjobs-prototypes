@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tax Registration Number — Company Settings Prototype</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; font-size: 14px; background: #F4F3F8; color: #32415B; min-height: 100vh; }
+
+/* ── Demo Banner ── */
+#demo-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  background: #1e1b3a; color: #fff; padding: 0 16px;
+  height: 48px; display: flex; align-items: center; gap: 10px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3); flex-wrap: nowrap; overflow-x: auto;
+}
+.banner-label { color: #a89cf7; text-transform: uppercase; font-size: 10px; letter-spacing: 1px; white-space: nowrap; }
+.demo-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.15); flex-shrink: 0; }
+.banner-group { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.banner-group-label { color: #aaa; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.demo-btn {
+  padding: 4px 11px; border-radius: 6px; border: 1.5px solid rgba(255,255,255,0.2);
+  background: transparent; color: #fff; font-family: 'Nunito', sans-serif;
+  font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  transition: background 0.15s;
+}
+.demo-btn:hover { background: rgba(255,255,255,0.1); }
+.demo-btn.active { background: #8B85EA; border-color: #8B85EA; }
+.br-toggle-btn {
+  margin-left: auto; flex-shrink: 0;
+  padding: 4px 10px; border-radius: 6px; border: 1.5px solid rgba(255,165,0,0.5);
+  background: transparent; color: #ffb347; font-family: 'Nunito', sans-serif;
+  font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap;
+}
+.br-toggle-btn.on { background: rgba(255,165,0,0.15); }
+
+/* ── BR chips ── */
+.br-chip {
+  display: none; position: absolute; top: -10px; right: -10px;
+  background: #FF8C00; color: #fff; font-size: 10px; font-weight: 700;
+  padding: 2px 6px; border-radius: 10px; white-space: nowrap; cursor: pointer;
+  z-index: 100; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.br-annotations-on .br-chip { display: block; }
+.br-annotatable { position: relative; }
+
+/* ── App Shell ── */
+#app-shell { padding-top: 48px; display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar { width: 200px; min-width: 200px; background: #fff; border-right: 1px solid #DAD8E3; padding: 16px 0; display: flex; flex-direction: column; }
+.sidebar-logo { padding: 8px 16px 16px; display: flex; align-items: center; gap: 8px; }
+.sidebar-logo-mark { width: 32px; height: 32px; background: #7C3AED; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; font-weight: 800; }
+.sidebar-logo-text { font-size: 15px; font-weight: 700; color: #32415B; }
+.sidebar-company { padding: 6px 14px 12px; font-size: 11px; font-weight: 600; color: #80879A; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #DAD8E3; margin-bottom: 8px; }
+.sidebar-section-label { padding: 12px 14px 4px; font-size: 10px; font-weight: 700; color: #80879A; text-transform: uppercase; letter-spacing: 0.8px; }
+.sidebar-item { display: flex; align-items: center; gap: 8px; padding: 7px 14px; font-size: 13px; font-weight: 500; color: #32415B; cursor: pointer; text-decoration: none; transition: background 0.1s; }
+.sidebar-item i { width: 16px; color: #80879A; font-size: 13px; }
+.sidebar-item:hover { background: #F4F3F8; }
+.sidebar-item.active { background: #EEF0FF; color: #7C3AED; font-weight: 600; }
+.sidebar-item.active i { color: #7C3AED; }
+
+/* ── Main ── */
+.main-content { flex: 1; overflow-y: auto; }
+
+/* ── Views (screens) ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── Settings Tabs ── */
+.settings-tabs { background: #fff; border-bottom: 1px solid #DAD8E3; padding: 0 24px; display: flex; align-items: center; gap: 4px; overflow-x: auto; }
+.settings-tab { padding: 12px 14px; font-size: 13px; font-weight: 500; color: #80879A; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+.settings-tab.active { color: #7C3AED; border-bottom-color: #7C3AED; font-weight: 600; }
+
+/* ── Page body ── */
+.page-body { padding: 24px; max-width: 1200px; }
+
+/* ── Settings ── */
+#settings-page {
+  --st-color-primary: #8B85EA; --st-color-primary-rgb: 139,133,234;
+  --st-color-text: #32415B; --st-color-text-muted: #80879A;
+  --st-color-border: #DAD8E3; --st-color-card-bg: #FFFFFF;
+}
+.settings-section { background: #fff; border: 1px solid #DAD8E3; border-radius: 10px; padding: 18px; margin-bottom: 18px; }
+.settings-section-title { font-size: 14px; font-weight: 600; margin: 0 0 14px 0; color: #32415B; }
+.settings-section-subtitle { font-size: 12px; color: #80879A; margin: -8px 0 14px 0; }
+.settings-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 18px 14px; }
+.settings-field { grid-column: span 2; position: relative; display: flex; flex-direction: column; }
+.settings-field--full { grid-column: 1/-1; }
+.settings-field--half { grid-column: span 3; }
+.settings-field--compact { grid-column: span 2; max-width: 180px; }
+.settings-field-label { position: absolute; top: -8px; left: 10px; background: #fff; padding: 0 6px; font-size: 11px; font-weight: 500; color: #80879A; z-index: 1; pointer-events: none; letter-spacing: 0.2px; }
+.settings-field-input, .settings-field select { height: 40px; padding: 0 14px; border: 1px solid #DAD8E3; border-radius: 8px; font-size: 14px; font-family: 'Nunito',sans-serif; background: #fff; color: #32415B; width: 100%; appearance: none; }
+.settings-field-input:focus { outline: none; border-color: #8B85EA; box-shadow: 0 0 0 3px rgba(139,133,234,0.18); }
+.select-wrapper { position: relative; }
+.select-wrapper::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 10px; color: #80879A; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.settings-field-group { display: flex; border: 1px solid #DAD8E3; border-radius: 8px; overflow: hidden; }
+.settings-field-group:focus-within { border-color: #8B85EA; box-shadow: 0 0 0 3px rgba(139,133,234,0.18); }
+.settings-field-group .settings-field-input { border: none; border-radius: 0; flex: 1; }
+.settings-field-group-suffix { display: flex; align-items: center; padding: 0 12px; background: #F4F3F8; border-left: 1px solid #DAD8E3; font-size: 13px; font-weight: 600; color: #80879A; }
+.toggle-row { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-top: 1px solid #DAD8E3; }
+.toggle-row:first-child { border-top: none; padding-top: 0; }
+.toggle-switch { position: relative; width: 44px; min-width: 44px; height: 24px; cursor: pointer; margin-top: 1px; }
+.toggle-track { width: 44px; height: 24px; border-radius: 12px; background: #DAD8E3; transition: background 0.2s; position: relative; }
+.toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
+.toggle-switch.on .toggle-track { background: #8B85EA; }
+.toggle-switch.on .toggle-thumb { transform: translateX(20px); }
+.toggle-content { flex: 1; }
+.toggle-label { font-size: 13px; font-weight: 600; color: #32415B; line-height: 1.3; }
+.toggle-helper { font-size: 12px; color: #80879A; margin-top: 3px; font-style: italic; }
+.helper-box { background: #f0fafa; border-left: 4px solid #0DCECE; border-radius: 0 6px 6px 0; padding: 10px 14px; display: flex; gap: 10px; align-items: flex-start; }
+.helper-box-icon { width: 20px; height: 20px; min-width: 20px; background: #0DCECE; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+.helper-box-icon i { color: #fff; font-size: 10px; }
+.helper-box-text { font-size: 12px; color: #32415B; line-height: 1.5; }
+.account-status-row { display: flex; align-items: center; gap: 24px; margin-bottom: 14px; flex-wrap: wrap; }
+.account-meta { display: flex; flex-direction: column; gap: 2px; }
+.account-meta-label { font-size: 11px; font-weight: 600; color: #80879A; text-transform: uppercase; letter-spacing: 0.5px; }
+.account-meta-value { font-size: 14px; font-weight: 600; color: #32415B; }
+.billing-alert { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 14px; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.billing-alert i { color: #D97706; margin-top: 1px; }
+.billing-alert-text { font-size: 13px; color: #92400E; }
+.billing-alert-text strong { display: block; font-size: 12px; font-weight: 700; }
+.coupon-alert { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 10px 14px; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.coupon-alert i { color: #16A34A; margin-top: 1px; }
+.coupon-alert-text { font-size: 13px; color: #166534; }
+.badge-active { display: inline-block; background: #D1FAE5; color: #065F46; border-radius: 10px; font-size: 11px; font-weight: 700; padding: 2px 8px; margin-left: 8px; }
+.save-bar { display: flex; gap: 10px; padding-top: 4px; padding-bottom: 32px; }
+.btn-save { padding: 8px 22px; background: #7C3AED; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Nunito',sans-serif; cursor: pointer; }
+.btn-save:hover { background: #6D28D9; }
+.btn-cancel { padding: 8px 16px; background: transparent; color: #80879A; border: 1px solid #DAD8E3; border-radius: 8px; font-size: 14px; font-weight: 500; font-family: 'Nunito',sans-serif; cursor: pointer; }
+.new-section-badge { display: inline-flex; align-items: center; gap: 4px; background: #EDE9FE; color: #7C3AED; border-radius: 10px; font-size: 10px; font-weight: 700; padding: 2px 8px; margin-left: 10px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.5px; }
+.checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 13px; font-weight: 500; color: #32415B; cursor: pointer; }
+.checkbox-row input { width: 15px; height: 15px; accent-color: #7C3AED; cursor: pointer; }
+.tooltip-wrap { position: relative; display: inline-block; }
+.tooltip-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; background: #DAD8E3; border-radius: 50%; font-size: 9px; color: #80879A; cursor: pointer; font-weight: 700; vertical-align: middle; margin-left: 4px; }
+.tooltip-pop { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1e1b3a; color: #fff; font-size: 11px; padding: 6px 10px; border-radius: 6px; white-space: nowrap; z-index: 200; pointer-events: none; }
+.tooltip-wrap:hover .tooltip-pop { display: block; }
+
+/* ── Invoice User View ── */
+.inv-header { background: #fff; border-bottom: 1px solid #DAD8E3; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.inv-title-row { display: flex; align-items: center; gap: 10px; }
+.inv-title { font-size: 20px; font-weight: 700; color: #32415B; }
+.badge-open { background: #E8F5E9; color: #2E7D32; border-radius: 10px; font-size: 11px; font-weight: 700; padding: 3px 10px; }
+.inv-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-primary-inv { background: #7C3AED; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 600; font-family: 'Nunito',sans-serif; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.btn-outline-inv { background: #fff; color: #32415B; border: 1px solid #DAD8E3; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; font-family: 'Nunito',sans-serif; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.inv-meta-card { background: #fff; border: 1px solid #DAD8E3; border-radius: 10px; margin: 16px 24px; padding: 18px 24px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+.inv-meta-client { grid-column: span 1; }
+.inv-meta-client-name { font-size: 14px; font-weight: 700; color: #7C3AED; }
+.inv-meta-client-detail { font-size: 12px; color: #32415B; margin-top: 4px; display: flex; align-items: flex-start; gap: 6px; }
+.inv-meta-client-detail i { color: #80879A; margin-top: 2px; font-size: 11px; }
+.inv-meta-label { font-size: 10px; font-weight: 600; color: #80879A; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.inv-meta-val { font-size: 14px; font-weight: 600; color: #32415B; }
+.inv-meta-val.purple { color: #7C3AED; }
+.inv-tabs { display: flex; gap: 6px; padding: 0 24px 0; }
+.inv-tab { padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #DAD8E3; background: #fff; color: #80879A; display: flex; align-items: center; gap: 6px; }
+.inv-tab.active { background: #EDE9FE; border-color: #C4B5FD; color: #7C3AED; }
+.inv-body { padding: 16px 24px; }
+.inv-section-title { font-size: 16px; font-weight: 700; color: #32415B; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+.btn-add-item { background: #fff; border: 1px solid #DAD8E3; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 600; color: #32415B; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.inv-line-item { background: #fff; border: 1px solid #DAD8E3; border-radius: 8px; padding: 14px 18px; margin-bottom: 8px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 10px; align-items: start; }
+.inv-line-col-label { font-size: 10px; font-weight: 600; color: #80879A; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.inv-line-item-name { font-size: 13px; font-weight: 700; color: #7C3AED; }
+.inv-line-co-badge { display: inline-block; background: #A7F3D0; color: #065F46; border-radius: 4px; font-size: 10px; font-weight: 700; padding: 1px 6px; margin-left: 6px; }
+.inv-line-val { font-size: 13px; font-weight: 600; color: #32415B; }
+.inv-totals { margin-left: auto; width: 360px; background: #F9F8FC; border: 1px solid #DAD8E3; border-radius: 10px; padding: 16px 20px; }
+.inv-total-row { display: flex; justify-content: space-between; font-size: 13px; color: #32415B; padding: 5px 0; }
+.inv-total-row.tax { color: #7C3AED; font-weight: 600; }
+.inv-total-row.total { font-weight: 600; border-top: 1px solid #DAD8E3; padding-top: 10px; margin-top: 4px; }
+.inv-total-row.balance { font-weight: 700; font-size: 14px; }
+.inv-payments { margin-top: 24px; }
+.inv-payments-title { font-size: 16px; font-weight: 700; color: #32415B; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+.inv-no-payments { text-align: center; color: #80879A; font-size: 13px; padding: 20px 0; border-top: 1px solid #DAD8E3; }
+.inv-bottom-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid #DAD8E3; margin-top: 16px; }
+
+/* ── Tax line highlight ── */
+.tax-reg-line {
+  font-size: 12px; color: #32415B; margin-top: 4px;
+  display: flex; align-items: center; gap: 6px;
+}
+.tax-reg-line.hidden { display: none; }
+.tax-reg-highlight { background: #FFF9C4; border: 1px solid #F9E05A; border-radius: 4px; padding: 1px 6px; font-weight: 700; font-size: 11px; }
+
+/* ── PDF View ── */
+.pdf-shell { background: #E5E5E5; padding: 32px; min-height: 100vh; }
+.pdf-paper { background: #fff; max-width: 760px; margin: 0 auto; padding: 48px 52px; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.6; box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
+.pdf-title { text-align: center; font-size: 22px; font-weight: 400; letter-spacing: 6px; color: #888; margin-bottom: 32px; font-family: Georgia, serif; }
+.pdf-top { display: flex; justify-content: space-between; gap: 32px; margin-bottom: 28px; }
+.pdf-client-block { font-size: 12px; line-height: 1.8; }
+.pdf-client-block strong { font-size: 13px; }
+.pdf-meta-table { font-size: 12px; line-height: 1.8; }
+.pdf-meta-table td:first-child { color: #555; padding-right: 16px; }
+.pdf-meta-table td:last-child { font-weight: 600; text-align: right; }
+.pdf-company-block { margin-top: 24px; margin-bottom: 28px; }
+.pdf-company-block strong { display: block; font-size: 13px; }
+.pdf-company-block .pdf-company-tax { margin-top: 6px; }
+.pdf-company-tax-line { font-size: 12px; font-weight: 600; background: #FFF9C4; border: 1px solid #F9E05A; display: inline-block; padding: 1px 8px; border-radius: 3px; }
+.pdf-items-header { display: grid; gap: 8px; border-top: 2px solid #333; border-bottom: 1px solid #ccc; padding: 6px 0; margin-bottom: 8px; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+.pdf-items-header.job-invoice { grid-template-columns: 3fr 1fr 1fr 1fr 1fr; }
+.pdf-items-header.manual { grid-template-columns: 3fr 1fr 1fr 1fr 1fr; }
+.pdf-item-row { display: grid; gap: 8px; padding: 10px 0; border-bottom: 1px solid #eee; }
+.pdf-item-row.job-invoice { grid-template-columns: 3fr 1fr 1fr 1fr 1fr; }
+.pdf-item-row.manual { grid-template-columns: 3fr 1fr 1fr 1fr 1fr; }
+.pdf-item-name { font-weight: 700; }
+.pdf-item-desc { font-weight: 400; color: #555; font-size: 11px; margin-top: 4px; line-height: 1.5; }
+.pdf-subtotals { margin-top: 16px; padding-top: 8px; }
+.pdf-subtotal-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 12px; }
+.pdf-subtotal-row.bold { font-weight: 700; border-top: 1px solid #333; padding-top: 8px; margin-top: 4px; }
+.pdf-footer-note { margin-top: 24px; font-size: 11px; color: #555; border-top: 1px solid #ccc; padding-top: 12px; }
+.pdf-logo-placeholder { width: 72px; height: 72px; background: #f0ede8; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: #888; margin-bottom: 8px; }
+.pdf-logo-placeholder .logo-icon { font-size: 28px; color: #7C3AED; }
+.pdf-hidden { display: none; }
+
+/* ── Customer Portal ── */
+.portal-shell { background: #F4F3F8; min-height: 100vh; }
+.portal-header { background: #7C3AED; color: #fff; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
+.portal-header-logo { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
+.portal-header-company { font-size: 13px; opacity: 0.85; }
+.portal-body { max-width: 900px; margin: 0 auto; padding: 28px 20px; }
+.portal-inv-card { background: #fff; border: 1px solid #DAD8E3; border-radius: 10px; padding: 20px 24px; margin-bottom: 16px; }
+.portal-inv-title { font-size: 18px; font-weight: 700; color: #32415B; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.portal-meta-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid #DAD8E3; }
+.portal-meta-label { font-size: 10px; font-weight: 700; color: #80879A; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.portal-meta-val { font-size: 14px; font-weight: 600; color: #32415B; }
+.portal-meta-val.purple { color: #7C3AED; }
+.portal-items-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid #DAD8E3; font-size: 10px; font-weight: 700; color: #80879A; text-transform: uppercase; letter-spacing: 0.5px; }
+.portal-item-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 8px; padding: 10px 0; border-bottom: 1px solid #F4F3F8; font-size: 13px; }
+.portal-item-name { font-weight: 700; color: #32415B; }
+.portal-totals { display: flex; justify-content: flex-end; margin-top: 12px; }
+.portal-totals-inner { width: 280px; }
+.portal-total-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+.portal-total-row.tax { color: #7C3AED; font-weight: 600; }
+.portal-total-row.bold { font-weight: 700; border-top: 1px solid #DAD8E3; padding-top: 8px; margin-top: 4px; }
+.portal-pay-btn { width: 100%; background: #7C3AED; color: #fff; border: none; border-radius: 8px; padding: 12px; font-size: 14px; font-weight: 700; font-family: 'Nunito',sans-serif; cursor: pointer; margin-top: 16px; }
+.portal-company-block { font-size: 12px; line-height: 1.8; color: #32415B; background: #F9F8FC; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; }
+.portal-company-block strong { font-size: 13px; display: block; margin-bottom: 2px; }
+.portal-tax-reg-display { margin-top: 6px; font-size: 12px; }
+.portal-tax-reg-display.hidden { display: none; }
+
+/* ── Tabs within invoice view ── */
+.view-inner-tabs { display: flex; gap: 0; border-bottom: 1px solid #DAD8E3; background: #fff; padding: 0 24px; }
+.view-inner-tab { padding: 10px 16px; font-size: 12px; font-weight: 600; color: #80879A; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+.view-inner-tab.active { color: #7C3AED; border-bottom-color: #7C3AED; }
+
+/* misc */
+.info-banner { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #1E40AF; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px; }
+.info-banner i { color: #2563EB; margin-top: 1px; }
+.warn-banner { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #92400E; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px; }
+.warn-banner i { color: #D97706; margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<!-- ── Demo Banner ── -->
+<div id="demo-banner">
+  <span class="banner-label">Prototype</span>
+  <div class="demo-sep"></div>
+  <div class="banner-group">
+    <span class="banner-group-label">Currency:</span>
+    <button class="demo-btn" id="btn-usd" onclick="setCurrency('USD')">🇺🇸 USD</button>
+    <button class="demo-btn active" id="btn-cad" onclick="setCurrency('CAD')">🇨🇦 CAD</button>
+  </div>
+  <div class="demo-sep"></div>
+  <div class="banner-group">
+    <span class="banner-group-label">Toggle:</span>
+    <button class="demo-btn" id="btn-tog-off" onclick="setTaxToggle(false)">Tax # OFF</button>
+    <button class="demo-btn" id="btn-tog-on" onclick="setTaxToggle(true)">Tax # ON</button>
+  </div>
+  <div class="demo-sep"></div>
+  <div class="banner-group">
+    <span class="banner-group-label">View:</span>
+    <button class="demo-btn active" id="nav-settings" onclick="showView('settings')">Company Settings</button>
+    <button class="demo-btn" id="nav-inv-job" onclick="showView('inv-job')">Invoice (Job)</button>
+    <button class="demo-btn" id="nav-inv-manual" onclick="showView('inv-manual')">Invoice (Manual)</button>
+    <button class="demo-btn" id="nav-portal-job" onclick="showView('portal-job')">Portal (Job)</button>
+    <button class="demo-btn" id="nav-portal-job-pdf" onclick="showView('portal-job-pdf')">Portal PDF (Job)</button>
+    <button class="demo-btn" id="nav-portal-manual" onclick="showView('portal-manual')">Portal (Manual)</button>
+    <button class="demo-btn" id="nav-portal-manual-pdf" onclick="showView('portal-manual-pdf')">Portal PDF (Manual)</button>
+  </div>
+  <button class="br-toggle-btn" id="br-btn" onclick="toggleBR()">BR: OFF</button>
+</div>
+
+<!-- ── App Shell ── -->
+<div id="app-shell">
+
+  <!-- Sidebar (hidden in portal/pdf views) -->
+  <nav class="sidebar" id="main-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">D</div>
+      <div class="sidebar-logo-text">dripjobs</div>
+    </div>
+    <div class="sidebar-company">The Nest</div>
+    <div class="sidebar-section-label">Sales</div>
+    <a class="sidebar-item" href="#"><i class="fa fa-user"></i> Contacts</a>
+    <a class="sidebar-item" href="#"><i class="fa fa-list"></i> Sales List</a>
+    <div class="sidebar-section-label">Jobs</div>
+    <a class="sidebar-item" href="#"><i class="fa fa-briefcase"></i> Jobs List</a>
+    <div class="sidebar-section-label">Documents</div>
+    <a class="sidebar-item" id="sidebar-invoices" href="#"><i class="fa fa-file-invoice"></i> Invoices</a>
+    <a class="sidebar-item" href="#"><i class="fa fa-file-lines"></i> Proposals</a>
+    <div class="sidebar-section-label">Settings</div>
+    <a class="sidebar-item" id="sidebar-settings" href="#"><i class="fa fa-building"></i> Company Settings</a>
+    <a class="sidebar-item" href="#"><i class="fa fa-users"></i> Employees</a>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════
+       VIEW 1: Company Settings
+  ════════════════════════════════════════════ -->
+  <div class="main-content view active" id="view-settings">
+    <div class="settings-tabs">
+      <div class="settings-tab active">Company Information</div>
+      <div class="settings-tab">Brand</div>
+      <div class="settings-tab">Email Settings</div>
+      <div class="settings-tab">App Settings</div>
+      <div class="settings-tab">Calendar</div>
+      <div class="settings-tab">Templates</div>
+      <div class="settings-tab">Notifications</div>
+      <div class="settings-tab">Payments</div>
+      <div class="settings-tab">Integrations</div>
+      <div class="settings-tab">Customer Portal</div>
+      <div class="settings-tab">Add-Ons</div>
+    </div>
+    <div class="page-body" id="settings-page">
+      <!-- Account Status -->
+      <div class="settings-section">
+        <h4 class="settings-section-title">Account Status</h4>
+        <div class="account-status-row">
+          <div class="account-meta"><span class="account-meta-label">Account</span><span class="account-meta-value">#11265</span></div>
+          <div class="account-meta"><span class="account-meta-label">Plan</span><span class="account-meta-value">DripJobs Advanced — $147/mo</span></div>
+        </div>
+        <div class="billing-alert"><i class="fa fa-calendar-alt"></i><div class="billing-alert-text"><strong>Next Billing Date</strong>July 14, 2026</div></div>
+        <div class="coupon-alert"><i class="fa fa-tag"></i><div class="coupon-alert-text"><strong>Coupon Applied (PARTNER8322)</strong>Gives a 100% lifetime discount (automatically applied each billing cycle). Applied on June 14, 2026 <span class="badge-active">Active</span></div></div>
+      </div>
+      <!-- Company Details -->
+      <div class="settings-section">
+        <h4 class="settings-section-title">Company Details</h4>
+        <div class="settings-grid">
+          <div class="settings-field settings-field--half"><label class="settings-field-label">Company Name *</label><input class="settings-field-input" type="text" value="Sparrow's Nest Painting"></div>
+          <div class="settings-field"><label class="settings-field-label">Short Name *</label><input class="settings-field-input" type="text" value="The Nest"></div>
+          <div class="settings-field"><label class="settings-field-label">Business Type</label><div class="select-wrapper"><select class="settings-field-input"><option>Painting</option></select></div></div>
+          <div class="settings-field settings-field--half"><label class="settings-field-label">Time Zone *</label><div class="select-wrapper"><select class="settings-field-input"><option>Eastern Standard Time</option></select></div></div>
+          <div class="settings-field"><label class="settings-field-label">License Number</label><input class="settings-field-input" type="text" value="L987616"></div>
+          <div class="settings-field"><label class="settings-field-label">Phone</label><input class="settings-field-input" type="text" value="(555) 555-5555"></div>
+          <div class="settings-field settings-field--compact"><label class="settings-field-label">Tax Rate</label><div class="settings-field-group"><input class="settings-field-input" type="text" value="9.100"><span class="settings-field-group-suffix">%</span></div></div>
+        </div>
+      </div>
+      <!-- TAX INFORMATION — NEW -->
+      <div class="settings-section br-annotatable" id="tax-info-section">
+        <span class="br-chip">BR 1–2</span>
+        <h4 class="settings-section-title">Tax Information <span class="new-section-badge"><i class="fa fa-plus" style="font-size:8px;"></i> New</span></h4>
+        <div class="settings-grid">
+          <div class="settings-field settings-field--half br-annotatable" id="tax-reg-field-wrap">
+            <span class="br-chip" id="tax-reg-br-chip">BR 2–3</span>
+            <label class="settings-field-label" id="tax-reg-label">GST/HST Registration Number</label>
+            <input class="settings-field-input" type="text" id="tax-reg-input" value="">
+          </div>
+        </div>
+        <div class="helper-box" style="margin-top:16px; max-width:560px;">
+          <div class="helper-box-icon"><i class="fa fa-info"></i></div>
+          <div class="helper-box-text" id="tax-reg-helper-text">Enter your CRA-issued GST/HST registration number. Required for Canadian businesses collecting HST/GST.</div>
+        </div>
+        <div style="margin-top:24px; padding-top:18px; border-top:1px solid #DAD8E3;" class="br-annotatable">
+          <span class="br-chip" style="top:-18px; right:0;">BR 4–8</span>
+          <div style="font-size:11px; font-weight:700; color:#80879A; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:12px;">Invoice Display Options</div>
+          <div class="toggle-row">
+            <label class="toggle-switch" id="show-tax-toggle" onclick="toggleShowTax()">
+              <div class="toggle-track"><div class="toggle-thumb"></div></div>
+            </label>
+            <div class="toggle-content">
+              <div class="toggle-label">Show tax registration number on invoices <span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-pop">Applies to all invoice types including deposit invoices and Customer Portal views.</span></span></div>
+              <div class="toggle-helper">Automatically include your tax registration number on every invoice.</div>
+            </div>
+          </div>
+          <div id="invoice-preview-hint" style="display:none; margin-top:12px;">
+            <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px; padding:10px 14px; display:flex; gap:10px; font-size:12px; color:#1E40AF;">
+              <i class="fa fa-file-invoice" style="color:#2563EB; margin-top:1px;"></i>
+              <div>The label <strong id="invoice-label-preview">"GST/HST #:"</strong> and your registration number will appear in the company information block at the top of every invoice PDF.</div>
+            </div>
+          </div>
+        </div>
+        <div id="empty-field-warn" style="display:none; margin-top:10px;">
+          <div class="billing-alert"><i class="fa fa-triangle-exclamation"></i><div class="billing-alert-text"><strong>No registration number entered</strong>The toggle is on, but no number has been entered. Invoices will render as if the toggle is off.</div></div>
+        </div>
+      </div>
+      <!-- Addresses -->
+      <div class="settings-section">
+        <h4 class="settings-section-title">Addresses</h4>
+        <p class="settings-section-subtitle">Where your business is located and where invoices are billed.</p>
+        <label class="checkbox-row"><input type="checkbox" checked> Billing same as physical</label>
+        <div style="font-size:11px; font-weight:700; color:#80879A; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:12px;">Physical Address</div>
+        <div class="settings-grid">
+          <div class="settings-field settings-field--full"><label class="settings-field-label">Company Address</label><input class="settings-field-input" type="text" value="1234 Reynolds Rd"></div>
+          <div class="settings-field settings-field--half"><label class="settings-field-label">City</label><input class="settings-field-input" type="text" value="Lakeland"></div>
+          <div class="settings-field"><label class="settings-field-label">State</label><input class="settings-field-input" type="text" value="GA"></div>
+          <div class="settings-field"><label class="settings-field-label">Zip</label><input class="settings-field-input" type="text" value="33801"></div>
+        </div>
+      </div>
+      <div class="save-bar">
+        <button class="btn-save" onclick="handleSave()">Save</button>
+        <button class="btn-cancel">Cancel — Return to Dashboard</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       VIEW 2: Invoice — Job-Based (User View)
+  ════════════════════════════════════════════ -->
+  <div class="main-content view" id="view-inv-job">
+    <div class="inv-header">
+      <div class="inv-title-row">
+        <span class="inv-title">Invoice #297803</span>
+        <span class="badge-open">Open</span>
+        <button class="btn-outline-inv" style="padding:5px 8px;"><i class="fa fa-download"></i></button>
+      </div>
+      <div class="inv-actions">
+        <button class="btn-primary-inv"><i class="fa fa-paper-plane"></i> Send Invoice</button>
+        <button class="btn-outline-inv">Receive Payment</button>
+        <button class="btn-outline-inv">More Actions <i class="fa fa-chevron-down"></i></button>
+      </div>
+    </div>
+    <div class="inv-meta-card" id="inv-job-meta-card">
+      <div class="inv-meta-client">
+        <div style="font-size:10px; font-weight:600; color:#80879A; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Client</div>
+        <div class="inv-meta-client-name">Jesus Rubio</div>
+        <div class="inv-meta-client-detail"><i class="fa fa-location-dot"></i> 1 Address, Minneapolis, MN, 55407</div>
+        <div class="inv-meta-client-detail"><i class="fa fa-envelope"></i> jesus.rubio@dripjobs.com</div>
+        <div class="inv-meta-client-detail"><i class="fa fa-mobile"></i> (444) 444-4444</div>
+      </div>
+      <div>
+        <div class="inv-meta-label">Invoice #</div><div class="inv-meta-val purple">297803</div>
+        <div class="inv-meta-label" style="margin-top:10px;">Date Invoiced</div><div class="inv-meta-val purple">8/3/2025</div>
+      </div>
+      <div>
+        <div class="inv-meta-label">Amount</div><div class="inv-meta-val">$2,022.83</div>
+        <div class="inv-meta-label" style="margin-top:10px;">Due On</div><div class="inv-meta-val purple">8/3/2025</div>
+      </div>
+      <div>
+        <div class="inv-meta-label">Balance</div><div class="inv-meta-val">$2,022.83</div>
+        <div class="inv-meta-label" style="margin-top:10px;">Salesperson</div><div class="inv-meta-val purple">Jeremy Harrison</div>
+      </div>
+      <div id="inv-job-tax-inline" style="display:none; grid-column:1/-1; border-top:1px solid #DAD8E3; padding-top:10px;">
+        <div class="inv-meta-label">Tax Registration</div>
+        <div class="inv-meta-val"><span id="inv-job-tax-label"></span>&nbsp;<span id="inv-job-tax-val"></span></div>
+      </div>
+    </div>
+    <div class="inv-tabs">
+      <div class="inv-tab active"><i class="fa fa-file-invoice"></i> Invoice</div>
+      <div class="inv-tab"><i class="fa fa-gear"></i> Settings</div>
+      <div class="inv-tab"><i class="fa fa-paperclip"></i> Attachments</div>
+      <div class="inv-tab"><i class="fa fa-note-sticky"></i> Notes</div>
+    </div>
+    <div class="inv-body">
+      <div class="inv-section-title">Invoice Items <button class="btn-add-item"><i class="fa fa-plus"></i> Add Item</button></div>
+      <div class="inv-line-item">
+        <div><div class="inv-line-col-label">Item</div><div class="inv-line-item-name">Master Bedroom</div></div>
+        <div><div class="inv-line-col-label">Qty</div><div class="inv-line-val">1.00</div></div>
+        <div><div class="inv-line-col-label">Price</div><div class="inv-line-val">$640.79</div></div>
+        <div><div class="inv-line-col-label">Tax</div><div class="inv-line-val">$32.04</div></div>
+        <div><div class="inv-line-col-label">Total</div><div class="inv-line-val">$672.83</div></div>
+      </div>
+      <div class="inv-line-item">
+        <div><div class="inv-line-col-label">Item</div><div class="inv-line-item-name">Interior Painting – Walls <span class="inv-line-co-badge">Change order</span></div></div>
+        <div><div class="inv-line-col-label">Qty</div><div class="inv-line-val">1.00</div></div>
+        <div><div class="inv-line-col-label">Price</div><div class="inv-line-val">$1,000.00 / Ea</div></div>
+        <div><div class="inv-line-col-label">Tax</div><div class="inv-line-val">$0.00</div></div>
+        <div><div class="inv-line-col-label">Total</div><div class="inv-line-val">$1,000.00</div></div>
+      </div>
+      <div class="inv-line-item">
+        <div><div class="inv-line-col-label">Item</div><div class="inv-line-item-name">Cabinet Refinishing – Drawers</div></div>
+        <div><div class="inv-line-col-label">Qty</div><div class="inv-line-val">1.00</div></div>
+        <div><div class="inv-line-col-label">Price</div><div class="inv-line-val">$350.00 / Ea</div></div>
+        <div><div class="inv-line-col-label">Tax</div><div class="inv-line-val">$0.00</div></div>
+        <div><div class="inv-line-col-label">Total</div><div class="inv-line-val">$350.00</div></div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; margin-top:12px;">
+        <div class="inv-totals">
+          <div class="inv-total-row"><span>Subtotal</span><span>$1,990.79</span></div>
+          <div class="inv-total-row tax"><span>Sales Tax</span><span>$32.04</span></div>
+          <div class="inv-total-row total"><span>Total</span><span>$2,022.83</span></div>
+          <div class="inv-total-row balance"><span>Balance</span><span>$2,022.83</span></div>
+        </div>
+      </div>
+      <div class="inv-payments">
+        <div class="inv-payments-title">Payments <button class="btn-outline-inv">Receive Payment</button></div>
+        <div class="inv-no-payments">No payments have been made</div>
+      </div>
+    </div>
+    <div class="inv-bottom-actions">
+      <button class="btn-outline-inv">Sync with QuickBooks</button>
+      <button class="btn-outline-inv">Void Invoice</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       VIEW 3: Invoice — Manual (User View)
+  ════════════════════════════════════════════ -->
+  <div class="main-content view" id="view-inv-manual">
+    <div class="inv-header">
+      <div class="inv-title-row">
+        <span class="inv-title">Invoice #469276</span>
+        <span class="badge-open">Open</span>
+        <button class="btn-outline-inv" style="padding:5px 8px;"><i class="fa fa-download"></i></button>
+      </div>
+      <div class="inv-actions">
+        <button class="btn-primary-inv"><i class="fa fa-paper-plane"></i> Send Invoice</button>
+        <button class="btn-outline-inv">Receive Payment</button>
+        <button class="btn-outline-inv">More Actions <i class="fa fa-chevron-down"></i></button>
+      </div>
+    </div>
+    <div class="inv-meta-card">
+      <div class="inv-meta-client">
+        <div style="font-size:10px; font-weight:600; color:#80879A; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">Client</div>
+        <div class="inv-meta-client-name">Dripjobs Harrison</div>
+        <div class="inv-meta-client-detail"><i class="fa fa-location-dot"></i> 221 N Nashville Ave, Hernando, FL, 34442</div>
+        <div class="inv-meta-client-detail"><i class="fa fa-envelope"></i> jeremy@driopjobs.com</div>
+        <div class="inv-meta-client-detail"><i class="fa fa-mobile"></i> (727) 250-8869</div>
+      </div>
+      <div>
+        <div class="inv-meta-label">Invoice #</div><div class="inv-meta-val purple">469276</div>
+        <div class="inv-meta-label" style="margin-top:10px;">Date Invoiced</div><div class="inv-meta-val purple">6/26/2026</div>
+      </div>
+      <div>
+        <div class="inv-meta-label">Amount</div><div class="inv-meta-val">$545.50</div>
+        <div class="inv-meta-label" style="margin-top:10px;">Due On</div><div class="inv-meta-val purple">(Add Due Date)</div>
+      </div>
+      <div>
+        <div class="inv-meta-label">Balance</div><div class="inv-meta-val">$545.50</div>
+        <div class="inv-meta-label" style="margin-top:10px;">Salesperson</div><div class="inv-meta-val purple">Jeremy Harrison</div>
+      </div>
+      <div id="inv-manual-tax-inline" style="display:none; grid-column:1/-1; border-top:1px solid #DAD8E3; padding-top:10px;">
+        <div class="inv-meta-label">Tax Registration</div>
+        <div class="inv-meta-val"><span id="inv-manual-tax-label"></span>&nbsp;<span id="inv-manual-tax-val"></span></div>
+      </div>
+    </div>
+    <div class="inv-tabs">
+      <div class="inv-tab active"><i class="fa fa-file-invoice"></i> Invoice</div>
+      <div class="inv-tab"><i class="fa fa-gear"></i> Settings</div>
+      <div class="inv-tab"><i class="fa fa-paperclip"></i> Attachments</div>
+      <div class="inv-tab"><i class="fa fa-note-sticky"></i> Notes</div>
+    </div>
+    <div class="inv-body">
+      <div class="inv-section-title">Invoice Items <button class="btn-add-item"><i class="fa fa-plus"></i> Add Item</button></div>
+      <div class="inv-line-item">
+        <div><div class="inv-line-col-label">Item</div><div class="inv-line-item-name">Extensive Prep &amp; Repair</div></div>
+        <div><div class="inv-line-col-label">Qty</div><div class="inv-line-val">1.00</div></div>
+        <div><div class="inv-line-col-label">Price</div><div class="inv-line-val">$500.00 / Ea</div></div>
+        <div><div class="inv-line-col-label">Tax</div><div class="inv-line-val">$45.50</div></div>
+        <div><div class="inv-line-col-label">Total</div><div class="inv-line-val">$545.50</div></div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; margin-top:12px;">
+        <div class="inv-totals">
+          <div class="inv-total-row"><span>Subtotal</span><span>$500.00</span></div>
+          <div class="inv-total-row tax"><span>Sales Tax</span><span>$45.50</span></div>
+          <div class="inv-total-row total"><span>Total</span><span>$545.50</span></div>
+          <div class="inv-total-row balance"><span>Balance</span><span>$545.50</span></div>
+        </div>
+      </div>
+      <div class="inv-payments">
+        <div class="inv-payments-title">Payments <button class="btn-outline-inv">Receive Payment</button></div>
+        <div class="inv-no-payments">No payments have been made</div>
+      </div>
+    </div>
+    <div class="inv-bottom-actions">
+      <button class="btn-outline-inv">Sync with QuickBooks</button>
+      <button class="btn-outline-inv">Void Invoice</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       VIEW 4: Customer Portal — Job Invoice
+  ════════════════════════════════════════════ -->
+  <div class="main-content view" id="view-portal-job" style="padding:0;">
+    <div class="portal-shell">
+      <div class="portal-header">
+        <div class="portal-header-logo">dripjobs</div>
+        <div class="portal-header-company">Sparrow's Nest Painting</div>
+      </div>
+      <div class="portal-body">
+        <div class="portal-inv-card">
+          <div class="portal-inv-title">Invoice #297803 <span class="badge-open">Open</span></div>
+          <!-- Company block with tax reg -->
+          <div class="portal-company-block br-annotatable" id="portal-job-company-block">
+            <span class="br-chip">BR 6</span>
+            <strong>Sparrow's Nest Painting</strong>
+            License# L987616<br>
+            1234 Reynolds Rd, Lakeland, GA 33801<br>
+            Phone: (555) 555-5555
+            <div class="portal-tax-reg-display" id="portal-job-tax-reg">
+              <span id="portal-job-tax-label" style="font-weight:600;"></span> <span id="portal-job-tax-val"></span>
+            </div>
+          </div>
+          <div class="portal-meta-grid">
+            <div><div class="portal-meta-label">Invoice #</div><div class="portal-meta-val purple">297803</div></div>
+            <div><div class="portal-meta-label">Invoice Date</div><div class="portal-meta-val">8/3/2025</div></div>
+            <div><div class="portal-meta-label">Balance Due</div><div class="portal-meta-val">$2,022.83</div></div>
+          </div>
+          <div class="portal-items-header"><span>Item</span><span>Qty</span><span>Price</span><span>Total</span></div>
+          <div class="portal-item-row"><div class="portal-item-name">Master Bedroom</div><div>1.00</div><div>$640.79</div><div>$672.83</div></div>
+          <div class="portal-item-row"><div class="portal-item-name">Interior Painting – Walls</div><div>1.00</div><div>$1,000.00</div><div>$1,000.00</div></div>
+          <div class="portal-item-row"><div class="portal-item-name">Cabinet Refinishing – Drawers</div><div>1.00</div><div>$350.00</div><div>$350.00</div></div>
+          <div class="portal-totals">
+            <div class="portal-totals-inner">
+              <div class="portal-total-row"><span>Subtotal</span><span>$1,990.79</span></div>
+              <div class="portal-total-row tax"><span>Sales Tax</span><span>$32.04</span></div>
+              <div class="portal-total-row bold"><span>Balance Due</span><span>$2,022.83</span></div>
+            </div>
+          </div>
+          <button class="portal-pay-btn">Pay $2,022.83</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       VIEW 5: Customer Portal — Job Invoice PDF
+  ════════════════════════════════════════════ -->
+  <div class="main-content view" id="view-portal-job-pdf" style="padding:0;">
+    <div class="pdf-shell">
+      <div class="pdf-paper">
+        <div class="pdf-title">Invoice</div>
+        <div class="pdf-top">
+          <div class="pdf-client-block">
+            <strong>Jesus Rubio</strong><br>
+            jesus.rubio@dripjobs.com<br>
+            (444) 444-4444<br>
+            1 Address<br>
+            Minneapolis, MN 55407
+          </div>
+          <table class="pdf-meta-table">
+            <tr><td>Invoice #</td><td>297803</td></tr>
+            <tr><td>Invoice Date</td><td>8/3/2025</td></tr>
+            <tr><td>Due Date</td><td>8/3/2025</td></tr>
+            <tr><td>Balance Due</td><td>$2,022.83</td></tr>
+            <tr><td>Remit Payment To</td><td>1234 Reynolds Rd<br>Lakeland, GA 33801</td></tr>
+          </table>
+        </div>
+        <div class="pdf-company-block br-annotatable" id="pdf-job-company">
+          <span class="br-chip">BR 6</span>
+          <div class="pdf-logo-placeholder"><span class="logo-icon">🪣</span><span>Sparrow's<br>Nest</span></div>
+          <strong>Sparrow's Nest Painting</strong>
+          License# L987616<br>
+          1234 Reynolds Rd<br>
+          Lakeland, GA 33801<br>
+          Phone: (555) 555-5555
+          <div class="pdf-company-tax" id="pdf-job-tax-line">
+            <span class="pdf-company-tax-line" id="pdf-job-tax-text"></span>
+          </div>
+        </div>
+        <div class="pdf-items-header job-invoice">
+          <span>Product / Service</span><span>Quantity</span><span>Price</span><span>Subtotal</span><span>Tax</span>
+        </div>
+        <div class="pdf-item-row job-invoice">
+          <div><div class="pdf-item-name">Master Bedroom</div><div class="pdf-item-desc">Trim: 1 coat · Walls: 2 coats</div></div>
+          <div>1.00</div><div>$640.79</div><div>$640.79</div><div>$32.04</div>
+        </div>
+        <div class="pdf-item-row job-invoice">
+          <div><div class="pdf-item-name">Cabinet Refinishing – Drawers</div><div class="pdf-item-desc">Preparation, on-site application, door &amp; drawer pickup/delivery.</div></div>
+          <div>1.00</div><div>$350.00 / Ea</div><div>$350.00</div><div>$0.00</div>
+        </div>
+        <div class="pdf-item-row job-invoice">
+          <div><div class="pdf-item-name">Interior Painting – Walls (Change Order)</div><div class="pdf-item-desc">Living Room, Dining Room, Kitchen — Sherwin Williams SuperPaint Satin</div></div>
+          <div>1.00</div><div>$1,000.00 / Ea</div><div>$1,000.00</div><div>$0.00</div>
+        </div>
+        <div class="pdf-subtotals">
+          <div class="pdf-subtotal-row"><span>SubTotal</span><span>$1,990.79</span></div>
+          <div class="pdf-subtotal-row"><span>Tax</span><span>$32.04</span></div>
+          <div class="pdf-subtotal-row bold"><span>Total</span><span>$2,022.83</span></div>
+        </div>
+        <div class="pdf-footer-note">
+          <strong>Service Address:</strong> 1 Address, Minneapolis, MN, 55407<br><br>
+          <strong>Terms and Conditions:</strong> Invoice must be paid in full within 90 days. Invoices not paid in full by 90 days will be sent to collections which may result in a credit score decrease.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       VIEW 6: Customer Portal — Manual Invoice
+  ════════════════════════════════════════════ -->
+  <div class="main-content view" id="view-portal-manual" style="padding:0;">
+    <div class="portal-shell">
+      <div class="portal-header">
+        <div class="portal-header-logo">dripjobs</div>
+        <div class="portal-header-company">Sparrow's Nest Painting</div>
+      </div>
+      <div class="portal-body">
+        <div class="portal-inv-card">
+          <div class="portal-inv-title">Invoice #469276 <span class="badge-open">Open</span></div>
+          <div class="portal-company-block br-annotatable" id="portal-manual-company-block">
+            <span class="br-chip">BR 6</span>
+            <strong>Sparrow's Nest Painting</strong>
+            License# L987616<br>
+            1234 Reynolds Rd, Lakeland, GA 33801<br>
+            Phone: (555) 555-5555
+            <div class="portal-tax-reg-display" id="portal-manual-tax-reg">
+              <span id="portal-manual-tax-label" style="font-weight:600;"></span> <span id="portal-manual-tax-val"></span>
+            </div>
+          </div>
+          <div class="portal-meta-grid">
+            <div><div class="portal-meta-label">Invoice #</div><div class="portal-meta-val purple">469276</div></div>
+            <div><div class="portal-meta-label">Invoice Date</div><div class="portal-meta-val">6/26/2026</div></div>
+            <div><div class="portal-meta-label">Balance Due</div><div class="portal-meta-val">$545.50</div></div>
+          </div>
+          <div class="portal-items-header"><span>Item</span><span>Qty</span><span>Price</span><span>Total</span></div>
+          <div class="portal-item-row"><div class="portal-item-name">Extensive Prep &amp; Repair</div><div>1.00</div><div>$500.00</div><div>$545.50</div></div>
+          <div class="portal-totals">
+            <div class="portal-totals-inner">
+              <div class="portal-total-row"><span>Subtotal</span><span>$500.00</span></div>
+              <div class="portal-total-row tax"><span>Sales Tax</span><span>$45.50</span></div>
+              <div class="portal-total-row bold"><span>Balance Due</span><span>$545.50</span></div>
+            </div>
+          </div>
+          <button class="portal-pay-btn">Pay $545.50</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       VIEW 7: Customer Portal — Manual Invoice PDF
+  ════════════════════════════════════════════ -->
+  <div class="main-content view" id="view-portal-manual-pdf" style="padding:0;">
+    <div class="pdf-shell">
+      <div class="pdf-paper">
+        <div class="pdf-title">Invoice</div>
+        <div class="pdf-top">
+          <div class="pdf-client-block">
+            <strong>Harrison Inc.</strong><br>
+            <strong>Dripjobs Harrison</strong><br>
+            jeremy@driopjobs.com<br>
+            (727) 250-8869<br>
+            221 N Nashville Ave<br>
+            Hernando, FL 34442
+          </div>
+          <table class="pdf-meta-table">
+            <tr><td>Invoice #</td><td>469276</td></tr>
+            <tr><td>Invoice Date</td><td>6/26/2026</td></tr>
+            <tr><td>Balance Due</td><td>$545.50</td></tr>
+            <tr><td>Remit Payment To</td><td>1234 Reynolds Rd<br>Lakeland, GA 33801</td></tr>
+          </table>
+        </div>
+        <div class="pdf-company-block br-annotatable" id="pdf-manual-company">
+          <span class="br-chip">BR 6</span>
+          <div class="pdf-logo-placeholder"><span class="logo-icon">🪣</span><span>Sparrow's<br>Nest</span></div>
+          <strong>Sparrow's Nest Painting</strong>
+          License# L987616<br>
+          1234 Reynolds Rd<br>
+          Lakeland, GA 33801<br>
+          Phone: (555) 555-5555
+          <div class="pdf-company-tax" id="pdf-manual-tax-line">
+            <span class="pdf-company-tax-line" id="pdf-manual-tax-text"></span>
+          </div>
+        </div>
+        <div class="pdf-items-header manual">
+          <span>Product / Service</span><span>Quantity</span><span>Price</span><span>Subtotal</span><span>Tax</span>
+        </div>
+        <div class="pdf-item-row manual">
+          <div>
+            <div class="pdf-item-name">Extensive Prep &amp; Repair</div>
+            <div class="pdf-item-desc">Extensive Prep &amp; Repair — Premium Service. Deeper sanding, patching, drywall repairs, texture blending, and serious surface restoration.</div>
+          </div>
+          <div>1.00</div><div>$500.00 / Ea</div><div>$500.00</div><div>$45.50</div>
+        </div>
+        <div class="pdf-subtotals">
+          <div class="pdf-subtotal-row"><span>SubTotal</span><span>$500.00</span></div>
+          <div class="pdf-subtotal-row"><span>Tax</span><span>$45.50</span></div>
+          <div class="pdf-subtotal-row bold"><span>Total</span><span>$545.50</span></div>
+        </div>
+        <div class="pdf-footer-note">
+          <strong>Service Address:</strong> 221 N Nashville Ave, Hernando, FL, 34442<br><br>
+          <strong>Terms and Conditions:</strong> Invoice must be paid in full within 90 days. Invoices not paid in full by 90 days will be sent to collections which may result in a credit score decrease.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app-shell -->
+
+<!-- Save Toast -->
+<div id="save-toast" style="display:none; position:fixed; bottom:24px; right:24px; background:#166534; color:#fff; padding:12px 20px; border-radius:8px; font-size:13px; font-weight:600; box-shadow:0 4px 16px rgba(0,0,0,0.2); z-index:9000;">
+  <i class="fa fa-check" style="margin-right:8px;"></i> Settings saved successfully.
+</div>
+
+<script>
+var currentCurrency = 'CAD';
+var showTaxOn = false;
+var brOn = false;
+// Demo reg numbers per currency
+var TAX_NUMS = { CAD: '89147 6523 RT0001', USD: '12-3456789' };
+
+function getCurLabel() {
+  return currentCurrency === 'CAD' ? 'GST/HST #:' : 'Tax Reg #:';
+}
+function getRegNum() {
+  var inp = document.getElementById('tax-reg-input');
+  var val = inp ? inp.value.trim() : '';
+  return val || TAX_NUMS[currentCurrency];
+}
+
+/* ── View navigation ── */
+var VIEW_IDS = ['settings','inv-job','inv-manual','portal-job','portal-job-pdf','portal-manual','portal-manual-pdf'];
+function showView(v) {
+  VIEW_IDS.forEach(function(id) {
+    var el = document.getElementById('view-' + id);
+    var btn = document.getElementById('nav-' + id);
+    if(el) el.classList.toggle('active', id === v);
+    if(btn) btn.classList.toggle('active', id === v);
+  });
+  var sidebar = document.getElementById('main-sidebar');
+  var isPortalOrPdf = (v === 'portal-job' || v === 'portal-job-pdf' || v === 'portal-manual' || v === 'portal-manual-pdf');
+  if(sidebar) sidebar.style.display = isPortalOrPdf ? 'none' : '';
+
+  // sidebar active item
+  var sSet = document.getElementById('sidebar-settings');
+  var sInv = document.getElementById('sidebar-invoices');
+  if(sSet) sSet.classList.toggle('active', v === 'settings');
+  if(sInv) sInv.classList.toggle('active', v === 'inv-job' || v === 'inv-manual');
+}
+
+/* ── Currency ── */
+function setCurrency(cur) {
+  currentCurrency = cur;
+  document.getElementById('btn-usd').classList.toggle('active', cur === 'USD');
+  document.getElementById('btn-cad').classList.toggle('active', cur === 'CAD');
+  applyTaxLabels();
+  renderAllTaxLines();
+}
+
+function applyTaxLabels() {
+  var label = document.getElementById('tax-reg-label');
+  var helper = document.getElementById('tax-reg-helper-text');
+  var previewLabel = document.getElementById('invoice-label-preview');
+  var chip = document.getElementById('tax-reg-br-chip');
+  if(currentCurrency === 'CAD') {
+    if(label) label.textContent = 'GST/HST Registration Number';
+    if(helper) helper.textContent = 'Enter your CRA-issued GST/HST registration number. Required for Canadian businesses collecting HST/GST.';
+    if(previewLabel) previewLabel.innerHTML = '"GST/HST #:"';
+    if(chip) chip.textContent = 'BR 2 (CAD)';
+  } else {
+    if(label) label.textContent = 'Tax Registration Number';
+    if(helper) helper.textContent = 'Enter your business tax registration number to display it on invoices (e.g., VAT number, GST number, state tax permit).';
+    if(previewLabel) previewLabel.innerHTML = '"Tax Reg #:"';
+    if(chip) chip.textContent = 'BR 2 (USD)';
+  }
+  updateSettingsHint();
+}
+
+/* ── Tax toggle ── */
+function setTaxToggle(val) {
+  showTaxOn = val;
+  document.getElementById('btn-tog-off').classList.toggle('active', !val);
+  document.getElementById('btn-tog-on').classList.toggle('active', val);
+  var toggle = document.getElementById('show-tax-toggle');
+  if(toggle) toggle.classList.toggle('on', val);
+  updateSettingsHint();
+  renderAllTaxLines();
+}
+
+function toggleShowTax() {
+  setTaxToggle(!showTaxOn);
+}
+
+function updateSettingsHint() {
+  var val = document.getElementById('tax-reg-input') ? document.getElementById('tax-reg-input').value.trim() : '';
+  var hint = document.getElementById('invoice-preview-hint');
+  var warn = document.getElementById('empty-field-warn');
+  if(!hint || !warn) return;
+  if(showTaxOn && val) {
+    hint.style.display = 'block'; warn.style.display = 'none';
+  } else if(showTaxOn && !val) {
+    hint.style.display = 'none'; warn.style.display = 'block';
+  } else {
+    hint.style.display = 'none'; warn.style.display = 'none';
+  }
+}
+
+/* ── Render tax number in all invoice/portal/pdf views ── */
+function renderAllTaxLines() {
+  var regNum = document.getElementById('tax-reg-input') ? document.getElementById('tax-reg-input').value.trim() : '';
+  // Use demo value if field is empty (so reviewers can see the effect without typing)
+  var displayNum = regNum || TAX_NUMS[currentCurrency];
+  var label = getCurLabel();
+  var show = showTaxOn; // BR 7: hidden if toggle off; BR 8: hidden if toggle on but no value
+
+  // Invoice user view — job
+  var ijr = document.getElementById('inv-job-tax-inline');
+  var ijtl = document.getElementById('inv-job-tax-label');
+  var ijtv = document.getElementById('inv-job-tax-val');
+  if(ijr) { ijr.style.display = show ? 'block' : 'none'; if(ijtl) ijtl.textContent = label; if(ijtv) ijtv.textContent = displayNum; }
+
+  // Invoice user view — manual
+  var imr = document.getElementById('inv-manual-tax-inline');
+  var imtl = document.getElementById('inv-manual-tax-label');
+  var imtv = document.getElementById('inv-manual-tax-val');
+  if(imr) { imr.style.display = show ? 'block' : 'none'; if(imtl) imtl.textContent = label; if(imtv) imtv.textContent = displayNum; }
+
+  // Portal job
+  var pjtr = document.getElementById('portal-job-tax-reg');
+  var pjtl = document.getElementById('portal-job-tax-label');
+  var pjtv = document.getElementById('portal-job-tax-val');
+  if(pjtr) { pjtr.classList.toggle('hidden', !show); if(pjtl) pjtl.textContent = label; if(pjtv) pjtv.textContent = displayNum; }
+
+  // Portal manual
+  var pmtr = document.getElementById('portal-manual-tax-reg');
+  var pmtl = document.getElementById('portal-manual-tax-label');
+  var pmtv = document.getElementById('portal-manual-tax-val');
+  if(pmtr) { pmtr.classList.toggle('hidden', !show); if(pmtl) pmtl.textContent = label; if(pmtv) pmtv.textContent = displayNum; }
+
+  // PDF job
+  var pdfj = document.getElementById('pdf-job-tax-line');
+  var pdfjt = document.getElementById('pdf-job-tax-text');
+  if(pdfj) { pdfj.style.display = show ? '' : 'none'; if(pdfjt) pdfjt.textContent = label + ' ' + displayNum; }
+
+  // PDF manual
+  var pdfm = document.getElementById('pdf-manual-tax-line');
+  var pdfmt = document.getElementById('pdf-manual-tax-text');
+  if(pdfm) { pdfm.style.display = show ? '' : 'none'; if(pdfmt) pdfmt.textContent = label + ' ' + displayNum; }
+}
+
+/* ── BR annotations ── */
+function toggleBR() {
+  brOn = !brOn;
+  document.body.classList.toggle('br-annotations-on', brOn);
+  document.getElementById('br-btn').textContent = 'BR: ' + (brOn ? 'ON' : 'OFF');
+  document.getElementById('br-btn').classList.toggle('on', brOn);
+}
+
+/* ── Save ── */
+function handleSave() {
+  var toast = document.getElementById('save-toast');
+  toast.style.display = 'block';
+  setTimeout(function(){ toast.style.display='none'; }, 2800);
+  renderAllTaxLines();
+}
+
+/* ── Input listener ── */
+var inp = document.getElementById('tax-reg-input');
+if(inp) { inp.addEventListener('input', function(){ updateSettingsHint(); renderAllTaxLines(); }); }
+
+/* ── Init ── */
+setTaxToggle(false);
+setCurrency('CAD');
+showView('settings');
+</script>
+</body>
+</html>
