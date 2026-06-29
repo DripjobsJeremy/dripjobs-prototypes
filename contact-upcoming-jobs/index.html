@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Profile – Upcoming Jobs | DripJobs Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+  /* ============================================================
+     DEMO BANNER
+  ============================================================ */
+  #demo-banner {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 9999;
+    background: #1e1a3c;
+    color: #fff;
+    font-family: Nunito, sans-serif;
+    font-size: 13px;
+    padding: 0 16px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  #demo-banner .banner-label {
+    font-weight: 700;
+    color: #8B85EA;
+    white-space: nowrap;
+  }
+  #demo-banner .banner-sep {
+    color: #555;
+  }
+  #demo-banner button {
+    background: rgba(139,133,234,0.18);
+    border: 1px solid #8B85EA;
+    color: #d4d0f8;
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-family: Nunito, sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  #demo-banner button:hover { background: rgba(139,133,234,0.35); }
+  #demo-banner button.active { background: #8B85EA; color: #fff; }
+  #demo-banner .br-toggle { margin-left: auto; }
+
+  /* BR annotation chips */
+  .br-chip {
+    display: none;
+    position: absolute;
+    top: -9px; right: -9px;
+    background: #f97316;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 1px 7px;
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  body.br-on .br-chip { display: block; }
+  .br-anchor { position: relative; display: block; }
+
+  /* ============================================================
+     PAGE SHELL
+  ============================================================ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Nunito, sans-serif;
+    background: #f5f4fb;
+    color: #32415B;
+    padding-top: 76px;
+  }
+
+  /* ============================================================
+     TOP STATS BAR
+  ============================================================ */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    background: #fff;
+    border-bottom: 1px solid #DAD8E3;
+  }
+  .stat-cell {
+    padding: 16px 24px;
+    border-right: 1px solid #DAD8E3;
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #80879A;
+    margin-bottom: 4px;
+  }
+  .stat-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: #32415B;
+  }
+  .stat-cell.highlight { background: #f0effe; }
+  .stat-cell.highlight .stat-value { color: #5C53DC; }
+
+  /* ============================================================
+     TAB NAV
+  ============================================================ */
+  .tab-nav {
+    background: #fff;
+    border-bottom: 1px solid #DAD8E3;
+    padding: 10px 20px 0;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .tab-chip {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all .15s;
+    white-space: nowrap;
+    margin-bottom: 10px;
+  }
+  .tab-chip:nth-child(1) { background:#E8E6FA; color:#5C53DC; border-color:#D6D2F5; }
+  .tab-chip:nth-child(2) { background:#FAF0E6; color:#92400E; border-color:#f5dfc6; }
+  .tab-chip:nth-child(3) { background:#E6FAF0; color:#065f46; border-color:#c6f0dc; }
+  .tab-chip:nth-child(4) { background:#E6F3FA; color:#1E40AF; border-color:#c6dff5; }
+  .tab-chip:nth-child(5) { background:#FAF7E6; color:#78350f; border-color:#f5efc6; }
+  .tab-chip:nth-child(6) { background:#FAE6E6; color:#991B1B; border-color:#f5c6c6; }
+  .tab-chip:nth-child(7) { background:#F0FAE6; color:#365314; border-color:#d5f0c6; }
+  .tab-chip:nth-child(8) { background:#E6FAFA; color:#065f5f; border-color:#c6f0f0; }
+  .tab-chip:nth-child(9) { background:#FAEAE6; color:#7c2d12; border-color:#f0d0c6; }
+  .tab-chip:nth-child(10) { background:#EFEFF3; color:#4b5563; border-color:#dadadf; }
+  .tab-chip.active {
+    outline: 2px solid #8B85EA;
+    outline-offset: 1px;
+  }
+
+  /* ============================================================
+     CONTENT AREA
+  ============================================================ */
+  .content-area {
+    width: 100%;
+    padding: 0 0 60px;
+  }
+
+  /* Header row for tab panels */
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .panel-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #32415B;
+  }
+
+  /* ============================================================
+     UPCOMING JOBS PANEL (NEW FEATURE)
+  ============================================================ */
+  .info-panel { display: none; }
+  .info-panel.active { display: block; padding-top: 12px; }
+
+  .section-gap { height: 12px; }
+
+  /* ── New feature: Upcoming Jobs summary card ── */
+  .upcoming-jobs-card {
+    background: #fff;
+    border-radius: 0;
+    border: none;
+    border-top: 1px solid #DAD8E3;
+    border-bottom: 1px solid #DAD8E3;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .upcoming-jobs-header {
+    padding: 14px 24px;
+    border-bottom: 1px solid #f0eef8;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    background: #fff;
+  }
+  .upcoming-jobs-header:hover { background: #faf9fe; filter: none; }
+  .upcoming-jobs-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #80879A;
+  }
+  .upcoming-jobs-header-left i { font-size: 13px; color: #8B85EA; }
+  .upcoming-jobs-header-left span { color: #80879A; }
+  .upcoming-jobs-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: #80879A;
+    font-weight: 600;
+  }
+  .upcoming-jobs-header-right .collapse-chevron { color: #b0adcc; }
+
+  .job-row {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0eef8;
+    gap: 16px;
+    transition: background .12s;
+    cursor: default;
+  }
+  .job-row:last-child { border-bottom: none; }
+  .job-row:hover { background: #faf9fe; }
+
+  .job-date-block {
+    min-width: 58px;
+    text-align: center;
+    background: #f0effe;
+    border-radius: 8px;
+    padding: 6px 8px;
+    flex-shrink: 0;
+  }
+  .job-date-month {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #8B85EA;
+    letter-spacing: .06em;
+  }
+  .job-date-day {
+    font-size: 20px;
+    font-weight: 800;
+    color: #5C53DC;
+    line-height: 1.1;
+  }
+  .job-date-year {
+    font-size: 10px;
+    color: #80879A;
+    font-weight: 600;
+  }
+
+  /* Multi-day range layout */
+  .job-date-block.multi-day {
+    min-width: 110px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 7px 10px;
+  }
+  .job-date-block.multi-day .date-part {
+    flex: 1;
+    text-align: center;
+  }
+  .job-date-block.multi-day .date-range-sep {
+    font-size: 13px;
+    font-weight: 700;
+    color: #8B85EA;
+    padding: 0 5px;
+    align-self: center;
+    opacity: .6;
+  }
+  .job-date-block.multi-day .job-date-day { font-size: 17px; }
+
+  .job-info { flex: 1; min-width: 0; }
+  .job-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #32415B;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .job-meta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 3px;
+  }
+  .job-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #80879A;
+    font-weight: 600;
+  }
+  .job-meta-item i { font-size: 11px; }
+
+  .job-status-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .badge-scheduled { background: #E6F3FA; color: #1E40AF; }
+  .badge-in-progress { background: #E6FAF0; color: #065f46; }
+  .badge-upcoming { background: #FAF7E6; color: #78350f; }
+
+  .job-amount {
+    font-size: 14px;
+    font-weight: 700;
+    color: #32415B;
+    min-width: 80px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .job-action-btn {
+    background: none;
+    border: 1px solid #DAD8E3;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #5C53DC;
+    cursor: pointer;
+    transition: all .12s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-family: Nunito, sans-serif;
+  }
+  .job-action-btn:hover {
+    background: #f0effe;
+    border-color: #8B85EA;
+  }
+
+  .no-jobs-state {
+    padding: 32px 20px;
+    text-align: center;
+    color: #80879A;
+  }
+  .no-jobs-state i {
+    font-size: 28px;
+    color: #DAD8E3;
+    display: block;
+    margin-bottom: 8px;
+  }
+  .no-jobs-state p { font-size: 13px; }
+
+  /* helper text */
+  .helper-note {
+    background: #f0fafa;
+    border-left: 4px solid #0DCECE;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: #32415B;
+  }
+  .helper-note .helper-icon {
+    width: 20px;
+    height: 20px;
+    background: #0DCECE;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+    font-size: 11px;
+    margin-top: 1px;
+  }
+
+  /* ============================================================
+     EXISTING SECTIONS (Appointments tab)
+  ============================================================ */
+  .section-card {
+    background: #fff;
+    border-radius: 0;
+    border: none;
+    border-top: 1px solid #DAD8E3;
+    border-bottom: 1px solid #DAD8E3;
+    margin-bottom: 0;
+    overflow: hidden;
+  }
+  /* ── Collapse / expand ── */
+  .upcoming-jobs-header { cursor: pointer; user-select: none; }
+  .upcoming-jobs-header:hover { filter: brightness(1.06); }
+
+  .collapse-chevron {
+    transition: transform .22s ease;
+    font-size: 13px;
+    opacity: .85;
+  }
+  .collapsed .collapse-chevron { transform: rotate(-90deg); }
+
+  .collapsible-body {
+    overflow: hidden;
+    max-height: 600px;
+    transition: max-height .28s ease, opacity .22s ease;
+    opacity: 1;
+  }
+  .collapsed .collapsible-body {
+    max-height: 0;
+    opacity: 0;
+  }
+
+  /* Section card header clickable */
+  .section-card-header {
+    padding: 14px 24px;
+    border-bottom: 1px solid #f0eef8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #80879A;
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-card-header:hover { background: #faf9fe; }
+  .section-card-header i.icon-main { font-size: 13px; color: #8B85EA; }
+  .section-card-header .hdr-spacer { flex: 1; }
+  .section-card-header .collapse-chevron { color: #b0adcc; }
+  .appt-row {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f8f7fc;
+    gap: 16px;
+  }
+  .appt-row:last-child { border-bottom: none; }
+  .appt-number { font-size: 13px; font-weight: 700; color: #5C53DC; }
+  .appt-badge { background: #E6FAF0; color: #065f46; border-radius: 20px; padding: 2px 9px; font-size: 11px; font-weight: 700; }
+  .appt-detail { flex: 1; font-size: 12px; color: #80879A; font-weight: 600; }
+  .appt-detail strong { color: #32415B; }
+  .view-appt-btn {
+    background: none;
+    border: 1px solid #DAD8E3;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #5C53DC;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+  }
+  .view-appt-btn:hover { background: #f0effe; border-color: #8B85EA; }
+
+  /* ============================================================
+     MODAL OVERLAY
+  ============================================================ */
+  /* ── Modal overlay ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(30,26,60,.5);
+    z-index: 8000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  /* ── Modal box: matches screenshot proportions ── */
+  .modal-box {
+    background: #fff;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 0 8px 40px rgba(30,26,60,.22);
+    animation: modalIn .18s ease;
+  }
+  @keyframes modalIn {
+    from { transform: translateY(10px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  /* Header: dark bg, white text, × top-right */
+  .modal-header {
+    padding: 14px 18px;
+    background: #fff;
+    border-bottom: 1px solid #e8e6f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #32415B;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #80879A;
+    line-height: 1;
+    padding: 0 2px;
+  }
+  .modal-close:hover { color: #32415B; }
+
+  /* Body */
+  .modal-body { padding: 16px 18px 0; }
+
+  /* EVENT INFORMATION section label */
+  .ei-section-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #5C7599;
+    margin-bottom: 12px;
+  }
+  .ei-section-label i { color: #8B85EA; font-size: 12px; }
+
+  /* Info table rows — each row has a bottom border like the screenshot */
+  .ei-table {
+    border: 1px solid #e8e6f0;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .ei-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 10px 14px;
+    border-bottom: 1px solid #f0eef8;
+    font-size: 13px;
+    gap: 0;
+  }
+  .ei-row:last-child { border-bottom: none; }
+  .ei-label {
+    min-width: 110px;
+    color: #32415B;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .ei-value {
+    color: #32415B;
+    font-weight: 400;
+  }
+  .ei-value.bold { font-weight: 700; }
+  .ei-value.link { color: #5C53DC; text-decoration: none; font-weight: 400; }
+  .ei-value .copy-icon {
+    color: #8B85EA;
+    margin-left: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  /* Action buttons row (View Deal / Schedule Again / Edit Event / Actions) */
+  .modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 18px 16px;
+    flex-wrap: wrap;
+  }
+
+  /* Bottom footer: Delete left, Save+Close right */
+  .modal-footer {
+    padding: 12px 18px;
+    border-top: 1px solid #e8e6f0;
+    background: #fafafa;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .modal-footer-right { display: flex; gap: 8px; }
+
+  /* Button styles matching screenshot exactly */
+  .btn-delete {
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+  }
+  .btn-delete:hover { background: #dc2626; }
+
+  .btn-save {
+    background: #8B85EA;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+  }
+  .btn-save:hover { background: #736BE3; }
+
+  .btn-close-modal {
+    background: #fff;
+    border: 1px solid #DAD8E3;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #32415B;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+  }
+  .btn-close-modal:hover { border-color: #8B85EA; color: #5C53DC; }
+
+  /* Action buttons row — all on one line */
+  .modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 24px 16px;
+    flex-wrap: nowrap;
+  }
+
+  /* View Deal — light purple bg, purple text */
+  .btn-view-deal {
+    background: #EDE9FF;
+    border: 1.5px solid #c7c3f0;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #6B63E0;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .btn-view-deal i { color: #6B63E0; }
+  .btn-view-deal:hover { background: #ddd8ff; }
+
+  /* Schedule Again — light blue bg, blue text */
+  .btn-schedule-again {
+    background: #E6F0FF;
+    border: 1.5px solid #93C5FD;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #2563EB;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .btn-schedule-again i { color: #2563EB; }
+  .btn-schedule-again:hover { background: #d0e4ff; }
+
+  /* Edit Event — yellow bg, orange text */
+  .btn-edit-event {
+    background: #FEF3C7;
+    border: 1.5px solid #FCD34D;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #D97706;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .btn-edit-event i { color: #D97706; }
+  .btn-edit-event:hover { background: #fde68a; }
+
+  /* Actions — white bg, light gray border, unchanged */
+  .btn-actions-wrap { position: relative; display: inline-block; }
+  .btn-actions {
+    background: #fff;
+    border: 1.5px solid #DAD8E3;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #32415B;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .btn-actions:hover { background: #f8f7fc; }
+  .actions-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    background: #fff;
+    border: 1px solid #DAD8E3;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(30,26,60,.12);
+    min-width: 190px;
+    z-index: 100;
+    overflow: hidden;
+  }
+  .actions-dropdown.open { display: block; }
+  .actions-dropdown-item {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #32415B;
+    cursor: pointer;
+    transition: background .1s;
+  }
+  .actions-dropdown-item:hover { background: #f8f7fc; }
+
+  /* Delete — pink/coral gradient */
+  .btn-delete {
+    background: linear-gradient(135deg, #f87171 0%, #fb7185 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+  }
+  .btn-delete:hover { background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%); }
+
+  /* Save — solid indigo */
+  .btn-save {
+    background: #8B85EA;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 22px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+  }
+  .btn-save:hover { background: #736BE3; }
+
+  /* Close — plain outline */
+  .btn-close-modal {
+    background: #fff;
+    border: 1.5px solid #DAD8E3;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #32415B;
+    cursor: pointer;
+    font-family: Nunito, sans-serif;
+  }
+  .btn-close-modal:hover { border-color: #8B85EA; color: #5C53DC; }
+
+  /* Legacy aliases */
+  .btn-primary {
+    background: #8B85EA; color: #fff; border: none; border-radius: 6px;
+    padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: Nunito, sans-serif;
+  }
+  .btn-outline {
+    background: none; border: 1px solid #DAD8E3; border-radius: 6px;
+    padding: 8px 16px; font-size: 13px; font-weight: 700; color: #32415B; cursor: pointer; font-family: Nunito, sans-serif;
+  }
+
+  /* ============================================================
+     CONTACT INFO FOOTER BAR
+  ============================================================ */
+  .contact-footer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #fff;
+    border-top: 1px solid #DAD8E3;
+    padding: 8px 24px;
+    font-size: 11px;
+    color: #80879A;
+    text-align: center;
+    z-index: 500;
+  }
+  .contact-footer a { color: #8B85EA; text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+<div style="position:fixed;top:44px;left:0;right:0;z-index:9998;background:#6B4C9A;color:#fff;font-family:Nunito,sans-serif;font-size:12px;padding:0 16px;height:32px;display:flex;align-items:center;gap:12px;"><a href="../index.html" style="color:#EDE7F6;text-decoration:none;font-weight:700;">&#8592; Hub</a><span style="color:#c4aaee;">|</span><span>Contact Profile &#8212; Upcoming Jobs</span><span style="color:#c4aaee;">|</span><a href="https://app.clickup.com/t/8633445/86bamgyn8" target="_blank" style="color:#EDE7F6;text-decoration:none;font-weight:600;">86bamgyn8</a></div>
+
+<!-- ============================================================ DEMO BANNER -->
+<div id="demo-banner">
+  <span class="banner-label">🧪 DripJobs Prototype</span>
+  <span class="banner-sep">|</span>
+  <span>Contact Profile – Upcoming Jobs</span>
+  <span class="banner-sep">|</span>
+  <button onclick="setTab('info')" id="tab-btn-info">Information Tab</button>
+  <button onclick="setTab('appts')" id="tab-btn-appts">Appointments Tab</button>
+  <button onclick="openJobModal(0)" style="background:rgba(13,206,206,.15); border-color:#0DCECE; color:#0DCECE;">Open Job Detail Modal</button>
+  <button class="br-toggle" onclick="toggleBR()" id="br-toggle-btn">👁 BR Tags: OFF</button>
+</div>
+
+<!-- ============================================================ STATS BAR -->
+<div class="stats-bar">
+  <div class="stat-cell highlight">
+    <div class="stat-label">Open Balance</div>
+    <div class="stat-value">$128,044.88</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-label">Lifetime Revenue</div>
+    <div class="stat-value">$128,144.88</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-label">Unpaid Invoices</div>
+    <div class="stat-value">12 Open</div>
+  </div>
+</div>
+
+<!-- ============================================================ TAB NAV -->
+<div class="tab-nav">
+  <div class="tab-chip" id="chip-info" onclick="setTab('info')">Information</div>
+  <div class="tab-chip" onclick="setTab('info')">Deals (19)</div>
+  <div class="tab-chip" onclick="setTab('info')">Proposals / Jobs (20)</div>
+  <div class="tab-chip active" id="chip-appts" onclick="setTab('appts')">Appointments (2)</div>
+  <div class="tab-chip" onclick="setTab('info')">Invoices (12)</div>
+  <div class="tab-chip" onclick="setTab('info')">Payments (1)</div>
+  <div class="tab-chip" onclick="setTab('info')">Tasks (0 Open)</div>
+  <div class="tab-chip" onclick="setTab('info')">Notes (3)</div>
+  <div class="tab-chip" onclick="setTab('info')">Attachments (0)</div>
+  <div class="tab-chip" onclick="setTab('info')">Emails (49)</div>
+</div>
+
+<!-- ============================================================ CONTENT -->
+<div class="content-area">
+
+  <!-- ── APPOINTMENTS TAB ── -->
+  <div id="panel-appts" class="info-panel active">
+
+    <!-- Appointments List — first, as they precede jobs in the workflow -->
+    <div class="section-card br-anchor" id="appts-card">
+      <span class="br-chip">BR-02: Existing Appointments</span>
+      <div class="section-card-header" onclick="toggleSection('appts-card')">
+        <i class="fas fa-calendar-check icon-main"></i>
+        Appointments
+        <span class="hdr-spacer"></span>
+        <i class="fas fa-chevron-down collapse-chevron"></i>
+      </div>
+      <div class="collapsible-body">
+      <div class="appt-row">
+        <span class="appt-number">Appointment #867511</span>
+        <span class="appt-badge">Scheduled</span>
+        <div class="appt-detail">
+          <strong>Scheduled Date:</strong> 6/8/2026 – 07:00 AM &nbsp;|&nbsp;
+          <strong>Address:</strong> 221 N Nashville Ave, Hernando …
+        </div>
+        <button class="view-appt-btn">View Appointment</button>
+      </div>
+      <div class="appt-row">
+        <span class="appt-number">Appointment #457613</span>
+        <span class="appt-badge">Scheduled</span>
+        <div class="appt-detail">
+          <strong>Scheduled Date:</strong> 5/1/2025 – 07:00 AM &nbsp;|&nbsp;
+          <strong>Address:</strong> 221 N Nashville Ave, Hernando …
+        </div>
+        <button class="view-appt-btn">View Appointment</button>
+      </div>
+      </div><!-- /collapsible-body -->
+    </div>
+
+    <div class="section-gap"></div>
+
+    <!-- ★ NEW FEATURE: Upcoming Jobs Summary Card -->
+    <div class="br-anchor">
+      <span class="br-chip">BR-01: Upcoming Jobs</span>
+      <div class="upcoming-jobs-card" id="upcoming-card">
+        <div class="upcoming-jobs-header" onclick="toggleSection('upcoming-card')">
+          <div class="upcoming-jobs-header-left">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Upcoming Scheduled Jobs</span>
+          </div>
+          <div class="upcoming-jobs-header-right" style="display:flex;align-items:center;gap:10px;">
+            <span id="jobs-count-label">3 scheduled</span>
+            <i class="fas fa-chevron-down collapse-chevron"></i>
+          </div>
+        </div>
+
+        <div class="collapsible-body">
+        <div class="job-row">
+          <div class="job-date-block">
+            <div class="job-date-month">Jul</div>
+            <div class="job-date-day">01</div>
+            <div class="job-date-year">2026</div>
+          </div>
+          <div class="job-info">
+            <div class="job-title">Exterior Paint – 221 N Nashville Ave</div>
+            <div class="job-meta">
+              <div class="job-meta-item"><i class="fas fa-clock"></i> 9:00 AM – 5:00 PM</div>
+              <div class="job-meta-item"><i class="fas fa-users"></i> Johnny &amp; Sarah</div>
+              <div class="job-meta-item"><i class="fas fa-folder-open"></i> Job #4821</div>
+            </div>
+          </div>
+          <span class="job-status-badge badge-scheduled">Scheduled</span>
+          <div class="job-amount">$2,631.81</div>
+          <button class="job-action-btn" onclick="openJobModal(0)">View Job</button>
+        </div>
+
+        <!-- Job Row 2 -->
+        <div class="job-row">
+          <div class="job-date-block">
+            <div class="job-date-month">Jul</div>
+            <div class="job-date-day">08</div>
+            <div class="job-date-year">2026</div>
+          </div>
+          <div class="job-info">
+            <div class="job-title">Interior Paint – Master Bedroom &amp; Hallway</div>
+            <div class="job-meta">
+              <div class="job-meta-item"><i class="fas fa-clock"></i> 8:00 AM – 4:00 PM</div>
+              <div class="job-meta-item"><i class="fas fa-users"></i> Mike's Crew</div>
+              <div class="job-meta-item"><i class="fas fa-folder-open"></i> Job #4855</div>
+            </div>
+          </div>
+          <span class="job-status-badge badge-upcoming">Upcoming</span>
+          <div class="job-amount">$1,180.00</div>
+          <button class="job-action-btn" onclick="openJobModal(1)">View Job</button>
+        </div>
+
+        <!-- Job Row 3 -->
+        <div class="job-row">
+          <div class="job-date-block multi-day">
+            <div class="date-part">
+              <div class="job-date-month">Jul</div>
+              <div class="job-date-day">15</div>
+              <div class="job-date-year">2026</div>
+            </div>
+            <div class="date-range-sep">—</div>
+            <div class="date-part">
+              <div class="job-date-month">Jul</div>
+              <div class="job-date-day">17</div>
+              <div class="job-date-year">2026</div>
+            </div>
+          </div>
+          <div class="job-info">
+            <div class="job-title">Garage Floor Epoxy Coating</div>
+            <div class="job-meta">
+              <div class="job-meta-item"><i class="fas fa-clock"></i> Jul 15 – Jul 17 (3 days)</div>
+              <div class="job-meta-item"><i class="fas fa-users"></i> TBD</div>
+              <div class="job-meta-item"><i class="fas fa-folder-open"></i> Job #4892</div>
+            </div>
+          </div>
+          <span class="job-status-badge badge-upcoming">Upcoming</span>
+          <div class="job-amount">$850.00</div>
+          <button class="job-action-btn" onclick="openJobModal(2)">View Job</button>
+        </div>
+        </div><!-- /collapsible-body -->
+      </div>
+    </div><!-- /br-anchor -->
+
+  </div><!-- /panel-appts -->
+
+  <!-- ── INFORMATION TAB (placeholder) ── -->
+  <div id="panel-info" class="info-panel">
+    <div class="helper-note">
+      <div class="helper-icon"><i class="fas fa-info"></i></div>
+      <div>This tab is shown for context. The Upcoming Jobs feature lives on the <strong>Appointments tab</strong> — click that tab or use the banner above to navigate there.</div>
+    </div>
+    <div class="section-card">
+      <div class="section-card-header"><i class="fas fa-user"></i> Personal Information</div>
+      <div style="padding:16px 20px; display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px; font-size:13px;">
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#80879A;margin-bottom:3px;">First Name</div><div style="font-weight:700;">Dripjobs</div></div>
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#80879A;margin-bottom:3px;">Last Name</div><div style="font-weight:700;">Harrison</div></div>
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#80879A;margin-bottom:3px;">Email</div><div style="font-weight:700;color:#5C53DC;">jeremy@driopjobs.com</div></div>
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#80879A;margin-bottom:3px;">Company</div><div style="font-weight:700;">Harrison Inc.</div></div>
+        <div><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#80879A;margin-bottom:3px;">Phone</div><div style="font-weight:700;color:#5C53DC;">7272508869</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content-area -->
+
+<!-- ============================================================ JOB DETAIL MODAL -->
+<div class="modal-overlay" id="job-modal" onclick="closeModalOutside(event)">
+  <div class="modal-box">
+
+    <!-- Header: "Dripjobs Harrison - $2631.81 - Johnny & Sarah - 7/1/2026  ×" -->
+    <div class="modal-header">
+      <span class="modal-title" id="modal-job-title">Job Detail</span>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+      <div class="br-anchor">
+        <span class="br-chip">BR-03: Job Detail Modal</span>
+
+        <!-- Section label -->
+        <div class="ei-section-label">
+          <i class="fas fa-info-circle"></i>
+          Event Information
+        </div>
+
+        <!-- Info table -->
+        <div class="ei-table">
+          <div class="ei-row">
+            <span class="ei-label">Customer</span>
+            <a class="ei-value link" href="#" id="md-customer">Dripjobs Harrison</a>
+          </div>
+          <div class="ei-row">
+            <span class="ei-label">Phone</span>
+            <a class="ei-value link" href="#" id="md-phone">7272508869</a>
+          </div>
+          <div class="ei-row">
+            <span class="ei-label">Job Address</span>
+            <span class="ei-value" id="md-address">221 N Nashville Ave, Hernando, FL, 34442 <i class="far fa-copy copy-icon"></i></span>
+          </div>
+          <div class="ei-row">
+            <span class="ei-label">Crew</span>
+            <span class="ei-value" id="md-crew">–</span>
+          </div>
+          <div class="ei-row">
+            <span class="ei-label">Job Amount</span>
+            <span class="ei-value bold" id="md-amount">–</span>
+          </div>
+          <div class="ei-row">
+            <span class="ei-label">Start</span>
+            <span class="ei-value" id="md-start">–</span>
+          </div>
+          <div class="ei-row">
+            <span class="ei-label">End</span>
+            <span class="ei-value" id="md-end">–</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action buttons row -->
+    <div class="modal-actions">
+      <button class="btn-view-deal"><i class="fas fa-eye"></i> View Deal</button>
+      <button class="btn-schedule-again"><i class="far fa-calendar-alt"></i> Schedule Again</button>
+      <button class="btn-edit-event"><i class="fas fa-pen"></i> Edit Event</button>
+      <div class="btn-actions-wrap">
+        <button class="btn-actions" onclick="toggleActionsDropdown(event)">Actions <i class="fas fa-chevron-down" style="font-size:11px;"></i></button>
+        <div class="actions-dropdown" id="actions-dropdown">
+          <div class="actions-dropdown-item">View Job</div>
+          <div class="actions-dropdown-item">View Invoice</div>
+          <div class="actions-dropdown-item">Send Invoice Via Text</div>
+          <div class="actions-dropdown-item">Copy Work Order</div>
+          <div class="actions-dropdown-item">Download Work Order</div>
+          <div class="actions-dropdown-item">Send Work Order</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer: Delete left | Save + Close right -->
+    <div class="modal-footer">
+      <button class="btn-delete">Delete</button>
+      <div class="modal-footer-right">
+        <button class="btn-save">Save</button>
+        <button class="btn-close-modal" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ FOOTER BAR -->
+<div class="contact-footer">
+  Contact created at 4/4/2025 10:51:25 AM &nbsp;|&nbsp; Synced with Quickbooks at 6/18/2026 4:36:10 PM (ID: 1) &nbsp;|&nbsp; <a href="#">Click here</a> to manually sync
+</div>
+
+<script>
+  function toggleSection(id) {
+    document.getElementById(id).classList.toggle('collapsed');
+  }
+
+  // ── Tab switching ──
+  const jobs = [
+    {
+      title: 'Dripjobs Harrison – $2,631.81 – Johnny & Sarah – 7/1/2026',
+      crew: 'Johnny & Sarah',
+      start: '7/1/2026 9:00 AM',
+      end: '7/1/2026 5:00 PM',
+      amount: '$2,631.81',
+      status: 'Scheduled'
+    },
+    {
+      title: 'Dripjobs Harrison – $1,180.00 – Mike\'s Crew – 7/8/2026',
+      crew: "Mike's Crew",
+      start: '7/8/2026 8:00 AM',
+      end: '7/8/2026 4:00 PM',
+      amount: '$1,180.00',
+      status: 'Upcoming'
+    },
+    {
+      title: 'Dripjobs Harrison – $850.00 – TBD – 7/15/2026',
+      crew: 'TBD',
+      start: '7/15/2026 7:00 AM',
+      end: '7/17/2026 3:00 PM',
+      amount: '$850.00',
+      status: 'Upcoming'
+    }
+  ];
+
+  function setTab(t) {
+    document.getElementById('panel-appts').classList.remove('active');
+    document.getElementById('panel-info').classList.remove('active');
+    document.getElementById('panel-' + t).classList.add('active');
+
+    document.querySelectorAll('.tab-chip').forEach(c => c.classList.remove('active'));
+    if (t === 'appts') document.getElementById('chip-appts').classList.add('active');
+    if (t === 'info')  document.getElementById('chip-info').classList.add('active');
+
+    document.getElementById('tab-btn-appts').classList.toggle('active', t === 'appts');
+    document.getElementById('tab-btn-info').classList.toggle('active', t === 'info');
+  }
+
+  function openJobModal(idx) {
+    const j = jobs[idx];
+    document.getElementById('modal-job-title').textContent = j.title;
+    document.getElementById('md-customer').textContent = 'Dripjobs Harrison';
+    document.getElementById('md-phone').textContent    = '7272508869';
+    document.getElementById('md-crew').textContent     = j.crew;
+    document.getElementById('md-amount').textContent   = j.amount;
+    document.getElementById('md-start').textContent    = j.start;
+    document.getElementById('md-end').textContent      = j.end;
+    // close dropdown if open
+    document.getElementById('actions-dropdown').classList.remove('open');
+    document.getElementById('job-modal').classList.add('open');
+    setTab('appts');
+  }
+
+  function toggleActionsDropdown(e) {
+    e.stopPropagation();
+    document.getElementById('actions-dropdown').classList.toggle('open');
+  }
+
+  // close dropdown when clicking elsewhere
+  document.addEventListener('click', function() {
+    const dd = document.getElementById('actions-dropdown');
+    if (dd) dd.classList.remove('open');
+  });
+
+  function closeModal() {
+    document.getElementById('job-modal').classList.remove('open');
+  }
+
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('job-modal')) closeModal();
+  }
+
+  function toggleBR() {
+    const on = document.body.classList.toggle('br-on');
+    document.getElementById('br-toggle-btn').textContent = '👁 BR Tags: ' + (on ? 'ON' : 'OFF');
+    document.getElementById('br-toggle-btn').classList.toggle('active', on);
+  }
+
+  // default to Appointments tab
+  setTab('appts');
+</script>
+</body>
+</html>
