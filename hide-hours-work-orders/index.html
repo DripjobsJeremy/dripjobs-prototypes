@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hide Hours on Work Orders — DripJobs Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:#f4f5f8;color:#32415B;padding-top:44px;font-size:14px;}
+
+/* ===== DEMO BANNER ===== */
+#demo-banner{position:fixed;top:0;left:0;right:0;background:#1e1b4b;color:#fff;z-index:9999;font-family:'Nunito',sans-serif;font-size:13px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:44px;gap:16px;box-shadow:0 2px 8px rgba(0,0,0,0.25);}
+.demo-title{font-weight:700;font-size:13px;color:#c7d2fe;white-space:nowrap;}
+.demo-ticket{font-size:11px;color:#818cf8;background:rgba(129,140,248,0.15);border:1px solid rgba(129,140,248,0.3);border-radius:4px;padding:2px 8px;white-space:nowrap;}
+.demo-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.demo-btn{font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.25);background:transparent;color:#e0e7ff;border-radius:6px;padding:4px 10px;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.demo-btn:hover{background:rgba(255,255,255,0.1);}
+.demo-btn.active{background:#6366f1;border-color:#6366f1;color:#fff;}
+.demo-sep{color:rgba(255,255,255,0.2);font-size:16px;}
+.demo-badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:700;}
+.demo-badge.new{background:#7C3AED;color:#fff;}
+.demo-badge.existing{background:#374151;color:#9ca3af;}
+.view-switch-label{font-size:11px;color:#a5b4fc;white-space:nowrap;}
+
+/* ===== BR CHIPS ===== */
+.br-chip{display:none;position:absolute;z-index:1000;background:#F97316;color:#fff;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;pointer-events:none;white-space:nowrap;top:-12px;left:0;line-height:1.4;}
+.br-annotate{position:relative;}
+body.br-on .br-chip{display:block;}
+body.br-on .br-annotate{outline:2px dashed #F97316;outline-offset:2px;border-radius:4px;}
+
+/* ===== VIEWS ===== */
+.view{max-height:0;overflow:hidden;pointer-events:none;opacity:0;}
+.view.active{max-height:none;overflow:visible;pointer-events:all;opacity:1;}
+.hide-row{display:none !important;}
+
+
+/* =============================================
+   VIEW 1: PROPOSAL SETTINGS
+   ============================================= */
+#view-proposal{max-width:940px;margin:0 auto;padding:20px 16px 60px;}
+.proposal-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:20px;}
+.ptab{font-family:'Nunito',sans-serif;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:20px;border:1px solid #DAD8E3;background:#fff;color:#6b7a99;cursor:pointer;transition:all 0.15s;}
+.ptab:hover{background:#f0eeff;color:#7C3AED;border-color:#c5bbf5;}
+.ptab.active{background:#7C3AED;color:#fff;border-color:#7C3AED;}
+.card{background:#fff;border:1px solid #e2e2ec;border-radius:10px;padding:20px 22px;margin-bottom:14px;}
+.card-section-label{font-size:13px;font-weight:800;color:#32415B;margin-bottom:12px;}
+.fields-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
+.float-field{position:relative;border:1px solid #c8c5d4;border-radius:6px;padding:8px 10px 6px;}
+.float-field label{position:absolute;top:6px;left:10px;font-size:10px;font-weight:700;color:#80879A;}
+.float-field .field-val{display:flex;align-items:center;gap:4px;margin-top:10px;font-size:14px;font-weight:700;color:#32415B;}
+.field-hint{font-size:11px;color:#adb5c4;margin-top:5px;}
+.tax-rate-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:13px;font-weight:700;color:#32415B;}
+.sw2-wrap{flex-shrink:0;width:42px;height:24px;position:relative;cursor:pointer;}
+.sw2-wrap input{opacity:0;position:absolute;inset:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2;}
+.sw2-track{width:42px;height:24px;border-radius:12px;background:#e0e0ea;transition:background 0.22s;position:relative;}
+.sw2-thumb{position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:2px;left:2px;box-shadow:0 1px 4px rgba(0,0,0,0.2);transition:transform 0.22s;}
+.sw2-wrap.on .sw2-track{background:#6C63FF;}
+.sw2-wrap.on .sw2-thumb{transform:translateX(18px);}
+.sw2-row{display:flex;align-items:center;gap:12px;padding:6px 0;}
+.sw2-row-label{font-size:13px;font-weight:600;color:#32415B;}
+.portal-card{background:#fff;border:1px solid #e2e2ec;border-radius:10px;padding:20px 22px;margin-bottom:14px;}
+.portal-title{font-size:13px;font-weight:800;color:#32415B;margin-bottom:2px;}
+.portal-subtitle{font-size:12px;color:#80879A;margin-bottom:16px;}
+.tog-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #f0f0f6;}
+.tog-row:last-child{border-bottom:none;}
+/* Switchery for portal display toggles — matches screenshot */
+.tog-sw{flex-shrink:0;width:42px;height:24px;position:relative;cursor:pointer;margin-top:1px;}
+.tog-sw input{opacity:0;position:absolute;inset:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2;}
+.tog-sw-track{width:42px;height:24px;border-radius:12px;background:#e0e0ea;transition:background 0.22s;position:relative;}
+.tog-sw-thumb{position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:2px;left:2px;box-shadow:0 1px 4px rgba(0,0,0,0.2);transition:transform 0.22s;}
+.tog-sw.on .tog-sw-track{background:#6C63FF;}
+.tog-sw.on .tog-sw-thumb{transform:translateX(18px);}
+.tog-text{flex:1;}
+.tog-label{font-size:13px;font-weight:700;color:#32415B;margin-bottom:2px;display:flex;align-items:center;gap:6px;}
+.tog-desc{font-size:12px;color:#80879A;line-height:1.45;}
+.tog-row.new-row{background:#faf9ff;border-radius:8px;padding:10px 10px;margin:4px -10px;border:1.5px solid #ebe8fb !important;}
+.new-badge{font-size:10px;font-weight:800;background:#7C3AED;color:#fff;border-radius:4px;padding:1px 6px;letter-spacing:0.3px;flex-shrink:0;}
+.save-row{display:flex;justify-content:flex-end;padding-top:10px;}
+.btn-save{font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;background:#7C3AED;color:#fff;border:none;border-radius:8px;padding:9px 24px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background 0.15s;}
+.btn-save:hover{background:#6d35d4;}
+.bottom-bar{display:flex;align-items:center;justify-content:space-between;margin-top:20px;flex-wrap:wrap;gap:10px;}
+.btn-send{font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;background:#7C3AED;color:#fff;border:none;border-radius:8px;padding:10px 22px;cursor:pointer;}
+.btn-outline-sm{font-family:'Nunito',sans-serif;font-size:12.5px;font-weight:600;background:#fff;color:#32415B;border:1px solid #DAD8E3;border-radius:8px;padding:8px 14px;cursor:pointer;}
+.btn-danger-sm{font-family:'Nunito',sans-serif;font-size:12.5px;font-weight:600;background:#fff;color:#991B1B;border:1px solid #FECACA;border-radius:8px;padding:8px 14px;cursor:pointer;}
+.bottom-right{display:flex;gap:8px;flex-wrap:wrap;}
+.link-setup{font-size:13px;color:#7C3AED;font-weight:600;text-decoration:none;}
+
+
+/* =============================================
+   VIEW 2: WORK ORDER (matches screenshot 1 exactly)
+   ============================================= */
+#view-workorder{background:#fff;padding:20px 16px 60px;}
+.wo-doc{max-width:900px;margin:0 auto;background:#fff;border:1px solid #e0e0e0;}
+
+/* Top utility bar */
+.wo-top-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-bottom:1px solid #e0e0e0;background:#fafafa;}
+.wo-top-bar .translate-wrap{display:flex;flex-direction:column;gap:2px;}
+.wo-top-bar select{font-size:11px;border:1px solid #ccc;border-radius:3px;padding:2px 6px;color:#333;}
+.wo-top-bar .powered{font-size:10px;color:#666;}
+.wo-top-bar .powered span{color:#4285F4;font-weight:700;}
+.wo-dl-btn{font-size:12px;border:1px solid #ccc;background:#fff;border-radius:4px;padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;color:#333;}
+
+/* Company header */
+.wo-company-header{padding:24px 40px 16px;display:flex;justify-content:space-between;align-items:flex-start;}
+.wo-company-left .co-name{font-size:15px;font-weight:800;color:#1a1a1a;margin-bottom:2px;}
+.wo-company-left .co-detail{font-size:13px;color:#333;line-height:1.6;}
+.wo-company-right{text-align:right;}
+.wo-company-right .wo-type-title{font-size:32px;font-weight:400;color:#1a1a1a;line-height:1;}
+.wo-company-right .wo-status{font-size:12px;color:#555;margin-top:2px;}
+
+/* Logo */
+.wo-logo-wrap{text-align:center;padding:10px 40px 0;}
+.wo-logo-circle{width:60px;height:60px;border-radius:50%;background:#7C3AED;color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;}
+.wo-logo-text{font-size:16px;font-weight:800;color:#7C3AED;line-height:1;}
+.wo-logo-sub{font-size:10px;color:#888;letter-spacing:0.5px;}
+
+/* Divider */
+.wo-divider{height:1px;background:#7C3AED;margin:14px 40px;}
+
+/* Meta row */
+.wo-meta{display:grid;grid-template-columns:1.6fr 1.8fr 1fr 1fr;gap:0;padding:0 40px 10px;border-bottom:1px solid #eee;}
+.wo-meta-col{padding:8px 0;}
+.wo-meta-col .meta-label{font-size:11px;color:#666;margin-bottom:3px;}
+.wo-meta-col .meta-val{font-size:13px;color:#333;font-weight:600;line-height:1.4;}
+.wo-meta-col .meta-val a{color:#7C3AED;text-decoration:none;}
+
+/* Estimated hrs total */
+.wo-hrs-total-row{display:flex;justify-content:flex-end;padding:8px 40px 10px;}
+.wo-hrs-total-row .hrs-label{font-size:14px;font-weight:800;color:#1a1a1a;transition:opacity 0.3s;}
+.wo-hrs-total-row .hrs-label.hidden{opacity:0;}
+
+/* Purple header bar */
+.wo-purple-bar{background:#7C3AED;color:#fff;display:flex;justify-content:space-between;padding:10px 40px;}
+.wo-purple-bar span{font-size:14px;font-weight:700;}
+
+/* Area section */
+.wo-area-wrap{padding:16px 40px 8px;}
+.wo-area-name{font-size:15px;font-weight:800;color:#1a1a1a;margin-bottom:1px;display:flex;align-items:center;gap:10px;}
+.wo-area-name .co-badge{font-size:11px;font-weight:700;background:#e8f5ff;color:#0077cc;border:1px solid #b3d9f5;border-radius:4px;padding:1px 8px;}
+.wo-area-hrs{font-size:13px;color:#555;margin-bottom:10px;transition:opacity 0.3s;}
+.wo-area-hrs.hidden{opacity:0;}
+
+/* Inner table */
+.wo-table{width:100%;border-collapse:collapse;}
+.wo-table thead tr{border-bottom:1px solid #ddd;}
+.wo-table thead th{font-size:11px;font-weight:700;color:#555;padding:6px 8px;text-align:left;}
+.wo-table thead th.right{text-align:right;}
+.wo-table thead th.hr-col{transition:opacity 0.3s;}
+.wo-table thead th.hr-col.hidden{opacity:0;}
+.wo-table tbody tr{border-bottom:1px solid #eee;}
+.wo-table tbody td{font-size:12.5px;color:#333;padding:10px 8px;vertical-align:top;}
+.wo-table tbody td.right{text-align:right;}
+.wo-table tbody td.hr-col{transition:opacity 0.3s;}
+.wo-table tbody td.hr-col.hidden{opacity:0;}
+.td-item-name{font-weight:700;font-size:13px;}
+.td-item-cat{font-size:11px;color:#888;font-weight:400;}
+.td-item-product{font-size:11px;color:#555;}
+.td-item-detail{font-size:11px;color:#888;margin-top:1px;}
+
+/* Subtotal row */
+.wo-subtotal-row td{font-weight:700;font-size:13px;padding:10px 8px;border-top:2px solid #ddd !important;}
+.wo-subtotal-row td.hr-col{transition:opacity 0.3s;}
+.wo-subtotal-row td.hr-col.hidden{opacity:0;}
+
+/* Total area hrs footer bar */
+.wo-footer-bar{margin:10px 40px 0;}
+.wo-footer-bar-header{background:#7C3AED;color:#fff;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;padding:8px 12px;}
+.wo-footer-bar-header span{font-size:12px;font-weight:700;}
+.wo-footer-bar-header span.hr-col{transition:opacity 0.3s;}
+.wo-footer-bar-header span.hr-col.hidden{opacity:0;}
+.wo-footer-bar-vals{background:#7C3AED;color:#fff;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;padding:6px 12px;border-top:1px solid rgba(255,255,255,0.2);}
+.wo-footer-bar-vals span{font-size:13px;font-weight:700;}
+.wo-footer-bar-vals span.hr-col{transition:opacity 0.3s;}
+.wo-footer-bar-vals span.hr-col.hidden{opacity:0;}
+.wo-footer-note{font-size:11px;color:#555;padding:10px 40px 20px;line-height:1.5;}
+
+
+/* =============================================
+   VIEW 3: CUSTOMER PORTAL (matches screenshot 2 exactly)
+   ============================================= */
+#view-portal{padding:20px 16px 60px;}
+.portal-doc{max-width:660px;margin:0 auto;}
+
+/* =============================================
+   VIEW 3: PRODUCTION RATES SETTINGS CSS
+   ============================================= */
+.prs-shell{display:flex;min-height:calc(100vh - 44px);background:#f4f5f8;}
+.prs-nav{width:190px;background:#fff;border-right:1px solid #e8e8f0;flex-shrink:0;padding:12px 0;overflow-y:auto;font-family:'Nunito',sans-serif;}
+.prs-nav-logo{display:flex;align-items:center;gap:8px;padding:8px 14px 16px;}
+.prs-nav-section{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:#b0b8c9;padding:12px 14px 3px;}
+.prs-nav-item{font-size:12px;font-weight:600;color:#6b7a99;padding:6px 14px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all 0.12s;}
+.prs-nav-item:hover{background:#f4f3ff;color:#7C3AED;}
+.prs-nav-item.active{background:#f0eeff;color:#7C3AED;font-weight:700;border-right:3px solid #7C3AED;}
+.prs-badge{font-size:10px;font-weight:800;background:#7C3AED;color:#fff;border-radius:10px;padding:1px 6px;margin-left:2px;}
+.prs-main{flex:1;padding:20px 24px 60px;overflow-y:auto;}
+.prs-page-title{font-size:18px;font-weight:800;color:#32415B;margin-bottom:16px;}
+.prs-tabs{display:flex;border-bottom:2px solid #e8e8f0;margin-bottom:20px;}
+.prs-tab{font-family:'Nunito',sans-serif;font-size:12.5px;font-weight:600;color:#80879A;padding:9px 22px;cursor:pointer;border:none;background:transparent;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s;white-space:nowrap;}
+.prs-tab:hover{color:#7C3AED;}
+.prs-tab.active{color:#7C3AED;border-bottom-color:#7C3AED;font-weight:700;}
+.prs-content-grid{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;}
+.prs-section-card{background:#fff;border:1px solid #e2e2ec;border-radius:8px;padding:18px 20px;margin-bottom:14px;}
+.prs-section-title{font-size:13px;font-weight:800;color:#32415B;margin-bottom:14px;}
+.prs-field-group{margin-bottom:12px;}
+.prs-field-label{font-size:12px;font-weight:700;color:#32415B;margin-bottom:4px;}
+.prs-info{font-size:11px;color:#adb5c4;cursor:help;}
+.prs-input-row{border:1px solid #DAD8E3;border-radius:6px;height:34px;display:flex;align-items:center;padding:0 10px;gap:4px;font-size:13px;font-weight:600;color:#32415B;}
+.prs-input-prefix{color:#80879A;}
+.prs-input-val{flex:1;}
+.prs-input-caret{color:#adb5c4;font-size:12px;}
+.prs-tax-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:700;color:#32415B;padding:6px 0 10px;}
+.prs-tax-val{font-weight:800;}
+.prs-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f4f5f8;gap:10px;}
+.prs-toggle-label{font-size:12.5px;font-weight:600;color:#32415B;flex:1;}
+.prs-note{font-size:11.5px;color:#6b7a99;margin-bottom:12px;line-height:1.5;}
+.prs-note a{color:#7C3AED;font-weight:700;text-decoration:none;}
+.prs-new-row{background:#faf9ff;border-radius:6px;padding:8px 10px !important;margin:4px -10px !important;border:1.5px solid #ebe8fb !important;}
+.prs-new-badge{font-size:10px;font-weight:800;background:#7C3AED;color:#fff;border-radius:4px;padding:1px 6px;}
+.prs-sw{flex-shrink:0;width:42px;height:24px;position:relative;cursor:pointer;}
+.prs-sw input{opacity:0;position:absolute;inset:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2;}
+.prs-sw-track{width:42px;height:24px;border-radius:12px;background:#e0e0ea;transition:background 0.22s;position:relative;}
+.prs-sw-thumb{position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:2px;left:2px;box-shadow:0 1px 4px rgba(0,0,0,0.2);transition:transform 0.22s;}
+.prs-sw.on .prs-sw-track{background:#6C63FF;}
+.prs-sw.on .prs-sw-thumb{transform:translateX(18px);}
+.prs-save-btn{font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;background:#7C3AED;color:#fff;border:none;border-radius:8px;padding:9px 32px;cursor:pointer;}
+.prs-right-card{background:#fff;border:1px solid #e2e2ec;border-radius:8px;padding:16px 18px;}
+.prs-right-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.prs-right-title{font-size:13px;font-weight:800;color:#32415B;}
+.prs-add-btn{font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;background:#7C3AED;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;}
+.prs-project-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f4f5f8;font-size:12px;color:#32415B;}
+.prs-project-row:last-child{border-bottom:none;}
+.prs-radio{width:14px;height:14px;border-radius:50%;border:1.5px solid #DAD8E3;flex-shrink:0;}
+.prs-radio.selected{border-color:#7C3AED;background:#7C3AED;box-shadow:inset 0 0 0 2px #fff;}
+.prs-project-name{flex:1;}
+.prs-proj-actions{display:flex;gap:6px;opacity:0.5;font-size:12px;}
+.prs-video-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.prs-video-label{font-size:11px;color:#6b7a99;font-weight:600;margin-bottom:6px;line-height:1.3;}
+.prs-video-thumb{background:#1a1a2e;border-radius:6px;height:100px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.prs-video-thumb.dark{background:#0f3460;}
+.prs-video-thumb.house{background:#2d5016;}
+.prs-video-title-overlay{position:absolute;top:6px;left:8px;right:8px;font-size:10px;font-weight:700;color:#fff;line-height:1.3;}
+.prs-play-btn{width:36px;height:36px;border-radius:50%;background:rgba(180,0,180,0.85);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;z-index:1;}
+.prs-video-meta{position:absolute;bottom:6px;left:8px;font-size:9px;color:rgba(255,255,255,0.7);}
+
+/* ===== TOAST ===== */
+#toast{position:fixed;bottom:24px;right:24px;background:#166534;color:#fff;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;padding:11px 18px;border-radius:10px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.18);opacity:0;transform:translateY(8px);transition:all 0.22s;pointer-events:none;z-index:9998;}
+#toast.show{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- DEMO BANNER -->
+<div id="demo-banner">
+  <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+    <div class="demo-title">🧪 Hide Hours on Work Orders</div>
+  </div>
+  <div class="demo-controls">
+    <span class="view-switch-label">View:</span>
+    <button class="demo-btn" id="btn-v3" onclick="switchView('portal')">Prod Rates Settings</button>
+    <button class="demo-btn active" id="btn-v1" onclick="switchView('proposal')">Proposal Settings</button>
+    <button class="demo-btn" id="btn-v2" onclick="switchView('workorder')">Work Order</button>
+    <span class="demo-sep">|</span>
+    <span class="demo-badge existing">Existing</span>
+    <button class="demo-btn active" id="btn-wo-off" onclick="setWO(false)">Hours: Visible</button>
+    <button class="demo-btn" id="btn-wo-on" onclick="setWO(true)">Hours: Hidden</button>
+    <span class="demo-sep">|</span>
+    <span class="demo-badge new">NEW</span>
+    <button class="demo-btn" id="btn-br" onclick="toggleBR()">BR Tags: OFF</button>
+  </div>
+</div>
+
+
+<!-- =============================================
+     VIEW 1: PROPOSAL SETTINGS
+     ============================================= -->
+<div id="view-proposal" class="view active">
+  <div style="max-width:940px;margin:0 auto;padding:20px 16px 60px;">
+
+    <div class="proposal-tabs">
+      <button class="ptab" onclick="setPTab(this)">Settings</button>
+      <button class="ptab" onclick="setPTab(this)">Reports</button>
+      <button class="ptab" onclick="setPTab(this)">Attachments</button>
+      <button class="ptab" onclick="setPTab(this)">Notes</button>
+      <button class="ptab" onclick="setPTab(this)">Activity Log</button>
+      <button class="ptab" onclick="setPTab(this)">Video</button>
+      <button class="ptab" onclick="setPTab(this)">Custom Sections</button>
+      <button class="ptab active" onclick="setPTab(this)">Production Rates</button>
+      <button class="ptab" onclick="setPTab(this)">Details</button>
+      <button class="ptab" onclick="setPTab(this)">Color Chart</button>
+      <button class="ptab" onclick="setPTab(this)">Booking Form</button>
+    </div>
+
+    <div class="card">
+      <div class="card-section-label">Settings</div>
+      <div class="fields-row">
+        <div>
+          <div class="float-field"><label>Hourly Cost Rate</label><div class="field-val"><span style="color:#80879A;font-size:13px;">$</span>26.00</div></div>
+          <div class="field-hint">Average hourly cost (including burden) of one painter.</div>
+        </div>
+        <div>
+          <div class="float-field"><label>Hourly Sell Rate</label><div class="field-val"><span style="color:#80879A;font-size:13px;">$</span>60.00</div></div>
+          <div class="field-hint">Hourly rate charged to the customer per painter.</div>
+        </div>
+        <div>
+          <div class="float-field"><label>Product Markup</label><div class="field-val">75.00<span style="color:#80879A;font-size:13px;"> %</span></div></div>
+          <div class="field-hint">Markup applied per gallon of paint on each proposal.</div>
+        </div>
+      </div>
+      <div class="tax-rate-row"><span>Company Tax Rate</span><span style="font-weight:800;margin-left:8px;">9.100%</span></div>
+      <div class="sw2-row">
+        <div class="sw2-wrap on" id="sw2-tax-mat"><input type="checkbox" checked onchange="syncSW2('sw2-tax-mat',this.checked)"><div class="sw2-track"><div class="sw2-thumb"></div></div></div>
+        <span class="sw2-row-label">Tax on materials</span>
+      </div>
+      <div class="sw2-row">
+        <div class="sw2-wrap on" id="sw2-tax-lab"><input type="checkbox" checked onchange="syncSW2('sw2-tax-lab',this.checked)"><div class="sw2-track"><div class="sw2-thumb"></div></div></div>
+        <span class="sw2-row-label">Tax on labor</span>
+      </div>
+    </div>
+
+    <div class="portal-card">
+      <div class="portal-title">Portal Display</div>
+      <div class="portal-subtitle">Choose which production-rate details appear on the customer-facing proposal.</div>
+
+      <div class="tog-row"><div class="tog-sw" id="ti-isl"><input type="checkbox" onchange="toggleTog('ti-isl',this.checked)"><div class="tog-sw-track"><div class="tog-sw-thumb"></div></div></div><div class="tog-text"><div class="tog-label">Hide internal substrate labels</div><div class="tog-desc">Only the category name shows on the proposal; the underlying substrate label is hidden.</div></div></div>
+      <div class="tog-row br-annotate"><span class="br-chip">BR1 (existing) — Proposal-only; unchanged</span><div class="tog-sw" id="ti-tothrs"><input type="checkbox" onchange="toggleTog('ti-tothrs',this.checked)"><div class="tog-sw-track"><div class="tog-sw-thumb"></div></div></div><div class="tog-text"><div class="tog-label">Hide total hours</div><div class="tog-desc">The total project hours don't appear on the proposal.</div></div></div>
+      <div class="tog-row"><div class="tog-sw" id="ti-unit"><input type="checkbox" onchange="toggleTog('ti-unit',this.checked)"><div class="tog-sw-track"><div class="tog-sw-thumb"></div></div></div><div class="tog-text"><div class="tog-label">Hide unit</div><div class="tog-desc">Quantity units (sqft, ft, x) are hidden from the customer.</div></div></div>
+      <div class="tog-row"><div class="tog-sw" id="ti-coats"><input type="checkbox" onchange="toggleTog('ti-coats',this.checked)"><div class="tog-sw-track"><div class="tog-sw-thumb"></div></div></div><div class="tog-text"><div class="tog-label">Hide number of coats</div><div class="tog-desc">The coats column is hidden from the proposal breakdown.</div></div></div>
+      <div class="tog-row"><div class="tog-sw" id="ti-matname"><input type="checkbox" onchange="toggleTog('ti-matname',this.checked)"><div class="tog-sw-track"><div class="tog-sw-thumb"></div></div></div><div class="tog-text"><div class="tog-label">Hide material name</div><div class="tog-desc">Specific paint and material names are kept internal.</div></div></div>
+      <div class="tog-row"><div class="tog-sw" id="ti-matprice"><input type="checkbox" onchange="toggleTog('ti-matprice',this.checked)"><div class="tog-sw-track"><div class="tog-sw-thumb"></div></div></div><div class="tog-text"><div class="tog-label">Hide material price</div><div class="tog-desc">Per-material pricing is hidden from the customer's breakdown.</div></div></div>
+      <div class="tog-row"><div class="tog-sw" id="ti-labor"><input type="checkbox" onchange="toggleTog('ti-labor',this.checked)"><div class="tog-sw-track"><div class="tog-sw-thumb"></div></div></div><div class="tog-text"><div class="tog-label">Hide labor</div><div class="tog-desc">Labor lines and totals are hidden from the proposal.</div></div></div>
+      <div class="tog-row"><div class="tog-sw" id="ti-tax"><input type="checkbox" onchange="toggleTog('ti-tax',this.checked)"><div class="tog-sw-track"><div class="tog-sw-thumb"></div></div></div><div class="tog-text"><div class="tog-label">Hide tax</div><div class="tog-desc">Tax breakdown rows don't show on the proposal.</div></div></div>
+      <div class="tog-row"><div class="tog-sw" id="ti-subprice"><input type="checkbox" onchange="toggleTog('ti-subprice',this.checked)"><div class="tog-sw-track"><div class="tog-sw-thumb"></div></div></div><div class="tog-text"><div class="tog-label">Hide substrate price</div><div class="tog-desc">Per-substrate price is hidden; only category and area totals show.</div></div></div>
+      <div class="tog-row"><div class="tog-sw" id="ti-areaprice"><input type="checkbox" onchange="toggleTog('ti-areaprice',this.checked)"><div class="tog-sw-track"><div class="tog-sw-thumb"></div></div></div><div class="tog-text"><div class="tog-label">Hide area price</div><div class="tog-desc">Per-area pricing is hidden; only the project total shows.</div></div></div>
+      <div class="tog-row"><div class="tog-sw" id="ti-projdetail"><input type="checkbox" onchange="toggleTog('ti-projdetail',this.checked)"><div class="tog-sw-track"><div class="tog-sw-thumb"></div></div></div><div class="tog-text"><div class="tog-label">Hide project details</div><div class="tog-desc">The project details / prep section is hidden from the proposal.</div></div></div>
+
+      <!-- ✦ NEW ✦ -->
+      <div class="tog-row new-row br-annotate">
+        <span class="br-chip">BR1+BR2 — New; independent of proposal toggles above</span>
+        <div class="tog-sw" id="ti-wo-hours"><input type="checkbox" id="cb-wo-hours" onchange="handleWOClick(this.checked)"><div class="tog-sw-track"><div class="tog-sw-thumb"></div></div></div>
+        <div class="tog-text">
+          <div class="tog-label">Hide hours on work orders <span class="new-badge">NEW</span></div>
+          <div class="tog-desc">The estimated hours don't appear on sent Work Orders. Proposals and internal views are unaffected.</div>
+        </div>
+      </div>
+
+      <div class="save-row">
+        <button class="btn-save" onclick="doSave()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save
+        </button>
+      </div>
+    </div>
+
+    <div style="font-size:13px;margin-bottom:10px;"><a href="#" class="link-setup">Click here to setup online payments&gt;</a></div>
+    <div class="bottom-bar">
+      <button class="btn-send">Send Proposal</button>
+      <div class="bottom-right">
+        <button class="btn-outline-sm">View / Edit T&amp;C's</button>
+        <button class="btn-outline-sm">Approve Without Signature</button>
+        <button class="btn-outline-sm">Duplicate Proposal</button>
+        <button class="btn-outline-sm">Archive</button>
+        <button class="btn-danger-sm">Delete Proposal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- =============================================
+     VIEW 2: WORK ORDER (matches screenshot 1)
+     ============================================= -->
+<div id="view-workorder" class="view">
+  <div style="background:#f4f5f8;padding:20px 16px 60px;">
+  <div class="wo-doc">
+
+    <!-- Top utility bar -->
+    <div class="wo-top-bar">
+      <div class="translate-wrap">
+        <select><option>Select Language</option></select>
+        <div class="powered">Powered by <span>Google</span> Translate</div>
+      </div>
+      <button class="wo-dl-btn">📄 Download Work Order</button>
+    </div>
+
+    <!-- Logo -->
+    <div class="wo-logo-wrap" style="padding:28px 40px 0;text-align:center;">
+      <div style="display:inline-block;text-align:center;">
+        <div style="font-size:42px;line-height:1;">🐦</div>
+        <div style="font-size:18px;font-weight:800;color:#7C3AED;line-height:1.1;">Sparrow's<br>Nest</div>
+        <div style="font-size:10px;color:#888;letter-spacing:0.5px;margin-top:2px;">Creative Colors</div>
+      </div>
+    </div>
+
+    <!-- Company + WO title -->
+    <div class="wo-company-header">
+      <div class="wo-company-left">
+        <div class="co-name">Sparrow's Nest Painting</div>
+        <div class="co-detail">
+          License# L987616<br>
+          1234 Reynolds Rd, Lakeland, GA 33801<br>
+          (555) 555-5555
+        </div>
+      </div>
+      <div class="wo-company-right">
+        <div class="wo-type-title">Work Order</div>
+        <div class="wo-status">ACCEPTED</div>
+      </div>
+    </div>
+
+    <div class="wo-divider"></div>
+
+    <!-- Meta -->
+    <div class="wo-meta">
+      <div class="wo-meta-col">
+        <div class="meta-label">Contact</div>
+        <div class="meta-val">TJ Bennett<br>678 N Seton Ave, Clearwater, FL, 34461<br>TJBennett@DJtest.com<br>(888) 555-4433</div>
+      </div>
+      <div class="wo-meta-col">
+        <div class="meta-label">Job Address</div>
+        <div class="meta-val"><a href="#">678 N Seton Ave, Clearwater, FL, 34461</a></div>
+      </div>
+      <div class="wo-meta-col">
+        <div class="meta-label">Proposal #</div>
+        <div class="meta-val">2920059</div>
+      </div>
+      <div class="wo-meta-col">
+        <div class="meta-label">Date</div>
+        <div class="meta-val">6/2/2026</div>
+      </div>
+    </div>
+
+    <!-- Total Estimated Hrs -->
+    <div class="wo-hrs-total-row br-annotate" id="wo-hrs-total-row">
+      <span class="br-chip">BR3 — "Total Estimated Hrs" header suppressed when toggle ON</span>
+      <span class="hrs-label" id="wo-total-hrs-label">Total Estimated Hrs: 19</span>
+    </div>
+
+    <!-- Purple header bar -->
+    <div class="wo-purple-bar">
+      <span>Item</span>
+      <span>Quantity</span>
+    </div>
+
+    <!-- Area section -->
+    <div class="wo-area-wrap">
+      <div class="wo-area-name">
+        Whole House
+        <span class="co-badge">Change order: 06/09/2026</span>
+      </div>
+      <div class="wo-area-hrs" id="wo-area-hrs">19hrs</div>
+
+      <table class="wo-table">
+        <thead>
+          <tr>
+            <th style="width:42%;">Item</th>
+            <th class="right hr-col" id="wot-prep-hdr">Prep Hrs</th>
+            <th class="right hr-col" id="wot-work-hdr">Working Hrs</th>
+            <th class="right hr-col" id="wot-total-hdr">Total Hrs</th>
+            <th class="right">Unit</th>
+            <th class="right">Coats</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="td-item-name">(Spray) Soffit and Fascia</span> <span class="td-item-cat">Trim</span><br>
+              <span class="td-item-product">Sherwin-Williams Duration Exterior (Satin)</span><br>
+              <span class="td-item-detail">Sheen: &nbsp; Color: &nbsp; Color Id:</span>
+            </td>
+            <td class="right hr-col" id="wot-r1-prep">0.00</td>
+            <td class="right hr-col" id="wot-r1-work">1.43</td>
+            <td class="right hr-col" id="wot-r1-total">1.43</td>
+            <td class="right">250ft</td>
+            <td class="right">2</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="td-item-name">(Spray) Front Door + Sidelights - 1 Side</span> <span class="td-item-cat">Doors</span><br>
+              <span class="td-item-product">PPG Paints Timeless Exterior (Satin)</span><br>
+              <span class="td-item-detail">Sheen: &nbsp; Color: &nbsp; Color Id:</span>
+            </td>
+            <td class="right hr-col" id="wot-r2-prep">0.00</td>
+            <td class="right hr-col" id="wot-r2-work">2.00</td>
+            <td class="right hr-col" id="wot-r2-total">2.00</td>
+            <td class="right">1x</td>
+            <td class="right">2</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="td-item-name">(Roll) Stucco Siding Light Texture</span> <span class="td-item-cat">Siding</span><br>
+              <span class="td-item-product">Sherwin Williams SuperPaint Interior (Satin)</span><br>
+              <span class="td-item-detail">Sheen: &nbsp; Color: &nbsp; Color Id:</span>
+            </td>
+            <td class="right hr-col" id="wot-r3-prep">0.00</td>
+            <td class="right hr-col" id="wot-r3-work">15.52</td>
+            <td class="right hr-col" id="wot-r3-total">15.52</td>
+            <td class="right">2250sqft</td>
+            <td class="right">2</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="wo-subtotal-row" id="wo-area-subtotal-row">
+            <td>Whole House Total Hrs :</td>
+            <td class="right hr-col" id="wot-sub-prep">0.00</td>
+            <td class="right hr-col" id="wot-sub-work">18.95</td>
+            <td class="right hr-col" id="wot-sub-total">18.95</td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Footer totals bar -->
+    <div class="wo-footer-bar br-annotate" id="wo-footer-bar">
+      <span class="br-chip">BR4 — Entire footer hours bar suppressed when toggle ON</span>
+      <div class="wo-footer-bar-header" id="wo-footer-header">
+        <span>Total Area Hrs :</span>
+        <span class="hr-col" id="wof-prep-lbl">Prep Hrs:</span>
+        <span class="hr-col" id="wof-work-lbl">Total Working Hrs :</span>
+        <span class="hr-col" id="wof-total-lbl">Total Hours:</span>
+      </div>
+      <div class="wo-footer-bar-vals" id="wo-footer-vals">
+        <span></span>
+        <span class="hr-col" id="wof-prep-val">0.00</span>
+        <span class="hr-col" id="wof-work-val">18.95</span>
+        <span class="hr-col" id="wof-total-val">18.95</span>
+      </div>
+    </div>
+
+    <div class="wo-footer-note" id="wo-footer-note">
+      <em><strong>Total Area Hrs</strong> reflects the combined hours from all <strong>Production Rate Areas</strong> (sections with area totals) and does not include standalone <strong>Line Items</strong>.</em>
+    </div>
+
+  </div>
+  </div>
+</div>
+
+
+<!-- =============================================
+     VIEW 3: PRODUCTION RATES SETTINGS (matches screenshot)
+     ============================================= -->
+<div id="view-portal" class="view">
+<div class="prs-shell">
+
+  <!-- LEFT NAV -->
+  <div class="prs-nav">
+    <div class="prs-nav-logo">
+      <svg width="22" height="22" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="20" fill="#7C3AED"/><path d="M12 20c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="20" cy="20" r="3" fill="#fff"/></svg>
+      <span style="font-size:15px;font-weight:800;color:#7C3AED;">dripjobs</span>
+    </div>
+    <div class="prs-nav-section">SALES</div>
+    <div class="prs-nav-item">Contacts</div>
+    <div class="prs-nav-item">Sales List</div>
+    <div class="prs-nav-item">Sales Pipeline</div>
+    <div class="prs-nav-section">JOBS</div>
+    <div class="prs-nav-item">Change Orders</div>
+    <div class="prs-nav-item">Job Schedule</div>
+    <div class="prs-nav-item">Jobs List</div>
+    <div class="prs-nav-item">Jobs Pipeline</div>
+    <div class="prs-nav-item">Work Orders</div>
+    <div class="prs-nav-section">DAILY OPERATIONS</div>
+    <div class="prs-nav-item">Appointments <span class="prs-badge">15</span></div>
+    <div class="prs-nav-item">Chat</div>
+    <div class="prs-nav-item">Email</div>
+    <div class="prs-nav-item">Tasks</div>
+    <div class="prs-nav-section">DOCUMENTS</div>
+    <div class="prs-nav-item">Invoices</div>
+    <div class="prs-nav-item">Proposals</div>
+    <div class="prs-nav-section">FINANCIALS</div>
+    <div class="prs-nav-item">Job Costing</div>
+    <div class="prs-nav-item active">Production Rates</div>
+    <div class="prs-nav-item">Metrics</div>
+    <div class="prs-nav-section">MARKETING</div>
+    <div class="prs-nav-item">Activity</div>
+    <div class="prs-nav-item">Blast</div>
+    <div class="prs-nav-item">Drips</div>
+    <div class="prs-nav-section">RESOURCES</div>
+    <div class="prs-nav-item">DJ Academy</div>
+    <div class="prs-nav-item">Automations</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="prs-main">
+    <div class="prs-page-title">Production Rates</div>
+
+    <!-- TABS -->
+    <div class="prs-tabs">
+      <button class="prs-tab active" onclick="setPRTab(this)">Settings</button>
+      <button class="prs-tab" onclick="setPRTab(this)">Interior Area</button>
+      <button class="prs-tab" onclick="setPRTab(this)">Exterior Area</button>
+      <button class="prs-tab" onclick="setPRTab(this)">Substrates</button>
+      <button class="prs-tab" onclick="setPRTab(this)">Products</button>
+    </div>
+
+    <div class="prs-content-grid">
+
+      <!-- LEFT: SETTINGS -->
+      <div class="prs-left">
+
+        <!-- Proposal Defaults -->
+        <div class="prs-section-card">
+          <div class="prs-section-title">Proposal Defaults</div>
+          <div class="prs-field-group">
+            <div class="prs-field-label">Hourly Cost Rate <span class="prs-info">ⓘ</span></div>
+            <div class="prs-input-row"><span class="prs-input-prefix">$</span><div class="prs-input-val">25.00</div><span class="prs-input-caret">⌄</span></div>
+          </div>
+          <div class="prs-field-group">
+            <div class="prs-field-label">Hourly Sell Rate <span class="prs-info">ⓘ</span></div>
+            <div class="prs-input-row"><span class="prs-input-prefix">$</span><div class="prs-input-val">135.00</div><span class="prs-input-caret">⌄</span></div>
+          </div>
+          <div class="prs-field-group">
+            <div class="prs-field-label">Product Markup <span class="prs-info">ⓘ</span></div>
+            <div class="prs-input-row"><div class="prs-input-val">15 %</div><span class="prs-input-caret">⌄</span></div>
+          </div>
+
+          <div class="prs-tax-row">
+            <span class="prs-tax-label">Company Tax Rate: <span class="prs-info">ⓘ</span></span>
+            <span class="prs-tax-val">9.100%</span>
+          </div>
+
+          <div class="prs-toggle-row">
+            <span class="prs-toggle-label">Tax On Materials</span>
+            <div class="prs-sw on" id="prs-sw-taxmat"><input type="checkbox" checked onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div>
+          </div>
+          <div class="prs-toggle-row">
+            <span class="prs-toggle-label">Tax On Labor</span>
+            <div class="prs-sw" id="prs-sw-taxlab"><input type="checkbox" onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div>
+          </div>
+        </div>
+
+        <!-- Proposal Settings -->
+        <div class="prs-section-card">
+          <div class="prs-section-title">Proposal Settings</div>
+          <div class="prs-note"><strong>Note:</strong> These settings will apply to any newly created proposals as a default. To adjust default settings on a per-proposal basis, use <a href="#">Proposal Templates</a> and adjust them within the proposal.</div>
+
+          <div class="prs-toggle-row"><span class="prs-toggle-label">Hide Internal Substrate Labels <span class="prs-info">ⓘ</span></span><div class="prs-sw" id="prs-isl"><input type="checkbox" onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div></div>
+          <div class="prs-toggle-row"><span class="prs-toggle-label">Hide Total Hours <span class="prs-info">ⓘ</span></span><div class="prs-sw" id="prs-tothrs"><input type="checkbox" onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div></div>
+          <div class="prs-toggle-row"><span class="prs-toggle-label">Hide Number of Coats <span class="prs-info">ⓘ</span></span><div class="prs-sw" id="prs-coats"><input type="checkbox" onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div></div>
+          <div class="prs-toggle-row"><span class="prs-toggle-label">Hide Unit <span class="prs-info">ⓘ</span></span><div class="prs-sw" id="prs-unit"><input type="checkbox" onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div></div>
+          <div class="prs-toggle-row"><span class="prs-toggle-label">Hide Material Name <span class="prs-info">ⓘ</span></span><div class="prs-sw" id="prs-matname"><input type="checkbox" onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div></div>
+          <div class="prs-toggle-row"><span class="prs-toggle-label">Hide Material Price <span class="prs-info">ⓘ</span></span><div class="prs-sw on" id="prs-matprice"><input type="checkbox" checked onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div></div>
+          <div class="prs-toggle-row"><span class="prs-toggle-label">Hide Labor <span class="prs-info">ⓘ</span></span><div class="prs-sw on" id="prs-labor"><input type="checkbox" checked onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div></div>
+          <div class="prs-toggle-row"><span class="prs-toggle-label">Hide Tax <span class="prs-info">ⓘ</span></span><div class="prs-sw" id="prs-tax"><input type="checkbox" onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div></div>
+          <div class="prs-toggle-row"><span class="prs-toggle-label">Hide Substrate Price <span class="prs-info">ⓘ</span></span><div class="prs-sw on" id="prs-subprice"><input type="checkbox" checked onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div></div>
+          <div class="prs-toggle-row"><span class="prs-toggle-label">Hide Area Price <span class="prs-info">ⓘ</span></span><div class="prs-sw" id="prs-areaprice"><input type="checkbox" onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div></div>
+          <div class="prs-toggle-row"><span class="prs-toggle-label">Hide Project Details <span class="prs-info">ⓘ</span></span><div class="prs-sw" id="prs-projdetail"><input type="checkbox" onchange="this.closest('.prs-sw').classList.toggle('on',this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div></div>
+
+          <!-- ✦ NEW ✦ -->
+          <div class="prs-toggle-row prs-new-row br-annotate">
+            <span class="br-chip">BR1+BR2 — New toggle; added to global Prod Rates settings</span>
+            <span class="prs-toggle-label">Hide Hours on Work Orders <span class="prs-info">ⓘ</span> <span class="prs-new-badge">NEW</span></span>
+            <div class="prs-sw" id="prs-wo-hours"><input type="checkbox" id="prs-cb-wo-hours" onchange="handlePRSWOClick(this.checked)"><div class="prs-sw-track"><div class="prs-sw-thumb"></div></div></div>
+          </div>
+
+          <div style="text-align:center;padding-top:16px;">
+            <button class="prs-save-btn" onclick="doSave()">Save</button>
+          </div>
+        </div>
+
+      </div><!-- /prs-left -->
+
+      <!-- RIGHT: PROJECT DETAILS + GUIDES -->
+      <div class="prs-right">
+
+        <!-- Project Details card -->
+        <div class="prs-right-card">
+          <div class="prs-right-card-header">
+            <span class="prs-right-title">Project Details <span class="prs-info">ⓘ</span></span>
+            <button class="prs-add-btn">Add Project Details</button>
+          </div>
+          <div class="prs-project-list">
+            <div class="prs-project-row"><span class="prs-radio"></span><span class="prs-project-name">General Project Expectations &amp; Note...</span><span class="prs-proj-actions"><span class="prs-proj-edit">✏</span><span class="prs-proj-del">🗑</span></span></div>
+            <div class="prs-project-row selected"><span class="prs-radio selected"></span><span class="prs-project-name">Standard &amp; Expectations</span><span class="prs-proj-actions"><span class="prs-proj-edit">✏</span><span class="prs-proj-del">🗑</span></span></div>
+            <div class="prs-project-row"><span class="prs-radio"></span><span class="prs-project-name">Exterior Preparation &amp; Scope of Wor...</span><span class="prs-proj-actions"><span class="prs-proj-edit">✏</span><span class="prs-proj-del">🗑</span></span></div>
+            <div class="prs-project-row"><span class="prs-radio"></span><span class="prs-project-name">Interior Preparation &amp; Scope of Wor...</span><span class="prs-proj-actions"><span class="prs-proj-edit">✏</span><span class="prs-proj-del">🗑</span></span></div>
+            <div class="prs-project-row"><span class="prs-radio"></span><span class="prs-project-name">Renovate Right: Important Lead Haza...</span><span class="prs-proj-actions"><span class="prs-proj-edit">✏</span><span class="prs-proj-del">🗑</span></span></div>
+          </div>
+        </div>
+
+        <!-- Production Rate Guides -->
+        <div class="prs-right-card" style="margin-top:14px;">
+          <div class="prs-right-title" style="margin-bottom:14px;">Production Rate Guides</div>
+          <div class="prs-video-grid">
+            <div class="prs-video-col">
+              <div class="prs-video-label">Understanding Production Rates</div>
+              <div class="prs-video-thumb">
+                <div class="prs-video-title-overlay">Understanding Production Rates in Painting Business</div>
+                <div class="prs-play-btn">▶</div>
+                <div class="prs-video-meta">🔄 1.2x &nbsp; 10 min • 8 min 36 sec</div>
+              </div>
+            </div>
+            <div class="prs-video-col">
+              <div class="prs-video-label">Setting Up Production Rates for Accurate Bids</div>
+              <div class="prs-video-thumb">
+                <div class="prs-video-title-overlay">Paint Pro Coaching: Setting Up Production Rates for Accurate Bids</div>
+                <div class="prs-play-btn">▶</div>
+                <div class="prs-video-meta">🔄 1.2x &nbsp; 14 min • 11 min</div>
+              </div>
+            </div>
+            <div class="prs-video-col">
+              <div class="prs-video-label">Interior Painting Estimate Walkthrough</div>
+              <div class="prs-video-thumb dark">
+                <div class="prs-video-title-overlay">Interior Bid Walkthrough 🏠</div>
+                <div class="prs-play-btn">▶</div>
+                <div class="prs-video-meta">🔄 1.2x &nbsp; 15 min • 8 min 46 sec</div>
+              </div>
+            </div>
+            <div class="prs-video-col">
+              <div class="prs-video-label">Exterior Painting Estimate Walkthrough</div>
+              <div class="prs-video-thumb house">
+                <div class="prs-video-title-overlay">Exterior Painting Estimate Walkthrough</div>
+                <div class="prs-play-btn">▶</div>
+                <div class="prs-video-meta">🔄 1.2x &nbsp; 7 min • 5 min 28 sec</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /prs-right -->
+    </div><!-- /prs-content-grid -->
+  </div><!-- /prs-main -->
+</div><!-- /prs-shell -->
+</div>
+
+
+<div id="toast"><span>✓</span><span id="toast-msg">Settings saved.</span></div>
+
+<script>
+var woHoursHidden = false;
+var brOn = false;
+
+/* All hour-related element IDs in the Work Order view */
+var WO_HR_IDS = [
+  'wot-prep-hdr','wot-work-hdr','wot-total-hdr',
+  'wot-r1-prep','wot-r1-work','wot-r1-total',
+  'wot-r2-prep','wot-r2-work','wot-r2-total',
+  'wot-r3-prep','wot-r3-work','wot-r3-total',
+  'wot-sub-prep','wot-sub-work','wot-sub-total',
+  'wof-prep-lbl','wof-work-lbl','wof-total-lbl',
+  'wof-prep-val','wof-work-val','wof-total-val'
+];
+
+function switchView(v) {
+  ['proposal','workorder','portal'].forEach(function(id) {
+    document.getElementById('view-'+id).classList.toggle('active', id === v);
+  });
+  document.getElementById('btn-v1').classList.toggle('active', v === 'proposal');
+  document.getElementById('btn-v2').classList.toggle('active', v === 'workorder');
+  document.getElementById('btn-v3').classList.toggle('active', v === 'portal');
+}
+
+function setWO(on) {
+  woHoursHidden = on;
+  // sync toggle in proposal view
+  document.getElementById('ti-wo-hours').classList.toggle('on', on);
+  document.getElementById('cb-wo-hours').checked = on;
+  // Work order view — hide all hr-col cells + header total + area hrs
+  WO_HR_IDS.forEach(function(id) {
+    document.getElementById(id).classList.toggle('hidden', on);
+  });
+  document.getElementById('wo-total-hrs-label').classList.toggle('hidden', on);
+  document.getElementById('wo-area-hrs').classList.toggle('hidden', on);
+  // Hide entire subtotal row, footer bar, and helper note
+  document.getElementById('wo-area-subtotal-row').classList.toggle('hide-row', on);
+  document.getElementById('wo-footer-bar').classList.toggle('hide-row', on);
+  document.getElementById('wo-footer-note').classList.toggle('hide-row', on);
+  // Sync PRS settings view toggle
+  var prsCb = document.getElementById('prs-cb-wo-hours');
+  if (prsCb) { prsCb.checked = on; document.getElementById('prs-wo-hours').classList.toggle('on', on); }
+  // Banner buttons
+  document.getElementById('btn-wo-on').classList.toggle('active', on);
+  document.getElementById('btn-wo-off').classList.toggle('active', !on);
+}
+
+function handleWOClick(checked) {
+  setWO(checked);
+}
+
+function syncSW2(id, on) {
+  document.getElementById(id).classList.toggle('on', on);
+}
+
+function toggleTog(id, checked) {
+  document.getElementById(id).classList.toggle('on', checked);
+}
+
+function handlePRSWOClick(checked) {
+  setWO(checked);
+}
+
+function setPRTab(el) {
+  document.querySelectorAll('.prs-tab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+function setPTab(el) {
+  document.querySelectorAll('.ptab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+function toggleBR() {
+  brOn = !brOn;
+  document.body.classList.toggle('br-on', brOn);
+  document.getElementById('btn-br').textContent = 'BR Tags: ' + (brOn ? 'ON' : 'OFF');
+  document.getElementById('btn-br').classList.toggle('active', brOn);
+}
+
+function doSave() {
+  var t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2600);
+}
+</script>
+<!-- PROTO BAR -->
+<div style="position:fixed;bottom:0;left:0;right:0;background:#1e1b4b;color:#fff;font-family:'Nunito',sans-serif;font-size:12px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:36px;z-index:10000;">
+  <a href="../index.html" style="color:#a5b4fc;font-weight:700;text-decoration:none;">&#8592; Hub</a>
+  <span style="color:#818cf8;">86bamht47 &mdash; Hide Hours on Work Orders</span>
+  <a href="https://app.clickup.com/t/8633445/86bamht47" target="_blank" style="color:#a5b4fc;font-weight:700;text-decoration:none;">ClickUp &#8599;</a>
+</div>
+<!-- END PROTO BAR -->
+</body>
+</html>
