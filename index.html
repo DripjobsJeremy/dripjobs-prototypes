@@ -81,6 +81,86 @@
     padding: 32px 24px 0;
   }
 
+  /* ── Top tabs ── */
+  .hub-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .hub-tab {
+    appearance: none;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    padding: 10px 4px;
+    margin-right: 24px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .hub-tab:hover { color: var(--color-text); }
+  .hub-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+  }
+  .hub-view { display: none; }
+  .hub-view.active { display: block; }
+
+  /* ── Release notes grid ── */
+  .release-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .release-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+  .release-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.12);
+  }
+  .release-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .release-date-badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    background: #E8E6FA;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .release-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+  .release-desc {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+  }
+  .release-card-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+
   /* ── Filter bar ── */
   .filter-bar {
     display: flex;
@@ -372,6 +452,15 @@
 
 <!-- Body -->
 <div class="hub-body">
+
+  <!-- Top Tabs -->
+  <div class="hub-tabs">
+    <button class="hub-tab active" data-view="prototypesView">Prototypes</button>
+    <button class="hub-tab" data-view="releaseNotesView">Product Release Notes</button>
+  </div>
+
+  <!-- Prototypes View -->
+  <div class="hub-view active" id="prototypesView">
 
   <!-- Stats -->
   <div class="stats-row">
@@ -938,6 +1027,29 @@
     <a class="proto-btn proto-btn-outline" href="_template/index.html">Preview Template</a>
   </div>
 
+  </div><!-- /prototypesView -->
+
+  <!-- Release Notes View -->
+  <div class="hub-view" id="releaseNotesView">
+
+    <div class="section-heading">Product Release Notes</div>
+
+    <div class="release-grid" id="releaseGrid">
+      <div class="release-card">
+        <div class="release-card-top">
+          <div class="proto-icon" style="background:#E8E6FA;">🚀</div>
+          <span class="release-date-badge">June 2026</span>
+        </div>
+        <div class="release-name">Release Notes | June 2026</div>
+        <div class="release-desc">Customer-facing summary of product updates and improvements shipped in June 2026.</div>
+        <div class="release-card-footer">
+          <a class="proto-btn proto-btn-primary" href="release-notes-june-2026/index.html">View</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /releaseNotesView -->
+
   <!-- Footer -->
   <div class="hub-footer">
     DripJobs Prototype Hub
@@ -982,6 +1094,17 @@
   });
 
   searchInput.addEventListener('input', applyFilters);
+
+  const hubTabs = document.querySelectorAll('.hub-tab');
+  const hubViews = document.querySelectorAll('.hub-view');
+  hubTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      hubTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const target = tab.dataset.view;
+      hubViews.forEach(v => v.classList.toggle('active', v.id === target));
+    });
+  });
 </script>
 </body>
 </html>
