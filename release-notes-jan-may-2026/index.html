@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DripJobs Release Log — Jan–May 2026 (Internal)</title>
+<style>
+  :root{
+    --purple-deep:#5B1A96;
+    --purple:#6B21A8;
+    --purple-med:#9333EA;
+    --purple-light:#DDD6FE;
+    --purple-wash:#F6F1FC;
+    --ink:#1E1530;
+    --ink-soft:#5B5468;
+    --line:#E7DFF5;
+    --amber:#B45309;
+    --amber-wash:#FEF3E2;
+    --green:#15803D;
+    --green-wash:#EAFBF1;
+    --white:#FFFFFF;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Inter","Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
+    color:var(--ink);
+    background:var(--white);
+    line-height:1.55;
+  }
+  a{color:var(--purple-med);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:linear-gradient(135deg,var(--purple-deep) 0%,var(--purple) 55%,var(--purple-med) 100%);
+    color:#fff;
+    padding:64px 24px 56px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:-120px; right:-120px;
+    width:380px; height:380px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.08);
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    bottom:-160px; left:-80px;
+    width:320px; height:320px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.06);
+  }
+  .hero-inner{
+    max-width:780px;
+    margin:0 auto;
+    position:relative;
+    z-index:2;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(255,255,255,0.16);
+    border:1px solid rgba(255,255,255,0.28);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:22px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:#fff;display:inline-block;}
+  .hero h1{
+    font-size:44px;
+    line-height:1.1;
+    margin:0 0 14px;
+    font-weight:800;
+    letter-spacing:-0.02em;
+  }
+  .hero p.sub{
+    font-size:17px;
+    color:rgba(255,255,255,0.86);
+    max-width:560px;
+    margin:0 0 30px;
+  }
+  .hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+    border-top:1px solid rgba(255,255,255,0.22);
+    padding-top:22px;
+  }
+  .hero-meta .stat-label{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:rgba(255,255,255,0.65);
+    margin-bottom:4px;
+  }
+  .hero-meta .stat-value{
+    font-size:16px;
+    font-weight:700;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{max-width:780px;margin:0 auto;padding:0 24px;}
+  .toc{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    padding:28px 0 8px;
+  }
+  .toc a{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--purple);
+    background:var(--purple-wash);
+    border:1px solid var(--purple-light);
+    padding:7px 14px;
+    border-radius:999px;
+    text-decoration:none;
+    transition:background .15s ease;
+  }
+  .toc a:hover{background:var(--purple-light);}
+
+  .section{padding:46px 0 8px;}
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    margin-bottom:22px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .section-head:hover h2{color:var(--purple-med);}
+  .section-head .icon{
+    font-size:20px;
+  }
+  .section-head h2{
+    font-size:22px;
+    font-weight:800;
+    margin:0;
+    color:var(--purple-deep);
+    letter-spacing:-0.01em;
+    transition:color .15s ease;
+  }
+  .section-head .count{
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    background:var(--purple-wash);
+    padding:3px 10px;
+    border-radius:999px;
+  }
+  .section-head .chevron{
+    margin-left:auto;
+    width:20px;
+    height:20px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--purple-med);
+    transition:transform .2s ease;
+  }
+  .section.collapsed .chevron{transform:rotate(-90deg);}
+  .section-body{
+    overflow:hidden;
+    max-height:none;
+  }
+  .section.collapsed .section-body{
+    display:none;
+  }
+  .section.collapsed{padding-bottom:46px;}
+
+  /* ---------- FEATURE CARD ---------- */
+  .card{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px 24px;
+    margin-bottom:16px;
+    background:#fff;
+    transition:box-shadow .15s ease, border-color .15s ease;
+  }
+  .card:hover{
+    border-color:var(--purple-light);
+    box-shadow:0 4px 18px rgba(107,33,168,0.08);
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .card-title{
+    font-size:16.5px;
+    font-weight:700;
+    color:var(--ink);
+    margin:0;
+  }
+  .badge{
+    flex-shrink:0;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .badge.released{color:var(--ink-soft);background:#F2F0F6;}
+
+  .field{
+    display:grid;
+    grid-template-columns:128px 1fr;
+    gap:6px 14px;
+    padding:10px 0;
+    border-top:1px solid #F1ECFA;
+    font-size:14.5px;
+  }
+  .field:first-of-type{border-top:none;padding-top:0;}
+  .field .label{
+    font-weight:700;
+    font-size:12.5px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    padding-top:2px;
+  }
+  .field.what .label{color:var(--purple);}
+  .field.why .label{color:var(--amber);}
+  .field.action .label{color:var(--green);}
+  .field .value{color:var(--ink-soft);}
+  .field.action .value.none{color:var(--green);font-weight:600;}
+
+  @media (max-width:560px){
+    .field{grid-template-columns:1fr;}
+    .field .label{padding-top:0;}
+  }
+
+  /* ---------- UPCOMING / OTHER (always-visible detail) ---------- */
+  .future-card{
+    border:1px solid var(--purple-light);
+    background:var(--purple-wash);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    margin-bottom:14px;
+  }
+  .future-card.alt{
+    border-color:#E9E1F7;
+    background:#FBF9FE;
+  }
+  .future-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:8px;
+  }
+  .future-title{
+    font-size:16px;
+    font-weight:700;
+    color:var(--purple-deep);
+    margin:0;
+  }
+  .future-desc{
+    font-size:14.5px;
+    color:var(--ink-soft);
+    margin:0 0 12px;
+  }
+  .future-link{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--purple-med);
+    text-decoration:none;
+  }
+  .future-link:hover{text-decoration:underline;}
+  .pill{
+    flex-shrink:0;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:999px;
+    background:#fff;
+    border:1px solid var(--purple-light);
+    color:var(--purple);
+    white-space:nowrap;
+  }
+
+  /* ---------- FOOTER ---------- */
+  .footer{
+    margin-top:54px;
+    padding:36px 0 56px;
+    border-top:1px solid var(--line);
+    text-align:center;
+  }
+  .footer p{
+    color:var(--ink-soft);
+    font-size:14px;
+    margin:0 0 6px;
+  }
+  .footer .gear{
+    width:34px;height:34px;
+    margin-bottom:14px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow"><span class="dot"></span>Internal Product Release Log</span>
+      <h1>DripJobs Releases — Jan&ndash;May 2026</h1>
+      <p class="sub">Internal consolidated log of every ticket marked Pushed to Production between January 1 and May 31, 2026, grouped by feature area and sorted chronologically within each group. Not customer-facing.</p>
+      <div class="hero-meta">
+        <div>
+          <div class="stat-label">Period</div>
+          <div class="stat-value">Jan 1 &ndash; May 31, 2026</div>
+        </div>
+        <div>
+          <div class="stat-label">Tickets Released</div>
+          <div class="stat-value">312 tickets</div>
+        </div>
+        <div>
+          <div class="stat-label">Feature Areas</div>
+          <div class="stat-value">11 areas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="toc">
+      <a href="#proposals">Proposals</a>
+<a href="#workorders">Work Orders</a>
+<a href="#portal">Customer Portal</a>
+<a href="#booking">Booking Forms</a>
+<a href="#pipeline">Pipeline & Mobile</a>
+<a href="#messaging">Messaging</a>
+<a href="#integrations">Integrations</a>
+<a href="#metrics">Metrics</a>
+<a href="#settings">Settings</a>
+<a href="#contacts">Contacts</a>
+<a href="#other">Other</a>
+    </div>
+
+    <div class="section" id="proposals">
+      <div class="section-head"><span class="icon">📄</span><h2>Proposals, Packages & Templates</h2><span class="count">109 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Packaged Pricing V1: Package System w/ Package-Level Pricing</h3><span class="badge released">Jan 6</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b52xnx5</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Sales Pipeline New Proposal Button Triggers 500 Error Due to Missing Customer ID Parameter</h3><span class="badge released">Jan 6</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7ywb5f</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Endless Loading When Submitting Categories in Proposal Builder Area Creation (Tenant Specific)</h3><span class="badge released">Jan 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7xzvw4</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Mismatched Totals Between Job Schedule Cards and Proposal Totals in Command Center</h3><span class="badge released">Jan 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b81heym</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">How it Works Button Missing Until Package is Created</h3><span class="badge released">Jan 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b81f1kh</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Photo Navigation Issue in Customer Portal for Line Items</h3><span class="badge released">Jan 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7uepzp</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Total Not Updating with Duplicated Areas</h3><span class="badge released">Jan 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7zb6c5</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Package Selection UI Based on Require Package Selection Toggle</h3><span class="badge released">Jan 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b81qg0r</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Toast Message for Approve Without Signature Action in Proposal Builder</h3><span class="badge released">Jan 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7z94rq</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">(Mobile) Line Item Tap Interaction Fails When Text Wraps in Proposal Builder</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b822849</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">(Mobile) Missing Photo Attachment Feature in Package Management</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b833uvm</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Contact Dropdown Becomes Empty After Validation Error on New Proposal Modal</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b82cy2y</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Line Items Can Be Added Without a Name, Causing Inaccessibility</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7xyq5u</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Move Proposal Templates Navigation Under Proposals Parent Menu</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7z9k7w</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Remove Duplicated Proposal Templates</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b83hyz1</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Remove Obsolete Zestimate Function Call from Lead/Job/Proposal Modal Creation</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7z6nbh</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Send Button Missing in Proposal Builder When Line Item Has $0 Price</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b82r4e1</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Template packages are removed after editing template name</h3><span class="badge released">Jan 13</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b83tcwb</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">(Mobile App) Not Displaying Line Items from Proposal Template</h3><span class="badge released">Jan 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b83ezbb</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Apply Discount Modal Shows Incorrect Job Total</h3><span class="badge released">Jan 15</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b835c9h</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Apply Discount Button Does Not Return After Package Removal</h3><span class="badge released">Jan 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b83ybbm</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Enable Emoji Support in Templates for Company Settings and Reminders</h3><span class="badge released">Jan 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7j1f9r</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Implement Package Settings Slider in Mobile Packages Section</h3><span class="badge released">Jan 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b83y89d</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Allow Users to Set a Default Proposal Template</h3><span class="badge released">Jan 22</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b4zefv6</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Incorrect Job Total Displayed in Event Banner When Proposal Uses Packages</h3><span class="badge released">Jan 22</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b85y09z</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Incorrect Man-Hours Calculation for Substrates in Proposal Builder</h3><span class="badge released">Jan 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b85yb01</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Date Sorting Not Functioning in Proposals &amp; Work Orders</h3><span class="badge released">Jan 27</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b88m10r</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Center Alignment Issue on Proposal Templates Page</h3><span class="badge released">Jan 27</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b88xv5j</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Total Display Issue for Items with Preset Prices</h3><span class="badge released">Jan 27</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b87x81x</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Line Item Description Resets When Price is Edited After Initial Description Update</h3><span class="badge released">Jan 28</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8a99kg</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update the tooltip text for the Line Item Description field</h3><span class="badge released">Jan 28</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b87xgb4</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Add Conditional Helper Text for Jobi AI Notes in Command Center &amp; Proposal Builder</h3><span class="badge released">Jan 30</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8b7pe5</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Relocate Jobi AI Helper Text Above Company Notes Section in Proposal Builder</h3><span class="badge released">Feb 2</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8bn2fj</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Zapier Trigger Proposal Accepted fails to map Salesperson field data</h3><span class="badge released">Feb 2</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8829d8</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Proposal Builder Empty Columns Expanding to Match Text Width / Height</h3><span class="badge released">Feb 4</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8cx0fc</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Add Proposals Sent KPI to Metrics Dashboard</h3><span class="badge released">Feb 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8b8fug</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Format Total Sales Column on Activations Tracking to Match Proposals Amount</h3><span class="badge released">Feb 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8d0ux2</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Project in Progress Revenue Incorrectly Includes Unaccepted Packages</h3><span class="badge released">Feb 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8d7tc7</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Inconsistent Line Item Positioning in Proposal Templates</h3><span class="badge released">Feb 17</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8dtfza</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Proposal Total Breakdown Missing Package Line Items (Tenant Specific)</h3><span class="badge released">Feb 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8jp7e5</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Renaming templates temporarily makes packages disappear in templates</h3><span class="badge released">Feb 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8jrx6e</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Add Discount Option Does Not Appear When Multiple Line Items Are Added to a Proposal</h3><span class="badge released">Feb 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8jwb36</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Proposal Hiding Settings Not Affecting Customer View</h3><span class="badge released">Feb 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8jvr0e</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Multiple Discount Line Items Are Not Displayed in the Customer Portal</h3><span class="badge released">Feb 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8jwgbw</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Countersignature Display Breaks Into Multiple Lines After Signing a Proposal</h3><span class="badge released">Feb 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8k8tcx</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Custom Section Template Description Not Populating When Added to Proposal Template</h3><span class="badge released">Feb 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8k331n</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Templates Restore Default Button Producing Error</h3><span class="badge released">Feb 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8fpt85</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Custom Section Order Not Retained When Creating Proposals from Templates</h3><span class="badge released">Feb 24</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8k394t</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Implement Details Modal for Areas inside Packages</h3><span class="badge released">Feb 24</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8k3qvc</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Remove Hardcoded Default Text from Blank Proposal Template</h3><span class="badge released">Feb 24</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8m1566</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Sheen Color Chart Details Missing in Downloaded Work Order PDF</h3><span class="badge released">Feb 24</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8g4zq3</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Customer portal blocks proposal acceptance (Tenant Specific)</h3><span class="badge released">Feb 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8en2zr</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix False Package Selection Prompt When Toggle is Disabled</h3><span class="badge released">Feb 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8mn69y</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix View Dropdown Hidden Under Table Border on Last Row of Proposals List</h3><span class="badge released">Feb 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8dcnaw</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Allow $0 Package-Only Proposals to Send (Move Validation to Customer Portal)</h3><span class="badge released">Mar 2</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8p1j8b</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Salesperson Field Returns Null in Proposal Accepted Zapier Trigger Payload (Regression Fix)</h3><span class="badge released">Mar 2</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8j9165</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Zero Dollar Total Issue in Proposal Submission</h3><span class="badge released">Mar 5</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8pxjd1</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Discount Description Not Displayed to Customer in Proposal / Customer Portal View</h3><span class="badge released">Mar 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8qpdxu</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix False $0 total Error Blocking Proposal Acceptance</h3><span class="badge released">Mar 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8r4thp</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Proposal Archive Wrongly Completing Deals Instead of Cancelling/Archiving</h3><span class="badge released">Mar 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8qu802</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Metrics - Proposals Sent Fallback Warning</h3><span class="badge released">Mar 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8gv5d9</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Hide Draft Status Proposals from Customer Portal My Proposals List</h3><span class="badge released">Mar 10</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8rrx2c</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Not Auto-Selected and Modal Body Not Scrollable (Tenant Specific)</h3><span class="badge released">Mar 10</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8m4wjq</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Package Description Not Carrying Over to Work Order</h3><span class="badge released">Mar 10</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8t2aye</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Error When Adding Optional Items to Proposal - Add Multiple Items</h3><span class="badge released">Mar 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8pwhev</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Infinite Spin When Adding New Substrate in Proposal Builder</h3><span class="badge released">Mar 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8rq8k2</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Optional Substrate Price Not Displayed in Proposal Builder — Mobile App</h3><span class="badge released">Mar 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8thj74</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Not Auto-Selected and Modal Body Not Scrollable</h3><span class="badge released">Mar 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8twh3u</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">AI-Assisted Line Item Description Generator — Proposal Builder</h3><span class="badge released">Mar 17</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b321euz</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Template Creation &amp; Access Errors (Tenant Specific)</h3><span class="badge released">Mar 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8uurb0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Inconsistencies in Proposal Display Settings in Customer Portal UI</h3><span class="badge released">Mar 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8v1qbw</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Make Entire Package Rectangle Clickable in Proposal Builder</h3><span class="badge released">Mar 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8tcyqk</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Builder Change Order Display Issues</h3><span class="badge released">Mar 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8u5q4b</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Recalculate Substrates Modal Loops and Cannot Be Dismissed — Mobile App</h3><span class="badge released">Mar 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8thjbk</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Line Item Title — Prevent Inconsistent Wrapping on Mobile</h3><span class="badge released">Mar 25</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8p20me</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Pipeline Deal Card — Scheduled Proposal Send Label Dynamic Date Fix</h3><span class="badge released">Mar 25</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8t2h7a</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Line Item Flickering on Hover - Proposal/Template Builder</h3><span class="badge released">Mar 30</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8rrne6</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Information Icon Click Causes Package Selection</h3><span class="badge released">Mar 30</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b901ek7</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Templates — Auto-Create Default Template for New Accounts</h3><span class="badge released">Mar 30</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b90xjpd</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Discount Display Bug in Customer Portal</h3><span class="badge released">Apr 3</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b93jpmz</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Siding Selection Adds Siding and Trim Repair Instead - Proposal Bug</h3><span class="badge released">Apr 3</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b93b3r6</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Mobile Proposal View Zoom Issue on Certain Screen Sizes</h3><span class="badge released">Apr 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9aqw5d</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Package Duplication — Percentage-Based Price Adjustment Modal</h3><span class="badge released">Apr 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8r7be9</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Proposal Hero Image Link - Customer Portal Settings</h3><span class="badge released">Apr 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9d1dde</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Invoice Due Date — Overdue Logic Fires Same Day, Calendar Blocks Today's Date &amp; Proposal Auto-Assignment</h3><span class="badge released">Apr 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9a92px</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Package Duplication Causes $0 Area Pricing + Work Order Hour Totals Incorrect</h3><span class="badge released">Apr 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b94h4v7</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal SMS Template Added space</h3><span class="badge released">Apr 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9frpj0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Discount Description Shows Raw HTML Code in Proposal</h3><span class="badge released">May 4</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9fwgm6</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Line Item Detail Modal — No Scroll &amp; No Dismissal in Customer Portal (Package View)</h3><span class="badge released">May 4</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9dmp1f</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal View — Area Item Detail Modal</h3><span class="badge released">May 4</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b92vna8</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Change Order Acceptance Modal to Match New Proposal Acceptance UI</h3><span class="badge released">May 4</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8zg0cz</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Add rounded gallon script to project</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9v62f4</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Customer Portal: Exclude Cancelled &amp; Unsent Proposals from My Proposals</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9ncym1</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Rounded Gallon Pricing Toggle (PARENT)</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86azcxv4c</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Top Shelf Painting Work Order Shows Multiple Packages</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9c8x3f</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Investigate Higher Loading Time on Proposal Sent Stage in Mobile</h3><span class="badge released">May 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9w9a77</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Add Multiple Items to Packages</h3><span class="badge released">May 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b84bmac</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Investigate Intermittent Proposal Attachment Corruption</h3><span class="badge released">May 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9u5w6m</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Builder — Mobile UI Button Alignment Issues (iPad &amp; Android)</h3><span class="badge released">May 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b96gh6a</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Reply-to Email When Deal Salesperson Changes After Proposal Sent</h3><span class="badge released">May 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9tj3x2</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Default New Proposal Template to Blank</h3><span class="badge released">May 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9xev9m</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Notification Template Keyword Set Restoration &amp; SMS Composer Quality Improvements</h3><span class="badge released">May 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9f1ay7</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Restrict Deletion / Edit of Proposal-Based &amp; Change Order Discounts from Invoices</h3><span class="badge released">May 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b6xkg7y</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">#15460 - Pro Painters Plus - Communication templates stuck in error state</h3><span class="badge released">May 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86ba0zbhj</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">About Us Section with Photo (Configurable Proposal Position)</h3><span class="badge released">May 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9r8v8b</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Enforce Character Limit on Line Item, Product, and Service Names</h3><span class="badge released">May 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8r52j0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Pending Proposal on Multi-Proposal Deal Generates Duplicate Job Card</h3><span class="badge released">May 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b99tnty</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Builder UI update</h3><span class="badge released">May 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9u5vm7</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Follow-Up Drip Open Rate Missing for Text-Only Follow-Ups</h3><span class="badge released">May 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9nrk8m</div></div>
+      </div>
+      </div>
+    </div>
+    <div class="section" id="workorders">
+      <div class="section-head"><span class="icon">🧾</span><h2>Work Orders & Change Orders</h2><span class="count">7 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Enable Multi-Recipient Selection for Work Order Email and SMS Delivery</h3><span class="badge released">Jan 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b5jw4zx</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Performance Optimizations Work Orders Page</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b82cfze</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Deal Name Column Click Behavior on Change Order Page</h3><span class="badge released">Jan 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b875ebk</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Metrics - Fix Interior/Exterior Sales By Production Rates Missing Change Order Areas</h3><span class="badge released">Mar 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8rg332</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Notification Trigger for Manual Change Order Acceptance</h3><span class="badge released">May 4</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b3xmuw4</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Customer portal change orders do not expand correctly</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9p298f</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">#14271 - Macatawa Painting - Change Order missing from the Work Order</h3><span class="badge released">May 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86ba0qgu8</div></div>
+      </div>
+      </div>
+    </div>
+    <div class="section" id="portal">
+      <div class="section-head"><span class="icon">💳</span><h2>Customer Portal, Invoicing & Billing</h2><span class="count">27 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Performance Optimizations Invoices Page</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b822q46</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Invoice Page UI Issues</h3><span class="badge released">Jan 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b859vhd</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Incorrect Invoice Statuses Displayed in UI</h3><span class="badge released">Jan 22</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b86c0q9</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Manage Billing Link Endless Spinner / Tab Closing on Mobile</h3><span class="badge released">Feb 2</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8bd62m</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Jobi AI Add-on Automatically Removed Despite Active Chargebee Subscription</h3><span class="badge released">Feb 6</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8e2th1</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Chargebee Webhook Enum Conversion Issue</h3><span class="badge released">Feb 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8cmpc0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Chargebee - Unpaid Invoice Alert in Company Settings</h3><span class="badge released">Feb 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8ayzwh</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Document Upload / Hero Image Do Not Display Until Save Is Clicked in Customer Portal</h3><span class="badge released">Feb 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8kkdb8</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Alternative Payment Instructions Not Displayed to Customers When Stripe Payment Option Is Enabled</h3><span class="badge released">Feb 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8mam55</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix error in payments tab</h3><span class="badge released">Mar 5</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8r7kz7</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix error with ACH status comparison</h3><span class="badge released">Mar 5</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8r6w08</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Invoice Displays Paid in Full When Stripe Payment Still Requires Customer Action</h3><span class="badge released">Mar 5</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8nve0r</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Invoices Subtotal / Total Mismatch</h3><span class="badge released">Mar 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8tu6y6</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Void Invoice Modal Stuck Loading (Tenant Specific)</h3><span class="badge released">Mar 17</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8ua7hu</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Revert Changes from Prior Invoice Ticket</h3><span class="badge released">Mar 17</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8v40yd</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Mobile App Welcome Screen with In-App Chargebee Checkout</h3><span class="badge released">Mar 24</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7z64xt</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Invoice Viewed Notification Not Triggering on Scroll</h3><span class="badge released">Mar 25</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8u3enu</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Incorrect Deposit Amount on Invoice (Tenant Specific)</h3><span class="badge released">Mar 25</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8z5593</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Missing Save and Delete Buttons in Manual Invoice Creation</h3><span class="badge released">Mar 25</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8r4cz0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Deactivated Account Reactivation in Chargebee API Calls</h3><span class="badge released">Mar 30</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b91wke6</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Job Costing - Add Prompt for Manual Invoices</h3><span class="badge released">Mar 30</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8qtyxn</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Sync Chargebee Add-On Removal / Addition to DripJobs Subscriptions</h3><span class="badge released">Mar 30</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8vhufe</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Relocate Portal Accent Color to Customer Portal Settings</h3><span class="badge released">Apr 3</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b93zknm</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Roll Back Chargebee Service Change</h3><span class="badge released">Apr 6</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b99h83q</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Customer Portal Hero Image Cropped and Not Scrollable on Android</h3><span class="badge released">Apr 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b96x5p4</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Deactivated Account Reactivation in Chargebee API Calls</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9thr47</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix issue with scrolling in the customer portal</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9v7d2n</div></div>
+      </div>
+      </div>
+    </div>
+    <div class="section" id="booking">
+      <div class="section-head"><span class="icon">📝</span><h2>Booking Forms</h2><span class="count">9 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Booking Form &amp; Zapier Create Estimate Request Error When Previous Estimate Has Been Archived</h3><span class="badge released">Feb 3</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7xag3h</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Remove Required Validation from Booking Form Notification Consent Checkbox</h3><span class="badge released">Feb 3</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b85drwa</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Download button for Booking Form QR code does not trigger download on mobile devices</h3><span class="badge released">Feb 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8hxr1e</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Social Media Icons Configured in Edit Mode Are Not Rendered on the Published Booking Form Page</h3><span class="badge released">Feb 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8jwmew</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Default Booking Form Communications Toggle to ON and Hide Terms After Initial A2P Approval</h3><span class="badge released">February</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8jeyv7</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Booking Forms — Add Duplicate Form Functionality</h3><span class="badge released">Mar 17</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8p1uwt</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Booking Form SMS Helper Text</h3><span class="badge released">Mar 17</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8vup04</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Booking Form Opt-In Checkbox Pre-Checked for Rejected/Pending Twilio Apps</h3><span class="badge released">Apr 6</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b95m7je</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Booking Form: SMS Opt-In Pre-Checked &amp; Terms Checkbox Missing for Pending/Non-Approved A2P Tenants</h3><span class="badge released">Apr 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9c4wrd</div></div>
+      </div>
+      </div>
+    </div>
+    <div class="section" id="pipeline">
+      <div class="section-head"><span class="icon">📱</span><h2>Pipeline, Scheduling & Mobile</h2><span class="count">47 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Infinite Loading &amp; Modal Format Issues in Appointments with URLs in Details</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b82vj9t</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Lead Source Filter Error on Jobs Pipeline and Jobs List</h3><span class="badge released">Jan 13</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b83kt20</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">(Mobile) Command Center Settings Not Saving</h3><span class="badge released">Jan 15</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b83kn3u</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Missing Logo and Appointment Request Button in Email Blast</h3><span class="badge released">Jan 15</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b83jbwx</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Duplicate Deals Appearing on Jobs Pipeline</h3><span class="badge released">Jan 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b82fyx6</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Error When Rescheduling Appointments for Specific Customer</h3><span class="badge released">Jan 22</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8693xh</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Mobile Drip Sequence Selection Issue on Deal Command Center</h3><span class="badge released">Jan 22</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b87a4vk</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Performance Enhancement for Mobile Sales Pipeline</h3><span class="badge released">Jan 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b88gkyh</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Deal Card Not Moving to New Stage Until Refresh</h3><span class="badge released">Jan 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b884zbd</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Mobile Deal Card Appointment Scheduling Redirects to HTML Page</h3><span class="badge released">Jan 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b88mm68</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Internal Lead Sources Not Displaying in Appointment Scheduling</h3><span class="badge released">Jan 27</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b88wc0z</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Up-Sell Pages: Production Rates / Job Costing / Chat</h3><span class="badge released">Jan 27</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b85d4a9</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Mobile - DJ App Navigation Bar Disappears Too Quickly</h3><span class="badge released">January</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7z7qwb</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Mobile Revamp of Sales and Jobs Pipeline</h3><span class="badge released">January</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b82w4jt</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Scrolling/Glitching on Job Schedule Pending Job Screen (iOS &amp; Mobile)</h3><span class="badge released">Feb 2</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8bb95e</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Job Costing Dashboard – Persist Showing Jobs Where Filter Preferences</h3><span class="badge released">Feb 2</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7xuyra</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Job Costing Dashboard Status Change Stuck on Costing Active</h3><span class="badge released">Feb 4</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8cwzct</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Custom event appointments fail to save when creating new contacts</h3><span class="badge released">Feb 6</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8dj7zg</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Clock Icon Alignment in Job Schedule Modal Time Fields</h3><span class="badge released">Feb 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8brd00</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Inconsistent delete button behavior in appointment modal</h3><span class="badge released">Feb 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8cdwtv</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Optimize Contacts Page Performance for Large Data Sets (Web and Mobile)</h3><span class="badge released">Feb 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7e5tn8</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Appointment reminder status displays as off when editing, preventing reminder delivery</h3><span class="badge released">Feb 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8ekkha</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Job Costing: Add Total Hours Entry Option</h3><span class="badge released">Feb 17</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b0vetj7</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Allow Scheduling of Future Dates in Job Costing</h3><span class="badge released">Feb 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7xkw8v</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Appointments Tab Modal Issues in Contact Record</h3><span class="badge released">Mar 2</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8nuc8p</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Job Costing: Infinite Loading When Deleting or Editing a Time Entry</h3><span class="badge released">Mar 5</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8qgd38</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Job Costing: Whoops Error When Opening Assigned Jobs for Specific Payroll Period</h3><span class="badge released">Mar 5</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8qgdxv</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New Zapier Action: Update Appointment (Nearest Scheduled)</h3><span class="badge released">Mar 24</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8xwrma</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Oversized Notifications Modal After Command Center Usage</h3><span class="badge released">Mar 25</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8u3bky</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Pipeline Time Mismatch - Shows Wrong Time</h3><span class="badge released">Mar 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b91rp3w</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Display SMS Opt Status Across DripJobs UI (Contact Record, Command Center, Deal Card, Job Card)</h3><span class="badge released">Mar 30</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7eqfqm</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Enhance Appointments Tab Display - Contact Record</h3><span class="badge released">Mar 30</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8p1en2</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Update Appointment Zap - Google Calendar Not Syncing</h3><span class="badge released">Apr 6</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b94hzze</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Edited Job Address Not Reflected in Command Center or Contact Deals List</h3><span class="badge released">Apr 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b95zrby</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Job Schedule — Mobile Form Controls Malfunction</h3><span class="badge released">Apr 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b967t9y</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Metrics KPI Banner: Dedicated Mobile Layout</h3><span class="badge released">Apr 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b96u3x8</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Job Schedule — Edit Event Button Non-Functional on Mobile</h3><span class="badge released">Apr 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b967tmp</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">DJ Chat Mobile — Ghost Grey Boxes Rendering in Chat List and Conversation View</h3><span class="badge released">April</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9c8pk8</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Schedule a Demo Button: Job Costing, Production Rates &amp; Zapier</h3><span class="badge released">May 4</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8z6hv0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Show/Hide Archived Deals &amp; Jobs — Sales List, Jobs List (Admin + Super Admin)</h3><span class="badge released">May 4</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8xtxym</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Exact Time Support &amp; 5-Minute Increments for Scheduled Appointments</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b99gajp</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix bug where completed jobs dont show in jobs pipeline</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9v71c3</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Improve Command Center Layout to Show Key Information at a Glance</h3><span class="badge released">May 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9tpff0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Job / Appointment Schedule Dropdown to Use Single Time Selects</h3><span class="badge released">May 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9xb86v</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Adjust Archived Jobs to show Archived Status throughout app; fix Project Complete filter in Jobs list</h3><span class="badge released">May 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9xet1k</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Show Appointment Requests in Appointments Menu for Salesperson Users</h3><span class="badge released">May 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86ba0kk92</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">BUG | Jobs Pipeline / Jobs List: Open &amp; Pending Jobs Invisible After May 19 Deploy (Custom Stage JobStatus NULL)</h3><span class="badge released">May 27</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86ba4cqvg</div></div>
+      </div>
+      </div>
+    </div>
+    <div class="section" id="messaging">
+      <div class="section-head"><span class="icon">💬</span><h2>Messaging, SMS & Notifications</h2><span class="count">36 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Enable iOS Password AutoFill Support for DJ Chat App</h3><span class="badge released">Jan 7</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7ryhwn</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Blast Feature Send to Dropdown Incorrectly Includes Archived and Closed Deals</h3><span class="badge released">Jan 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7ym70c</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Inconsistent Dropdown Menu Behavior on Drips Page</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7w4ef2</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">A2P Registration Submission Confirmation &amp; Next Steps Display</h3><span class="badge released">Jan 13</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7p1w7x</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Email Blasts Not Sending to Contacts</h3><span class="badge released">Jan 22</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b85dvcu</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New Company Activation Tracking System - OBCSS Assignment, A2P Tracking, and Automated Metrics</h3><span class="badge released">Jan 22</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7xaabg</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Text Messaging Add-On Availability Not Updated After Downgrade to Pro Account</h3><span class="badge released">Jan 22</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7xf63a</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">DJ Chat App - Implement Login Autofill (Android &amp; iOS)</h3><span class="badge released">January</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7tyxwu</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Google Calendar Events Not Syncing to DripJobs</h3><span class="badge released">Feb 2</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8bd10m</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Add Terms &amp; Privacy Policy Consent Checkbox with Conditional SMS Opt-in Logic</h3><span class="badge released">Feb 6</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8dbqer</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Permanently Remove All A2P Campaign Status Notification Emails</h3><span class="badge released">Feb 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8g1xtc</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Call Routing Helper Text — Text Messaging Integration Card</h3><span class="badge released">Feb 17</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8h392n</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">iOS - DripJobs Chat - Fix Duplicate Lightning Bolt Icon</h3><span class="badge released">February</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8eh6p1</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Blast Preview Missing Images (Tenant Specific)</h3><span class="badge released">Mar 5</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8ncb8h</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Missing Privacy Policy &amp; Terms URLs in Twilio A2P Registration</h3><span class="badge released">Mar 5</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8nq3n3</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">QuickBooks Time records not syncing to DripJobs (Tenant Specific)</h3><span class="badge released">Mar 5</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8ektfe</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Replace Default DripJobs Form with Brand Website in Text Messaging Setup</h3><span class="badge released">Mar 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8fur78</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Users Receiving Notifications Despite Disabled Settings</h3><span class="badge released">Mar 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8q62x0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Chat Message Received Notification Not Triggering</h3><span class="badge released">Mar 25</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8u55n1</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Skip A2P Registration &amp; Enable SMS for Canadian Customers (Account Specific)</h3><span class="badge released">Mar 25</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8t36jh</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">DripJobs APP - In-App Browser Schemas for New Onboarding Process</h3><span class="badge released">March</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8td5df</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Block SMS Add-On Access for Pro Plan Users</h3><span class="badge released">Apr 3</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b95k9w6</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Restore Disconnected Text Messaging Add-On</h3><span class="badge released">Apr 6</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b96ax1t</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Twilio Client Init Threading Race Condition</h3><span class="badge released">Apr 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9a3d2k</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">GetStream API Audit — Excessive UpdateUsers Calls &amp; Contact-to-Channel Registration Gap</h3><span class="badge released">Apr 10</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9aqt4q</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">A2P Application Success Screen — Update 10-15 Business Days Copy</h3><span class="badge released">Apr 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9bdum5</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Incoming SMS Delivered but Missing from DripJobs Chat Interface</h3><span class="badge released">Apr 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9c1ecj</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Add helper text &amp; tooltip for Reply-To email behavior</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9rvnkk</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Drips Menu UI Update</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9rw9gd</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Delete Button Not Working - Blasts Management</h3><span class="badge released">May 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9dw0dj</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Create endpoint to send reset password email through API for DJ Chat</h3><span class="badge released">May 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9y2khe</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Twilio Campaign Status Reconciliation — Admin Tool Mismatch Detection &amp; Resolution</h3><span class="badge released">May 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b94wn6z</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Blasts Sent from List Views Do Not Appear on the Blast Dashboard</h3><span class="badge released">May 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9dx5ze</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">DJ Chat - Add Forgot Password Link</h3><span class="badge released">May</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9j0nw9</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">DJ Chat - Custom Message Create/Edit Modal — Typed Text Invisible (White on White Background)</h3><span class="badge released">May</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9ybazv</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Reply-To Email Logic for Scheduled Communications (Salesperson to Company Fallback)</h3><span class="badge released">May</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8g71qz</div></div>
+      </div>
+      </div>
+    </div>
+    <div class="section" id="integrations">
+      <div class="section-head"><span class="icon">🔌</span><h2>Integrations</h2><span class="count">14 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Branch Switching Bug: User Kicked Out When Not Changing Account Name</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b82k5hm</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Zapier - Add Optional Deal Name Mapping Field to Actions</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7kftx7</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Enhance Zapier Create On Site Estimate Action to Move Existing Deals to Estimate Scheduled</h3><span class="badge released">Jan 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7xa84d</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Timezone Conversion for Calendly Integration in Zapier Triggers</h3><span class="badge released">January</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b89zdzy</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Auto-Create Internal Lead Sources from Zapier Submissions</h3><span class="badge released">Feb 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b4n18qq</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Customer View Continues to Display Acorn Option After Integration Has Been Disabled in Settings</h3><span class="badge released">Feb 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8jehrf</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Quo Integration MVP - Pilot Tenant Only</h3><span class="badge released">Feb 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8jkraz</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Zapier Lead Source Mapping (Tenant Specific)</h3><span class="badge released">Mar 5</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8nd7du</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New Automations Menu (Zapier Embed Integration)</h3><span class="badge released">Mar 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b91u6q4</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Calendly Link for Schedule Setup Dropdown Option</h3><span class="badge released">Mar 30</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9312fc</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Enable Acorn Financing for Eligible Canadian Provinces (Fig / Canada Fig)</h3><span class="badge released">Apr 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8ycdz8</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Acorn Financing Upgrade Message</h3><span class="badge released">Apr 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9fu30n</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Angi Leads Integration Link - Company Settings</h3><span class="badge released">May 4</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9dv7t2</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">QuickBooks Sync Failure — 401 Error Message Provides No Actionable Guidance</h3><span class="badge released">May 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9npap7</div></div>
+      </div>
+      </div>
+    </div>
+    <div class="section" id="metrics">
+      <div class="section-head"><span class="icon">📊</span><h2>Metrics & Reports</h2><span class="count">10 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Metrics Page Date Range Bug</h3><span class="badge released">Jan 28</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b88e4kr</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Prevent Old Companies (Pre-Dec 29 2025) Reappearing in Activations Tracking</h3><span class="badge released">Feb 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8k70r6</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Activation Tracking Page Displaying Retroactive/Pre-Launch Companies</h3><span class="badge released">February</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8g65ny</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Metrics - Fix Sales By Salesperson Missing No Salesperson + Incorrect Totals</h3><span class="badge released">Mar 5</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8qtfpz</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Metrics - Fix Closing Ratio by Source Total Jobs Won Mismatch</h3><span class="badge released">Mar 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8rrq2v</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Unify Sales Metrics Logic - Consistent Totals Across All Sales Reports</h3><span class="badge released">Mar 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8td04g</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Metrics Dashboard — KPI Banner Redesign, Date Range Consistency &amp; Section Cards</h3><span class="badge released">Apr 3</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8qu3hn</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Metrics Dashboard — Closing Ratio Breakdown Cards Fix</h3><span class="badge released">Apr 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9bd07g</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Bulk Change Report Job Not Generating After Product Swap</h3><span class="badge released">Apr 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9gkeun</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Add Leonardo Motta to OBCSS Dropdown — Activation Trackings List</h3><span class="badge released">May 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86ba2vhen</div></div>
+      </div>
+      </div>
+    </div>
+    <div class="section" id="settings">
+      <div class="section-head"><span class="icon">⚙️</span><h2>Settings & Admin</h2><span class="count">5 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Super Admins Cannot Save Company Settings Without CS Representative Assignment</h3><span class="badge released">Jan 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b886nfu</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Add Users to OBCSS Dropdown - Company Settings</h3><span class="badge released">Mar 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8xn9a8</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Schedule Refresher Link in User Dropdown Menu</h3><span class="badge released">Mar 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8u9bm0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Remove Cody from OBCSS Dropdown in Company Settings</h3><span class="badge released">Mar 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b90w8xv</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Company Settings UI Update</h3><span class="badge released">May 4</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9q0uux</div></div>
+      </div>
+      </div>
+    </div>
+    <div class="section" id="contacts">
+      <div class="section-head"><span class="icon">👤</span><h2>Contacts & Leads</h2><span class="count">9 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Contacts Import Fails With Upload Error</h3><span class="badge released">Jan 22</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b86z0rw</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Lead Source Mapping Bug - Missing Lead Source on Schedule</h3><span class="badge released">Jan 22</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b86q73z</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Empty Fields on Add New Contact Page</h3><span class="badge released">January</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b858z13</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix No Lead Source Filter (Tenant Specific)</h3><span class="badge released">Apr 8</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b94p6ut</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Force Lead Source Assignment on Contact Creation</h3><span class="badge released">Apr 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b96r6xh</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix CSV Import Stuck at 15 Contacts - Fails to Import 1200 New Contacts</h3><span class="badge released">Apr 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9bhz5p</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Contact Import Fails Silently After Ready to Import</h3><span class="badge released">May 4</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9md1da</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Enhance Contact Import to Require and Map Lead Source</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9h0pdd</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Contact List: Add Created Date Column with Sort</h3><span class="badge released">May 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9uk39a</div></div>
+      </div>
+      </div>
+    </div>
+    <div class="section" id="other">
+      <div class="section-head"><span class="icon">✨</span><h2>Other Improvements & Fixes</h2><span class="count">39 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Post Merge fixes</h3><span class="badge released">Jan 6</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b81edfv</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Copyright Year to 2026 Across All Platforms</h3><span class="badge released">Jan 7</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b7zj90c</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Performance Optimizations Jobs Create/Edit Page (N+1 query issues)</h3><span class="badge released">Jan 12</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b820zqc</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Allowing Creation of Products/Services Without a Name</h3><span class="badge released">Jan 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b831wbt</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Error Opening Google Maps App from New UI</h3><span class="badge released">Jan 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b84q7ax</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Opening Modal from Modal Triggers Double Function Call</h3><span class="badge released">Jan 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b82zgj8</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Incorrect Paint Value Displayed After Zeroing Measurements</h3><span class="badge released">Jan 15</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b84x862</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Add Project Manager Keywords to Dynamic Messaging</h3><span class="badge released">Jan 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b46knh2</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Error Message Obscures Text Input in Add Item Modal</h3><span class="badge released">Jan 27</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b886d7r</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Jobi AI</h3><span class="badge released">Jan 27</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b869jqq</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Truncated Fields &amp; Layout Issues on Customer Info Page</h3><span class="badge released">Jan 27</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b88e7e5</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Activity Page Date Sorting Bug</h3><span class="badge released">Jan 28</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b87cge6</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">CK Editor: Restore Embed Media and Table Features</h3><span class="badge released">Jan 28</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b87qwa1</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Emoji Support Not Functioning in User Profile Signature Box</h3><span class="badge released">Feb 9</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8bcv4m</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Restore Suggest a Feature link in User Profile dropdown</h3><span class="badge released">Feb 17</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8fchee</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Update Duplicate Area Modal</h3><span class="badge released">Feb 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8d7qth</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Delete Line Action Triggers an Empty Pop-Up with No Confirmation Message or User Feedback</h3><span class="badge released">Feb 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8jwjbk</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Areas Total Removed from Final Breakdown When Hide Area Price Enabled</h3><span class="badge released">Feb 24</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8m115d</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Skip Auto Password Reset for Users with 2FA Enabled</h3><span class="badge released">Feb 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8n0kt5</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Terms and Conditions Generator Link Broken with Security Warning</h3><span class="badge released">Feb 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8128yt</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Event end time not syncing to Google Calendar for non-estimate events</h3><span class="badge released">Mar 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8x713n</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Optional Area Toggle Missing Despite Existing Items (Tenant Specific)</h3><span class="badge released">Mar 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8u4fe8</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Whoops Error on Deal Delete with Jobi AI Data</h3><span class="badge released">Mar 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8v7xyv</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Jobi AI — Description Assistant for Products &amp; Services</h3><span class="badge released">Mar 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8x42m7</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Remove subscription_id Param + Session Screen Logic</h3><span class="badge released">Mar 24</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b910m53</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Auto Compress Logo Pictures upon upload</h3><span class="badge released">Mar 25</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b8rt189</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix error on job start modal</h3><span class="badge released">Apr 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9d6n9t</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Bulk Product Changer — Cost Summary Area Entry Points &amp; Change Products Modal</h3><span class="badge released">Apr 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b3fm30n</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fix Notes Section Spinning Wheel (Tenant Specific)</h3><span class="badge released">Apr 20</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b94cnay</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Add-On Modal: Rename Coupon Code to Access Code</h3><span class="badge released">Apr 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9be000</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Factory Direct Renovations Cancelled Deal Won't Open (Spinning Wheel)</h3><span class="badge released">Apr 23</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9eme5t</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Error When Adding New User</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9be77d</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Show Archived Large Accounts + Behavior Correction</h3><span class="badge released">May 11</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9rxx1z</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Millan Painting Cancelled Deal Won't Open to Re-Open</h3><span class="badge released">May 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9q01vu</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Restore &amp; Improve Quantity Calculator in Add Item Modal</h3><span class="badge released">May 14</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b96y3rm</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Jobi Communication Suggestions Panel Does Not Scroll</h3><span class="badge released">May 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9yc7hx</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Sales List Page - Horizontal Scrolling Not Working</h3><span class="badge released">May 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9r46t3</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Support Users with Both Salesperson and Project Manager Roles</h3><span class="badge released">May 19</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b9q8vfy</div></div>
+      </div>
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Add Industry-Specific Options to Business Type Dropdown</h3><span class="badge released">May 26</span></div>
+        <div class="field what"><div class="label">ClickUp ID</div><div class="value">#86b92tjqp</div></div>
+      </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p><strong>Internal reference only — not shared publicly.</strong></p>
+      <p>Generated from ClickUp "Pushed to Production" status, Jan 1 &ndash; May 31, 2026. Customer-facing release notes begin with the June 2026 card.</p>
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('.section-head').forEach(function(head){
+      head.addEventListener('click', function(){
+        head.closest('.section').classList.toggle('collapsed');
+      });
+    });
+  </script>
+</body>
+</html>
