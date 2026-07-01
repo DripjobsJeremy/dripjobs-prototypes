@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Activation Dashboard All Tenants Ticket 86b9512kq — v1.7 Login Events</title>
+<title>Activation Dashboard All Tenants Ticket 86b9512kq — v1.8 CS Feedback Flag</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -174,12 +174,26 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
 .ms-item input[type=checkbox]{accent-color:#7C3AED;width:13px;height:13px;cursor:pointer;flex-shrink:0;}
 .ms-footer{padding:6px 14px;font-size:11px;color:#7C3AED;cursor:pointer;font-weight:600;text-align:center;border-top:1px solid #f3f4f6;border-radius:0 0 8px 8px;}
 .ms-footer:hover{background:#faf5ff;}
+/* --- CS Flags group --- */
+.cg-csflags{background:#be185d;}
+thead tr.col-row th.col-csflag{background:#fff1f2;}
+thead tr.col-row th.col-csflag:hover{background:#ffe4e6;}
+tbody td.col-csflag{background:#fffafa;}
+tbody tr:hover td.col-csflag{background:#fff1f2 !important;}
+tfoot td.col-csflag{background:#fecdd3;}
+tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
+/* CF inline select */
+.cf-select{appearance:none;-webkit-appearance:none;border:1px solid transparent;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;padding:2px 8px 2px 7px;outline:none;min-width:96px;text-align-last:center;}
+.cf-select:focus{border-color:#7C3AED;box-shadow:0 0 0 2px rgba(124,58,237,.1);}
+.cf-sel-none{color:#9ca3af;border-color:#e5e7eb;background:#f9fafb;}
+.cf-sel-concern{background:#fef3c7;color:#92400e;border-color:#fde68a;}
+.cf-sel-escalated{background:#fee2e2;color:#991b1b;border-color:#fca5a5;}
 </style>
 </head>
 <body>
 <div class="proto-banner">
   <span class="proto-tag">Prototype</span>
-  <strong>Ticket #86b9512kq</strong> &mdash; Activation Dashboard: All Tenants, New Columns &amp; Totals Row &nbsp;&middot;&nbsp; v1.7-LoginEvents &nbsp;&middot;&nbsp; <span style="background:rgba(255,255,255,.18);padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">PROTOTYPE — NEW DATA (Not Yet Tracked)</span>
+  <strong>Ticket #86b9512kq</strong> &mdash; Activation Dashboard: All Tenants, New Columns &amp; Totals Row &nbsp;&middot;&nbsp; v1.8-CSFeedbackFlag &nbsp;&middot;&nbsp; <span style="background:rgba(255,255,255,.18);padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">PROTOTYPE — NEW DATA (Not Yet Tracked)</span>
   <span class="proto-right">Plan &amp; /Month sourced from Company Settings &gt; Company Information (local DB) &nbsp;&middot;&nbsp; No Chargebee API call</span>
 </div>
 <div class="page-wrapper">
@@ -198,6 +212,9 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
   </div>
   <div class="info-note" style="background:#fefce8;border-color:#fde68a;border-left-color:#f59e0b;color:#92400e;">
     <strong>&#9888; Prototype Only &mdash; Data Not Yet Tracked:</strong> The login columns below are <em>simulated for demonstration purposes</em>. As confirmed with TJ (June 16, 2026), DripJobs does not currently capture or store per-user login timestamps. This prototype was created for Mary Murphy (CSM) to demonstrate what this data could look like. &nbsp;<strong>Three event types are modeled:</strong> (1) <span style="background:#dcfce7;color:#166534;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">TRUE LOGIN</span> — real tenant user authenticating; &nbsp;(2) <span style="background:#ede9fe;color:#5b21b6;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">ADMIN ACCESS</span> — CS/Super User accessing tenant account; &nbsp;(3) <span style="background:#cffafe;color:#164e63;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">IMPERSONATION</span> — CS/Super User impersonating a specific tenant user. The <strong>Last Login</strong> column always surfaces the most recent <em>True Login</em>. Admin access appears as a secondary sub-label so CS can distinguish stale true-login data from recent admin activity.
+  </div>
+  <div class="info-note" style="background:#fff1f2;border-color:#fecdd3;border-left-color:#be185d;color:#9f1239;">
+    <strong>&#10024; New in v1.8 &mdash; CS Feedback Flag (Phase 2 Prototype):</strong> The <strong>CS Feedback</strong> column (pink group) is a manually-set field controlled by the assigned OBCSS team member. It surfaces low satisfaction signals from Intercom or Onboarding star ratings that cannot be pulled automatically. &nbsp;<strong>Values:</strong> &nbsp;<span style="background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">&#9888; Concern</span> &mdash; a poor rating was logged; &nbsp;<span style="background:#fee2e2;color:#991b1b;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">&#128680; Escalated</span> &mdash; requires immediate CS action. &nbsp;<strong>Click any cell in the CS Feedback column to set or change a flag.</strong> Changes persist for this session. This column requires a separate ticket from the V1 spec.
   </div>
   <div class="filters-card">
     <div class="filters-header">
@@ -376,6 +393,17 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
           <option value="admin-only">Admin Access, No True Login</option>
         </select>
       </div>
+      <div class="filter-divider" style="width:100%;margin:4px 0 2px;"></div>
+      <div class="filter-section-label" style="width:100%;font-size:10px;font-weight:700;color:#be185d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">&#10024; New (Phase 2 Prototype) &mdash; CS Flags</div>
+      <div class="filter-group">
+        <label class="filter-label">CS Feedback</label>
+        <select class="filter-select" id="f-csfeedback" onchange="applyFilters()" style="border-color:#fecdd3;">
+          <option value="">All</option>
+          <option value="none">None (no flag)</option>
+          <option value="concern">&#9888; Concern</option>
+          <option value="escalated">&#128680; Escalated</option>
+        </select>
+      </div>
     </div>
   </div>
   <div class="metrics-row" id="metrics-row"></div>
@@ -405,6 +433,7 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
           <tr class="group-row">
             <th class="cg-account" colspan="8">Account Info</th>
             <th class="cg-core" colspan="12">Core Activation Tracking</th>
+            <th class="cg-csflags" colspan="1" title="Phase 2 Prototype: manually-set CS feedback flags">CS Flags &#10024;</th>
             <th class="cg-plan" colspan="2">Plan &amp; Billing</th>
             <th class="cg-addons" colspan="4">Add-On Status</th>
             <th class="cg-integrations" colspan="1" id="gh-integrations" onclick="toggleGroup('integrations')" style="cursor:pointer;">Integrations [+]</th>
@@ -527,13 +556,21 @@ function generateCompanies(total){
     else if((!a2pApplied&&daysAgo>14)||(totalSales===0&&daysAgo>60)||estimateGoneQuiet){health='At Risk';}
     else if(estimateSent&&a2pActivated&&totalSales>0){health='On Track';}
     else{health='Needs Attention';}
-    out.push({tenantId:genTid(),name:name,isLegacy:isLegacy,created:created,createdStr:fmtDate(created),daysAgo:daysAgo,isActive:isActive,sub:isActive?'Active':'Inactive',totalSales:totalSales,reached10k:reached10k,a2pApplied:a2pApplied,a2pActivated:a2pActivated,industry:industry,obcss:obcss,daysRemaining:daysRemaining,plan:plan,planCost:planCost,prodRates:prodRates,jobCost:jobCost,textMsg:textMsg,jobiAi:jobiAi,health:health,estimateSent:estimateSent,daysSinceEst:daysSinceEst,activeUsers:activeUsers,contacts:contacts,googleInt:googleInt,qboInt:qboInt,qbtInt:qbtInt,acornInt:acornInt,quoInt:quoInt,companyCamInt:companyCamInt,routemizeInt:routemizeInt,zapierInt:zapierInt,angiInt:angiInt,lastTrueLoginDate:lastTrueLoginDate,lastTrueLoginUser:lastTrueLoginUser,lastAdminAccessDate:lastAdminAccessDate,lastAdminAccessUser:lastAdminAccessUser,lastImpersonateDate:lastImpersonateDate,lastImpersonateUser:lastImpersonateUser,lastImpersonateAdminUser:lastImpersonateAdminUser});
+    var csFeedback=null;
+    if(isActive&&Math.random()<0.10){csFeedback=Math.random()<0.70?'concern':'escalated';}
+    out.push({tenantId:genTid(),name:name,isLegacy:isLegacy,created:created,createdStr:fmtDate(created),daysAgo:daysAgo,isActive:isActive,sub:isActive?'Active':'Inactive',totalSales:totalSales,reached10k:reached10k,a2pApplied:a2pApplied,a2pActivated:a2pActivated,industry:industry,obcss:obcss,daysRemaining:daysRemaining,plan:plan,planCost:planCost,prodRates:prodRates,jobCost:jobCost,textMsg:textMsg,jobiAi:jobiAi,health:health,estimateSent:estimateSent,daysSinceEst:daysSinceEst,activeUsers:activeUsers,contacts:contacts,googleInt:googleInt,qboInt:qboInt,qbtInt:qbtInt,acornInt:acornInt,quoInt:quoInt,companyCamInt:companyCamInt,routemizeInt:routemizeInt,zapierInt:zapierInt,angiInt:angiInt,lastTrueLoginDate:lastTrueLoginDate,lastTrueLoginUser:lastTrueLoginUser,lastAdminAccessDate:lastAdminAccessDate,lastAdminAccessUser:lastAdminAccessUser,lastImpersonateDate:lastImpersonateDate,lastImpersonateUser:lastImpersonateUser,lastImpersonateAdminUser:lastImpersonateAdminUser,csFeedback:csFeedback});
   }
   return out;
 }
 
 var ALL=generateCompanies(1400),filtered=ALL.slice(),page=1,pageSize=25,sortCol=null,sortDir='asc';
 var activeMetricCard=null;
+/* CS Feedback overrides — persists user edits within this session without needing backend */
+var CS_FEEDBACK_OVERRIDES={};
+function getCfVal(c){return CS_FEEDBACK_OVERRIDES[c.tenantId]!==undefined?CS_FEEDBACK_OVERRIDES[c.tenantId]:(c.csFeedback||'none');}
+function cfBadge(v){if(!v||v==='none')return'<span style="color:#d1d5db;font-size:11px;">—</span>';if(v==='concern')return'<span class="badge cf-sel-concern">&#9888; Concern</span>';return'<span class="badge cf-sel-escalated">&#128680; Escalated</span>';}
+function cfCellHtml(c){var safeId='cfc-'+c.tenantId.replace(/[^a-z0-9]/gi,'');var val=getCfVal(c);return'<td class="col-csflag group-sep" id="'+safeId+'" style="vertical-align:middle;"><select class="cf-select cf-sel-'+val+'" onchange="setCsFeedback(\''+c.tenantId+'\',this.value,\''+safeId+'\')" title="Click to set CS feedback flag"><option value="none"'+(val==='none'?' selected':'')+'>— None</option><option value="concern"'+(val==='concern'?' selected':'')+'>⚠ Concern</option><option value="escalated"'+(val==='escalated'?' selected':'')+'>🚨 Escalated</option></select></td>';}
+function setCsFeedback(tenantId,val,cellId){CS_FEEDBACK_OVERRIDES[tenantId]=val;var td=document.getElementById(cellId);if(td){var sel=td.querySelector('select');if(sel){sel.className='cf-select cf-sel-'+val;}}var cfF=document.getElementById('f-csfeedback');if(cfF&&cfF.value)applyFilters();}
 function fmtAge(d){if(d<30)return d+'d';if(d<365){return Math.floor(d/30)+'mo';}var y=Math.floor(d/365),m=Math.floor((d%365)/30);return m?y+'yr '+m+'mo':y+'yr';}
 function fmtLoginTs(d){
   if(!d)return null;
@@ -583,6 +620,7 @@ function getSortVal(c,col){
     case 37:return(c.daysSinceEst!==null&&c.daysSinceEst!==undefined)?c.daysSinceEst:9999;
     case 38:return c.lastTrueLoginDate?c.lastTrueLoginDate.getTime():0;
     case 39:return(c.lastTrueLoginUser||'').toLowerCase();
+    case 40:var cv=getCfVal(c);return cv==='escalated'?2:cv==='concern'?1:0;
     default:return'';
   }
 }
@@ -694,6 +732,7 @@ function mkRow(c){
     '<td class="col-addons">'+ynCell(c.jobCost)+'</td>'+
     '<td class="col-addons">'+ynCell(c.textMsg)+'</td>'+
     '<td class="col-addons">'+ynCell(c.jobiAi)+'</td>'+
+    cfCellHtml(c)+
     (integrationsExpanded?
       '<td class="col-integrations group-sep">'+intCell(c.googleInt)+'</td>'+
       '<td class="col-integrations">'+intCell(c.qboInt)+'</td>'+
@@ -732,6 +771,7 @@ function renderTotals(co){
     '<td class="col-plan group-sep" style="color:#059669;font-weight:700;">'+fmtD(tM)+'/m</td>'+
     '<td class="col-plan"></td>'+
     '<td class="col-addons group-sep"></td><td class="col-addons"></td><td class="col-addons"></td><td class="col-addons"></td>'+
+    '<td class="col-csflag group-sep"></td>'+
     (integrationsExpanded?'<td class="col-integrations group-sep"></td><td class="col-integrations"></td><td class="col-integrations"></td><td class="col-integrations"></td><td class="col-integrations"></td><td class="col-integrations"></td><td class="col-integrations"></td>':'<td class="col-integrations group-sep" style="width:0;min-width:0;padding:0;border:none;"></td>')+
     (automationsExpanded?'<td class="col-automations group-sep"></td><td class="col-automations"></td>':'<td class="col-automations group-sep" style="width:0;min-width:0;padding:0;border:none;"></td>');
 }
@@ -780,7 +820,8 @@ function renderColHeaders(){
     '<th data-col="15" class="col-addons group-sep" style="min-width:78px;">Prod Rates<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="17" class="col-addons" style="min-width:70px;">Job Cost<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="19" class="col-addons" style="min-width:72px;">Text MSG<span class="sort-icon">&#x21C5;</span></th>'+
-    '<th data-col="21" class="col-addons" style="min-width:66px;">Jobi AI<span class="sort-icon">&#x21C5;</span></th>';
+    '<th data-col="21" class="col-addons" style="min-width:66px;">Jobi AI<span class="sort-icon">&#x21C5;</span></th>'+
+    '<th data-col="40" class="col-csflag group-sep" style="min-width:130px;" title="Phase 2 Prototype: manually set by OBCSS">CS Feedback &#10024;<span class="sort-icon">&#x21C5;</span></th>';
   if(integrationsExpanded){h+=
     '<th data-col="27" class="col-integrations group-sep" style="min-width:72px;">Google<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="28" class="col-integrations" style="min-width:60px;">QBO<span class="sort-icon">&#x21C5;</span></th>'+
@@ -857,6 +898,7 @@ function applyFilters(){
   var tenk=document.getElementById('f-10k').value,a2pApp=document.getElementById('f-a2papplied').value,a2pSt=document.getElementById('f-a2pstatus').value;
   var loginFilter=document.getElementById('f-lastlogin').value,lastUserQ=(document.getElementById('f-lastuser').value||'').toLowerCase().trim();
   var loginTypeFilter=document.getElementById('f-logintype').value;
+  var cfFeedbackFilter=document.getElementById('f-csfeedback').value;
   var selPlan=getMS('ms-plan'),selHealth=getMS('ms-health'),selOb=getMS('ms-obcss');
   var selInd=getMS('ms-industry'),selInteg=getMS('ms-integration'),selAuto=getMS('ms-automation');
   filtered=ALL.filter(function(c){
@@ -913,6 +955,8 @@ function applyFilters(){
       if(loginTypeFilter==='impersonate'&&!c.lastImpersonateDate)return false;
       if(loginTypeFilter==='admin-only'&&(c.lastTrueLoginDate||!c.lastAdminAccessDate))return false;
     }
+    /* CS Feedback filter */
+    if(cfFeedbackFilter&&getCfVal(c)!==cfFeedbackFilter)return false;
     return true;
   });
   applySort();page=1;render();
@@ -942,6 +986,7 @@ function clearAllFilters(){
   document.getElementById('f-lastlogin').value='';
   document.getElementById('f-lastuser').value='';
   document.getElementById('f-logintype').value='';
+  document.getElementById('f-csfeedback').value='';
   ['ms-plan','ms-health','ms-obcss','ms-industry','ms-integration','ms-automation'].forEach(clearMS);
   ['djdash_search','djdash_type','djdash_sub','djdash_users','djdash_contacts','djdash_estsent','djdash_10k','djdash_a2papplied','djdash_a2pstatus'].forEach(function(k){sessionStorage.removeItem(k);});
   filtered=ALL.slice();applySort();page=1;render();
