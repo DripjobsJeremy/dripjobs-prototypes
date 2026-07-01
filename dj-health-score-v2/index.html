@@ -159,6 +159,12 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
 .legend strong{color:#374151;}
 .info-note{background:#f0fdf4;border:1px solid #a7f3d0;border-left:3px solid #059669;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#065f46;}
 .info-note strong{font-weight:600;}
+.info-note-header{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.info-note-body{margin-top:5px;}
+.info-note.collapsed .info-note-body{display:none;}
+.info-note.collapsed{padding-bottom:8px;}
+.info-collapse-btn{flex-shrink:0;background:none;border:none;cursor:pointer;font-size:11px;font-weight:600;opacity:.6;padding:1px 5px;border-radius:4px;font-family:inherit;line-height:1.4;}
+.info-collapse-btn:hover{opacity:1;background:rgba(0,0,0,.06);}
 .filter-divider{width:100%;height:1px;background:#f3f4f6;margin:6px 0 2px;}
 .filter-section-label{width:100%;font-size:10px;font-weight:700;color:#c4b5fd;text-transform:uppercase;letter-spacing:.5px;margin-bottom:-4px;}
 .multi-select{position:relative;}
@@ -204,17 +210,32 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
     </div>
     <div><button class="btn" onclick="exportCSV()">&#x2B07; Export CSV</button></div>
   </div>
-  <div class="info-note">
-    <strong>What&rsquo;s new in this view:</strong> All tenants are now visible regardless of signup date.
+  <div class="info-note" id="note-whats-new">
+    <div class="info-note-header">
+      <strong>What&rsquo;s new in this view:</strong>
+      <button class="info-collapse-btn" onclick="toggleNote('note-whats-new')">Hide &#9650;</button>
+    </div>
+    <div class="info-note-body">All tenants are now visible regardless of signup date.
     Legacy accounts (created before 12/28/25) show <strong>Total Invoiced Sales</strong> (lifetime) and <strong>&mdash;</strong> for Days Remaining &mdash; no 90-day activation rules apply.
     Net-new accounts (after 12/28/25) continue tracking the 90-day activation window.
     New columns added: Industry, Days Remaining, Plan, /Month, and 4 add-on status columns. Plan and /Month read from Company Settings (local). Totals Row updates dynamically with filters.
+    </div>
   </div>
-  <div class="info-note" style="background:#fefce8;border-color:#fde68a;border-left-color:#f59e0b;color:#92400e;">
-    <strong>&#9888; Prototype Only &mdash; Data Not Yet Tracked:</strong> The login columns below are <em>simulated for demonstration purposes</em>. As confirmed with TJ (June 16, 2026), DripJobs does not currently capture or store per-user login timestamps. This prototype was created for Mary Murphy (CSM) to demonstrate what this data could look like. &nbsp;<strong>Three event types are modeled:</strong> (1) <span style="background:#dcfce7;color:#166534;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">TRUE LOGIN</span> — real tenant user authenticating; &nbsp;(2) <span style="background:#ede9fe;color:#5b21b6;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">ADMIN ACCESS</span> — CS/Super User accessing tenant account; &nbsp;(3) <span style="background:#cffafe;color:#164e63;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">IMPERSONATION</span> — CS/Super User impersonating a specific tenant user. The <strong>Last Login</strong> column always surfaces the most recent <em>True Login</em>. Admin access appears as a secondary sub-label so CS can distinguish stale true-login data from recent admin activity.
+  <div class="info-note" style="background:#fefce8;border-color:#fde68a;border-left-color:#f59e0b;color:#92400e;" id="note-login">
+    <div class="info-note-header">
+      <strong>&#9888; Prototype Only &mdash; Login Data Not Yet Tracked</strong>
+      <button class="info-collapse-btn" onclick="toggleNote('note-login')" style="color:#92400e;">Hide &#9650;</button>
+    </div>
+    <div class="info-note-body">The login columns below are <em>simulated for demonstration purposes</em>. As confirmed with TJ (June 16, 2026), DripJobs does not currently capture or store per-user login timestamps. This prototype was created for Mary Murphy (CSM) to demonstrate what this data could look like. &nbsp;<strong>Three event types are modeled:</strong> (1) <span style="background:#dcfce7;color:#166534;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">TRUE LOGIN</span> &mdash; real tenant user authenticating; &nbsp;(2) <span style="background:#ede9fe;color:#5b21b6;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">ADMIN ACCESS</span> &mdash; CS/Super User accessing tenant account; &nbsp;(3) <span style="background:#cffafe;color:#164e63;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">IMPERSONATION</span> &mdash; CS/Super User impersonating a specific tenant user. The <strong>Last Login</strong> column always surfaces the most recent <em>True Login</em>. Admin access appears as a secondary sub-label so CS can distinguish stale true-login data from recent admin activity.
+    </div>
   </div>
-  <div class="info-note" style="background:#fff1f2;border-color:#fecdd3;border-left-color:#be185d;color:#9f1239;">
-    <strong>&#10024; New in v1.8 &mdash; CS Feedback Flag (Phase 2 Prototype):</strong> The <strong>CS Feedback</strong> column (pink group) is a manually-set field controlled by the assigned OBCSS team member. It surfaces low satisfaction signals from Intercom or Onboarding star ratings that cannot be pulled automatically. &nbsp;<strong>Values:</strong> &nbsp;<span style="background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">&#9888; Concern</span> &mdash; a poor rating was logged; &nbsp;<span style="background:#fee2e2;color:#991b1b;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">&#128680; Escalated</span> &mdash; requires immediate CS action. &nbsp;<strong>Click any cell in the CS Feedback column to set or change a flag.</strong> Changes persist for this session. This column requires a separate ticket from the V1 spec.
+  <div class="info-note" style="background:#fff1f2;border-color:#fecdd3;border-left-color:#be185d;color:#9f1239;" id="note-csfeedback">
+    <div class="info-note-header">
+      <strong>&#10024; New in v1.8 &mdash; CS Feedback Flag (Phase 2 Prototype)</strong>
+      <button class="info-collapse-btn" onclick="toggleNote('note-csfeedback')" style="color:#9f1239;">Hide &#9650;</button>
+    </div>
+    <div class="info-note-body">The <strong>CS Feedback</strong> column (pink group) is a manually-set field controlled by the assigned OBCSS team member. It surfaces low satisfaction signals from Intercom or Onboarding star ratings that cannot be pulled automatically. &nbsp;<strong>Values:</strong> &nbsp;<span style="background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">&#9888; Concern</span> &mdash; a poor rating was logged; &nbsp;<span style="background:#fee2e2;color:#991b1b;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">&#128680; Escalated</span> &mdash; requires immediate CS action. &nbsp;<strong>Click any cell in the CS Feedback column to set or change a flag.</strong> Changes persist for this session. This column requires a separate ticket from the V1 spec.
+    </div>
   </div>
   <div class="filters-card">
     <div class="filters-header">
@@ -1031,6 +1052,7 @@ function populateDropdowns(){
 }
 
 function exportCSV(){alert('[Prototype] Export would generate CSV \u2014 '+filtered.length.toLocaleString()+' rows \u00d7 31 columns.');}
+function toggleNote(id){var el=document.getElementById(id);if(!el)return;var collapsed=el.classList.toggle('collapsed');var btn=el.querySelector('.info-collapse-btn');if(btn)btn.innerHTML=collapsed?'Show &#9660;':'Hide &#9650;';}
 
 populateDropdowns();initSortHeaders();
 (function(){
