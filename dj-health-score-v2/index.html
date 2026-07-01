@@ -194,6 +194,21 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
 .cf-sel-none{color:#9ca3af;border-color:#e5e7eb;background:#f9fafb;}
 .cf-sel-concern{background:#fef3c7;color:#92400e;border-color:#fde68a;}
 .cf-sel-escalated{background:#fee2e2;color:#991b1b;border-color:#fca5a5;}
+/* CF popup panel */
+.cf-edit-cell{cursor:pointer;transition:background .1s;}
+.cf-edit-cell:hover{background:#ffe4e6 !important;}
+.cf-popup-panel{background:white;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:230px;font-family:'Inter',-apple-system,sans-serif;overflow:hidden;}
+.cf-panel-header{padding:7px 12px;background:#fff1f2;border-bottom:1px solid #fecdd3;font-size:10px;font-weight:700;color:#be185d;text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;justify-content:space-between;}
+.cf-panel-close{background:none;border:none;cursor:pointer;font-size:14px;color:#9ca3af;padding:0;line-height:1;font-family:inherit;}
+.cf-panel-close:hover{color:#374151;}
+.cf-panel-section{padding:8px 12px;}
+.cf-panel-section+.cf-panel-section{border-top:1px solid #f3f4f6;}
+.cf-panel-label{font-size:11px;font-weight:600;color:#374151;margin-bottom:4px;}
+.cf-panel-sel{width:100%;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;color:#374151;background:white;cursor:pointer;outline:none;font-family:inherit;}
+.cf-panel-sel:focus{border-color:#7C3AED;box-shadow:0 0 0 2px rgba(124,58,237,.1);}
+.cf-signal{display:flex;align-items:center;gap:4px;margin-bottom:3px;}
+.cf-signal:last-child{margin-bottom:0;}
+.cf-signal-source{font-size:9px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.3px;}
 </style>
 </head>
 <body>
@@ -234,7 +249,7 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
       <strong>&#10024; New in v1.8 &mdash; CS Feedback Flag (Phase 2 Prototype)</strong>
       <button class="info-collapse-btn" onclick="toggleNote('note-csfeedback')" style="color:#9f1239;">Hide &#9650;</button>
     </div>
-    <div class="info-note-body">The <strong>CS Feedback</strong> column (pink group) is a manually-set field controlled by the assigned OBCSS team member. It surfaces low satisfaction signals from Intercom or Onboarding star ratings that cannot be pulled automatically. &nbsp;<strong>Values:</strong> &nbsp;<span style="background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">&#9888; Concern</span> &mdash; a poor rating was logged; &nbsp;<span style="background:#fee2e2;color:#991b1b;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">&#128680; Escalated</span> &mdash; requires immediate CS action. &nbsp;<strong>Click any cell in the CS Feedback column to set or change a flag.</strong> Changes persist for this session. This column requires a separate ticket from the V1 spec.
+    <div class="info-note-body">The <strong>CS Feedback</strong> column (pink group) is manually set by the assigned OBCSS team member. It surfaces low satisfaction signals from Intercom CSAT or Onboarding star ratings that cannot be pulled automatically. <strong>Click any cell in the CS Feedback column</strong> to set flags independently per source. Each account can carry both an Intercom signal and an OB signal simultaneously — both display as stacked badges with source and date. &nbsp;<strong>Intercom CSAT:</strong> <span style="background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">😟 Bad</span> (Neutral — does not affect CSAT score) &nbsp;or&nbsp; <span style="background:#fee2e2;color:#991b1b;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">😡 Terrible</span> (Negative — reduces CSAT score). &nbsp;<strong>OB Feedback:</strong> <span style="background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">⭐⭐ 2 Stars</span> or <span style="background:#fee2e2;color:#991b1b;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;">⭐ 1 Star</span>. This column requires a separate ticket from the V1 spec.
     </div>
   </div>
   <div class="filters-card">
@@ -420,9 +435,15 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
         <label class="filter-label">CS Feedback</label>
         <select class="filter-select" id="f-csfeedback" onchange="applyFilters()" style="border-color:#fecdd3;">
           <option value="">All</option>
-          <option value="none">None (no flag)</option>
-          <option value="concern">&#9888; Concern</option>
-          <option value="escalated">&#128680; Escalated</option>
+          <option value="any">Any Flag Set</option>
+          <optgroup label="Intercom CSAT">
+            <option value="intercom-bad">😟 Bad (Neutral)</option>
+            <option value="intercom-terrible">😡 Terrible (Negative)</option>
+          </optgroup>
+          <optgroup label="OB Feedback">
+            <option value="ob-2star">⭐⭐ 2 Stars</option>
+            <option value="ob-1star">⭐ 1 Star</option>
+          </optgroup>
         </select>
       </div>
     </div>
@@ -577,21 +598,87 @@ function generateCompanies(total){
     else if((!a2pApplied&&daysAgo>14)||(totalSales===0&&daysAgo>60)||estimateGoneQuiet){health='At Risk';}
     else if(estimateSent&&a2pActivated&&totalSales>0){health='On Track';}
     else{health='Needs Attention';}
-    var csFeedback=null;
-    if(isActive&&Math.random()<0.10){csFeedback=Math.random()<0.70?'concern':'escalated';}
+    var cfInt=null,cfIntDate=null,cfOb=null,cfObDate=null;
+    if(isActive){
+      if(Math.random()<0.08){cfInt=Math.random()<0.70?'bad':'terrible';cfIntDate=new Date(now.getTime()-rd(0,30)*86400000);}
+      if(Math.random()<0.06){cfOb=Math.random()<0.60?'2star':'1star';cfObDate=new Date(now.getTime()-rd(0,45)*86400000);}
+    }
+    var csFeedback={intercom:cfInt,intercomDate:cfIntDate,ob:cfOb,obDate:cfObDate};
     out.push({tenantId:genTid(),name:name,isLegacy:isLegacy,created:created,createdStr:fmtDate(created),daysAgo:daysAgo,isActive:isActive,sub:isActive?'Active':'Inactive',totalSales:totalSales,reached10k:reached10k,a2pApplied:a2pApplied,a2pActivated:a2pActivated,industry:industry,obcss:obcss,daysRemaining:daysRemaining,plan:plan,planCost:planCost,prodRates:prodRates,jobCost:jobCost,textMsg:textMsg,jobiAi:jobiAi,health:health,estimateSent:estimateSent,daysSinceEst:daysSinceEst,activeUsers:activeUsers,contacts:contacts,googleInt:googleInt,qboInt:qboInt,qbtInt:qbtInt,acornInt:acornInt,quoInt:quoInt,companyCamInt:companyCamInt,routemizeInt:routemizeInt,zapierInt:zapierInt,angiInt:angiInt,lastTrueLoginDate:lastTrueLoginDate,lastTrueLoginUser:lastTrueLoginUser,lastAdminAccessDate:lastAdminAccessDate,lastAdminAccessUser:lastAdminAccessUser,lastImpersonateDate:lastImpersonateDate,lastImpersonateUser:lastImpersonateUser,lastImpersonateAdminUser:lastImpersonateAdminUser,csFeedback:csFeedback});
   }
   return out;
 }
 
 var ALL=generateCompanies(1400),filtered=ALL.slice(),page=1,pageSize=25,sortCol=null,sortDir='asc';
+var ALL_MAP={};ALL.forEach(function(c){ALL_MAP[c.tenantId]=c;});
 var activeMetricCard=null;
-/* CS Feedback overrides — persists user edits within this session without needing backend */
+/* CS Feedback overrides — structured: { intercom, intercomDate, ob, obDate } */
 var CS_FEEDBACK_OVERRIDES={};
-function getCfVal(c){return CS_FEEDBACK_OVERRIDES[c.tenantId]!==undefined?CS_FEEDBACK_OVERRIDES[c.tenantId]:(c.csFeedback||'none');}
-function cfBadge(v){if(!v||v==='none')return'<span style="color:#d1d5db;font-size:11px;">—</span>';if(v==='concern')return'<span class="badge cf-sel-concern">&#9888; Concern</span>';return'<span class="badge cf-sel-escalated">&#128680; Escalated</span>';}
-function cfCellHtml(c){var safeId='cfc-'+c.tenantId.replace(/[^a-z0-9]/gi,'');var val=getCfVal(c);return'<td class="col-csflag group-sep" id="'+safeId+'" style="vertical-align:middle;"><select class="cf-select cf-sel-'+val+'" onchange="setCsFeedback(\''+c.tenantId+'\',this.value,\''+safeId+'\')" title="Click to set CS feedback flag"><option value="none"'+(val==='none'?' selected':'')+'>— None</option><option value="concern"'+(val==='concern'?' selected':'')+'>⚠ Concern</option><option value="escalated"'+(val==='escalated'?' selected':'')+'>🚨 Escalated</option></select></td>';}
-function setCsFeedback(tenantId,val,cellId){CS_FEEDBACK_OVERRIDES[tenantId]=val;var td=document.getElementById(cellId);if(td){var sel=td.querySelector('select');if(sel){sel.className='cf-select cf-sel-'+val;}}var cfF=document.getElementById('f-csfeedback');if(cfF&&cfF.value)applyFilters();}
+var CF_PANEL_OPEN=null;
+function getCfVal(c){return CS_FEEDBACK_OVERRIDES[c.tenantId]!==undefined?CS_FEEDBACK_OVERRIDES[c.tenantId]:(c.csFeedback||{intercom:null,intercomDate:null,ob:null,obDate:null});}
+function cfSignalBadge(source,rating,date){
+  var emoji='',label='',cls='';
+  if(source==='intercom'){if(rating==='bad'){emoji='😟';label='Bad';cls='cf-sel-concern';}else{emoji='😡';label='Terrible';cls='cf-sel-escalated';}}
+  else{if(rating==='2star'){emoji='⭐⭐';label='2 Stars';cls='cf-sel-concern';}else{emoji='⭐';label='1 Star';cls='cf-sel-escalated';}}
+  var srcLbl=source==='intercom'?'Intercom':'OB';
+  var dateStr='';if(date){var d=new Date(date);dateStr=' · '+(d.getMonth()+1)+'/'+(d.getDate());}
+  return'<div class="cf-signal"><span class="badge '+cls+'" style="font-size:10px;">'+emoji+' '+label+'</span><span class="cf-signal-source">'+srcLbl+dateStr+'</span></div>';
+}
+function cfCellHtml(c){
+  var safeId='cfc-'+c.tenantId.replace(/[^a-z0-9]/gi,'');
+  var val=getCfVal(c);var content='';
+  if(val.intercom)content+=cfSignalBadge('intercom',val.intercom,val.intercomDate);
+  if(val.ob)content+=cfSignalBadge('ob',val.ob,val.obDate);
+  if(!content)content='<span style="color:#d1d5db;font-size:11px;" title="Click to set CS feedback">—</span>';
+  return'<td class="col-csflag group-sep cf-edit-cell" id="'+safeId+'" onclick="openCfPanel(\''+c.tenantId+'\',this)" title="Click to set CS feedback flags" style="vertical-align:middle;min-width:160px;">'+content+'</td>';
+}
+function buildCfPanelHtml(tenantId,val){
+  var iVal=val.intercom||'',oVal=val.ob||'';
+  return'<div class="cf-panel-header">CS Feedback Flags<button class="cf-panel-close" onclick="closeCfPanel()" title="Close">&times;</button></div>'+
+    '<div class="cf-panel-section">'+
+      '<div class="cf-panel-label">Intercom CSAT</div>'+
+      '<select class="cf-panel-sel" onchange="setCfSource(\''+tenantId+'\',\'intercom\',this.value)">'+
+        '<option value=""'+(!iVal?' selected':'')+'>None</option>'+
+        '<option value="bad"'+(iVal==='bad'?' selected':'')+'>😟 Bad (Neutral)</option>'+
+        '<option value="terrible"'+(iVal==='terrible'?' selected':'')+'>😡 Terrible (Negative)</option>'+
+      '</select>'+
+    '</div>'+
+    '<div class="cf-panel-section">'+
+      '<div class="cf-panel-label">OB Feedback</div>'+
+      '<select class="cf-panel-sel" onchange="setCfSource(\''+tenantId+'\',\'ob\',this.value)">'+
+        '<option value=""'+(!oVal?' selected':'')+'>None</option>'+
+        '<option value="2star"'+(oVal==='2star'?' selected':'')+'>⭐⭐ 2 Stars</option>'+
+        '<option value="1star"'+(oVal==='1star'?' selected':'')+'>⭐ 1 Star</option>'+
+      '</select>'+
+    '</div>';
+}
+function openCfPanel(tenantId,cellEl){
+  event.stopPropagation();
+  if(CF_PANEL_OPEN===tenantId){closeCfPanel();return;}
+  closeCfPanel();
+  CF_PANEL_OPEN=tenantId;
+  var rect=cellEl.getBoundingClientRect();
+  var orig=ALL_MAP[tenantId]||{tenantId:tenantId,csFeedback:{intercom:null,intercomDate:null,ob:null,obDate:null}};
+  var val=getCfVal(orig);
+  var panel=document.createElement('div');
+  panel.className='cf-popup-panel';panel.id='cf-popup';
+  var left=Math.min(rect.left,window.innerWidth-240);
+  panel.style.cssText='position:fixed;top:'+(rect.bottom+4)+'px;left:'+left+'px;z-index:9999;';
+  panel.innerHTML=buildCfPanelHtml(tenantId,val);
+  document.body.appendChild(panel);
+}
+function closeCfPanel(){var p=document.getElementById('cf-popup');if(p)p.remove();CF_PANEL_OPEN=null;}
+function setCfSource(tenantId,source,rating){
+  var orig=ALL_MAP[tenantId];
+  if(!CS_FEEDBACK_OVERRIDES[tenantId]){var base=orig?orig.csFeedback:{intercom:null,intercomDate:null,ob:null,obDate:null};CS_FEEDBACK_OVERRIDES[tenantId]={intercom:base.intercom,intercomDate:base.intercomDate,ob:base.ob,obDate:base.obDate};}
+  CS_FEEDBACK_OVERRIDES[tenantId][source]=rating||null;
+  if(source==='intercom'&&rating&&!CS_FEEDBACK_OVERRIDES[tenantId].intercomDate)CS_FEEDBACK_OVERRIDES[tenantId].intercomDate=new Date();
+  if(source==='ob'&&rating&&!CS_FEEDBACK_OVERRIDES[tenantId].obDate)CS_FEEDBACK_OVERRIDES[tenantId].obDate=new Date();
+  var safeId='cfc-'+tenantId.replace(/[^a-z0-9]/gi,'');
+  var td=document.getElementById(safeId);
+  if(td){var val=CS_FEEDBACK_OVERRIDES[tenantId];var content='';if(val.intercom)content+=cfSignalBadge('intercom',val.intercom,val.intercomDate);if(val.ob)content+=cfSignalBadge('ob',val.ob,val.obDate);if(!content)content='<span style="color:#d1d5db;font-size:11px;" title="Click to set CS feedback">—</span>';td.innerHTML=content;}
+  var cfF=document.getElementById('f-csfeedback');if(cfF&&cfF.value)applyFilters();
+}
 function fmtAge(d){if(d<30)return d+'d';if(d<365){return Math.floor(d/30)+'mo';}var y=Math.floor(d/365),m=Math.floor((d%365)/30);return m?y+'yr '+m+'mo':y+'yr';}
 function fmtLoginTs(d){
   if(!d)return null;
@@ -641,7 +728,7 @@ function getSortVal(c,col){
     case 37:return(c.daysSinceEst!==null&&c.daysSinceEst!==undefined)?c.daysSinceEst:9999;
     case 38:return c.lastTrueLoginDate?c.lastTrueLoginDate.getTime():0;
     case 39:return(c.lastTrueLoginUser||'').toLowerCase();
-    case 40:var cv=getCfVal(c);return cv==='escalated'?2:cv==='concern'?1:0;
+    case 40:var cv=getCfVal(c);return(cv.intercom==='terrible'||cv.ob==='1star')?2:(cv.intercom||cv.ob)?1:0;
     default:return'';
   }
 }
@@ -885,6 +972,7 @@ function updateSubtitleAndPagination(total,start,end){
 }
 
 function render(){
+  closeCfPanel();
   var eff=pageSize===0?filtered.length:pageSize,total=Math.ceil(filtered.length/Math.max(eff,1))||1;
   var start=(page-1)*eff,end=Math.min(start+eff,filtered.length),slice=filtered.slice(start,end);
   renderMetrics(filtered);
@@ -907,7 +995,7 @@ function toggleMS(id){var panel=document.getElementById(id+'-panel'),isOpen=pane
 function msChange(id){if(!MS[id])MS[id]=new Set();MS[id].clear();document.querySelectorAll('#'+id+'-panel input[type=checkbox]:checked').forEach(function(cb){MS[id].add(cb.value);});updateMSBtn(id);applyFilters();}
 function updateMSBtn(id){var count=MS[id]?MS[id].size:0,lbl=document.querySelector('#'+id+' .ms-label'),btn=document.querySelector('#'+id+' .ms-btn');if(lbl)lbl.textContent=count?(count+' selected'):MS_LABELS[id];if(btn)btn.classList.toggle('ms-active',count>0);}
 function clearMS(id){if(MS[id])MS[id].clear();var panel=document.getElementById(id+'-panel');if(panel)panel.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.checked=false;});updateMSBtn(id);applyFilters();}
-document.addEventListener('click',function(e){if(!e.target.closest('.multi-select'))document.querySelectorAll('.ms-panel.ms-open').forEach(function(p){p.classList.remove('ms-open');});});
+document.addEventListener('click',function(e){if(!e.target.closest('.multi-select'))document.querySelectorAll('.ms-panel.ms-open').forEach(function(p){p.classList.remove('ms-open');});if(!e.target.closest('.cf-popup-panel')&&!e.target.closest('.cf-edit-cell'))closeCfPanel();});
 
 var searchDebounce,totalsDebounce;
 function debounceSearch(){clearTimeout(searchDebounce);searchDebounce=setTimeout(applyFilters,300);}
@@ -977,7 +1065,7 @@ function applyFilters(){
       if(loginTypeFilter==='admin-only'&&(c.lastTrueLoginDate||!c.lastAdminAccessDate))return false;
     }
     /* CS Feedback filter */
-    if(cfFeedbackFilter&&getCfVal(c)!==cfFeedbackFilter)return false;
+    if(cfFeedbackFilter){var cfv=getCfVal(c);if(cfFeedbackFilter==='any'&&!cfv.intercom&&!cfv.ob)return false;if(cfFeedbackFilter==='intercom-bad'&&cfv.intercom!=='bad')return false;if(cfFeedbackFilter==='intercom-terrible'&&cfv.intercom!=='terrible')return false;if(cfFeedbackFilter==='ob-2star'&&cfv.ob!=='2star')return false;if(cfFeedbackFilter==='ob-1star'&&cfv.ob!=='1star')return false;}
     return true;
   });
   applySort();page=1;render();
