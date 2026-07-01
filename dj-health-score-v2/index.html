@@ -209,6 +209,7 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
 .cf-signal{display:flex;align-items:center;gap:4px;margin-bottom:3px;}
 .cf-signal:last-child{margin-bottom:0;}
 .cf-signal-source{font-size:9px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.3px;}
+.cf-ob-good{background:#d1fae5;color:#065f46;}
 </style>
 </head>
 <body>
@@ -441,6 +442,9 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
             <option value="intercom-terrible">😡 Terrible (Negative)</option>
           </optgroup>
           <optgroup label="OB Feedback">
+            <option value="ob-5star">⭐⭐⭐⭐⭐ 5 Stars</option>
+            <option value="ob-4star">⭐⭐⭐⭐ 4 Stars</option>
+            <option value="ob-3star">⭐⭐⭐ 3 Stars</option>
             <option value="ob-2star">⭐⭐ 2 Stars</option>
             <option value="ob-1star">⭐ 1 Star</option>
           </optgroup>
@@ -474,8 +478,7 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
         <thead>
           <tr class="group-row">
             <th class="cg-account" colspan="8">Account Info</th>
-            <th class="cg-core" colspan="12">Core Activation Tracking</th>
-            <th class="cg-csflags" colspan="1" title="Phase 2 Prototype: manually-set CS feedback flags">CS Flags &#10024;</th>
+            <th class="cg-core" colspan="13">Core Activation Tracking</th>
             <th class="cg-plan" colspan="2">Plan &amp; Billing</th>
             <th class="cg-addons" colspan="4">Add-On Status</th>
             <th class="cg-integrations" colspan="1" id="gh-integrations" onclick="toggleGroup('integrations')" style="cursor:pointer;">Integrations [+]</th>
@@ -601,7 +604,7 @@ function generateCompanies(total){
     var cfInt=null,cfIntDate=null,cfOb=null,cfObDate=null;
     if(isActive){
       if(Math.random()<0.08){cfInt=Math.random()<0.70?'bad':'terrible';cfIntDate=new Date(now.getTime()-rd(0,30)*86400000);}
-      if(Math.random()<0.06){cfOb=Math.random()<0.60?'2star':'1star';cfObDate=new Date(now.getTime()-rd(0,45)*86400000);}
+      if(Math.random()<0.08){var r2=Math.random();cfOb=r2<0.12?'5star':r2<0.25?'4star':r2<0.45?'3star':r2<0.72?'2star':'1star';cfObDate=new Date(now.getTime()-rd(0,45)*86400000);}
     }
     var csFeedback={intercom:cfInt,intercomDate:cfIntDate,ob:cfOb,obDate:cfObDate};
     out.push({tenantId:genTid(),name:name,isLegacy:isLegacy,created:created,createdStr:fmtDate(created),daysAgo:daysAgo,isActive:isActive,sub:isActive?'Active':'Inactive',totalSales:totalSales,reached10k:reached10k,a2pApplied:a2pApplied,a2pActivated:a2pActivated,industry:industry,obcss:obcss,daysRemaining:daysRemaining,plan:plan,planCost:planCost,prodRates:prodRates,jobCost:jobCost,textMsg:textMsg,jobiAi:jobiAi,health:health,estimateSent:estimateSent,daysSinceEst:daysSinceEst,activeUsers:activeUsers,contacts:contacts,googleInt:googleInt,qboInt:qboInt,qbtInt:qbtInt,acornInt:acornInt,quoInt:quoInt,companyCamInt:companyCamInt,routemizeInt:routemizeInt,zapierInt:zapierInt,angiInt:angiInt,lastTrueLoginDate:lastTrueLoginDate,lastTrueLoginUser:lastTrueLoginUser,lastAdminAccessDate:lastAdminAccessDate,lastAdminAccessUser:lastAdminAccessUser,lastImpersonateDate:lastImpersonateDate,lastImpersonateUser:lastImpersonateUser,lastImpersonateAdminUser:lastImpersonateAdminUser,csFeedback:csFeedback});
@@ -619,7 +622,7 @@ function getCfVal(c){return CS_FEEDBACK_OVERRIDES[c.tenantId]!==undefined?CS_FEE
 function cfSignalBadge(source,rating,date){
   var emoji='',label='',cls='';
   if(source==='intercom'){if(rating==='bad'){emoji='😟';label='Bad';cls='cf-sel-concern';}else{emoji='😡';label='Terrible';cls='cf-sel-escalated';}}
-  else{if(rating==='2star'){emoji='⭐⭐';label='2 Stars';cls='cf-sel-concern';}else{emoji='⭐';label='1 Star';cls='cf-sel-escalated';}}
+  else{var sMap={'5star':'⭐⭐⭐⭐⭐ 5 Stars','4star':'⭐⭐⭐⭐ 4 Stars','3star':'⭐⭐⭐ 3 Stars','2star':'⭐⭐ 2 Stars','1star':'⭐ 1 Star'};var cMap={'5star':'cf-ob-good','4star':'cf-ob-good','3star':'b-gray','2star':'cf-sel-concern','1star':'cf-sel-escalated'};emoji='';label=sMap[rating]||rating;cls=cMap[rating]||'b-gray';}
   var srcLbl=source==='intercom'?'Intercom':'OB';
   var dateStr='';if(date){var d=new Date(date);dateStr=' · '+(d.getMonth()+1)+'/'+(d.getDate());}
   return'<div class="cf-signal"><span class="badge '+cls+'" style="font-size:10px;">'+emoji+' '+label+'</span><span class="cf-signal-source">'+srcLbl+dateStr+'</span></div>';
@@ -630,7 +633,7 @@ function cfCellHtml(c){
   if(val.intercom)content+=cfSignalBadge('intercom',val.intercom,val.intercomDate);
   if(val.ob)content+=cfSignalBadge('ob',val.ob,val.obDate);
   if(!content)content='<span style="color:#d1d5db;font-size:11px;" title="Click to set CS feedback">—</span>';
-  return'<td class="col-csflag group-sep cf-edit-cell" id="'+safeId+'" onclick="openCfPanel(\''+c.tenantId+'\',this)" title="Click to set CS feedback flags" style="vertical-align:middle;min-width:160px;">'+content+'</td>';
+  return'<td class="col-csflag cf-edit-cell" id="'+safeId+'" onclick="openCfPanel(\''+c.tenantId+'\',this)" title="Click to set CS feedback flags" style="vertical-align:middle;min-width:160px;">'+content+'</td>';
 }
 function buildCfPanelHtml(tenantId,val){
   var iVal=val.intercom||'',oVal=val.ob||'';
@@ -647,6 +650,9 @@ function buildCfPanelHtml(tenantId,val){
       '<div class="cf-panel-label">OB Feedback</div>'+
       '<select class="cf-panel-sel" onchange="setCfSource(\''+tenantId+'\',\'ob\',this.value)">'+
         '<option value=""'+(!oVal?' selected':'')+'>None</option>'+
+        '<option value="5star"'+(oVal==='5star'?' selected':'')+'>⭐⭐⭐⭐⭐ 5 Stars</option>'+
+        '<option value="4star"'+(oVal==='4star'?' selected':'')+'>⭐⭐⭐⭐ 4 Stars</option>'+
+        '<option value="3star"'+(oVal==='3star'?' selected':'')+'>⭐⭐⭐ 3 Stars</option>'+
         '<option value="2star"'+(oVal==='2star'?' selected':'')+'>⭐⭐ 2 Stars</option>'+
         '<option value="1star"'+(oVal==='1star'?' selected':'')+'>⭐ 1 Star</option>'+
       '</select>'+
@@ -728,7 +734,7 @@ function getSortVal(c,col){
     case 37:return(c.daysSinceEst!==null&&c.daysSinceEst!==undefined)?c.daysSinceEst:9999;
     case 38:return c.lastTrueLoginDate?c.lastTrueLoginDate.getTime():0;
     case 39:return(c.lastTrueLoginUser||'').toLowerCase();
-    case 40:var cv=getCfVal(c);return(cv.intercom==='terrible'||cv.ob==='1star')?2:(cv.intercom||cv.ob)?1:0;
+    case 40:var cv=getCfVal(c);var obW={'1star':5,'2star':4,'3star':3,'4star':2,'5star':1};var intW={terrible:5,bad:3};return Math.max(obW[cv.ob]||0,intW[cv.intercom]||0);
     default:return'';
   }
 }
@@ -825,6 +831,7 @@ function mkRow(c){
     '<td style="text-align:center;">'+(c.activeUsers<2?'<span class="badge b-danger">'+c.activeUsers+'</span>':c.activeUsers)+'</td>'+
     '<td style="text-align:center;"><span class="badge '+(c.contacts>=100?'b-success':c.contacts>=50?'b-warning':'b-danger')+'">'+c.contacts.toLocaleString('en-US')+'</span></td>'+
     '<td>'+hBadge(c.health)+'</td>'+
+    cfCellHtml(c)+
     '<td><span class="badge '+(c.isActive?'b-success':'b-gray')+'">'+c.sub+'</span></td>'+
     '<td><strong>'+fmtD(c.totalSales)+'</strong></td>'+
     '<td>'+tenk+'</td>'+
@@ -840,7 +847,6 @@ function mkRow(c){
     '<td class="col-addons">'+ynCell(c.jobCost)+'</td>'+
     '<td class="col-addons">'+ynCell(c.textMsg)+'</td>'+
     '<td class="col-addons">'+ynCell(c.jobiAi)+'</td>'+
-    cfCellHtml(c)+
     (integrationsExpanded?
       '<td class="col-integrations group-sep">'+intCell(c.googleInt)+'</td>'+
       '<td class="col-integrations">'+intCell(c.qboInt)+'</td>'+
@@ -873,13 +879,14 @@ function renderTotals(co){
     '<td style="background:#fffdf5;"></td>'+
     '<td style="text-align:center;font-weight:700;color:#111827;">'+tU.toLocaleString()+'</td>'+
     '<td style="text-align:center;font-weight:700;color:#111827;">'+tC.toLocaleString()+'</td>'+
-    '<td></td><td></td>'+
+    '<td></td>'+
+    '<td class="col-csflag"></td>'+
+    '<td></td>'+
     '<td>'+fmtD(tS)+'</td>'+
     '<td></td><td></td><td></td><td></td><td></td><td></td><td></td>'+
     '<td class="col-plan group-sep" style="color:#059669;font-weight:700;">'+fmtD(tM)+'/m</td>'+
     '<td class="col-plan"></td>'+
     '<td class="col-addons group-sep"></td><td class="col-addons"></td><td class="col-addons"></td><td class="col-addons"></td>'+
-    '<td class="col-csflag group-sep"></td>'+
     (integrationsExpanded?'<td class="col-integrations group-sep"></td><td class="col-integrations"></td><td class="col-integrations"></td><td class="col-integrations"></td><td class="col-integrations"></td><td class="col-integrations"></td><td class="col-integrations"></td>':'<td class="col-integrations group-sep" style="width:0;min-width:0;padding:0;border:none;"></td>')+
     (automationsExpanded?'<td class="col-automations group-sep"></td><td class="col-automations"></td>':'<td class="col-automations group-sep" style="width:0;min-width:0;padding:0;border:none;"></td>');
 }
@@ -914,6 +921,7 @@ function renderColHeaders(){
     '<th data-col="24" style="min-width:80px;">Active Users<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="25" style="min-width:80px;">Contacts<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="4" style="min-width:90px;">Health<span class="sort-icon">&#x21C5;</span></th>'+
+    '<th data-col="40" class="col-csflag" style="min-width:160px;" title="Phase 2 Prototype: manually set by OBCSS">CS Feedback &#10024;<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="6" style="min-width:72px;">Status<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="7" style="min-width:100px;">Total Sales<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="8" style="min-width:70px;">$10k<span class="sort-icon">&#x21C5;</span></th>'+
@@ -928,8 +936,7 @@ function renderColHeaders(){
     '<th data-col="15" class="col-addons group-sep" style="min-width:78px;">Prod Rates<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="17" class="col-addons" style="min-width:70px;">Job Cost<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="19" class="col-addons" style="min-width:72px;">Text MSG<span class="sort-icon">&#x21C5;</span></th>'+
-    '<th data-col="21" class="col-addons" style="min-width:66px;">Jobi AI<span class="sort-icon">&#x21C5;</span></th>'+
-    '<th data-col="40" class="col-csflag group-sep" style="min-width:130px;" title="Phase 2 Prototype: manually set by OBCSS">CS Feedback &#10024;<span class="sort-icon">&#x21C5;</span></th>';
+    '<th data-col="21" class="col-addons" style="min-width:66px;">Jobi AI<span class="sort-icon">&#x21C5;</span></th>';
   if(integrationsExpanded){h+=
     '<th data-col="27" class="col-integrations group-sep" style="min-width:72px;">Google<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="28" class="col-integrations" style="min-width:60px;">QBO<span class="sort-icon">&#x21C5;</span></th>'+
@@ -1065,7 +1072,7 @@ function applyFilters(){
       if(loginTypeFilter==='admin-only'&&(c.lastTrueLoginDate||!c.lastAdminAccessDate))return false;
     }
     /* CS Feedback filter */
-    if(cfFeedbackFilter){var cfv=getCfVal(c);if(cfFeedbackFilter==='any'&&!cfv.intercom&&!cfv.ob)return false;if(cfFeedbackFilter==='intercom-bad'&&cfv.intercom!=='bad')return false;if(cfFeedbackFilter==='intercom-terrible'&&cfv.intercom!=='terrible')return false;if(cfFeedbackFilter==='ob-2star'&&cfv.ob!=='2star')return false;if(cfFeedbackFilter==='ob-1star'&&cfv.ob!=='1star')return false;}
+    if(cfFeedbackFilter){var cfv=getCfVal(c);if(cfFeedbackFilter==='any'&&!cfv.intercom&&!cfv.ob)return false;if(cfFeedbackFilter==='intercom-bad'&&cfv.intercom!=='bad')return false;if(cfFeedbackFilter==='intercom-terrible'&&cfv.intercom!=='terrible')return false;if(cfFeedbackFilter==='ob-5star'&&cfv.ob!=='5star')return false;if(cfFeedbackFilter==='ob-4star'&&cfv.ob!=='4star')return false;if(cfFeedbackFilter==='ob-3star'&&cfv.ob!=='3star')return false;if(cfFeedbackFilter==='ob-2star'&&cfv.ob!=='2star')return false;if(cfFeedbackFilter==='ob-1star'&&cfv.ob!=='1star')return false;}
     return true;
   });
   applySort();page=1;render();
