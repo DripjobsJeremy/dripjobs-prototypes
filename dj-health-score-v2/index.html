@@ -284,6 +284,19 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
         </div>
       </div>
       <div class="filter-group">
+        <label class="filter-label">Add-On</label>
+        <div class="multi-select" id="ms-addon">
+          <button class="ms-btn" onclick="toggleMS('ms-addon')"><span class="ms-label">All Add-Ons</span><span class="ms-caret">&#9660;</span></button>
+          <div class="ms-panel" id="ms-addon-panel">
+            <label class="ms-item"><input type="checkbox" value="prodRates" onchange="msChange('ms-addon')"> Prod Rates</label>
+            <label class="ms-item"><input type="checkbox" value="jobCost" onchange="msChange('ms-addon')"> Job Cost</label>
+            <label class="ms-item"><input type="checkbox" value="textMsg" onchange="msChange('ms-addon')"> Text MSG</label>
+            <label class="ms-item"><input type="checkbox" value="jobiAi" onchange="msChange('ms-addon')"> Jobi AI</label>
+            <div class="ms-footer" onclick="clearMS('ms-addon')">Clear</div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-group">
         <label class="filter-label">Health Status</label>
         <div class="multi-select" id="ms-health">
           <button class="ms-btn" onclick="toggleMS('ms-health')"><span class="ms-label">All Statuses</span><span class="ms-caret">&#9660;</span></button>
@@ -990,7 +1003,7 @@ function render(){
 }
 
 var MS={};
-var MS_LABELS={'ms-plan':'All Plans','ms-health':'All Statuses','ms-obcss':'All Team Members','ms-industry':'All Industries','ms-integration':'All Integrations','ms-automation':'All Automations'};
+var MS_LABELS={'ms-plan':'All Plans','ms-health':'All Statuses','ms-obcss':'All Team Members','ms-industry':'All Industries','ms-addon':'All Add-Ons','ms-integration':'All Integrations','ms-automation':'All Automations'};
 function getMS(id){return MS[id]?Array.from(MS[id]):[];}
 function toggleMS(id){var panel=document.getElementById(id+'-panel'),isOpen=panel.classList.contains('ms-open');document.querySelectorAll('.ms-panel.ms-open').forEach(function(p){p.classList.remove('ms-open');});if(!isOpen)panel.classList.add('ms-open');}
 function msChange(id){if(!MS[id])MS[id]=new Set();MS[id].clear();document.querySelectorAll('#'+id+'-panel input[type=checkbox]:checked').forEach(function(cb){MS[id].add(cb.value);});updateMSBtn(id);applyFilters();}
@@ -1010,7 +1023,7 @@ function applyFilters(){
   var loginTypeFilter=document.getElementById('f-logintype').value;
   var cfFeedbackFilter=document.getElementById('f-csfeedback').value;
   var selPlan=getMS('ms-plan'),selHealth=getMS('ms-health'),selOb=getMS('ms-obcss');
-  var selInd=getMS('ms-industry'),selInteg=getMS('ms-integration'),selAuto=getMS('ms-automation');
+  var selInd=getMS('ms-industry'),selAddon=getMS('ms-addon'),selInteg=getMS('ms-integration'),selAuto=getMS('ms-automation');
   filtered=ALL.filter(function(c){
     if(q&&c.name.toLowerCase().indexOf(q)<0&&c.tenantId.toLowerCase().indexOf(q)<0)return false;
     if(type==='new'&&c.isLegacy)return false;
@@ -1020,6 +1033,7 @@ function applyFilters(){
     if(sub&&c.sub!==sub)return false;
     if(selOb.length&&selOb.indexOf(c.obcss)<0)return false;
     if(selInd.length&&selInd.indexOf(c.industry||'')<0)return false;
+    if(selAddon.length){var addonMap={prodRates:c.prodRates&&c.prodRates.active,jobCost:c.jobCost&&c.jobCost.active,textMsg:c.textMsg&&c.textMsg.active,jobiAi:c.jobiAi&&c.jobiAi.active};var addonMatch=false;for(var ai=0;ai<selAddon.length;ai++){if(addonMap[selAddon[ai]])addonMatch=true;}if(!addonMatch)return false;}
     if(usr==='flagged'&&c.activeUsers>=2)return false;
     if(usr==='2plus'&&c.activeUsers<2)return false;
     if(con==='100plus'&&c.contacts<100)return false;
@@ -1097,7 +1111,7 @@ function clearAllFilters(){
   document.getElementById('f-lastuser').value='';
   document.getElementById('f-logintype').value='';
   document.getElementById('f-csfeedback').value='';
-  ['ms-plan','ms-health','ms-obcss','ms-industry','ms-integration','ms-automation'].forEach(clearMS);
+  ['ms-plan','ms-health','ms-obcss','ms-industry','ms-addon','ms-integration','ms-automation'].forEach(clearMS);
   ['djdash_search','djdash_type','djdash_sub','djdash_users','djdash_contacts','djdash_estsent','djdash_10k','djdash_a2papplied','djdash_a2pstatus'].forEach(function(k){sessionStorage.removeItem(k);});
   filtered=ALL.slice();applySort();page=1;render();
 }
@@ -1109,7 +1123,7 @@ function filterByCard(id){
   document.getElementById('f-sub').value='';document.getElementById('f-users').value='';document.getElementById('f-contacts').value='';
   document.getElementById('f-estsent').value='';document.getElementById('f-10k').value='';document.getElementById('f-a2papplied').value='';document.getElementById('f-a2pstatus').value='';
   document.getElementById('f-lastlogin').value='';document.getElementById('f-lastuser').value='';document.getElementById('f-logintype').value='';
-  ['ms-plan','ms-health','ms-obcss','ms-industry','ms-integration','ms-automation'].forEach(function(k){if(MS[k])MS[k].clear();var p=document.getElementById(k+'-panel');if(p)p.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.checked=false;});updateMSBtn(k);});
+  ['ms-plan','ms-health','ms-obcss','ms-industry','ms-addon','ms-integration','ms-automation'].forEach(function(k){if(MS[k])MS[k].clear();var p=document.getElementById(k+'-panel');if(p)p.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.checked=false;});updateMSBtn(k);});
   if(id==='active'){document.getElementById('f-sub').value='Active';}
   else if(id==='on-track'||id==='needs-attention'||id==='at-risk'){
     var val={'on-track':'On Track','needs-attention':'Needs Attention','at-risk':'At Risk'}[id];
