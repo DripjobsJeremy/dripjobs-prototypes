@@ -279,7 +279,7 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
         </select>
       </div>
       <div class="filter-divider"></div>
-      <div class="filter-section-label">Integrations &amp; Automations</div>
+      <div class="filter-section-label">Integrations, Automations, &amp; Add-Ons</div>
       <div class="filter-group">
         <label class="filter-label">Integration</label>
         <div class="multi-select" id="ms-integration">
@@ -304,6 +304,19 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
             <label class="ms-item"><input type="checkbox" value="zapier" onchange="msChange('ms-automation')"> Zapier</label>
             <label class="ms-item"><input type="checkbox" value="angi" onchange="msChange('ms-automation')"> Angi Leads</label>
             <div class="ms-footer" onclick="clearMS('ms-automation')">Clear</div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Add-On</label>
+        <div class="multi-select" id="ms-addon">
+          <button class="ms-btn" onclick="toggleMS('ms-addon')"><span class="ms-label">All Add-Ons</span><span class="ms-caret">&#9660;</span></button>
+          <div class="ms-panel" id="ms-addon-panel">
+            <label class="ms-item"><input type="checkbox" value="prodRates" onchange="msChange('ms-addon')"> Prod Rates</label>
+            <label class="ms-item"><input type="checkbox" value="jobCost" onchange="msChange('ms-addon')"> Job Cost</label>
+            <label class="ms-item"><input type="checkbox" value="textMsg" onchange="msChange('ms-addon')"> Text MSG</label>
+            <label class="ms-item"><input type="checkbox" value="jobiAi" onchange="msChange('ms-addon')"> Jobi AI</label>
+            <div class="ms-footer" onclick="clearMS('ms-addon')">Clear</div>
           </div>
         </div>
       </div>
@@ -395,7 +408,7 @@ function toggleGroup(group){if(group==='integrations'){integrationsExpanded=!int
 function updateSubtitleAndPagination(total,start,end){document.getElementById('table-subtitle').textContent='Showing '+filtered.length.toLocaleString()+' accounts \u00b7 Page '+page+' of '+total;document.getElementById('pg-info-text').textContent='Showing '+(filtered.length?start+1:0).toLocaleString()+'\u2013'+end.toLocaleString()+' of '+filtered.length.toLocaleString()+' accounts';document.getElementById('pg-label').textContent='Page '+page+' of '+total;document.getElementById('prev-btn').disabled=page<=1;document.getElementById('next-btn').disabled=page>=total;}
 function render(){var eff=pageSize===0?filtered.length:pageSize,total=Math.ceil(filtered.length/Math.max(eff,1))||1;var start=(page-1)*eff,end=Math.min(start+eff,filtered.length),slice=filtered.slice(start,end);renderMetrics(filtered);renderColHeaders();document.getElementById('table-body').innerHTML='<tr><td colspan="99" style="text-align:center;padding:24px;color:#9ca3af;font-size:13px;">Loading accounts\u2026</td></tr>';updateSubtitleAndPagination(total,start,end);setTimeout(function(){var html='';for(var i=0;i<slice.length;i++)html+=mkRow(slice[i]);document.getElementById('table-body').innerHTML=html;clearTimeout(totalsDebounce);totalsDebounce=setTimeout(function(){renderTotals(filtered);},500);},0);}
 var MS={};
-var MS_LABELS={'ms-plan':'All Plans','ms-health':'All Statuses','ms-obcss':'All Team Members','ms-industry':'All Industries','ms-integration':'All Integrations','ms-automation':'All Automations'};
+var MS_LABELS={'ms-plan':'All Plans','ms-health':'All Statuses','ms-obcss':'All Team Members','ms-industry':'All Industries','ms-addon':'All Add-Ons','ms-integration':'All Integrations','ms-automation':'All Automations'};
 function getMS(id){return MS[id]?Array.from(MS[id]):[];}
 function toggleMS(id){var panel=document.getElementById(id+'-panel'),isOpen=panel.classList.contains('ms-open');document.querySelectorAll('.ms-panel.ms-open').forEach(function(p){p.classList.remove('ms-open');});if(!isOpen)panel.classList.add('ms-open');}
 function msChange(id){if(!MS[id])MS[id]=new Set();MS[id].clear();document.querySelectorAll('#'+id+'-panel input[type=checkbox]:checked').forEach(function(cb){MS[id].add(cb.value);});updateMSBtn(id);applyFilters();}
