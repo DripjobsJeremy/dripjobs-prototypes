@@ -1243,12 +1243,34 @@ table.dt tbody td { padding:9px 12px; font-size:13px; vertical-align:middle; }
         <div class="pb-section-head">
           <span class="pb-section-title">Line Items</span>
           <div class="pb-section-btns">
-            <button class="pb-btn-outline" onclick="toast('Add Optional')">Add Optional</button>
-            <button class="pb-btn-outline" onclick="toast('Add Multiple')">Add Multiple</button>
-            <button class="pb-btn-solid" onclick="toast('Add Item')">Add Item</button>
+            <button class="pb-btn-outline" onclick="openPbLiAddMultiModal()">Add Multiple</button>
+            <button class="pb-btn-solid" onclick="openPbLiAddItemModal()">Add Item</button>
           </div>
         </div>
-        <div class="info-placeholder"><i class="fas fa-info-circle"></i> Start by adding a Line Item here...</div>
+        <div class="info-placeholder" id="pb-li-empty"><i class="fas fa-info-circle"></i> Start by adding a Line Item here...</div>
+        <div id="pb-li-wrap" style="display:none;">
+          <table class="pb-table">
+            <thead>
+              <tr>
+                <th>Product / Service</th>
+                <th class="num">Quantity</th>
+                <th class="num">Price</th>
+                <th class="num">Subtotal</th>
+                <th class="num">Total</th>
+                <th style="width:64px;"></th>
+              </tr>
+            </thead>
+            <tbody id="pb-li-body"></tbody>
+            <tfoot>
+              <tr>
+                <td><strong>Total</strong></td><td></td><td></td>
+                <td class="num" id="pb-li-subtotal">$0.00</td>
+                <td class="num grand" id="pb-li-total">$0.00</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
 
       <!-- Areas card -->
@@ -1263,7 +1285,15 @@ table.dt tbody td { padding:9px 12px; font-size:13px; vertical-align:middle; }
         <div class="info-placeholder" id="pb-area-empty" style="display:none;"><i class="fas fa-info-circle"></i> Start by adding an Area here...</div>
         <div id="pb-area-wrap">
           <table class="pb-table">
-            <thead><tr><th>Area</th><th class="num">Quantity</th><th class="num">Price</th><th class="num">Subtotal</th><th class="num">Tax</th><th class="num">Total</th></tr></thead>
+            <thead><tr>
+              <th>Area</th>
+              <th class="num">Quantity</th>
+              <th class="num">Price</th>
+              <th class="num">Subtotal</th>
+              <th class="num">Tax</th>
+              <th class="num">Total</th>
+              <th style="width:64px;"></th>
+            </tr></thead>
             <tbody id="pb-area-body">
               <tr data-area-name="Whole House">
                 <td><i class="fas fa-grip-vertical" style="color:#c8ccd4;margin-right:6px;"></i><span class="pb-row-name">Whole House</span><i class="fas fa-copy pb-row-icons"></i><i class="fas fa-paperclip pb-row-icons"></i></td>
@@ -1272,6 +1302,10 @@ table.dt tbody td { padding:9px 12px; font-size:13px; vertical-align:middle; }
                 <td class="num">$3,852.56</td>
                 <td class="num">$87.12</td>
                 <td class="num" style="color:#8B85EA;font-weight:700;">$3,939.68</td>
+                <td style="text-align:right;white-space:nowrap;">
+                  <button class="dt-action-btn edit" onclick="editPbAreaRow(this)" title="Edit"><i class="fas fa-pencil-alt"></i></button>
+                  <button class="dt-action-btn del" onclick="deletePbAreaRow(this)" title="Delete"><i class="fas fa-trash"></i></button>
+                </td>
               </tr>
             </tbody>
             <tfoot><tr>
@@ -1279,6 +1313,7 @@ table.dt tbody td { padding:9px 12px; font-size:13px; vertical-align:middle; }
               <td class="num" id="pb-area-subtotal">$3,852.56</td>
               <td class="num" id="pb-area-tax">$87.12</td>
               <td class="num grand" id="pb-area-total">$3,939.68</td>
+              <td></td>
             </tr></tfoot>
           </table>
         </div>
@@ -2538,7 +2573,9 @@ function addMultiItems() {
       price: descOnly ? '—' : '$' + price.toFixed(2),
       descOnly
     };
-    if (targetCard) {
+    if (targetCard === '__pb_li__') {
+      document.getElementById('pb-li-body').insertAdjacentHTML('beforeend', buildPbLiRow(li));
+    } else if (targetCard) {
       const card  = document.getElementById(targetCard);
       if (card) {
         const tbody = card.querySelector('.pkg-items-table tbody');
@@ -2551,8 +2588,15 @@ function addMultiItems() {
     }
     added++;
   });
-  if (targetCard) recalcPkgCard(targetCard);
-  else updateLiEmpty();
+  if (targetCard === '__pb_li__') {
+    updatePbLiTotals();
+    document.getElementById('pb-li-empty').style.display = 'none';
+    document.getElementById('pb-li-wrap').style.display  = 'block';
+  } else if (targetCard) {
+    recalcPkgCard(targetCard);
+  } else {
+    updateLiEmpty();
+  }
   // Reset checkboxes
   document.querySelectorAll('.multi-cb').forEach(cb => cb.checked = false);
   document.getElementById('multi-count').textContent = '0 Selected';
@@ -2672,7 +2716,8 @@ function awAddAreaToContext(ctx) {
   tr.dataset.areaName = 'Whole House';
   tr.innerHTML = '<td><i class="fas fa-grip-vertical" style="color:#c8ccd4;margin-right:6px;"></i><span class="pb-row-name">Whole House</span><i class="fas fa-copy pb-row-icons"></i><i class="fas fa-paperclip pb-row-icons"></i></td>'
     + '<td class="num">1.00</td><td class="num">$3,852.56</td><td class="num">$3,852.56</td><td class="num">$87.12</td>'
-    + '<td class="num" style="color:#8B85EA;font-weight:700;">$3,939.68</td>';
+    + '<td class="num" style="color:#8B85EA;font-weight:700;">$3,939.68</td>'
+    + '<td style="text-align:right;white-space:nowrap;"><button class="dt-action-btn edit" onclick="editPbAreaRow(this)" title="Edit"><i class="fas fa-pencil-alt"></i></button><button class="dt-action-btn del" onclick="deletePbAreaRow(this)" title="Delete"><i class="fas fa-trash"></i></button></td>';
   body.appendChild(tr);
   document.getElementById(ids.empty).style.display = 'none';
   document.getElementById(ids.wrap).style.display = 'block';
@@ -2784,6 +2829,130 @@ function filterTable() {
 }
 
 // ─── ADD ITEM MODAL ───
+// ─── PROPOSAL BUILDER — STANDALONE LINE ITEMS ───
+let editingPbLiRow = null;
+
+function openPbLiAddItemModal() {
+  activePkgCardId = '__pb_li__';
+  editingPbLiRow  = null;
+  openAddItemModal('add', null, '__pb_li__');
+}
+function openPbLiAddMultiModal() {
+  activePkgCardId = '__pb_li__';
+  openModal('modal-multi-items');
+}
+
+function buildPbLiRow(li) {
+  const nameCell = `<td>
+    <i class="fas fa-grip-vertical" style="color:#c8ccd4;margin-right:6px;"></i>
+    <span class="pb-row-name">${li.name}</span>
+    <i class="fas fa-copy pb-row-icons"></i>
+    <i class="fas fa-paperclip pb-row-icons"></i>
+  </td>`;
+  const dataCells = li.descOnly
+    ? `<td></td><td><span class="desc-only-badge">Description only</span></td><td></td><td></td>`
+    : `<td class="num">1.00</td><td class="num">${li.price}</td><td class="num">${li.price}</td><td class="num" style="color:#8B85EA;font-weight:700;">${li.price}</td>`;
+  const actionCell = `<td style="text-align:right;white-space:nowrap;">
+    <button class="dt-action-btn edit" onclick="editPbLiRow(this)" title="Edit"><i class="fas fa-pencil-alt"></i></button>
+    <button class="dt-action-btn del"  onclick="deletePbLiRow(this)" title="Delete"><i class="fas fa-trash"></i></button>
+  </td>`;
+  return `<tr>${nameCell}${dataCells}${actionCell}</tr>`;
+}
+
+function updatePbLiTotals() {
+  let total = 0;
+  document.querySelectorAll('#pb-li-body tr').forEach(row => {
+    if (row.querySelector('.desc-only-badge')) return;
+    const tds = row.querySelectorAll('td');
+    if (tds.length >= 5) total += parsePrice(tds[4].textContent);
+  });
+  document.getElementById('pb-li-subtotal').textContent = fmtPrice(total);
+  document.getElementById('pb-li-total').textContent    = fmtPrice(total);
+}
+
+function editPbLiRow(btn) {
+  editingPbLiRow  = btn.closest('tr');
+  activePkgCardId = '__pb_li__';
+  const name      = editingPbLiRow.querySelector('.pb-row-name')?.textContent?.trim() || '';
+  const tds       = editingPbLiRow.querySelectorAll('td');
+  const isDescOnly = !!editingPbLiRow.querySelector('.desc-only-badge');
+  const priceText  = tds.length >= 3 ? tds[2].textContent.trim() : '';
+
+  document.getElementById('add-item-title').textContent = 'Edit Item';
+  document.getElementById('item-name-input').value = name;
+  document.getElementById('char-count').textContent = name.length + '/75';
+  document.getElementById('desc-only-toggle').checked = isDescOnly;
+  toggleDescOnly();
+  document.getElementById('item-price').value = isDescOnly ? '0'
+    : (parseFloat(priceText.replace(/[$,]/g, '')) || 0).toFixed(2);
+  const sel = document.getElementById('product-service-select');
+  if (sel) sel.value = '';
+  openModal('modal-add-item');
+}
+
+function updatePbLiRowCells(row, li) {
+  const nameEl = row.querySelector('.pb-row-name');
+  if (nameEl) nameEl.textContent = li.name;
+  const tds = row.querySelectorAll('td');
+  if (li.descOnly) {
+    tds[1].textContent = '';
+    tds[2].innerHTML   = '<span class="desc-only-badge">Description only</span>';
+    tds[3].textContent = '';
+    tds[4].textContent = '';
+  } else {
+    tds[1].textContent = '1.00';
+    tds[2].textContent = li.price;
+    tds[3].textContent = li.price;
+    tds[4].innerHTML   = `<span style="color:#8B85EA;font-weight:700;">${li.price}</span>`;
+  }
+}
+
+function deletePbLiRow(btn) {
+  btn.closest('tr').remove();
+  updatePbLiTotals();
+  if (!document.querySelectorAll('#pb-li-body tr').length) {
+    document.getElementById('pb-li-empty').style.display = 'flex';
+    document.getElementById('pb-li-wrap').style.display  = 'none';
+  }
+}
+
+// ─── PROPOSAL BUILDER — STANDALONE AREAS ───
+function updatePbAreaTotals() {
+  let subtotal = 0, tax = 0, total = 0;
+  document.querySelectorAll('#pb-area-body tr').forEach(row => {
+    const tds = row.querySelectorAll('td');
+    if (tds.length >= 6) {
+      subtotal += parsePrice(tds[3].textContent);
+      tax      += parsePrice(tds[4].textContent);
+      total    += parsePrice(tds[5].textContent);
+    }
+  });
+  document.getElementById('pb-area-subtotal').textContent = fmtPrice(subtotal);
+  document.getElementById('pb-area-tax').textContent      = fmtPrice(tax);
+  document.getElementById('pb-area-total').textContent    = fmtPrice(total);
+}
+
+function deletePbAreaRow(btn) {
+  btn.closest('tr').remove();
+  updatePbAreaTotals();
+  if (!document.querySelectorAll('#pb-area-body tr').length) {
+    document.getElementById('pb-area-empty').style.display = 'flex';
+    document.getElementById('pb-area-wrap').style.display  = 'none';
+  }
+}
+
+function editPbAreaRow(btn) {
+  // Remove the existing row and open the Area Wizard to re-add with updated details
+  btn.closest('tr').remove();
+  updatePbAreaTotals();
+  if (!document.querySelectorAll('#pb-area-body tr').length) {
+    document.getElementById('pb-area-empty').style.display = 'flex';
+    document.getElementById('pb-area-wrap').style.display  = 'none';
+  }
+  openAddAreaModal('proposal');
+  toast('Area removed — complete the wizard to re-add with changes');
+}
+
 // ─── PKG CARD CONTEXT OPENERS ───
 function openPkgAddItemModal(uid)  { activePkgCardId = uid; openAddItemModal('add', null, uid); }
 function openPkgAddMultiModal(uid) { activePkgCardId = uid; openModal('modal-multi-items'); }
@@ -2830,6 +2999,7 @@ function recalcPkgCard(cardId) {
 function closeAddItemModal() {
   activePkgCardId = null;
   editingLiRow    = null;
+  editingPbLiRow  = null;
   closeModal('modal-add-item');
 }
 
@@ -2895,6 +3065,24 @@ function saveAddItemToList() {
   };
 
   const targetCard = activePkgCardId;
+
+  if (targetCard === '__pb_li__') {
+    // ── Proposal Builder standalone Line Items ──
+    activePkgCardId = null;
+    const isEdit = !!editingPbLiRow;
+    if (isEdit) {
+      updatePbLiRowCells(editingPbLiRow, li);
+      editingPbLiRow = null;
+    } else {
+      document.getElementById('pb-li-body').insertAdjacentHTML('beforeend', buildPbLiRow(li));
+      document.getElementById('pb-li-empty').style.display = 'none';
+      document.getElementById('pb-li-wrap').style.display  = 'block';
+    }
+    updatePbLiTotals();
+    closeModal('modal-add-item');
+    toast('"' + nameVal + '" ' + (isEdit ? 'updated' : 'added to Line Items'));
+    return;
+  }
 
   if (targetCard) {
     // ── Insert into a package card in the Proposal Builder ──
