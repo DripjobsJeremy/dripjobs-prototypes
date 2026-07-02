@@ -610,6 +610,65 @@ table.dt tbody td { padding:9px 12px; font-size:13px; vertical-align:middle; }
 .modal-header-light .modal-x { color:#9aa0b0; font-size:20px; }
 .modal-header-light .modal-x:hover { background:#f0f0f4; color:#333; border-radius:4px; }
 
+/* ── AREA COST SUMMARY MODAL ── */
+.cs-area-head { display:flex; align-items:center; gap:8px; padding-bottom:10px; }
+.cs-area-type-chip { display:inline-flex; align-items:center; gap:5px; color:#8B85EA; font-size:12.5px; font-weight:700; }
+.cs-area-name { font-size:15px; font-weight:800; color:#32415B; }
+.cs-edit-area-btn {
+  background:#f8f7ff; border:1px solid #d4d0f7; color:#8B85EA;
+  font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:6px; cursor:pointer;
+}
+.cs-edit-area-btn:hover { background:#ede9ff; }
+.cs-gear-btn { background:none; border:none; color:#9aa0b0; cursor:pointer; font-size:14px; margin-left:auto; }
+.cs-gear-btn:hover { color:#8B85EA; }
+.cs-stats-row {
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  background:#fafafc; border:1px solid #eef0f4; border-radius:7px;
+  padding:8px 12px; font-size:12px; color:#7a8099; margin-bottom:12px;
+}
+.cs-stats-row .cs-stat { display:flex; align-items:center; gap:5px; }
+.cs-stats-row .cs-price { margin-left:auto; color:#8B85EA; font-weight:800; font-size:13.5px; }
+.cs-change-all-banner {
+  background:#f0eeff; border:1px solid #ded9fb; border-radius:7px;
+  padding:9px 12px; display:flex; align-items:center; gap:8px;
+  font-size:12.5px; font-weight:700; color:#6647f0; cursor:pointer; margin-bottom:12px;
+}
+.cs-change-all-banner i:first-child { color:#8B85EA; }
+.cs-change-all-banner .cs-arrow { margin-left:auto; color:#8B85EA; }
+.cs-line-item { border-bottom:1px solid #f0f0f4; padding:10px 0; }
+.cs-li-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.cs-li-title { font-size:13px; }
+.cs-li-title strong { color:#32415B; }
+.cs-li-title span { color:#9aa0b0; font-weight:600; }
+.cs-li-sub { font-size:11.5px; color:#9aa0b0; margin:2px 0 8px; }
+.cs-li-edit-btn {
+  background:#f8f7ff; border:1px solid #d4d0f7; color:#8B85EA;
+  font-size:11px; font-weight:700; padding:3px 10px; border-radius:6px; cursor:pointer; flex:none;
+}
+.cs-li-edit-btn:hover { background:#ede9ff; }
+.cs-li-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+.cs-li-col { font-size:11.5px; color:#9aa0b0; }
+.cs-li-col strong { display:block; margin-top:2px; font-size:13px; color:#32415B; font-weight:700; }
+.cs-totals-row {
+  display:grid; grid-template-columns:repeat(5,1fr); gap:6px;
+  background:#fafafc; border-radius:7px; padding:10px 12px; margin-top:6px; margin-bottom:16px;
+}
+.cs-optional-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.cs-optional-label { font-weight:700; font-size:13.5px; color:#32415B; }
+.cs-note-tabs { display:flex; border-bottom:1px solid #e8e8ec; margin-bottom:10px; }
+.cs-note-tab {
+  padding:8px 14px; font-size:12.5px; font-weight:700; cursor:pointer;
+  color:#9aa0b0; border-bottom:2px solid transparent; margin-bottom:-1px; display:flex; align-items:center; gap:5px;
+}
+.cs-note-tab.active { color:#8B85EA; border-bottom-color:#8B85EA; }
+.cs-note-textarea {
+  width:100%; min-height:90px; border:1px solid #e0e0e6; border-radius:7px;
+  padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;
+}
+.cs-note-textarea:focus { outline:none; border-color:#8B85EA; box-shadow:0 0 0 2px rgba(139,133,234,.16); }
+.cs-char-count { font-size:11.5px; color:#bbb; margin-top:5px; }
+.cs-footer { display:flex; align-items:center; justify-content:space-between; width:100%; }
+
 .pks-section-lbl {
   font-size:11px; font-weight:700; color:#5a6277;
   text-transform:uppercase; letter-spacing:.5px;
@@ -1292,20 +1351,15 @@ table.dt tbody td { padding:9px 12px; font-size:13px; vertical-align:middle; }
               <th class="num">Subtotal</th>
               <th class="num">Tax</th>
               <th class="num">Total</th>
-              <th style="width:64px;"></th>
             </tr></thead>
             <tbody id="pb-area-body">
               <tr data-area-name="Whole House">
-                <td><i class="fas fa-grip-vertical" style="color:#c8ccd4;margin-right:6px;"></i><span class="pb-row-name">Whole House</span><i class="fas fa-copy pb-row-icons"></i><i class="fas fa-paperclip pb-row-icons"></i></td>
+                <td><i class="fas fa-grip-vertical" style="color:#c8ccd4;margin-right:6px;"></i><span class="pb-row-name" onclick="openAreaCostSummary(this.closest('tr'))">Whole House</span><i class="fas fa-copy pb-row-icons"></i><i class="fas fa-paperclip pb-row-icons"></i></td>
                 <td class="num">1.00</td>
                 <td class="num">$3,852.56</td>
                 <td class="num">$3,852.56</td>
                 <td class="num">$87.12</td>
                 <td class="num" style="color:#8B85EA;font-weight:700;">$3,939.68</td>
-                <td style="text-align:right;white-space:nowrap;">
-                  <button class="dt-action-btn edit" onclick="editPbAreaRow(this)" title="Edit"><i class="fas fa-pencil-alt"></i></button>
-                  <button class="dt-action-btn del" onclick="deletePbAreaRow(this)" title="Delete"><i class="fas fa-trash"></i></button>
-                </td>
               </tr>
             </tbody>
             <tfoot><tr>
@@ -1313,7 +1367,6 @@ table.dt tbody td { padding:9px 12px; font-size:13px; vertical-align:middle; }
               <td class="num" id="pb-area-subtotal">$3,852.56</td>
               <td class="num" id="pb-area-tax">$87.12</td>
               <td class="num grand" id="pb-area-total">$3,939.68</td>
-              <td></td>
             </tr></tfoot>
           </table>
         </div>
@@ -1539,7 +1592,142 @@ table.dt tbody td { padding:9px 12px; font-size:13px; vertical-align:middle; }
   </div>
 </div>
 
-<!-- 7. ADD ITEM MODAL (matches screenshots exactly) -->
+<!-- AREA COST SUMMARY MODAL — opened by clicking an Area name in Proposal Builder -->
+<div class="modal-overlay" id="modal-area-cost-summary">
+  <div class="modal-shell modal-lg">
+    <div class="modal-header-light">
+      <span style="font-size:15px;font-weight:700;color:#32415B;">Cost Summary</span>
+      <button class="modal-x" onclick="closeModal('modal-area-cost-summary')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="cs-area-head">
+        <span class="cs-area-type-chip"><i class="fas fa-sync-alt" style="font-size:11px;"></i> Exterior</span>
+        <span class="cs-area-name" id="cs-area-name">Whole House</span>
+        <button class="cs-edit-area-btn" onclick="toast('Edit Area — not in scope')">Edit Area</button>
+        <button class="cs-gear-btn" onclick="toast('Area Settings — not in scope')" title="Area Settings"><i class="fas fa-cog"></i></button>
+      </div>
+
+      <div class="cs-stats-row">
+        <span class="cs-stat"><i class="fas fa-ruler-combined"></i> 9 × 250 ft</span>
+        <span class="cs-stat"><i class="far fa-copy"></i> 5 substrates</span>
+        <span class="cs-stat"><i class="far fa-square"></i> 2250 sq ft</span>
+        <span class="cs-price"><i class="fas fa-tag" style="font-size:11px;"></i> <span id="cs-area-total">$6,081.86</span></span>
+      </div>
+
+      <div class="cs-change-all-banner" onclick="toast('Bulk Product Changer — not in scope')">
+        <i class="fas fa-cog"></i> Change all products in this area <i class="fas fa-arrow-right cs-arrow"></i>
+      </div>
+
+      <div class="cs-line-item">
+        <div class="cs-li-head">
+          <div class="cs-li-title"><i class="fas fa-chevron-right" style="font-size:10px;color:#c2c6d0;margin-right:4px;"></i><strong>(Roll) Stucco Siding Light Texture</strong> <span>Siding</span></div>
+          <button class="cs-li-edit-btn" onclick="toast('Edit line item — not in scope')">Edit</button>
+        </div>
+        <div class="cs-li-sub">Square Foot (Walls) — 2250sqft</div>
+        <div class="cs-li-grid">
+          <div class="cs-li-col">Quantity<strong>1</strong></div>
+          <div class="cs-li-col">Hours<strong>15.5</strong></div>
+          <div class="cs-li-col">Materials<strong>$658.45</strong></div>
+          <div class="cs-li-col">Labor<strong>$2,094.83</strong></div>
+          <div class="cs-li-col">Sales Tax<strong>$59.92</strong></div>
+        </div>
+      </div>
+
+      <div class="cs-line-item">
+        <div class="cs-li-head">
+          <div class="cs-li-title"><i class="fas fa-chevron-right" style="font-size:10px;color:#c2c6d0;margin-right:4px;"></i><strong>(Spray) Front Door + Sidelights - 1 Side</strong> <span>Doors</span></div>
+          <button class="cs-li-edit-btn" onclick="toast('Edit line item — not in scope')">Edit</button>
+        </div>
+        <div class="cs-li-sub">Hours Per Item — 1x</div>
+        <div class="cs-li-grid">
+          <div class="cs-li-col">Quantity<strong>1</strong></div>
+          <div class="cs-li-col">Hours<strong>2</strong></div>
+          <div class="cs-li-col">Materials<strong>$45.99</strong></div>
+          <div class="cs-li-col">Labor<strong>$270.00</strong></div>
+          <div class="cs-li-col">Sales Tax<strong>$4.19</strong></div>
+        </div>
+      </div>
+
+      <div class="cs-line-item">
+        <div class="cs-li-head">
+          <div class="cs-li-title"><i class="fas fa-chevron-right" style="font-size:10px;color:#c2c6d0;margin-right:4px;"></i><strong>(Spray) Drywall Ceiling Light Texture</strong> <span>Ceiling</span></div>
+          <button class="cs-li-edit-btn" onclick="toast('Edit line item — not in scope')">Edit</button>
+        </div>
+        <div class="cs-li-sub">Square Foot (Ceiling) — 2250sqft</div>
+        <div class="cs-li-grid">
+          <div class="cs-li-col">Quantity<strong>1</strong></div>
+          <div class="cs-li-col">Hours<strong>10</strong></div>
+          <div class="cs-li-col">Materials<strong>$432.63</strong></div>
+          <div class="cs-li-col">Labor<strong>$1,350.00</strong></div>
+          <div class="cs-li-col">Sales Tax<strong>$39.37</strong></div>
+        </div>
+      </div>
+
+      <div class="cs-line-item">
+        <div class="cs-li-head">
+          <div class="cs-li-title"><i class="fas fa-chevron-right" style="font-size:10px;color:#c2c6d0;margin-right:4px;"></i><strong>(Spray) Soffit and Fascia</strong> <span>Trim</span></div>
+          <button class="cs-li-edit-btn" onclick="toast('Edit line item — not in scope')">Edit</button>
+        </div>
+        <div class="cs-li-sub">Linear Foot — 250ft</div>
+        <div class="cs-li-grid">
+          <div class="cs-li-col">Quantity<strong>1</strong></div>
+          <div class="cs-li-col">Hours<strong>1.4</strong></div>
+          <div class="cs-li-col">Materials<strong>$298.92</strong></div>
+          <div class="cs-li-col">Labor<strong>$192.86</strong></div>
+          <div class="cs-li-col">Sales Tax<strong>$27.20</strong></div>
+        </div>
+      </div>
+
+      <div class="cs-line-item" style="border-bottom:none;">
+        <div class="cs-li-head">
+          <div class="cs-li-title"><i class="fas fa-chevron-right" style="font-size:10px;color:#c2c6d0;margin-right:4px;"></i><strong>Power Washing</strong> <span>Power Washing</span></div>
+          <button class="cs-li-edit-btn" onclick="toast('Edit line item — not in scope')">Edit</button>
+        </div>
+        <div class="cs-li-sub">Square Foot (Walls) — 2250sqft</div>
+        <div class="cs-li-grid">
+          <div class="cs-li-col">Quantity<strong>1</strong></div>
+          <div class="cs-li-col">Hours<strong>4.5</strong></div>
+          <div class="cs-li-col">Materials<strong>$0.00</strong></div>
+          <div class="cs-li-col">Labor<strong>$607.50</strong></div>
+          <div class="cs-li-col">Sales Tax<strong>$0.00</strong></div>
+        </div>
+      </div>
+
+      <div class="cs-totals-row">
+        <div class="cs-li-col">Total Hours<strong>33.5</strong></div>
+        <div class="cs-li-col">Total Materials<strong>$1,435.99</strong></div>
+        <div class="cs-li-col">Total Labor<strong>$4,515.19</strong></div>
+        <div class="cs-li-col">Sales Tax<strong>$130.68</strong></div>
+        <div class="cs-li-col">Project Total<strong>$6,081.86</strong></div>
+      </div>
+
+      <div class="cs-optional-row">
+        <span class="cs-optional-label">Is Optional</span>
+        <label class="switchery-wrap"><input type="checkbox"><span class="sw-track"></span></label>
+      </div>
+
+      <div class="cs-note-tabs">
+        <div class="cs-note-tab active" onclick="document.querySelectorAll('.cs-note-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active')">Crew Note <i class="fas fa-info-circle" style="font-size:10px;"></i></div>
+        <div class="cs-note-tab" onclick="document.querySelectorAll('.cs-note-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active')">Client Note <i class="fas fa-info-circle" style="font-size:10px;"></i></div>
+      </div>
+      <textarea class="cs-note-textarea" id="cs-note-text" maxlength="300" placeholder="Begin typing notes here..." oninput="document.getElementById('cs-char-count').textContent=(300-this.value.length)+' characters remaining ('+this.value.length+'/300)'"></textarea>
+      <div class="cs-char-count" id="cs-char-count">300 characters remaining (0/300)</div>
+
+    </div>
+    <div class="modal-footer">
+      <div class="cs-footer">
+        <button class="btn-danger" onclick="confirmDeleteAreaFromCostSummary()"><i class="fas fa-trash"></i> Delete</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-save" onclick="closeModal('modal-area-cost-summary');toast('Area saved')">Save</button>
+          <button class="btn-close" onclick="closeModal('modal-area-cost-summary')">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div class="modal-overlay" id="modal-add-item">
   <div class="modal-shell">
     <div class="modal-header">
@@ -2714,10 +2902,9 @@ function awAddAreaToContext(ctx) {
   }
   const tr = document.createElement('tr');
   tr.dataset.areaName = 'Whole House';
-  tr.innerHTML = '<td><i class="fas fa-grip-vertical" style="color:#c8ccd4;margin-right:6px;"></i><span class="pb-row-name">Whole House</span><i class="fas fa-copy pb-row-icons"></i><i class="fas fa-paperclip pb-row-icons"></i></td>'
+  tr.innerHTML = '<td><i class="fas fa-grip-vertical" style="color:#c8ccd4;margin-right:6px;"></i><span class="pb-row-name" onclick="openAreaCostSummary(this.closest(\'tr\'))">Whole House</span><i class="fas fa-copy pb-row-icons"></i><i class="fas fa-paperclip pb-row-icons"></i></td>'
     + '<td class="num">1.00</td><td class="num">$3,852.56</td><td class="num">$3,852.56</td><td class="num">$87.12</td>'
-    + '<td class="num" style="color:#8B85EA;font-weight:700;">$3,939.68</td>'
-    + '<td style="text-align:right;white-space:nowrap;"><button class="dt-action-btn edit" onclick="editPbAreaRow(this)" title="Edit"><i class="fas fa-pencil-alt"></i></button><button class="dt-action-btn del" onclick="deletePbAreaRow(this)" title="Delete"><i class="fas fa-trash"></i></button></td>';
+    + '<td class="num" style="color:#8B85EA;font-weight:700;">$3,939.68</td>';
   body.appendChild(tr);
   document.getElementById(ids.empty).style.display = 'none';
   document.getElementById(ids.wrap).style.display = 'block';
@@ -2932,25 +3119,30 @@ function updatePbAreaTotals() {
   document.getElementById('pb-area-total').textContent    = fmtPrice(total);
 }
 
-function deletePbAreaRow(btn) {
-  btn.closest('tr').remove();
-  updatePbAreaTotals();
-  if (!document.querySelectorAll('#pb-area-body tr').length) {
-    document.getElementById('pb-area-empty').style.display = 'flex';
-    document.getElementById('pb-area-wrap').style.display  = 'none';
-  }
+// ─── AREA COST SUMMARY MODAL (opened by clicking an Area name) ───
+let activeCostSummaryRow = null;
+function openAreaCostSummary(row) {
+  activeCostSummaryRow = row;
+  const name = row.querySelector('.pb-row-name')?.textContent?.trim() || 'Area';
+  const totalCell = row.querySelectorAll('td')[5];
+  document.getElementById('cs-area-name').textContent = name;
+  document.getElementById('cs-area-total').textContent = totalCell ? totalCell.textContent.trim() : '$0.00';
+  document.getElementById('cs-note-text').value = '';
+  document.getElementById('cs-char-count').textContent = '300 characters remaining (0/300)';
+  openModal('modal-area-cost-summary');
 }
-
-function editPbAreaRow(btn) {
-  // Remove the existing row and open the Area Wizard to re-add with updated details
-  btn.closest('tr').remove();
+function confirmDeleteAreaFromCostSummary() {
+  if (!activeCostSummaryRow) { closeModal('modal-area-cost-summary'); return; }
+  const name = activeCostSummaryRow.querySelector('.pb-row-name')?.textContent?.trim() || 'Area';
+  activeCostSummaryRow.remove();
+  activeCostSummaryRow = null;
   updatePbAreaTotals();
   if (!document.querySelectorAll('#pb-area-body tr').length) {
     document.getElementById('pb-area-empty').style.display = 'flex';
     document.getElementById('pb-area-wrap').style.display  = 'none';
   }
-  openAddAreaModal('proposal');
-  toast('Area removed — complete the wizard to re-add with changes');
+  closeModal('modal-area-cost-summary');
+  toast('"' + name + '" deleted');
 }
 
 // ─── PKG CARD CONTEXT OPENERS ───
