@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DripJobs — Jobs List (Job Address + Column Management) Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<style>
+  html,body { background:#F4F5F8; margin:0; }
+  body { font-family:'Nunito', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+  #jobs-list-page {
+    --jl-primary:        #8B85EA;
+    --jl-primary-hover:  #736BE3;
+    --jl-primary-active: #5C53DC;
+    --jl-primary-rgb:    139, 133, 234;
+    --jl-teal:           #0DCECE;
+    --jl-orange:         #FF6A45;
+    --jl-text:           #32415B;
+    --jl-text-muted:     #80879A;
+    --jl-border:         #DAD8E3;
+    --jl-card-bg:        #FFFFFF;
+    --jl-filterbar-bg:   #F5F4FA;
+    color: var(--jl-text);
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 0 80px;
+    background:#fff;
+  }
+
+  /* ---------- Demo banner ---------- */
+  .demo-banner {
+    position: sticky; top: 0; z-index: 500;
+    background: #32415B; color: #fff;
+    padding: 10px 20px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    flex-wrap: wrap; font-size: 13px;
+  }
+  .demo-banner b { color: var(--jl-teal); }
+  .demo-banner a { color:#C9C4FF; text-decoration:underline; }
+  .demo-toggle { display:flex; align-items:center; gap:8px; font-size:12px; white-space:nowrap; }
+
+  /* ---------- BR annotation chips ---------- */
+  .br-chip {
+    display:none;
+    font-size:10px; font-weight:700; letter-spacing:0.3px;
+    color:#B45309; background:#FFF3E0; border:1px solid #FCD9A8;
+    border-radius:999px; padding:1px 7px; margin-left:6px;
+    cursor: help; vertical-align: middle;
+  }
+  #jobs-list-page.show-br .br-chip { display:inline-block; }
+
+  /* ---------- Page header (title/stats + action bar) ---------- */
+  .jl-page-header {
+    display:flex; align-items:flex-start; justify-content:space-between;
+    padding:18px 24px 14px; flex-wrap:wrap; gap:12px;
+    border-bottom:1px solid var(--jl-border);
+  }
+  .jl-title { font-size:19px; font-weight:800; margin:0; color:var(--jl-text); }
+  .jl-stats { font-size:12px; color:var(--jl-text-muted); margin-top:4px; }
+  .jl-stats b { color: var(--jl-text); font-weight:700; }
+
+  .jl-action-bar { display:none; align-items:center; gap:10px; }
+  .jl-action-bar.visible { display:flex; }
+  .jl-selected-count { font-size:13px; color:var(--jl-text); font-weight:600; margin-right:4px; }
+
+  .jl-pill-btn {
+    height:34px; padding:0 16px; border-radius:8px; font-size:13px; font-weight:700;
+    display:inline-flex; align-items:center; gap:7px; border:1px solid transparent; cursor:pointer;
+    color:#fff; transition: filter .15s ease;
+  }
+  .jl-pill-btn:hover { filter: brightness(0.94); }
+  .jl-btn-blast   { background: var(--jl-orange); }
+  .jl-btn-export  { background: var(--jl-primary); }
+  .jl-btn-archive { background: var(--jl-primary); }
+
+  /* ---------- Filter bar ---------- */
+  .jl-filter-bar {
+    background: var(--jl-filterbar-bg);
+    padding:14px 24px;
+    display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap;
+  }
+  .jl-filter-field { display:flex; flex-direction:column; gap:5px; min-width:130px; }
+  .jl-filter-field label { font-size:11px; color:var(--jl-text-muted); font-weight:600; }
+  .jl-filter-field select {
+    height:34px; border:1px solid var(--jl-border); border-radius:6px;
+    padding:0 26px 0 10px; font-size:12.5px; font-weight:600; color:var(--jl-text);
+    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5 4.5-5z' fill='%2380879A'/%3E%3C/svg%3E") no-repeat right 10px center;
+    appearance:none; -webkit-appearance:none; cursor:pointer; min-width:130px;
+  }
+  .jl-filter-field select:focus { outline:none; border-color:var(--jl-primary); box-shadow:0 0 0 3px rgba(var(--jl-primary-rgb),0.18); }
+
+  .jl-btn-go {
+    height:34px; padding:0 22px; border-radius:6px; background:var(--jl-primary); color:#fff;
+    border:none; font-size:13px; font-weight:700; cursor:pointer;
+  }
+  .jl-btn-go:hover { background:var(--jl-primary-hover); }
+  .jl-btn-reset {
+    height:34px; padding:0 16px; border-radius:6px; background:#fff; color:var(--jl-text);
+    border:1px solid var(--jl-border); font-size:13px; font-weight:700; cursor:pointer;
+  }
+  .jl-btn-reset:hover { border-color:var(--jl-primary); color:var(--jl-primary); }
+
+  .jl-archived-toggle { display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--jl-text); }
+
+  /* ---------- Toggle switch (shared: Show Archived + Column Manager) ---------- */
+  .toggle-switch { position:relative; display:inline-block; width:34px; height:19px; flex-shrink:0; }
+  .toggle-switch input { opacity:0; width:0; height:0; }
+  .toggle-slider {
+    position:absolute; cursor:pointer; inset:0; background:#D6D5E0; border-radius:999px; transition:.15s;
+  }
+  .toggle-slider::before {
+    content:""; position:absolute; height:15px; width:15px; left:2px; top:2px;
+    background:#fff; border-radius:50%; transition:.15s; box-shadow:0 1px 2px rgba(0,0,0,0.15);
+  }
+  .toggle-switch input:checked + .toggle-slider { background: var(--jl-primary); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(15px); }
+
+  /* ---------- Search / entries / view controls row ---------- */
+  .jl-search-row {
+    display:flex; align-items:center; justify-content:space-between; padding:14px 24px; flex-wrap:wrap; gap:12px;
+  }
+  .jl-search-field { display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--jl-text-muted); font-weight:600;}
+  .jl-search-field input {
+    height:32px; border:1px solid var(--jl-border); border-radius:6px; padding:0 12px; font-size:12.5px; width:220px;
+  }
+  .jl-search-field input:focus { outline:none; border-color:var(--jl-primary); box-shadow:0 0 0 3px rgba(var(--jl-primary-rgb),0.18); }
+
+  .jl-right-controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+
+  .jl-select-view {
+    height:32px; border:1px solid var(--jl-border); border-radius:6px;
+    padding:0 28px 0 12px; font-size:12.5px; font-weight:700; color:var(--jl-text);
+    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5 4.5-5z' fill='%2380879A'/%3E%3C/svg%3E") no-repeat right 10px center;
+    appearance:none; -webkit-appearance:none; cursor:pointer;
+  }
+  .jl-select-view:focus { outline:none; border-color:var(--jl-primary); }
+
+  .jl-columns-btn {
+    height:32px; padding:0 14px; border-radius:6px; font-size:12.5px; font-weight:700;
+    display:inline-flex; align-items:center; gap:7px; border:1px solid var(--jl-border); cursor:pointer;
+    background:#fff; color:var(--jl-text);
+  }
+  .jl-columns-btn:hover, .jl-columns-btn.active-cols { border-color:var(--jl-primary); color:var(--jl-primary); background:rgba(var(--jl-primary-rgb),0.06); }
+
+  .jl-entries-field { display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--jl-text-muted); font-weight:600; }
+  .jl-entries-field select {
+    height:32px; border:1px solid var(--jl-border); border-radius:6px; padding:0 24px 0 10px; font-size:12.5px;
+    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5 4.5-5z' fill='%2380879A'/%3E%3C/svg%3E") no-repeat right 8px center;
+    appearance:none; -webkit-appearance:none; cursor:pointer;
+  }
+
+  /* ---------- Table ---------- */
+  .jl-table-scroll { overflow-x:auto; border-top:1px solid var(--jl-border); }
+  table.jl-table { width:100%; border-collapse:collapse; font-size:13px; min-width:1900px; }
+  table.jl-table thead th {
+    position:sticky; top:0; background:#fff; text-align:left; font-weight:700; font-size:11.5px;
+    color:var(--jl-text-muted); padding:10px 16px; border-bottom:1px solid var(--jl-border); white-space:nowrap;
+  }
+  table.jl-table th .sort-caret { font-size:9px; color:#C7C5D6; margin-left:5px; }
+  table.jl-table th.col-new { color:var(--jl-primary-active); }
+  table.jl-table th.checkbox-col, table.jl-table td.checkbox-col { width:40px; padding-left:16px; padding-right:8px; }
+  table.jl-table tbody td { padding:11px 16px; border-bottom:1px solid #EEEDF3; white-space:nowrap; color:var(--jl-text); }
+  table.jl-table tbody tr:last-child td { border-bottom:none; }
+  table.jl-table tbody tr:hover { background:#FAFAFE; }
+  table.jl-table tbody tr.row-selected { background:#FAFAFE; }
+  .jl-empty-cell { color:var(--jl-text-muted); }
+  .jl-muted-text { color:var(--jl-text-muted); }
+
+  .jl-row-checkbox, .jl-header-checkbox { width:16px; height:16px; accent-color: var(--jl-primary); cursor:pointer; }
+
+  .jl-link { color:var(--jl-primary-active); text-decoration:none; font-weight:600; }
+  .jl-link:hover { text-decoration:underline; }
+  .jl-link i { font-size:11px; margin-right:5px; color:#B7B2F2; }
+
+  .add-label-link { color:var(--jl-text-muted); font-size:12.5px; cursor:pointer; }
+  .add-label-link:hover { color:var(--jl-primary); }
+
+  .status-pill, .invoice-status-pill, .label-chip {
+    display:inline-block; padding:3px 10px; border-radius:14px; font-size:11.5px; font-weight:700; white-space:nowrap;
+  }
+  .status-accepted   { background:#E6FAF0; color:#1E8E5A; }
+  .status-completed  { background:#E6F3FA; color:#1D6FA5; }
+  .status-progress   { background:#FAF7E6; color:#9C7A0A; }
+  .status-onhold     { background:#FAE6E6; color:#B3423F; }
+
+  .invoice-paid   { background:#E6FAF0; color:#1E8E5A; }
+  .invoice-open   { background:#EFEFF3; color:#5B6270; }
+  .invoice-partial{ background:#FAF7E6; color:#9C7A0A; }
+  .invoice-na     { background:#F5F4FA; color:#9A97B0; }
+
+  .label-chip-callback { background:#E6FAFA; color:#0D8C8C; }
+
+  .invoice-id-wrap { display:flex; align-items:center; gap:6px; color:var(--jl-text); }
+  .invoice-id-wrap i { color:#B0AECF; font-size:12px; }
+
+  .deal-stage-cell { font-weight:600; }
+  .deal-stage-accepted  { background:#EAFBF2; color:#1E8E5A; }
+  .deal-stage-complete  { background:#E8EAF6; color:#3F51B5; }
+  .deal-stage-scheduled { background:#E3F2FD; color:#1D6FA5; }
+  .deal-stage-progress  { background:#FDEEDF; color:#B0630F; }
+
+  .sched-date-wrap { display:inline-flex; align-items:center; gap:6px; color:var(--jl-text); }
+  .sched-date-wrap i { color:#B0AECF; font-size:12px; }
+  .jl-link-plain i { display:none; }
+
+  .jl-empty-state { padding:60px 20px; text-align:center; }
+  .jl-empty-state i { font-size:28px; color:var(--jl-text-muted); margin-bottom:10px; }
+  .jl-empty-state p { color:var(--jl-text-muted); font-size:13px; margin-bottom:14px; }
+
+  .jl-footer-bar { display:flex; justify-content:space-between; align-items:center; padding:12px 24px; border-top:1px solid var(--jl-border); font-size:12px; color:var(--jl-text-muted); }
+
+  .jl-btn {
+    height:36px; padding:0 16px; border-radius:8px; font-size:13px; font-weight:700;
+    display:inline-flex; align-items:center; gap:7px; border:1px solid transparent; cursor:pointer;
+  }
+  .jl-btn-outline { background:#fff; border-color:var(--jl-border); color:var(--jl-text); }
+  .jl-btn-outline:hover { border-color:var(--jl-primary); color:var(--jl-primary); }
+  .jl-btn-primary { background:var(--jl-primary); color:#fff; }
+  .jl-btn-primary:hover { background:var(--jl-primary-hover); }
+
+  /* ---------- Column manager panel ---------- */
+  .jl-overlay {
+    position:fixed; inset:0; background:rgba(50,65,91,0.35); z-index:800;
+    opacity:0; pointer-events:none; transition:opacity .18s ease;
+  }
+  .jl-overlay.open { opacity:1; pointer-events:auto; }
+
+  .jl-panel {
+    position:fixed; top:0; right:0; height:100%; width:320px; max-width:92vw;
+    background:#fff; z-index:900; box-shadow:-8px 0 24px rgba(50,65,91,0.12);
+    display:flex; flex-direction:column;
+    transform: translateX(100%); transition: transform .2s ease;
+  }
+  .jl-panel.open { transform: translateX(0); }
+
+  .jl-panel-header { padding:16px; border-bottom:1px solid var(--jl-border); display:flex; align-items:center; justify-content:space-between; }
+  .jl-panel-title { font-size:14px; font-weight:700; margin:0; }
+  .jl-panel-close { background:none; border:none; color:var(--jl-text-muted); font-size:16px; cursor:pointer; padding:4px; }
+  .jl-panel-close:hover { color:var(--jl-text); }
+
+  .jl-panel-search { padding:12px 16px; border-bottom:1px solid var(--jl-border); }
+  .jl-panel-search input {
+    width:100%; height:36px; border:1px solid var(--jl-border); border-radius:8px; padding:0 12px 0 32px;
+    font-size:13px; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2380879A' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") no-repeat 10px center;
+  }
+  .jl-panel-search input:focus { outline:none; border-color:var(--jl-primary); box-shadow:0 0 0 3px rgba(var(--jl-primary-rgb),0.18); }
+  .jl-search-note { font-size:11px; color:var(--jl-text-muted); margin-top:6px; }
+
+  .jl-panel-list { flex:1; overflow-y:auto; padding:8px 8px; }
+  .jl-col-row {
+    display:flex; align-items:center; gap:10px; padding:9px 8px; border-radius:8px;
+    user-select:none;
+  }
+  .jl-col-row:hover { background:#FAFAFE; }
+  .jl-col-row.hidden-by-search { display:none; }
+  .jl-drag-handle { color:#C7C5D6; cursor:grab; font-size:14px; width:16px; text-align:center; }
+  .jl-drag-handle:active { cursor:grabbing; }
+  .jl-col-row.sortable-ghost { opacity:0.4; }
+  .jl-col-label { font-size:13px; flex:1; }
+  .jl-col-label.new-badge::after {
+    content:"NEW"; font-size:9px; font-weight:800; color:var(--jl-primary-active);
+    background:#E8E6FA; border-radius:6px; padding:1px 5px; margin-left:6px; vertical-align:middle;
+  }
+
+  .jl-panel-footer { padding:14px 16px; border-top:1px solid var(--jl-border); display:flex; gap:10px; }
+  .jl-panel-footer .jl-btn { flex:1; justify-content:center; }
+
+  @media (max-width: 900px) {
+    .jl-filter-bar { gap:10px; }
+    .jl-filter-field { min-width:110px; }
+  }
+  @media (max-width: 576px) {
+    .jl-page-header, .jl-filter-bar, .jl-search-row, .jl-footer-bar { padding-left:14px; padding-right:14px; }
+    .jl-panel {
+      top:auto; bottom:0; left:0; right:0; width:100%; height:80vh; max-width:100%;
+      border-radius:14px 14px 0 0;
+      transform: translateY(100%);
+    }
+    .jl-panel.open { transform: translateY(0); }
+    .jl-search-row { flex-direction:column; align-items:stretch; }
+    .jl-right-controls { justify-content:space-between; }
+  }
+
+  .helper-note {
+    background:#f0fafa; border-left:4px solid var(--jl-teal); border-radius:6px;
+    padding:10px 12px; font-size:12px; color:var(--jl-text); margin:16px 24px 0;
+  }
+
+  /* ---------- Injected Prototype Hub top bar ---------- */
+  .proto-bar {
+    background: #FFFFFF;
+    border-bottom: 1px solid #DAD8E3;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: 'Nunito', sans-serif;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .proto-bar .back-link {
+    font-size: 12px; font-weight: 600; color: #80879A; text-decoration: none;
+    display: flex; align-items: center; gap: 4px; transition: color 0.15s;
+  }
+  .proto-bar .back-link:hover { color: #8B85EA; }
+  .proto-bar .divider { color: #DAD8E3; font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 700; color: #32415B; }
+  .proto-bar-ticket {
+    font-size: 11px; font-weight: 700; color: #5C53DC; text-decoration: none;
+    padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA;
+    border-radius: 999px; letter-spacing: 0.2px;
+  }
+  .proto-bar-ticket:hover { background: #8B85EA; color: #fff; }
+</style>
+</head>
+<body>
+<!-- Top bar (injected: Prototype Hub navigation) -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">&larr; Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Job Address + Column Management (Jobs List)</span>
+  </div>
+  <div style="display:flex; gap:8px;">
+    <a class="proto-bar-ticket" href="https://app.clickup.com/t/86barv187" target="_blank">86barv187</a>
+    <a class="proto-bar-ticket" href="https://app.clickup.com/t/86barybju" target="_blank">86barybju</a>
+  </div>
+</div>
+<div id="jobs-list-page">
+
+  <div class="demo-banner">
+    <div>
+      Prototype scope: <b>Job Address column</b> (<a href="https://app.clickup.com/t/86barv187" target="_blank">CU-86barv187</a>) +
+      <b>Show/Hide Column Management</b> (<a href="https://app.clickup.com/t/86barybju" target="_blank">CU-86barybju</a>).
+      Layout matches current Jobs List filters, actions, and table.
+    </div>
+    <label class="demo-toggle">
+      <span class="toggle-switch"><input type="checkbox" id="brToggle" checked><span class="toggle-slider"></span></span> Show BR tags
+    </label>
+  </div>
+
+  <div class="jl-page-header">
+    <div>
+      <h1 class="jl-title">Jobs List</h1>
+      <div class="jl-stats">Total Deals: <b>143</b>&nbsp;&nbsp;&nbsp;Total Value: <b>$729,615.05</b></div>
+    </div>
+    <div class="jl-action-bar" id="actionBar">
+      <span class="jl-selected-count" id="selectedCountLabel">0 selected</span>
+      <button class="jl-pill-btn jl-btn-blast"><i class="fas fa-rocket"></i> Blast</button>
+      <button class="jl-pill-btn jl-btn-export" id="exportBtn">Export CSV
+        <span class="br-chip" title="BR-5: CSV export includes Job Address when visible, excludes when hidden. Export also respects overall column visibility settings.">BR-5</span>
+      </button>
+      <button class="jl-pill-btn jl-btn-archive">Archive</button>
+    </div>
+  </div>
+
+  <div class="jl-filter-bar">
+    <div class="jl-filter-field"><label>Filter Preset</label>
+      <select><option>Default</option></select>
+    </div>
+    <div class="jl-filter-field"><label>Salesperson</label>
+      <select><option>All Salespeople</option></select>
+    </div>
+    <div class="jl-filter-field"><label>Project Manager</label>
+      <select><option>All Project Managers</option></select>
+    </div>
+    <div class="jl-filter-field"><label>Crews</label>
+      <select><option>All Crews</option></select>
+    </div>
+    <div class="jl-filter-field"><label>Labels</label>
+      <select><option>All Labels Selected</option></select>
+    </div>
+    <div class="jl-filter-field"><label>Deal Stage</label>
+      <select><option>All Deal Stages</option></select>
+    </div>
+    <div class="jl-filter-field"><label>Lead Source</label>
+      <select><option>All Lead Sources</option></select>
+    </div>
+    <div class="jl-filter-field"><label>Changed Date</label>
+      <select><option>Anytime</option></select>
+    </div>
+    <button class="jl-btn-go">Go</button>
+    <button class="jl-btn-reset">Reset</button>
+    <label class="jl-archived-toggle">
+      <span class="toggle-switch"><input type="checkbox" id="archivedToggle"><span class="toggle-slider"></span></span>
+      Show Archived
+    </label>
+  </div>
+
+  <div class="jl-search-row">
+    <div class="jl-search-field">Search: <input type="text" placeholder=""></div>
+    <div class="jl-right-controls">
+      <select class="jl-select-view" id="savedViewSelect"></select>
+      <button class="jl-columns-btn" id="columnsBtn">
+        <i class="fas fa-sliders-h"></i> Columns
+        <span class="br-chip" title="BR-1: Users must be able to access a column visibility control from the Jobs List.">BR-1</span>
+      </button>
+      <div class="jl-entries-field">Show
+        <select><option>25</option><option>50</option><option>100</option></select>
+        entries
+      </div>
+    </div>
+  </div>
+
+  <div class="jl-table-scroll">
+    <table class="jl-table" id="jobsTable">
+      <thead><tr id="tableHeadRow"></tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+  <div class="jl-empty-state" id="emptyState" style="display:none;">
+    <i class="fas fa-table"></i>
+    <p>No visible columns. Turn on at least one column to view your jobs.</p>
+    <button class="jl-btn jl-btn-primary" id="emptyResetBtn">Reset Columns</button>
+  </div>
+  <div class="jl-footer-bar">
+    <span>Showing <span id="visibleColCount">–</span> of <span id="totalColCount">–</span> columns</span>
+    <span id="persistNote">Column settings save automatically for your account <span class="br-chip" title="BR-3: Column visibility preferences persist for that user across sessions.">BR-3</span></span>
+  </div>
+
+  <div class="helper-note">
+    <b>Note for dev handoff:</b> Job Address value is sourced from the job's Accepted proposal service address (BR-2 of CU-86barv187) and stays fixed even when change orders exist (BR-3). Rows with no Accepted proposal show an em dash. Hiding a column never alters underlying job data (BR-4 of CU-86barybju) — only display + export. Column visibility controls now use slider toggles instead of checkboxes.
+  </div>
+
+  <div class="jl-overlay" id="overlay"></div>
+  <div class="jl-panel" id="colPanel">
+    <div class="jl-panel-header">
+      <h4 class="jl-panel-title">Columns</h4>
+      <button class="jl-panel-close" id="panelCloseBtn"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="jl-panel-search">
+      <input type="text" id="colSearch" placeholder="Search columns...">
+      <div class="jl-search-note" id="searchNote" style="display:none;">Clear search to drag-reorder columns.</div>
+    </div>
+    <ul class="jl-panel-list" id="colList" style="list-style:none; margin:0;"></ul>
+    <div class="jl-panel-footer">
+      <button class="jl-btn jl-btn-outline" id="resetColsBtn">Reset to Default</button>
+      <button class="jl-btn jl-btn-primary" id="saveViewBtn">Save View</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+
+  // ---------- Column definitions ----------
+  var DEFAULT_COLUMNS = [
+    { id:'status',         label:'Status',          visible:true,  isNew:false },
+    { id:'label',          label:'Label',           visible:true,  isNew:false },
+    { id:'job',            label:'Job',             visible:true,  isNew:false },
+    { id:'jobAddress',     label:'Job Address',     visible:true,  isNew:true  },
+    { id:'name',           label:'Name',            visible:true,  isNew:false },
+    { id:'email',          label:'Email',           visible:true,  isNew:false },
+    { id:'phone',          label:'Phone Number',    visible:true,  isNew:false },
+    { id:'salesperson',    label:'Salesperson',     visible:true,  isNew:false },
+    { id:'projectManager', label:'Project Manager', visible:true,  isNew:false },
+    { id:'crew',           label:'Crew',            visible:true,  isNew:false },
+    { id:'proposalId',     label:'Proposal ID',     visible:true,  isNew:false },
+    { id:'invoiceId',      label:'Invoice ID',      visible:true,  isNew:false },
+    { id:'invoiceStatus',  label:'Invoice Status',  visible:true,  isNew:false },
+    { id:'amount',         label:'Amount',          visible:true,  isNew:false },
+    { id:'paid',           label:'Paid',            visible:true,  isNew:false },
+    { id:'balance',        label:'Balance',         visible:true,  isNew:false },
+    { id:'dealStage',      label:'Deal Stage',      visible:true,  isNew:false },
+    { id:'dealStageDate',      label:'Deal Stage Date',       visible:true, isNew:true },
+    { id:'proposalSignedDate', label:'Proposal Signed Date',  visible:true, isNew:true },
+    { id:'jobScheduledDate',   label:'Job Scheduled Date',    visible:true, isNew:true },
+    { id:'jobStartDate',       label:'Job Start Date',        visible:true, isNew:true },
+    { id:'jobCompletionDate',  label:'Job Completion Date',   visible:true, isNew:true },
+    { id:'leadSource',     label:'Lead Source',     visible:false, isNew:false },
+    { id:'changedDate',    label:'Changed Date',    visible:false, isNew:false }
+  ];
+  var COL_MAP = {};
+  DEFAULT_COLUMNS.forEach(function(c){ COL_MAP[c.id] = c; });
+  var DEFAULT_ORDER = DEFAULT_COLUMNS.map(function(c){ return c.id; });
+  var DEFAULT_VISIBLE = DEFAULT_COLUMNS.filter(function(c){ return c.visible; }).map(function(c){ return c.id; });
+
+  // Builds a full column order: the given priority/visible list first, then any
+  // remaining columns (e.g. currently-hidden ones) appended in their default order.
+  function buildFullOrder(priorityIds){
+    var rest = DEFAULT_ORDER.filter(function(id){ return priorityIds.indexOf(id) === -1; });
+    return priorityIds.concat(rest);
+  }
+
+  // ---------- Seed data ----------
+  var JOBS = [
+    { status:'Accepted',  label:null, job:'Multiple Props', jobAddress:'214 Maple Ridge Ln, Marietta, GA', name:'Adam Smith', email:'AdamSmith@djtest.com', phone:'(456) 555-7907', salesperson:'Jeremy Harrison', projectManager:null, crew:null, proposalId:'1359276', invoiceId:'#212928', invoiceStatus:'Paid', amount:2300.00, paid:2300.00, balance:0.00, dealStage:'Project Complete', dealStageDate:'Wednesday, January 21, 2026', proposalSignedDate:'Accepted without signature', jobScheduledDate:null, jobStartDate:'01/21/2026', jobCompletionDate:'01/21/2026', leadSource:'Referral', changedDate:'Jul 2, 2026' },
+    { status:'Accepted',  label:null, job:'TEST Activity View...', jobAddress:'88 Hollow Creek Ct, Roswell, GA', name:'Jesus Rubio', email:'jesus.rubio@dripjobs.com', phone:'(788) 688-9296', salesperson:'Jeremy Harrison', projectManager:null, crew:null, proposalId:'1437271', invoiceId:'#279936', invoiceStatus:'Open', amount:2185.46, paid:0.00, balance:2185.46, dealStage:'Project Scheduled', dealStageDate:'Friday, December 22, 2023', proposalSignedDate:'12/6/2023 11:05:07 AM', jobScheduledDate:'Mon. Jan 15 - Fri. Jan 19', jobStartDate:'01/31/2024', jobCompletionDate:null, leadSource:'Google Ads', changedDate:'Jul 3, 2026' },
+    { status:'Completed', label:null, job:'Jesus Acorn', jobAddress:'502 Ashford Way, Alpharetta, GA', name:'Jesus Rubio', email:'jesus.rubio@dripjobs.com', phone:'(444) 444-4444', salesperson:'Jeremy Harrison', projectManager:null, crew:null, proposalId:'1462635', invoiceId:'#228692', invoiceStatus:'Paid', amount:1609.37, paid:1609.37, balance:0.00, dealStage:'Project Complete', dealStageDate:'Tuesday, January 30, 2024', proposalSignedDate:'1/30/2024 2:24:43 PM', jobScheduledDate:'Mon. Feb 5 - Wed. Feb 7', jobStartDate:'02/19/2024', jobCompletionDate:null, leadSource:'Website', changedDate:'Jul 1, 2026' },
+    { status:'Accepted',  label:null, job:'ACORN', jobAddress:'', name:'Aaron Blankfields', email:'jeremy@dripjobs.com', phone:'(352) 555-1234', salesperson:'Jeremy Harrison', projectManager:null, crew:null, proposalId:'1509761', invoiceId:'#250346', invoiceStatus:'Open', amount:6264.70, paid:0.00, balance:6264.70, dealStage:'Project Scheduled', dealStageDate:'Wednesday, February 19, 2025', proposalSignedDate:'Accepted without signature', jobScheduledDate:'Wed. Feb 19 - Wed. Feb 19', jobStartDate:'03/04/2025', jobCompletionDate:null, leadSource:'Referral', changedDate:'Jun 28, 2026' },
+    { status:'Accepted',  label:null, job:'Aaron Blankfields ...', jobAddress:'19 Birchwood Dr, Woodstock, GA', name:'Aaron Blankfields', email:'AaronB@dripjobstest.com', phone:'(727) 555-0000', salesperson:'Jeremy Harrison', projectManager:null, crew:null, proposalId:'1521618', invoiceId:'#281777', invoiceStatus:'Open', amount:828.82, paid:0.00, balance:828.82, dealStage:'Project In Progress', dealStageDate:'Friday, February 7, 2025', proposalSignedDate:'11/20/2024 2:24:23 PM', jobScheduledDate:'Sat. Dec 7 - Sat. Dec 7', jobStartDate:'03/06/2025', jobCompletionDate:null, leadSource:'Facebook Ads', changedDate:'Jun 30, 2026' },
+    { status:'Accepted',  label:'Call Back', job:'Discount Test', jobAddress:'77 Sable Chase, Duluth, GA', name:'Jesus Rubio', email:'jesus.rubio@dripjobs.com', phone:'(444) 444-4444', salesperson:'Jeremy Harrison', projectManager:null, crew:null, proposalId:'1534723', invoiceId:'#252521', invoiceStatus:'Open', amount:4387.39, paid:0.00, balance:4387.39, dealStage:'Project In Progress', dealStageDate:'Monday, April 6, 2026', proposalSignedDate:'4/6/2026 3:10:16 PM', jobScheduledDate:'Mon. Apr 13 - Mon. Apr 13', jobStartDate:'04/06/2026', jobCompletionDate:null, leadSource:'Referral', changedDate:'Jun 29, 2026' },
+    { status:'Accepted',  label:null, job:'Cams', jobAddress:'6 Copperfield Ln, Cumming, GA', name:'Michael Adeoye', email:'Michael.adeoye@dripjobs.com', phone:'(111) 111-1111', salesperson:'Jeremy Harrison', projectManager:null, crew:null, proposalId:'1686447', invoiceId:'#298431', invoiceStatus:'Partial', amount:9566.99, paid:9566.99, balance:0.00, dealStage:'Project Complete', dealStageDate:'Thursday, May 14, 2026', proposalSignedDate:'4/28/2026 5:24:44 PM', jobScheduledDate:'Fri. May 15 - Fri. May 15', jobStartDate:'05/14/2026', jobCompletionDate:'05/14/2026', leadSource:'Website', changedDate:'Jun 25, 2026' },
+    { status:'Accepted',  label:null, job:'Exterior Repaint — 900 Fenwick Cir', jobAddress:'900 Fenwick Cir, Johns Creek, GA', name:'Elaine Choi', email:'elaine.choi@email.com', phone:'(770) 555-0161', salesperson:'Ray Combs', projectManager:'Ashley Kirk', crew:'Crew 4', proposalId:'1544210', invoiceId:'#301120', invoiceStatus:'Open', amount:2800.00, paid:0.00, balance:2800.00, dealStage:'Project In Progress', dealStageDate:'Monday, July 29, 2024', proposalSignedDate:'6/11/2024 1:09:24 PM', jobScheduledDate:'Mon. Jun 17 - Mon. Jun 17', jobStartDate:'06/18/2024', jobCompletionDate:null, leadSource:'Google Ads', changedDate:'Jun 22, 2026' },
+    { status:'Completed', label:null, job:'Gutter Install — 12 Windham Pl', jobAddress:'12 Windham Pl, Sandy Springs, GA', name:'Victor Manu', email:'v.manu@email.com', phone:'(404) 555-0177', salesperson:'Ray Combs', projectManager:'Tom Duval', crew:'Crew 2', proposalId:'1392004', invoiceId:'#279301', invoiceStatus:'Paid', amount:100.00, paid:0.00, balance:100.00, dealStage:'Project Scheduled', dealStageDate:'Tuesday, August 5, 2025', proposalSignedDate:'8/5/2025 3:31:22 PM', jobScheduledDate:'Tue. Aug 5 - Tue. Aug 5', jobStartDate:'08/05/2025', jobCompletionDate:null, leadSource:'Referral', changedDate:'Jun 18, 2026' },
+    { status:'Accepted',  label:null, job:'Commercial Repaint — Harborview Offices', jobAddress:'410 Harborview Blvd, Atlanta, GA', name:'Harborview Mgmt Co', email:'billing@harborviewmgmt.com', phone:'(404) 555-0190', salesperson:'Jill Prater', projectManager:'Tom Duval', crew:'Crew 1', proposalId:'1430098', invoiceId:'#280612', invoiceStatus:'Partial', amount:1890.00, paid:0.00, balance:1890.00, dealStage:'Project In Progress', dealStageDate:'Tuesday, May 27, 2025', proposalSignedDate:'5/27/2025 12:46:54 PM', jobScheduledDate:'Wed. Sep 3 - Fri. Sep 5', jobStartDate:'09/03/2025', jobCompletionDate:null, leadSource:'Referral', changedDate:'Jun 15, 2026' }
+  ];
+
+  var STATUS_CLASS = {
+    'Accepted':'status-accepted', 'Completed':'status-completed',
+    'In Progress':'status-progress', 'On Hold':'status-onhold'
+  };
+  var INVOICE_CLASS = {
+    'Paid':'invoice-paid', 'Open':'invoice-open', 'Partial':'invoice-partial'
+  };
+  var DEAL_STAGE_CLASS = {
+    'Project Accepted':'deal-stage-accepted',
+    'Project Scheduled':'deal-stage-scheduled',
+    'Project In Progress':'deal-stage-progress',
+    'Project Complete':'deal-stage-complete'
+  };
+
+  // ---------- Saved views (no personal/shared distinction) ----------
+  var BUILT_IN_VIEWS = {
+    'Default':     { visible: DEFAULT_VISIBLE.slice() },
+    'Sales':       { visible: ['status','job','name','salesperson','proposalId','amount','dealStage'] },
+    'Production':  { visible: ['status','job','jobAddress','projectManager','crew','jobScheduledDate','jobStartDate'] },
+    'Accounting':  { visible: ['job','name','proposalId','invoiceId','invoiceStatus','amount','paid','balance'] },
+    'Minimal':     { visible: ['status','job','name','amount'] }
+  };
+  Object.keys(BUILT_IN_VIEWS).forEach(function(name){
+    BUILT_IN_VIEWS[name].columns = buildFullOrder(BUILT_IN_VIEWS[name].visible);
+  });
+
+  var STORAGE_KEY_STATE = 'dj_jobslist_column_state_v3';
+  var STORAGE_KEY_CUSTOM_VIEWS = 'dj_jobslist_custom_views_v3';
+  var STORAGE_KEY_ACTIVE_VIEW = 'dj_jobslist_active_view_v3';
+
+  function loadCustomViews(){
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_VIEWS)) || {}; }
+    catch(e){ return {}; }
+  }
+  function saveCustomViews(v){ localStorage.setItem(STORAGE_KEY_CUSTOM_VIEWS, JSON.stringify(v)); }
+  var customViews = loadCustomViews();
+
+  var state = loadState();
+  function loadState(){
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORAGE_KEY_STATE));
+      var orderValid = saved && Array.isArray(saved.order) && saved.order.length === DEFAULT_ORDER.length &&
+        saved.order.every(function(id){ return !!COL_MAP[id]; });
+      var visibleValid = saved && Array.isArray(saved.visible) &&
+        saved.visible.every(function(id){ return !!COL_MAP[id]; });
+      if (orderValid && visibleValid) return saved;
+    } catch(e){}
+    return { order: DEFAULT_ORDER.slice(), visible: DEFAULT_VISIBLE.slice() };
+  }
+  function persistState(){ localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(state)); }
+
+  // ---------- Row selection state ----------
+  var selectedRows = {}; // index -> true
+
+  function getSelectedIndices(){
+    return Object.keys(selectedRows).filter(function(k){ return selectedRows[k]; }).map(Number);
+  }
+
+  function updateActionBar(){
+    var count = getSelectedIndices().length;
+    var bar = document.getElementById('actionBar');
+    var label = document.getElementById('selectedCountLabel');
+    if (count > 0) {
+      bar.classList.add('visible');
+      label.textContent = count + ' selected';
+    } else {
+      bar.classList.remove('visible');
+    }
+  }
+
+  // ---------- Render table ----------
+  function renderTable(){
+    var visibleOrdered = state.order.filter(function(id){ return state.visible.indexOf(id) !== -1; });
+
+    var theadRow = document.getElementById('tableHeadRow');
+    var tbody = document.getElementById('tableBody');
+    var emptyState = document.getElementById('emptyState');
+    var table = document.getElementById('jobsTable');
+
+    theadRow.innerHTML = '';
+    tbody.innerHTML = '';
+
+    var thCheck = document.createElement('th');
+    thCheck.className = 'checkbox-col';
+    var headerCheckbox = document.createElement('input');
+    headerCheckbox.type = 'checkbox';
+    headerCheckbox.className = 'jl-header-checkbox';
+    headerCheckbox.addEventListener('change', function(){
+      JOBS.forEach(function(job, idx){ selectedRows[idx] = headerCheckbox.checked; });
+      renderTable();
+    });
+    thCheck.appendChild(headerCheckbox);
+    theadRow.appendChild(thCheck);
+
+    if (visibleOrdered.length === 0) {
+      table.style.display = 'none';
+      emptyState.style.display = 'block';
+    } else {
+      table.style.display = '';
+      emptyState.style.display = 'none';
+
+      visibleOrdered.forEach(function(id){
+        var col = COL_MAP[id];
+        var th = document.createElement('th');
+        th.innerHTML = col.label + ' <i class="fas fa-sort sort-caret"></i>';
+        if (col.isNew) { th.classList.add('col-new'); }
+        theadRow.appendChild(th);
+      });
+
+      var selectedIndices = getSelectedIndices();
+      var allSelected = selectedIndices.length === JOBS.length;
+      headerCheckbox.checked = allSelected;
+      headerCheckbox.indeterminate = selectedIndices.length > 0 && !allSelected;
+
+      JOBS.forEach(function(job, idx){
+        var tr = document.createElement('tr');
+        if (selectedRows[idx]) tr.classList.add('row-selected');
+
+        var tdCheck = document.createElement('td');
+        tdCheck.className = 'checkbox-col';
+        var rowCheckbox = document.createElement('input');
+        rowCheckbox.type = 'checkbox';
+        rowCheckbox.className = 'jl-row-checkbox';
+        rowCheckbox.checked = !!selectedRows[idx];
+        rowCheckbox.addEventListener('change', function(){
+          selectedRows[idx] = rowCheckbox.checked;
+          renderTable();
+        });
+        tdCheck.appendChild(rowCheckbox);
+        tr.appendChild(tdCheck);
+
+        visibleOrdered.forEach(function(id){
+          var td = document.createElement('td');
+          var val = job[id];
+
+          if (id === 'status') {
+            var span = document.createElement('span');
+            span.className = 'status-pill ' + (STATUS_CLASS[val] || '');
+            span.textContent = val;
+            td.appendChild(span);
+          } else if (id === 'label') {
+            if (val) {
+              var chip = document.createElement('span');
+              chip.className = 'label-chip label-chip-callback';
+              chip.textContent = val;
+              td.appendChild(chip);
+            } else {
+              var addLink = document.createElement('span');
+              addLink.className = 'add-label-link';
+              addLink.textContent = '+ add label';
+              td.appendChild(addLink);
+            }
+          } else if (id === 'job' || id === 'proposalId') {
+            var a = document.createElement('a');
+            a.href = '#'; a.className = 'jl-link';
+            a.innerHTML = '<i class="fas fa-link"></i>' + val;
+            td.appendChild(a);
+          } else if (id === 'invoiceId') {
+            var wrap = document.createElement('span');
+            wrap.className = 'invoice-id-wrap';
+            wrap.innerHTML = '<i class="fas fa-receipt"></i>' + val;
+            td.appendChild(wrap);
+          } else if (id === 'invoiceStatus') {
+            var ispan = document.createElement('span');
+            ispan.className = 'invoice-status-pill ' + (INVOICE_CLASS[val] || 'invoice-na');
+            ispan.textContent = val;
+            td.appendChild(ispan);
+          } else if (id === 'amount' || id === 'paid' || id === 'balance') {
+            td.textContent = '$' + Number(val).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+          } else if (id === 'dealStage') {
+            td.textContent = val;
+            td.classList.add('deal-stage-cell', DEAL_STAGE_CLASS[val] || 'deal-stage-accepted');
+          } else if (id === 'jobScheduledDate') {
+            if (val) {
+              var schedWrap = document.createElement('span');
+              schedWrap.className = 'sched-date-wrap';
+              schedWrap.innerHTML = '<i class="far fa-calendar-alt"></i>' + val;
+              td.appendChild(schedWrap);
+            } else {
+              td.textContent = '—';
+              td.classList.add('jl-empty-cell');
+            }
+          } else if (id === 'jobStartDate' || id === 'jobCompletionDate') {
+            if (val) {
+              var dateLink = document.createElement('a');
+              dateLink.href = '#'; dateLink.className = 'jl-link jl-link-plain';
+              dateLink.textContent = val;
+              td.appendChild(dateLink);
+            } else {
+              td.textContent = 'N/A';
+              td.classList.add('jl-muted-text');
+            }
+          } else if (id === 'projectManager' || id === 'crew') {
+            if (val) { td.textContent = val; }
+            else { td.textContent = id === 'crew' ? 'No crew' : 'No project manager'; td.classList.add('jl-muted-text'); }
+          } else if (!val) {
+            td.textContent = '—';
+            td.classList.add('jl-empty-cell');
+          } else {
+            td.textContent = val;
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('visibleColCount').textContent = visibleOrdered.length;
+    document.getElementById('totalColCount').textContent = DEFAULT_COLUMNS.length;
+    updateActionBar();
+  }
+
+  // ---------- Column manager panel ----------
+  var sortableInstance = null;
+
+  function renderColList(filterText){
+    var list = document.getElementById('colList');
+    list.innerHTML = '';
+    filterText = (filterText || '').trim().toLowerCase();
+
+    state.order.forEach(function(id){
+      var col = COL_MAP[id];
+      var li = document.createElement('li');
+      li.className = 'jl-col-row';
+      li.setAttribute('data-col-id', id);
+
+      if (filterText && col.label.toLowerCase().indexOf(filterText) === -1) {
+        li.classList.add('hidden-by-search');
+      }
+
+      var handle = document.createElement('span');
+      handle.className = 'jl-drag-handle';
+      handle.innerHTML = '<i class="fas fa-grip-vertical"></i>';
+
+      var toggleWrap = document.createElement('label');
+      toggleWrap.className = 'toggle-switch';
+      var toggleInput = document.createElement('input');
+      toggleInput.type = 'checkbox';
+      toggleInput.checked = state.visible.indexOf(id) === -1; // ON = hidden, OFF = shown
+      toggleInput.setAttribute('aria-label', 'Hide ' + col.label + ' column');
+      toggleInput.addEventListener('change', function(){
+        toggleColumn(id, !toggleInput.checked); // checked means "hide", so visible = !checked
+      });
+      var toggleSlider = document.createElement('span');
+      toggleSlider.className = 'toggle-slider';
+      toggleWrap.appendChild(toggleInput);
+      toggleWrap.appendChild(toggleSlider);
+
+      var label = document.createElement('span');
+      label.className = 'jl-col-label' + (col.isNew ? ' new-badge' : '');
+      label.textContent = col.label;
+
+      li.appendChild(handle);
+      li.appendChild(toggleWrap);
+      li.appendChild(label);
+      list.appendChild(li);
+    });
+
+    var searchNote = document.getElementById('searchNote');
+    searchNote.style.display = filterText ? 'block' : 'none';
+
+    if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
+    if (!filterText) {
+      sortableInstance = new Sortable(list, {
+        handle: '.jl-drag-handle',
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        onEnd: function(){
+          var newOrder = Array.prototype.slice.call(list.children).map(function(li){
+            return li.getAttribute('data-col-id');
+          });
+          state.order = newOrder;
+          persistState();
+          renderTable();
+        }
+      });
+    }
+  }
+
+  function toggleColumn(id, isVisible){
+    var idx = state.visible.indexOf(id);
+    if (isVisible && idx === -1) { state.visible.push(id); }
+    else if (!isVisible && idx !== -1) { state.visible.splice(idx, 1); }
+    persistState();
+    renderTable();
+    updateColumnsButtonState();
+  }
+
+  function updateColumnsButtonState(){
+    var btn = document.getElementById('columnsBtn');
+    if (state.visible.length < DEFAULT_COLUMNS.length) { btn.classList.add('active-cols'); }
+    else { btn.classList.remove('active-cols'); }
+  }
+
+  var panel = document.getElementById('colPanel');
+  var overlay = document.getElementById('overlay');
+
+  function openPanel(){
+    renderColList(document.getElementById('colSearch').value);
+    panel.classList.add('open');
+    overlay.classList.add('open');
+  }
+  function closePanel(){
+    panel.classList.remove('open');
+    overlay.classList.remove('open');
+  }
+
+  document.getElementById('columnsBtn').addEventListener('click', openPanel);
+  document.getElementById('panelCloseBtn').addEventListener('click', closePanel);
+  overlay.addEventListener('click', closePanel);
+  document.getElementById('colSearch').addEventListener('input', function(e){ renderColList(e.target.value); });
+
+  document.getElementById('resetColsBtn').addEventListener('click', function(){
+    state.order = DEFAULT_ORDER.slice();
+    state.visible = DEFAULT_VISIBLE.slice();
+    persistState();
+    renderTable();
+    renderColList(document.getElementById('colSearch').value);
+    updateColumnsButtonState();
+    document.getElementById('savedViewSelect').value = 'Default';
+  });
+
+  document.getElementById('emptyResetBtn').addEventListener('click', function(){
+    document.getElementById('resetColsBtn').click();
+  });
+
+  document.getElementById('saveViewBtn').addEventListener('click', function(){
+    var name = prompt('Name this view:');
+    if (!name) return;
+    name = name.trim();
+    if (!name) return;
+    if (BUILT_IN_VIEWS[name]) { alert('"' + name + '" is a built-in view name. Please choose a different name.'); return; }
+    customViews[name] = { columns: state.order.slice(), visible: state.visible.slice() };
+    saveCustomViews(customViews);
+    populateViewSelect();
+    document.getElementById('savedViewSelect').value = name;
+    localStorage.setItem(STORAGE_KEY_ACTIVE_VIEW, name);
+  });
+
+  function populateViewSelect(){
+    var select = document.getElementById('savedViewSelect');
+    var current = select.value;
+    select.innerHTML = '';
+
+    var builtInGroup = document.createElement('optgroup');
+    builtInGroup.label = 'Views';
+    Object.keys(BUILT_IN_VIEWS).forEach(function(name){
+      var opt = document.createElement('option'); opt.value = name; opt.textContent = name;
+      builtInGroup.appendChild(opt);
+    });
+    select.appendChild(builtInGroup);
+
+    var customKeys = Object.keys(customViews);
+    if (customKeys.length) {
+      var customGroup = document.createElement('optgroup');
+      customGroup.label = 'My Saved Views';
+      customKeys.forEach(function(name){
+        var opt = document.createElement('option'); opt.value = name; opt.textContent = name;
+        customGroup.appendChild(opt);
+      });
+      select.appendChild(customGroup);
+    }
+
+    if (current && (BUILT_IN_VIEWS[current] || customViews[current])) { select.value = current; }
+  }
+
+  document.getElementById('savedViewSelect').addEventListener('change', function(e){
+    var name = e.target.value;
+    var view = BUILT_IN_VIEWS[name] || customViews[name];
+    if (!view) return;
+    state.order = view.columns.slice();
+    state.visible = view.visible.slice();
+    persistState();
+    renderTable();
+    updateColumnsButtonState();
+    localStorage.setItem(STORAGE_KEY_ACTIVE_VIEW, name);
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', function(){
+    var visibleOrdered = state.order.filter(function(id){ return state.visible.indexOf(id) !== -1; });
+    if (!visibleOrdered.length) { alert('No visible columns to export.'); return; }
+    var selectedIndices = getSelectedIndices();
+    var rowsToExport = selectedIndices.length ? selectedIndices.map(function(i){ return JOBS[i]; }) : JOBS;
+
+    var headerRow = visibleOrdered.map(function(id){ return '"' + COL_MAP[id].label.replace(/"/g,'""') + '"'; }).join(',');
+    var rows = rowsToExport.map(function(job){
+      return visibleOrdered.map(function(id){
+        var val = job[id];
+        if (id === 'amount' || id === 'paid' || id === 'balance') val = '$' + Number(val).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+        if (!val) val = '';
+        return '"' + String(val).replace(/"/g,'""') + '"';
+      }).join(',');
+    });
+    var csv = [headerRow].concat(rows).join('\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'jobs-list-export.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('brToggle').addEventListener('change', function(e){
+    document.getElementById('jobs-list-page').classList.toggle('show-br', e.target.checked);
+  });
+  document.getElementById('jobs-list-page').classList.add('show-br');
+
+  populateViewSelect();
+  var activeView = localStorage.getItem(STORAGE_KEY_ACTIVE_VIEW);
+  document.getElementById('savedViewSelect').value = (activeView && (BUILT_IN_VIEWS[activeView] || customViews[activeView])) ? activeView : 'Default';
+  renderTable();
+  updateColumnsButtonState();
+
+})();
+</script>
+</body>
+</html>
