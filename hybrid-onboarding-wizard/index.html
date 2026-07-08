@@ -1349,11 +1349,52 @@
     };
 
     // Step 7: Create & Send Proposal
-    const Step7Proposal = ({ data, setData, onNext, onBack }) => {
+    // ─── Create Deal (BR2: sequence step between Team and Create Proposal) ───
+    const CreateDealScreen = ({ data, setData, onNext, onBack }) => {
+      const [customerName, setCustomerName] = useState(data.dealCustomerName || "Test Contact");
+      const [address, setAddress] = useState(data.dealAddress || "123 Test Street, Atlanta, GA 30301");
+      const [stage, setStage] = useState(data.dealStage || "Estimate Scheduled");
+      const [value, setValue] = useState(data.dealValue || "6,800");
+
+      const stageOptions = ["Cold Leads", "Warm Leads", "Hot Leads", "Estimate Requested", "Estimate Scheduled"];
+
+      const handleCreate = () => {
+        setData({ ...data, dealCreated: true, dealCustomerName: customerName, dealAddress: address, dealStage: stage, dealValue: value });
+        onNext();
+      };
+
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center">
+            <h1 className="text-3xl font-bold text-gray-900">Create a Deal</h1>
+            <BRChip id="BR2">Sequence: Company Info → Brand → Create Deal → Create Proposal → Send Proposal.</BRChip>
+          </div>
+          <HelperTip>A Deal represents a customer opportunity in your Pipeline. You'll attach your first proposal to this deal next.</HelperTip>
+
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+            <FormInput label="Customer Name" required value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="e.g. Jane Smith" />
+            <FormInput label="Property Address" required value={address} onChange={e => setAddress(e.target.value)} placeholder="Street, City, State, Zip" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormSelect label="Pipeline Stage" required value={stage} onChange={e => setStage(e.target.value)}
+                options={stageOptions.map(s => ({ value: s, label: s }))} />
+              <FormInput label="Estimated Deal Value" required value={value} onChange={e => setValue(e.target.value)} placeholder="0.00" />
+            </div>
+          </div>
+
+          <div className="flex justify-between pt-4">
+            <button onClick={onBack} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Back</button>
+            <div className="flex items-center gap-3">
+              <button onClick={onNext} className="text-gray-500 hover:text-gray-700 underline text-sm">Skip</button>
+              <button onClick={handleCreate} disabled={!customerName || !address} className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-medium transition-colors">Create Deal &amp; Continue</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const Step7Proposal = ({ data, setData, onNext, onBack, onSkipToDashboard }) => {
       const [selectedOption, setSelectedOption] = useState(1);
       const [showProposal, setShowProposal] = useState(false);
-      const [sending, setSending] = useState(false);
-      const [sent, setSent] = useState(false);
       const [lineItems, setLineItems] = useState([]);
       const [showAddItemModal, setShowAddItemModal] = useState(false);
       const [selectedProduct, setSelectedProduct] = useState('');
@@ -1371,13 +1412,9 @@
       const leadName = `${lead.firstName} ${lead.lastName}`;
       const proposalNumber = 1042857;
 
-      const handleSend = () => {
-        doSend();
-      };
-
-      const doSend = () => {
-        setSending(true);
-        setTimeout(() => { setSending(false); setSent(true); setData({...data, proposalSent: true}); setTimeout(() => onNext(), 2000); }, 1000);
+      const handleContinueToSend = () => {
+        setData({ ...data, lineItems, proposalBuilt: true, leadName, leadEmail: lead.email, proposalNumber });
+        onNext();
       };
 
       const handleAddLineItem = () => {
@@ -1409,14 +1446,6 @@
 
       const lineItemsTotal = lineItems.reduce((sum, item) => sum + (item.descriptionOnly ? 0 : item.price), 0);
 
-      if (sent) return (
-        <div className="flex flex-col items-center justify-center py-20 fade-in">
-          <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mb-6 checkmark-animate"><Icon name="Check" size={40} className="text-white" /></div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Proposal Sent!</h2>
-          <p className="text-gray-600">Your proposal has been sent via email.</p>
-        </div>
-      );
-
       return (
         <div className="space-y-6">
           <div><h1 className="text-3xl font-bold text-gray-900">Create Your First Proposal</h1></div>
@@ -1445,7 +1474,7 @@
                 <div className="flex justify-between pt-4">
                   <button onClick={onBack} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Back</button>
                   {selectedOption === 2 ? (
-                    <button onClick={onNext} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Continue to Dashboard</button>
+                    <button onClick={onSkipToDashboard} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Continue to Dashboard</button>
                   ) : (
                     <button onClick={() => setShowProposal(true)} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Continue</button>
                   )}
@@ -1556,19 +1585,19 @@
               {/* Footer Actions */}
               <div className="p-4 border-t border-gray-200 bg-gray-50">
                 <div className="flex flex-wrap gap-2">
-                  <button onClick={handleSend} disabled={sending || lineItems.length === 0}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">{sending ? "Sending..." : "Send Proposal"}</button>
+                  <button onClick={handleContinueToSend} disabled={lineItems.length === 0}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">Continue to Send Proposal</button>
                   <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100">View/ Edit T&C's</button>
                   <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100">Duplicate</button>
                 </div>
                 {lineItems.length === 0 && (
-                  <p className="text-sm text-amber-600 mt-3 flex items-center gap-1"><Icon name="AlertCircle" size={14} /> Add at least one line item to send the proposal</p>
+                  <p className="text-sm text-amber-600 mt-3 flex items-center gap-1"><Icon name="AlertCircle" size={14} /> Add at least one line item to continue</p>
                 )}
               </div>
 
               <div className="p-4 border-t border-gray-200 flex justify-between">
                 <button onClick={() => setShowProposal(false)} className="text-gray-500 hover:text-gray-700 underline text-sm">Back to Options</button>
-                <button onClick={onNext} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Skip Proposal</button>
+                <button onClick={onSkipToDashboard} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Skip Proposal</button>
               </div>
             </div>
           )}
@@ -1576,6 +1605,135 @@
         </div>
       );
     };
+
+    // ─── Send Proposal — Real vs Test path (BR7, BR8, BR9, BR10) ───
+    const SendProposalScreen = ({ data, setData, onSentReal, onBack, onSkip }) => {
+      const [mode, setMode] = useState('real'); // 'real' | 'test'
+      const [realEmail, setRealEmail] = useState(data.leadEmail || "");
+      const [testEmail, setTestEmail] = useState("preview@example.com");
+      const [emailError, setEmailError] = useState("");
+      const [sending, setSending] = useState(false);
+      const [testPreviewed, setTestPreviewed] = useState(false);
+
+      const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+      const handleSendReal = () => {
+        if (!isValidEmail(realEmail)) { setEmailError("Enter a valid email address to send a Real proposal."); return; }
+        setEmailError("");
+        setSending(true);
+        setTimeout(() => {
+          setSending(false);
+          setData({ ...data, proposalMode: 'real', realProposalSent: true, realProposalEmail: realEmail, realProposalSentAt: Date.now() });
+          onSentReal();
+        }, 900);
+      };
+
+      const handlePreviewTest = () => {
+        setData({ ...data, proposalMode: 'test', testProposalPreviewed: true, testProposalEmail: testEmail });
+        setTestPreviewed(true);
+      };
+
+      const handleConvertToReal = () => {
+        setMode('real');
+        setTestPreviewed(false);
+        setRealEmail(data.leadEmail && isValidEmail(data.leadEmail) ? data.leadEmail : "");
+      };
+
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center">
+            <h1 className="text-3xl font-bold text-gray-900">Send Proposal</h1>
+            <BRChip id="BR7">User selects Real (requires validated email, counts toward completion) or Test (placeholder ok, preview-only).</BRChip>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-5">
+            <div className="flex gap-2 p-1 bg-gray-100 rounded-lg w-fit">
+              <button onClick={() => { setMode('real'); setTestPreviewed(false); }}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${mode === 'real' ? 'bg-white shadow text-purple-700' : 'text-gray-500 hover:text-gray-700'}`}>
+                <Icon name="Mail" size={14} className="inline mr-1" /> Real Proposal
+              </button>
+              <button onClick={() => { setMode('test'); setEmailError(""); }}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${mode === 'test' ? 'bg-white shadow text-purple-700' : 'text-gray-500 hover:text-gray-700'}`}>
+                <Icon name="FlaskConical" size={14} className="inline mr-1" /> Test Proposal
+              </button>
+            </div>
+
+            {mode === 'real' && (
+              <div className="space-y-4 fade-in">
+                <p className="text-sm text-gray-600">This sends the real proposal to your customer via email and SMS through your normal send flow. Your walkthrough completes once your customer views it.</p>
+                <FormInput label="Recipient Email" required type="email" value={realEmail} onChange={e => { setRealEmail(e.target.value); setEmailError(""); }}
+                  placeholder="customer@example.com" error={emailError} />
+                <button onClick={handleSendReal} disabled={sending}
+                  className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                  {sending ? "Sending..." : "Send Real Proposal"}
+                </button>
+              </div>
+            )}
+
+            {mode === 'test' && !testPreviewed && (
+              <div className="space-y-4 fade-in">
+                <div className="flex items-start">
+                  <HelperTip className="flex-1">This proposal will not actually be sent to the recipient. It's for preview purposes only.</HelperTip>
+                  <BRChip id="BR8">Selecting Test Proposal must display helper text that it won't be sent and is preview-only.</BRChip>
+                </div>
+                <div className="flex items-start">
+                  <HelperTip className="flex-1">Test proposals are excluded from your reports (for example, Total Proposals Sent).</HelperTip>
+                  <BRChip id="BR9">Test proposals excluded from standard reporting metrics; user must be told.</BRChip>
+                </div>
+                <FormInput label="Placeholder Email (not sent)" value={testEmail} onChange={e => setTestEmail(e.target.value)} placeholder="preview@example.com" />
+                <button onClick={handlePreviewTest} className="bg-white border-2 border-purple-500 text-purple-700 hover:bg-purple-50 px-6 py-3 rounded-lg font-medium transition-colors">Preview Test Proposal</button>
+              </div>
+            )}
+
+            {mode === 'test' && testPreviewed && (
+              <div className="space-y-4 fade-in">
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-center">
+                  <Icon name="Eye" size={28} className="text-purple-600 mx-auto mb-2" />
+                  <p className="font-semibold text-gray-900">Test Proposal Preview</p>
+                  <p className="text-sm text-gray-500 mt-1">Sent to placeholder address only — nothing was delivered to a real recipient.</p>
+                </div>
+                <div className="flex items-center">
+                  <p className="text-sm text-gray-600">Ready to send this to your customer for real?</p>
+                  <BRChip id="BR10">Converting Test to Real (or starting a new Real proposal) tracks and reports normally, same as any Real proposal.</BRChip>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <button onClick={handleConvertToReal} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Convert to Real &amp; Send</button>
+                  <button onClick={onSkip} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Return to Dashboard</button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-between pt-2">
+            <button onClick={onBack} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Back</button>
+            <button onClick={onSkip} className="text-gray-500 hover:text-gray-700 underline text-sm">Skip</button>
+          </div>
+        </div>
+      );
+    };
+
+    // ─── Awaiting Customer Action — shown after Real send, until Proposal Viewed fires (BR11, BR12, BR13) ───
+    const AwaitingViewScreen = ({ data, onExit }) => (
+      <div className="space-y-6">
+        <div className="flex items-center">
+          <h1 className="text-3xl font-bold text-gray-900">Almost There!</h1>
+          <BRChip id="BR12">Until a qualifying Proposal Viewed event occurs, the session shows an in-progress / awaiting customer action state, not complete.</BRChip>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center space-y-4">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto"><Icon name="Clock" size={30} className="text-amber-600" /></div>
+          <div>
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium"><Icon name="Hourglass" size={14} /> AWAITING CUSTOMER ACTION</span>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900">Your proposal is on its way</h2>
+          <p className="text-gray-600 max-w-md mx-auto">We sent your Real proposal to <span className="font-medium text-gray-900">{data.realProposalEmail || "your customer"}</span>. Your walkthrough will complete automatically once they view it — no further action needed from you.</p>
+          <div className="flex items-center justify-center">
+            <p className="text-xs text-gray-400">You can leave and come back anytime; you'll return to this status screen.</p>
+            <BRChip id="BR13">Users who exit after sending but before it's viewed return to a status view, not a restart.</BRChip>
+          </div>
+          <button onClick={onExit} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Exit to Dashboard</button>
+        </div>
+      </div>
+    );
 
     // Completion Screen
     const CompletionScreen = ({ data, setData, onViewDashboard, onNavigateToStep }) => {
@@ -1602,7 +1760,9 @@
                 { label: "Products & Services", done: true },
                 { label: "Add-Ons", done: true },
                 { label: "Team Members", done: data.teamMember?.added || false },
-                { label: "First Proposal", done: data.proposalSent || false }
+                { label: "Create a Deal", done: data.dealCreated || false },
+                { label: "Create a Proposal", done: data.proposalBuilt || false },
+                { label: "Send Proposal (Customer Viewed)", done: data.proposalViewed || false }
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center ${item.done ? 'bg-green-500' : 'bg-gray-300'}`}>
@@ -1684,7 +1844,7 @@
     };
 
     // Mock Dashboard
-    const MockDashboard = ({ data, onNavigateToStep }) => {
+    const MockDashboard = ({ data, onNavigateToStep, awaitingView, onResumeAwaitingView }) => {
       const lead = { firstName: "Test", lastName: "Contact" };
       const [dismissed, setDismissed] = useState(false);
 
@@ -1694,12 +1854,12 @@
         { name: 'Hot Leads', color: 'bg-orange-100', textColor: 'text-orange-700', count: 0 },
         { name: 'Estimate Requested', color: 'bg-purple-100', textColor: 'text-purple-700', count: 0 },
         { name: 'Estimate Scheduled', color: 'bg-indigo-100', textColor: 'text-indigo-700', count: 0 },
-        { name: 'In Draft', color: 'bg-gray-100', textColor: 'text-gray-700', count: data.proposalSent ? 0 : 1 },
-        { name: 'Proposal(s) Sent', color: 'bg-green-100', textColor: 'text-green-700', count: data.proposalSent ? 1 : 0 },
+        { name: 'In Draft', color: 'bg-gray-100', textColor: 'text-gray-700', count: data.realProposalSent ? 0 : 1 },
+        { name: 'Proposal(s) Sent', color: 'bg-green-100', textColor: 'text-green-700', count: data.realProposalSent ? 1 : 0 },
         { name: 'Proposal(s) Rejected', color: 'bg-red-100', textColor: 'text-red-700', count: 0 }
       ];
 
-      // ── Onboarding checklist: 8 items (scheduling + 7 setup steps) ──
+      // ── Onboarding checklist: scheduling + 9 setup steps ──
       const checklistItems = [
         { label: "Schedule Onboarding Session", done: !!data.scheduledOnboarding, icon: "Calendar", step: "schedule_intro" },
         { label: "Company Settings", done: true, icon: "Building2", step: "company_info" },
@@ -1708,7 +1868,9 @@
         { label: "Products & Services", done: true, icon: "Package", step: "products" },
         { label: "Platform Add-Ons", done: true, icon: "Puzzle", step: "addons" },
         { label: "Team Members", done: !!data.teamMember?.added, icon: "Users", step: "team" },
-        { label: "Send First Proposal", done: !!data.proposalSent, icon: "FileText", step: "proposal" }
+        { label: "Create a Deal", done: !!data.dealCreated, icon: "Handshake", step: "create_deal" },
+        { label: "Create a Proposal", done: !!data.proposalBuilt, icon: "FileText", step: "proposal" },
+        { label: "Send Proposal (customer must view it to complete)", done: !!data.proposalViewed, icon: "Send", step: "send_proposal" }
       ];
 
       const completedCount = checklistItems.filter(i => i.done).length;
@@ -1720,6 +1882,22 @@
 
       return (
         <div className="space-y-4 fade-in -mx-4 sm:-mx-6">
+
+          {/* ── Awaiting Customer Action banner (BR13: resumes to status view, not restart) ── */}
+          {awaitingView && (
+            <div className="px-4 sm:px-6 pt-2">
+              <div className="rounded-xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-yellow-50 px-5 py-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-amber-200 flex items-center justify-center flex-shrink-0"><Icon name="Hourglass" size={18} className="text-amber-700" /></div>
+                  <div>
+                    <p className="font-semibold text-amber-900 text-sm">Awaiting Customer Action</p>
+                    <p className="text-xs text-amber-700">Your Real proposal was sent to {data.realProposalEmail || "your customer"} — walkthrough completes once they view it.</p>
+                  </div>
+                </div>
+                <button onClick={onResumeAwaitingView} className="px-4 py-2 bg-white border border-amber-300 text-amber-800 rounded-lg text-sm font-medium hover:bg-amber-50 whitespace-nowrap">View Status</button>
+              </div>
+            </div>
+          )}
 
           {/* ── Onboarding Progress Tracker ── */}
           {!dismissed && (
@@ -1814,7 +1992,7 @@
 
           <div className="px-4 sm:px-6">
             <h1 className="text-2xl font-bold text-gray-900">Sales Pipeline</h1>
-            <div className="flex items-center gap-4 text-sm text-gray-600 mt-1"><span>Total Deals: <strong>1</strong></span><span>Total Value: <strong>${data.proposalSent ? '6,800.00' : '0.00'}</strong></span></div>
+            <div className="flex items-center gap-4 text-sm text-gray-600 mt-1"><span>Total Deals: <strong>1</strong></span><span>Total Value: <strong>${data.realProposalSent ? '6,800.00' : '0.00'}</strong></span></div>
           </div>
           <div className="px-4 sm:px-6 py-3 bg-white border-y border-gray-200">
             <div className="flex flex-wrap items-center gap-2">
@@ -1831,7 +2009,7 @@
                     <span className={`text-sm ${col.textColor}`}>{col.count}</span>
                   </div>
                   <div className="bg-gray-50 rounded-b-lg p-2 min-h-[300px]">
-                    {((col.name === 'Warm Leads') || (col.name === 'In Draft' && !data.proposalSent) || (col.name === 'Proposal(s) Sent' && data.proposalSent)) && (
+                    {((col.name === 'Warm Leads') || (col.name === 'In Draft' && !data.realProposalSent) || (col.name === 'Proposal(s) Sent' && data.realProposalSent)) && (
                       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-2">
                         <div className="flex items-start justify-between mb-2">
                           <span className="font-medium text-gray-900 text-sm">{lead.firstName} {lead.lastName}</span>
@@ -1839,7 +2017,7 @@
                         </div>
                         <p className="text-xs text-gray-500 mb-2">Website</p>
                         {(col.name !== 'Warm Leads') && (
-                          <div className="text-right mb-2"><span className="text-lg font-bold text-gray-900">${data.proposalSent ? '6,800.00' : '0.00'}</span></div>
+                          <div className="text-right mb-2"><span className="text-lg font-bold text-gray-900">${data.realProposalSent ? '6,800.00' : '0.00'}</span></div>
                         )}
                         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                           <span className="text-xs text-gray-500">You</span>
@@ -1847,7 +2025,7 @@
                         </div>
                       </div>
                     )}
-                    {!((col.name === 'Warm Leads') || (col.name === 'In Draft' && !data.proposalSent) || (col.name === 'Proposal(s) Sent' && data.proposalSent)) && col.count === 0 && (
+                    {!((col.name === 'Warm Leads') || (col.name === 'In Draft' && !data.realProposalSent) || (col.name === 'Proposal(s) Sent' && data.realProposalSent)) && col.count === 0 && (
                       <div className="flex flex-col items-center justify-center h-32 text-gray-400"><Icon name="Inbox" size={24} /><p className="text-xs mt-1">No Deals</p></div>
                     )}
                   </div>
@@ -1876,15 +2054,42 @@
       PRODUCTS: 'products',
       ADDONS: 'addons',
       TEAM: 'team',
+      CREATE_DEAL: 'create_deal',
       PROPOSAL: 'proposal',
+      SEND_PROPOSAL: 'send_proposal',
+      AWAITING_VIEW: 'awaiting_view',
       COMPLETE: 'complete',
       DASHBOARD: 'dashboard'
     };
 
     const STEP_ORDER = [
       STEPS.WELCOME, STEPS.SCHEDULE_INTRO, STEPS.CALENDAR, STEPS.BOOKING_CONFIRMED, STEPS.SKIP_SCHEDULING,
-      STEPS.COMPANY_INFO, STEPS.BRAND_SETUP, STEPS.GOOGLE_CALENDAR, STEPS.PRODUCTS, STEPS.ADDONS, STEPS.TEAM, STEPS.PROPOSAL, STEPS.COMPLETE, STEPS.DASHBOARD
+      STEPS.COMPANY_INFO, STEPS.BRAND_SETUP, STEPS.GOOGLE_CALENDAR, STEPS.PRODUCTS, STEPS.ADDONS, STEPS.TEAM,
+      STEPS.CREATE_DEAL, STEPS.PROPOSAL, STEPS.SEND_PROPOSAL, STEPS.AWAITING_VIEW, STEPS.COMPLETE, STEPS.DASHBOARD
     ];
+
+    // ── LocalStorage persistence (BR5: progress saved/restored across reload/exit) ──
+    const WALKTHROUGH_STORAGE_KEY = 'dripjobs_onboarding_walkthrough_v1';
+    const WALKTHROUGH_SCHEMA_VERSION = 1;
+
+    // ── BR Annotation Chip — orange, hover tooltip, traces UI to ticket 86b4ek0j7 business rules ──
+    const BRChip = ({ id, children }) => (
+      <span className="group relative inline-flex items-center ml-2 align-middle">
+        <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 border border-orange-300 rounded text-[10px] font-bold cursor-help leading-none">{id}</span>
+        <span className="hidden group-hover:block absolute z-50 left-0 top-full mt-1 w-64 bg-gray-900 text-white text-xs rounded-lg p-2 shadow-lg font-normal normal-case">{children}</span>
+      </span>
+    );
+
+    const getInitialFormData = () => ({
+      companyName: "", shortName: "", businessType: "Painting", timeZone: "EST",
+      streetAddress: "", city: "", state: "", zipCode: "", phone: "", licenseNumber: "",
+      googleCalendar: false, brandFinderUsed: false, logoFile: "", accentColor: "#7C3AED",
+      websiteUrl: "", reviewUrl: "", facebookUrl: "", instagramUrl: "", linkedinUrl: "", xUrl: "",
+      products: null, addOns: { productionRates: false, jobiAI: false, jobCosting: false },
+      teamMember: null, proposalSent: false, scheduledOnboarding: null, smsUnlocked: false,
+      dealCreated: false, proposalBuilt: false, proposalMode: null, realProposalSent: false,
+      testProposalPreviewed: false, proposalViewed: false
+    });
 
     const DripJobsHybridOnboarding = () => {
       const [currentStep, setCurrentStep] = useState(STEPS.WELCOME);
@@ -1892,14 +2097,48 @@
       const [errors, setErrors] = useState({});
       const [booking, setBooking] = useState(null);
 
-      const [formData, setFormData] = useState({
-        companyName: "", shortName: "", businessType: "Painting", timeZone: "EST",
-        streetAddress: "", city: "", state: "", zipCode: "", phone: "", licenseNumber: "",
-        googleCalendar: false, brandFinderUsed: false, logoFile: "", accentColor: "#7C3AED",
-        websiteUrl: "", reviewUrl: "", facebookUrl: "", instagramUrl: "", linkedinUrl: "", xUrl: "",
-        products: null, addOns: { productionRates: false, jobiAI: false, jobCosting: false },
-        teamMember: null, proposalSent: false, scheduledOnboarding: null, smsUnlocked: false
-      });
+      const [formData, setFormData] = useState(getInitialFormData());
+
+      // ── BR5: restore saved progress on load ──
+      const [resumeMode, setResumeMode] = useState(false);
+      useEffect(() => {
+        try {
+          const raw = localStorage.getItem(WALKTHROUGH_STORAGE_KEY);
+          if (raw) {
+            const saved = JSON.parse(raw);
+            if (saved && saved.schemaVersion === WALKTHROUGH_SCHEMA_VERSION && saved.currentStep && saved.currentStep !== STEPS.WELCOME) {
+              setFormData({ ...getInitialFormData(), ...saved.formData });
+              setBooking(saved.booking || null);
+              setResumeMode(!!saved.resumeMode);
+              setCurrentStep(saved.currentStep);
+            }
+          }
+        } catch (e) { /* corrupt or missing storage — start fresh */ }
+      }, []);
+
+      // ── BR5: persist progress on every change (skipped while still on Welcome) ──
+      useEffect(() => {
+        if (currentStep === STEPS.WELCOME) return;
+        try {
+          localStorage.setItem(WALKTHROUGH_STORAGE_KEY, JSON.stringify({
+            schemaVersion: WALKTHROUGH_SCHEMA_VERSION, currentStep, formData, booking, resumeMode
+          }));
+        } catch (e) { /* storage unavailable — fail silently in prototype */ }
+      }, [currentStep, formData, booking, resumeMode]);
+
+      // ── BR6: manual restart, available from Settings menu ──
+      const restartWalkthrough = () => {
+        try { localStorage.removeItem(WALKTHROUGH_STORAGE_KEY); } catch (e) {}
+        setFormData(getInitialFormData());
+        setBooking(null);
+        setResumeMode(false);
+        setErrors({});
+        setCurrentStep(STEPS.WELCOME);
+      };
+
+      // ── BR6: Settings menu (manual restart entry point) ──
+      const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
+      const [confirmingRestart, setConfirmingRestart] = useState(false);
 
       const goTo = (step) => {
         const oldIdx = STEP_ORDER.indexOf(currentStep);
@@ -1909,16 +2148,15 @@
         setCurrentStep(step);
       };
 
-      // ── Resume Mode: when returning from dashboard to complete skipped steps ──
-      const [resumeMode, setResumeMode] = useState(false);
-
       // Given a step the user just completed/skipped past, find the next incomplete step
       const getNextIncompleteStep = (movingPastStep) => {
         const skippableSteps = [
           { step: STEPS.SCHEDULE_INTRO, done: movingPastStep === STEPS.SCHEDULE_INTRO || !!formData.scheduledOnboarding },
           { step: STEPS.GOOGLE_CALENDAR, done: movingPastStep === STEPS.GOOGLE_CALENDAR || !!formData.googleCalendar },
           { step: STEPS.TEAM, done: movingPastStep === STEPS.TEAM || !!formData.teamMember?.added },
-          { step: STEPS.PROPOSAL, done: movingPastStep === STEPS.PROPOSAL || !!formData.proposalSent }
+          { step: STEPS.CREATE_DEAL, done: movingPastStep === STEPS.CREATE_DEAL || !!formData.dealCreated },
+          { step: STEPS.PROPOSAL, done: movingPastStep === STEPS.PROPOSAL || !!formData.proposalBuilt },
+          { step: STEPS.SEND_PROPOSAL, done: movingPastStep === STEPS.SEND_PROPOSAL || !!formData.realProposalSent }
         ];
         const afterIdx = skippableSteps.findIndex(s => s.step === movingPastStep);
         for (let i = afterIdx + 1; i < skippableSteps.length; i++) {
@@ -1928,8 +2166,8 @@
       };
 
       // Setup wizard step numbers (for progress bar)
-      const setupStepNames = ["Company Information", "Brand Setup", "Google Calendar", "Products & Services", "Platform Add-Ons", "Team Members", "Send Proposal"];
-      const setupSteps = [STEPS.COMPANY_INFO, STEPS.BRAND_SETUP, STEPS.GOOGLE_CALENDAR, STEPS.PRODUCTS, STEPS.ADDONS, STEPS.TEAM, STEPS.PROPOSAL];
+      const setupStepNames = ["Company Information", "Brand Setup", "Google Calendar", "Products & Services", "Platform Add-Ons", "Team Members", "Create Deal", "Create Proposal", "Send Proposal"];
+      const setupSteps = [STEPS.COMPANY_INFO, STEPS.BRAND_SETUP, STEPS.GOOGLE_CALENDAR, STEPS.PRODUCTS, STEPS.ADDONS, STEPS.TEAM, STEPS.CREATE_DEAL, STEPS.PROPOSAL, STEPS.SEND_PROPOSAL];
       const currentSetupStep = setupSteps.indexOf(currentStep) + 1;
       const isInSetupWizard = setupSteps.includes(currentStep);
       const isInScheduling = [STEPS.SCHEDULE_INTRO, STEPS.CALENDAR, STEPS.BOOKING_CONFIRMED, STEPS.SKIP_SCHEDULING].includes(currentStep);
@@ -1962,14 +2200,26 @@
                 { step: STEPS.PRODUCTS, label: "4. Products" },
                 { step: STEPS.ADDONS, label: "5. Add-Ons" },
                 { step: STEPS.TEAM, label: "6. Team" },
-                { step: STEPS.PROPOSAL, label: "7. Proposal" },
+                { step: STEPS.CREATE_DEAL, label: "7. Create Deal" },
+                { step: STEPS.PROPOSAL, label: "8. Create Proposal" },
+                { step: STEPS.SEND_PROPOSAL, label: "9. Send Proposal" },
+                { step: STEPS.AWAITING_VIEW, label: "Awaiting View" },
                 { step: STEPS.COMPLETE, label: "Complete" },
                 { step: STEPS.DASHBOARD, label: "Dashboard" },
               ].map(s => (
                 <button key={s.step} className={`btn ${currentStep === s.step ? 'setup' : ''}`} onClick={() => { goTo(s.step); setDemoOpen(false); }}>{s.label}</button>
               ))}
+              <span className="text-xs text-amber-400 font-semibold ml-2 mr-1">Walkthrough:</span>
+              <button className="btn" style={{background: '#B45309', borderColor: '#B45309', color: 'white'}}
+                onClick={() => { setFormData(prev => ({...prev, proposalViewed: true})); goTo(STEPS.COMPLETE); setDemoOpen(false); }}>
+                🔔 Simulate: Proposal Viewed
+              </button>
+              <button className="btn" style={{background: '#7F1D1D', borderColor: '#7F1D1D', color: 'white'}}
+                onClick={() => { restartWalkthrough(); setDemoOpen(false); }}>
+                ♻ Reset Saved Progress
+              </button>
             </div>
-            <div className="text-xs text-gray-500 mt-1">Clickable Prototype — Flow 2 (Scheduling) → Flow 1 (Account Setup, 7 steps) | Owner-only | Custom modals, not redirects</div>
+            <div className="text-xs text-gray-500 mt-1">Clickable Prototype — Flow 2 (Scheduling) → Flow 1 (Account Setup, 9 steps) | Owner-only | Custom modals, not redirects</div>
           </div>
         </div>
       );
@@ -2038,20 +2288,38 @@
             )}
             {currentStep === STEPS.TEAM && (
               <Step6TeamMembers data={formData} setData={setFormData}
-                onNext={() => resumeMode ? goTo(getNextIncompleteStep(STEPS.TEAM)) : goTo(STEPS.PROPOSAL)}
+                onNext={() => resumeMode ? goTo(getNextIncompleteStep(STEPS.TEAM)) : goTo(STEPS.CREATE_DEAL)}
                 onBack={() => resumeMode ? goTo(STEPS.DASHBOARD) : goTo(STEPS.ADDONS)} />
+            )}
+            {currentStep === STEPS.CREATE_DEAL && (
+              <CreateDealScreen data={formData} setData={setFormData}
+                onNext={() => resumeMode ? goTo(getNextIncompleteStep(STEPS.CREATE_DEAL)) : goTo(STEPS.PROPOSAL)}
+                onBack={() => resumeMode ? goTo(STEPS.DASHBOARD) : goTo(STEPS.TEAM)} />
             )}
             {currentStep === STEPS.PROPOSAL && (
               <Step7Proposal data={formData} setData={setFormData}
-                onNext={() => resumeMode ? goTo(STEPS.DASHBOARD) : goTo(STEPS.COMPLETE)}
-                onBack={() => resumeMode ? goTo(STEPS.DASHBOARD) : goTo(STEPS.TEAM)} />
+                onNext={() => resumeMode ? goTo(getNextIncompleteStep(STEPS.PROPOSAL)) : goTo(STEPS.SEND_PROPOSAL)}
+                onBack={() => resumeMode ? goTo(STEPS.DASHBOARD) : goTo(STEPS.CREATE_DEAL)}
+                onSkipToDashboard={() => { setResumeMode(true); goTo(STEPS.DASHBOARD); }} />
+            )}
+            {currentStep === STEPS.SEND_PROPOSAL && (
+              <SendProposalScreen data={formData} setData={setFormData}
+                onSentReal={() => goTo(STEPS.AWAITING_VIEW)}
+                onBack={() => goTo(STEPS.PROPOSAL)}
+                onSkip={() => { setResumeMode(true); goTo(STEPS.DASHBOARD); }} />
+            )}
+            {currentStep === STEPS.AWAITING_VIEW && (
+              <AwaitingViewScreen data={formData}
+                onExit={() => { setResumeMode(true); goTo(STEPS.DASHBOARD); }} />
             )}
             {currentStep === STEPS.COMPLETE && (
               <CompletionScreen data={formData} setData={setFormData} onViewDashboard={() => goTo(STEPS.DASHBOARD)}
                 onNavigateToStep={(step) => { setResumeMode(true); goTo(step); }} />
             )}
             {currentStep === STEPS.DASHBOARD && (
-              <MockDashboard data={formData} onNavigateToStep={(step) => { setResumeMode(true); goTo(step); }} />
+              <MockDashboard data={formData} onNavigateToStep={(step) => { setResumeMode(true); goTo(step); }}
+                awaitingView={!!formData.realProposalSent && !formData.proposalViewed}
+                onResumeAwaitingView={() => { setResumeMode(true); goTo(STEPS.AWAITING_VIEW); }} />
             )}
           </div>
         );
@@ -2066,12 +2334,41 @@
             <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3"><DripJobsLogo size={40} /><span className="text-xl font-bold text-gray-900">DripJobs</span></div>
-                {isInSetupWizard && (
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Icon name="User" size={16} />
-                    <span>Account Owner</span>
+                <div className="flex items-center gap-3">
+                  {isInSetupWizard && (
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Icon name="User" size={16} />
+                      <span>Account Owner</span>
+                    </div>
+                  )}
+                  <div className="relative">
+                    <button onClick={() => { setSettingsMenuOpen(!settingsMenuOpen); setConfirmingRestart(false); }}
+                      className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors" title="Settings">
+                      <Icon name="Settings" size={18} />
+                    </button>
+                    {settingsMenuOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 fade-in">
+                        {!confirmingRestart ? (
+                          <button onClick={() => setConfirmingRestart(true)}
+                            className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                            <Icon name="RotateCcw" size={14} /> Restart Walkthrough
+                            <BRChip id="BR6">A manual restart option remains available from the Settings menu.</BRChip>
+                          </button>
+                        ) : (
+                          <div className="p-4 space-y-3">
+                            <p className="text-sm text-gray-700">Restart the walkthrough from the beginning? Your saved progress will be cleared.</p>
+                            <div className="flex gap-2">
+                              <button onClick={() => { restartWalkthrough(); setSettingsMenuOpen(false); setConfirmingRestart(false); }}
+                                className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium">Restart</button>
+                              <button onClick={() => setConfirmingRestart(false)}
+                                className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </header>
@@ -2092,7 +2389,7 @@
           {isInSetupWizard && (
             <ProgressBar
               currentStep={currentSetupStep}
-              totalSteps={7}
+              totalSteps={setupSteps.length}
               stepNames={setupStepNames}
               onBack={() => {
                 const idx = setupSteps.indexOf(currentStep);
