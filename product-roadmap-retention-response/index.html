@@ -207,12 +207,16 @@
       <h3>Activation Dashboard: Health Score Aligned to the Data</h3>
       <span class="status-badge on-track">On Track</span>
     </div>
-    <div class="ticket-ref"><a href="https://app.clickup.com/t/86b9512kq" target="_blank">Activation Dashboard</a> · Already elevated to internal priority</div>
-    <div class="evidence"><strong>Why:</strong> Rick recommends retiring the current activation definition (10k in sales + A2P verification) in favor of a directable, leading metric: a proposal viewed by a customer plus 3+ deals worked, within the first 30 to 60 days. Signing a proposal has 3.94× retention lift; 3+ deals worked has 3.94× lift independently.</div>
-    <p class="desc">Keep this workstream moving as planned. Use its continued momentum to fold in the new activation definition rather than opening a parallel effort.</p>
+    <div class="ticket-ref"><a href="https://app.clickup.com/t/86b9512kq" target="_blank">Activation Dashboard</a> · In Progress, Internal Priority 1</div>
+    <div class="ticket-ref"><strong>Upstream dependency:</strong> <a href="https://app.clickup.com/t/86b72rqzq" target="_blank">Customer Success Activation Tracking (90-Day Milestone)</a> · Pushed to Production, Dec 2025</div>
+    <div class="evidence"><strong>Why:</strong> Rick recommends retiring the current activation definition (10k in sales + A2P verification) in favor of a directable, leading metric: a proposal viewed by a customer plus 3+ deals worked, within the first 30 to 60 days. Signing a proposal has 3.94× retention lift; 3+ deals worked has 3.94× lift independently. Confirmed directly in the dashboard ticket: the Health column's "Healthy" condition is coded as <code>totalSales &gt;= $10,000 AND a2pActivated = true</code>, exactly the metric Rick says to retire.</div>
+    <p class="desc">The $10k + A2P definition isn't owned by the dashboard ticket itself, it's computed upstream in 86b72rqzq and the dashboard just displays it. Redefining activation touches both tickets. The good news: no new instrumentation is needed. Proposal-viewed activity is already tracked (86b61qexb, shipped), and Rick's own report confirms Proposal/Viewed events are already logged in the activity data. The dashboard's existing Est. Sent / Last Est. columns are close but track whether an estimate was sent, not whether the customer opened it.</p>
     <ul class="action-list">
-      <li>Compare current health score logic against Rick's proposed definition (proposal viewed + 3 deals worked, 30 to 60 day window)</li>
-      <li>Fold the login/session tracking subtasks already in progress into this definition where they overlap</li>
+      <li>Decide whether 86b72rqzq's underlying milestone definition changes, or whether the new leading indicator is added as a parallel signal alongside it</li>
+      <li>Add a "Proposal Viewed" signal to the dashboard using existing activity data, no new tracking required</li>
+      <li>Add a "Deals Worked (90d)" or similar signal per Rick's 3+ deals threshold</li>
+      <li>Decide how legacy accounts are handled, they have no 90-day window today by design, so a 30-to-60-day leading indicator needs an explicit rule for them</li>
+      <li>Connect this to the unscoped Renewal Risk Flag (Phase 2 stub, ticket 86bajkxdy), which maps closely to Rick's "activated-then-left" churn segment, but is still waiting on thresholds from Tanner/Mary/Eli</li>
       <li>Keep the CS Feedback Flag column and filter work moving; no change to that scope</li>
     </ul>
   </div>
