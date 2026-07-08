@@ -185,7 +185,7 @@
     );
 
     // ─── Progress Bar ───
-    const ProgressBar = ({ currentStep, totalSteps, stepNames, onBack, isSchedulingPhase }) => (
+    const ProgressBar = ({ currentStep, totalSteps, stepNames, currentLabel, onBack, isSchedulingPhase }) => (
       <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-2">
@@ -202,7 +202,7 @@
                     {stepNames[currentStep - 1]}
                   </span>
                 ) : (
-                  <>Step {currentStep} of {totalSteps}: <span className="hidden sm:inline">{stepNames[currentStep - 1]}</span></>
+                  <>Step {currentStep} of {totalSteps}: <span className="hidden sm:inline">{currentLabel || stepNames[currentStep - 1]}</span></>
                 )}
               </span>
             </div>
@@ -1594,6 +1594,90 @@
       );
     };
 
+    // ─── Apply Discount modal (module scope) ───
+    const DiscountModal = ({ jobTotal, initialDiscount, onSave, onClose }) => {
+      const [percent, setPercent] = useState(initialDiscount?.percent ?? '');
+      const [amount, setAmount] = useState(initialDiscount?.amount ?? 0);
+      const [name, setName] = useState(initialDiscount?.name || 'Sales Discount');
+      const [note, setNote] = useState(initialDiscount?.note || '');
+
+      const applyQuick = (pct) => {
+        setPercent(pct);
+        setAmount(Number((jobTotal * pct / 100).toFixed(2)));
+      };
+
+      const handlePercentChange = (val) => {
+        setPercent(val);
+        const p = Number(val) || 0;
+        setAmount(Number((jobTotal * p / 100).toFixed(2)));
+      };
+
+      const handleAmountChange = (val) => {
+        setAmount(val);
+        const a = Number(val) || 0;
+        setPercent(jobTotal > 0 ? Number(((a / jobTotal) * 100).toFixed(2)) : 0);
+      };
+
+      const handleSave = () => onSave({ percent: Number(percent) || 0, amount: Number(amount) || 0, name, note });
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full fade-in max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Apply Discount</h2>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><Icon name="X" size={20} /></button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-start gap-2">
+                <Icon name="Info" size={16} className="text-blue-500 mt-0.5" />
+                <div>
+                  <p className="text-xs font-semibold text-blue-900">Job Total</p>
+                  <p className="text-lg font-bold text-blue-900">${jobTotal.toFixed(2)}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Quick Discount</p>
+                <div className="flex gap-2 flex-wrap">
+                  {[5, 10, 15, 20].map(pct => (
+                    <button key={pct} onClick={() => applyQuick(pct)}
+                      className={`px-4 py-2 border rounded-lg text-sm font-medium ${Number(percent) === pct ? 'bg-purple-600 text-white border-purple-600' : 'border-purple-300 text-purple-700 hover:bg-purple-50'}`}>{pct}%</button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-gray-700">Discount</label>
+                  <div className="relative">
+                    <input type="number" value={percent} onChange={e => handlePercentChange(e.target.value)}
+                      className="w-full px-4 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-gray-700">Amount</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                    <input type="number" value={amount} onChange={e => handleAmountChange(e.target.value)}
+                      className="w-full pl-7 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" />
+                  </div>
+                </div>
+              </div>
+              <FormInput label="Name" value={name} onChange={e => setName(e.target.value)} />
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700">Note</label>
+                <textarea value={note} onChange={e => setNote(e.target.value)} rows={3} placeholder="You can add an optional note here..."
+                  className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 p-4 border-t border-gray-200">
+              <button onClick={handleSave} className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium">Save</button>
+              <button onClick={onClose} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">Close</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
     // ─── Send Proposal modal (module scope) ───
     const SendProposalModalUI = ({ proposalNumber, customerName, companyName, phone, email, onSend, onClose }) => {
       const [deliveryMethod, setDeliveryMethod] = useState('Both Email and Text');
@@ -1657,9 +1741,32 @@
       );
     };
 
-    const Step7Proposal = ({ data, setData, onSentReal, onBack, onSkipToDashboard }) => {
+    const Step7Proposal = ({ data, setData, onSentReal, onBack, onSkipToDashboard, onPhaseChange }) => {
       // phase: choose | contact | address | assignment | lineItems | payments | display | financing | reviewSend | sendModal | sending | sent | testPreview
       const [phase, setPhase] = useState('choose');
+
+      // Step 7 itself covers choose/contact/address/assignment (creating the deal). Once the builder
+      // starts (Line Items onward) there are more steps than the top-level wizard knows about, so we
+      // report our own step/total up to the parent and it expands the progress bar past 7 of 7.
+      useEffect(() => {
+        const PHASE_PROGRESS = {
+          choose: { num: 7, total: 7, label: 'Create Proposal' },
+          contact: { num: 7, total: 7, label: 'Create Proposal' },
+          address: { num: 7, total: 7, label: 'Create Proposal' },
+          assignment: { num: 7, total: 7, label: 'Create Proposal' },
+          lineItems: { num: 8, total: 12, label: 'Add Line Items' },
+          payments: { num: 9, total: 12, label: 'Payments' },
+          display: { num: 10, total: 12, label: 'Proposal Display' },
+          financing: { num: 11, total: 12, label: 'Financing' },
+          reviewSend: { num: 12, total: 12, label: 'Review & Send' },
+          sendModal: { num: 12, total: 12, label: 'Review & Send' },
+          sending: { num: 12, total: 12, label: 'Review & Send' },
+          sent: { num: 12, total: 12, label: 'Review & Send' },
+          testPreview: { num: 12, total: 12, label: 'Review & Send' }
+        };
+        if (onPhaseChange) onPhaseChange(PHASE_PROGRESS[phase] || { num: 7, total: 7, label: 'Create Proposal' });
+      }, [phase]);
+
       const [mode, setMode] = useState('real'); // 'real' | 'test'
       const [errors, setErrors] = useState({});
 
@@ -1701,10 +1808,16 @@
       const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
       const assignOptions = ["Me (Account Owner)", ...(data.teamMember?.added && teamMemberName ? [teamMemberName] : [])];
 
+      // ── Discount ──
+      const [discount, setDiscount] = useState(data.discount || null);
+      const [showDiscountModal, setShowDiscountModal] = useState(false);
+
       // ── Line item totals (shared across Line Items, Payments, and Review phases) ──
       const subtotal = lineItems.reduce((s, i) => s + (i.descriptionOnly ? 0 : i.qty * i.price), 0);
+      const discountAmount = discount ? Math.min(discount.amount, subtotal) : 0;
+      const discountedSubtotal = subtotal - discountAmount;
       const taxTotal = lineItems.reduce((s, i) => s + (i.taxable && !i.descriptionOnly ? i.qty * i.price * (companyTaxRate / 100) : 0), 0);
-      const grandTotal = subtotal + taxTotal;
+      const grandTotal = discountedSubtotal + taxTotal;
       const depositComputedAmount = depositType === 'Percent' ? grandTotal * (depositAmount / 100) : depositAmount;
 
       const openModal = () => { setErrors({}); setPhase('contact'); };
@@ -1761,7 +1874,7 @@
       };
 
       const persistBuilderState = () => ({
-        proposalBuilt: true, lineItems, depositType, depositAmount, depositSet, allowAlternativePayment,
+        proposalBuilt: true, lineItems, discount, depositType, depositAmount, depositSet, allowAlternativePayment,
         showQuantities, showSignatureLine, acornEnabled, proposalTotal: grandTotal
       });
 
@@ -1992,13 +2105,30 @@
 
                   <div className="mt-6 pt-4 border-t border-gray-200 space-y-2">
                     <div className="flex justify-between text-sm text-gray-600"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
+                    {discount && (
+                      <div className="flex justify-between text-sm text-purple-700">
+                        <span>Discount{discount.name ? ` (${discount.name})` : ''}</span>
+                        <span>-${discountAmount.toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-sm text-gray-600"><span>Tax</span><span>${taxTotal.toFixed(2)}</span></div>
                     <div className="flex justify-between items-center bg-gray-800 text-white px-4 py-2 rounded-lg font-semibold"><span>Total</span><span>${grandTotal.toFixed(2)}</span></div>
-                    <div className="flex justify-end pt-2"><button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium">Apply Discount</button></div>
+                    <div className="flex justify-end pt-2 gap-2">
+                      {discount && (
+                        <button onClick={() => setDiscount(null)} className="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50">Remove Discount</button>
+                      )}
+                      <button onClick={() => setShowDiscountModal(true)} className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium">{discount ? 'Edit Discount' : 'Apply Discount'}</button>
+                    </div>
                   </div>
                 </>
               )}
             </div>
+
+            {showDiscountModal && (
+              <DiscountModal jobTotal={subtotal} initialDiscount={discount}
+                onSave={(d) => { setDiscount(d); setShowDiscountModal(false); }}
+                onClose={() => setShowDiscountModal(false)} />
+            )}
 
             <div className="flex justify-between pt-2">
               <button onClick={() => setPhase('assignment')} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Back</button>
@@ -2035,10 +2165,10 @@
                 <button onClick={() => setShowDepositModal(true)} className="px-4 py-1.5 border border-purple-300 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-50 flex items-center gap-1"><Icon name="Pencil" size={14} /> Edit</button>
               </div>
               <div className="flex items-start gap-3 pt-3 border-t border-gray-100">
-                <Toggle enabled={allowAlternativePayment} onChange={setAllowAlternativePayment} />
+                <Toggle enabled={true} disabled={true} onChange={() => {}} />
                 <div>
                   <p className="text-sm font-medium text-gray-900">Allow alternative payment</p>
-                  <p className="text-xs text-gray-500">Lets the customer pay the deposit in person, by check, or by other means.</p>
+                  <p className="text-xs text-gray-500">Lets the customer pay the deposit in person, by check, or by other means. This can't be turned off — it's currently the only way for a customer to pay if they don't pay online.</p>
                 </div>
               </div>
               <div className="pt-3 border-t border-gray-100">
@@ -2116,6 +2246,7 @@
                 <div className="flex justify-between text-sm"><span className="text-gray-500">Customer</span><span className="font-medium text-gray-900">{firstName} {lastName}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-gray-500">Job Address</span><span className="font-medium text-gray-900">{street}, {city}, {stateVal} {zip}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-gray-500">Line Items</span><span className="font-medium text-gray-900">{lineItems.length}</span></div>
+                {discount && <div className="flex justify-between text-sm"><span className="text-gray-500">Discount</span><span className="font-medium text-purple-700">-${discountAmount.toFixed(2)}</span></div>}
                 <div className="flex justify-between text-sm"><span className="text-gray-500">Total</span><span className="font-semibold text-purple-700">${grandTotal.toFixed(2)}</span></div>
                 {depositSet && <div className="flex justify-between text-sm"><span className="text-gray-500">Deposit</span><span className="font-medium text-gray-900">${depositComputedAmount.toFixed(2)}</span></div>}
                 {acornEnabled && <div className="flex justify-between text-sm"><span className="text-gray-500">Financing</span><span className="font-medium text-gray-900">Acorn Finance Widget Enabled</span></div>}
@@ -2615,6 +2746,10 @@
         setCurrentStep(STEPS.WELCOME);
       };
 
+      // ── Step 7's internal builder has more sub-steps than the top-level wizard knows about;
+      // Step7Proposal reports its current sub-step here so the progress bar can expand past 7/7. ──
+      const [proposalProgress, setProposalProgress] = useState({ num: 7, total: 7, label: 'Create Proposal' });
+
       // ── BR6: Settings menu (manual restart entry point) ──
       const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
       const [confirmingRestart, setConfirmingRestart] = useState(false);
@@ -2770,7 +2905,8 @@
               <Step7Proposal data={formData} setData={setFormData}
                 onSentReal={() => goTo(STEPS.AWAITING_VIEW)}
                 onBack={() => resumeMode ? goTo(STEPS.DASHBOARD) : goTo(STEPS.TEAM)}
-                onSkipToDashboard={() => { setResumeMode(true); goTo(STEPS.DASHBOARD); }} />
+                onSkipToDashboard={() => { setResumeMode(true); goTo(STEPS.DASHBOARD); }}
+                onPhaseChange={setProposalProgress} />
             )}
             {currentStep === STEPS.AWAITING_VIEW && (
               <AwaitingViewScreen data={formData}
@@ -2852,9 +2988,10 @@
           )}
           {isInSetupWizard && (
             <ProgressBar
-              currentStep={currentSetupStep}
-              totalSteps={setupSteps.length}
+              currentStep={currentStep === STEPS.PROPOSAL ? proposalProgress.num : currentSetupStep}
+              totalSteps={currentStep === STEPS.PROPOSAL ? proposalProgress.total : setupSteps.length}
               stepNames={setupStepNames}
+              currentLabel={currentStep === STEPS.PROPOSAL ? proposalProgress.label : undefined}
               onBack={() => {
                 const idx = setupSteps.indexOf(currentStep);
                 if (idx > 0) goTo(setupSteps[idx - 1]);
