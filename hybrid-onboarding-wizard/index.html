@@ -1383,8 +1383,283 @@
     // are consolidated into one guided step. "Create Deal" is fulfilled inline as creating the Lead/Contact for the deal.)
     const LEAD_SOURCE_OPTIONS = ["Referral", "Google", "Facebook", "Instagram", "Website", "Door Hanger", "Yard Sign", "Other"];
 
+    const PRODUCT_CATALOG = [
+      { name: "3rd Color Selection", price: 0 },
+      { name: "10-Year Warranty", price: 10 },
+      { name: "5-Year Warranty", price: 0 },
+      { name: "Basic Paint", price: 0 },
+      { name: "Cabinet Refinishing - Add Door Knobs", price: 0 },
+      { name: "Cabinet Refinishing - Doors", price: 3 },
+      { name: "Cabinet Refinishing - Drawers", price: 0 },
+      { name: "Cabinet Refinishing - Kick Plates", price: 3 },
+      { name: "Color Consultation", price: 200 },
+      { name: "Crown Molding Coat", price: 4 },
+      { name: "EXT Painting (sq ft)", price: 20 },
+      { name: "Extensive Prep & Repair", price: 500 },
+      { name: "Exterior Painting", price: 5000 },
+      { name: "Garage Floor Coating", price: 0 },
+      { name: "Garage Floors", price: 20 },
+      { name: "General Prep", price: 200 },
+      { name: "Interior Painting - Trim", price: 500 },
+      { name: "Interior Painting - Walls", price: 1000 }
+    ];
+
+    // ─── Add Item modal (module scope — see ModalShell comment on why this can't live inside Step7Proposal) ───
+    const AddItemModal = ({ catalog, companyTaxRate, editingItem, onSave, onClose }) => {
+      const [descriptionOnly, setDescriptionOnly] = useState(editingItem?.descriptionOnly || false);
+      const [optional, setOptional] = useState(editingItem?.optional || false);
+      const [selectedProduct, setSelectedProduct] = useState(editingItem?.catalogName || '');
+      const [name, setName] = useState(editingItem?.name || '');
+      const [qty, setQty] = useState(editingItem?.qty ?? 1);
+      const [price, setPrice] = useState(editingItem?.price ?? 0);
+      const [taxable, setTaxable] = useState(editingItem?.taxable ?? true);
+      const [description, setDescription] = useState(editingItem?.description || '');
+
+      const handleProductSelect = (val) => {
+        setSelectedProduct(val);
+        const p = catalog.find(c => c.name === val);
+        if (p) { setName(p.name); setPrice(p.price); }
+      };
+
+      const total = descriptionOnly ? 0 : (Number(qty) || 0) * (Number(price) || 0);
+
+      const handleSave = () => {
+        if (!name) return;
+        onSave({
+          id: editingItem?.id || `item_${Date.now()}`,
+          name, qty: Number(qty) || 0, price: Number(price) || 0, taxable, optional, descriptionOnly, description
+        });
+      };
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full fade-in max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">{editingItem ? 'Edit Item' : 'Add Item'}</h2>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><Icon name="X" size={20} /></button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="border border-gray-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="text-sm font-semibold text-gray-700 flex items-center gap-1"><Icon name="Package" size={14} className="text-purple-500" /> Item</span>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 text-xs text-gray-600">Description Only <Toggle enabled={descriptionOnly} onChange={setDescriptionOnly} /></label>
+                    <label className="flex items-center gap-2 text-xs text-gray-600">Optional <Toggle enabled={optional} onChange={setOptional} /></label>
+                  </div>
+                </div>
+                <FormSelect label="Product or Service" value={selectedProduct} onChange={e => handleProductSelect(e.target.value)}
+                  options={[{ value: '', label: 'Select a product or service...' }, ...catalog.map(c => ({ value: c.name, label: c.name }))]} />
+                <FormInput label="Name" required value={name} onChange={e => setName(e.target.value.slice(0, 75))} placeholder="Enter item name" />
+                <p className="text-xs text-gray-400 text-right">{name.length}/75</p>
+              </div>
+
+              {!descriptionOnly && (
+                <div className="border border-gray-200 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-gray-700 flex items-center gap-1"><Icon name="DollarSign" size={14} className="text-green-500" /> Pricing</span>
+                    <label className="flex items-center gap-2 text-xs text-gray-600">Taxable <Toggle enabled={taxable} onChange={setTaxable} /></label>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <FormInput label="Quantity" type="number" value={qty} onChange={e => setQty(e.target.value)} />
+                    <FormInput label="Price" type="number" value={price} onChange={e => setPrice(e.target.value)} />
+                    <div className="space-y-1">
+                      <label className="block text-sm font-medium text-gray-700">Tax Rate</label>
+                      <div className="px-4 py-2 border border-gray-200 bg-gray-50 rounded-lg text-gray-500">{companyTaxRate.toFixed(3)}%</div>
+                    </div>
+                  </div>
+                  <p className="text-right font-bold text-purple-700">${total.toFixed(2)}</p>
+                </div>
+              )}
+
+              <div className="border border-gray-200 rounded-xl p-4 space-y-2">
+                <span className="text-sm font-semibold text-gray-700 flex items-center gap-1"><Icon name="AlignLeft" size={14} className="text-purple-500" /> Description</span>
+                <textarea value={description} onChange={e => setDescription(e.target.value)} rows={4}
+                  className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500" placeholder="Add a description (optional)..." />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 p-4 border-t border-gray-200">
+              <button onClick={handleSave} disabled={!name} className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium disabled:opacity-50">Save</button>
+              <button onClick={onClose} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">Close</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ─── Add Multiple modal (module scope) ───
+    const AddMultipleModal = ({ catalog, onSave, onClose }) => {
+      const [search, setSearch] = useState('');
+      const [selections, setSelections] = useState({});
+
+      const filtered = catalog.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+
+      const toggleCheck = (name, defaultPrice) => {
+        setSelections(prev => {
+          if (prev[name]?.checked) {
+            const next = { ...prev };
+            delete next[name];
+            return next;
+          }
+          return { ...prev, [name]: { qty: 1, price: defaultPrice, optional: false, checked: true } };
+        });
+      };
+
+      const updateSelection = (name, field, value) => {
+        setSelections(prev => prev[name] ? { ...prev, [name]: { ...prev[name], [field]: value } } : prev);
+      };
+
+      const selectedCount = Object.keys(selections).length;
+
+      const handleSave = () => {
+        const items = Object.entries(selections).map(([name, sel]) => ({
+          id: `item_${Date.now()}_${name.replace(/\s+/g, '_')}`, name, qty: Number(sel.qty) || 1, price: Number(sel.price) || 0,
+          taxable: true, optional: sel.optional, descriptionOnly: false, description: ''
+        }));
+        onSave(items);
+      };
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full fade-in max-h-[90vh] overflow-y-auto flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Add Items</h2>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><Icon name="X" size={20} /></button>
+            </div>
+            <div className="p-4 border-b border-gray-200 flex items-center gap-3">
+              <div className="flex-1 relative">
+                <Icon name="Search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products..."
+                  className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500" />
+              </div>
+              <span className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold whitespace-nowrap">Selected {selectedCount}</span>
+            </div>
+            <div className="overflow-y-auto flex-1">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-white">
+                  <tr className="text-xs text-gray-400 uppercase border-b border-gray-200">
+                    <th className="text-left py-2 pl-4 w-8"></th>
+                    <th className="text-left py-2">Product/Service</th>
+                    <th className="text-right py-2 w-20">Qty</th>
+                    <th className="text-right py-2 w-24">Price</th>
+                    <th className="text-center py-2 pr-4 w-20">Optional</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map(p => {
+                    const sel = selections[p.name];
+                    return (
+                      <tr key={p.name} className="border-b border-gray-100 last:border-0">
+                        <td className="py-2 pl-4"><input type="checkbox" checked={!!sel?.checked} onChange={() => toggleCheck(p.name, p.price)} /></td>
+                        <td className="py-2 text-gray-800">{p.name}</td>
+                        <td className="py-2"><input type="number" disabled={!sel} value={sel?.qty ?? 1} onChange={e => updateSelection(p.name, 'qty', e.target.value)} className="w-16 border border-gray-300 rounded px-2 py-1 text-right disabled:bg-gray-50" /></td>
+                        <td className="py-2"><input type="number" disabled={!sel} value={sel?.price ?? p.price} onChange={e => updateSelection(p.name, 'price', e.target.value)} className="w-20 border border-gray-300 rounded px-2 py-1 text-right disabled:bg-gray-50" /></td>
+                        <td className="py-2 text-center"><input type="checkbox" disabled={!sel} checked={!!sel?.optional} onChange={e => updateSelection(p.name, 'optional', e.target.checked)} /></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex justify-end gap-3 p-4 border-t border-gray-200">
+              <button onClick={handleSave} disabled={selectedCount === 0} className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium disabled:opacity-50">Save</button>
+              <button onClick={onClose} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">Close</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ─── Required Deposit modal (module scope) ───
+    const RequiredDepositModal = ({ initialType, initialAmount, onSave, onClose }) => {
+      const [type, setType] = useState(initialType || 'Percent');
+      const [amount, setAmount] = useState(initialAmount ?? 0);
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full fade-in">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Required Deposit Amount</h2>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><Icon name="X" size={20} /></button>
+            </div>
+            <div className="p-4 grid grid-cols-2 gap-4">
+              <FormSelect label="Type" value={type} onChange={e => setType(e.target.value)}
+                options={[{ value: 'Percent', label: 'Percent' }, { value: 'Fixed Amount', label: 'Fixed Amount' }]} />
+              <FormInput label="Amount" type="number" value={amount} onChange={e => setAmount(e.target.value)} />
+            </div>
+            <div className="flex justify-end gap-3 p-4 border-t border-gray-200">
+              <button onClick={() => onSave(type, Number(amount) || 0)} className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium">Save</button>
+              <button onClick={onClose} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">Close</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ─── Send Proposal modal (module scope) ───
+    const SendProposalModalUI = ({ proposalNumber, customerName, companyName, phone, email, onSend, onClose }) => {
+      const [deliveryMethod, setDeliveryMethod] = useState('Both Email and Text');
+      const [textTo, setTextTo] = useState(phone || '');
+      const [textBody, setTextBody] = useState(`Please see the attached quote from ${companyName}.\n{view-quote-link}`);
+      const [emailTo, setEmailTo] = useState(email || '');
+      const [emailCc, setEmailCc] = useState('');
+      const [subject, setSubject] = useState(`${companyName} Proposal #${proposalNumber}`);
+      const [body, setBody] = useState(`Hi there,\n\nPlease see the attached quote for ${customerName} and click the button below to accept.\n\nFeel free to let us know if you have any questions!\n\nThanks for your business.\n{view-quote-button}`);
+      const [dripSequence, setDripSequence] = useState('Passive Proposal Follow Up');
+      const [sendOn, setSendOn] = useState('Now');
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full fade-in max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Send Proposal #{proposalNumber}</h2>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><Icon name="X" size={20} /></button>
+            </div>
+            <div className="p-4 space-y-4">
+              <FormSelect label="Choose proposal delivery method" value={deliveryMethod} onChange={e => setDeliveryMethod(e.target.value)}
+                options={[{ value: 'Both Email and Text', label: 'Both Email and Text' }, { value: 'Email Only', label: 'Email Only' }, { value: 'Text Only', label: 'Text Only' }]} />
+
+              {(deliveryMethod === 'Both Email and Text' || deliveryMethod === 'Text Only') && (
+                <div className="border border-gray-200 rounded-xl p-4 space-y-3">
+                  <span className="text-sm font-semibold text-gray-700 flex items-center gap-1"><Icon name="MessageCircle" size={14} className="text-green-500" /> Text Message</span>
+                  <FormInput label="To" value={textTo} onChange={e => setTextTo(formatPhone(e.target.value))} />
+                  <div className="space-y-1">
+                    <label className="block text-sm font-medium text-gray-700">Text Message Body</label>
+                    <textarea value={textBody} onChange={e => setTextBody(e.target.value)} rows={3} className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500" />
+                  </div>
+                </div>
+              )}
+
+              {(deliveryMethod === 'Both Email and Text' || deliveryMethod === 'Email Only') && (
+                <div className="border border-gray-200 rounded-xl p-4 space-y-3">
+                  <span className="text-sm font-semibold text-gray-700 flex items-center gap-1"><Icon name="Mail" size={14} className="text-purple-500" /> Email</span>
+                  <FormInput label="To" type="email" value={emailTo} onChange={e => setEmailTo(e.target.value)} />
+                  <FormInput label="Cc" value={emailCc} onChange={e => setEmailCc(e.target.value)} placeholder="Enter your email..." />
+                  <FormInput label="Subject" value={subject} onChange={e => setSubject(e.target.value)} />
+                  <div className="space-y-1">
+                    <label className="block text-sm font-medium text-gray-700">Email Body</label>
+                    <textarea value={body} onChange={e => setBody(e.target.value)} rows={6} className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500" />
+                  </div>
+                </div>
+              )}
+
+              <FormSelect label="Drip Sequence" value={dripSequence} onChange={e => setDripSequence(e.target.value)}
+                options={[{ value: 'Passive Proposal Follow Up', label: 'Passive Proposal Follow Up' }, { value: 'Aggressive Proposal Follow Up', label: 'Aggressive Proposal Follow Up' }, { value: 'None', label: 'None' }]} />
+              <p className="text-xs text-gray-500 -mt-2">Next Drip: Immediate Proposal sent</p>
+
+              <FormSelect label="Send On" value={sendOn} onChange={e => setSendOn(e.target.value)}
+                options={[{ value: 'Now', label: 'Now' }, { value: 'Schedule', label: 'Schedule for later' }]} />
+            </div>
+            <div className="flex justify-end gap-3 p-4 border-t border-gray-200">
+              <button onClick={() => onSend({ deliveryMethod, emailTo, textTo })} className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium">Send</button>
+              <button onClick={onClose} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">Close</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
     const Step7Proposal = ({ data, setData, onSentReal, onBack, onSkipToDashboard }) => {
-      const [phase, setPhase] = useState('choose'); // choose | contact | address | assignment | sending | sent | testPreview
+      // phase: choose | contact | address | assignment | lineItems | payments | display | financing | reviewSend | sendModal | sending | sent | testPreview
+      const [phase, setPhase] = useState('choose');
       const [mode, setMode] = useState('real'); // 'real' | 'test'
       const [errors, setErrors] = useState({});
 
@@ -1403,8 +1678,34 @@
       const teamMemberName = data.teamMember?.firstName ? `${data.teamMember.firstName} ${data.teamMember.lastName || ''}`.trim() : null;
       const [assignedTo, setAssignedTo] = useState(data.assignedTo || (data.teamMember?.added && teamMemberName ? teamMemberName : "Me (Account Owner)"));
 
+      // ── Proposal Builder state ──
+      const companyTaxRate = data.companyTaxRate ?? 9.1;
+      const [lineItems, setLineItems] = useState(data.lineItems || []);
+      const [showAddItemModal, setShowAddItemModal] = useState(false);
+      const [showAddMultipleModal, setShowAddMultipleModal] = useState(false);
+      const [editingItem, setEditingItem] = useState(null);
+
+      const [depositType, setDepositType] = useState(data.depositType || 'Percent');
+      const [depositAmount, setDepositAmount] = useState(data.depositAmount ?? 10);
+      const [depositSet, setDepositSet] = useState(!!data.depositSet);
+      const [showDepositModal, setShowDepositModal] = useState(false);
+      const [allowAlternativePayment, setAllowAlternativePayment] = useState(data.allowAlternativePayment !== false);
+
+      const [showQuantities, setShowQuantities] = useState(data.showQuantities !== false);
+      const [showSignatureLine, setShowSignatureLine] = useState(data.showSignatureLine !== false);
+
+      const [acornEnabled, setAcornEnabled] = useState(!!data.acornEnabled);
+
+      const proposalNumber = data.proposalNumber || 3064242;
+
       const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
       const assignOptions = ["Me (Account Owner)", ...(data.teamMember?.added && teamMemberName ? [teamMemberName] : [])];
+
+      // ── Line item totals (shared across Line Items, Payments, and Review phases) ──
+      const subtotal = lineItems.reduce((s, i) => s + (i.descriptionOnly ? 0 : i.qty * i.price), 0);
+      const taxTotal = lineItems.reduce((s, i) => s + (i.taxable && !i.descriptionOnly ? i.qty * i.price * (companyTaxRate / 100) : 0), 0);
+      const grandTotal = subtotal + taxTotal;
+      const depositComputedAmount = depositType === 'Percent' ? grandTotal * (depositAmount / 100) : depositAmount;
 
       const openModal = () => { setErrors({}); setPhase('contact'); };
 
@@ -1440,7 +1741,7 @@
       };
 
       const persistContactAndAddress = () => ({
-        ...data, dealCreated: true, proposalBuilt: true,
+        ...data, dealCreated: true,
         contactFirstName: firstName || (mode === 'test' ? "Test" : ""),
         contactLastName: lastName || (mode === 'test' ? "Contact" : ""),
         contactEmail: email, contactPhone: phone, leadSource: leadSource || (mode === 'test' ? "Referral" : ""),
@@ -1449,26 +1750,59 @@
         jobCity: city || (mode === 'test' ? "Atlanta" : ""),
         jobState: stateVal || (mode === 'test' ? "GA" : ""),
         jobZip: zip || (mode === 'test' ? "30301" : ""),
-        assignedTo
+        assignedTo, proposalNumber
       });
 
+      // "Start" moves from the New Proposal modal into the Proposal Builder (Line Items first).
       const handleStart = () => {
-        if (mode === 'real') {
-          setPhase('sending');
-          setTimeout(() => {
-            setData({ ...persistContactAndAddress(), proposalMode: 'real', realProposalSent: true, realProposalEmail: email, realProposalSentAt: Date.now() });
-            setPhase('sent');
-          }, 900);
-        } else {
-          setData({ ...persistContactAndAddress(), proposalMode: 'test', testProposalPreviewed: true, testProposalEmail: email || "preview@example.com" });
-          setPhase('testPreview');
-        }
+        setData(persistContactAndAddress());
+        setErrors({});
+        setPhase('lineItems');
       };
 
-      const handleConvertToReal = () => {
-        setMode('real');
+      const persistBuilderState = () => ({
+        proposalBuilt: true, lineItems, depositType, depositAmount, depositSet, allowAlternativePayment,
+        showQuantities, showSignatureLine, acornEnabled, proposalTotal: grandTotal
+      });
+
+      const handleSaveItem = (item) => {
+        setLineItems(prev => {
+          const exists = prev.some(i => i.id === item.id);
+          return exists ? prev.map(i => i.id === item.id ? item : i) : [...prev, item];
+        });
+        setShowAddItemModal(false);
+        setEditingItem(null);
+      };
+
+      const handleSaveMultiple = (items) => {
+        setLineItems(prev => [...prev, ...items]);
+        setShowAddMultipleModal(false);
+      };
+
+      const handleRemoveItem = (id) => setLineItems(prev => prev.filter(i => i.id !== id));
+
+      const handleSend = ({ emailTo }) => {
+        setPhase('sending');
+        setTimeout(() => {
+          if (mode === 'real') {
+            setData({ ...persistContactAndAddress(), ...persistBuilderState(), proposalMode: 'real', realProposalSent: true, realProposalEmail: emailTo || email, realProposalSentAt: Date.now() });
+            setPhase('sent');
+          } else {
+            setData({ ...persistContactAndAddress(), ...persistBuilderState(), proposalMode: 'test', testProposalPreviewed: true, testProposalEmail: emailTo || email || "preview@example.com" });
+            setPhase('testPreview');
+          }
+        }, 900);
+      };
+
+      const handleSendRealFromPreview = () => {
+        if (!isValidEmail(email)) { setErrors({ previewEmail: "Enter a valid email to send a Real proposal." }); return; }
         setErrors({});
-        setPhase('contact');
+        setMode('real');
+        setPhase('sending');
+        setTimeout(() => {
+          setData({ ...persistContactAndAddress(), ...persistBuilderState(), proposalMode: 'real', realProposalSent: true, realProposalEmail: email, realProposalSentAt: Date.now() });
+          setPhase('sent');
+        }, 900);
       };
 
       // ── Step 7 landing: Real / Test / Not ready ──
@@ -1516,9 +1850,9 @@
 
       // ── New Proposal modal: Contact Info → Job Address → Assignment ──
       const cardMeta = {
-        contact: { step: 1, label: "Contact Information", icon: "User", intro: "Enter your customer's contact info." },
-        address: { step: 2, label: "Job Address", icon: "MapPin", intro: "Now, let's enter the job location." },
-        assignment: { step: 3, label: "Assignment", icon: "UserCheck", intro: "Last, you can assign this to a Salesperson, if you added one previously, or move forward with you as the default. You can always change this later." }
+        contact: { intro: "Enter your customer's contact info." },
+        address: { intro: "Now, let's enter the job location." },
+        assignment: { intro: "Last, you can assign this to a Salesperson, if you added one previously, or move forward with you as the default. You can always change this later." }
       };
 
       if (phase === 'contact') {
@@ -1593,14 +1927,225 @@
         );
       }
 
+      // ── Proposal Builder: Line Items ──
+      if (phase === 'lineItems') {
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Add Your Line Items</h1>
+            <HelperTip>To add Line Items to your proposal, click <strong>Add Item</strong>, or click <strong>Add Multiple</strong> to add more than one at a time.</HelperTip>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <h3 className="font-semibold text-gray-900 text-lg">Line Items</h3>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowAddMultipleModal(true)} className="px-3 py-1.5 border border-purple-300 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-50">Add Multiple</button>
+                  <button onClick={() => { setEditingItem(null); setShowAddItemModal(true); }} className="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700">Add Item</button>
+                </div>
+              </div>
+
+              {lineItems.length === 0 ? (
+                <p className="text-gray-500 text-sm flex items-center gap-2 py-8 justify-center"><Icon name="Info" size={16} /> No line items yet — click Add Item or Add Multiple to get started.</p>
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-xs text-gray-400 uppercase border-b border-gray-200">
+                          <th className="text-left py-2">Product / Service</th>
+                          <th className="text-right py-2">Quantity</th>
+                          <th className="text-right py-2">Price</th>
+                          <th className="text-right py-2">Subtotal</th>
+                          <th className="text-right py-2">Tax</th>
+                          <th className="text-right py-2">Total</th>
+                          <th className="py-2 w-16"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {lineItems.map(item => {
+                          const lineSubtotal = item.descriptionOnly ? 0 : item.qty * item.price;
+                          const lineTax = item.taxable && !item.descriptionOnly ? lineSubtotal * (companyTaxRate / 100) : 0;
+                          return (
+                            <tr key={item.id} className="border-b border-gray-100 last:border-0 group">
+                              <td className="py-2 text-purple-600 font-medium cursor-pointer" onClick={() => { setEditingItem(item); setShowAddItemModal(true); }}>
+                                {item.name}{item.optional && <span className="ml-2 text-xs text-gray-400">(Optional)</span>}
+                              </td>
+                              <td className="py-2 text-right">{item.qty.toFixed(2)}</td>
+                              <td className="py-2 text-right">${item.price.toFixed(2)}</td>
+                              <td className="py-2 text-right">${lineSubtotal.toFixed(2)}</td>
+                              <td className="py-2 text-right">${lineTax.toFixed(2)}</td>
+                              <td className="py-2 text-right font-medium">${(lineSubtotal + lineTax).toFixed(2)}</td>
+                              <td className="py-2 text-right">
+                                <button onClick={() => handleRemoveItem(item.id)} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity" title="Remove"><Icon name="Trash2" size={14} /></button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        <tr className="font-bold">
+                          <td className="py-2" colSpan="3">Total</td>
+                          <td className="py-2 text-right">${subtotal.toFixed(2)}</td>
+                          <td className="py-2 text-right">${taxTotal.toFixed(2)}</td>
+                          <td className="py-2 text-right text-purple-700" colSpan="2">${grandTotal.toFixed(2)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-gray-200 space-y-2">
+                    <div className="flex justify-between text-sm text-gray-600"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-sm text-gray-600"><span>Tax</span><span>${taxTotal.toFixed(2)}</span></div>
+                    <div className="flex justify-between items-center bg-gray-800 text-white px-4 py-2 rounded-lg font-semibold"><span>Total</span><span>${grandTotal.toFixed(2)}</span></div>
+                    <div className="flex justify-end pt-2"><button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium">Apply Discount</button></div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-between pt-2">
+              <button onClick={() => setPhase('assignment')} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Back</button>
+              <button onClick={() => setPhase('payments')} disabled={lineItems.length === 0} className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-medium transition-colors">Next</button>
+            </div>
+
+            {showAddItemModal && (
+              <AddItemModal catalog={PRODUCT_CATALOG} companyTaxRate={companyTaxRate} editingItem={editingItem}
+                onSave={handleSaveItem} onClose={() => { setShowAddItemModal(false); setEditingItem(null); }} />
+            )}
+            {showAddMultipleModal && (
+              <AddMultipleModal catalog={PRODUCT_CATALOG} onSave={handleSaveMultiple} onClose={() => setShowAddMultipleModal(false)} />
+            )}
+          </div>
+        );
+      }
+
+      // ── Proposal Builder: Payments ──
+      if (phase === 'payments') {
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Settings: Payments</h1>
+            <HelperTip>If you'd like to establish a Deposit for this Proposal, you can do so by clicking <strong>Edit</strong>. Otherwise, click <strong>Next</strong> to skip.</HelperTip>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 space-y-4">
+              <h3 className="font-semibold text-gray-900">Payments</h3>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <p className="text-gray-700">
+                  <strong>Deposit</strong>{' '}
+                  {depositSet
+                    ? `${depositType === 'Percent' ? depositAmount.toFixed(2) + '%' : ''} ($${depositComputedAmount.toFixed(2)})`
+                    : 'Not Set'}
+                </p>
+                <button onClick={() => setShowDepositModal(true)} className="px-4 py-1.5 border border-purple-300 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-50 flex items-center gap-1"><Icon name="Pencil" size={14} /> Edit</button>
+              </div>
+              <div className="flex items-start gap-3 pt-3 border-t border-gray-100">
+                <Toggle enabled={allowAlternativePayment} onChange={setAllowAlternativePayment} />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Allow alternative payment</p>
+                  <p className="text-xs text-gray-500">Lets the customer pay the deposit in person, by check, or by other means.</p>
+                </div>
+              </div>
+              <div className="pt-3 border-t border-gray-100">
+                <p className="text-sm text-gray-700"><strong>Company Tax Rate</strong> {companyTaxRate.toFixed(3)}%</p>
+              </div>
+            </div>
+
+            <HelperTip>The allowed payment type defaults to "Allow alternative payment," and the Tax Rate is set to your Company Tax Rate. If you haven't set your Company Tax Rate yet, close this walkthrough and set it in Company Settings first, before sending a proposal.</HelperTip>
+
+            <div className="flex justify-between pt-2">
+              <button onClick={() => setPhase('lineItems')} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium">Back</button>
+              <button onClick={() => setPhase('display')} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">Next</button>
+            </div>
+
+            {showDepositModal && (
+              <RequiredDepositModal initialType={depositType} initialAmount={depositAmount}
+                onSave={(t, a) => { setDepositType(t); setDepositAmount(a); setDepositSet(true); setShowDepositModal(false); }}
+                onClose={() => setShowDepositModal(false)} />
+            )}
+          </div>
+        );
+      }
+
+      // ── Proposal Builder: Proposal Display ──
+      if (phase === 'display') {
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Proposal Display</h1>
+            <HelperTip>Choose how this proposal appears to your customer. You can always change these later.</HelperTip>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">Show Line Item Quantities</span>
+                <Toggle enabled={showQuantities} onChange={setShowQuantities} />
+              </div>
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                <span className="text-sm font-medium text-gray-700">Show Signature Line</span>
+                <Toggle enabled={showSignatureLine} onChange={setShowSignatureLine} />
+              </div>
+            </div>
+            <div className="flex justify-between pt-2">
+              <button onClick={() => setPhase('payments')} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium">Back</button>
+              <button onClick={() => setPhase('financing')} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">Next</button>
+            </div>
+          </div>
+        );
+      }
+
+      // ── Proposal Builder: Financing ──
+      if (phase === 'financing') {
+        return (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-bold text-gray-900">Financing</h1>
+            <HelperTip>If your proposal meets the amount threshold, you may enable Acorn Financing for your customer at this time. You can always update this later if you'd like to read more about this option before turning it on.</HelperTip>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-900">Display Acorn Finance Widget</span>
+                <Toggle enabled={acornEnabled} onChange={setAcornEnabled} />
+              </div>
+            </div>
+            <div className="flex justify-between pt-2">
+              <button onClick={() => setPhase('display')} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium">Back</button>
+              <button onClick={() => setPhase('reviewSend')} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">Next</button>
+            </div>
+          </div>
+        );
+      }
+
+      // ── Proposal Builder: Review & Send trigger ──
+      if (phase === 'reviewSend' || phase === 'sendModal') {
+        return (
+          <>
+            <div className="space-y-6">
+              <h1 className="text-3xl font-bold text-gray-900">Ready to Send</h1>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-3">
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Customer</span><span className="font-medium text-gray-900">{firstName} {lastName}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Job Address</span><span className="font-medium text-gray-900">{street}, {city}, {stateVal} {zip}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Line Items</span><span className="font-medium text-gray-900">{lineItems.length}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-gray-500">Total</span><span className="font-semibold text-purple-700">${grandTotal.toFixed(2)}</span></div>
+                {depositSet && <div className="flex justify-between text-sm"><span className="text-gray-500">Deposit</span><span className="font-medium text-gray-900">${depositComputedAmount.toFixed(2)}</span></div>}
+                {acornEnabled && <div className="flex justify-between text-sm"><span className="text-gray-500">Financing</span><span className="font-medium text-gray-900">Acorn Finance Widget Enabled</span></div>}
+              </div>
+              <div className="flex justify-between pt-2 items-center">
+                <button onClick={() => setPhase('financing')} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium">Back</button>
+                <button onClick={() => setPhase('sendModal')} className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold text-lg">Send Proposal</button>
+              </div>
+            </div>
+            {phase === 'sendModal' && (
+              <SendProposalModalUI
+                proposalNumber={proposalNumber}
+                customerName={`${firstName} ${lastName}`}
+                companyName={data.companyName || "Your Company"}
+                phone={phone}
+                email={email}
+                onSend={handleSend}
+                onClose={() => setPhase('reviewSend')}
+              />
+            )}
+          </>
+        );
+      }
+
       if (phase === 'sending') {
         return (
-          <ModalShell mode={mode} phase={phase} onClose={handleClose}>
-            <div className="flex flex-col items-center justify-center py-10">
-              <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mb-4" />
-              <p className="text-gray-600">Sending your proposal...</p>
-            </div>
-          </ModalShell>
+          <div className="flex flex-col items-center justify-center py-20 fade-in">
+            <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mb-4" />
+            <p className="text-gray-600">Sending your proposal...</p>
+          </div>
         );
       }
 
@@ -1626,7 +2171,7 @@
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-center">
                 <Icon name="Eye" size={28} className="text-purple-600 mx-auto mb-2" />
                 <p className="font-semibold text-gray-900">{dealName || `${lastName || 'Test'} Residence`}</p>
-                <p className="text-sm text-gray-500 mt-1">Preview only — nothing was delivered to a real recipient.</p>
+                <p className="text-sm text-gray-500 mt-1">Preview only — nothing was delivered to a real recipient. Total: ${grandTotal.toFixed(2)}</p>
               </div>
               <div className="flex items-start">
                 <HelperTip className="flex-1">Test proposals are excluded from your reports (for example, Total Proposals Sent).</HelperTip>
@@ -1636,8 +2181,10 @@
                 <p className="text-sm text-gray-600">Ready to send this to your customer for real?</p>
                 <BRChip id="BR10">Converting Test to Real (or starting a new Real proposal) tracks and reports normally, same as any Real proposal.</BRChip>
               </div>
+              <FormInput label="Recipient Email" required type="email" value={email} onChange={e => setEmail(e.target.value)}
+                placeholder="customer@example.com" error={errors.previewEmail} />
               <div className="flex flex-wrap gap-3">
-                <button onClick={handleConvertToReal} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Convert to Real &amp; Send</button>
+                <button onClick={handleSendRealFromPreview} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Convert to Real &amp; Send</button>
                 <button onClick={onSkipToDashboard} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Return to Dashboard</button>
               </div>
             </div>
@@ -1647,6 +2194,7 @@
 
       return null;
     };
+
 
 
     // ─── Awaiting Customer Action — shown after Real send, until Proposal Viewed fires (BR11, BR12, BR13) ───
@@ -1780,7 +2328,7 @@
 
     // Mock Dashboard
     const MockDashboard = ({ data, onNavigateToStep, awaitingView, onResumeAwaitingView }) => {
-      const lead = { firstName: "Test", lastName: "Contact" };
+      const lead = { firstName: data.contactFirstName || "Test", lastName: data.contactLastName || "Contact" };
       const [dismissed, setDismissed] = useState(false);
 
       const pipelineColumns = [
@@ -1925,7 +2473,7 @@
 
           <div className="px-4 sm:px-6">
             <h1 className="text-2xl font-bold text-gray-900">Sales Pipeline</h1>
-            <div className="flex items-center gap-4 text-sm text-gray-600 mt-1"><span>Total Deals: <strong>1</strong></span><span>Total Value: <strong>${data.realProposalSent ? '6,800.00' : '0.00'}</strong></span></div>
+            <div className="flex items-center gap-4 text-sm text-gray-600 mt-1"><span>Total Deals: <strong>1</strong></span><span>Total Value: <strong>${(data.proposalTotal || 0).toFixed(2)}</strong></span></div>
           </div>
           <div className="px-4 sm:px-6 py-3 bg-white border-y border-gray-200">
             <div className="flex flex-wrap items-center gap-2">
@@ -1950,7 +2498,7 @@
                         </div>
                         <p className="text-xs text-gray-500 mb-2">Website</p>
                         {(col.name !== 'Warm Leads') && (
-                          <div className="text-right mb-2"><span className="text-lg font-bold text-gray-900">${data.realProposalSent ? '6,800.00' : '0.00'}</span></div>
+                          <div className="text-right mb-2"><span className="text-lg font-bold text-gray-900">${(data.proposalTotal || 0).toFixed(2)}</span></div>
                         )}
                         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                           <span className="text-xs text-gray-500">You</span>
