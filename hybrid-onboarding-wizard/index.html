@@ -1348,369 +1348,301 @@
       );
     };
 
-    // Step 7: Create & Send Proposal
-    // ─── Create Deal (BR2: sequence step between Team and Create Proposal) ───
-    const CreateDealScreen = ({ data, setData, onNext, onBack }) => {
-      const [customerName, setCustomerName] = useState(data.dealCustomerName || "Test Contact");
-      const [address, setAddress] = useState(data.dealAddress || "123 Test Street, Atlanta, GA 30301");
-      const [stage, setStage] = useState(data.dealStage || "Estimate Scheduled");
-      const [value, setValue] = useState(data.dealValue || "6,800");
+    // Step 7: Create Your First Proposal (BR2, BR7, BR8, BR9, BR10 — Create Deal, Create Proposal, and Send Proposal
+    // are consolidated into one guided step. "Create Deal" is fulfilled inline as creating the Lead/Contact for the deal.)
+    const LEAD_SOURCE_OPTIONS = ["Referral", "Google", "Facebook", "Instagram", "Website", "Door Hanger", "Yard Sign", "Other"];
 
-      const stageOptions = ["Cold Leads", "Warm Leads", "Hot Leads", "Estimate Requested", "Estimate Scheduled"];
-
-      const handleCreate = () => {
-        setData({ ...data, dealCreated: true, dealCustomerName: customerName, dealAddress: address, dealStage: stage, dealValue: value });
-        onNext();
-      };
-
-      return (
-        <div className="space-y-6">
-          <div className="flex items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Create a Deal</h1>
-            <BRChip id="BR2">Sequence: Company Info → Brand → Create Deal → Create Proposal → Send Proposal.</BRChip>
-          </div>
-          <HelperTip>A Deal represents a customer opportunity in your Pipeline. You'll attach your first proposal to this deal next.</HelperTip>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-            <FormInput label="Customer Name" required value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="e.g. Jane Smith" />
-            <FormInput label="Property Address" required value={address} onChange={e => setAddress(e.target.value)} placeholder="Street, City, State, Zip" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormSelect label="Pipeline Stage" required value={stage} onChange={e => setStage(e.target.value)}
-                options={stageOptions.map(s => ({ value: s, label: s }))} />
-              <FormInput label="Estimated Deal Value" required value={value} onChange={e => setValue(e.target.value)} placeholder="0.00" />
-            </div>
-          </div>
-
-          <div className="flex justify-between pt-4">
-            <button onClick={onBack} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Back</button>
-            <div className="flex items-center gap-3">
-              <button onClick={onNext} className="text-gray-500 hover:text-gray-700 underline text-sm">Skip</button>
-              <button onClick={handleCreate} disabled={!customerName || !address} className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-medium transition-colors">Create Deal &amp; Continue</button>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    const Step7Proposal = ({ data, setData, onNext, onBack, onSkipToDashboard }) => {
-      const [selectedOption, setSelectedOption] = useState(1);
-      const [showProposal, setShowProposal] = useState(false);
-      const [lineItems, setLineItems] = useState([]);
-      const [showAddItemModal, setShowAddItemModal] = useState(false);
-      const [selectedProduct, setSelectedProduct] = useState('');
-      const [editingItemIndex, setEditingItemIndex] = useState(null);
-
-      const products = data.products || [
-        { name: "Exterior Paint", price: 3500, checked: true },
-        { name: "Interior Paint", price: 2500, checked: true },
-        { name: "Trim Work", price: 800, checked: true }
-      ];
-      const checkedProducts = products.filter(p => p.checked);
-      const allProducts = [...checkedProducts, { name: "General Prep", price: 500, checked: true }, { name: "Interior Painting - Ceiling", price: 1200, checked: true }, { name: "Interior Painting - Doors", price: 800, checked: true }];
-      // Auto-populate test contact for practice proposal
-      const lead = { firstName: "Test", lastName: "Contact", phone: "(555) 000-1234", streetAddress: "123 Test Street", city: "Atlanta", state: "GA", zipCode: "30301", email: "test@dripjobs.com" };
-      const leadName = `${lead.firstName} ${lead.lastName}`;
-      const proposalNumber = 1042857;
-
-      const handleContinueToSend = () => {
-        setData({ ...data, lineItems, proposalBuilt: true, leadName, leadEmail: lead.email, proposalNumber });
-        onNext();
-      };
-
-      const handleAddLineItem = () => {
-        if (selectedProduct) {
-          const product = allProducts.find(p => p.name === selectedProduct);
-          if (product) {
-            if (editingItemIndex !== null) {
-              const updated = [...lineItems];
-              updated[editingItemIndex] = product;
-              setLineItems(updated);
-            } else {
-              setLineItems([...lineItems, product]);
-            }
-          }
-        }
-        setEditingItemIndex(null);
-        setShowAddItemModal(false);
-      };
-
-      const handleEditItem = (idx) => {
-        setEditingItemIndex(idx);
-        setSelectedProduct(lineItems[idx].name);
-        setShowAddItemModal(true);
-      };
-
-      const handleRemoveItem = (idx) => {
-        setLineItems(lineItems.filter((_, i) => i !== idx));
-      };
-
-      const lineItemsTotal = lineItems.reduce((sum, item) => sum + (item.descriptionOnly ? 0 : item.price), 0);
-
-      return (
-        <div className="space-y-6">
-          <div><h1 className="text-3xl font-bold text-gray-900">Create Your First Proposal</h1></div>
-
-          {!showProposal && (
-            <>
-              <HelperTip>Final step! Choose an option to create your first proposal. We recommend a <strong>test proposal</strong> to explore how everything works.</HelperTip>
-              <div className="space-y-4">
-                {[
-                  { id: 1, icon: "FlaskConical", title: "Practice with a test proposal", desc: "Create a test proposal using a sample contact (Test Contact)" },
-                  { id: 2, icon: "FastForward", title: "I'm not ready for this step yet", desc: "Skip to dashboard and explore on your own" }
-                ].map(option => (
-                  <div key={option.id} onClick={() => setSelectedOption(option.id)}
-                    className={`bg-white rounded-xl shadow-sm border-2 p-5 cursor-pointer transition-all ${selectedOption === option.id ? 'border-purple-500' : 'border-gray-200 hover:border-gray-300'}`}>
-                    <div className="flex items-start gap-4">
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-1 ${selectedOption === option.id ? 'border-purple-600' : 'border-gray-300'}`}>
-                        {selectedOption === option.id && <div className="w-3 h-3 rounded-full bg-purple-600" />}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-1"><Icon name={option.icon} size={20} className="text-purple-600" /><h3 className="font-semibold text-gray-900">{option.title}</h3></div>
-                        <p className="text-gray-600 text-sm">{option.desc}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <div className="flex justify-between pt-4">
-                  <button onClick={onBack} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Back</button>
-                  {selectedOption === 2 ? (
-                    <button onClick={onSkipToDashboard} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Continue to Dashboard</button>
-                  ) : (
-                    <button onClick={() => setShowProposal(true)} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Continue</button>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-
-          {showProposal && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 fade-in">
-              {/* Proposal Header */}
-              <div className="p-4 border-b border-gray-200">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center"><Icon name="User" size={16} className="text-purple-600" /></div>
-                    <div>
-                      <h3 className="font-semibold text-purple-600">{leadName}</h3>
-                      <p className="text-sm text-gray-500 flex items-center gap-1"><Icon name="MapPin" size={12} /> {lead.streetAddress}, {lead.city}, {lead.state} {lead.zipCode}</p>
-                      <p className="text-sm text-gray-500 flex items-center gap-1"><Icon name="Phone" size={12} /> {lead.phone}</p>
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <h2 className="text-xl font-semibold text-gray-900">Proposal #{proposalNumber}</h2>
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium mt-1"><Icon name="Clock" size={14} /> PENDING</span>
-                  </div>
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <p><span className="text-gray-400">Created:</span> {new Date().toLocaleDateString()}</p>
-                    <p><span className="text-gray-400">Exp. Date:</span> <span className="text-purple-600">Not Set</span></p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Line Items */}
-              <div className="p-4 border-b border-gray-200 relative">
-                <div className="flex items-start justify-between mb-3"><h4 className="font-semibold text-gray-900">Line Items</h4></div>
-                <div className="hidden lg:block absolute -right-4 top-2 z-10 helper-tooltip bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-amber-300 rounded-xl p-4 max-w-[260px] shadow-lg">
-                  <p className="text-sm text-amber-900 flex items-start gap-2 font-medium">
-                    <span className="flex-shrink-0 mt-0.5 lightbulb-glow"><Icon name="Lightbulb" size={18} className="text-yellow-500 fill-yellow-300" /></span>
-                    Build your first proposal using Line Items. Later you can experiment with areas & packages.
-                  </p>
-                </div>
-                <div className="lg:hidden mb-3 bg-gradient-to-br from-amber-50 to-yellow-100 border-2 border-amber-300 rounded-xl p-3">
-                  <p className="text-sm text-amber-900 flex items-start gap-2 font-medium">
-                    <span className="flex-shrink-0 mt-0.5 lightbulb-glow"><Icon name="Lightbulb" size={18} className="text-yellow-500 fill-yellow-300" /></span>
-                    Build your first proposal using Line Items.
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4 mb-3">
-                  {lineItems.length === 0 ? (
-                    <p className="text-gray-500 text-sm flex items-center gap-2"><Icon name="Info" size={16} /> Start by adding Line Items here...</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {lineItems.map((item, idx) => (
-                        <div key={idx} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-0 group">
-                          <span className="text-gray-700">{item.name}</span>
-                          <div className="flex items-center gap-3">
-                            <span className="font-medium text-gray-900">${item.price.toLocaleString()}</span>
-                            <button onClick={() => handleEditItem(idx)} className="text-purple-600 hover:text-purple-800 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity" title="Edit"><Icon name="Pencil" size={14} /></button>
-                            <button onClick={() => handleRemoveItem(idx)} className="text-red-500 hover:text-red-700 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity" title="Remove"><Icon name="Trash2" size={14} /></button>
-                          </div>
-                        </div>
-                      ))}
-                      <div className="flex justify-between items-center pt-2 font-bold">
-                        <span className="text-gray-900">Total</span>
-                        <span className="text-purple-600">${lineItemsTotal.toLocaleString()}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <button onClick={() => { setEditingItemIndex(null); setSelectedProduct(''); setShowAddItemModal(true); }} className="px-3 py-1.5 border border-purple-500 text-purple-600 rounded-lg text-sm font-medium hover:bg-purple-50">Add Item</button>
-              </div>
-
-              {/* Add Item Modal */}
-              {showAddItemModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                  <div className="bg-white rounded-xl shadow-xl max-w-lg w-full fade-in max-h-[90vh] overflow-y-auto">
-                    <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                      <h2 className="text-lg font-semibold text-gray-900">{editingItemIndex !== null ? 'Edit Item' : 'Add Item'}</h2>
-                      <button onClick={() => setShowAddItemModal(false)} className="text-gray-400 hover:text-gray-600"><Icon name="X" size={20} /></button>
-                    </div>
-                    <div className="p-4 space-y-4">
-                      <div className="bg-purple-50 rounded-lg p-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Product or Service</label>
-                        <select value={selectedProduct} onChange={e => setSelectedProduct(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                          <option value="">Select a product or service...</option>
-                          {allProducts.map((p, idx) => <option key={idx} value={p.name}>{p.name}</option>)}
-                        </select>
-                        {selectedProduct && (
-                          <div className="bg-white border border-purple-200 rounded-lg p-2 mt-2 flex justify-between items-center">
-                            <span className="text-purple-600 font-medium">{selectedProduct}</span>
-                            <span className="font-bold text-gray-900">${allProducts.find(p => p.name === selectedProduct)?.price.toLocaleString() || '0'}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="bg-purple-100 rounded-lg p-4 text-center">
-                        <p className="text-sm text-purple-600 mb-1">Total</p>
-                        <p className="text-2xl font-bold text-purple-700">${selectedProduct ? (allProducts.find(p => p.name === selectedProduct)?.price || 0).toLocaleString() : '0.00'}</p>
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-3 p-4 border-t border-gray-200">
-                      <button onClick={handleAddLineItem} disabled={!selectedProduct} className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium disabled:opacity-50">Save</button>
-                      <button onClick={() => setShowAddItemModal(false)} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">Close</button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Footer Actions */}
-              <div className="p-4 border-t border-gray-200 bg-gray-50">
-                <div className="flex flex-wrap gap-2">
-                  <button onClick={handleContinueToSend} disabled={lineItems.length === 0}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">Continue to Send Proposal</button>
-                  <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100">View/ Edit T&C's</button>
-                  <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100">Duplicate</button>
-                </div>
-                {lineItems.length === 0 && (
-                  <p className="text-sm text-amber-600 mt-3 flex items-center gap-1"><Icon name="AlertCircle" size={14} /> Add at least one line item to continue</p>
-                )}
-              </div>
-
-              <div className="p-4 border-t border-gray-200 flex justify-between">
-                <button onClick={() => setShowProposal(false)} className="text-gray-500 hover:text-gray-700 underline text-sm">Back to Options</button>
-                <button onClick={onSkipToDashboard} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Skip Proposal</button>
-              </div>
-            </div>
-          )}
-
-        </div>
-      );
-    };
-
-    // ─── Send Proposal — Real vs Test path (BR7, BR8, BR9, BR10) ───
-    const SendProposalScreen = ({ data, setData, onSentReal, onBack, onSkip }) => {
+    const Step7Proposal = ({ data, setData, onSentReal, onBack, onSkipToDashboard }) => {
+      const [phase, setPhase] = useState('choose'); // choose | contact | address | assignment | sending | sent | testPreview
       const [mode, setMode] = useState('real'); // 'real' | 'test'
-      const [realEmail, setRealEmail] = useState(data.leadEmail || "");
-      const [testEmail, setTestEmail] = useState("preview@example.com");
-      const [emailError, setEmailError] = useState("");
-      const [sending, setSending] = useState(false);
-      const [testPreviewed, setTestPreviewed] = useState(false);
+      const [errors, setErrors] = useState({});
+
+      const [firstName, setFirstName] = useState(data.contactFirstName || "");
+      const [lastName, setLastName] = useState(data.contactLastName || "");
+      const [email, setEmail] = useState(data.contactEmail || "");
+      const [phone, setPhone] = useState(data.contactPhone || "");
+      const [leadSource, setLeadSource] = useState(data.leadSource || "");
+      const [dealName, setDealName] = useState(data.dealName || "");
+
+      const [street, setStreet] = useState(data.jobStreet || "");
+      const [city, setCity] = useState(data.jobCity || "");
+      const [stateVal, setStateVal] = useState(data.jobState || "");
+      const [zip, setZip] = useState(data.jobZip || "");
+
+      const teamMemberName = data.teamMember?.firstName ? `${data.teamMember.firstName} ${data.teamMember.lastName || ''}`.trim() : null;
+      const [assignedTo, setAssignedTo] = useState(data.assignedTo || (data.teamMember?.added && teamMemberName ? teamMemberName : "Me (Account Owner)"));
 
       const isValidEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      const assignOptions = ["Me (Account Owner)", ...(data.teamMember?.added && teamMemberName ? [teamMemberName] : [])];
 
-      const handleSendReal = () => {
-        if (!isValidEmail(realEmail)) { setEmailError("Enter a valid email address to send a Real proposal."); return; }
-        setEmailError("");
-        setSending(true);
-        setTimeout(() => {
-          setSending(false);
-          setData({ ...data, proposalMode: 'real', realProposalSent: true, realProposalEmail: realEmail, realProposalSentAt: Date.now() });
-          onSentReal();
-        }, 900);
+      const openModal = () => { setErrors({}); setPhase('contact'); };
+
+      const handleContactNext = () => {
+        if (mode === 'real') {
+          const newErrors = {};
+          if (!firstName) newErrors.firstName = "First name is required.";
+          if (!lastName) newErrors.lastName = "Last name is required.";
+          if (!isValidEmail(email)) newErrors.email = "Enter a valid email to send a Real proposal.";
+          if (!leadSource) newErrors.leadSource = "Lead source is required.";
+          if (Object.keys(newErrors).length) { setErrors(newErrors); return; }
+        }
+        setErrors({});
+        setPhase('address');
       };
 
-      const handlePreviewTest = () => {
-        setData({ ...data, proposalMode: 'test', testProposalPreviewed: true, testProposalEmail: testEmail });
-        setTestPreviewed(true);
+      const handleAddressNext = () => {
+        if (mode === 'real') {
+          const newErrors = {};
+          if (!street) newErrors.street = "Street is required.";
+          if (!city) newErrors.city = "City is required.";
+          if (!stateVal) newErrors.state = "State is required.";
+          if (!zip) newErrors.zip = "Postal code is required.";
+          if (Object.keys(newErrors).length) { setErrors(newErrors); return; }
+        }
+        setErrors({});
+        setPhase('assignment');
+      };
+
+      const handleClose = () => {
+        setErrors({});
+        setPhase('choose');
+      };
+
+      const persistContactAndAddress = () => ({
+        ...data, dealCreated: true, proposalBuilt: true,
+        contactFirstName: firstName || (mode === 'test' ? "Test" : ""),
+        contactLastName: lastName || (mode === 'test' ? "Contact" : ""),
+        contactEmail: email, contactPhone: phone, leadSource: leadSource || (mode === 'test' ? "Referral" : ""),
+        dealName: dealName || `${lastName || 'Test'} Residence`,
+        jobStreet: street || (mode === 'test' ? "123 Test Street" : ""),
+        jobCity: city || (mode === 'test' ? "Atlanta" : ""),
+        jobState: stateVal || (mode === 'test' ? "GA" : ""),
+        jobZip: zip || (mode === 'test' ? "30301" : ""),
+        assignedTo
+      });
+
+      const handleStart = () => {
+        if (mode === 'real') {
+          setPhase('sending');
+          setTimeout(() => {
+            setData({ ...persistContactAndAddress(), proposalMode: 'real', realProposalSent: true, realProposalEmail: email, realProposalSentAt: Date.now() });
+            setPhase('sent');
+          }, 900);
+        } else {
+          setData({ ...persistContactAndAddress(), proposalMode: 'test', testProposalPreviewed: true, testProposalEmail: email || "preview@example.com" });
+          setPhase('testPreview');
+        }
       };
 
       const handleConvertToReal = () => {
         setMode('real');
-        setTestPreviewed(false);
-        setRealEmail(data.leadEmail && isValidEmail(data.leadEmail) ? data.leadEmail : "");
+        setErrors({});
+        setPhase('contact');
       };
 
-      return (
-        <div className="space-y-6">
-          <div className="flex items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Send Proposal</h1>
-            <BRChip id="BR7">User selects Real (requires validated email, counts toward completion) or Test (placeholder ok, preview-only).</BRChip>
-          </div>
+      // ── Step 7 landing: Real / Test / Not ready ──
+      if (phase === 'choose') {
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center">
+              <h1 className="text-3xl font-bold text-gray-900">Create Your First Proposal</h1>
+              <BRChip id="BR2">"Create Deal" is fulfilled here as creating the Lead/Contact for the deal, inline in this step.</BRChip>
+            </div>
+            <HelperTip>Choose how you'd like to send your first proposal. We recommend a <strong>test proposal</strong> to see how everything works before sending to a real customer.</HelperTip>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-5">
-            <div className="flex gap-2 p-1 bg-gray-100 rounded-lg w-fit">
-              <button onClick={() => { setMode('real'); setTestPreviewed(false); }}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${mode === 'real' ? 'bg-white shadow text-purple-700' : 'text-gray-500 hover:text-gray-700'}`}>
-                <Icon name="Mail" size={14} className="inline mr-1" /> Real Proposal
-              </button>
-              <button onClick={() => { setMode('test'); setEmailError(""); }}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${mode === 'test' ? 'bg-white shadow text-purple-700' : 'text-gray-500 hover:text-gray-700'}`}>
-                <Icon name="FlaskConical" size={14} className="inline mr-1" /> Test Proposal
-              </button>
+            <div className="space-y-4">
+              {[
+                { id: 'real', icon: "Mail", title: "Real Proposal", desc: "This sends the real proposal to your customer via email and/or SMS through your normal send flow and will be tracked in your reports." },
+                { id: 'test', icon: "FlaskConical", title: "Test Proposal", desc: "This proposal will not actually be sent to the recipient. It's for preview purposes only. Test proposals are excluded from your reports (for example, Total Proposals Sent)." },
+                { id: 'skip', icon: "FastForward", title: "I'm not ready for this step yet", desc: "Skip to dashboard and explore on your own." }
+              ].map(option => (
+                <div key={option.id} onClick={() => setMode(option.id)}
+                  className={`bg-white rounded-xl shadow-sm border-2 p-5 cursor-pointer transition-all ${mode === option.id ? 'border-purple-500' : 'border-gray-200 hover:border-gray-300'}`}>
+                  <div className="flex items-start gap-4">
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-1 ${mode === option.id ? 'border-purple-600' : 'border-gray-300'}`}>
+                      {mode === option.id && <div className="w-3 h-3 rounded-full bg-purple-600" />}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1"><Icon name={option.icon} size={20} className="text-purple-600" /><h3 className="font-semibold text-gray-900">{option.title}</h3></div>
+                      <p className="text-gray-600 text-sm">{option.desc}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {mode === 'real' && (
-              <div className="space-y-4 fade-in">
-                <p className="text-sm text-gray-600">This sends the real proposal to your customer via email and SMS through your normal send flow. Your walkthrough completes once your customer views it.</p>
-                <FormInput label="Recipient Email" required type="email" value={realEmail} onChange={e => { setRealEmail(e.target.value); setEmailError(""); }}
-                  placeholder="customer@example.com" error={emailError} />
-                <button onClick={handleSendReal} disabled={sending}
-                  className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-                  {sending ? "Sending..." : "Send Real Proposal"}
-                </button>
-              </div>
-            )}
-
-            {mode === 'test' && !testPreviewed && (
-              <div className="space-y-4 fade-in">
-                <div className="flex items-start">
-                  <HelperTip className="flex-1">This proposal will not actually be sent to the recipient. It's for preview purposes only.</HelperTip>
-                  <BRChip id="BR8">Selecting Test Proposal must display helper text that it won't be sent and is preview-only.</BRChip>
-                </div>
-                <div className="flex items-start">
-                  <HelperTip className="flex-1">Test proposals are excluded from your reports (for example, Total Proposals Sent).</HelperTip>
-                  <BRChip id="BR9">Test proposals excluded from standard reporting metrics; user must be told.</BRChip>
-                </div>
-                <FormInput label="Placeholder Email (not sent)" value={testEmail} onChange={e => setTestEmail(e.target.value)} placeholder="preview@example.com" />
-                <button onClick={handlePreviewTest} className="bg-white border-2 border-purple-500 text-purple-700 hover:bg-purple-50 px-6 py-3 rounded-lg font-medium transition-colors">Preview Test Proposal</button>
-              </div>
-            )}
-
-            {mode === 'test' && testPreviewed && (
-              <div className="space-y-4 fade-in">
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-center">
-                  <Icon name="Eye" size={28} className="text-purple-600 mx-auto mb-2" />
-                  <p className="font-semibold text-gray-900">Test Proposal Preview</p>
-                  <p className="text-sm text-gray-500 mt-1">Sent to placeholder address only — nothing was delivered to a real recipient.</p>
-                </div>
-                <div className="flex items-center">
-                  <p className="text-sm text-gray-600">Ready to send this to your customer for real?</p>
-                  <BRChip id="BR10">Converting Test to Real (or starting a new Real proposal) tracks and reports normally, same as any Real proposal.</BRChip>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <button onClick={handleConvertToReal} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Convert to Real &amp; Send</button>
-                  <button onClick={onSkip} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Return to Dashboard</button>
-                </div>
-              </div>
-            )}
+            <div className="flex justify-between pt-4">
+              <button onClick={onBack} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Back</button>
+              {mode === 'skip' ? (
+                <button onClick={onSkipToDashboard} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Continue to Dashboard</button>
+              ) : (
+                <button onClick={openModal} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Continue</button>
+              )}
+            </div>
           </div>
+        );
+      }
 
-          <div className="flex justify-between pt-2">
-            <button onClick={onBack} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Back</button>
-            <button onClick={onSkip} className="text-gray-500 hover:text-gray-700 underline text-sm">Skip</button>
+      // ── New Proposal modal: Contact Info → Job Address → Assignment ──
+      const cardMeta = {
+        contact: { step: 1, label: "Contact Information", icon: "User", intro: "Enter your customer's contact info." },
+        address: { step: 2, label: "Job Address", icon: "MapPin", intro: "Now, let's enter the job location." },
+        assignment: { step: 3, label: "Assignment", icon: "UserCheck", intro: "Last, you can assign this to a Salesperson, if you added one previously, or move forward with you as the default. You can always change this later." }
+      };
+
+      const ModalShell = ({ children, showFooterBack, onFooterBack }) => (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full fade-in max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">New Proposal {mode === 'test' && <span className="ml-1 text-xs font-medium px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full align-middle">TEST</span>}</h2>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  {['contact', 'address', 'assignment'].map((key, i) => (
+                    <span key={key} className={`h-1.5 rounded-full transition-all ${phase === key ? 'w-6 bg-purple-600' : 'w-1.5 bg-gray-200'}`} />
+                  ))}
+                </div>
+              </div>
+              <button onClick={handleClose} className="text-gray-400 hover:text-gray-600" title="Close"><Icon name="X" size={20} /></button>
+            </div>
+            <div className="p-4 space-y-4">
+              {children}
+            </div>
+            {showFooterBack && (
+              <div className="px-4 pb-4">
+                <button onClick={onFooterBack} className="text-gray-500 hover:text-gray-700 underline text-sm">Back</button>
+              </div>
+            )}
           </div>
         </div>
       );
+
+      if (phase === 'contact') {
+        return (
+          <ModalShell>
+            <div className="flex items-center gap-2 text-green-700 font-semibold text-sm uppercase tracking-wide">
+              <Icon name="User" size={16} /> Contact Information
+            </div>
+            <p className="text-sm text-gray-600">{cardMeta.contact.intro}</p>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">Contact</label>
+              <select disabled className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"><option>New Contact</option></select>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormInput label="First Name" required={mode === 'real'} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Enter a first name" error={errors.firstName} />
+              <FormInput label="Last Name" required={mode === 'real'} value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Enter a last name" error={errors.lastName} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormInput label="E-mail" required={mode === 'real'} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Enter an email" error={errors.email} />
+              <FormInput label="Phone" value={phone} onChange={e => setPhone(formatPhone(e.target.value))} placeholder="Enter a phone number" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormSelect label="Lead Source" required={mode === 'real'} value={leadSource} onChange={e => setLeadSource(e.target.value)}
+                options={[{ value: '', label: 'Select a lead source...' }, ...LEAD_SOURCE_OPTIONS.map(s => ({ value: s, label: s }))]} error={errors.leadSource} />
+              <FormInput label="Deal Name" value={dealName} onChange={e => setDealName(e.target.value)} placeholder="Give this job a unique name..." />
+            </div>
+            {mode === 'test' && <p className="text-xs text-gray-400 flex items-center gap-1"><Icon name="Info" size={12} /> Test Proposal — none of these fields are required or validated.</p>}
+            <div className="flex justify-end pt-2">
+              <button onClick={handleContactNext} className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium">Next</button>
+            </div>
+          </ModalShell>
+        );
+      }
+
+      if (phase === 'address') {
+        return (
+          <ModalShell showFooterBack onFooterBack={() => setPhase('contact')}>
+            <div className="flex items-center gap-2 text-orange-600 font-semibold text-sm uppercase tracking-wide">
+              <Icon name="MapPin" size={16} /> Job Address
+            </div>
+            <p className="text-sm text-gray-600">{cardMeta.address.intro}</p>
+            <FormInput label="Street" required={mode === 'real'} value={street} onChange={e => setStreet(e.target.value)} placeholder="Enter street" error={errors.street} />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <FormInput label="City" required={mode === 'real'} value={city} onChange={e => setCity(e.target.value)} placeholder="Enter city" error={errors.city} />
+              <FormInput label="State" required={mode === 'real'} value={stateVal} onChange={e => setStateVal(e.target.value)} placeholder="Enter state" error={errors.state} />
+              <FormInput label="Postal Code" required={mode === 'real'} value={zip} onChange={e => setZip(e.target.value)} placeholder="Enter postal code" error={errors.zip} />
+            </div>
+            {mode === 'test' && <p className="text-xs text-gray-400 flex items-center gap-1"><Icon name="Info" size={12} /> Test Proposal — address is optional and not validated.</p>}
+            <div className="flex justify-end pt-2">
+              <button onClick={handleAddressNext} className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium">Next</button>
+            </div>
+          </ModalShell>
+        );
+      }
+
+      if (phase === 'assignment') {
+        return (
+          <ModalShell showFooterBack onFooterBack={() => setPhase('address')}>
+            <div className="flex items-center gap-2 text-indigo-600 font-semibold text-sm uppercase tracking-wide">
+              <Icon name="UserCheck" size={16} /> Assignment
+            </div>
+            <p className="text-sm text-gray-600">{cardMeta.assignment.intro}</p>
+            <FormSelect label="Assign To" value={assignedTo} onChange={e => setAssignedTo(e.target.value)}
+              options={assignOptions.map(a => ({ value: a, label: a }))} />
+            {mode === 'real' && <p className="text-xs text-gray-500 flex items-center gap-1"><Icon name="Mail" size={12} /> This will send a Real proposal to {email}.</p>}
+            {mode === 'test' && <p className="text-xs text-amber-600 flex items-center gap-1"><Icon name="FlaskConical" size={12} /> This is a Test Proposal — nothing will be sent, and it won't appear in your reports.</p>}
+            <div className="flex justify-end gap-3 pt-2">
+              <button onClick={handleClose} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50">Close</button>
+              <button onClick={handleStart} className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium">Start</button>
+            </div>
+          </ModalShell>
+        );
+      }
+
+      if (phase === 'sending') {
+        return (
+          <ModalShell>
+            <div className="flex flex-col items-center justify-center py-10">
+              <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mb-4" />
+              <p className="text-gray-600">Sending your proposal...</p>
+            </div>
+          </ModalShell>
+        );
+      }
+
+      if (phase === 'sent') {
+        return (
+          <div className="flex flex-col items-center justify-center py-20 fade-in">
+            <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mb-6 checkmark-animate"><Icon name="Check" size={40} className="text-white" /></div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Proposal Sent!</h2>
+            <p className="text-gray-600 mb-6">Your Real proposal was sent to {email}.</p>
+            <button onClick={onSentReal} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Continue</button>
+          </div>
+        );
+      }
+
+      if (phase === 'testPreview') {
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center">
+              <h1 className="text-3xl font-bold text-gray-900">Test Proposal Preview</h1>
+              <BRChip id="BR8">Test Proposal is preview-only and is not actually sent to the recipient.</BRChip>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-5">
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-center">
+                <Icon name="Eye" size={28} className="text-purple-600 mx-auto mb-2" />
+                <p className="font-semibold text-gray-900">{dealName || `${lastName || 'Test'} Residence`}</p>
+                <p className="text-sm text-gray-500 mt-1">Preview only — nothing was delivered to a real recipient.</p>
+              </div>
+              <div className="flex items-start">
+                <HelperTip className="flex-1">Test proposals are excluded from your reports (for example, Total Proposals Sent).</HelperTip>
+                <BRChip id="BR9">Test proposals excluded from standard reporting metrics; user must be told.</BRChip>
+              </div>
+              <div className="flex items-center">
+                <p className="text-sm text-gray-600">Ready to send this to your customer for real?</p>
+                <BRChip id="BR10">Converting Test to Real (or starting a new Real proposal) tracks and reports normally, same as any Real proposal.</BRChip>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button onClick={handleConvertToReal} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">Convert to Real &amp; Send</button>
+                <button onClick={onSkipToDashboard} className="bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors">Return to Dashboard</button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return null;
     };
+
 
     // ─── Awaiting Customer Action — shown after Real send, until Proposal Viewed fires (BR11, BR12, BR13) ───
     const AwaitingViewScreen = ({ data, onExit }) => (
@@ -1760,8 +1692,6 @@
                 { label: "Products & Services", done: true },
                 { label: "Add-Ons", done: true },
                 { label: "Team Members", done: data.teamMember?.added || false },
-                { label: "Create a Deal", done: data.dealCreated || false },
-                { label: "Create a Proposal", done: data.proposalBuilt || false },
                 { label: "Send Proposal (Customer Viewed)", done: data.proposalViewed || false }
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
@@ -1859,7 +1789,7 @@
         { name: 'Proposal(s) Rejected', color: 'bg-red-100', textColor: 'text-red-700', count: 0 }
       ];
 
-      // ── Onboarding checklist: scheduling + 9 setup steps ──
+      // ── Onboarding checklist: scheduling + 7 setup steps ──
       const checklistItems = [
         { label: "Schedule Onboarding Session", done: !!data.scheduledOnboarding, icon: "Calendar", step: "schedule_intro" },
         { label: "Company Settings", done: true, icon: "Building2", step: "company_info" },
@@ -1868,9 +1798,7 @@
         { label: "Products & Services", done: true, icon: "Package", step: "products" },
         { label: "Platform Add-Ons", done: true, icon: "Puzzle", step: "addons" },
         { label: "Team Members", done: !!data.teamMember?.added, icon: "Users", step: "team" },
-        { label: "Create a Deal", done: !!data.dealCreated, icon: "Handshake", step: "create_deal" },
-        { label: "Create a Proposal", done: !!data.proposalBuilt, icon: "FileText", step: "proposal" },
-        { label: "Send Proposal (customer must view it to complete)", done: !!data.proposalViewed, icon: "Send", step: "send_proposal" }
+        { label: "Send Proposal (customer must view it to complete)", done: !!data.proposalViewed, icon: "Send", step: "proposal" }
       ];
 
       const completedCount = checklistItems.filter(i => i.done).length;
@@ -2054,9 +1982,7 @@
       PRODUCTS: 'products',
       ADDONS: 'addons',
       TEAM: 'team',
-      CREATE_DEAL: 'create_deal',
       PROPOSAL: 'proposal',
-      SEND_PROPOSAL: 'send_proposal',
       AWAITING_VIEW: 'awaiting_view',
       COMPLETE: 'complete',
       DASHBOARD: 'dashboard'
@@ -2065,7 +1991,7 @@
     const STEP_ORDER = [
       STEPS.WELCOME, STEPS.SCHEDULE_INTRO, STEPS.CALENDAR, STEPS.BOOKING_CONFIRMED, STEPS.SKIP_SCHEDULING,
       STEPS.COMPANY_INFO, STEPS.BRAND_SETUP, STEPS.GOOGLE_CALENDAR, STEPS.PRODUCTS, STEPS.ADDONS, STEPS.TEAM,
-      STEPS.CREATE_DEAL, STEPS.PROPOSAL, STEPS.SEND_PROPOSAL, STEPS.AWAITING_VIEW, STEPS.COMPLETE, STEPS.DASHBOARD
+      STEPS.PROPOSAL, STEPS.AWAITING_VIEW, STEPS.COMPLETE, STEPS.DASHBOARD
     ];
 
     // ── LocalStorage persistence (BR5: progress saved/restored across reload/exit) ──
@@ -2154,9 +2080,7 @@
           { step: STEPS.SCHEDULE_INTRO, done: movingPastStep === STEPS.SCHEDULE_INTRO || !!formData.scheduledOnboarding },
           { step: STEPS.GOOGLE_CALENDAR, done: movingPastStep === STEPS.GOOGLE_CALENDAR || !!formData.googleCalendar },
           { step: STEPS.TEAM, done: movingPastStep === STEPS.TEAM || !!formData.teamMember?.added },
-          { step: STEPS.CREATE_DEAL, done: movingPastStep === STEPS.CREATE_DEAL || !!formData.dealCreated },
-          { step: STEPS.PROPOSAL, done: movingPastStep === STEPS.PROPOSAL || !!formData.proposalBuilt },
-          { step: STEPS.SEND_PROPOSAL, done: movingPastStep === STEPS.SEND_PROPOSAL || !!formData.realProposalSent }
+          { step: STEPS.PROPOSAL, done: movingPastStep === STEPS.PROPOSAL || !!formData.realProposalSent || !!formData.testProposalPreviewed }
         ];
         const afterIdx = skippableSteps.findIndex(s => s.step === movingPastStep);
         for (let i = afterIdx + 1; i < skippableSteps.length; i++) {
@@ -2166,8 +2090,8 @@
       };
 
       // Setup wizard step numbers (for progress bar)
-      const setupStepNames = ["Company Information", "Brand Setup", "Google Calendar", "Products & Services", "Platform Add-Ons", "Team Members", "Create Deal", "Create Proposal", "Send Proposal"];
-      const setupSteps = [STEPS.COMPANY_INFO, STEPS.BRAND_SETUP, STEPS.GOOGLE_CALENDAR, STEPS.PRODUCTS, STEPS.ADDONS, STEPS.TEAM, STEPS.CREATE_DEAL, STEPS.PROPOSAL, STEPS.SEND_PROPOSAL];
+      const setupStepNames = ["Company Information", "Brand Setup", "Google Calendar", "Products & Services", "Platform Add-Ons", "Team Members", "Create Proposal"];
+      const setupSteps = [STEPS.COMPANY_INFO, STEPS.BRAND_SETUP, STEPS.GOOGLE_CALENDAR, STEPS.PRODUCTS, STEPS.ADDONS, STEPS.TEAM, STEPS.PROPOSAL];
       const currentSetupStep = setupSteps.indexOf(currentStep) + 1;
       const isInSetupWizard = setupSteps.includes(currentStep);
       const isInScheduling = [STEPS.SCHEDULE_INTRO, STEPS.CALENDAR, STEPS.BOOKING_CONFIRMED, STEPS.SKIP_SCHEDULING].includes(currentStep);
@@ -2200,9 +2124,7 @@
                 { step: STEPS.PRODUCTS, label: "4. Products" },
                 { step: STEPS.ADDONS, label: "5. Add-Ons" },
                 { step: STEPS.TEAM, label: "6. Team" },
-                { step: STEPS.CREATE_DEAL, label: "7. Create Deal" },
-                { step: STEPS.PROPOSAL, label: "8. Create Proposal" },
-                { step: STEPS.SEND_PROPOSAL, label: "9. Send Proposal" },
+                { step: STEPS.PROPOSAL, label: "7. Create Proposal" },
                 { step: STEPS.AWAITING_VIEW, label: "Awaiting View" },
                 { step: STEPS.COMPLETE, label: "Complete" },
                 { step: STEPS.DASHBOARD, label: "Dashboard" },
@@ -2288,25 +2210,14 @@
             )}
             {currentStep === STEPS.TEAM && (
               <Step6TeamMembers data={formData} setData={setFormData}
-                onNext={() => resumeMode ? goTo(getNextIncompleteStep(STEPS.TEAM)) : goTo(STEPS.CREATE_DEAL)}
+                onNext={() => resumeMode ? goTo(getNextIncompleteStep(STEPS.TEAM)) : goTo(STEPS.PROPOSAL)}
                 onBack={() => resumeMode ? goTo(STEPS.DASHBOARD) : goTo(STEPS.ADDONS)} />
-            )}
-            {currentStep === STEPS.CREATE_DEAL && (
-              <CreateDealScreen data={formData} setData={setFormData}
-                onNext={() => resumeMode ? goTo(getNextIncompleteStep(STEPS.CREATE_DEAL)) : goTo(STEPS.PROPOSAL)}
-                onBack={() => resumeMode ? goTo(STEPS.DASHBOARD) : goTo(STEPS.TEAM)} />
             )}
             {currentStep === STEPS.PROPOSAL && (
               <Step7Proposal data={formData} setData={setFormData}
-                onNext={() => resumeMode ? goTo(getNextIncompleteStep(STEPS.PROPOSAL)) : goTo(STEPS.SEND_PROPOSAL)}
-                onBack={() => resumeMode ? goTo(STEPS.DASHBOARD) : goTo(STEPS.CREATE_DEAL)}
-                onSkipToDashboard={() => { setResumeMode(true); goTo(STEPS.DASHBOARD); }} />
-            )}
-            {currentStep === STEPS.SEND_PROPOSAL && (
-              <SendProposalScreen data={formData} setData={setFormData}
                 onSentReal={() => goTo(STEPS.AWAITING_VIEW)}
-                onBack={() => goTo(STEPS.PROPOSAL)}
-                onSkip={() => { setResumeMode(true); goTo(STEPS.DASHBOARD); }} />
+                onBack={() => resumeMode ? goTo(STEPS.DASHBOARD) : goTo(STEPS.TEAM)}
+                onSkipToDashboard={() => { setResumeMode(true); goTo(STEPS.DASHBOARD); }} />
             )}
             {currentStep === STEPS.AWAITING_VIEW && (
               <AwaitingViewScreen data={formData}
