@@ -2494,16 +2494,21 @@
       const lead = { firstName: data.contactFirstName || "Test", lastName: data.contactLastName || "Contact" };
       const [dismissed, setDismissed] = useState(false);
 
+      // A deal lives in exactly one pipeline column at a time: Warm Leads until the proposal
+      // builder is started, In Draft while it's being built, Proposal(s) Sent once a Real
+      // proposal goes out.
+      const dealStage = data.realProposalSent ? 'Proposal(s) Sent' : (data.dealCreated ? 'In Draft' : 'Warm Leads');
+
       const pipelineColumns = [
-        { name: 'Cold Leads', color: 'bg-blue-100', textColor: 'text-blue-700', count: 0 },
-        { name: 'Warm Leads', color: 'bg-yellow-100', textColor: 'text-yellow-700', count: 1 },
-        { name: 'Hot Leads', color: 'bg-orange-100', textColor: 'text-orange-700', count: 0 },
-        { name: 'Estimate Requested', color: 'bg-purple-100', textColor: 'text-purple-700', count: 0 },
-        { name: 'Estimate Scheduled', color: 'bg-indigo-100', textColor: 'text-indigo-700', count: 0 },
-        { name: 'In Draft', color: 'bg-gray-100', textColor: 'text-gray-700', count: data.realProposalSent ? 0 : 1 },
-        { name: 'Proposal(s) Sent', color: 'bg-green-100', textColor: 'text-green-700', count: data.realProposalSent ? 1 : 0 },
-        { name: 'Proposal(s) Rejected', color: 'bg-red-100', textColor: 'text-red-700', count: 0 }
-      ];
+        { name: 'Cold Leads', color: 'bg-blue-100', textColor: 'text-blue-700' },
+        { name: 'Warm Leads', color: 'bg-yellow-100', textColor: 'text-yellow-700' },
+        { name: 'Hot Leads', color: 'bg-orange-100', textColor: 'text-orange-700' },
+        { name: 'Estimate Requested', color: 'bg-purple-100', textColor: 'text-purple-700' },
+        { name: 'Estimate Scheduled', color: 'bg-indigo-100', textColor: 'text-indigo-700' },
+        { name: 'In Draft', color: 'bg-gray-100', textColor: 'text-gray-700' },
+        { name: 'Proposal(s) Sent', color: 'bg-green-100', textColor: 'text-green-700' },
+        { name: 'Proposal(s) Rejected', color: 'bg-red-100', textColor: 'text-red-700' }
+      ].map(col => ({ ...col, count: col.name === dealStage ? 1 : 0 }));
 
       // ── Onboarding checklist: scheduling + 7 setup steps ──
       const checklistItems = [
@@ -2653,14 +2658,14 @@
                     <span className={`text-sm ${col.textColor}`}>{col.count}</span>
                   </div>
                   <div className="bg-gray-50 rounded-b-lg p-2 min-h-[300px]">
-                    {((col.name === 'Warm Leads') || (col.name === 'In Draft' && !data.realProposalSent) || (col.name === 'Proposal(s) Sent' && data.realProposalSent)) && (
+                    {col.name === dealStage && (
                       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-2">
                         <div className="flex items-start justify-between mb-2">
                           <span className="font-medium text-gray-900 text-sm">{lead.firstName} {lead.lastName}</span>
                           <button className="text-gray-400"><Icon name="MoreHorizontal" size={14} /></button>
                         </div>
                         <p className="text-xs text-gray-500 mb-2">Website</p>
-                        {(col.name !== 'Warm Leads') && (
+                        {dealStage !== 'Warm Leads' && (
                           <div className="text-right mb-2"><span className="text-lg font-bold text-gray-900">${(data.proposalTotal || 0).toFixed(2)}</span></div>
                         )}
                         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
@@ -2669,7 +2674,7 @@
                         </div>
                       </div>
                     )}
-                    {!((col.name === 'Warm Leads') || (col.name === 'In Draft' && !data.realProposalSent) || (col.name === 'Proposal(s) Sent' && data.realProposalSent)) && col.count === 0 && (
+                    {col.name !== dealStage && (
                       <div className="flex flex-col items-center justify-center h-32 text-gray-400"><Icon name="Inbox" size={24} /><p className="text-xs mt-1">No Deals</p></div>
                     )}
                   </div>
