@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Proposal Section Order — Drag &amp; Drop Prototype</title>
+<style>
+  #pso-page {
+    --st-color-primary: #8B85EA;
+    --st-color-primary-hover: #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb: 139, 133, 234;
+    --st-color-text: #32415B;
+    --st-color-text-muted: #80879A;
+    --st-color-border: #DAD8E3;
+    --st-color-card-bg: #FFFFFF;
+
+    font-family: -apple-system, "Segoe UI", Roboto, Nunito, Arial, sans-serif;
+    color: var(--st-color-text);
+    background: #F5F6FA;
+    padding: 32px 16px 80px;
+    max-width: 900px;
+    margin: 0 auto;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #pso-page * { box-sizing: border-box; }
+
+  .pso-header { display:flex; align-items:center; justify-content: space-between; margin-bottom: 4px; }
+  .pso-title-row { display:flex; align-items:center; gap:8px; }
+  .pso-title { font-size: 18px; font-weight: 700; margin:0; }
+  .pso-new-badge {
+    font-size: 10px; font-weight:700; letter-spacing:.3px; text-transform:uppercase;
+    background: #E6FAF0; color:#1a8a57; padding: 2px 8px; border-radius: 999px;
+  }
+  .pso-subtitle { font-size: 13px; color: var(--st-color-text-muted); margin: 4px 0 20px; }
+
+  .pso-restore-btn {
+    height: 36px; padding: 0 14px; font-size: 13px; font-weight: 600;
+    border-radius: 10px; border: 1px solid var(--st-color-border);
+    background: #fff; color: var(--st-color-text); cursor: pointer;
+    display:flex; align-items:center; gap:6px; white-space:nowrap;
+  }
+  .pso-restore-btn:hover { border-color: var(--st-color-primary); color: var(--st-color-primary); }
+
+  .pso-banner {
+    display:flex; gap:10px; align-items:flex-start;
+    background:#EFF6FF; border:1px solid #BFDBFE; color:#1E40AF;
+    border-radius:8px; padding:12px 14px; font-size:13px; margin-bottom:18px; line-height:1.5;
+  }
+  .pso-banner b { font-weight:700; }
+  .pso-banner svg { flex:none; margin-top:1px; }
+
+  .pso-card {
+    background: var(--st-color-card-bg);
+    border: 1px solid var(--st-color-border);
+    border-radius: 10px;
+    padding: 8px;
+    position: relative;
+  }
+
+  .pso-list { list-style:none; margin:0; padding:0; }
+
+  .pso-row {
+    display:flex; align-items:center; gap:12px;
+    padding: 12px 10px;
+    border-radius: 8px;
+    background: #fff;
+    position: relative;
+    touch-action: pan-y;
+  }
+  .pso-row + .pso-row { border-top: 1px solid #F0F0F5; }
+  .pso-row.is-fixed { background: #FAFAFC; }
+
+  .pso-drop-line {
+    height: 0; margin: 0 10px; border-radius: 4px;
+    background: var(--st-color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), .18);
+    transition: height .12s ease;
+    overflow:hidden;
+  }
+  .pso-drop-line.is-active { height: 8px; margin-top: 4px; margin-bottom: 4px; }
+
+  .pso-handle {
+    flex: none; width: 32px; height:32px; border-radius: 8px;
+    display:flex; align-items:center; justify-content:center;
+    color: var(--st-color-text-muted);
+    cursor: grab;
+    border: none; background: transparent;
+  }
+  .pso-handle:hover { background:#F5F4FE; color: var(--st-color-primary); }
+  .pso-handle:focus-visible {
+    outline: none; box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), .35);
+    background:#F5F4FE; color: var(--st-color-primary);
+  }
+  .pso-handle.is-grabbed { background: var(--st-color-primary); color:#fff; cursor: grabbing; }
+  .pso-handle-spacer { flex:none; width:32px; height:32px; }
+
+  .pso-pos {
+    flex:none; width:24px; height:24px; border-radius:50%;
+    background:#EFEFF3; color: var(--st-color-text-muted);
+    font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  }
+  .pso-icon {
+    flex:none; width:36px; height:36px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    background:#F0EEFC; color: var(--st-color-primary-active);
+  }
+  .pso-icon svg { width:18px; height:18px; }
+
+  .pso-text { flex:1 1 auto; min-width:0; }
+  .pso-name { font-size:14px; font-weight:600; line-height:1.3; }
+  .pso-desc { font-size:12px; color: var(--st-color-text-muted); margin-top:1px; }
+
+  .pso-badge {
+    flex:none; font-size:11px; font-weight:600; padding:3px 9px; border-radius:999px;
+    white-space:nowrap;
+  }
+  .pso-badge--locked { background:#E6F3FA; color:#1E6091; }
+  .pso-badge--fixed { background:#EFEFF3; color: var(--st-color-text-muted); }
+
+  .pso-row.is-dragging { box-shadow: 0 8px 24px rgba(50,65,91,.16); z-index:5; border-radius:8px; }
+  .pso-row.is-dragging .pso-name { color: var(--st-color-primary-active); }
+
+  .br-chip {
+    flex:none; font-size:9px; font-weight:700; letter-spacing:.2px;
+    color:#9A5B00; background:#FFF3DF; border:1px solid #FBDDA6;
+    border-radius:999px; padding:1px 6px; cursor:help; margin-left:4px;
+  }
+
+  .pso-footer {
+    display:flex; justify-content:flex-end; gap:10px; margin-top:20px;
+  }
+  .pso-btn {
+    height:40px; padding:0 18px; font-size:14px; font-weight:600;
+    border-radius:10px; border:1px solid transparent; cursor:pointer;
+  }
+  .pso-btn--outline { background:#fff; border-color: var(--st-color-border); color: var(--st-color-text); }
+  .pso-btn--outline:hover { border-color: var(--st-color-primary); color: var(--st-color-primary); }
+  .pso-btn--primary { background: var(--st-color-primary); color:#fff; }
+  .pso-btn--primary:hover { background: var(--st-color-primary-hover); }
+
+  .pso-toast {
+    position:fixed; left:50%; bottom:24px; transform: translateX(-50%) translateY(12px);
+    background:#32415B; color:#fff; font-size:13px; font-weight:500;
+    padding:10px 18px; border-radius:999px; box-shadow:0 8px 24px rgba(0,0,0,.2);
+    opacity:0; pointer-events:none; transition: opacity .18s ease, transform .18s ease;
+    z-index:50;
+  }
+  .pso-toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 520px) {
+    .pso-desc { display:none; }
+    .pso-badge { font-size:10px; padding:2px 7px; }
+  }
+
+  body.brs-hidden #pso-page .br-chip { display: none; }
+</style>
+
+<style>
+  #demoControlBar {
+    font-family: -apple-system, "Segoe UI", Roboto, Nunito, Arial, sans-serif;
+    max-width: 900px; margin: 0 auto; padding: 10px 16px;
+    display:flex; align-items:center; gap:14px;
+    background:#FFF3DF; border-bottom:1px solid #FBDDA6;
+    font-size:12px; color:#7A4A00;
+  }
+  #demoControlLabel {
+    font-weight:700; font-size:10px; letter-spacing:.4px; text-transform:uppercase;
+    background:#FBDDA6; padding:3px 8px; border-radius:999px; color:#7A4A00;
+  }
+  .demo-toggle { display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; font-weight:600; }
+  .demo-toggle input { position:absolute; opacity:0; width:0; height:0; }
+  .demo-toggle-track {
+    width:34px; height:20px; border-radius:999px; background:#D8C9A3;
+    position:relative; transition: background .15s ease; flex:none;
+  }
+  .demo-toggle-thumb {
+    position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%;
+    background:#fff; transition: transform .15s ease; box-shadow:0 1px 2px rgba(0,0,0,.25);
+  }
+  .demo-toggle input:checked + .demo-toggle-track { background:#8B85EA; }
+  .demo-toggle input:checked + .demo-toggle-track .demo-toggle-thumb { transform: translateX(14px); }
+  .demo-toggle input:focus-visible + .demo-toggle-track { box-shadow: 0 0 0 3px rgba(139,133,234,.35); }
+</style>
+</head>
+<body>
+
+<div id="demoControlBar">
+  <span id="demoControlLabel">Demo control</span>
+  <label class="demo-toggle">
+    <input type="checkbox" id="brToggle" checked>
+    <span class="demo-toggle-track"><span class="demo-toggle-thumb"></span></span>
+    <span class="demo-toggle-text">Show BR annotations</span>
+  </label>
+</div>
+
+<div id="pso-page">
+
+  <div class="pso-header">
+    <div class="pso-title-row">
+      <h3 class="pso-title">Proposal Section Order</h3>
+      <span class="pso-new-badge">New</span>
+    </div>
+    <button class="pso-restore-btn" id="restoreBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      Restore default
+    </button>
+  </div>
+  <p class="pso-subtitle">Control the order sections appear in on customer-facing proposals. Applies to all of your proposals.</p>
+
+  <div class="pso-banner">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    <div>
+      <b>Drag any row by its handle to reposition it.</b> Hero Image, Your Investment / Financing, and Terms and Conditions are fixed and can't be moved. Don't forget to <b>Save Changes</b> at the bottom of the page.
+      <span class="br-chip" title="BR-1: The button-based Move / Before-After panel is removed and replaced entirely with drag-and-drop reordering.">BR-1</span>
+    </div>
+  </div>
+
+  <div class="pso-card">
+    <ul class="pso-list" id="psoList" role="list"></ul>
+  </div>
+
+  <div class="pso-footer">
+    <button class="pso-btn pso-btn--outline" id="cancelBtn">Cancel</button>
+    <button class="pso-btn pso-btn--primary" id="saveBtn">Save Changes</button>
+  </div>
+
+</div>
+
+<div class="pso-toast" id="toast"></div>
+<div id="ariaLive" aria-live="assertive" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);"></div>
+
+<script>
+(function(){
+  const ICONS = {
+    hero: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 15l4.5-4.5a2 2 0 0 1 2.8 0L14 14l1.8-1.8a2 2 0 0 1 2.8 0L21 15"/><circle cx="8" cy="8.5" r="1.2"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>',
+    note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H8l-4 4z"/></svg>',
+    building: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 7h.01M15 7h.01M9 11h.01M15 11h.01M9 15h.01M15 15h.01"/></svg>',
+    clip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="12" height="17" rx="1.5"/><path d="M9 3h6v3H9z"/><path d="M9 11h6M9 15h6"/></svg>',
+    box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
+    list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>',
+    columns: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="7" height="16" rx="1"/><rect x="13" y="4" width="7" height="16" rx="1"/></svg>',
+    media: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5.5-5-5 4.5L7 13l-4 4"/></svg>',
+    file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v5h5"/></svg>',
+    play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M10 9l5 3-5 3z"/></svg>',
+    dollar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M17 7c0-2-2-3-5-3s-5 1.3-5 3 2 2.7 5 3 5 1 5 3-2 3-5 3-5-1-5-3"/></svg>'
+  };
+
+  const DATA = [
+    {id:'hero',    name:'Hero Image',               desc:'Cover banner at the very top',                type:'fixed',  icon:'hero'},
+    {id:'trust',   name:'Trust Builders',           desc:'Credibility highlights',                      type:'move',   icon:'check'},
+    {id:'notes',   name:'Client Notes',             desc:'Skips rendering if no note on the proposal',  type:'move',   icon:'note'},
+    {id:'about',   name:'About Us',                 desc:'Your company story — (hidden on proposal)',   type:'move',   icon:'building'},
+    {id:'details', name:'Details',                  desc:'Scope of work / project preparations',        type:'move',   icon:'clip'},
+    {id:'pkgs',    name:'Packages',                 desc:'Selectable package options',                  type:'move',   icon:'box'},
+    {id:'lines',   name:'Line Items',               desc:'Line Items + Optional Line Items',            type:'locked', icon:'list'},
+    {id:'areas',   name:'Areas',                    desc:'Areas + Optional Areas',                      type:'locked', icon:'columns'},
+    {id:'media',   name:'Media',                    desc:'Uploaded photos & videos',                    type:'move',   icon:'media'},
+    {id:'custom',  name:'Custom Section(s)',        desc:'Your custom proposal sections',               type:'move',   icon:'file'},
+    {id:'video',   name:'Video',                    desc:'Linked / embedded video',                     type:'move',   icon:'play'},
+    {id:'invest',  name:'Your Investment / Financing', desc:'Pricing totals & financing',               type:'fixed',  icon:'dollar'},
+    {id:'terms',   name:'Terms and Conditions',     desc:'Fine print',                                  type:'fixed',  icon:'file'}
+  ];
+
+  const DEFAULT_ORDER = DATA.map(d => d.id);
+  let order = DEFAULT_ORDER.slice();
+  let dirty = false;
+
+  const listEl = document.getElementById('psoList');
+  const toastEl = document.getElementById('toast');
+  const liveEl = document.getElementById('ariaLive');
+
+  function announce(msg){ liveEl.textContent = ''; requestAnimationFrame(()=>{ liveEl.textContent = msg; }); }
+
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=> toastEl.classList.remove('show'), 1800);
+  }
+
+  function badgeFor(type){
+    if (type === 'locked') return '<span class="pso-badge pso-badge--locked">Locked group</span>';
+    if (type === 'fixed')  return '<span class="pso-badge pso-badge--fixed">Fixed</span>';
+    return '';
+  }
+
+  function render(){
+    listEl.innerHTML = '';
+    order.forEach((id, i) => {
+      const item = DATA.find(d => d.id === id);
+      const li = document.createElement('li');
+      li.className = 'pso-row' + (item.type === 'fixed' ? ' is-fixed' : '');
+      li.dataset.id = id;
+      li.setAttribute('role','listitem');
+
+      let handleHtml;
+      if (item.type === 'fixed') {
+        handleHtml = '<span class="pso-handle-spacer"></span>';
+      } else {
+        const brChip = i === 1
+          ? '<span class="br-chip" title="BR-2: Every moveable row and locked-group row shows a drag handle, matching the hamburger handle used in Schedule Training URLs. Fixed rows show none.">BR-2</span><span class="br-chip" title="BR-7: The handle is keyboard focusable — Space/Enter picks up, arrow keys move, Space/Enter drops, Escape cancels. Moves are announced to assistive tech.">BR-7</span>'
+          : '';
+        handleHtml = '<button type="button" class="pso-handle" data-handle tabindex="0" '
+          + 'aria-label="Drag to reorder ' + item.name + ', position ' + (i+1) + ' of ' + order.length + '">'
+          + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h8M8 12h8M8 18h8"/></svg>'
+          + '</button>' + brChip;
+      }
+
+      li.innerHTML =
+        handleHtml +
+        '<span class="pso-icon">' + ICONS[item.icon] + '</span>' +
+        '<span class="pso-text"><div class="pso-name">' + item.name + '</div><div class="pso-desc">' + item.desc + '</div></span>' +
+        badgeFor(item.type);
+
+      listEl.appendChild(li);
+    });
+    attachHandleEvents();
+  }
+
+  // ---------- Pointer-based drag (mouse + touch) ----------
+  let dragState = null;
+
+  function attachHandleEvents(){
+    listEl.querySelectorAll('[data-handle]').forEach(handle => {
+      handle.addEventListener('pointerdown', onPointerDown);
+      handle.addEventListener('keydown', onKeyDown);
+    });
+  }
+
+  function rowEls(){ return Array.from(listEl.querySelectorAll('.pso-row')); }
+
+  function onPointerDown(e){
+    if (e.button !== undefined && e.button !== 0 && e.pointerType === 'mouse') return;
+    const handle = e.currentTarget;
+    const row = handle.closest('.pso-row');
+    const id = row.dataset.id;
+    const startIndex = order.indexOf(id);
+    const rows = rowEls();
+    const startY = e.clientY;
+    const rowHeight = row.getBoundingClientRect().height;
+
+    dragState = { id, startIndex, currentIndex: startIndex, startY, rowHeight, row, handle };
+    row.classList.add('is-dragging');
+    handle.classList.add('is-grabbed');
+    row.style.transform = 'translateY(0px)';
+    row.setPointerCapture && handle.setPointerCapture(e.pointerId);
+
+    ensureDropLine();
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp, { once: true });
+    e.preventDefault();
+  }
+
+  function onPointerMove(e){
+    if (!dragState) return;
+    const dy = e.clientY - dragState.startY;
+    dragState.row.style.transform = 'translateY(' + dy + 'px)';
+
+    const rows = rowEls().filter(r => r !== dragState.row);
+    let targetIndex = dragState.currentIndex;
+    const rowCenterY = dragState.row.getBoundingClientRect().top + dragState.rowHeight / 2;
+
+    // find nearest valid gap, skipping fixed rows as drop targets adjacent to themselves is fine,
+    // but we won't allow index 0 (before Hero Image) or last position (after Terms and Conditions)
+    let closestDist = Infinity, closestIdx = dragState.currentIndex;
+    for (let i = 0; i <= order.length; i++){
+      // compute gap position i (between item i-1 and i in current order minus dragged item)
+      const idAtI = order[i];
+      const beforeFixed = i === 0; // before Hero Image
+      const afterTerms = i === order.length; // after Terms and Conditions
+      if (beforeFixed || afterTerms) continue;
+      const refRow = listEl.querySelectorAll('.pso-row')[i];
+      if (!refRow) continue;
+      const refRect = refRow.getBoundingClientRect();
+      const gapY = refRect.top;
+      const dist = Math.abs(rowCenterY - gapY);
+      if (dist < closestDist){ closestDist = dist; closestIdx = i; }
+    }
+    // don't allow landing immediately after/before a fixed anchor incorrectly (fixed rows just can't be reordered themselves, gaps next to them for others are fine except top/bottom)
+    showDropLineAt(closestIdx);
+    dragState.currentIndex = closestIdx;
+  }
+
+  function onPointerUp(){
+    if (!dragState) return;
+    window.removeEventListener('pointermove', onPointerMove);
+    const { id, startIndex, currentIndex, row, handle } = dragState;
+    row.style.transform = '';
+    row.classList.remove('is-dragging');
+    handle.classList.remove('is-grabbed');
+    hideDropLine();
+
+    let targetIndex = currentIndex;
+    if (targetIndex > startIndex) targetIndex -= 1; // account for removal shift
+    moveItem(startIndex, targetIndex, id);
+    dragState = null;
+  }
+
+  function moveItem(fromIndex, toIndex, id){
+    if (fromIndex === toIndex) return;
+    order.splice(fromIndex, 1);
+    order.splice(toIndex, 0, id);
+    dirty = true;
+    render();
+    const item = DATA.find(d => d.id === id);
+    announce(item.name + ' moved to position ' + (order.indexOf(id)+1) + ' of ' + order.length + '.');
+    requestAnimationFrame(() => { const h = listEl.querySelector('[data-id="'+id+'"] [data-handle]'); if (h) h.focus(); });
+  }
+
+  let dropLineEl = null;
+  function ensureDropLine(){
+    if (!dropLineEl){ dropLineEl = document.createElement('div'); dropLineEl.className = 'pso-drop-line'; }
+  }
+  function showDropLineAt(index){
+    ensureDropLine();
+    const rows = listEl.querySelectorAll('.pso-row');
+    dropLineEl.remove();
+    if (rows[index]) listEl.insertBefore(dropLineEl, rows[index]);
+    else listEl.appendChild(dropLineEl);
+    dropLineEl.classList.add('is-active');
+  }
+  function hideDropLine(){ if (dropLineEl) dropLineEl.remove(); }
+
+  // ---------- Keyboard reordering ----------
+  let kbGrabbedId = null;
+  let kbSnapshot = null;
+
+  function onKeyDown(e){
+    const handle = e.currentTarget;
+    const row = handle.closest('.pso-row');
+    const id = row.dataset.id;
+
+    if (e.key === ' ' || e.key === 'Enter'){
+      e.preventDefault();
+      if (kbGrabbedId !== id){
+        kbGrabbedId = id;
+        kbSnapshot = order.slice();
+        handle.classList.add('is-grabbed');
+        const item = DATA.find(d => d.id === id);
+        announce('Picked up ' + item.name + ', position ' + (order.indexOf(id)+1) + ' of ' + order.length + '. Use arrow keys to move, Space to drop, Escape to cancel.');
+      } else {
+        handle.classList.remove('is-grabbed');
+        const item = DATA.find(d => d.id === id);
+        announce(item.name + ' dropped at position ' + (order.indexOf(id)+1) + ' of ' + order.length + '.');
+        kbGrabbedId = null; kbSnapshot = null;
+        dirty = true;
+      }
+      return;
+    }
+    if (kbGrabbedId === id && (e.key === 'ArrowUp' || e.key === 'ArrowDown')){
+      e.preventDefault();
+      const idx = order.indexOf(id);
+      let target = e.key === 'ArrowUp' ? idx - 1 : idx + 1;
+      if (target <= 0 || target >= order.length - 1) return; // can't pass fixed anchors at top/bottom
+      order.splice(idx, 1);
+      order.splice(target, 0, id);
+      render();
+      const item = DATA.find(d => d.id === id);
+      announce(item.name + ' moved to position ' + (order.indexOf(id)+1) + ' of ' + order.length + '.');
+      const h = listEl.querySelector('[data-id="'+id+'"] [data-handle]');
+      if (h){ h.focus(); h.classList.add('is-grabbed'); }
+      return;
+    }
+    if (kbGrabbedId === id && e.key === 'Escape'){
+      e.preventDefault();
+      order = kbSnapshot.slice();
+      kbGrabbedId = null; kbSnapshot = null;
+      render();
+      announce('Move cancelled. ' + DATA.find(d=>d.id===id).name + ' returned to its original position.');
+      const h = listEl.querySelector('[data-id="'+id+'"] [data-handle]');
+      if (h) h.focus();
+    }
+  }
+
+  document.getElementById('restoreBtn').addEventListener('click', () => {
+    order = DEFAULT_ORDER.slice();
+    dirty = true;
+    render();
+    showToast('Restored to default order');
+  });
+  document.getElementById('cancelBtn').addEventListener('click', () => {
+    order = DEFAULT_ORDER.slice();
+    dirty = false;
+    render();
+    showToast('Changes discarded');
+  });
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    dirty = false;
+    showToast('Section order saved');
+  });
+
+  document.getElementById('brToggle').addEventListener('change', (e) => {
+    document.body.classList.toggle('brs-hidden', !e.target.checked);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
