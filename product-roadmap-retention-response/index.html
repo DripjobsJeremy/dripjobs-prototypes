@@ -109,6 +109,8 @@
   .action-list li { font-size: 14.5px; color: var(--ink); padding: 9px 0 9px 26px; position: relative; border-top: 1px solid var(--purple-faint); }
   .action-list li:first-child { border-top: none; }
   .action-list li::before { content: '→'; position: absolute; left: 0; color: var(--purple-mid); font-weight: 700; }
+  .action-list li.done { color: var(--ink-light); text-decoration: line-through; text-decoration-color: var(--purple-light); }
+  .action-list li.done::before { content: '✓'; color: var(--green); }
 
   .gap-flag { display: inline-block; margin-top: 4px; font-size: 12.5px; color: var(--amber); font-weight: 600; }
 
@@ -179,26 +181,24 @@
     </div>
   </div>
 
-  <p class="section-label">Workstream 1 · Scope Change</p>
+  <p class="section-label">Workstream 1 · In Progress</p>
   <div class="card">
     <div class="card-head">
       <h3>Onboarding Wizard: Finish Line Moves to "Proposal Viewed"</h3>
-      <span class="status-badge scope-change">Scope Change</span>
+      <span class="status-badge on-track">In Progress</span>
     </div>
-    <div class="ticket-ref"><strong>Wizard concept:</strong> Onboarding Wizard (Flow 1/Flow 2), Tanner requested, currently blocked on Ahmad's upstream dependency. No formal ticket on file for this concept yet.</div>
-    <div class="gap-flag" style="margin-bottom:16px;">❓ Gap: this is directionally bet #1, but there's a scope gap worth flagging. The wireframed flow ends at "Create First Proposal" (step 8), described as a test or real proposal walkthrough. Rick's data says the fork isn't proposal created, it's proposal viewed by the customer. If the wizard's success state is "a proposal exists" rather than "a proposal was sent and opened," it stops one step short of the behavior that actually predicts retention. Worth deciding now, before development unblocks, whether the wizard's finish line needs to move.</div>
-    <div class="ticket-ref"><strong>Existing ticket:</strong> <a href="https://app.clickup.com/t/8633445/86b4ek0j7" target="_blank">Onboarding Walkthrough for Company Settings w/ Brandfetch Integration</a> · Status: Needs PM Analysis · Active Triage (V1)</div>
-    <div class="evidence"><strong>Why:</strong> this ticket stops even earlier than the wizard concept, at Company Info and the Brand tab. Rick's data shows the actual retention fork is a proposal being <em>viewed by the customer</em>: 57% retention if viewed, 8% if not. Neither the wireframed flow nor this ticket currently reaches that line.</div>
-    <p class="desc">Extend this ticket's scope to continue past Brand setup through Create Deal, Create Proposal, and Send Proposal, with completion defined as customer-side "Proposal Viewed," not proposal creation. This also requires a rewrite pass: the ticket as written prescribes implementation (Shepherd.js/Intro.js, Zustand store, specific API endpoints, backend field names), which needs to come out before it's dev-ready.</p>
+    <div class="ticket-ref"><strong>Ticket:</strong> <a href="https://app.clickup.com/t/8633445/86b4ek0j7" target="_blank">Onboarding Walkthrough: Schedule Onboarding Through Proposal Viewed</a> · Status: Needs Design · Active Triage (V1)</div>
+    <div class="evidence"><strong>Progress:</strong> renamed and rewritten twice since this roadmap published on July 8. Rick's data shows the actual retention fork is a proposal being <em>viewed by the customer</em>: 57% retention if viewed, 8% if not. The ticket now reaches that line, and confirms it's the same effort as the Flow 1/Flow 2 wizard concept rather than a separate, narrower piece of it, resolving the assumption originally flagged here.</div>
+    <p class="desc"><strong>July 8 rewrite:</strong> removed implementation prescription (Shepherd.js/Intro.js, Zustand store, specific API endpoints, backend field names); extended scope past Brand setup through Create Deal, Create Proposal, and Send Proposal; redefined completion as customer-side Proposal Viewed on a Real proposal; added a Real vs. Test proposal distinction; scoped to Cold Signup accounts only, with Warm Signup confirmed out of scope for this ticket.</p>
+    <p class="desc"><strong>July 9 rewrite</strong> (against the hybrid onboarding wizard prototype): added Phase 1, Schedule Onboarding, merging the Flow 1/Flow 2 wizard concept (previously no ticket existed for it) into this walkthrough as a scheduling step before account setup. Reclassified "Create Deal" as fulfilled inline within the Create Proposal step via Lead/Contact creation rather than a standalone step. Company Info now pre-populates from ChargeBee billing data. A new outbound communication was scoped: a one-time system-sender completion summary email, fixed and non-editable. Saved progress is resumable indefinitely, including across future requirement changes.</p>
     <ul class="action-list">
-      <li>Rewrite the ticket to remove implementation prescription; keep only user-facing behavior and business rules</li>
-      <li>Extend step flow beyond Brand tab through Create Deal, Create Proposal, Send Proposal</li>
-      <li>Redefine completion criteria as customer-side "Proposal Viewed" activity, not proposal creation</li>
-      <li>Confirm with Jason/Ahmad whether this changes the blocked upstream dependency scope or can layer on top of it</li>
-      <li>Decide cold vs. warm signup treatment (open question from last sync) with this new finish line in mind</li>
-      <li>Instrument proposal-viewed as a trackable event tied to the wizard session, feeding Workstream 2</li>
+      <li class="done">Rewrite the ticket to remove implementation prescription; keep only user-facing behavior and business rules</li>
+      <li class="done">Extend step flow beyond Brand tab through Create Deal, Create Proposal, Send Proposal</li>
+      <li class="done">Redefine completion criteria as customer-side "Proposal Viewed" activity, not proposal creation</li>
+      <li class="done">Decide cold vs. warm signup treatment: scoped to Cold Signup only, Warm Signup out of scope for this ticket</li>
+      <li>Confirm with Jason/Ahmad whether this changes the blocked upstream dependency scope or can layer on top of it, still open</li>
+      <li>Instrument proposal-viewed as a trackable event tied to the wizard session, feeding Workstream 2, not yet explicitly confirmed in the ticket</li>
     </ul>
-    <div class="gap-flag">⚠ Assumption: this ticket is the right vehicle for the expanded scope rather than a new ticket, and that it's the same effort as the Flow 1/Flow 2 wizard concept rather than a separate, narrower piece of it. Confirm with Jeremy before drafting.</div>
   </div>
 
   <p class="section-label">Workstream 2 · On Track</p>
@@ -207,15 +207,15 @@
       <h3>Activation Dashboard: Health Score Aligned to the Data</h3>
       <span class="status-badge on-track">On Track</span>
     </div>
-    <div class="ticket-ref"><a href="https://app.clickup.com/t/86b9512kq" target="_blank">Activation Dashboard</a> · In Progress, Internal Priority 1</div>
+    <div class="ticket-ref"><a href="https://app.clickup.com/t/86b9512kq" target="_blank">Activation Dashboard V1 Expansion</a> · In Progress, assigned to Ali Raza</div>
     <div class="ticket-ref"><strong>Upstream dependency:</strong> <a href="https://app.clickup.com/t/86b72rqzq" target="_blank">Customer Success Activation Tracking (90-Day Milestone)</a> · Pushed to Production, Dec 2025</div>
-    <div class="evidence"><strong>Why:</strong> Rick recommends retiring the current activation definition (10k in sales + A2P verification) in favor of a directable, leading metric: a proposal viewed by a customer plus 3+ deals worked, within the first 30 to 60 days. Signing a proposal has 3.94× retention lift; 3+ deals worked has 3.94× lift independently. Confirmed directly in the dashboard ticket: the Health column's "Healthy" condition is coded as <code>totalSales &gt;= $10,000 AND a2pActivated = true</code>, exactly the metric Rick says to retire.</div>
-    <p class="desc">The $10k + A2P definition isn't owned by the dashboard ticket itself, it's computed upstream in 86b72rqzq and the dashboard just displays it. Redefining activation touches both tickets. The good news: no new instrumentation is needed. Proposal-viewed activity is already tracked (86b61qexb, shipped), and Rick's own report confirms Proposal/Viewed events are already logged in the activity data. The dashboard's existing Est. Sent / Last Est. columns are close but track whether an estimate was sent, not whether the customer opened it.</p>
+    <div class="evidence"><strong>Why:</strong> Rick recommends retiring the current activation definition (10k in sales + A2P verification) in favor of a directable, leading metric: a proposal viewed by a customer plus 3+ deals worked, within the first 30 to 60 days. Signing a proposal has 3.94× retention lift; 3+ deals worked has 3.94× lift independently.</div>
+    <p class="desc"><strong>Resolved (July 8):</strong> decided as Option A, parallel signal. Prop. Viewed and Deals (90d) columns have been added to the ticket, sourced from existing proposal activity tracking (86b61qexb, shipped) with no new instrumentation required. Corresponding filters and a new Metrics Bar card were added alongside them. Health scoring, the $10k filter, and A2P filters remain unchanged in this ticket; no coordinated change was made to 86b72rqzq. Full Health redefinition (Option B) is logged as an Out of Scope / Phase 2 item for future consideration.</p>
     <ul class="action-list">
-      <li>Decide whether 86b72rqzq's underlying milestone definition changes, or whether the new leading indicator is added as a parallel signal alongside it</li>
-      <li>Add a "Proposal Viewed" signal to the dashboard using existing activity data, no new tracking required</li>
-      <li>Add a "Deals Worked (90d)" or similar signal per Rick's 3+ deals threshold</li>
-      <li>Decide how legacy accounts are handled, they have no 90-day window today by design, so a 30-to-60-day leading indicator needs an explicit rule for them</li>
+      <li class="done">Decide whether 86b72rqzq's underlying milestone definition changes, or whether the new leading indicator is added as a parallel signal alongside it: resolved as parallel signal</li>
+      <li class="done">Add a "Proposal Viewed" signal to the dashboard using existing activity data, no new tracking required</li>
+      <li class="done">Add a "Deals Worked (90d)" or similar signal per Rick's 3+ deals threshold</li>
+      <li>Decide how legacy accounts are handled for the new Prop. Viewed and Deals (90d) signals specifically; both currently display — for legacy accounts, same as other milestone fields</li>
       <li>Connect this to the unscoped Renewal Risk Flag (Phase 2 stub, ticket 86bajkxdy), which maps closely to Rick's "activated-then-left" churn segment, but is still waiting on thresholds from Tanner/Mary/Eli</li>
       <li>Keep the CS Feedback Flag column and filter work moving; no change to that scope</li>
     </ul>
@@ -229,7 +229,7 @@
     </div>
     <div class="ticket-ref"><strong>Shipped:</strong> <a href="https://app.clickup.com/t/86b8ayzwh" target="_blank">ChargeBee - Unpaid Invoice Alert in Company Settings</a> · Pushed to Production, Feb 12, 2026</div>
     <div class="ticket-ref"><strong>Shipped (adjacent):</strong> <a href="https://app.clickup.com/t/86b4deec4" target="_blank">Display Banner for Failed Subscription Payment</a> · Pushed to Production, Jun 13, 2025 · site-wide, fires after a payment attempt fails</div>
-    <div class="ticket-ref"><strong>Not yet built:</strong> <a href="https://app.clickup.com/t/86b8bmzhr" target="_blank">Expired Payment Card Alert Banner</a> · Short Term Parking, recently updated</div>
+    <div class="ticket-ref"><strong>Not yet built:</strong> <a href="https://app.clickup.com/t/86b8bmzhr" target="_blank">Expired Payment Card Alert Banner</a> · Needs PM Analysis, Active Triage</div>
     <div class="evidence"><strong>Why:</strong> roughly 28% of cancellations (~$4.6K MRR/month) are failed payments, not deliberate churn. Rick calls this the fastest dollar-for-effort win on the board, recoverable with retries, card-update nudges, and grace periods, with no product rebuild required.</div>
     <p class="desc">Chat history shows the original Unpaid Invoice Banner was planned as a site-wide, master-layout banner. Jason flagged a performance risk and proposed alternatives, including limiting scope to Company Settings. Ticket comments from Feb 11, 2026 show the team landed somewhere in between: desktop shows the banner across all pages, mobile is limited to the Sales Pipeline screen only, and cache time was set to 15 minutes to address the performance concern. Neither of the two shipped banners is preventative, both fire after a payment has already failed or gone unpaid. The Expired Card Alert is the one built to catch a card expiring before the next charge attempt fails, and it appears to have been queued behind the invoice banner in Feb 2026 and never picked back up.</p>
     <ul class="action-list">
@@ -259,7 +259,7 @@
   </div>
 
   <div class="footer-note">
-    Prepared by Jeremy Harrison, PM · DripJobs Product &amp; Engineering · July 8, 2026<br>
+    Prepared by Jeremy Harrison, PM · DripJobs Product &amp; Engineering · July 8, 2026 · Last updated July 10, 2026<br>
     Source: Rick's Retention &amp; Churn Full-Population Analysis, 4,974 tenants, 46.3M activity events, as of 2026-07-08<br>
     Reference: <a href="https://dripjobsjeremy.github.io/dripjobs-prototypes/" target="_blank" style="color:var(--purple-primary); font-weight:600; text-decoration:none;">DripJobs Prototype Hub</a>
   </div>
