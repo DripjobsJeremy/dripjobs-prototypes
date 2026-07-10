@@ -1,9 +1,21 @@
 # Product Roadmap: Response to Retention & Churn Analysis
 
 **Prepared by:** Jeremy Harrison, PM · DripJobs Product & Engineering
-**Date:** July 8, 2026
+**Date:** July 8, 2026 · **Last updated:** July 10, 2026
 **Source:** Rick's Retention & Churn Full-Population Analysis (4,974 tenants, 46.3M activity events, as of 2026-07-08)
 **Reference:** [DripJobs Prototype Hub](https://dripjobsjeremy.github.io/dripjobs-prototypes/)
+
+---
+
+## Progress Update: July 10, 2026
+
+**Workstream 1 (Onboarding Wizard):** Ticket rewritten twice since this roadmap was published. On July 8, scope was extended through Create Proposal with completion redefined as customer side Proposal Viewed, and implementation prescription was removed. On July 9, a Phase 1 "Schedule Onboarding" step was folded in (the Flow 1/Flow 2 wizard concept, which previously had no ticket), and Create Deal was reclassified as inline within the Create Proposal step rather than a standalone step. Scoped to Cold Signup accounts only; Warm Signup is confirmed out of scope for this ticket. Ticket status moved from Needs PM Analysis to Needs Design. The Jason/Ahmad upstream dependency question remains open and unresolved.
+
+**Workstream 2 (Activation Dashboard):** The parallel signal decision is resolved. Prop. Viewed and Deals (90d) columns, corresponding filters, and a new Metrics Bar card have been added to the ticket. Health scoring, the $10k filter, and A2P filters are confirmed unchanged; full Health redefinition is logged as an Out of Scope / Phase 2 item. Ticket is In Progress, assigned to Ali Raza.
+
+**Workstream 3 (Dunning Recovery):** No change. Expired Payment Card Alert Banner remains in Needs PM Analysis.
+
+**Workstream 4 (Funnel Refill):** No change. Still no ticket or owner.
 
 ---
 
@@ -31,46 +43,48 @@ Retention is ~57% for tenants who get a proposal viewed in the first 90 days, ~8
 ---
 
 ## Workstream 1: Onboarding Wizard — Finish Line Moves to "Proposal Viewed"
-**Status: Scope Change**
+**Status: In Progress**
 
-**Wizard concept:** Onboarding Wizard (Flow 1/Flow 2), Tanner requested, currently blocked on Ahmad's upstream dependency. No formal ticket on file for this concept specifically.
+**Existing ticket:** [Onboarding Walkthrough: Schedule Onboarding Through Proposal Viewed](https://app.clickup.com/t/8633445/86b4ek0j7) · Needs Design, Active Triage (V1)
 
-> ❓ **Gap:** this is directionally bet #1, but there's a scope gap. The wireframed flow ends at "Create First Proposal" (step 8), described as a test or real proposal walkthrough. Rick's data says the fork isn't proposal *created*, it's proposal *viewed by the customer*. If the wizard's success state is "a proposal exists" rather than "a proposal was sent and opened," it stops one step short of the behavior that actually predicts retention. Worth deciding now, before development unblocks, whether the wizard's finish line needs to move.
+Renamed from "Onboarding Walkthrough for Company Settings w/ Brandfetch Integration" and rewritten twice since this roadmap was first published on July 8. The ticket now confirms this is the same effort as the Flow 1/Flow 2 wizard concept rather than a separate, narrower piece of it, resolving the assumption flagged below at first publication.
 
-**Existing ticket:** [Onboarding Walkthrough for Company Settings w/ Brandfetch Integration](https://app.clickup.com/t/8633445/86b4ek0j7) · Needs PM Analysis, Active Triage (V1)
+**July 8 rewrite:**
+- Removed implementation prescription (Shepherd.js/Intro.js, Zustand store, specific API endpoints, backend field names) per ticket standards
+- Extended step flow beyond Brand tab through Create Deal, Create Proposal, Send Proposal
+- Redefined completion criteria as customer-side "Proposal Viewed" activity on a Real proposal, not proposal creation or send
+- Added Real vs. Test proposal distinction at the Send Proposal step, with Test excluded from completion and standard reporting
+- Scoped to Cold Signup accounts only; Warm Signup treatment confirmed out of scope for this ticket
 
-This ticket stops even earlier than the wizard concept, at Company Info and the Brand tab. Neither the wireframed flow nor this ticket currently reaches the proposal-viewed line.
+**July 9 rewrite (against the hybrid onboarding wizard prototype):**
+- Added Phase 1: Schedule Onboarding, merging the Flow 1/Flow 2 wizard concept (which previously had no ticket) into this walkthrough as a scheduling step before account setup
+- Reclassified "Create Deal" as fulfilled inline within the Create Proposal step via Lead/Contact creation, rather than a standalone step
+- Company Info step now pre-populates from ChargeBee billing data
+- New outbound communication scoped: one-time system-sender completion summary email, fixed non-editable template
+- Saved walkthrough progress is resumable indefinitely, including across future requirement changes, with no forced restarts
 
-**Actions:**
-- Rewrite the ticket to remove implementation prescription (it currently specifies Shepherd.js/Intro.js, Zustand store, specific API endpoints); keep only user-facing behavior and business rules
-- Extend step flow beyond Brand tab through Create Deal, Create Proposal, Send Proposal
-- Redefine completion criteria as customer-side "Proposal Viewed" activity, not proposal creation
-- Confirm with Jason/Ahmad whether this changes the blocked upstream dependency scope or can layer on top of it
-- Decide cold vs. warm signup treatment (open question from last sync) with this new finish line in mind
-- Instrument proposal-viewed as a trackable event tied to the wizard session, feeding Workstream 2
-
-> ⚠ **Assumption:** this ticket is the right vehicle for the expanded scope, and is the same effort as the Flow 1/Flow 2 wizard concept rather than a separate, narrower piece of it. (Note: this roadmap has already been linked directly into the ticket's comments, which is a strong signal it's being treated as the vehicle.)
+**Still open:**
+- Upstream dependency scope change with Jason/Ahmad remains unresolved, tracked separately, and is not blocking further ticket refinement
+- Instrumenting proposal-viewed as a trackable event tied to the wizard session, feeding Workstream 2, is not yet explicitly confirmed in the ticket
 
 ---
 
 ## Workstream 2: Activation Dashboard — Health Score Aligned to the Data
 **Status: On Track**
 
-[Activation Dashboard](https://app.clickup.com/t/86b9512kq) · In Progress, Internal Priority 1
+[Activation Dashboard V1 Expansion](https://app.clickup.com/t/86b9512kq) · In Progress, assigned to Ali Raza
 
 **Upstream dependency:** [Customer Success Activation Tracking (90-Day Milestone)](https://app.clickup.com/t/86b72rqzq) · Pushed to Production, Dec 2025
 
 Rick recommends retiring the current activation definition (10k in sales + A2P verification) in favor of a directable, leading metric: a proposal viewed by a customer plus 3+ deals worked, within the first 30 to 60 days. Signing a proposal has 3.94× retention lift; 3+ deals worked has 3.94× lift independently.
 
-Confirmed directly in the dashboard ticket: the Health column's "Healthy" condition is coded as `totalSales >= $10,000 AND a2pActivated = true`, exactly the metric Rick says to retire.
-
-The $10k + A2P definition isn't owned by the dashboard ticket itself, it's computed upstream in 86b72rqzq and the dashboard just displays it. Redefining activation touches both tickets. The good news: no new instrumentation is needed. Proposal-viewed activity is already tracked ([Enhance Proposal Activity Tracking](https://app.clickup.com/t/86b61qexb), shipped), and Rick's own report confirms Proposal/Viewed events are already logged in the activity data. The dashboard's existing Est. Sent / Last Est. columns are close but track whether an estimate was sent, not whether the customer opened it.
+**Resolved (July 8):** Decided as Option A, parallel signal. Prop. Viewed and Deals (90d) columns have been added to the ticket, sourced from existing proposal activity tracking with no new instrumentation required. Corresponding filters and a new Metrics Bar card were added alongside them. Health scoring, the $10k filter, and A2P filters remain unchanged in this ticket; no coordinated change was made to the 90-Day Activation Rule ticket. Full Health redefinition (Option B) is logged as an Out of Scope / Phase 2 item for future consideration.
 
 **Actions:**
-- Decide whether 86b72rqzq's underlying milestone definition changes, or whether the new leading indicator is added as a parallel signal alongside it
-- Add a "Proposal Viewed" signal to the dashboard using existing activity data, no new tracking required
-- Add a "Deals Worked (90d)" or similar signal per Rick's 3+ deals threshold
-- Decide how legacy accounts are handled, they have no 90-day window today by design, so a 30-to-60-day leading indicator needs an explicit rule for them
+- ~~Decide whether 86b72rqzq's underlying milestone definition changes, or whether the new leading indicator is added as a parallel signal alongside it~~ Resolved: parallel signal, no change to 86b72rqzq
+- ~~Add a "Proposal Viewed" signal to the dashboard using existing activity data~~ Done
+- ~~Add a "Deals Worked (90d)" or similar signal per Rick's 3+ deals threshold~~ Done
+- Decide how legacy accounts are handled for the new Prop. Viewed and Deals (90d) signals specifically; legacy accounts currently display — for both, same as other milestone fields
 - Connect this to the unscoped Renewal Risk Flag (Phase 2 stub, ticket 86bajkxdy), which maps closely to Rick's "activated-then-left" churn segment, but is still waiting on thresholds from Tanner/Mary/Eli
 - Keep the CS Feedback Flag column and filter work moving; no change to that scope
 
