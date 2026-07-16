@@ -123,6 +123,7 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
 .h-warning{background:#fef3c7;color:#92400e;}
 .h-critical{background:#fee2e2;color:#991b1b;}
 .h-inactive{background:#f3f4f6;color:#6b7280;}
+.h-high-risk{background:#ffe4cc;color:#9a3412;}
 /* Login event type styles */
 .login-cell{display:flex;flex-direction:column;gap:2px;min-width:0;}
 .login-primary{font-size:11px;font-weight:500;white-space:nowrap;}
@@ -180,6 +181,9 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
 .ms-item input[type=checkbox]{accent-color:#7C3AED;width:13px;height:13px;cursor:pointer;flex-shrink:0;}
 .ms-footer{padding:6px 14px;font-size:11px;color:#7C3AED;cursor:pointer;font-weight:600;text-align:center;border-top:1px solid #f3f4f6;border-radius:0 0 8px 8px;}
 .ms-footer:hover{background:#faf5ff;}
+.ms-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid #f3f4f6;position:sticky;top:0;background:white;z-index:1;}
+.ms-header span{font-size:12px;font-weight:700;color:#7C3AED;cursor:pointer;}
+.ms-header span:hover{text-decoration:underline;}
 /* --- CS Flags group --- */
 .cg-csflags{background:#be185d;}
 thead tr.col-row th.col-csflag{background:#fff1f2;}
@@ -276,10 +280,10 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
         <div class="multi-select" id="ms-plan">
           <button class="ms-btn" onclick="toggleMS('ms-plan')"><span class="ms-label">All Plans</span><span class="ms-caret">&#9660;</span></button>
           <div class="ms-panel" id="ms-plan-panel">
-            <label class="ms-item"><input type="checkbox" value="Pro" onchange="msChange('ms-plan')"> Pro ($79/m)</label>
+            <div class="ms-header"><span onclick="selectAllMS('ms-plan')">Select all</span><span onclick="clearMS('ms-plan')">Clear</span></div>
+            <label class="ms-item"><input type="checkbox" value="Pro" onchange="msChange('ms-plan')"> Pro ($97/m)</label>
             <label class="ms-item"><input type="checkbox" value="Advanced" onchange="msChange('ms-plan')"> Advanced &mdash; Legacy ($147/m)</label>
             <label class="ms-item"><input type="checkbox" value="none" onchange="msChange('ms-plan')"> No Active Plan</label>
-            <div class="ms-footer" onclick="clearMS('ms-plan')">Clear</div>
           </div>
         </div>
       </div>
@@ -288,11 +292,11 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
         <div class="multi-select" id="ms-health">
           <button class="ms-btn" onclick="toggleMS('ms-health')"><span class="ms-label">All Statuses</span><span class="ms-caret">&#9660;</span></button>
           <div class="ms-panel" id="ms-health-panel">
+            <div class="ms-header"><span onclick="selectAllMS('ms-health')">Select all</span><span onclick="clearMS('ms-health')">Clear</span></div>
             <label class="ms-item"><input type="checkbox" value="On Track" onchange="msChange('ms-health')"> &#x1F7E2; On Track</label>
             <label class="ms-item"><input type="checkbox" value="Needs Attention" onchange="msChange('ms-health')"> &#x1F7E1; Needs Attention</label>
             <label class="ms-item"><input type="checkbox" value="At Risk" onchange="msChange('ms-health')"> &#x1F534; At Risk</label>
             <label class="ms-item"><input type="checkbox" value="Inactive" onchange="msChange('ms-health')"> &#x25A1; Inactive</label>
-            <div class="ms-footer" onclick="clearMS('ms-health')">Clear</div>
           </div>
         </div>
       </div>
@@ -309,7 +313,7 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
         <div class="multi-select" id="ms-obcss">
           <button class="ms-btn" onclick="toggleMS('ms-obcss')"><span class="ms-label">All Team Members</span><span class="ms-caret">&#9660;</span></button>
           <div class="ms-panel" id="ms-obcss-panel">
-            <div class="ms-footer" onclick="clearMS('ms-obcss')">Clear</div>
+            <div class="ms-header"><span onclick="selectAllMS('ms-obcss')">Select all</span><span onclick="clearMS('ms-obcss')">Clear</span></div>
           </div>
         </div>
       </div>
@@ -318,12 +322,10 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
         <div class="multi-select" id="ms-industry">
           <button class="ms-btn" onclick="toggleMS('ms-industry')"><span class="ms-label">All Industries</span><span class="ms-caret">&#9660;</span></button>
           <div class="ms-panel" id="ms-industry-panel">
-            <div class="ms-footer" onclick="clearMS('ms-industry')">Clear</div>
+            <div class="ms-header"><span onclick="selectAllMS('ms-industry')">Select all</span><span onclick="clearMS('ms-industry')">Clear</span></div>
           </div>
         </div>
       </div>
-      <div class="filter-divider"></div>
-      <div class="filter-section-label">Account Data</div>
       <div class="filter-group">
         <label class="filter-label">Active Users</label>
         <select class="filter-select" id="f-users" onchange="applyFilters()">
@@ -347,6 +349,22 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
           <option value="">All</option>
           <option value="yes">Yes</option>
           <option value="no">No</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Prop. Viewed</label>
+        <select class="filter-select" id="f-propviewed" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Deals (90d)</label>
+        <select class="filter-select" id="f-deals90d" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="3plus">3+</option>
+          <option value="under3">Under 3</option>
         </select>
       </div>
       <div class="filter-group">
@@ -374,13 +392,12 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
           <option value="none">None</option>
         </select>
       </div>
-      <div class="filter-divider"></div>
-      <div class="filter-section-label">Integrations, Automations, &amp; Add-Ons</div>
       <div class="filter-group">
         <label class="filter-label">Integration</label>
         <div class="multi-select" id="ms-integration">
           <button class="ms-btn" onclick="toggleMS('ms-integration')"><span class="ms-label">All Integrations</span><span class="ms-caret">&#9660;</span></button>
           <div class="ms-panel" id="ms-integration-panel">
+            <div class="ms-header"><span onclick="selectAllMS('ms-integration')">Select all</span><span onclick="clearMS('ms-integration')">Clear</span></div>
             <label class="ms-item"><input type="checkbox" value="google" onchange="msChange('ms-integration')"> Google</label>
             <label class="ms-item"><input type="checkbox" value="qbo" onchange="msChange('ms-integration')"> QBO</label>
             <label class="ms-item"><input type="checkbox" value="qbt" onchange="msChange('ms-integration')"> QBT</label>
@@ -388,7 +405,6 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
             <label class="ms-item"><input type="checkbox" value="quo" onchange="msChange('ms-integration')"> Quo</label>
             <label class="ms-item"><input type="checkbox" value="companyCam" onchange="msChange('ms-integration')"> CompanyCam</label>
             <label class="ms-item"><input type="checkbox" value="routemize" onchange="msChange('ms-integration')"> Routemize</label>
-            <div class="ms-footer" onclick="clearMS('ms-integration')">Clear</div>
           </div>
         </div>
       </div>
@@ -397,9 +413,9 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
         <div class="multi-select" id="ms-automation">
           <button class="ms-btn" onclick="toggleMS('ms-automation')"><span class="ms-label">All Automations</span><span class="ms-caret">&#9660;</span></button>
           <div class="ms-panel" id="ms-automation-panel">
+            <div class="ms-header"><span onclick="selectAllMS('ms-automation')">Select all</span><span onclick="clearMS('ms-automation')">Clear</span></div>
             <label class="ms-item"><input type="checkbox" value="zapier" onchange="msChange('ms-automation')"> Zapier</label>
             <label class="ms-item"><input type="checkbox" value="angi" onchange="msChange('ms-automation')"> Angi Leads</label>
-            <div class="ms-footer" onclick="clearMS('ms-automation')">Clear</div>
           </div>
         </div>
       </div>
@@ -408,11 +424,11 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
         <div class="multi-select" id="ms-addon">
           <button class="ms-btn" onclick="toggleMS('ms-addon')"><span class="ms-label">All Add-Ons</span><span class="ms-caret">&#9660;</span></button>
           <div class="ms-panel" id="ms-addon-panel">
+            <div class="ms-header"><span onclick="selectAllMS('ms-addon')">Select all</span><span onclick="clearMS('ms-addon')">Clear</span></div>
             <label class="ms-item"><input type="checkbox" value="prodRates" onchange="msChange('ms-addon')"> Prod Rates</label>
             <label class="ms-item"><input type="checkbox" value="jobCost" onchange="msChange('ms-addon')"> Job Cost</label>
             <label class="ms-item"><input type="checkbox" value="textMsg" onchange="msChange('ms-addon')"> Text MSG</label>
             <label class="ms-item"><input type="checkbox" value="jobiAi" onchange="msChange('ms-addon')"> Jobi AI</label>
-            <div class="ms-footer" onclick="clearMS('ms-addon')">Clear</div>
           </div>
         </div>
       </div>
@@ -460,6 +476,7 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
           </optgroup>
         </select>
       </div>
+
     </div>
   </div>
   <div class="metrics-row" id="metrics-row"></div>
@@ -514,8 +531,8 @@ tfoot td.col-csflag.group-sep{border-left:2px solid #fb7185;}
 var OBCSS_TEAM=['Matt Fournier','Ximena Jimenez','Juan Quintero','Daniel Lee','Kennedy Smith','Alexis Calderon'];
 var INDUSTRIES=['Painting - Residential','Painting - Commercial','Painting - Industrial','Gutters & Drainage','Epoxy Flooring','Garage Floor Coatings','Concrete - Decorative','Concrete - Flatwork','Concrete - Stamped','Deck & Fence','Cabinet Refinishing','Drywall & Texture','Power Washing','Roof Coating','General Contractor'];
 /* Plan costs sourced from Company Settings > Company Information > Account Status (local DB) */
-var PLAN_COSTS={Pro:79,Advanced:147};
-var HEALTH_ORDER={'At Risk':0,'Needs Attention':1,'Inactive':2,'On Track':3};
+var PLAN_COSTS={Pro:97,Advanced:147};
+var HEALTH_ORDER={'Critical':0,'High Risk':1,'Warning':2,'Inactive':3,'On Track':4,'Healthy':5};
 var PREFIXES=['Elite','Premium','Pro','Master','Superior','Quality','Precision','Expert','Prime','Apex','Summit','Peak','Crown','Royal','Diamond','Platinum','Certified','Licensed','Heritage','Legacy','Custom','Artisan','Craftsman','Professional','Reliable'];
 var MIDDLES=['Painting','Paint','Coatings','Finishes','Colors','Gutters','Seamless Gutters','Epoxy','Floor Coating','Garage Floor','Concrete','Flatwork','Deck','Fence','Drywall','Texture','Cabinet','Exterior','Power Wash','Stamped Concrete'];
 var SUFFIXES=['LLC','Inc','Co','Corp','Services','Solutions','Pros','Group','Team','Masters','Works','Experts','Specialists','Enterprises'];
@@ -536,8 +553,9 @@ function generateCompanies(total){
     do{name=genName();tries++;}while(used[name]&&tries<20);
     used[name]=true;
     var isLegacy=i<legacyCount,created;
-    if(isLegacy){var lo=new Date('2022-01-01').getTime(),hi=new Date('2025-12-27').getTime();created=new Date(lo+Math.random()*(hi-lo));}
-    else{var lo2=new Date('2025-12-28').getTime(),hi2=new Date('2026-03-31').getTime();created=new Date(lo2+Math.random()*(hi2-lo2));}
+    var newWindowCutoff=now.getTime()-100*86400000;
+    if(isLegacy){var lo=newWindowCutoff-1460*86400000,hi=newWindowCutoff;created=new Date(lo+Math.random()*(hi-lo));}
+    else{var lo2=newWindowCutoff,hi2=now.getTime();created=new Date(lo2+Math.random()*(hi2-lo2));}
     var daysAgo=Math.floor((now-created)/86400000);
     var isActive=isLegacy?Math.random()<0.76:Math.random()<0.89;
     var plan=null;
@@ -551,15 +569,22 @@ function generateCompanies(total){
     var reached10k=totalSales>=10000;
     var a2pApplied=isActive&&(daysAgo>7?Math.random()<0.78:Math.random()<0.25);
     var a2pActivated=a2pApplied&&(daysAgo>14?Math.random()<0.87:Math.random()<0.42);
-    var daysRemaining=(!isLegacy&&isActive)?Math.max(0,90-daysAgo):null;
+    var daysRemaining=(!isLegacy)?Math.max(0,90-daysAgo):null;
     var industry=Math.random()<0.70?ri(INDUSTRIES):null;
-    var obcss=ri(OBCSS_TEAM);
+    var obcss=Math.random()<0.08?null:ri(OBCSS_TEAM);
     var estimateSent=isActive&&daysAgo>3&&Math.random()<0.76;
     var daysSinceEst=estimateSent?(Math.random()<0.72?rd(0,13):rd(14,50)):null;
     var estimateGoneQuiet=estimateSent&&daysSinceEst!=null&&daysSinceEst>=14;
+    /* Prop. Viewed (Rule 20): new accounts only, parallel signal to Est. Sent. */
+    var propViewed=isLegacy?null:(estimateSent&&Math.random()<0.64);
+    /* Deals (90d) (Rule 21): new accounts only, count of deals updated within the 90-day activation window */
+    var deals90d=isLegacy?null:(isActive?rd(0,7):0);
     /* Add-on status only (no cost display) */
     function mkAddon(){if(!isActive||!plan)return{active:false};return{active:Math.random()<(plan==='Advanced'?0.52:0.28)};}
     var prodRates=mkAddon(),jobCost=mkAddon(),textMsg=mkAddon(),jobiAi=mkAddon();
+    /* A2P registration requires the Text Messaging add-on. If A2P has been applied AND activated
+       (A2P Status = Active), Text Messaging cannot show No. */
+    if(a2pApplied&&a2pActivated&&!textMsg.active)textMsg={active:true};
     /* Integration flags */
     var googleInt=isActive&&Math.random()<0.42,qboInt=isActive&&Math.random()<0.31,qbtInt=isActive&&Math.random()<0.18;
     var acornInt=isActive&&Math.random()<0.14,quoInt=isActive&&Math.random()<0.22;
@@ -601,23 +626,25 @@ function generateCompanies(total){
         lastImpersonateAdminUser=ri(ADMIN_TEAM); /* the CS user doing the impersonating */
       }
     }
-    /* Health — based on signals the system tracks:
-       At Risk:  SMS not applied after 14 days, or no revenue after 60 days, or estimate gone quiet (14+ day gap)
-       On Track: Estimate sent + A2P activated + revenue > 0
-       Needs Attention: Active but not all signals green
-       Inactive: Account not active */
+    /* Health (Rule 12): 7-condition priority table, first match wins. */
+    var milestoneUnmet=(totalSales<10000||!a2pActivated);
     var health;
     if(!isActive){health='Inactive';}
-    else if((!a2pApplied&&daysAgo>14)||(totalSales===0&&daysAgo>60)||estimateGoneQuiet){health='At Risk';}
-    else if(estimateSent&&a2pActivated&&totalSales>0){health='On Track';}
-    else{health='Needs Attention';}
+    else if(totalSales>=10000&&a2pActivated){health='Healthy';}
+    else if(!isLegacy&&daysRemaining!==null&&daysRemaining<10&&milestoneUnmet){health='Critical';}
+    else if(!isLegacy&&daysRemaining!==null&&daysRemaining<30&&milestoneUnmet){health='High Risk';}
+    else if(!isLegacy&&daysRemaining!==null&&daysRemaining<60&&milestoneUnmet){health='Warning';}
+    else if(isLegacy&&milestoneUnmet){health='Warning';}
+    else{health='On Track';}
+    /* Health filter category (Rule 12 note): Healthy/On Track -> On Track; Warning -> Needs Attention; High Risk/Critical -> At Risk; Inactive -> Inactive */
+    var healthCategory=(health==='Healthy'||health==='On Track')?'On Track':(health==='Warning')?'Needs Attention':(health==='High Risk'||health==='Critical')?'At Risk':'Inactive';
     var cfInt=null,cfIntDate=null,cfOb=null,cfObDate=null;
     if(isActive){
       if(Math.random()<0.08){cfInt=Math.random()<0.70?'bad':'terrible';cfIntDate=new Date(now.getTime()-rd(0,30)*86400000);}
       if(Math.random()<0.06){cfOb=Math.random()<0.60?'2star':'1star';cfObDate=new Date(now.getTime()-rd(0,45)*86400000);}
     }
     var csFeedback={intercom:cfInt,intercomDate:cfIntDate,ob:cfOb,obDate:cfObDate};
-    out.push({tenantId:genTid(),name:name,isLegacy:isLegacy,created:created,createdStr:fmtDate(created),daysAgo:daysAgo,isActive:isActive,sub:isActive?'Active':'Inactive',totalSales:totalSales,reached10k:reached10k,a2pApplied:a2pApplied,a2pActivated:a2pActivated,industry:industry,obcss:obcss,daysRemaining:daysRemaining,plan:plan,planCost:planCost,prodRates:prodRates,jobCost:jobCost,textMsg:textMsg,jobiAi:jobiAi,health:health,estimateSent:estimateSent,daysSinceEst:daysSinceEst,activeUsers:activeUsers,contacts:contacts,googleInt:googleInt,qboInt:qboInt,qbtInt:qbtInt,acornInt:acornInt,quoInt:quoInt,companyCamInt:companyCamInt,routemizeInt:routemizeInt,zapierInt:zapierInt,angiInt:angiInt,lastTrueLoginDate:lastTrueLoginDate,lastTrueLoginUser:lastTrueLoginUser,lastAdminAccessDate:lastAdminAccessDate,lastAdminAccessUser:lastAdminAccessUser,lastImpersonateDate:lastImpersonateDate,lastImpersonateUser:lastImpersonateUser,lastImpersonateAdminUser:lastImpersonateAdminUser,csFeedback:csFeedback});
+    out.push({tenantId:genTid(),name:name,isLegacy:isLegacy,created:created,createdStr:fmtDate(created),daysAgo:daysAgo,isActive:isActive,sub:isActive?'Active':'Inactive',totalSales:totalSales,reached10k:reached10k,a2pApplied:a2pApplied,a2pActivated:a2pActivated,industry:industry,obcss:obcss,daysRemaining:daysRemaining,plan:plan,planCost:planCost,prodRates:prodRates,jobCost:jobCost,textMsg:textMsg,jobiAi:jobiAi,health:health,healthCategory:healthCategory,propViewed:propViewed,deals90d:deals90d,estimateSent:estimateSent,daysSinceEst:daysSinceEst,activeUsers:activeUsers,contacts:contacts,googleInt:googleInt,qboInt:qboInt,qbtInt:qbtInt,acornInt:acornInt,quoInt:quoInt,companyCamInt:companyCamInt,routemizeInt:routemizeInt,zapierInt:zapierInt,angiInt:angiInt,lastTrueLoginDate:lastTrueLoginDate,lastTrueLoginUser:lastTrueLoginUser,lastAdminAccessDate:lastAdminAccessDate,lastAdminAccessUser:lastAdminAccessUser,lastImpersonateDate:lastImpersonateDate,lastImpersonateUser:lastImpersonateUser,lastImpersonateAdminUser:lastImpersonateAdminUser,csFeedback:csFeedback});
   }
   return out;
 }
@@ -717,7 +744,7 @@ function getSortVal(c,col){
     case 8:return c.reached10k?1:0;
     case 9:return c.a2pApplied?1:0;
     case 10:return c.a2pActivated?2:(c.a2pApplied?1:0);
-    case 11:return c.obcss.toLowerCase();
+    case 11:return(c.obcss||'').toLowerCase();
     case 12:return c.daysRemaining!==null?c.daysRemaining:9999;
     case 13:return(c.plan||'').toLowerCase();
     case 14:return c.planCost||0;
@@ -742,6 +769,8 @@ function getSortVal(c,col){
     case 38:return c.lastTrueLoginDate?c.lastTrueLoginDate.getTime():0;
     case 39:return(c.lastTrueLoginUser||'').toLowerCase();
     case 40:var cv=getCfVal(c);var obW={'1star':5,'2star':4,'3star':3,'4star':2,'5star':1};var intW={terrible:5,bad:3};return Math.max(obW[cv.ob]||0,intW[cv.intercom]||0);
+    case 41:return c.propViewed===null?-1:(c.propViewed?1:0);
+    case 42:return c.deals90d===null?-1:c.deals90d;
     default:return'';
   }
 }
@@ -759,7 +788,7 @@ function applySort(){if(sortCol===null)return;filtered.sort(function(a,b){var av
 function updateSortUI(){var ths=document.querySelectorAll('#col-headers th');for(var i=0;i<ths.length;i++){var th=ths[i],col=parseInt(th.getAttribute('data-col')),icon=th.querySelector('.sort-icon');if(col===sortCol){th.classList.add('sort-active');if(icon)icon.innerHTML=sortDir==='asc'?'&#x2191;':'&#x2193;';}else{th.classList.remove('sort-active');if(icon)icon.innerHTML='&#x21C5;';}}}
 function initSortHeaders(){var ths=document.querySelectorAll('#col-headers th');for(var i=0;i<ths.length;i++){ths[i].addEventListener('click',(function(th){return function(){var col=parseInt(th.getAttribute('data-col'));if(sortCol===col){sortDir=sortDir==='asc'?'desc':'asc';}else{sortCol=col;sortDir='asc';}applySort();updateSortUI();page=1;render();};})(ths[i]));}}
 
-function hBadge(h){var m={'On Track':'h-on-track','Needs Attention':'h-warning','At Risk':'h-critical','Inactive':'h-inactive'};return'<span class="badge '+(m[h]||'h-inactive')+'">'+h+'</span>';}
+function hBadge(h){var m={'Healthy':'h-on-track','On Track':'h-on-track','Warning':'h-warning','High Risk':'h-high-risk','Critical':'h-critical','Inactive':'h-inactive'};return'<span class="badge '+(m[h]||'h-inactive')+'">'+h+'</span>';}
 function pBadge(p){if(!p)return'<span style="color:#d1d5db;">\u2014</span>';var m={Pro:'p-pro',Advanced:'p-advanced'};return'<span class="badge '+(m[p]||'p-pro')+'">'+p+(p==='Advanced'?' \u2605':'')+'</span>';}
 function ynCell(ao){return ao.active?'<span class="badge b-success">Yes</span>':'<span class="badge b-gray">No</span>';}
 function intCell(v){return v?'<span class="badge b-success">Yes</span>':'<span class="badge b-gray">No</span>';}
@@ -843,10 +872,12 @@ function mkRow(c){
     '<td><strong>'+fmtD(c.totalSales)+'</strong></td>'+
     '<td>'+tenk+'</td>'+
     '<td>'+estSentCell+'</td>'+
+    '<td>'+(c.propViewed===null?'<span style="color:#d1d5db;">\u2014</span>':(c.propViewed?'<span class="badge b-success">Yes</span>':'<span class="badge b-gray">No</span>'))+'</td>'+
     '<td>'+lastEstCell+'</td>'+
+    '<td>'+(c.deals90d===null?'<span style="color:#d1d5db;">\u2014</span>':'<span style="color:'+(c.deals90d>=3?'#059669;font-weight:700;':'#6b7280;')+'">'+c.deals90d+'</span>')+'</td>'+
     '<td><span class="badge '+(c.a2pApplied?'b-success':'b-gray')+'">'+(c.a2pApplied?'Yes':'No')+'</span></td>'+
     '<td><span class="badge '+a2pCls+'">'+a2pLbl+'</span></td>'+
-    '<td>'+c.obcss+'</td>'+
+    '<td>'+(c.obcss||'<span style="color:#d1d5db;">\u2014</span>')+'</td>'+
     '<td>'+drCell+'</td>'+
     '<td class="col-plan group-sep">'+pBadge(c.plan)+'</td>'+
     '<td class="col-plan">'+(c.planCost?'<strong>$'+c.planCost+'</strong>':'<span style="color:#d1d5db;">\u2014</span>')+'</td>'+
@@ -890,7 +921,7 @@ function renderTotals(co){
     '<td class="col-csflag"></td>'+
     '<td></td>'+
     '<td>'+fmtD(tS)+'</td>'+
-    '<td></td><td></td><td></td><td></td><td></td><td></td><td></td>'+
+    '<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>'+
     '<td class="col-plan group-sep" style="color:#059669;font-weight:700;">'+fmtD(tM)+'/m</td>'+
     '<td class="col-plan"></td>'+
     '<td class="col-addons group-sep"></td><td class="col-addons"></td><td class="col-addons"></td><td class="col-addons"></td>'+
@@ -899,18 +930,30 @@ function renderTotals(co){
 }
 
 function renderMetrics(co){
-  var total=co.length,legacy=0,active=0,onTrack=0,needsAttn=0,atRisk=0;
-  for(var i=0;i<co.length;i++){var c=co[i];if(c.isLegacy)legacy++;if(c.isActive)active++;if(c.health==='On Track')onTrack++;if(c.health==='Needs Attention')needsAttn++;if(c.health==='At Risk')atRisk++;}
-  function card(id,colorCls,label,value,sub){
+  var total=co.length,legacy=0,active=0,healthy=0,highRisk=0,critical=0,planRev=0,newTotal=0,propViewedYes=0;
+  for(var i=0;i<co.length;i++){
+    var c=co[i];
+    if(c.isLegacy)legacy++;else newTotal++;
+    if(c.isActive)active++;
+    if(c.health==='Healthy')healthy++;
+    if(c.health==='High Risk')highRisk++;
+    if(c.health==='Critical')critical++;
+    planRev+=(c.planCost||0);
+    if(!c.isLegacy&&c.propViewed)propViewedYes++;
+  }
+  function card(id,colorCls,label,value,sub,clickable){
     var isActive=activeMetricCard===id;
-    return'<div class="metric-card '+colorCls+(isActive?' mc-active':'')+'" onclick="filterByCard(\''+id+'\')" title="Click to filter by '+label+'"><div class="mc-label">'+label+'</div><div class="mc-value">'+value+'</div><div class="mc-sub">'+sub+'</div></div>';
+    var clickAttr=clickable===false?'':' onclick="filterByCard(\''+id+'\')" title="Click to filter by '+label+'"';
+    return'<div class="metric-card '+colorCls+(isActive?' mc-active':'')+'"'+clickAttr+'><div class="mc-label">'+label+'</div><div class="mc-value">'+value+'</div><div class="mc-sub">'+sub+'</div></div>';
   }
   document.getElementById('metrics-row').innerHTML=
     card('total','c-purple','Total Accounts',total.toLocaleString(),(total-legacy).toLocaleString()+' new \u00b7 '+legacy.toLocaleString()+' legacy')+
     card('active','c-green','Active Subscriptions',active.toLocaleString(),Math.round(active/Math.max(total,1)*100)+'% of accounts')+
-    card('on-track','c-green','On Track',onTrack.toLocaleString(),Math.round(onTrack/Math.max(total,1)*100)+'% all signals green')+
-    card('needs-attention','c-amber','Needs Attention',needsAttn.toLocaleString(),'Partial progress \u2014 missing signals')+
-    card('at-risk','c-red','At Risk',atRisk.toLocaleString(),'Major red flags \u2014 needs immediate action');
+    card('healthy','c-green','Healthy Accounts',healthy.toLocaleString(),Math.round(healthy/Math.max(total,1)*100)+'% fully activated')+
+    card('prop-viewed','c-green','Prop. Viewed',propViewedYes.toLocaleString(),Math.round(propViewedYes/Math.max(newTotal,1)*100)+'% of new accounts',false)+
+    card('high-risk','c-amber','High Risk',highRisk.toLocaleString(),'10\u201329 days left, missing milestone')+
+    card('critical','c-red','Critical',critical.toLocaleString(),'<10 days left, needs action')+
+    card('plan-rev','c-purple','Total Plan Rev. (visible)','$'+planRev.toLocaleString(),'Active plan subscriptions only',false);
 }
 
 var integrationsExpanded=false,automationsExpanded=false;
@@ -933,7 +976,9 @@ function renderColHeaders(){
     '<th data-col="7" style="min-width:100px;">Total Sales<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="8" style="min-width:70px;">$10k<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="36" style="min-width:80px;">Est. Sent<span class="sort-icon">&#x21C5;</span></th>'+
+    '<th data-col="41" style="min-width:90px;">Prop. Viewed<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="37" style="min-width:80px;">Last Est.<span class="sort-icon">&#x21C5;</span></th>'+
+    '<th data-col="42" style="min-width:90px;">Deals (90d)<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="9" style="min-width:82px;">A2P Applied<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="10" style="min-width:82px;">A2P Status<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="11" style="min-width:130px;">OBCSS<span class="sort-icon">&#x21C5;</span></th>'+
@@ -1019,6 +1064,7 @@ function applyFilters(){
   var type=document.getElementById('f-type').value,sub=document.getElementById('f-sub').value;
   var usr=document.getElementById('f-users').value,con=document.getElementById('f-contacts').value,est=document.getElementById('f-estsent').value;
   var tenk=document.getElementById('f-10k').value,a2pApp=document.getElementById('f-a2papplied').value,a2pSt=document.getElementById('f-a2pstatus').value;
+  var propViewedFilter=document.getElementById('f-propviewed').value,deals90dFilter=document.getElementById('f-deals90d').value;
   var loginFilter=document.getElementById('f-lastlogin').value,lastUserQ=(document.getElementById('f-lastuser').value||'').toLowerCase().trim();
   var loginTypeFilter=document.getElementById('f-logintype').value;
   var cfFeedbackFilter=document.getElementById('f-csfeedback').value;
@@ -1029,9 +1075,9 @@ function applyFilters(){
     if(type==='new'&&c.isLegacy)return false;
     if(type==='legacy'&&!c.isLegacy)return false;
     if(selPlan.length){var pm=false;for(var i=0;i<selPlan.length;i++){if(selPlan[i]==='none'&&!c.plan)pm=true;else if(c.plan===selPlan[i])pm=true;}if(!pm)return false;}
-    if(selHealth.length&&selHealth.indexOf(c.health)<0)return false;
+    if(selHealth.length&&selHealth.indexOf(c.healthCategory)<0)return false;
     if(sub&&c.sub!==sub)return false;
-    if(selOb.length&&selOb.indexOf(c.obcss)<0)return false;
+    if(selOb.length){var obMatch=false;for(var oi=0;oi<selOb.length;oi++){if(selOb[oi]==='__unassigned__'&&!c.obcss)obMatch=true;else if(c.obcss===selOb[oi])obMatch=true;}if(!obMatch)return false;}
     if(selInd.length&&selInd.indexOf(c.industry||'')<0)return false;
     if(selAddon.length){var addonMap={prodRates:c.prodRates&&c.prodRates.active,jobCost:c.jobCost&&c.jobCost.active,textMsg:c.textMsg&&c.textMsg.active,jobiAi:c.jobiAi&&c.jobiAi.active};var addonMatch=false;for(var ai=0;ai<selAddon.length;ai++){if(addonMap[selAddon[ai]])addonMatch=true;}if(!addonMatch)return false;}
     if(usr==='flagged'&&c.activeUsers>=2)return false;
@@ -1048,6 +1094,8 @@ function applyFilters(){
     if(a2pSt==='active'&&!c.a2pActivated)return false;
     if(a2pSt==='pending'&&!(c.a2pApplied&&!c.a2pActivated))return false;
     if(a2pSt==='none'&&c.a2pApplied)return false;
+    if(propViewedFilter){if(c.isLegacy)return false;if(propViewedFilter==='yes'&&!c.propViewed)return false;if(propViewedFilter==='no'&&c.propViewed)return false;}
+    if(deals90dFilter){if(c.isLegacy)return false;if(deals90dFilter==='3plus'&&!(c.deals90d>=3))return false;if(deals90dFilter==='under3'&&!(c.deals90d<3))return false;}
     if(selInteg.indexOf('google')>=0&&!c.googleInt)return false;
     if(selInteg.indexOf('qbo')>=0&&!c.qboInt)return false;
     if(selInteg.indexOf('qbt')>=0&&!c.qbtInt)return false;
@@ -1107,6 +1155,8 @@ function clearAllFilters(){
   document.getElementById('f-10k').value='';
   document.getElementById('f-a2papplied').value='';
   document.getElementById('f-a2pstatus').value='';
+  document.getElementById('f-propviewed').value='';
+  document.getElementById('f-deals90d').value='';
   document.getElementById('f-lastlogin').value='';
   document.getElementById('f-lastuser').value='';
   document.getElementById('f-logintype').value='';
@@ -1122,11 +1172,12 @@ function filterByCard(id){
   document.getElementById('f-search').value='';document.getElementById('f-type').value='';
   document.getElementById('f-sub').value='';document.getElementById('f-users').value='';document.getElementById('f-contacts').value='';
   document.getElementById('f-estsent').value='';document.getElementById('f-10k').value='';document.getElementById('f-a2papplied').value='';document.getElementById('f-a2pstatus').value='';
+  document.getElementById('f-propviewed').value='';document.getElementById('f-deals90d').value='';
   document.getElementById('f-lastlogin').value='';document.getElementById('f-lastuser').value='';document.getElementById('f-logintype').value='';
   ['ms-plan','ms-health','ms-obcss','ms-industry','ms-addon','ms-integration','ms-automation'].forEach(function(k){if(MS[k])MS[k].clear();var p=document.getElementById(k+'-panel');if(p)p.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.checked=false;});updateMSBtn(k);});
   if(id==='active'){document.getElementById('f-sub').value='Active';}
-  else if(id==='on-track'||id==='needs-attention'||id==='at-risk'){
-    var val={'on-track':'On Track','needs-attention':'Needs Attention','at-risk':'At Risk'}[id];
+  else if(id==='healthy'||id==='high-risk'||id==='critical'){
+    var val={'healthy':'On Track','high-risk':'At Risk','critical':'At Risk'}[id];
     if(!MS['ms-health'])MS['ms-health']=new Set();
     MS['ms-health'].add(val);
     var panel=document.getElementById('ms-health-panel');
@@ -1148,10 +1199,18 @@ function changePageSize(){
 }
 
 function populateDropdowns(){
-  var obPanel=document.getElementById('ms-obcss-panel'),obFooter=obPanel.querySelector('.ms-footer');
-  OBCSS_TEAM.forEach(function(n){var lbl=document.createElement('label');lbl.className='ms-item';lbl.innerHTML='<input type="checkbox" value="'+n+'" onchange="msChange(\'ms-obcss\')"> '+n;obPanel.insertBefore(lbl,obFooter);});
-  var indPanel=document.getElementById('ms-industry-panel'),indFooter=indPanel.querySelector('.ms-footer');
-  INDUSTRIES.slice().sort().forEach(function(n){var lbl=document.createElement('label');lbl.className='ms-item';lbl.innerHTML='<input type="checkbox" value="'+n+'" onchange="msChange(\'ms-industry\')"> '+n;indPanel.insertBefore(lbl,indFooter);});
+  var obPanel=document.getElementById('ms-obcss-panel');
+  OBCSS_TEAM.forEach(function(n){var lbl=document.createElement('label');lbl.className='ms-item';lbl.innerHTML='<input type="checkbox" value="'+n+'" onchange="msChange(\'ms-obcss\')"> '+n;obPanel.appendChild(lbl);});
+  var unassignedLbl=document.createElement('label');unassignedLbl.className='ms-item';unassignedLbl.innerHTML='<input type="checkbox" value="__unassigned__" onchange="msChange(\'ms-obcss\')"> No OBCSS assigned';obPanel.appendChild(unassignedLbl);
+  var indPanel=document.getElementById('ms-industry-panel');
+  INDUSTRIES.slice().sort().forEach(function(n){var lbl=document.createElement('label');lbl.className='ms-item';lbl.innerHTML='<input type="checkbox" value="'+n+'" onchange="msChange(\'ms-industry\')"> '+n;indPanel.appendChild(lbl);});
+}
+
+function selectAllMS(id){
+  if(!MS[id])MS[id]=new Set();
+  var panel=document.getElementById(id+'-panel');
+  panel.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.checked=true;MS[id].add(cb.value);});
+  updateMSBtn(id);applyFilters();
 }
 
 function exportCSV(){alert('[Prototype] Export would generate CSV \u2014 '+filtered.length.toLocaleString()+' rows \u00d7 31 columns.');}
