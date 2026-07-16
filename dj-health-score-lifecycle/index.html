@@ -695,6 +695,7 @@ function generateCompanies(total){
   return out;
 }
 
+var ALL_MAP={};
 var ALL=generateCompanies(1400),filtered=ALL.slice(),page=1,pageSize=25,sortCol=null,sortDir='asc';
 ALL.forEach(function(c){ALL_MAP[c.tenantId]=c;});
 var activeMetricCard=null;
@@ -1188,7 +1189,6 @@ function exportCSV(){alert('[Prototype] Export would generate CSV \u2014 '+filte
 function toggleNote(id){var el=document.getElementById(id);if(!el)return;var col=el.classList.toggle('collapsed');var btn=el.querySelector('.info-collapse-btn');if(btn)btn.innerHTML=col?'Show &#9660;':'Hide &#9650;';}
 var CS_FEEDBACK_OVERRIDES={};
 var CF_PANEL_OPEN=null;
-var ALL_MAP={};
 function getCfVal(c){return CS_FEEDBACK_OVERRIDES[c.tenantId]!==undefined?CS_FEEDBACK_OVERRIDES[c.tenantId]:(c.csFeedback||{intercom:null,intercomDate:null,ob:null,obDate:null});}
 function cfSignalBadge(source,rating,date){var emoji='',label='',cls='';if(source==='intercom'){if(rating==='bad'){emoji='\uD83D\uDE1F';label='Bad';cls='cf-sel-concern';}else{emoji='\uD83D\uDE21';label='Terrible';cls='cf-sel-escalated';}}else{if(rating==='2star'){emoji='\u2B50\u2B50';label='2 Stars';cls='cf-sel-concern';}else{emoji='\u2B50';label='1 Star';cls='cf-sel-escalated';}}var srcLbl=source==='intercom'?'Intercom':'OB';var dateStr='';if(date){var d=new Date(date);dateStr=' \u00b7 '+(d.getMonth()+1)+'/'+(d.getDate());}return'<div class="cf-signal"><span class="badge '+cls+'" style="font-size:10px;">'+emoji+' '+label+'</span><span class="cf-signal-source">'+srcLbl+dateStr+'</span></div>';}
 function cfCellHtml(c){var safeId='cfc-'+c.tenantId.replace(/[^a-z0-9]/gi,'');var val=getCfVal(c);var content='';if(val.intercom)content+=cfSignalBadge('intercom',val.intercom,val.intercomDate);if(val.ob)content+=cfSignalBadge('ob',val.ob,val.obDate);if(!content)content='<span style="color:#d1d5db;font-size:11px;" title="Click to set CS feedback">\u2014</span>';return'<td class="col-csflag cf-edit-cell" id="'+safeId+'" onclick="openCfPanel(\''+c.tenantId+'\',this)" title="Click to set CS feedback flags" style="vertical-align:middle;min-width:160px;">'+content+'</td>';}
