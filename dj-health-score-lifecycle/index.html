@@ -890,7 +890,9 @@ function mkRow(c){
     '<td><strong>'+fmtD(c.totalSales)+'</strong></td>'+
     '<td>'+tenk+'</td>'+
     '<td>'+estSentCell+'</td>'+
+    '<td>'+(c.propViewed===null?'<span style="color:#d1d5db;">\u2014</span>':(c.propViewed?'<span class="badge b-success">Yes</span>':'<span class="badge b-gray">No</span>'))+'</td>'+
     '<td>'+lastEstCell+'</td>'+
+    '<td>'+(c.deals90d===null?'<span style="color:#d1d5db;">\u2014</span>':'<span style="color:'+(c.deals90d>=3?'#059669;font-weight:700;':'#6b7280;')+'">'+c.deals90d+'</span>')+'</td>'+
     '<td><span class="badge '+(c.a2pApplied?'b-success':'b-gray')+'">'+(c.a2pApplied?'Yes':'No')+'</span></td>'+
     '<td><span class="badge '+a2pCls+'">'+a2pLbl+'</span></td>'+
     '<td>'+c.obcss+'</td>'+
@@ -914,8 +916,6 @@ function mkRow(c){
       '<td class="col-automations group-sep">'+intCell(c.zapierInt)+'</td>'+
       '<td class="col-automations">'+intCell(c.angiInt)+'</td>':
       '<td class="col-automations group-sep" style="width:0;min-width:0;padding:0;border:none;"></td>')+
-    '<td>'+(c.propViewed===null?'<span style="color:#d1d5db;">\u2014</span>':(c.propViewed?'<span class="badge b-success">Yes</span>':'<span class="badge b-gray">No</span>'))+'</td>'+
-    '<td>'+(c.deals90d===null?'<span style="color:#d1d5db;">\u2014</span>':'<span style="color:'+(c.deals90d>=3?'#059669;font-weight:700;':'#6b7280;')+'">'+c.deals90d+'</span>')+'</td>'+
     '</tr>';
 }
 
@@ -937,13 +937,12 @@ function renderTotals(co){
     '<td style="text-align:center;font-weight:700;color:#111827;">'+tC.toLocaleString()+'</td>'+
     '<td></td><td></td><td></td>'+
     '<td>'+fmtD(tS)+'</td>'+
-    '<td></td><td></td><td></td><td></td><td></td><td></td><td></td>'+
+    '<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>'+
     '<td class="col-plan group-sep" style="color:#059669;font-weight:700;">'+fmtD(tM)+'/m</td>'+
     '<td class="col-plan"></td>'+
     '<td class="col-addons group-sep"></td><td class="col-addons"></td><td class="col-addons"></td><td class="col-addons"></td>'+
     (integrationsExpanded?'<td class="col-integrations group-sep"></td><td class="col-integrations"></td><td class="col-integrations"></td><td class="col-integrations"></td><td class="col-integrations"></td><td class="col-integrations"></td><td class="col-integrations"></td>':'<td class="col-integrations group-sep" style="width:0;min-width:0;padding:0;border:none;"></td>')+
-    (automationsExpanded?'<td class="col-automations group-sep"></td><td class="col-automations"></td>':'<td class="col-automations group-sep" style="width:0;min-width:0;padding:0;border:none;"></td>')+
-    '<td></td><td></td>';
+    (automationsExpanded?'<td class="col-automations group-sep"></td><td class="col-automations"></td>':'<td class="col-automations group-sep" style="width:0;min-width:0;padding:0;border:none;"></td>');
 }
 
 function renderMetrics(co){
@@ -994,7 +993,9 @@ function renderColHeaders(){
     '<th data-col="7" style="min-width:100px;">Total Sales<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="8" style="min-width:70px;">$10k<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="36" style="min-width:80px;">Est. Sent<span class="sort-icon">&#x21C5;</span></th>'+
+    '<th data-col="41" style="min-width:90px;">Prop. Viewed<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="37" style="min-width:80px;">Last Est.<span class="sort-icon">&#x21C5;</span></th>'+
+    '<th data-col="42" style="min-width:90px;">Deals (90d)<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="9" style="min-width:82px;">A2P Applied<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="10" style="min-width:82px;">A2P Status<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="11" style="min-width:130px;">OBCSS<span class="sort-icon">&#x21C5;</span></th>'+
@@ -1018,8 +1019,6 @@ function renderColHeaders(){
     '<th data-col="34" class="col-automations group-sep" style="min-width:72px;">Zapier<span class="sort-icon">&#x21C5;</span></th>'+
     '<th data-col="35" class="col-automations" style="min-width:90px;">Angi Leads<span class="sort-icon">&#x21C5;</span></th>';}
   else{h+='<th class="col-automations group-sep" style="width:0;min-width:0;padding:0;border:none;overflow:hidden;"></th>';}
-  h+='<th data-col="41" class="group-sep" style="min-width:90px;">Prop. Viewed<span class="sort-icon">&#x21C5;</span></th>'+
-    '<th data-col="42" style="min-width:90px;">Deals (90d)<span class="sort-icon">&#x21C5;</span></th>';
   document.getElementById('col-headers').innerHTML=h;
   updateSortUI();
   initSortHeaders();
