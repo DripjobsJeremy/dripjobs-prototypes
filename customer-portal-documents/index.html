@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Portal Settings — Documents (Prototype)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #F4F5F8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+  /* ===================== Design System tokens (scoped) ===================== */
+  #portal-docs-page {
+    --st-color-primary:        #8B85EA;
+    --st-color-primary-hover:  #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb:    139, 133, 234;
+
+    --st-color-text:           #32415B;
+    --st-color-text-muted:     #80879A;
+    --st-color-border:         #DAD8E3;
+    --st-color-card-bg:        #FFFFFF;
+
+    color: var(--st-color-text);
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  #portal-docs-page .page-header { margin-bottom: 4px; }
+  #portal-docs-page .page-title { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+  #portal-docs-page .page-sub { font-size: 13px; color: var(--st-color-text-muted); margin: 0; }
+
+  /* Chip tab nav */
+  #portal-docs-page .settings-tabs { display: flex; gap: 8px; margin: 20px 0 24px; flex-wrap: wrap; }
+  #portal-docs-page .settings-tab {
+    padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 600;
+    background: #EFEFF3; color: var(--st-color-text-muted); cursor: pointer; border: 1px solid transparent;
+    transition: all .15s ease; user-select: none;
+  }
+  #portal-docs-page .settings-tab:hover { background: #E8E6FA; color: var(--st-color-primary-active); }
+  #portal-docs-page .settings-tab.active { background: var(--st-color-primary); color: #fff; }
+
+  #portal-docs-page .tab-placeholder {
+    display: none; text-align: center; padding: 60px 20px; color: var(--st-color-text-muted);
+    background: #fff; border: 1px dashed var(--st-color-border); border-radius: 14px; font-size: 13px; margin-bottom: 18px;
+  }
+  #portal-docs-page .tab-placeholder.show { display: block; }
+  #portal-docs-page .tab-placeholder i { font-size: 22px; margin-bottom: 10px; display: block; color: #C7C9D6; }
+  #portal-docs-page #documents-panel { display: none; }
+  #portal-docs-page #documents-panel.show { display: block; }
+
+  /* Section card */
+  #portal-docs-page .settings-section {
+    background: var(--st-color-card-bg);
+    border: 1px solid var(--st-color-border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+  #portal-docs-page .settings-section-title { font-size: 15px; font-weight: 700; margin: 0 0 3px; }
+  #portal-docs-page .settings-section-subtitle { font-size: 12.5px; color: var(--st-color-text-muted); margin: 0 0 16px; }
+
+  /* Buttons */
+  #portal-docs-page .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 40px; padding: 0 16px; font-size: 14px; font-weight: 600;
+    border-radius: 10px; border: 1px solid transparent; cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+    background: none; white-space: nowrap;
+  }
+  #portal-docs-page .btn-sm { height: 32px; padding: 0 12px; font-size: 13px; border-radius: 8px; }
+  #portal-docs-page .btn-xs { height: 26px; padding: 0 10px; font-size: 11.5px; border-radius: 999px; font-weight: 600; }
+  #portal-docs-page .btn-primary { background: var(--st-color-primary); color: #fff; }
+  #portal-docs-page .btn-primary:hover { background: var(--st-color-primary-hover); }
+  #portal-docs-page .btn-outline-primary { background: #fff; color: var(--st-color-primary-active); border-color: var(--st-color-primary); }
+  #portal-docs-page .btn-outline-primary:hover { background: #F3F1FE; }
+  #portal-docs-page .btn-danger { background: #fff; color: #DC2626; border-color: #FECACA; }
+  #portal-docs-page .btn-danger:hover { background: #FEF2F2; }
+  #portal-docs-page .btn-ghost { background: transparent; color: var(--st-color-text-muted); border-color: transparent; }
+  #portal-docs-page .btn-ghost:hover { background: #F3F3F6; color: var(--st-color-text); }
+  #portal-docs-page .btn-icon { width: 30px; height: 30px; padding: 0; justify-content: center; border-radius: 8px; }
+
+  /* Pill-style Upload / Remove actions (match production look) */
+  #portal-docs-page .pill-upload {
+    background: #EFEFF3; color: var(--st-color-text); border: none; border-radius: 999px;
+    font-size: 12px; font-weight: 600; padding: 5px 12px; cursor: pointer; white-space: nowrap;
+  }
+  #portal-docs-page .pill-upload:hover { background: #E3E4EA; }
+  #portal-docs-page .pill-remove {
+    background: #FDECEC; color: #DC2626; border: none; border-radius: 999px;
+    font-size: 11.5px; font-weight: 600; padding: 4px 10px; cursor: pointer; white-space: nowrap;
+  }
+  #portal-docs-page .pill-remove:hover { background: #FBDADA; }
+
+  /* Document grid */
+  #portal-docs-page .doc-grid {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch;
+  }
+  @media (max-width: 720px) { #portal-docs-page .doc-grid { grid-template-columns: 1fr; } }
+
+  #portal-docs-page .doc-card {
+    border: 1px solid var(--st-color-border); border-radius: 12px; padding: 14px;
+    background: #fff; display: flex; flex-direction: column; gap: 10px; height: 100%;
+    min-width: 0; overflow: hidden;
+  }
+  #portal-docs-page .doc-card-body {
+    flex: 1; display: flex; flex-direction: column; gap: 6px;
+  }
+  #portal-docs-page .doc-card-body.is-empty {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+  }
+  #portal-docs-page .doc-card-body .doc-file-list { display: flex; flex-direction: column; }
+  #portal-docs-page .doc-card-body .doc-meta-row { margin-top: auto; padding-top: 4px; }
+  #portal-docs-page .doc-card-head { display: flex; align-items: center; gap: 8px; }
+  #portal-docs-page .doc-card-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+  #portal-docs-page .doc-card-title { font-size: 13.5px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #portal-docs-page .doc-card-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--st-color-text-muted); background: #EFEFF3; padding: 2px 6px; border-radius: 5px; }
+
+  /* Custom category header extras */
+  #portal-docs-page .cc-swatch {
+    width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+  }
+  #portal-docs-page .cc-swatch:hover { box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), .18); }
+  #portal-docs-page .cc-title-input {
+    font-size: 13.5px; font-weight: 700; border: none; border-bottom: 1px dashed var(--st-color-primary);
+    background: transparent; padding: 0; outline: none; width: 100%;
+  }
+  #portal-docs-page .cc-actions { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+
+  #portal-docs-page .doc-file-row {
+    display: flex; align-items: center; gap: 8px; font-size: 12.5px;
+    padding: 6px 0; border-top: 1px solid #F0F0F4;
+  }
+  #portal-docs-page .doc-file-row:first-of-type { border-top: none; }
+  #portal-docs-page .doc-file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--st-color-text); }
+  #portal-docs-page .doc-file-date { color: var(--st-color-text-muted); font-size: 11.5px; white-space: nowrap; }
+
+  #portal-docs-page .doc-count-label { font-size: 11px; color: var(--st-color-text-muted); }
+  #portal-docs-page .doc-count-label.at-cap { color: #DC2626; font-weight: 600; }
+  #portal-docs-page .pill-upload:disabled {
+    background: #F3F3F6; color: #C7C9D6; cursor: not-allowed;
+  }
+  #portal-docs-page .add-file-link.disabled { color: #C7C9D6; cursor: not-allowed; pointer-events: none; }
+  #portal-docs-page .cap-note {
+    font-size: 11px; color: #DC2626; text-align: center; margin-top: 2px;
+  }
+  #portal-docs-page .doc-file-icon.fa-file-pdf { color: #DC2626; }
+  #portal-docs-page .doc-file-icon.fa-file-word { color: #2563EB; }
+  #portal-docs-page .doc-file-icon.fa-file-image { color: #16A34A; }
+
+  #portal-docs-page .no-file {
+    text-align: center; padding: 14px 4px; color: var(--st-color-text-muted); font-size: 12px;
+  }
+  #portal-docs-page .no-file i { display: block; font-size: 16px; margin-bottom: 6px; color: #C7C9D6; }
+
+  #portal-docs-page .doc-card-footer { margin-top: auto; }
+  #portal-docs-page .add-file-link {
+    font-size: 11.5px; color: var(--st-color-primary-active); cursor: pointer; font-weight: 600; text-align: center; display: block;
+  }
+  #portal-docs-page .add-file-link:hover { text-decoration: underline; }
+
+  #portal-docs-page .section-footer {
+    display: flex; gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--st-color-border);
+  }
+
+  /* Custom section add button row */
+  #portal-docs-page .custom-header-row { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px; }
+
+  #portal-docs-page .custom-empty {
+    text-align: center; padding: 28px 16px; border: 1.5px dashed var(--st-color-border);
+    border-radius: 12px; color: var(--st-color-text-muted); font-size: 13px; grid-column: 1 / -1;
+  }
+  #portal-docs-page .custom-empty i { font-size: 22px; margin-bottom: 8px; display: block; color: #C7C9D6; }
+
+  /* Alerts */
+  #portal-docs-page .settings-alert {
+    display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 10px;
+    font-size: 13px; margin-bottom: 16px; border: 1px solid;
+  }
+  #portal-docs-page .settings-alert--info { background: #EFF6FF; border-color: #BFDBFE; color: #1E40AF; }
+  #portal-docs-page .settings-alert i { margin-top: 1px; }
+  #portal-docs-page .settings-alert-title { font-weight: 600; margin-bottom: 2px; }
+
+  /* Modal */
+  #portal-docs-page .modal-overlay {
+    position: fixed; inset: 0; background: rgba(20, 20, 30, .38);
+    display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+  }
+  #portal-docs-page .modal-overlay.open { display: flex; }
+  #portal-docs-page .modal-box {
+    background: #fff; border-radius: 14px; width: 100%; max-width: 420px;
+    padding: 22px; box-shadow: 0 20px 60px rgba(20,20,40,.25);
+    max-height: 86vh; overflow-y: auto;
+  }
+  #portal-docs-page .modal-title { font-size: 15px; font-weight: 700; margin: 0 0 4px; }
+  #portal-docs-page .modal-sub { font-size: 12.5px; color: var(--st-color-text-muted); margin: 0 0 18px; }
+  #portal-docs-page .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+  /* Floating label field */
+  #portal-docs-page .settings-field { position: relative; display: flex; flex-direction: column; margin-bottom: 4px; }
+  #portal-docs-page .settings-field-label {
+    position: absolute; top: -8px; left: 10px; background: #fff; padding: 0 6px;
+    font-size: 11px; font-weight: 500; color: var(--st-color-text-muted); letter-spacing: .2px;
+  }
+  #portal-docs-page .settings-field-input {
+    height: 40px; padding: 0 14px; border: 1px solid var(--st-color-border); border-radius: 8px;
+    font-size: 14px; outline: none; transition: border-color .15s ease, box-shadow .15s ease; width: 100%;
+  }
+  #portal-docs-page .settings-field-input:focus {
+    border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), .18);
+  }
+  #portal-docs-page .char-counter { font-size: 11px; color: var(--st-color-text-muted); text-align: right; margin: 4px 0 16px; }
+
+  /* Icon/color picker */
+  #portal-docs-page .picker-label { font-size: 12px; font-weight: 600; margin: 4px 0 8px; }
+  #portal-docs-page .swatch-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  #portal-docs-page .swatch {
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer; border: 2px solid transparent;
+    display: flex; align-items: center; justify-content: center; font-size: 13px; transition: transform .1s ease; flex-shrink: 0;
+  }
+  #portal-docs-page .swatch:hover { transform: scale(1.08); }
+  #portal-docs-page .swatch.selected { border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), .2); }
+  #portal-docs-page .icon-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  #portal-docs-page .icon-choice {
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer; border: 1px solid var(--st-color-border);
+    background: #FBFBFD; display: flex; align-items: center; justify-content: center; font-size: 13px;
+    color: var(--st-color-text-muted); transition: all .1s ease; flex-shrink: 0;
+  }
+  #portal-docs-page .icon-choice:hover { border-color: var(--st-color-primary); color: var(--st-color-primary-active); }
+  #portal-docs-page .icon-choice.selected { border-color: var(--st-color-primary); background: #F3F1FE; color: var(--st-color-primary-active); }
+
+  #portal-docs-page .preview-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  #portal-docs-page .preview-swatch {
+    width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink:0;
+  }
+  #portal-docs-page .preview-label { font-size: 12px; color: var(--st-color-text-muted); }
+
+  /* Toasts */
+  #portal-docs-page .toast-stack {
+    position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 200;
+  }
+  #portal-docs-page .toast {
+    background: #32415B; color: #fff; font-size: 13px; font-weight: 500;
+    padding: 11px 16px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    display: flex; align-items: center; gap: 8px; opacity: 0; transform: translateY(6px);
+    animation: toast-in .18s ease forwards;
+  }
+  @keyframes toast-in { to { opacity: 1; transform: translateY(0); } }
+
+  #portal-docs-page .footer-note {
+    text-align: center; font-size: 11.5px; color: var(--st-color-text-muted); margin-top: 28px;
+  }
+
+  /* ---------- Injected Prototype Hub top bar ---------- */
+  .proto-bar {
+    background: #FFFFFF;
+    border-bottom: 1px solid #DAD8E3;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .proto-bar .back-link {
+    font-size: 12px; font-weight: 600; color: #80879A; text-decoration: none;
+    display: flex; align-items: center; gap: 4px; transition: color 0.15s;
+  }
+  .proto-bar .back-link:hover { color: #8B85EA; }
+  .proto-bar .divider { color: #DAD8E3; font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 700; color: #32415B; }
+  .proto-bar-ticket {
+    font-size: 11px; font-weight: 700; color: #5C53DC; text-decoration: none;
+    padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA;
+    border-radius: 999px; letter-spacing: 0.2px;
+  }
+  .proto-bar-ticket:hover { background: #8B85EA; color: #fff; }
+</style>
+</head>
+<body>
+<!-- Top bar (injected: Prototype Hub navigation) -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">&larr; Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Customer Portal Settings — Documents</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/86b7p31xb" target="_blank">86b7p31xb</a>
+</div>
+
+<div id="portal-docs-page">
+
+  <div class="page-header">
+    <p class="page-title">Company Settings &nbsp;›&nbsp; Customer Portal</p>
+    <p class="page-sub">Manage what your leads and customers see in their Customer Portal.</p>
+  </div>
+
+  <div class="settings-tabs" id="tabNav">
+    <div class="settings-tab" data-tab="branding" onclick="switchTab('branding')">Branding</div>
+    <div class="settings-tab" data-tab="sections" onclick="switchTab('sections')">Custom Sections</div>
+    <div class="settings-tab active" data-tab="documents" onclick="switchTab('documents')">Documents</div>
+    <div class="settings-tab" data-tab="link" onclick="switchTab('link')">Public Link</div>
+  </div>
+
+  <div class="tab-placeholder" id="placeholder-branding">
+    <i class="fa-solid fa-palette"></i>
+    Branding settings aren't part of this prototype — see Ticket #86b7p31xb for scope.
+  </div>
+  <div class="tab-placeholder" id="placeholder-sections">
+    <i class="fa-solid fa-layer-group"></i>
+    Custom Sections is a separate ticket (parent: Customer Portal Enhancement) — not covered in this prototype.
+  </div>
+  <div class="tab-placeholder" id="placeholder-link">
+    <i class="fa-solid fa-link"></i>
+    Public Portal Link is a separate ticket — not covered in this prototype.
+  </div>
+
+  <div id="documents-panel" class="show">
+
+    <div class="settings-alert settings-alert--info">
+      <i class="fa-solid fa-circle-info"></i>
+      <div>
+        <div class="settings-alert-title">Prototype — Ticket #86b7p31xb</div>
+        <div>Up to 5 documents per category (fixed or custom), unlimited Custom Document Categories with a user-selectable icon/color. Layout matched to the current production UI.</div>
+      </div>
+    </div>
+
+    <!-- FIXED CATEGORIES -->
+    <div class="settings-section">
+      <p class="settings-section-title">Company Documents</p>
+      <p class="settings-section-subtitle">Upload key business documents to share on the customer portal.</p>
+
+      <div class="doc-grid" id="fixed-categories"></div>
+
+      <div class="section-footer">
+        <button class="btn btn-primary btn-sm" onclick="showToast('Changes saved.')">Save</button>
+        <button class="btn btn-outline-primary btn-sm" onclick="showToast('Returning to dashboard…')">Cancel - Return to Dashboard</button>
+      </div>
+    </div>
+
+    <!-- CUSTOM CATEGORIES -->
+    <div class="settings-section">
+      <div class="custom-header-row">
+        <div>
+          <p class="settings-section-title" style="margin-bottom:2px;">Custom Document Categories</p>
+          <p class="settings-section-subtitle" style="margin-bottom:0;">Create your own categories for anything that doesn't fit above.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddCategoryModal()">
+          <i class="fa-solid fa-plus"></i> Add Category
+        </button>
+      </div>
+
+      <div class="doc-grid" id="custom-categories"></div>
+    </div>
+
+  </div>
+
+  <p class="footer-note">Company Settings › Customer Portal › Documents — DripJobs Prototype Hub</p>
+
+  <!-- Add / Edit Category Modal -->
+  <div class="modal-overlay" id="categoryModal">
+    <div class="modal-box">
+      <p class="modal-title" id="categoryModalTitle">New Custom Category</p>
+      <p class="modal-sub">Choose a title and an icon/color for this category.</p>
+
+      <div class="settings-field">
+        <label class="settings-field-label">Category Title</label>
+        <input type="text" id="categoryTitleInput" class="settings-field-input" maxlength="100" placeholder="e.g. Right to Lien Notices" oninput="updateCharCounter()">
+      </div>
+      <div class="char-counter" id="charCounter">0/100</div>
+
+      <div class="preview-row">
+        <div class="preview-swatch" id="previewIcon"></div>
+        <span class="preview-label">Preview</span>
+      </div>
+
+      <p class="picker-label">Color</p>
+      <div class="swatch-grid" id="colorSwatchGrid"></div>
+
+      <p class="picker-label">Icon</p>
+      <div class="icon-grid" id="iconChoiceGrid"></div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('categoryModal')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="saveCategory()">Save Category</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+      <p class="modal-title">Delete this category?</p>
+      <p class="modal-sub" style="margin-bottom:6px;">Deleting <strong id="deleteCategoryName"></strong> will permanently remove all documents within it. This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('deleteModal')">Cancel</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete()">Delete Category</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remove Document Confirmation -->
+  <div class="modal-overlay" id="removeDocModal">
+    <div class="modal-box">
+      <p class="modal-title">Remove this document?</p>
+      <p class="modal-sub">This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('removeDocModal')">Cancel</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmRemoveDoc()">Remove Document</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toastStack"></div>
+
+</div>
+
+<script>
+/* ============== Data model ============== */
+const PASTELS = [
+  { name: 'lavender', bg: '#E8E6FA', fg: '#5C53DC' },
+  { name: 'peach',    bg: '#FAF0E6', fg: '#C2703D' },
+  { name: 'mint',     bg: '#E6FAF0', fg: '#1B9C6E' },
+  { name: 'sky',      bg: '#E6F3FA', fg: '#2477B3' },
+  { name: 'lemon',    bg: '#FAF7E6', fg: '#B99A1F' },
+  { name: 'coral',    bg: '#FAE6E6', fg: '#D14E4E' },
+  { name: 'lime',     bg: '#F0FAE6', fg: '#6FAA2A' },
+  { name: 'aqua',     bg: '#E6FAFA', fg: '#209B9B' },
+  { name: 'salmon',   bg: '#FAEAE6', fg: '#C2603F' },
+  { name: 'neutral',  bg: '#EFEFF3', fg: '#6B7080' },
+  { name: 'pink',     bg: '#FAE6F0', fg: '#C2458F' },
+];
+
+const ICON_CHOICES = [
+  'fa-solid fa-star','fa-solid fa-bookmark','fa-solid fa-tag','fa-solid fa-folder',
+  'fa-solid fa-clipboard','fa-solid fa-certificate','fa-solid fa-file-contract','fa-solid fa-house-chimney',
+  'fa-solid fa-scale-balanced','fa-solid fa-lock','fa-solid fa-heart','fa-solid fa-flag'
+];
+
+const today = () => {
+  const d = new Date();
+  return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+};
+
+/* Fixed category colors: Insurance / Workers' Comp / W-9 / Misc confirmed from production screenshot.
+   Warranty / License Information not visible in the reference screenshot (no file uploaded there),
+   so those two keep the values already documented in the Design System guide (green / purple). */
+let fixedCategories = [
+  { id: 'insurance', title: 'Insurance', icon: 'fa-solid fa-file-pdf', fg: '#2563EB',
+    docs: [ {name:'General_Liability_Cert.pdf', type:'pdf', date:'Jun 02, 2026'} ] },
+  { id: 'warranty', title: 'Warranty', icon: 'fa-solid fa-file-pdf', fg: '#16A34A',
+    docs: [] },
+  { id: 'workerscomp', title: "Workers' Comp", icon: 'fa-solid fa-file-pdf', fg: '#D97706',
+    docs: [ {name:'WC_Policy_2026.pdf', type:'pdf', date:'Jun 02, 2026'} ] },
+  { id: 'license', title: 'License Information', icon: 'fa-solid fa-file-pdf', fg: '#7C3AED',
+    docs: [] },
+  { id: 'w9', title: 'W-9 Information', icon: 'fa-solid fa-file-pdf', fg: '#0891B2',
+    docs: [ {name:'W9_2026.pdf', type:'pdf', date:'Jan 09, 2026'} ] },
+  { id: 'misc', title: 'Misc Documents', icon: 'fa-solid fa-file-pdf', fg: '#C2458F',
+    docs: [ {name:'Invoice_365516.pdf', type:'pdf', date:'Jan 09, 2026'} ] },
+];
+
+let customCategories = [
+  { id: 'cc1', title: 'WA State Licensing', color: PASTELS[3], icon: 'fa-solid fa-id-card',
+    docs: [ {name:'WA_Contractor_License.pdf', type:'pdf', date:'Jul 18, 2026'} ] },
+];
+
+let nextCcId = 2;
+let editingCategoryId = null;
+let pendingDelete = null;
+let pendingDocRemoval = null;
+let selectedColor = PASTELS[0];
+let selectedIcon = ICON_CHOICES[0];
+
+/* ============== Tabs ============== */
+function switchTab(tab) {
+  document.querySelectorAll('#tabNav .settings-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.getElementById('documents-panel').classList.toggle('show', tab === 'documents');
+  ['branding','sections','link'].forEach(t => {
+    const el = document.getElementById('placeholder-' + t);
+    if (el) el.classList.toggle('show', tab === t);
+  });
+}
+
+/* ============== Rendering ============== */
+function fileIcon(type) {
+  if (type === 'pdf') return 'fa-solid fa-file-pdf';
+  if (type === 'doc') return 'fa-solid fa-file-word';
+  return 'fa-solid fa-file-image';
+}
+
+const DOC_CAP = 5;
+
+function renderFixed() {
+  const root = document.getElementById('fixed-categories');
+  root.innerHTML = fixedCategories.map(cat => {
+    const atCap = cat.docs.length >= DOC_CAP;
+    return `
+    <div class="doc-card">
+      <div class="doc-card-head">
+        ${cat.docs.length ? `<i class="doc-card-icon ${cat.icon}" style="color:${cat.fg};"></i>` : ''}
+        <span class="doc-card-title">${cat.title}</span>
+        <button class="pill-upload" ${atCap ? 'disabled' : ''} onclick="simulateUpload('fixed','${cat.id}')">Upload</button>
+      </div>
+      ${cat.docs.length ? `
+        <div class="doc-card-body">
+          <div class="doc-file-list">
+            ${cat.docs.map((d,i) => `
+              <div class="doc-file-row">
+                <i class="doc-file-icon ${fileIcon(d.type)}"></i>
+                <span class="doc-file-name" title="${d.name}">${d.name}</span>
+                <span class="doc-file-date">${d.date}</span>
+                <button class="pill-remove" onclick="askRemoveDoc('fixed','${cat.id}',${i})">Remove</button>
+              </div>
+            `).join('')}
+          </div>
+          <div class="doc-meta-row">
+            <span class="doc-count-label ${atCap ? 'at-cap' : ''}">${cat.docs.length}/${DOC_CAP} documents</span><br>
+            ${atCap
+              ? `<span class="cap-note">Maximum of ${DOC_CAP} documents reached. Remove one to upload another.</span>`
+              : `<span class="add-file-link" onclick="simulateUpload('fixed','${cat.id}')">+ Add another document</span>`}
+          </div>
+        </div>
+      ` : `
+        <div class="doc-card-body is-empty">
+          <div class="no-file">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            No file uploaded
+          </div>
+        </div>
+      `}
+    </div>
+  `;
+  }).join('');
+}
+
+function renderCustom() {
+  const root = document.getElementById('custom-categories');
+  if (!customCategories.length) {
+    root.innerHTML = `<div class="custom-empty"><i class="fa-regular fa-folder-open"></i>No custom categories yet. Create categories to organize additional documents for your portal.</div>`;
+    return;
+  }
+
+  root.innerHTML = customCategories.map((cat, idx) => {
+    const atCap = cat.docs.length >= DOC_CAP;
+    return `
+    <div class="doc-card" draggable="true" ondragstart="dragStart(event,'${cat.id}')" ondragover="event.preventDefault()" ondrop="dragDrop(event,'${cat.id}')">
+      <div class="doc-card-head">
+        <i class="fa-solid fa-grip-vertical" style="color:#C7C9D6; cursor:grab; font-size:12px;" title="Drag to reorder"></i>
+        <div class="cc-swatch" style="background:${cat.color.bg}; color:${cat.color.fg};" onclick="openAddCategoryModal('${cat.id}')" title="Edit icon/color">
+          <i class="${cat.icon}"></i>
+        </div>
+        <span class="doc-card-title" id="cc-title-${cat.id}" ondblclick="startEditTitle('${cat.id}')">${cat.title}</span>
+        <div class="cc-actions">
+          <button class="btn btn-ghost btn-icon" onclick="startEditTitle('${cat.id}')" title="Edit title"><i class="fa-solid fa-pen" style="font-size:11px;"></i></button>
+          <button class="btn btn-ghost btn-icon" onclick="moveCategory(${idx},-1)" title="Move up"><i class="fa-solid fa-arrow-up" style="font-size:11px;"></i></button>
+          <button class="btn btn-ghost btn-icon" onclick="moveCategory(${idx},1)" title="Move down"><i class="fa-solid fa-arrow-down" style="font-size:11px;"></i></button>
+          <button class="btn btn-ghost btn-icon" onclick="askDelete('${cat.id}')" title="Delete"><i class="fa-solid fa-trash" style="font-size:11px;"></i></button>
+        </div>
+      </div>
+      ${cat.docs.length ? `
+        <div class="doc-card-body">
+          <div class="doc-file-list">
+            ${cat.docs.map((d,i) => `
+              <div class="doc-file-row">
+                <i class="doc-file-icon ${fileIcon(d.type)}"></i>
+                <span class="doc-file-name" title="${d.name}">${d.name}</span>
+                <span class="doc-file-date">${d.date}</span>
+                <button class="pill-remove" onclick="askRemoveDoc('custom','${cat.id}',${i})">Remove</button>
+              </div>
+            `).join('')}
+          </div>
+          <div class="doc-meta-row">
+            <span class="doc-count-label ${atCap ? 'at-cap' : ''}">${cat.docs.length}/${DOC_CAP} documents</span><br>
+            ${atCap
+              ? `<span class="cap-note">Maximum of ${DOC_CAP} documents reached. Remove one to upload another.</span>`
+              : `<span class="add-file-link" onclick="simulateUpload('custom','${cat.id}')">+ Add another document</span>`}
+          </div>
+        </div>
+      ` : `
+        <div class="doc-card-body is-empty">
+          <div class="no-file">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            No file uploaded
+          </div>
+        </div>
+        <div class="doc-meta-row" style="text-align:center;">
+          <button class="pill-upload" onclick="simulateUpload('custom','${cat.id}')">Upload</button>
+        </div>
+      `}
+    </div>
+  `;
+  }).join('');
+}
+
+/* ============== Inline title edit ============== */
+function startEditTitle(id) {
+  const cat = customCategories.find(c => c.id === id);
+  const el = document.getElementById('cc-title-'+id);
+  el.outerHTML = `<input class="cc-title-input" id="cc-input-${id}" value="${cat.title}" maxlength="100"
+    onkeydown="if(event.key==='Enter') commitTitle('${id}')" onblur="commitTitle('${id}')">`;
+  const input = document.getElementById('cc-input-'+id);
+  input.focus();
+  input.select();
+}
+function commitTitle(id) {
+  const cat = customCategories.find(c => c.id === id);
+  const input = document.getElementById('cc-input-'+id);
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) { showToast('Please enter a category title.', true); renderCustom(); return; }
+  cat.title = val;
+  renderCustom();
+  showToast('Category updated.');
+}
+
+/* ============== Reorder ============== */
+function moveCategory(idx, dir) {
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= customCategories.length) return;
+  const tmp = customCategories[idx];
+  customCategories[idx] = customCategories[newIdx];
+  customCategories[newIdx] = tmp;
+  renderCustom();
+  showToast('Category order updated.');
+}
+let dragId = null;
+function dragStart(e, id) { dragId = id; e.dataTransfer.effectAllowed = 'move'; }
+function dragDrop(e, targetId) {
+  e.preventDefault();
+  if (!dragId || dragId === targetId) return;
+  const fromIdx = customCategories.findIndex(c => c.id === dragId);
+  const toIdx = customCategories.findIndex(c => c.id === targetId);
+  const [moved] = customCategories.splice(fromIdx, 1);
+  customCategories.splice(toIdx, 0, moved);
+  dragId = null;
+  renderCustom();
+  showToast('Category order updated.');
+}
+
+/* ============== Add / Edit Category Modal ============== */
+function openAddCategoryModal(editId) {
+  editingCategoryId = editId || null;
+  const modalTitleEl = document.getElementById('categoryModalTitle');
+  const titleInput = document.getElementById('categoryTitleInput');
+
+  if (editingCategoryId) {
+    const cat = customCategories.find(c => c.id === editingCategoryId);
+    modalTitleEl.textContent = 'Edit Category';
+    titleInput.value = cat.title;
+    selectedColor = cat.color;
+    selectedIcon = cat.icon;
+  } else {
+    modalTitleEl.textContent = 'New Custom Category';
+    titleInput.value = '';
+    selectedColor = PASTELS[nextCcId % PASTELS.length];
+    selectedIcon = ICON_CHOICES[0];
+  }
+
+  updateCharCounter();
+  renderSwatchGrid();
+  renderIconGrid();
+  updatePreview();
+  document.getElementById('categoryModal').classList.add('open');
+}
+
+function renderSwatchGrid() {
+  const grid = document.getElementById('colorSwatchGrid');
+  grid.innerHTML = PASTELS.map(p => `
+    <div class="swatch ${p.name===selectedColor.name?'selected':''}" style="background:${p.bg};"
+         onclick="pickColor('${p.name}')" title="${p.name}"></div>
+  `).join('');
+}
+function pickColor(name) {
+  selectedColor = PASTELS.find(p => p.name === name);
+  renderSwatchGrid();
+  updatePreview();
+}
+function renderIconGrid() {
+  const grid = document.getElementById('iconChoiceGrid');
+  grid.innerHTML = ICON_CHOICES.map(ic => `
+    <div class="icon-choice ${ic===selectedIcon?'selected':''}" onclick="pickIcon('${ic}')">
+      <i class="${ic}"></i>
+    </div>
+  `).join('');
+}
+function pickIcon(ic) {
+  selectedIcon = ic;
+  renderIconGrid();
+  updatePreview();
+}
+function updatePreview() {
+  const el = document.getElementById('previewIcon');
+  el.style.background = selectedColor.bg;
+  el.style.color = selectedColor.fg;
+  el.innerHTML = `<i class="${selectedIcon}"></i>`;
+}
+function updateCharCounter() {
+  const input = document.getElementById('categoryTitleInput');
+  document.getElementById('charCounter').textContent = `${input.value.length}/100`;
+}
+function saveCategory() {
+  const titleInput = document.getElementById('categoryTitleInput');
+  const val = titleInput.value.trim();
+  if (!val) { showToast('Please enter a category title.', true); return; }
+
+  if (editingCategoryId) {
+    const cat = customCategories.find(c => c.id === editingCategoryId);
+    cat.title = val;
+    cat.color = selectedColor;
+    cat.icon = selectedIcon;
+    showToast('Category updated.');
+  } else {
+    customCategories.push({ id: 'cc' + (nextCcId++), title: val, color: selectedColor, icon: selectedIcon, docs: [] });
+    showToast('Category created.');
+  }
+  closeModal('categoryModal');
+  renderCustom();
+}
+
+/* ============== Delete category ============== */
+function askDelete(id) {
+  pendingDelete = id;
+  const cat = customCategories.find(c => c.id === id);
+  document.getElementById('deleteCategoryName').textContent = cat.title;
+  document.getElementById('deleteModal').classList.add('open');
+}
+function confirmDelete() {
+  customCategories = customCategories.filter(c => c.id !== pendingDelete);
+  pendingDelete = null;
+  closeModal('deleteModal');
+  renderCustom();
+  showToast('Category deleted.');
+}
+
+/* ============== Documents ============== */
+const SAMPLE_FILES = [
+  {name:'Signed_Disclaimer.pdf', type:'pdf'},
+  {name:'Right_to_Lien_Notice.pdf', type:'pdf'},
+  {name:'Privacy_Notice.docx', type:'doc'},
+  {name:'Job_Site_Photo.jpg', type:'image'},
+];
+function simulateUpload(kind, catId) {
+  const list = kind === 'fixed' ? fixedCategories : customCategories;
+  const cat = list.find(c => c.id === catId);
+  if (cat.docs.length >= DOC_CAP) {
+    showToast(`This category has reached the maximum of ${DOC_CAP} documents.`, true);
+    return;
+  }
+  const file = SAMPLE_FILES[Math.floor(Math.random()*SAMPLE_FILES.length)];
+  cat.docs.push({ name: file.name, type: file.type, date: today() });
+  kind === 'fixed' ? renderFixed() : renderCustom();
+  showToast('Document uploaded.');
+}
+function askRemoveDoc(kind, catId, index) {
+  pendingDocRemoval = { kind, catId, index };
+  document.getElementById('removeDocModal').classList.add('open');
+}
+function confirmRemoveDoc() {
+  const { kind, catId, index } = pendingDocRemoval;
+  const list = kind === 'fixed' ? fixedCategories : customCategories;
+  const cat = list.find(c => c.id === catId);
+  cat.docs.splice(index, 1);
+  kind === 'fixed' ? renderFixed() : renderCustom();
+  closeModal('removeDocModal');
+  showToast('Document removed.');
+}
+
+/* ============== Modal helpers ============== */
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('#portal-docs-page .modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
+});
+
+/* ============== Toasts ============== */
+function showToast(msg, isWarn) {
+  const stack = document.getElementById('toastStack');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<i class="fa-solid ${isWarn ? 'fa-triangle-exclamation' : 'fa-circle-check'}" style="color:${isWarn?'#FCA5A5':'#86EFAC'}"></i> ${msg}`;
+  stack.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform='translateY(6px)'; t.style.transition='all .2s ease'; setTimeout(()=>t.remove(), 220); }, 2400);
+}
+
+/* ============== Init ============== */
+renderFixed();
+renderCustom();
+</script>
+
+</body>
+</html>
