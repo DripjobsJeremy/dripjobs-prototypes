@@ -40,7 +40,17 @@
   }
   .demo-banner b { color: var(--jl-teal); }
   .demo-banner a { color:#C9C4FF; text-decoration:underline; }
+  .demo-banner-right { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
   .demo-toggle { display:flex; align-items:center; gap:8px; font-size:12px; white-space:nowrap; }
+  .demo-sim-wrap { display:flex; align-items:center; gap:6px; }
+  .demo-sim-btn {
+    background:transparent; border:1px solid rgba(255,255,255,0.35); color:#fff;
+    font-size:11px; font-weight:700; padding:5px 10px; border-radius:999px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+  }
+  .demo-sim-btn:hover { background:rgba(255,255,255,0.12); }
+  .demo-sim-btn:disabled { opacity:0.7; cursor:default; }
+  .demo-sim-btn:disabled:hover { background:transparent; }
 
   /* ---------- BR annotation chips ---------- */
   .br-chip {
@@ -51,6 +61,8 @@
     cursor: help; vertical-align: middle;
   }
   #jobs-list-page.show-br .br-chip { display:inline-block; }
+  .demo-banner .br-chip { display:none; }
+  .demo-banner.show-br-banner .br-chip { display:inline-block; }
 
   /* ---------- Page header (title/stats + action bar) ---------- */
   .jl-page-header {
@@ -221,6 +233,13 @@
   .jl-btn-primary { background:var(--jl-primary); color:#fff; }
   .jl-btn-primary:hover { background:var(--jl-primary-hover); }
 
+  /* ---------- Frozen (freeze boundary) columns ---------- */
+  .jl-frozen-col { position:sticky; background:#fff; z-index:4; }
+  table.jl-table thead th.jl-frozen-col { z-index:14; }
+  table.jl-table tbody tr:hover td.jl-frozen-col { background:#FAFAFE; }
+  table.jl-table tbody tr.row-selected td.jl-frozen-col { background:#FAFAFE; }
+  .jl-frozen-divider { box-shadow: 3px 0 6px -2px rgba(50,65,91,0.28); }
+
   /* ---------- Column manager panel ---------- */
   .jl-overlay {
     position:fixed; inset:0; background:rgba(50,65,91,0.35); z-index:800;
@@ -237,7 +256,7 @@
   .jl-panel.open { transform: translateX(0); }
 
   .jl-panel-header { padding:16px; border-bottom:1px solid var(--jl-border); display:flex; align-items:center; justify-content:space-between; }
-  .jl-panel-title { font-size:14px; font-weight:700; margin:0; }
+  .jl-panel-title { font-size:14px; font-weight:700; margin:0; display:flex; align-items:center; flex-wrap:wrap; }
   .jl-panel-close { background:none; border:none; color:var(--jl-text-muted); font-size:16px; cursor:pointer; padding:4px; }
   .jl-panel-close:hover { color:var(--jl-text); }
 
@@ -248,6 +267,17 @@
   }
   .jl-panel-search input:focus { outline:none; border-color:var(--jl-primary); box-shadow:0 0 0 3px rgba(var(--jl-primary-rgb),0.18); }
   .jl-search-note { font-size:11px; color:var(--jl-text-muted); margin-top:6px; }
+
+  /* ---------- Freeze boundary control ---------- */
+  .jl-freeze-control { padding:12px 16px; border-bottom:1px solid var(--jl-border); display:flex; flex-direction:column; gap:6px; }
+  .jl-freeze-control label { font-size:11px; font-weight:700; color:var(--jl-text-muted); display:flex; align-items:center; flex-wrap:wrap; }
+  .jl-freeze-control select {
+    height:34px; border:1px solid var(--jl-border); border-radius:6px; padding:0 26px 0 10px; font-size:12.5px; font-weight:600; color:var(--jl-text);
+    background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath d='M0 0l4.5 5 4.5-5z' fill='%2380879A'/%3E%3C/svg%3E") no-repeat right 10px center;
+    appearance:none; -webkit-appearance:none; cursor:pointer;
+  }
+  .jl-freeze-control select:focus { outline:none; border-color:var(--jl-primary); box-shadow:0 0 0 3px rgba(var(--jl-primary-rgb),0.18); }
+  .jl-freeze-hint { font-size:11px; color:var(--jl-text-muted); }
 
   .jl-panel-list { flex:1; overflow-y:auto; padding:8px 8px; }
   .jl-col-row {
@@ -264,9 +294,43 @@
     content:"NEW"; font-size:9px; font-weight:800; color:var(--jl-primary-active);
     background:#E8E6FA; border-radius:6px; padding:1px 5px; margin-left:6px; vertical-align:middle;
   }
+  .jl-freeze-tag {
+    font-size:9.5px; font-weight:800; color:#1D6FA5; background:#E3F2FD; border:1px solid #BEE0FA;
+    border-radius:6px; padding:2px 6px; display:inline-flex; align-items:center; gap:3px; white-space:nowrap;
+  }
 
   .jl-panel-footer { padding:14px 16px; border-top:1px solid var(--jl-border); display:flex; gap:10px; }
   .jl-panel-footer .jl-btn { flex:1; justify-content:center; }
+
+  /* ---------- Save View modal ---------- */
+  .jl-modal-overlay {
+    position:fixed; inset:0; background:rgba(50,65,91,0.45); z-index:950;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .15s ease;
+  }
+  .jl-modal-overlay.open { opacity:1; pointer-events:auto; }
+  .jl-modal {
+    background:#fff; border-radius:12px; width:380px; max-width:90vw;
+    box-shadow:0 16px 40px rgba(50,65,91,0.28);
+  }
+  .jl-modal-header { display:flex; align-items:center; justify-content:space-between; padding:16px; border-bottom:1px solid var(--jl-border); }
+  .jl-modal-header h4 { margin:0; font-size:15px; font-weight:800; display:flex; align-items:center; flex-wrap:wrap; }
+  .jl-modal-body { padding:16px; }
+  .jl-modal-label { display:block; font-size:11.5px; font-weight:700; color:var(--jl-text-muted); margin-bottom:6px; }
+  #saveViewNameInput {
+    width:100%; height:38px; border:1px solid var(--jl-border); border-radius:8px; padding:0 12px;
+    font-size:13.5px; box-sizing:border-box; color:var(--jl-text);
+  }
+  #saveViewNameInput:focus { outline:none; border-color:var(--jl-primary); box-shadow:0 0 0 3px rgba(var(--jl-primary-rgb),0.18); }
+  #saveViewNameInput.input-error { border-color:#D9534F; }
+  #saveViewNameInput.input-error:focus { box-shadow:0 0 0 3px rgba(217,83,79,0.18); }
+  .jl-modal-error { color:#B3423F; font-size:12px; margin-top:8px; align-items:flex-start; gap:6px; display:none; }
+  .jl-modal-error.visible { display:flex; }
+  .jl-modal-hint { font-size:11.5px; color:var(--jl-text-muted); margin-top:8px; }
+  .jl-modal-footer { padding:14px 16px; border-top:1px solid var(--jl-border); display:flex; gap:10px; justify-content:flex-end; }
+  .jl-modal-footer .jl-btn { flex:0 0 auto; }
+  .jl-btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .jl-btn-primary:disabled:hover { background:var(--jl-primary); }
 
   @media (max-width: 900px) {
     .jl-filter-bar { gap:10px; }
@@ -327,6 +391,7 @@
   <div style="display:flex; gap:8px;">
     <a class="proto-bar-ticket" href="https://app.clickup.com/t/86barv187" target="_blank">86barv187</a>
     <a class="proto-bar-ticket" href="https://app.clickup.com/t/86barybju" target="_blank">86barybju</a>
+    <a class="proto-bar-ticket" href="https://app.clickup.com/t/86baryc1z" target="_blank">86baryc1z</a>
   </div>
 </div>
 <div id="jobs-list-page">
@@ -334,12 +399,22 @@
   <div class="demo-banner">
     <div>
       Prototype scope: <b>Job Address column</b> (<a href="https://app.clickup.com/t/86barv187" target="_blank">CU-86barv187</a>) +
-      <b>Show/Hide Column Management</b> (<a href="https://app.clickup.com/t/86barybju" target="_blank">CU-86barybju</a>).
-      Layout matches current Jobs List filters, actions, and table.
+      <b>Column Management</b> — show/hide, drag-and-drop reorder, freeze boundary column, built-in preset &amp; personal saved views
+      (<a href="https://app.clickup.com/t/86barybju" target="_blank">CU-86barybju</a>, scope mirrored in the Sales List companion ticket
+      <a href="https://app.clickup.com/t/86baryc1z" target="_blank">CU-86baryc1z</a>).
+      <b>Updated 2026-07-21:</b> duplicate saved-view names are now blocked with an inline warning instead of silently overwritten,
+      new columns stay hidden in existing saved views until manually enabled, and a freeze boundary column keeps leading columns
+      fixed while scrolling horizontally.
     </div>
-    <label class="demo-toggle">
-      <span class="toggle-switch"><input type="checkbox" id="brToggle" checked><span class="toggle-slider"></span></span> Show BR tags
-    </label>
+    <div class="demo-banner-right">
+      <span class="demo-sim-wrap">
+        <button class="demo-sim-btn" id="simulateNewColBtn" type="button"><i class="fas fa-flask"></i> Simulate: add new column</button>
+        <span class="br-chip" title="BR-13: When a new column is added to the Jobs List in the future, it does not automatically appear in a user's existing saved views. It remains hidden in that view until the user manually enables it.">BR-13</span>
+      </span>
+      <label class="demo-toggle">
+        <span class="toggle-switch"><input type="checkbox" id="brToggle" checked><span class="toggle-slider"></span></span> Show BR tags
+      </label>
+    </div>
   </div>
 
   <div class="jl-page-header">
@@ -396,7 +471,7 @@
       <select class="jl-select-view" id="savedViewSelect"></select>
       <button class="jl-columns-btn" id="columnsBtn">
         <i class="fas fa-sliders-h"></i> Columns
-        <span class="br-chip" title="BR-1: Users must be able to access a column visibility control from the Jobs List.">BR-1</span>
+        <span class="br-chip" title="BR-1: Users must be able to access a column management control from the Jobs List showing all available columns.">BR-1</span>
       </button>
       <div class="jl-entries-field">Show
         <select><option>25</option><option>50</option><option>100</option></select>
@@ -418,27 +493,63 @@
   </div>
   <div class="jl-footer-bar">
     <span>Showing <span id="visibleColCount">–</span> of <span id="totalColCount">–</span> columns</span>
-    <span id="persistNote">Column settings save automatically for your account <span class="br-chip" title="BR-3: Column visibility preferences persist for that user across sessions.">BR-3</span></span>
+    <span id="persistNote">Column, order &amp; freeze settings save automatically for your account <span class="br-chip" title="BR-4: Column visibility, order, freeze boundary, and saved view selections persist at the user account level, durable across sessions, browsers, and devices, consistent with Filter Presets.">BR-4</span></span>
   </div>
 
   <div class="helper-note">
-    <b>Note for dev handoff:</b> Job Address value is sourced from the job's Accepted proposal service address (BR-2 of CU-86barv187) and stays fixed even when change orders exist (BR-3). Rows with no Accepted proposal show an em dash. Hiding a column never alters underlying job data (BR-4 of CU-86barybju) — only display + export. Column visibility controls now use slider toggles instead of checkboxes.
+    <b>Note for dev handoff:</b> Job Address value is sourced from the job's Accepted proposal service address (BR-2 of CU-86barv187) and stays fixed even when change orders exist (BR-3 of CU-86barv187). Rows with no Accepted proposal show an em dash. Hiding a column never alters underlying job data (BR-5) — only display + export. Saving a view under a name already in use, built-in or personal, is now blocked with an inline warning rather than silently overwriting the existing view (BR-9). Columns added to the product after a view is saved remain hidden in that view until the user manually enables them — use "Simulate: add new column" above to see this live (BR-13). The freeze boundary column (defaults to the Name column, this list's Customer Name field, BR-16) keeps every column up to and including it fixed during horizontal scroll (BR-15); reordering the boundary column re-freezes through its new position (BR-19), and hiding it shifts the boundary to the nearest preceding visible column (BR-20). Freeze boundary is saved and restored per named view alongside column visibility and order (BR-17).
   </div>
 
   <div class="jl-overlay" id="overlay"></div>
   <div class="jl-panel" id="colPanel">
     <div class="jl-panel-header">
-      <h4 class="jl-panel-title">Columns</h4>
+      <h4 class="jl-panel-title">Columns
+        <span class="br-chip" title="BR-2: Users must be able to toggle any column on or off from view.">BR-2</span>
+        <span class="br-chip" title="BR-3: Users must be able to reorder columns via drag and drop.">BR-3</span>
+      </h4>
       <button class="jl-panel-close" id="panelCloseBtn"><i class="fas fa-times"></i></button>
     </div>
     <div class="jl-panel-search">
       <input type="text" id="colSearch" placeholder="Search columns...">
       <div class="jl-search-note" id="searchNote" style="display:none;">Clear search to drag-reorder columns.</div>
     </div>
+    <div class="jl-freeze-control">
+      <label for="freezeSelect">Freeze columns through
+        <span class="br-chip" title="BR-15: Users can designate a freeze boundary column. All columns from the start of the table through the selected column remain fixed and visible during horizontal scroll. BR-18: Only one freeze boundary exists at a time — selecting a new column replaces the prior one.">BR-15</span>
+        <span class="br-chip" title="BR-16: The freeze boundary defaults to the Name column (this list's Customer Name field) for new users and newly created views.">BR-16</span>
+      </label>
+      <select id="freezeSelect"></select>
+      <div class="jl-freeze-hint">Columns before and including this one stay fixed while the table scrolls horizontally.</div>
+    </div>
     <ul class="jl-panel-list" id="colList" style="list-style:none; margin:0;"></ul>
     <div class="jl-panel-footer">
-      <button class="jl-btn jl-btn-outline" id="resetColsBtn">Reset to Default</button>
-      <button class="jl-btn jl-btn-primary" id="saveViewBtn">Save View</button>
+      <button class="jl-btn jl-btn-outline" id="resetColsBtn">Reset to Default
+        <span class="br-chip" title="BR-6: Users can reset column visibility, order, and freeze boundary back to system default in a single action.">BR-6</span>
+      </button>
+      <button class="jl-btn jl-btn-primary" id="saveViewBtn">Save View
+        <span class="br-chip" title="BR-8: Users can save their current column visibility, order, and freeze boundary as a personal named view.">BR-8</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="jl-modal-overlay" id="saveViewOverlay">
+    <div class="jl-modal" id="saveViewModal">
+      <div class="jl-modal-header">
+        <h4>Save Column View
+          <span class="br-chip" title="BR-9: Attempting to save a custom view under a name that matches an existing custom view is blocked, and the system displays a warning that the name is already in use.">BR-9</span>
+        </h4>
+        <button class="jl-panel-close" id="saveViewModalClose"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="jl-modal-body">
+        <label class="jl-modal-label" for="saveViewNameInput">View name</label>
+        <input type="text" id="saveViewNameInput" placeholder="e.g. My Custom View" autocomplete="off">
+        <div class="jl-modal-error" id="saveViewError"></div>
+        <div class="jl-modal-hint">Saves current column visibility, order, and freeze boundary as a personal view, visible only to you.</div>
+      </div>
+      <div class="jl-modal-footer">
+        <button class="jl-btn jl-btn-outline" id="saveViewCancelBtn">Cancel</button>
+        <button class="jl-btn jl-btn-primary" id="saveViewConfirmBtn" disabled>Save View</button>
+      </div>
     </div>
   </div>
 
@@ -446,6 +557,8 @@
 
 <script>
 (function(){
+
+  var DEFAULT_FREEZE = 'name';
 
   // ---------- Column definitions ----------
   var DEFAULT_COLUMNS = [
@@ -516,19 +629,19 @@
 
   // ---------- Saved views (no personal/shared distinction) ----------
   var BUILT_IN_VIEWS = {
-    'Default':     { visible: DEFAULT_VISIBLE.slice() },
-    'Sales':       { visible: ['status','job','name','salesperson','proposalId','amount','dealStage'] },
-    'Production':  { visible: ['status','job','jobAddress','projectManager','crew','jobScheduledDate','jobStartDate'] },
-    'Accounting':  { visible: ['job','name','proposalId','invoiceId','invoiceStatus','amount','paid','balance'] },
-    'Minimal':     { visible: ['status','job','name','amount'] }
+    'Default':     { visible: DEFAULT_VISIBLE.slice(), freeze: 'name' },
+    'Sales':       { visible: ['status','job','name','salesperson','proposalId','amount','dealStage'], freeze: 'name' },
+    'Production':  { visible: ['status','job','jobAddress','projectManager','crew','jobScheduledDate','jobStartDate'], freeze: 'job' },
+    'Accounting':  { visible: ['job','name','proposalId','invoiceId','invoiceStatus','amount','paid','balance'], freeze: 'name' },
+    'Minimal':     { visible: ['status','job','name','amount'], freeze: 'name' }
   };
   Object.keys(BUILT_IN_VIEWS).forEach(function(name){
     BUILT_IN_VIEWS[name].columns = buildFullOrder(BUILT_IN_VIEWS[name].visible);
   });
 
-  var STORAGE_KEY_STATE = 'dj_jobslist_column_state_v3';
-  var STORAGE_KEY_CUSTOM_VIEWS = 'dj_jobslist_custom_views_v3';
-  var STORAGE_KEY_ACTIVE_VIEW = 'dj_jobslist_active_view_v3';
+  var STORAGE_KEY_STATE = 'dj_jobslist_column_state_v4';
+  var STORAGE_KEY_CUSTOM_VIEWS = 'dj_jobslist_custom_views_v4';
+  var STORAGE_KEY_ACTIVE_VIEW = 'dj_jobslist_active_view_v4';
 
   function loadCustomViews(){
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_VIEWS)) || {}; }
@@ -545,9 +658,12 @@
         saved.order.every(function(id){ return !!COL_MAP[id]; });
       var visibleValid = saved && Array.isArray(saved.visible) &&
         saved.visible.every(function(id){ return !!COL_MAP[id]; });
-      if (orderValid && visibleValid) return saved;
+      if (orderValid && visibleValid) {
+        var freeze = (saved.freeze && COL_MAP[saved.freeze] && saved.visible.indexOf(saved.freeze) !== -1) ? saved.freeze : DEFAULT_FREEZE;
+        return { order: saved.order, visible: saved.visible, freeze: freeze };
+      }
     } catch(e){}
-    return { order: DEFAULT_ORDER.slice(), visible: DEFAULT_VISIBLE.slice() };
+    return { order: DEFAULT_ORDER.slice(), visible: DEFAULT_VISIBLE.slice(), freeze: DEFAULT_FREEZE };
   }
   function persistState(){ localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(state)); }
 
@@ -568,6 +684,53 @@
     } else {
       bar.classList.remove('visible');
     }
+  }
+
+  // ---------- Freeze boundary helpers ----------
+  function populateFreezeSelect(){
+    var select = document.getElementById('freezeSelect');
+    if (!select) return;
+    var visibleOrdered = state.order.filter(function(id){ return state.visible.indexOf(id) !== -1; });
+    select.innerHTML = '';
+    visibleOrdered.forEach(function(id){
+      var opt = document.createElement('option');
+      opt.value = id; opt.textContent = COL_MAP[id].label;
+      select.appendChild(opt);
+    });
+    if (state.freeze && visibleOrdered.indexOf(state.freeze) !== -1) {
+      select.value = state.freeze;
+    } else if (visibleOrdered.length) {
+      state.freeze = visibleOrdered[0];
+      select.value = state.freeze;
+    } else {
+      state.freeze = null;
+    }
+  }
+
+  function applyFreezeLayout(visibleOrdered, theadRow, tbody){
+    var ths = Array.prototype.slice.call(theadRow.children);
+    var freezeIdx = state.freeze ? visibleOrdered.indexOf(state.freeze) : -1;
+    var frozenThCount = (freezeIdx === -1) ? 1 : (freezeIdx + 2); // +1 for checkbox col
+
+    var left = 0;
+    for (var i = 0; i < ths.length; i++) {
+      if (i < frozenThCount) {
+        ths[i].classList.add('jl-frozen-col');
+        ths[i].style.left = left + 'px';
+        left += ths[i].getBoundingClientRect().width;
+        if (i === frozenThCount - 1) ths[i].classList.add('jl-frozen-divider');
+      }
+    }
+    Array.prototype.slice.call(tbody.children).forEach(function(tr){
+      var tds = Array.prototype.slice.call(tr.children);
+      var left2 = 0;
+      for (var j = 0; j < tds.length && j < frozenThCount; j++) {
+        tds[j].classList.add('jl-frozen-col');
+        tds[j].style.left = left2 + 'px';
+        left2 += ths[j].getBoundingClientRect().width;
+        if (j === frozenThCount - 1) tds[j].classList.add('jl-frozen-divider');
+      }
+    });
   }
 
   // ---------- Render table ----------
@@ -705,10 +868,13 @@
         });
         tbody.appendChild(tr);
       });
+
+      applyFreezeLayout(visibleOrdered, theadRow, tbody);
     }
 
     document.getElementById('visibleColCount').textContent = visibleOrdered.length;
     document.getElementById('totalColCount').textContent = DEFAULT_COLUMNS.length;
+    populateFreezeSelect();
     updateActionBar();
   }
 
@@ -755,6 +921,15 @@
       li.appendChild(handle);
       li.appendChild(toggleWrap);
       li.appendChild(label);
+
+      if (id === state.freeze) {
+        var freezeTag = document.createElement('span');
+        freezeTag.className = 'jl-freeze-tag';
+        freezeTag.innerHTML = '<i class="fas fa-thumbtack"></i> Freeze';
+        freezeTag.title = 'Freeze boundary — columns before this stay fixed while scrolling horizontally.';
+        li.appendChild(freezeTag);
+      }
+
       list.appendChild(li);
     });
 
@@ -762,7 +937,7 @@
     searchNote.style.display = filterText ? 'block' : 'none';
 
     if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
-    if (!filterText) {
+    if (!filterText && typeof Sortable !== 'undefined') {
       sortableInstance = new Sortable(list, {
         handle: '.jl-drag-handle',
         animation: 150,
@@ -773,7 +948,7 @@
           });
           state.order = newOrder;
           persistState();
-          renderTable();
+          renderTable(); // freeze boundary follows its column automatically (BR-19): position is order-derived
         }
       });
     }
@@ -781,10 +956,27 @@
 
   function toggleColumn(id, isVisible){
     var idx = state.visible.indexOf(id);
-    if (isVisible && idx === -1) { state.visible.push(id); }
-    else if (!isVisible && idx !== -1) { state.visible.splice(idx, 1); }
+    if (isVisible && idx === -1) {
+      state.visible.push(id);
+    } else if (!isVisible && idx !== -1) {
+      state.visible.splice(idx, 1);
+      if (state.freeze === id) {
+        // BR-20: hiding the freeze boundary column shifts the boundary to the nearest preceding visible column.
+        var orderIdx = state.order.indexOf(id);
+        var newFreeze = null;
+        for (var i = orderIdx - 1; i >= 0; i--) {
+          if (state.visible.indexOf(state.order[i]) !== -1) { newFreeze = state.order[i]; break; }
+        }
+        if (!newFreeze) {
+          var remaining = state.order.filter(function(cid){ return state.visible.indexOf(cid) !== -1; });
+          newFreeze = remaining.length ? remaining[0] : null;
+        }
+        state.freeze = newFreeze;
+      }
+    }
     persistState();
     renderTable();
+    renderColList(document.getElementById('colSearch').value);
     updateColumnsButtonState();
   }
 
@@ -812,9 +1004,17 @@
   overlay.addEventListener('click', closePanel);
   document.getElementById('colSearch').addEventListener('input', function(e){ renderColList(e.target.value); });
 
+  document.getElementById('freezeSelect').addEventListener('change', function(e){
+    state.freeze = e.target.value || null;
+    persistState();
+    renderTable();
+    renderColList(document.getElementById('colSearch').value);
+  });
+
   document.getElementById('resetColsBtn').addEventListener('click', function(){
     state.order = DEFAULT_ORDER.slice();
     state.visible = DEFAULT_VISIBLE.slice();
+    state.freeze = DEFAULT_FREEZE;
     persistState();
     renderTable();
     renderColList(document.getElementById('colSearch').value);
@@ -826,17 +1026,72 @@
     document.getElementById('resetColsBtn').click();
   });
 
-  document.getElementById('saveViewBtn').addEventListener('click', function(){
-    var name = prompt('Name this view:');
+  // ---------- Save View modal (BR-8 / BR-9) ----------
+  var saveViewOverlay = document.getElementById('saveViewOverlay');
+  var saveViewNameInput = document.getElementById('saveViewNameInput');
+  var saveViewError = document.getElementById('saveViewError');
+  var saveViewConfirmBtn = document.getElementById('saveViewConfirmBtn');
+
+  function openSaveViewModal(){
+    saveViewNameInput.value = '';
+    saveViewError.classList.remove('visible');
+    saveViewNameInput.classList.remove('input-error');
+    saveViewConfirmBtn.disabled = true;
+    saveViewOverlay.classList.add('open');
+    setTimeout(function(){ saveViewNameInput.focus(); }, 50);
+  }
+  function closeSaveViewModal(){ saveViewOverlay.classList.remove('open'); }
+
+  function showSaveViewError(msg){
+    saveViewError.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
+    saveViewError.classList.add('visible');
+    saveViewNameInput.classList.add('input-error');
+    saveViewConfirmBtn.disabled = true;
+  }
+
+  // Returns the trimmed, valid name, or null (and shows the relevant inline error) if invalid.
+  function validateSaveViewName(){
+    var name = saveViewNameInput.value.trim();
+    if (!name) {
+      saveViewError.classList.remove('visible');
+      saveViewNameInput.classList.remove('input-error');
+      saveViewConfirmBtn.disabled = true;
+      return null;
+    }
+    var builtInMatch = Object.keys(BUILT_IN_VIEWS).some(function(n){ return n.toLowerCase() === name.toLowerCase(); });
+    if (builtInMatch) {
+      showSaveViewError('"' + name + '" is a built-in view name and can\'t be used for a personal view.');
+      return null;
+    }
+    var dupMatch = Object.keys(customViews).some(function(n){ return n.toLowerCase() === name.toLowerCase(); });
+    if (dupMatch) {
+      showSaveViewError('You already have a saved view named "' + name + '". Choose a different name.');
+      return null;
+    }
+    saveViewError.classList.remove('visible');
+    saveViewNameInput.classList.remove('input-error');
+    saveViewConfirmBtn.disabled = false;
+    return name;
+  }
+
+  document.getElementById('saveViewBtn').addEventListener('click', openSaveViewModal);
+  document.getElementById('saveViewCancelBtn').addEventListener('click', closeSaveViewModal);
+  document.getElementById('saveViewModalClose').addEventListener('click', closeSaveViewModal);
+  saveViewOverlay.addEventListener('click', function(e){ if (e.target === saveViewOverlay) closeSaveViewModal(); });
+  saveViewNameInput.addEventListener('input', validateSaveViewName);
+  saveViewNameInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' && !saveViewConfirmBtn.disabled) { saveViewConfirmBtn.click(); }
+  });
+
+  saveViewConfirmBtn.addEventListener('click', function(){
+    var name = validateSaveViewName();
     if (!name) return;
-    name = name.trim();
-    if (!name) return;
-    if (BUILT_IN_VIEWS[name]) { alert('"' + name + '" is a built-in view name. Please choose a different name.'); return; }
-    customViews[name] = { columns: state.order.slice(), visible: state.visible.slice() };
+    customViews[name] = { columns: state.order.slice(), visible: state.visible.slice(), freeze: state.freeze };
     saveCustomViews(customViews);
     populateViewSelect();
     document.getElementById('savedViewSelect').value = name;
     localStorage.setItem(STORAGE_KEY_ACTIVE_VIEW, name);
+    closeSaveViewModal();
   });
 
   function populateViewSelect(){
@@ -872,6 +1127,12 @@
     if (!view) return;
     state.order = view.columns.slice();
     state.visible = view.visible.slice();
+    var freezeCandidate = view.freeze;
+    if (!freezeCandidate || state.visible.indexOf(freezeCandidate) === -1) {
+      var firstVisible = state.order.filter(function(id){ return state.visible.indexOf(id) !== -1; })[0];
+      freezeCandidate = firstVisible || null;
+    }
+    state.freeze = freezeCandidate;
     persistState();
     renderTable();
     updateColumnsButtonState();
@@ -901,6 +1162,45 @@
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
   });
+
+  // ---------- Simulate: add new column (demonstrates BR-13) ----------
+  var demoColumnAdded = false;
+  function simulateNewColumn(){
+    if (demoColumnAdded) return;
+    demoColumnAdded = true;
+
+    var newCol = { id:'paymentMethod', label:'Payment Method', visible:false, isNew:true };
+    DEFAULT_COLUMNS.push(newCol);
+    COL_MAP[newCol.id] = newCol;
+    DEFAULT_ORDER.push(newCol.id);
+
+    var METHODS = ['Credit Card', 'ACH Transfer', 'Check', 'Financing'];
+    JOBS.forEach(function(job, i){ job.paymentMethod = METHODS[i % METHODS.length]; });
+
+    // Append to every existing built-in and personal view's order WITHOUT adding it to that
+    // view's visible list — it stays hidden until the user manually enables it (BR-13).
+    Object.keys(BUILT_IN_VIEWS).forEach(function(name){
+      var v = BUILT_IN_VIEWS[name];
+      if (v.columns.indexOf(newCol.id) === -1) v.columns.push(newCol.id);
+    });
+    Object.keys(customViews).forEach(function(name){
+      var v = customViews[name];
+      if (v.columns.indexOf(newCol.id) === -1) v.columns.push(newCol.id);
+    });
+    saveCustomViews(customViews);
+
+    if (state.order.indexOf(newCol.id) === -1) state.order.push(newCol.id);
+    persistState();
+
+    renderTable();
+    renderColList(document.getElementById('colSearch').value);
+    updateColumnsButtonState();
+
+    var btn = document.getElementById('simulateNewColBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-check"></i> "Payment Method" added — hidden in every existing view until enabled';
+  }
+  document.getElementById('simulateNewColBtn').addEventListener('click', simulateNewColumn);
 
   document.getElementById('brToggle').addEventListener('change', function(e){
     document.getElementById('jobs-list-page').classList.toggle('show-br', e.target.checked);
