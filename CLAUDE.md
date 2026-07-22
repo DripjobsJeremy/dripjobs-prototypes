@@ -14,6 +14,7 @@ Audience is field contractors using this on mobile in the field. Mobile-first, m
 
 - `docs/design-system.md`: color tokens, section/grid layout, form field patterns, button rules, alerts, tab navigation, spacing/radius scales, JS hooks that carry behavior, anti-patterns. Read this before building or restyling any page. This is the authoritative look-and-feel source, don't invent new patterns when one already exists here.
 - `docs/ux-laws-reference.md`: Laws of UX and current UX/UI/accessibility standards to apply when making layout, interaction, and hierarchy decisions.
+- `docs/design-workflow.md`: scope discipline rules (only build what was asked, don't redesign adjacent areas), deliverable type definitions (wireframe vs. high-fidelity mockup vs. clickable prototype vs. annotated design), and the input → analysis → execution → validation workflow. Read this before starting any new request to confirm what fidelity and scope is actually expected.
 - `docs/qa-chrome-prompt.md`: QA self-check prompt. Use this to review a prototype against acceptance criteria before presenting it, when a ticket or AC list is provided.
 - `docs/decision-log.md`: running log of prototype decisions. Append a short entry after any session where a real design or scope decision was made, don't rely on conversation memory carrying forward.
 

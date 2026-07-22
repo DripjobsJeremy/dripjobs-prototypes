@@ -18,6 +18,8 @@ Practical reference for layout, interaction, and hierarchy decisions when buildi
 
 **Von Restorff Effect (Isolation Effect)**: an item that stands out visually is remembered and noticed more. Use sparingly, for one primary action per screen, not for every element competing for attention.
 
+**Tesler's Law (Law of Conservation of Complexity)**: complexity can't be eliminated, only moved. Push complexity into the system, not onto the contractor, smart defaults, pre-filled fields, and automated calculations behind the scenes beat asking the user to figure it out. If a flow feels like it's offloading decisions the system could make itself, that's a signal to reconsider, not a fact of life to accept.
+
 **Serial Position Effect**: items at the start and end of a list are recalled better than the middle. Put the most important options first or last in a menu or list, not buried in the middle.
 
 **Law of Proximity / Common Region** (Gestalt): elements grouped closely or enclosed in a shared boundary are read as related. This is already encoded in the design system's section-card pattern, keep using card boundaries to group related fields rather than relying on whitespace alone.
