@@ -1,0 +1,521 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>CSV Import for Products and Services – DripJobs Prototype</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#F5F7FA;color:#333;font-size:14px;}
+
+/* ── Proto bar ── */
+.proto-bar{background:#fff;border-bottom:1px solid #DAD8E3;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:'DM Sans',sans-serif;}
+.proto-bar-left{display:flex;align-items:center;gap:10px;}
+.back-link{font-size:12px;font-weight:500;color:#80879A;text-decoration:none;display:flex;align-items:center;gap:4px;}
+.back-link:hover{color:#8B85EA;}
+.proto-divider{color:#DAD8E3;font-size:16px;}
+.proto-bar-title{font-size:14px;font-weight:600;}
+.proto-bar-ticket{font-size:11px;font-weight:600;color:#8B85EA;text-decoration:none;padding:4px 10px;border:1px solid #D6D2F5;background:#E8E6FA;border-radius:999px;letter-spacing:0.2px;}
+.proto-bar-ticket:hover{background:#8B85EA;color:#fff;}
+
+/* ── App shell ── */
+.app{display:flex;min-height:calc(100vh - 49px);}
+.sidebar{width:178px;background:#404E67;flex-shrink:0;}
+.sidebar-logo{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.1);}
+.sidebar-nav a{display:flex;align-items:center;gap:8px;padding:8px 16px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:12.5px;cursor:pointer;}
+.sidebar-nav a:hover,.sidebar-nav a.active{background:rgba(255,255,255,0.1);color:#fff;}
+.sidebar-nav a.highlight{background:#685AE8;color:#fff;}
+.sidebar-nav .lbl{color:rgba(255,255,255,0.4);font-size:10px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;padding:10px 16px 3px;}
+.sidebar-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,0.1);}
+.sidebar-footer a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:12.5px;}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+.topbar{height:52px;background:#fff;border-bottom:1px solid #e8edf2;display:flex;align-items:center;padding:0 20px;gap:12px;}
+.topbar-search{flex:1;max-width:320px;background:#F8FAFC;border:1px solid #e2e8f0;border-radius:20px;padding:6px 14px;display:flex;align-items:center;gap:8px;}
+.topbar-search input{background:none;border:none;outline:none;font-size:13px;color:#333;width:100%;}
+.topbar-right{display:flex;align-items:center;gap:12px;margin-left:auto;}
+.avatar{width:32px;height:32px;background:#685AE8;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;}
+.content{padding:24px;flex:1;}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.page-title{font-size:22px;font-weight:700;color:#1e293b;}
+.page-header-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;text-decoration:none;white-space:nowrap;}
+.btn-primary{background:#685AE8;color:#fff;}
+.btn-primary:hover{background:#5a4dd4;}
+.btn-primary:disabled{background:#c7c2f5;cursor:not-allowed;}
+.btn-secondary{background:#fff;color:#32415B;border:1px solid #DFE1E6;}
+.btn-secondary:hover{background:#f8fafc;}
+.btn-outline{background:#fff;color:#685AE8;border:1.5px solid #685AE8;}
+.btn-outline:hover{background:#f5f3ff;}
+.btn-sm{padding:5px 11px;font-size:12.5px;}
+.btn-edit-sm,.btn-danger-sm{background:none;border:none;cursor:pointer;padding:3px 5px;font-size:14px;}
+.btn-danger-sm{color:#ef4444;}
+.btn-edit-sm{color:#685AE8;}
+.card{background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;flex-wrap:wrap;gap:10px;}
+.section-title{font-size:16px;font-weight:600;color:#1e293b;}
+.section-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.data-table{width:100%;border-collapse:collapse;}
+.data-table thead tr{background:#F2F8FE;}
+.data-table th{padding:10px 12px;text-align:left;font-size:12.5px;color:#404E67;font-weight:500;}
+.data-table td{padding:9px 12px;border-bottom:1px solid #e3ebf3;font-size:13px;color:#333;vertical-align:middle;}
+.data-table tbody tr:last-child td{border-bottom:none;}
+.data-table tbody tr:hover{background:#fafbff;}
+.data-table tr.row-new{background:#f0fdf4;}
+.data-table tr.row-new:hover{background:#e6fbec;}
+.actions-cell{display:flex;align-items:center;gap:2px;justify-content:flex-end;}
+.table-scroll{overflow-x:auto;}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600;white-space:nowrap;}
+.badge-product{background:#e0f0ff;color:#0066cc;}
+.badge-service{background:#F0EEFF;color:#5C53DC;}
+.badge-success{background:#d4edda;color:#155724;}
+.badge-warning{background:#fff3cd;color:#856404;}
+.badge-danger{background:#fee2e2;color:#dc2626;}
+.badge-info{background:#e0f0ff;color:#0066cc;}
+.badge-new-tag{background:#7C3AED;color:#fff;font-size:9px;margin-left:6px;}
+.pagination-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;font-size:13px;color:#64748b;border-top:1px solid #e3ebf3;flex-wrap:wrap;gap:8px;}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:#fff;border-radius:15px;width:760px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1;}
+.modal-header h3{font-size:16px;font-weight:700;color:#1e293b;}
+.modal-close{background:none;border:none;font-size:22px;color:#94a3b8;cursor:pointer;line-height:1;}
+.modal-close:hover{color:#333;}
+.modal-body{padding:24px;}
+.modal-footer{padding:16px 24px;border-top:1px solid #eee;display:flex;align-items:center;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff;flex-wrap:wrap;}
+.modal-footer-note{font-size:11.5px;color:#94a3b8;margin-right:auto;}
+
+/* ── Steps ── */
+.steps{display:flex;align-items:center;margin-bottom:24px;}
+.step{display:flex;align-items:center;gap:8px;font-size:12.5px;flex-shrink:0;}
+.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
+.step.done .step-num{background:#685AE8;color:#fff;}
+.step.active .step-num{background:#685AE8;color:#fff;}
+.step.inactive .step-num{background:#e2e8f0;color:#94a3b8;}
+.step.done .step-label,.step.active .step-label{color:#685AE8;}
+.step.active .step-label{font-weight:600;}
+.step.inactive .step-label{color:#94a3b8;}
+.step-divider{flex:1;height:2px;background:#e2e8f0;margin:0 8px;min-width:16px;}
+.step-divider.done{background:#685AE8;}
+
+/* ── Upload ── */
+.upload-zone{border:2px dashed #c7d2fe;border-radius:12px;padding:36px 24px;text-align:center;background:#f5f3ff;cursor:pointer;transition:all 0.2s;}
+.upload-zone:hover,.upload-zone.dragover{border-color:#685AE8;background:#ede9fe;}
+.upload-zone .upload-icon{font-size:36px;margin-bottom:10px;}
+.upload-zone h4{font-size:15px;font-weight:600;color:#1e293b;margin-bottom:6px;}
+.upload-zone p{font-size:13px;color:#64748b;margin-bottom:4px;}
+.upload-zone small{font-size:11.5px;color:#94a3b8;}
+.template-link{color:#685AE8;text-decoration:underline;cursor:pointer;font-size:13px;margin-top:10px;display:inline-block;background:none;border:none;font-family:inherit;}
+.file-chip{display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-top:12px;}
+.file-chip-icon{font-size:22px;}
+.file-chip-info{flex:1;}
+.file-chip-name{font-size:13px;font-weight:600;color:#166534;}
+.file-chip-size{font-size:12px;color:#16a34a;}
+.file-chip-remove{background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;}
+.upload-hint{font-size:11.5px;color:#94a3b8;margin-top:14px;text-align:center;}
+
+/* ── Preview / summary ── */
+.import-summary{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px 16px;margin-bottom:12px;display:flex;gap:20px;font-size:13px;flex-wrap:wrap;}
+.stat{display:flex;align-items:center;gap:6px;}
+.stat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dot-green{background:#22c55e;}
+.dot-yellow{background:#f59e0b;}
+.dot-red{background:#ef4444;}
+.dot-purple{background:#685AE8;}
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px;}
+.alert-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}
+.alert-warning{background:#fffbeb;border:1px solid #fde68a;color:#92400e;}
+.alert-danger{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;}
+.conflict-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#92400e;}
+.conflict-row select{border:1px solid #fde68a;border-radius:6px;padding:5px 10px;font-size:12.5px;background:#fff;color:#1e293b;}
+.preview-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.preview-table th{padding:8px 10px;background:#F2F8FE;color:#404E67;font-weight:500;font-size:11.5px;text-align:left;}
+.preview-table td{padding:7px 10px;border-bottom:1px solid #f0f4f8;vertical-align:middle;}
+.preview-table tr.row-duplicate{background:#fffbeb;}
+.preview-table tr.row-error{background:#fff5f5;}
+.preview-table .error-reason{font-size:11px;color:#dc2626;display:block;margin-top:2px;}
+.conflict-select{border:1px solid #e2e8f0;border-radius:5px;padding:3px 8px;font-size:11.5px;background:#fff;}
+
+/* ── Success ── */
+.success-state{text-align:center;padding:16px 8px 8px;}
+.success-icon{font-size:52px;margin-bottom:14px;}
+.success-title{font-size:20px;font-weight:700;color:#1e293b;margin-bottom:8px;}
+.success-subtitle{color:#64748b;font-size:14px;margin-bottom:18px;}
+.success-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.success-card{border-radius:8px;padding:14px;text-align:left;}
+.success-card .num{font-size:22px;font-weight:700;}
+.success-card .lbl{font-size:11.5px;font-weight:500;margin-top:2px;}
+.audit-note{font-size:11.5px;color:#94a3b8;display:flex;align-items:center;justify-content:center;gap:6px;}
+
+.hidden{display:none!important;}
+@media (max-width:640px){.success-grid{grid-template-columns:repeat(2,1fr);}}
+</style></head><body>
+
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="proto-divider">|</span>
+    <span class="proto-bar-title">CSV Import for Products and Services (V1)</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bb0tcpe" target="_blank">86bb0tcpe</a>
+</div>
+
+<div class="app">
+<div class="sidebar">
+  <div class="sidebar-logo"><svg width="110" height="26" viewBox="0 0 110 26"><circle cx="11" cy="13" r="9" fill="#685AE8" opacity="0.3"/><circle cx="11" cy="13" r="5" fill="#685AE8"/><circle cx="11" cy="13" r="2.5" fill="#fff"/><text x="24" y="18" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="white">dripjobs</text></svg></div>
+  <div class="sidebar-nav">
+    <a href="#">📅 Job Schedule</a><a href="#">📋 Jobs List</a><a href="#">🔀 Pipeline</a><a href="#">🔧 Work Orders</a>
+    <div class="lbl">Daily Ops</div>
+    <a href="#">📆 Appointments</a><a href="#">💬 Chat</a><a href="#">✅ Tasks</a>
+    <div class="lbl">Documents</div><a href="#">🧾 Invoices</a><a href="#">📄 Proposals</a>
+    <div class="lbl">Financials</div><a href="#">💼 Job Costing</a>
+    <a href="#" class="highlight">🏷️ Products &amp; Services</a>
+    <a href="#">📈 Metrics</a>
+    <div class="lbl">Marketing</div><a href="#">📣 Activity</a><a href="#">💧 Drips</a>
+    <div class="lbl">Resources</div><a href="#">🎓 DJ Academy</a>
+  </div>
+  <div class="sidebar-footer"><a href="#">⚙ Settings</a></div>
+</div>
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-search"><span style="color:#94a3b8;font-size:14px;">🔍</span><input type="text" placeholder="Search leads, contacts, tags..."></div>
+    <div class="topbar-right"><span style="font-size:16px;color:#94a3b8;">⚠</span><span style="font-size:16px;color:#94a3b8;">🔔</span><div class="avatar">JH</div><span style="font-size:13px;color:#333;">Jeremy Harrison ▾</span></div>
+  </div>
+  <div class="content">
+    <div class="page-header">
+      <h1 class="page-title">Products &amp; Services</h1>
+      <div class="page-header-actions">
+        <button class="btn btn-secondary" onclick="downloadTemplate()">⬇ Download Sample Template</button>
+        <button class="btn btn-outline" onclick="openImportModal()">⬆ Import from CSV</button>
+        <button class="btn btn-primary">+ Add Product / Service</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-header">
+        <h2 class="section-title">Library <span id="record-count" style="color:#94a3b8;font-weight:400;font-size:13px;">(6)</span></h2>
+        <div class="section-actions">
+          <input type="text" placeholder="Search products or services..." style="border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:12.5px;width:200px;outline:none;">
+          <button class="btn btn-secondary btn-sm">Search</button>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Category</th><th>Price</th><th>SKU</th><th>Taxable</th><th style="text-align:right;">Actions</th></tr></thead>
+          <tbody id="library-tbody">
+            <tr><td>Interior Painting – Labor</td><td><span class="badge badge-service">Service</span></td><td>Labor</td><td>$45.00 / hr</td><td>—</td><td>No</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+            <tr id="row-ext-painting-labor"><td>Exterior Painting – Labor</td><td><span class="badge badge-service">Service</span></td><td>Labor</td><td id="price-ext-painting-labor">$50.00 / hr</td><td>—</td><td>No</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+            <tr><td>Drywall Repair</td><td><span class="badge badge-service">Service</span></td><td>Labor</td><td>$65.00 / hr</td><td>—</td><td>No</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+            <tr><td>Sherwin-Williams Duration Exterior (Satin)</td><td><span class="badge badge-product">Product</span></td><td>Materials</td><td>$38.99 / gal</td><td>SW-DUR-EXT</td><td>Yes</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+            <tr><td>Behr Premium Plus Interior (Satin)</td><td><span class="badge badge-product">Product</span></td><td>Materials</td><td>$34.99 / gal</td><td>BEHR-PPI-SAT</td><td>Yes</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+            <tr><td>Painter's Tape (Roll)</td><td><span class="badge badge-product">Product</span></td><td>Materials</td><td>$6.50 / ea</td><td>TAPE-2IN</td><td>Yes</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-danger-sm">🗑</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-bar"><span id="pagination-label">Displaying: <strong>6 products &amp; services</strong></span></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== IMPORT MODAL ===== -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Import Products &amp; Services from CSV</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="steps">
+        <div class="step active" id="step-1"><div class="step-num">1</div><div class="step-label">Upload</div></div>
+        <div class="step-divider" id="div-1"></div>
+        <div class="step inactive" id="step-2"><div class="step-num">2</div><div class="step-label">Review &amp; Resolve</div></div>
+        <div class="step-divider" id="div-2"></div>
+        <div class="step inactive" id="step-3"><div class="step-num">3</div><div class="step-label">Done</div></div>
+      </div>
+
+      <!-- STEP 1: UPLOAD -->
+      <div id="step-content-1">
+        <p style="font-size:13px;color:#64748b;margin-bottom:16px;">Upload a .csv file with your Products and Services. Each row needs a Name, Type (Product or Service), and Price. Category, Description, Cost, SKU, Taxable, and Active are optional.</p>
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+          <div class="upload-icon">📁</div>
+          <h4>Drag &amp; drop your CSV here</h4>
+          <p>or click to browse</p>
+          <small>.CSV only</small><br>
+          <button type="button" class="template-link" onclick="event.stopPropagation();downloadTemplate();">⬇ Download sample CSV template</button>
+        </div>
+        <input type="file" id="file-input" accept=".csv" class="hidden" onchange="handleFileSelect(event)">
+        <div id="file-chip" class="file-chip hidden">
+          <div class="file-chip-icon">📄</div>
+          <div class="file-chip-info"><div class="file-chip-name" id="file-name">products_services_import.csv</div><div class="file-chip-size">10 rows detected</div></div>
+          <button class="file-chip-remove" onclick="removeFile()">×</button>
+        </div>
+        <div id="upload-error" class="alert alert-danger hidden" style="margin-top:12px;">
+          <span>⚠</span>
+          <div><strong>That file can't be imported.</strong> Only .csv files are supported. Please export your data as CSV and try again.</div>
+        </div>
+        <p class="upload-hint">Tip: pick a non-.csv file (e.g. .xlsx) to see how the rejection message looks.</p>
+      </div>
+
+      <!-- STEP 2: REVIEW & RESOLVE -->
+      <div id="step-content-2" class="hidden">
+        <div class="import-summary">
+          <div class="stat"><div class="stat-dot dot-green"></div><strong>6 new</strong> products/services</div>
+          <div class="stat"><div class="stat-dot dot-purple"></div><strong>3 new</strong> categories</div>
+          <div class="stat"><div class="stat-dot dot-yellow"></div><strong>1 duplicate</strong></div>
+          <div class="stat"><div class="stat-dot dot-red"></div><strong>3 errors</strong></div>
+        </div>
+        <div class="alert alert-info">
+          <span>ℹ</span>
+          <div><strong>Exterior Services</strong>, <strong>Prep Work</strong>, and <strong>Interior Services</strong> don't exist yet — they'll be created automatically and applied to their rows.</div>
+        </div>
+        <div class="conflict-row">
+          <span>⚠ <strong>1 row</strong> matches an existing record by name (<em>Exterior Painting – Labor</em>). Choose how to handle it:</span>
+          <select id="global-conflict-select" onchange="applyGlobalConflict()">
+            <option value="skip" selected>Skip (keep existing)</option>
+            <option value="overwrite">Overwrite existing</option>
+          </select>
+        </div>
+        <div class="table-scroll">
+          <table class="preview-table">
+            <thead><tr><th>Name</th><th>Type</th><th>Price</th><th>Category</th><th>Status</th></tr></thead>
+            <tbody id="preview-tbody"></tbody>
+          </table>
+        </div>
+        <p style="font-size:11.5px;color:#94a3b8;margin-top:10px;">Rows with errors won't be imported. You'll be able to download a corrected list after import.</p>
+      </div>
+
+      <!-- STEP 3: DONE -->
+      <div id="step-content-3" class="hidden">
+        <div id="importing-state">
+          <div class="success-state">
+            <div class="success-icon">⏳</div>
+            <h3 class="success-title">Importing…</h3>
+            <p class="success-subtitle">Creating records and new categories.</p>
+          </div>
+        </div>
+        <div id="done-state" class="hidden">
+          <div class="success-state">
+            <div class="success-icon">✅</div>
+            <h3 class="success-title">Import Complete!</h3>
+            <p class="success-subtitle">Your Products &amp; Services library has been updated.</p>
+            <div class="success-grid">
+              <div class="success-card" style="background:#f0fdf4;border:1px solid #bbf7d0;"><div class="num" style="color:#166534;" id="stat-created">6</div><div class="lbl" style="color:#16a34a;">Created</div></div>
+              <div class="success-card" style="background:#eff6ff;border:1px solid #bfdbfe;"><div class="num" style="color:#1e40af;" id="stat-updated">0</div><div class="lbl" style="color:#1e40af;">Updated</div></div>
+              <div class="success-card" style="background:#fffbeb;border:1px solid #fde68a;"><div class="num" style="color:#92400e;" id="stat-skipped">1</div><div class="lbl" style="color:#d97706;">Skipped</div></div>
+              <div class="success-card" style="background:#fef2f2;border:1px solid #fecaca;"><div class="num" style="color:#991b1b;">3</div><div class="lbl" style="color:#dc2626;">Errors</div></div>
+            </div>
+            <button class="btn btn-secondary" onclick="downloadRejected()">⬇ Download 3 rejected rows (with reasons)</button>
+            <p class="audit-note" style="margin-top:14px;">🗒 This import was recorded in your account's audit trail.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span class="modal-footer-note" id="footer-note"></span>
+      <button class="btn btn-secondary" id="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-secondary hidden" id="btn-back" onclick="goBack()">← Back</button>
+      <button class="btn btn-primary" id="btn-next" onclick="goNext()" disabled>Next →</button>
+      <button class="btn btn-primary hidden" id="btn-done" onclick="finishImport()">View Updated Library</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---- Canned import rows: [name, type, price, category, status, reason] ---- */
+var ROWS = [
+  ['Pressure Washing','Service','$55.00 / hr','Labor','new'],
+  ['Deck Staining','Service','$60.00 / hr','Exterior Services','new'],
+  ['Behr Marquee Interior Paint (Gallon)','Product','$52.99 / gal','Materials','new'],
+  ['Exterior Painting – Labor','Service','$52.00 / hr','Labor','dup'],
+  ['Caulking &amp; Sealing','Service','$40.00 / hr','Prep Work','new'],
+  ['Deck Staining','Service','$60.00 / hr','Exterior Services','err','Duplicate name within this file — first seen at row 2'],
+  ['Wallpaper Removal','Service','—','Interior Services','err','Missing required field: Price'],
+  ['Pressure Washer Rental','Item','$75.00 / hr','Prep Work','err','Invalid Type value "Item" — must be Product or Service'],
+  ['Cabinet Refinishing','Service','$85.00 / hr','Interior Services','new'],
+  ['Trim Paint – Quart','Product','$14.99 / ea','Materials','new']
+];
+
+var NEW_ROWS = ROWS.filter(function(r){return r[4]==='new';});
+var DUP_ROWS = ROWS.filter(function(r){return r[4]==='dup';});
+var ERR_ROWS = ROWS.filter(function(r){return r[4]==='err';});
+
+var currentStep = 1;
+var fileLoaded = false;
+var alreadyImported = false;
+
+function openImportModal(){
+  currentStep = 1;
+  fileLoaded = false;
+  document.getElementById('file-input').value = '';
+  document.getElementById('upload-zone').classList.remove('hidden');
+  document.getElementById('file-chip').classList.add('hidden');
+  document.getElementById('upload-error').classList.add('hidden');
+  document.getElementById('done-state').classList.add('hidden');
+  document.getElementById('importing-state').classList.remove('hidden');
+  showStep(1);
+  document.getElementById('import-modal').classList.add('open');
+}
+function closeModal(){document.getElementById('import-modal').classList.remove('open');}
+
+function showStep(s){
+  for(var i=1;i<=3;i++){
+    var el=document.getElementById('step-content-'+i); if(el) el.classList.add('hidden');
+    var st=document.getElementById('step-'+i); if(st) st.className='step '+(i<s?'done':i===s?'active':'inactive');
+    var dv=document.getElementById('div-'+i); if(dv) dv.className='step-divider'+(i<s?' done':'');
+  }
+  var c=document.getElementById('step-content-'+s); if(c) c.classList.remove('hidden');
+  currentStep = s;
+  document.getElementById('btn-cancel').classList.toggle('hidden', s===3);
+  document.getElementById('btn-back').classList.toggle('hidden', s<=1 || s===3);
+  document.getElementById('btn-next').classList.toggle('hidden', s===3);
+  document.getElementById('btn-done').classList.toggle('hidden', s!==3);
+  document.getElementById('btn-next').disabled = (s===1 && !fileLoaded);
+  document.getElementById('btn-next').textContent = s===2 ? 'Import Records →' : 'Next →';
+  document.getElementById('footer-note').textContent = s===2 ? '10 rows read from file' : '';
+}
+
+/* ---- Step 1: upload ---- */
+function handleFileSelect(e){
+  var f = e.target.files[0];
+  if(!f) return;
+  processFile(f.name);
+}
+function handleDragOver(e){e.preventDefault();document.getElementById('upload-zone').classList.add('dragover');}
+function handleDragLeave(e){document.getElementById('upload-zone').classList.remove('dragover');}
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('dragover');
+  var f = e.dataTransfer.files[0];
+  if(!f) return;
+  processFile(f.name);
+}
+function processFile(name){
+  var isCsv = /\.csv$/i.test(name);
+  document.getElementById('upload-error').classList.toggle('hidden', isCsv);
+  if(!isCsv){
+    fileLoaded = false;
+    document.getElementById('upload-zone').classList.remove('hidden');
+    document.getElementById('file-chip').classList.add('hidden');
+    document.getElementById('btn-next').disabled = true;
+    return;
+  }
+  fileLoaded = true;
+  document.getElementById('upload-zone').classList.add('hidden');
+  document.getElementById('file-chip').classList.remove('hidden');
+  document.getElementById('file-name').textContent = name;
+  document.getElementById('btn-next').disabled = false;
+}
+function removeFile(){
+  fileLoaded = false;
+  document.getElementById('file-input').value = '';
+  document.getElementById('upload-zone').classList.remove('hidden');
+  document.getElementById('file-chip').classList.add('hidden');
+  document.getElementById('upload-error').classList.add('hidden');
+  document.getElementById('btn-next').disabled = true;
+}
+
+/* ---- Step 2: preview ---- */
+function buildPreview(){
+  var tb = document.getElementById('preview-tbody');
+  tb.innerHTML = '';
+  ROWS.forEach(function(row, i){
+    var name=row[0], type=row[1], price=row[2], cat=row[3], status=row[4], reason=row[5];
+    var typeBadge = type==='Item' ? '<span class="badge badge-danger">Item</span>' : '<span class="badge badge-'+type.toLowerCase()+'">'+type+'</span>';
+    var statusCell;
+    var trClass = '';
+    if(status==='new'){
+      statusCell = '<span class="badge badge-success">New</span>';
+    } else if(status==='dup'){
+      trClass = 'row-duplicate';
+      statusCell = '<select class="conflict-select row-conflict-select" onchange="syncGlobalFromRow()"><option value="skip" selected>Skip (keep existing)</option><option value="overwrite">Overwrite existing</option></select>';
+    } else {
+      trClass = 'row-error';
+      statusCell = '<span class="badge badge-danger">Error</span><span class="error-reason">'+reason+'</span>';
+    }
+    tb.innerHTML += '<tr class="'+trClass+'"><td>'+name+'</td><td>'+typeBadge+'</td><td>'+price+'</td><td>'+cat+'</td><td>'+statusCell+'</td></tr>';
+  });
+}
+function applyGlobalConflict(){
+  var v = document.getElementById('global-conflict-select').value;
+  document.querySelectorAll('.row-conflict-select').forEach(function(sel){ sel.value = v; });
+}
+function syncGlobalFromRow(){
+  var selects = document.querySelectorAll('.row-conflict-select');
+  if(selects.length === 1){
+    document.getElementById('global-conflict-select').value = selects[0].value;
+  }
+}
+
+/* ---- Navigation ---- */
+function goNext(){
+  if(currentStep===1){
+    buildPreview();
+    showStep(2);
+  } else if(currentStep===2){
+    runImport();
+  }
+}
+function goBack(){
+  if(currentStep>1) showStep(currentStep-1);
+}
+
+function runImport(){
+  document.getElementById('btn-next').disabled = true;
+  document.getElementById('btn-next').textContent = 'Importing…';
+  document.getElementById('btn-back').classList.add('hidden');
+  document.getElementById('btn-cancel').classList.add('hidden');
+  showStep(3);
+  setTimeout(function(){
+    var overwriteCount = 0, skipCount = 0;
+    document.querySelectorAll('.row-conflict-select').forEach(function(sel){
+      if(sel.value === 'overwrite') overwriteCount++; else skipCount++;
+    });
+    document.getElementById('stat-created').textContent = NEW_ROWS.length;
+    document.getElementById('stat-updated').textContent = overwriteCount;
+    document.getElementById('stat-skipped').textContent = skipCount;
+    document.getElementById('importing-state').classList.add('hidden');
+    document.getElementById('done-state').classList.remove('hidden');
+    document.getElementById('btn-done').classList.remove('hidden');
+    window._lastOverwriteCount = overwriteCount;
+  }, 1000);
+}
+
+function finishImport(){
+  if(!alreadyImported){
+    alreadyImported = true;
+    var tbody = document.getElementById('library-tbody');
+    NEW_ROWS.forEach(function(row){
+      var typeClass = row[1].toLowerCase();
+      tbody.innerHTML += '<tr class="row-new"><td>'+row[0]+' <span class="badge badge-new-tag">Imported</span></td><td><span class="badge badge-'+typeClass+'">'+row[1]+'</span></td><td>'+row[3]+'</td><td>'+row[2]+'</td><td>—</td><td>—</td><td><div class="actions-cell"><button class="btn-edit-sm">✏</button><button class="btn-danger-sm">🗑</button></div></td></tr>';
+    });
+    if(window._lastOverwriteCount > 0){
+      document.getElementById('price-ext-painting-labor').textContent = '$52.00 / hr';
+    }
+    var total = 6 + NEW_ROWS.length;
+    document.getElementById('record-count').textContent = '('+total+')';
+    document.getElementById('pagination-label').innerHTML = 'Displaying: <strong>'+total+' products &amp; services</strong>';
+  }
+  closeModal();
+}
+
+/* ---- Downloads ---- */
+function triggerDownload(filename, content){
+  var blob = new Blob([content], {type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function downloadTemplate(){
+  var csv = 'Name,Type,Price,Category,Description,Cost,SKU,Taxable,Active\n'
+    + 'Exterior Painting - Labor,Service,50.00,Labor,Standard hourly labor rate for exterior painting,,,No,Yes\n'
+    + 'Sherwin-Williams Duration Exterior (Satin),Product,38.99,Materials,5-gallon exterior paint,24.50,SW-DUR-EXT,Yes,Yes\n';
+  triggerDownload('products_services_import_template.csv', csv);
+}
+function downloadRejected(){
+  var header = 'Name,Type,Price,Category,Error Reason\n';
+  var rows = ERR_ROWS.map(function(r){
+    var price = r[2]==='—' ? '' : r[2].replace(' / hr','').replace(' / gal','').replace(' / ea','').replace('$','');
+    return '"'+r[0]+'","'+r[1]+'","'+price+'","'+r[3]+'","'+r[5]+'"';
+  }).join('\n');
+  triggerDownload('rejected_rows.csv', header + rows + '\n');
+}
+</script>
+</body></html>
