@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jobs Schedule Calendar — Crew Leveling — DripJobs</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --color-primary:        #8B85EA;
+    --color-primary-hover:  #736BE3;
+    --color-primary-active: #5C53DC;
+    --color-primary-rgb:    139, 133, 234;
+    --color-bg:             #F3F1FC;
+    --color-text:           #32415B;
+    --color-text-muted:     #80879A;
+    --color-border:         #DAD8E3;
+    --color-card:           #FFFFFF;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100vh;
+  }
+
+  /* ── Top bar ── */
+  .proto-bar {
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; }
+  .back-link {
+    font-size: 12px; font-weight: 500; color: var(--color-text-muted);
+    text-decoration: none; display: flex; align-items: center; gap: 4px;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--color-primary); }
+  .divider { color: var(--color-border); font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; }
+  .proto-bar-ticket {
+    font-size: 11px; font-weight: 600; color: var(--color-primary);
+    text-decoration: none; padding: 4px 10px; border: 1px solid #D6D2F5;
+    background: #E8E6FA; border-radius: 999px; letter-spacing: 0.2px;
+  }
+  .proto-bar-ticket:hover { background: var(--color-primary); color: #fff; }
+
+  .proto-content { max-width: 1080px; margin: 32px auto 64px; padding: 0 24px; }
+
+  .jsc-header { margin-bottom: 20px; }
+  .jsc-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .jsc-header p { font-size: 13px; color: var(--color-text-muted); line-height: 1.6; max-width: 720px; }
+
+  /* ── settings-section (design system section card, scoped to this page) ── */
+  #jsc-page .settings-section {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  #jsc-page .settings-section-title { font-size: 14px; font-weight: 600; margin: 0 0 4px 0; }
+  #jsc-page .settings-section-subtitle { font-size: 12px; color: var(--color-text-muted); margin: 0 0 14px 0; }
+
+  /* ── settings-alert (design system alert, scoped to this page) ── */
+  #jsc-page .settings-alert {
+    display: flex; align-items: flex-start; gap: 10px;
+    border-radius: 8px; border: 1px solid; padding: 12px 14px;
+    margin-bottom: 12px; font-size: 13px; line-height: 1.5;
+  }
+  #jsc-page .settings-alert--info  { background:#EFF6FF; border-color:#BFDBFE; color:#1E40AF; }
+  #jsc-page .settings-alert--warn  { background:#FFFBEB; border-color:#FDE68A; color:#92400E; }
+  #jsc-page .settings-alert-icon { font-size: 15px; line-height: 1.4; flex-shrink: 0; }
+  #jsc-page .settings-alert-title { font-weight: 600; margin-bottom: 2px; }
+
+  /* ── settings-tabs (view switcher, design system tab pattern) ── */
+  #jsc-page .settings-tabs nav {
+    display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px;
+  }
+  #jsc-page .settings-tabs nav::-webkit-scrollbar { display: none; }
+  #jsc-page .settings-tab-link {
+    flex-shrink: 0; text-decoration: none; color: var(--color-text);
+    font-size: 13px; font-weight: 500; padding: 9px 18px; border-radius: 16px;
+    white-space: nowrap; transition: box-shadow 0.15s, font-weight 0.15s;
+  }
+  #jsc-page .settings-tab-link:nth-child(1) { background: #E8E6FA; }
+  #jsc-page .settings-tab-link:nth-child(2) { background: #FAF0E6; }
+  #jsc-page .settings-tab-link:nth-child(3) { background: #E6FAF0; }
+  #jsc-page .settings-tab-link.active {
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    font-weight: 600;
+  }
+
+  /* ── Prototype-only demo control (explicitly NOT a production element) ── */
+  .jsc-demo-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    color: var(--color-primary-active); background: #E8E6FA; border: 1px solid #D6D2F5;
+    border-radius: 999px; padding: 2px 9px; display: inline-block; margin-bottom: 8px;
+  }
+  .jsc-sort-toggle { display: inline-flex; border: 1px solid var(--color-border); border-radius: 10px; padding: 3px; gap: 3px; flex-wrap: wrap; }
+  .jsc-sort-btn {
+    border: none; background: transparent; font-family: inherit; cursor: pointer;
+    font-size: 12px; font-weight: 600; color: var(--color-text-muted);
+    padding: 9px 14px; border-radius: 8px; transition: background 0.15s, color 0.15s;
+  }
+  .jsc-sort-btn.active { background: var(--color-primary); color: #fff; }
+  .jsc-controls-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 18px; }
+
+  /* ── Crew order reference panel ── */
+  .jsc-crew-list { display: flex; flex-wrap: wrap; gap: 10px; }
+  .jsc-crew-chip {
+    display: flex; align-items: center; gap: 8px; background: #FAFAFC;
+    border: 1px solid var(--color-border); border-radius: 10px; padding: 8px 8px 8px 12px;
+  }
+  .jsc-crew-name { font-size: 13px; font-weight: 600; }
+  .jsc-crew-rank { font-size: 11px; color: var(--color-text-muted); font-weight: 500; }
+  .jsc-crew-move { display: flex; gap: 2px; margin-left: 4px; }
+  .jsc-move-btn {
+    width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--color-border);
+    background: #fff; cursor: pointer; font-size: 10px; color: var(--color-text-muted);
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+  }
+  .jsc-move-btn:hover:not(:disabled) { border-color: var(--color-primary); color: var(--color-primary); }
+  .jsc-move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .jsc-crew-note { font-size: 12px; color: var(--color-text-muted); margin-top: 12px; }
+
+  .jsc-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+
+  /* ── Date nav bar ── */
+  .jsc-datebar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .jsc-nav-btn {
+    height: 36px; min-width: 36px; padding: 0 12px; border-radius: 8px;
+    border: 1px solid var(--color-border); background: #fff; cursor: pointer;
+    font-size: 14px; font-weight: 600; color: var(--color-text); transition: all 0.15s;
+  }
+  .jsc-nav-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .jsc-date-heading { font-size: 15px; font-weight: 700; margin-left: 4px; }
+
+  /* ── Day view ── */
+  .jsc-day-list { display: flex; flex-direction: column; gap: 10px; }
+  .jsc-job-card {
+    display: flex; align-items: center; gap: 14px; background: #fff;
+    border: 1px solid var(--color-border); border-left: 4px solid var(--crew-color, #9AA1B5);
+    border-radius: 8px; padding: 12px 14px;
+  }
+  .jsc-job-time { font-size: 12px; font-weight: 700; color: var(--color-text-muted); width: 66px; flex-shrink: 0; }
+  .jsc-job-main { flex: 1; min-width: 0; }
+  .jsc-job-title { font-size: 13px; font-weight: 600; }
+  .jsc-job-address { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+  .jsc-job-crew { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--color-text-muted); flex-shrink: 0; }
+
+  .jsc-note { font-size: 12px; color: var(--color-text-muted); margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--color-border); }
+  .jsc-empty { font-size: 13px; color: var(--color-text-muted); padding: 24px 0; text-align: center; }
+  .jsc-empty-sm { padding: 10px 0; font-size: 12px; }
+
+  /* ── 3 Day view ── */
+  .jsc-3day-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
+  .jsc-3day-col { background: #FAFAFC; border: 1px solid var(--color-border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .jsc-3day-col.is-today { border-color: var(--color-primary); background: #F5F4FE; }
+  .jsc-3day-colhead { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+  .jsc-3day-col .jsc-job-card { padding: 9px 10px; gap: 8px; flex-wrap: wrap; }
+  .jsc-3day-col .jsc-job-time { width: auto; }
+  .jsc-3day-col .jsc-job-crew { width: 100%; }
+  @media (max-width: 720px) { .jsc-3day-grid { grid-template-columns: 1fr; } }
+
+  /* ── Month view ── */
+  .jsc-month-scroll { overflow-x: auto; }
+  .jsc-month-dow, .jsc-month-grid { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 6px; min-width: 780px; }
+  .jsc-month-dow { margin-bottom: 6px; }
+  .jsc-month-dow div { font-size: 11px; font-weight: 700; color: var(--color-text-muted); text-align: center; text-transform: uppercase; letter-spacing: 0.4px; }
+  .jsc-month-cell { background: #fff; border: 1px solid var(--color-border); border-radius: 8px; padding: 8px; min-height: 108px; }
+  .jsc-month-cell--blank { background: transparent; border-color: transparent; }
+  .jsc-month-cell.is-today { border-color: var(--color-primary); background: #F9F8FF; }
+  .jsc-month-date { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+  .jsc-month-lines { display: flex; flex-direction: column; gap: 3px; }
+  .jsc-month-line { display: flex; align-items: center; gap: 5px; font-size: 11px; overflow: hidden; }
+  .jsc-month-time { color: var(--color-text-muted); font-weight: 600; flex-shrink: 0; }
+  .jsc-month-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .jsc-month-more {
+    margin-top: 4px; border: none; background: transparent; color: var(--color-primary);
+    font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; font-family: inherit;
+  }
+  .jsc-month-extra { display: flex; flex-direction: column; gap: 3px; margin-top: 3px; }
+
+  /* ── Acceptance criteria list ── */
+  .jsc-ac-list { display: flex; flex-direction: column; gap: 10px; }
+  .jsc-ac-item { display: flex; gap: 10px; font-size: 13px; line-height: 1.5; }
+  .jsc-ac-check { color: #166534; font-weight: 700; flex-shrink: 0; }
+  .jsc-ac-item b { font-weight: 600; }
+  .jsc-ac-item span.muted { color: var(--color-text-muted); }
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Jobs Schedule Calendar — Crew Leveling</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/86barp4zu" target="_blank">86barp4zu</a>
+</div>
+
+<div class="proto-content" id="jsc-page">
+
+  <div class="jsc-header">
+    <h1>Jobs Schedule Calendar — Crew Leveling</h1>
+    <p>Prototype for ticket 86barp4zu. Jobs on the Day, 3 Day, and Month views are grouped and ordered so each crew consistently appears in the same relative position, matching the crew order in Crew Settings, instead of stacking by start time. Use the controls below to compare the current behavior against the proposed fix, and to see what happens when a crew's position changes.</p>
+  </div>
+
+  <div class="settings-alert settings-alert--info">
+    <span class="settings-alert-icon">ℹ️</span>
+    <div>
+      <div class="settings-alert-title">Assumption carried from the ticket</div>
+      <div>Sort order within a single crew's own jobs on the same date (currently by start time) is unchanged. This prototype only reorders crews relative to one another, not jobs within a crew.</div>
+    </div>
+  </div>
+
+  <div class="settings-alert settings-alert--warn">
+    <span class="settings-alert-icon">⚠️</span>
+    <div>
+      <div class="settings-alert-title">Open gap, flagged for engineering scoping</div>
+      <div>Behavior for jobs whose crew has since been deactivated or deleted in Crew Settings is not defined yet. This prototype does not simulate that case — recommend walking it in production before finalizing.</div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="jsc-controls-row">
+      <div>
+        <span class="jsc-demo-tag">Prototype control, not production UI</span><br/>
+        <div class="jsc-sort-toggle" role="group" aria-label="Compare sort behavior">
+          <button type="button" class="jsc-sort-btn" data-sort="current">Current sort (by time)</button>
+          <button type="button" class="jsc-sort-btn active" data-sort="leveled">New: crew leveled</button>
+        </div>
+      </div>
+      <div class="settings-tabs">
+        <nav>
+          <a href="#" class="settings-tab-link active" data-tab="day">Day</a>
+          <a href="#" class="settings-tab-link" data-tab="3day">3 Day</a>
+          <a href="#" class="settings-tab-link" data-tab="month">Month</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="jsc-datebar">
+      <button type="button" class="jsc-nav-btn" id="navPrev" aria-label="Previous">‹</button>
+      <button type="button" class="jsc-nav-btn" id="navToday">Today</button>
+      <button type="button" class="jsc-nav-btn" id="navNext" aria-label="Next">›</button>
+      <div class="jsc-date-heading" id="dateHeading"></div>
+    </div>
+
+    <div id="calendarBody"></div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">Crew Settings — Display Order</div>
+    <div class="settings-section-subtitle">Reference of each crew's position in Crew Settings. Reorder here to see the calendar update automatically — no separate calendar configuration needed. Only affects "New: crew leveled" sort.</div>
+    <div class="jsc-crew-list" id="crewOrderList"></div>
+    <div class="jsc-crew-note">Jobs with no crew assigned always sort to the bottom of each date's list, below all crew-ordered jobs, regardless of this order.</div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">Acceptance criteria coverage</div>
+    <div class="settings-section-subtitle">How this prototype demonstrates each acceptance criterion from the ticket.</div>
+    <div class="jsc-ac-list">
+      <div class="jsc-ac-item"><span class="jsc-ac-check">✓</span><span><b>Day view</b> groups and orders jobs by crew, matching Crew Settings — <span class="muted">switch to the Day tab with "New: crew leveled" selected.</span></span></div>
+      <div class="jsc-ac-item"><span class="jsc-ac-check">✓</span><span><b>3 Day view</b> groups and orders jobs by crew, with the same crew in the same relative position across dates — <span class="muted">see the 3 Day tab; each column follows the same crew order.</span></span></div>
+      <div class="jsc-ac-item"><span class="jsc-ac-check">✓</span><span><b>Month view</b> groups and orders jobs by crew using a layout scaled to the smaller cell size — <span class="muted">see the Month tab; compact colored-dot lines replace full swimlane cards.</span></span></div>
+      <div class="jsc-ac-item"><span class="jsc-ac-check">✓</span><span><b>Crews with no jobs on a date show no row/placeholder</b> — <span class="muted">no empty rows are ever rendered; the Day view also calls out which crews aren't scheduled that day.</span></span></div>
+      <div class="jsc-ac-item"><span class="jsc-ac-check">✓</span><span><b>Unassigned jobs sort below all crew-ordered jobs, no dedicated label</b> — <span class="muted">see any date with an "Unassigned" job in "New: crew leveled" mode.</span></span></div>
+      <div class="jsc-ac-item"><span class="jsc-ac-check">✓</span><span><b>Reordering a crew in Crew Settings updates the calendar automatically</b> — <span class="muted">use the ▲/▼ buttons in the Crew Settings panel above.</span></span></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const CREWS = {
+    alpha:   { name: 'Crew Alpha',   color: '#8B85EA' },
+    bravo:   { name: 'Crew Bravo',   color: '#0DCECE' },
+    charlie: { name: 'Crew Charlie', color: '#F5A623' },
+    delta:   { name: 'Crew Delta',   color: '#EC6BA5' },
+  };
+  const CREW_IDS = Object.keys(CREWS);
+  let crewOrder = ['alpha', 'bravo', 'charlie', 'delta'];
+
+  const JOB_TEMPLATES = [
+    { title: 'Exterior Repaint',            address: '142 Maple St' },
+    { title: 'Interior Trim & Doors',       address: '58 Johnson Ave' },
+    { title: 'Cabinet Refinishing',         address: '23 Oakwood Dr' },
+    { title: 'Deck Staining',               address: '710 Miller Rd' },
+    { title: 'Fence Painting',              address: '8 Riverside Ln' },
+    { title: 'Full Interior Repaint',       address: '1220 Birchwood Ct' },
+    { title: 'Siding & Trim',               address: '45 Hillcrest Ave' },
+    { title: 'Garage Floor Coating',        address: '902 Sunset Blvd' },
+    { title: 'Popcorn Ceiling Removal',     address: '16 Cedar Ct' },
+    { title: 'Commercial Office Repaint',   address: '300 Main St Suite 4' },
+    { title: 'Pressure Wash & Repaint',     address: '77 Lakeview Dr' },
+    { title: 'Accent Wall Install',         address: '12 Ridgeway Ter' },
+  ];
+  const TIMES = ['8:00 AM', '9:00 AM', '9:30 AM', '10:00 AM', '11:00 AM', '1:00 PM', '2:00 PM', '3:30 PM'];
+
+  const state = { view: 'day', sort: 'leveled', anchor: new Date() };
+
+  function timeToMinutes(t) {
+    const [time, ampm] = t.split(' ');
+    let [h, m] = time.split(':').map(Number);
+    if (ampm === 'PM' && h !== 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+    return h * 60 + m;
+  }
+  function shortTime(t) {
+    const mins = timeToMinutes(t);
+    const h = Math.floor(mins / 60), m = mins % 60;
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    const suffix = h < 12 ? 'a' : 'p';
+    return m === 0 ? `${h12}${suffix}` : `${h12}:${String(m).padStart(2, '0')}${suffix}`;
+  }
+  function sameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  function jobsForDate(dateObj) {
+    const seed = dateObj.getFullYear() * 10000 + (dateObj.getMonth() + 1) * 100 + dateObj.getDate();
+    let r = seed;
+    const rand = () => (r = (r * 9301 + 49297) % 233280) / 233280;
+    const day = dateObj.getDay();
+    if (day === 0) return [];
+    const count = day === 6 ? Math.floor(rand() * 2) : 1 + Math.floor(rand() * 3);
+    const jobs = [];
+    const used = new Set();
+    for (let i = 0; i < count; i++) {
+      let idx;
+      do { idx = Math.floor(rand() * JOB_TEMPLATES.length); } while (used.has(idx) && used.size < JOB_TEMPLATES.length);
+      used.add(idx);
+      const crewRoll = rand();
+      const crew = crewRoll < 0.12 ? null : CREW_IDS[Math.floor(rand() * CREW_IDS.length)];
+      const time = TIMES[Math.floor(rand() * TIMES.length)];
+      jobs.push({ id: `${seed}-${i}`, crew, time, title: JOB_TEMPLATES[idx].title, address: JOB_TEMPLATES[idx].address });
+    }
+    return jobs;
+  }
+
+  function sortJobs(jobs) {
+    if (state.sort === 'current') {
+      return [...jobs].sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
+    }
+    return [...jobs].sort((a, b) => {
+      const ra = a.crew ? crewOrder.indexOf(a.crew) : Infinity;
+      const rb = b.crew ? crewOrder.indexOf(b.crew) : Infinity;
+      if (ra !== rb) return ra - rb;
+      return timeToMinutes(a.time) - timeToMinutes(b.time);
+    });
+  }
+
+  function jobCardHTML(job) {
+    const crew = job.crew ? CREWS[job.crew] : null;
+    const color = crew ? crew.color : '#9AA1B5';
+    const label = crew ? crew.name : 'Unassigned';
+    return `<div class="jsc-job-card" style="--crew-color:${color}">
+      <div class="jsc-job-time">${job.time}</div>
+      <div class="jsc-job-main">
+        <div class="jsc-job-title">${job.title}</div>
+        <div class="jsc-job-address">${job.address}</div>
+      </div>
+      <div class="jsc-job-crew"><span class="jsc-dot" style="background:${color}"></span>${label}</div>
+    </div>`;
+  }
+  function monthLineHTML(job) {
+    const color = job.crew ? CREWS[job.crew].color : '#9AA1B5';
+    return `<div class="jsc-month-line">
+      <span class="jsc-dot" style="background:${color}"></span>
+      <span class="jsc-month-time">${shortTime(job.time)}</span>
+      <span class="jsc-month-title">${job.title}</span>
+    </div>`;
+  }
+
+  function renderDayView(container) {
+    const jobs = sortJobs(jobsForDate(state.anchor));
+    if (jobs.length === 0) {
+      container.innerHTML = `<div class="jsc-empty">No jobs scheduled for this date.</div>`;
+      return;
+    }
+    const present = new Set(jobs.filter(j => j.crew).map(j => j.crew));
+    const missing = crewOrder.filter(c => !present.has(c));
+    container.innerHTML = `
+      <div class="jsc-day-list">${jobs.map(jobCardHTML).join('')}</div>
+      ${missing.length ? `<div class="jsc-note">Not scheduled today: ${missing.map(c => CREWS[c].name).join(', ')} — no row reserved.</div>` : ''}
+    `;
+  }
+
+  function render3DayView(container) {
+    const dates = [0, 1, 2].map(o => { const d = new Date(state.anchor); d.setDate(d.getDate() + o); return d; });
+    container.innerHTML = `<div class="jsc-3day-grid">${dates.map(d => {
+      const jobs = sortJobs(jobsForDate(d));
+      const isToday = sameDay(d, new Date());
+      return `<div class="jsc-3day-col ${isToday ? 'is-today' : ''}">
+        <div class="jsc-3day-colhead">${d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+        ${jobs.length ? jobs.map(jobCardHTML).join('') : '<div class="jsc-empty jsc-empty-sm">No jobs</div>'}
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  function buildMonthGrid(anchor) {
+    const year = anchor.getFullYear(), month = anchor.getMonth();
+    const startDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < startDay; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
+    while (cells.length % 7 !== 0) cells.push(null);
+    return cells;
+  }
+
+  function renderMonthView(container) {
+    const cells = buildMonthGrid(state.anchor);
+    const dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    container.innerHTML = `
+      <div class="jsc-month-scroll">
+        <div class="jsc-month-dow">${dow.map(d => `<div>${d}</div>`).join('')}</div>
+        <div class="jsc-month-grid">${cells.map(d => {
+          if (!d) return `<div class="jsc-month-cell jsc-month-cell--blank"></div>`;
+          const jobs = sortJobs(jobsForDate(d));
+          const isToday = sameDay(d, new Date());
+          const visible = jobs.slice(0, 3);
+          const overflow = jobs.length - visible.length;
+          const cellId = 'mc-' + d.getTime();
+          return `<div class="jsc-month-cell ${isToday ? 'is-today' : ''}">
+            <div class="jsc-month-date">${d.getDate()}</div>
+            <div class="jsc-month-lines">${visible.map(monthLineHTML).join('')}</div>
+            ${overflow > 0 ? `<button type="button" class="jsc-month-more" data-target="${cellId}" data-overflow="${overflow}">+${overflow} more</button><div class="jsc-month-extra" id="${cellId}-extra" hidden>${jobs.slice(3).map(monthLineHTML).join('')}</div>` : ''}
+          </div>`;
+        }).join('')}</div>
+      </div>
+    `;
+    container.querySelectorAll('.jsc-month-more').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const extra = document.getElementById(btn.dataset.target + '-extra');
+        const collapsed = extra.hidden;
+        extra.hidden = !collapsed;
+        btn.textContent = collapsed ? 'Show less' : `+${btn.dataset.overflow} more`;
+      });
+    });
+  }
+
+  function renderCalendar() {
+    document.querySelectorAll('.settings-tab-link').forEach(a => a.classList.toggle('active', a.dataset.tab === state.view));
+    const heading = document.getElementById('dateHeading');
+    const container = document.getElementById('calendarBody');
+    if (state.view === 'day') {
+      heading.textContent = state.anchor.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      renderDayView(container);
+    } else if (state.view === '3day') {
+      const end = new Date(state.anchor); end.setDate(end.getDate() + 2);
+      heading.textContent = `${state.anchor.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      render3DayView(container);
+    } else {
+      heading.textContent = state.anchor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+      renderMonthView(container);
+    }
+  }
+
+  function shiftAnchor(direction) {
+    const d = new Date(state.anchor);
+    if (state.view === 'day') d.setDate(d.getDate() + direction);
+    else if (state.view === '3day') d.setDate(d.getDate() + direction * 3);
+    else d.setMonth(d.getMonth() + direction);
+    state.anchor = d;
+    renderCalendar();
+  }
+
+  function renderCrewPanel() {
+    const list = document.getElementById('crewOrderList');
+    list.innerHTML = crewOrder.map((id, i) => {
+      const c = CREWS[id];
+      return `<div class="jsc-crew-chip">
+        <span class="jsc-dot" style="background:${c.color}"></span>
+        <span class="jsc-crew-name">${c.name}</span>
+        <span class="jsc-crew-rank">#${i + 1}</span>
+        <div class="jsc-crew-move">
+          <button type="button" class="jsc-move-btn" data-dir="up" data-id="${id}" ${i === 0 ? 'disabled' : ''} aria-label="Move ${c.name} up">▲</button>
+          <button type="button" class="jsc-move-btn" data-dir="down" data-id="${id}" ${i === crewOrder.length - 1 ? 'disabled' : ''} aria-label="Move ${c.name} down">▼</button>
+        </div>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('.jsc-move-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id, dir = btn.dataset.dir;
+        const idx = crewOrder.indexOf(id);
+        const swapWith = dir === 'up' ? idx - 1 : idx + 1;
+        if (swapWith < 0 || swapWith >= crewOrder.length) return;
+        [crewOrder[idx], crewOrder[swapWith]] = [crewOrder[swapWith], crewOrder[idx]];
+        renderCrewPanel();
+        renderCalendar();
+      });
+    });
+  }
+
+  document.querySelectorAll('.jsc-sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.sort = btn.dataset.sort;
+      document.querySelectorAll('.jsc-sort-btn').forEach(b => b.classList.toggle('active', b === btn));
+      renderCalendar();
+    });
+  });
+  document.querySelectorAll('.settings-tab-link').forEach(a => {
+    a.addEventListener('click', e => { e.preventDefault(); state.view = a.dataset.tab; renderCalendar(); });
+  });
+  document.getElementById('navPrev').addEventListener('click', () => shiftAnchor(-1));
+  document.getElementById('navNext').addEventListener('click', () => shiftAnchor(1));
+  document.getElementById('navToday').addEventListener('click', () => { state.anchor = new Date(); renderCalendar(); });
+
+  renderCrewPanel();
+  renderCalendar();
+</script>
+
+</body>
+</html>
