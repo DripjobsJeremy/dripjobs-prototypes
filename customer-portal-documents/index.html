@@ -134,7 +134,8 @@
     padding: 6px 0; border-top: 1px solid #F0F0F4;
   }
   #portal-docs-page .doc-file-row:first-of-type { border-top: none; }
-  #portal-docs-page .doc-file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--st-color-text); }
+  #portal-docs-page .doc-file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--st-color-text); cursor: pointer; }
+  #portal-docs-page .doc-file-name:hover { color: var(--st-color-primary-active); text-decoration: underline; }
   #portal-docs-page .doc-file-date { color: var(--st-color-text-muted); font-size: 11.5px; white-space: nowrap; }
 
   #portal-docs-page .doc-count-label { font-size: 11px; color: var(--st-color-text-muted); }
@@ -147,8 +148,6 @@
     font-size: 11px; color: #DC2626; text-align: center; margin-top: 2px;
   }
   #portal-docs-page .doc-file-icon.fa-file-pdf { color: #DC2626; }
-  #portal-docs-page .doc-file-icon.fa-file-word { color: #2563EB; }
-  #portal-docs-page .doc-file-icon.fa-file-image { color: #16A34A; }
 
   #portal-docs-page .no-file {
     text-align: center; padding: 14px 4px; color: var(--st-color-text-muted); font-size: 12px;
@@ -324,7 +323,7 @@
       <i class="fa-solid fa-circle-info"></i>
       <div>
         <div class="settings-alert-title">Prototype — Ticket #86b7p31xb</div>
-        <div>Up to 5 documents per category (fixed or custom), unlimited Custom Document Categories with a user-selectable icon/color. Layout matched to the current production UI.</div>
+        <div>Up to 5 PDF documents per category (fixed or custom), unlimited Custom Document Categories with a user-selectable icon/color. PDF only, per the Jul 27 ticket update. Click a file name to open it, matching the new Admin View requirement. Layout matched to the current production UI.</div>
       </div>
     </div>
 
@@ -486,10 +485,22 @@ function switchTab(tab) {
 }
 
 /* ============== Rendering ============== */
-function fileIcon(type) {
-  if (type === 'pdf') return 'fa-solid fa-file-pdf';
-  if (type === 'doc') return 'fa-solid fa-file-word';
-  return 'fa-solid fa-file-image';
+/* PDF only, per Jul 27, 2026 ticket update (reversed the earlier DOC/DOCX/JPG/PNG expansion). */
+function fileIcon() {
+  return 'fa-solid fa-file-pdf';
+}
+
+/* Admin View & File Naming: clicking a file name opens the PDF, same as the customer already can in the portal. */
+function openDocument(name) {
+  const html = `<!DOCTYPE html><html><head><title>${name}</title></head>
+    <body style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F4F5F8;color:#32415B;padding:60px 40px;text-align:center;">
+      <div style="font-size:40px;color:#DC2626;">&#128196;</div>
+      <h2 style="margin:16px 0 4px;">${name}</h2>
+      <p style="color:#80879A;font-size:13px;">Prototype preview &mdash; in production this opens the uploaded PDF using its original file name.</p>
+    </body></html>`;
+  const win = window.open('', '_blank');
+  if (win) { win.document.write(html); win.document.close(); }
+  else { showToast(`Opening ${name}…`); }
 }
 
 const DOC_CAP = 5;
@@ -510,8 +521,8 @@ function renderFixed() {
           <div class="doc-file-list">
             ${cat.docs.map((d,i) => `
               <div class="doc-file-row">
-                <i class="doc-file-icon ${fileIcon(d.type)}"></i>
-                <span class="doc-file-name" title="${d.name}">${d.name}</span>
+                <i class="doc-file-icon ${fileIcon()}"></i>
+                <span class="doc-file-name" title="Click to open ${d.name}" onclick="openDocument('${d.name}')">${d.name}</span>
                 <span class="doc-file-date">${d.date}</span>
                 <button class="pill-remove" onclick="askRemoveDoc('fixed','${cat.id}',${i})">Remove</button>
               </div>
@@ -566,8 +577,8 @@ function renderCustom() {
           <div class="doc-file-list">
             ${cat.docs.map((d,i) => `
               <div class="doc-file-row">
-                <i class="doc-file-icon ${fileIcon(d.type)}"></i>
-                <span class="doc-file-name" title="${d.name}">${d.name}</span>
+                <i class="doc-file-icon ${fileIcon()}"></i>
+                <span class="doc-file-name" title="Click to open ${d.name}" onclick="openDocument('${d.name}')">${d.name}</span>
                 <span class="doc-file-date">${d.date}</span>
                 <button class="pill-remove" onclick="askRemoveDoc('custom','${cat.id}',${i})">Remove</button>
               </div>
@@ -737,11 +748,12 @@ function confirmDelete() {
 }
 
 /* ============== Documents ============== */
+/* PDF only, per Jul 27, 2026 ticket update. */
 const SAMPLE_FILES = [
   {name:'Signed_Disclaimer.pdf', type:'pdf'},
   {name:'Right_to_Lien_Notice.pdf', type:'pdf'},
-  {name:'Privacy_Notice.docx', type:'doc'},
-  {name:'Job_Site_Photo.jpg', type:'image'},
+  {name:'Privacy_Notice.pdf', type:'pdf'},
+  {name:'OR_Contractor_License.pdf', type:'pdf'},
 ];
 function simulateUpload(kind, catId) {
   const list = kind === 'fixed' ? fixedCategories : customCategories;
