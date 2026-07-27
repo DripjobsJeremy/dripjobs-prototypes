@@ -11,6 +11,11 @@ Format:
 
 ---
 
+## [2026-07-27] Hub: sync card status badges to ClickUp dev-stage statuses
+- Decision: Cross-checked every hub card's linked ClickUp ticket against its actual current status and corrected 12 cards whose badge no longer matched (e.g. Customer Portal Documents was showing "Needs PM Analysis" but is actually "Ready for Dev"). Added four new badge/filter categories the hub didn't have before: Ready for Dev, In QA Testing, Pushed to Production, and Mixed Status. Mixed Status is used for the one card (Job Address + Column Management) whose 3 linked tickets are now at different stages — per Jeremy's call, rather than picking one ticket's status to represent the whole card.
+- Why: The hub previously only had pre-dev badges (Triage, Needs PM Analysis, Needs Design, New, Postponed) with no way to reflect a ticket that has moved into or through development. Several tickets have shipped to production or reached Ready for Dev/QA without the hub reflecting it.
+- Open question: The top stats row (Total Prototypes / Active Triage / Needs PM Review / Postponed) was already stale before this session (shows 17 total vs. 24 actual cards) and wasn't touched here since it's a pre-existing data-hygiene issue unrelated to ClickUp status sync, not a design decision. Flagged for Jeremy to decide whether to make it dynamic (JS-computed) or keep it as a manually maintained figure.
+
 ## [2026-07-27] Customer Portal Documents: PDF-only reversal + clickable file names
 - Decision: Updated the customer-portal-documents prototype for ticket 86b7p31xb's Jul 27 revision: removed the earlier DOC/DOCX/JPG/PNG upload simulation (PDF only again), and made uploaded file names clickable in Settings, opening a preview labeled with the document's clean original file name.
 - Why: Jeremy's Jul 27 ticket comment explicitly reversed the file-type expansion and added a new Admin View & File Naming business rule; the prototype (last built against the Jul 20 version) needed to catch up to both changes.
