@@ -11,6 +11,12 @@ Format:
 
 ---
 
+## [2026-07-28] Metrics — AI Predictability: design system rework
+
+- Decision: Reworked the ClickUp-attached prototype (ticket 86b9bmc1u, "Metrics Natural Language Insights") to match current design standards, then published it to the hub as `metrics-ai-predictability/`. Swapped every hardcoded marketing-brand purple `#7C3AED` for the in-app token `#8B85EA`, matching `design-system.md` and the existing `metrics-clickable-affordance` prototype (the only other Metrics Dashboard prototype in this repo, already on `#8B85EA`). Introduced `:root` CSS custom properties instead of hardcoded hex, per the design system's token pattern. Corrected five buttons using non-standard 20px/12px pill radii to the documented 999px scale value. Added the proto-bar. No content, copy, or business-logic changes.
+- Why: The attachment used the marketing brand purple throughout, which is a hardcoded-hex anti-pattern per the design system, and doesn't match the established in-app token already used for this exact dashboard elsewhere in the repo. Confirmed the color swap and hub placement with Jeremy before executing, per the confirm-then-execute rule for anything beyond a single tweak.
+- Open question: None. Noting the hub's top stat counters (Total/Triage/Needs PM Review/Postponed) remain the pre-existing stale figures flagged in the 2026-07-27 entry below; this session added one more "analysis"-status card without recomputing them, consistent with that already-flagged, unrelated data-hygiene issue.
+
 ## [2026-07-27] Hub: sync card status badges to ClickUp dev-stage statuses
 - Decision: Cross-checked every hub card's linked ClickUp ticket against its actual current status and corrected 12 cards whose badge no longer matched (e.g. Customer Portal Documents was showing "Needs PM Analysis" but is actually "Ready for Dev"). Added four new badge/filter categories the hub didn't have before: Ready for Dev, In QA Testing, Pushed to Production, and Mixed Status. Mixed Status is used for the one card (Job Address + Column Management) whose 3 linked tickets are now at different stages — per Jeremy's call, rather than picking one ticket's status to represent the whole card.
 - Why: The hub previously only had pre-dev badges (Triage, Needs PM Analysis, Needs Design, New, Postponed) with no way to reflect a ticket that has moved into or through development. Several tickets have shipped to production or reached Ready for Dev/QA without the hub reflecting it.
