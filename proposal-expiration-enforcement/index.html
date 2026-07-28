@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposal Expiration Enforcement & Re-Open Flow — DripJobs Prototype</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" rel="stylesheet">
+<style>
+  * { font-family: 'Nunito', sans-serif; box-sizing: border-box; }
+  body { background: #F3F1FC; color: #32415B; font-size: 14px; margin: 0; }
+
+  /* ── Proto bar ── */
+  .proto-bar {
+    background: #fff; border-bottom: 1px solid #DAD8E3; padding: 12px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; }
+  .back-link { font-size: 12px; font-weight: 600; color: #80879A; text-decoration: none; }
+  .back-link:hover { color: #8B85EA; }
+  .proto-bar .divider { color: #DAD8E3; font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 700; }
+  .proto-bar-ticket {
+    font-size: 11px; font-weight: 700; color: #5C53DC; text-decoration: none;
+    padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA; border-radius: 999px;
+  }
+  .proto-bar-ticket:hover { background: #8B85EA; color: #fff; }
+
+  #proposal-expiry-proto {
+    --st-color-primary:        #8B85EA;
+    --st-color-primary-hover:  #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-text:           #32415B;
+    --st-color-text-muted:     #80879A;
+    --st-color-border:         #DAD8E3;
+    max-width: 1040px; margin: 0 auto; padding: 20px 20px 80px;
+  }
+
+  /* ── Demo controls ── */
+  .demo-controls {
+    background: #1e1b4b; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .demo-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .demo-row-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: rgba(255,255,255,.45); width: 88px; flex-shrink: 0; }
+  .demo-pill {
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.8);
+    padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; cursor: pointer;
+    transition: all .15s; font-family: 'Nunito', sans-serif;
+  }
+  .demo-pill:hover { background: rgba(255,255,255,.16); }
+  .demo-pill.active { background: #8B85EA; border-color: #8B85EA; color: #fff; }
+  .demo-note { font-size: 11px; color: rgba(255,255,255,.5); line-height: 1.5; }
+  .demo-note strong { color: rgba(255,255,255,.75); }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── Status pill ── */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px; border-radius: 999px;
+    padding: 5px 14px; font-size: 12px; font-weight: 700; letter-spacing: .2px;
+  }
+  .status-pill.pending  { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+  .status-pill.expired  { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+  .status-pill.accepted { background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534; }
+
+  /* ══════════════════════════════════════════
+     CUSTOMER PORTAL MOCK
+  ══════════════════════════════════════════ */
+  .portal-frame { background: #fff; border-radius: 14px; border: 1px solid var(--st-color-border); overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+  .portal-topstrip {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; border-bottom: 1px solid var(--st-color-border); font-weight: 700; font-size: 14px;
+  }
+  .portal-topstrip .phone { font-weight: 500; font-size: 12px; color: var(--st-color-text-muted); }
+  .portal-body { display: flex; }
+  .portal-sidebar { width: 190px; flex-shrink: 0; border-right: 1px solid var(--st-color-border); padding: 16px 0; }
+  .portal-sidebar a {
+    display: flex; align-items: center; gap: 8px; padding: 8px 18px; font-size: 12px; font-weight: 600;
+    color: var(--st-color-text); text-decoration: none;
+  }
+  .portal-sidebar a i { width: 14px; color: var(--st-color-text-muted); font-size: 12px; }
+  .portal-sidebar a.active { background: #F3F1FC; color: var(--st-color-primary-active); border-right: 3px solid var(--st-color-primary); }
+  .portal-sidebar a.active i { color: var(--st-color-primary); }
+  .portal-sidebar .sb-heading { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #C7C9D6; padding: 14px 18px 4px; }
+  .portal-main { flex: 1; min-width: 0; padding: 18px 22px 26px; }
+
+  .portal-actionbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .portal-btn {
+    display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 7px 16px;
+    font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid var(--st-color-border); background: #fff; color: var(--st-color-text);
+  }
+  .portal-btn.primary { background: #16A34A; border-color: #16A34A; color: #fff; }
+  .portal-btn.primary:hover { background: #15803D; }
+  .portal-btn:not(.primary):hover { border-color: var(--st-color-primary); color: var(--st-color-primary-active); }
+  .portal-btn.disabled { background: #F4F5F8; color: #B0B4C0; cursor: not-allowed; border-color: var(--st-color-border); }
+  .portal-btn.disabled:hover { border-color: var(--st-color-border); color: #B0B4C0; }
+  .portal-approved-badge { display: inline-flex; align-items: center; gap: 6px; color: #166534; font-weight: 800; font-size: 13px; padding: 7px 4px; }
+
+  .portal-hero {
+    background: linear-gradient(135deg, #8B85EA, #5C53DC); border-radius: 12px; padding: 22px 24px; color: #fff;
+  }
+  .portal-hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .portal-hero-brand { display: flex; align-items: center; gap: 12px; }
+  .portal-hero-logo { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .portal-hero-company { font-size: 16px; font-weight: 800; }
+  .portal-hero-license { font-size: 11px; color: rgba(255,255,255,.7); margin-top: 2px; }
+  .portal-hero-right { text-align: right; }
+  .portal-hero-title { font-size: 22px; font-weight: 800; margin-top: 6px; }
+  .portal-hero-meta {
+    display: flex; gap: 28px; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.2);
+    flex-wrap: wrap;
+  }
+  .portal-hero-meta .m-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: rgba(255,255,255,.6); }
+  .portal-hero-meta .m-value { font-size: 13px; font-weight: 700; margin-top: 2px; }
+
+  .expired-alert {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B;
+    border-radius: 10px; padding: 12px 16px; margin-top: 14px; font-size: 13px; line-height: 1.5;
+  }
+  .expired-alert i { margin-top: 2px; }
+  .expired-alert strong { display: block; font-size: 13px; margin-bottom: 2px; }
+
+  .portal-prepared-row {
+    display: flex; gap: 24px; margin-top: 16px; padding: 14px 4px; border-bottom: 1px solid var(--st-color-border);
+    flex-wrap: wrap;
+  }
+  .portal-prepared-row .pp-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--st-color-text-muted); }
+  .portal-prepared-row .pp-value { font-size: 13px; font-weight: 700; margin-top: 3px; }
+  .portal-prepared-row .pp-sub { font-size: 12px; color: var(--st-color-text-muted); font-weight: 500; }
+
+  .portal-areas { margin-top: 18px; }
+  .portal-areas-title { font-size: 13px; font-weight: 800; margin-bottom: 10px; }
+  .portal-areas table { width: 100%; border-collapse: collapse; }
+  .portal-areas th { text-align: left; font-size: 10px; font-weight: 700; color: var(--st-color-text-muted); text-transform: uppercase; letter-spacing: .04em; padding: 6px 4px; border-bottom: 1px solid var(--st-color-border); }
+  .portal-areas th.num, .portal-areas td.num { text-align: right; }
+  .portal-areas td { padding: 9px 4px; font-size: 13px; border-bottom: 1px solid #F0EEF8; }
+  .portal-areas .total-row td { font-weight: 800; border-bottom: none; padding-top: 12px; }
+
+  /* ══════════════════════════════════════════
+     PROPOSAL BUILDER MOCK
+  ══════════════════════════════════════════ */
+  .builder-frame { background: #fff; border-radius: 14px; border: 1px solid var(--st-color-border); padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+  .builder-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  .builder-customer .cust-name { color: var(--st-color-primary); font-weight: 800; font-size: 15px; }
+  .builder-customer .msg-btn {
+    display: inline-flex; align-items: center; gap: 5px; margin-left: 8px; border: 1px solid var(--st-color-border);
+    border-radius: 8px; padding: 3px 10px; font-size: 11px; font-weight: 700; color: var(--st-color-text); background: #fff; cursor: pointer;
+  }
+  .builder-customer .info-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--st-color-text); margin-top: 4px; }
+  .builder-customer .info-row i { color: var(--st-color-primary); width: 14px; text-align: center; }
+  .builder-right { text-align: right; }
+  .builder-right .add-display { font-size: 12px; color: var(--st-color-primary); cursor: pointer; margin-bottom: 6px; }
+  .builder-right .status-line { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+  .builder-linked-project {
+    margin-top: 14px; border: 1px solid var(--st-color-border); border-radius: 10px; padding: 10px 14px;
+  }
+  .builder-linked-project .lp-label { font-size: 10px; font-weight: 700; color: var(--st-color-text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .builder-linked-project .lp-value { font-size: 13px; color: var(--st-color-text-muted); font-style: italic; }
+
+  .builder-actionbar { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .builder-actionbar button {
+    display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--st-color-border); background: #fff;
+    color: var(--st-color-text); border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  .builder-actionbar button i { color: var(--st-color-primary); }
+  .builder-actionbar button:hover { border-color: var(--st-color-primary); background: #f5f4fd; }
+
+  .builder-meta-bar {
+    display: flex; gap: 26px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--st-color-border);
+    flex-wrap: wrap; font-size: 12px;
+  }
+  .builder-meta-bar .bm-label { font-weight: 700; color: var(--st-color-text-muted); text-transform: uppercase; font-size: 10px; letter-spacing: .05em; }
+  .builder-meta-bar .bm-value { font-weight: 700; color: var(--st-color-text); font-size: 13px; margin-top: 2px; }
+  .builder-meta-bar .bm-value.danger { color: #991B1B; }
+  .builder-meta-bar .financing-badge { background: #EFEFF3; color: var(--st-color-text-muted); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+
+  /* Rejected-pattern banner, mirrored for Expired */
+  .state-banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    background: #FEF2F2; border: 1px solid #FECACA; border-radius: 10px; padding: 12px 16px; margin-top: 16px;
+  }
+  .state-banner-text { font-size: 13px; color: #991B1B; }
+  .state-banner-text strong { font-weight: 800; }
+  .state-banner-text .sub { display: block; font-size: 12px; margin-top: 2px; font-weight: 600; opacity: .9; }
+  .reopen-btn {
+    background: #fff; border: 1px solid #991B1B; color: #991B1B; border-radius: 8px;
+    padding: 7px 16px; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap;
+  }
+  .reopen-btn:hover { background: #991B1B; color: #fff; }
+
+  .drip-note {
+    display: flex; align-items: flex-start; gap: 8px; margin-top: 10px; padding: 10px 14px;
+    background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; border-radius: 8px; font-size: 12px; line-height: 1.5;
+  }
+  .drip-note i { margin-top: 2px; }
+  .drip-note a { color: #92400E; text-decoration: underline; font-weight: 700; }
+
+  .builder-areas { margin-top: 20px; }
+  .builder-areas-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .builder-areas-title { font-size: 14px; font-weight: 800; }
+  .builder-areas-actions button {
+    border: 1px solid var(--st-color-border); background: #fff; border-radius: 8px; padding: 5px 12px;
+    font-size: 11px; font-weight: 700; color: var(--st-color-text); margin-left: 6px; cursor: pointer;
+  }
+  .builder-locked .builder-areas-actions button,
+  .builder-locked .row-edit-icon { opacity: .35; pointer-events: none; cursor: not-allowed; }
+  .builder-areas table { width: 100%; border-collapse: collapse; }
+  .builder-areas th { text-align: left; font-size: 10px; font-weight: 700; color: var(--st-color-text-muted); text-transform: uppercase; letter-spacing: .04em; padding: 6px 4px; border-bottom: 1px solid var(--st-color-border); }
+  .builder-areas th.num, .builder-areas td.num { text-align: right; }
+  .builder-areas td { padding: 9px 4px; font-size: 13px; border-bottom: 1px solid #F0EEF8; }
+  .builder-areas .item-name { color: var(--st-color-primary); font-weight: 700; }
+  .row-edit-icon { color: var(--st-color-text-muted); font-size: 12px; margin-left: 6px; cursor: pointer; }
+  .builder-areas .total-row td { font-weight: 800; border-bottom: none; padding-top: 12px; }
+
+  /* PDF export preview */
+  .pdf-preview {
+    margin-top: 18px; border: 1px dashed var(--st-color-border); border-radius: 10px; padding: 14px 16px; background: #FAFAFC;
+  }
+  .pdf-preview-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--st-color-text-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .pdf-preview-doc { background: #fff; border: 1px solid var(--st-color-border); border-radius: 6px; padding: 12px 16px; }
+  .pdf-preview-doc .pdf-title { font-size: 13px; font-weight: 800; margin-bottom: 6px; }
+  .pdf-preview-doc .pdf-row { display: flex; gap: 20px; font-size: 11px; color: var(--st-color-text-muted); flex-wrap: wrap; }
+  .pdf-preview-doc .pdf-row strong { color: var(--st-color-text); }
+  .pdf-preview-caption { font-size: 11px; color: var(--st-color-text-muted); margin-top: 8px; line-height: 1.5; }
+
+  /* Activity log */
+  .activity-log { margin-top: 18px; border-top: 1px solid var(--st-color-border); padding-top: 16px; }
+  .activity-log-title { font-size: 13px; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .activity-log-title small { font-weight: 600; color: var(--st-color-text-muted); font-size: 11px; }
+  .activity-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F5F4FA; font-size: 12px; }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-item i { margin-top: 2px; color: var(--st-color-primary); width: 14px; text-align: center; }
+  .activity-item.flag i { color: #D97706; }
+  .activity-item .a-time { color: var(--st-color-text-muted); font-size: 11px; margin-top: 2px; }
+
+  .builder-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--st-color-border); flex-wrap: wrap; gap: 10px; }
+  .send-btn { background: var(--st-color-primary); color: #fff; border: none; border-radius: 10px; padding: 9px 22px; font-size: 13px; font-weight: 800; cursor: pointer; }
+  .send-btn:hover { background: var(--st-color-primary-hover); }
+  .send-btn.disabled { background: #EFEFF3; color: #B0B4C0; cursor: not-allowed; }
+  .send-btn.disabled:hover { background: #EFEFF3; }
+  .send-helper { font-size: 11px; color: var(--st-color-text-muted); }
+  .send-helper.danger { color: #991B1B; font-weight: 600; }
+
+  /* ══════════════════════════════════════════
+     RE-OPEN MODAL (mirrors Reject Proposal modal)
+  ══════════════════════════════════════════ */
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(30,27,75,.4); z-index: 400; }
+  .modal-card {
+    display: none; flex-direction: column; position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); background: #fff; border-radius: 10px; width: 400px;
+    max-width: calc(100vw - 32px); z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,.18); overflow: hidden;
+  }
+  .modal-header { padding: 18px 20px 4px; }
+  .modal-title { font-size: 15px; font-weight: 800; color: var(--st-color-text); }
+  .modal-subtitle { font-size: 12px; color: var(--st-color-text-muted); margin-top: 4px; line-height: 1.5; }
+  .modal-body { padding: 16px 20px; }
+  .modal-field-label { font-size: 12px; font-weight: 700; color: var(--st-color-text); margin-bottom: 8px; display: block; }
+  .modal-field-label.is-required::after { content: " *"; color: #DC2626; }
+  .modal-date-input {
+    width: 100%; height: 40px; padding: 0 14px; border: 1px solid var(--st-color-border); border-radius: 8px;
+    font-size: 14px; font-family: 'Nunito', sans-serif; color: var(--st-color-text); transition: border-color .15s, box-shadow .15s;
+  }
+  .modal-date-input:focus { outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(139,133,234,.18); }
+  .modal-date-input.is-invalid { border-color: #FECACA; box-shadow: 0 0 0 3px rgba(220,53,69,.1); }
+  .modal-error { display: none; font-size: 12px; color: #991B1B; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 7px 10px; margin-top: 8px; }
+  .modal-error.visible { display: flex; align-items: center; gap: 6px; }
+  .modal-assumption-note {
+    display: flex; gap: 7px; margin-top: 14px; padding: 9px 11px; background: #FFFBEB; border: 1px solid #FDE68A;
+    color: #92400E; border-radius: 8px; font-size: 11px; line-height: 1.5;
+  }
+  .modal-assumption-note i { margin-top: 1px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--st-color-border); background: #fafafa; }
+  .modal-cancel-btn { background: #fff; border: 1px solid var(--st-color-border); color: var(--st-color-text); border-radius: 10px; padding: 7px 20px; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .modal-cancel-btn:hover { border-color: var(--st-color-primary); background: #f5f4fd; }
+  .modal-confirm-btn { background: var(--st-color-primary); border: none; color: #fff; border-radius: 10px; padding: 7px 20px; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .modal-confirm-btn:hover { background: var(--st-color-primary-hover); }
+
+  /* Toast */
+  .toast-msg {
+    position: fixed; top: 20px; right: 20px; z-index: 600;
+    background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534;
+    padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; gap: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.12);
+    transform: translateX(120%); transition: transform .25s ease;
+  }
+  .toast-msg.show { transform: translateX(0); }
+
+  @media (max-width: 640px) {
+    .portal-body { flex-direction: column; }
+    .portal-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--st-color-border); display: flex; flex-wrap: wrap; padding: 10px; }
+    .portal-sidebar a { padding: 6px 10px; }
+    .portal-sidebar .sb-heading { display: none; }
+    .builder-right { text-align: left; }
+    .builder-right .status-line { justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Proposal Expiration Enforcement &amp; Re-Open Flow</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86b2xn7hx" target="_blank">86b2xn7hx</a>
+</div>
+
+<div id="proposal-expiry-proto">
+
+  <!-- ══════════════════════════════
+       DEMO CONTROLS
+  ══════════════════════════════ -->
+  <div class="demo-controls">
+    <div class="demo-row">
+      <span class="demo-row-label">View</span>
+      <button class="demo-pill active" id="persp-portal" onclick="setPerspective('portal')">Customer Portal</button>
+      <button class="demo-pill" id="persp-builder" onclick="setPerspective('builder')">Proposal Builder</button>
+    </div>
+    <div class="demo-row">
+      <span class="demo-row-label">State</span>
+      <button class="demo-pill active" id="state-pending" onclick="setState('pending')">Pending — No Expiration Set (BR-2)</button>
+      <button class="demo-pill" id="state-expired" onclick="setState('expired')">Expired (BR-3&ndash;BR-8)</button>
+      <button class="demo-pill" id="state-accepted" onclick="setState('accepted')">Accepted, Past Exp. Date (BR-9)</button>
+    </div>
+    <div class="demo-note">
+      Today's date in this demo is <strong>7/28/2026</strong>. The <strong>Expired</strong> state shows a proposal whose expiration date (7/25/2026) has already passed and was never accepted or rejected &mdash; this is what triggers BR-3. Re-Open is only available from that state, in both views.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       CUSTOMER PORTAL VIEW
+  ══════════════════════════════ -->
+  <div class="view active" id="view-portal">
+    <div class="portal-frame">
+      <div class="portal-topstrip">
+        <span>Sparrow's Nest Painting</span>
+        <span class="phone"><i class="fas fa-phone"></i> (555) 555-5555</span>
+      </div>
+      <div class="portal-body">
+        <div class="portal-sidebar">
+          <a class="active" href="#"><i class="fas fa-file-alt"></i> My Proposals</a>
+          <a href="#"><i class="fas fa-file-invoice-dollar"></i> My Invoices</a>
+          <a href="#"><i class="far fa-calendar-plus"></i> Request Appointment</a>
+          <a href="#"><i class="far fa-envelope"></i> Email Settings</a>
+          <a href="#"><i class="fas fa-globe"></i> Visit Website</a>
+          <a href="#"><i class="far fa-star"></i> Reviews</a>
+          <div class="sb-heading">Company Documents</div>
+          <a href="#"><i class="fas fa-shield-alt"></i> Insurance</a>
+          <a href="#"><i class="fas fa-hard-hat"></i> Workers' Comp</a>
+          <a href="#"><i class="fas fa-file-signature"></i> W-9 Information</a>
+          <a href="#"><i class="far fa-file"></i> Misc Document</a>
+        </div>
+        <div class="portal-main">
+
+          <div class="portal-actionbar" id="portal-actionbar"><!-- filled by JS --></div>
+
+          <div class="portal-hero">
+            <div class="portal-hero-top">
+              <div class="portal-hero-brand">
+                <div class="portal-hero-logo"><i class="fas fa-paint-roller"></i></div>
+                <div>
+                  <div class="portal-hero-company">Sparrow's Nest Painting</div>
+                  <div class="portal-hero-license">License# L987616</div>
+                </div>
+              </div>
+              <div class="portal-hero-right">
+                <span class="status-pill" id="portal-status-pill"></span>
+                <div class="portal-hero-title">Proposal</div>
+              </div>
+            </div>
+            <div class="portal-hero-meta">
+              <div>
+                <div class="m-label">Proposal #</div>
+                <div class="m-value">3109240</div>
+              </div>
+              <div>
+                <div class="m-label">Date</div>
+                <div class="m-value">7/20/2026</div>
+              </div>
+              <div>
+                <div class="m-label">Status</div>
+                <div class="m-value" id="portal-status-text">Pending</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="expired-alert" id="portal-expired-alert" style="display:none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+              <strong>This proposal expired on <span id="portal-exp-date-text">7/25/2026</span>.</strong>
+              Please contact us to discuss current availability and updated pricing.
+            </div>
+          </div>
+
+          <div class="portal-prepared-row">
+            <div>
+              <div class="pp-label">Prepared For</div>
+              <div class="pp-value">Dripjobs Harrison</div>
+              <div class="pp-sub">jeremy@dripjobs.com</div>
+            </div>
+            <div>
+              <div class="pp-label">Project Location</div>
+              <div class="pp-value">221 N Nashville Ave</div>
+              <div class="pp-sub">Hernando, FL 34442</div>
+            </div>
+            <div>
+              <div class="pp-label">Company</div>
+              <div class="pp-value">Sparrow's Nest Painting</div>
+              <div class="pp-sub">(555) 555-5555</div>
+            </div>
+          </div>
+
+          <div class="portal-areas">
+            <div class="portal-areas-title">Areas</div>
+            <table>
+              <thead><tr><th>Area</th><th class="num">Quantity</th><th class="num">Price</th><th class="num">Total</th></tr></thead>
+              <tbody>
+                <tr><td>Whole House</td><td class="num">1.00</td><td class="num">$3,601.60</td><td class="num">$3,709.65</td></tr>
+                <tr class="total-row"><td colspan="3">Total</td><td class="num">$3,709.65</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="demo-note" id="portal-br4-note" style="color:#80879A; margin-top:14px; display:none;">Per BR-4, proposal content stays fully visible to the customer when expired &mdash; only the signing action is blocked.</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       PROPOSAL BUILDER VIEW
+  ══════════════════════════════ -->
+  <div class="view" id="view-builder">
+    <div class="builder-frame">
+      <div class="builder-header-row">
+        <div class="builder-customer">
+          <span class="cust-name">Dripjobs Harrison</span>
+          <button class="msg-btn"><i class="far fa-comment-alt"></i> Message</button>
+          <div class="info-row"><i class="fas fa-map-marker-alt"></i> 221 N Nashville Ave, Hernando, FL 34442</div>
+          <div class="info-row"><i class="far fa-envelope"></i> jeremy@dripjobs.com</div>
+          <div class="info-row"><i class="fas fa-phone"></i> (727) 250-8869</div>
+        </div>
+        <div class="builder-right">
+          <div class="add-display">+ Add display name</div>
+          <div class="status-line">
+            <span class="status-pill" id="builder-status-pill"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="builder-linked-project">
+        <div class="lp-label">Linked Project</div>
+        <div class="lp-value">[ Select a project ]</div>
+      </div>
+
+      <div class="builder-actionbar">
+        <button><i class="far fa-eye"></i> View Deal</button>
+        <button><i class="fas fa-file-alt"></i> Work Order <i class="fas fa-chevron-down" style="font-size:9px;color:#80879A;"></i></button>
+        <button><i class="far fa-user"></i> Customer View</button>
+        <button><i class="far fa-copy"></i> Copy Link</button>
+      </div>
+
+      <div class="builder-meta-bar">
+        <div><div class="bm-label">Created</div><div class="bm-value">7/20/2026</div></div>
+        <div><div class="bm-label">Exp. Date</div><div class="bm-value" id="builder-exp-date">Not Set</div></div>
+        <div><div class="bm-label">Salesperson</div><div class="bm-value">Jeremy Harrison</div></div>
+        <div><div class="bm-label">Financing</div><div class="bm-value"><span class="financing-badge">NOT INITIATED</span></div></div>
+      </div>
+
+      <!-- Expired-only banner, mirrors the Rejected Proposal banner pattern (BR-8) -->
+      <div class="state-banner" id="builder-state-banner" style="display:none;">
+        <div class="state-banner-text">
+          <strong>Expired</strong>
+          <span class="sub" id="builder-banner-sub">Expiration date: 7/25/2026</span>
+        </div>
+        <button class="reopen-btn" onclick="openReopenModal()">Re-Open Proposal</button>
+      </div>
+      <div class="drip-note" id="builder-drip-note" style="display:none;">
+        <i class="fas fa-flag"></i>
+        <div>
+          <strong>BR-11:</strong> Expiring also suppresses this deal's active drip sequence (drips are keyed to deal stage/time-in-stage, not the proposal). Exact mechanism (skip next step vs. pause the sequence) is still pending a feasibility check with engineering &mdash; no separate Deal/drip UI is modeled here per the July 17 decision log entry.
+        </div>
+      </div>
+
+      <div class="builder-areas" id="builder-areas">
+        <div class="builder-areas-head">
+          <div class="builder-areas-title">Areas</div>
+          <div class="builder-areas-actions">
+            <button>Add Optional Area</button>
+            <button>Add Area</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Area</th><th class="num">Quantity</th><th class="num">Price</th><th class="num">Tax</th><th class="num">Total</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="item-name">Whole House</span><i class="fas fa-pencil-alt row-edit-icon"></i></td>
+              <td class="num">1.00</td><td class="num">$3,601.60</td><td class="num">$108.05</td><td class="num">$3,709.65</td>
+            </tr>
+            <tr class="total-row"><td colspan="4">Total</td><td class="num">$3,709.65</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pdf-preview">
+        <div class="pdf-preview-label"><i class="far fa-file-pdf"></i> Proposal PDF Export Preview (BR-12)</div>
+        <div class="pdf-preview-doc">
+          <div class="pdf-title">Proposal #3109240</div>
+          <div class="pdf-row">
+            <span><strong>Created:</strong> 7/20/2026</span>
+            <span id="pdf-exp-row"><strong>Exp. Date:</strong> Not Set</span>
+            <span><strong>Salesperson:</strong> Jeremy Harrison</span>
+          </div>
+        </div>
+        <div class="pdf-preview-caption" id="pdf-preview-caption">No expiration date is set, so the Exp. Date field is omitted from the PDF header entirely.</div>
+      </div>
+
+      <div class="activity-log">
+        <div class="activity-log-title">Activity Log <small>(Proposal Builder only &mdash; not shown in Customer Portal, per BR-10)</small></div>
+        <div id="activity-log-list"><!-- filled by JS --></div>
+      </div>
+
+      <div class="builder-bottom">
+        <div>
+          <button class="send-btn" id="send-proposal-btn">Send Proposal</button>
+          <div class="send-helper" id="send-helper" style="margin-top:6px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════
+     RE-OPEN MODAL — mirrors the Reject Proposal modal chrome (BR-8)
+════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="closeReopenModal()"></div>
+<div class="modal-card" id="modal-card">
+  <div class="modal-header">
+    <div class="modal-title">Re-Open Proposal</div>
+    <div class="modal-subtitle">A new expiration date is required to bring this proposal back to Pending. You'll be able to edit the proposal and re-send it afterward.</div>
+  </div>
+  <div class="modal-body">
+    <label class="modal-field-label is-required" for="reopen-date-input">New Expiration Date</label>
+    <input type="date" id="reopen-date-input" class="modal-date-input" oninput="validateReopenInput()">
+    <div class="modal-error" id="reopen-error"><i class="fas fa-exclamation-circle"></i> A new expiration date is required to re-open this proposal.</div>
+    <div class="modal-assumption-note">
+      <i class="fas fa-flag"></i>
+      <div>Assumption per the ticket's edge cases: drip suppression lifts and the deal's sequence resumes normal sends once re-opened. Not yet confirmed &mdash; flagged in the decision log.</div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="modal-cancel-btn" onclick="closeReopenModal()">Cancel</button>
+    <button class="modal-confirm-btn" onclick="confirmReopen()">Re-Open Proposal</button>
+  </div>
+</div>
+
+<div class="toast-msg" id="toast"><i class="fas fa-check-circle"></i> <span id="toast-text"></span></div>
+
+<script>
+  let perspective = 'portal';
+  let state = 'pending';
+
+  const PREVIOUS_EXP_DATE = '7/25/2026';
+
+  const ACTIVITY = {
+    pending:  [ { time: '7/20/2026 9:14 AM', text: 'Proposal created', icon: 'fa-plus-circle' } ],
+    expired:  [
+      { time: '7/20/2026 9:14 AM', text: 'Proposal created', icon: 'fa-plus-circle' },
+      { time: '7/25/2026 8:02 AM', text: "Proposal expired (expiration date passed). Deal's active drip sequence suppressed &mdash; see BR-11 note below.", icon: 'fa-exclamation-triangle', flag: true }
+    ],
+    accepted: [
+      { time: '7/10/2026 9:14 AM', text: 'Proposal created', icon: 'fa-plus-circle' },
+      { time: '7/22/2026 2:47 PM', text: 'Proposal accepted by customer', icon: 'fa-check-circle' }
+    ]
+  };
+  let reopenLogEntry = null; // appended after a live re-open in this demo session
+
+  function setPerspective(p) {
+    perspective = p;
+    document.getElementById('persp-portal').classList.toggle('active', p === 'portal');
+    document.getElementById('persp-builder').classList.toggle('active', p === 'builder');
+    document.getElementById('view-portal').classList.toggle('active', p === 'portal');
+    document.getElementById('view-builder').classList.toggle('active', p === 'builder');
+  }
+
+  function setState(s) {
+    state = s;
+    document.getElementById('state-pending').classList.toggle('active', s === 'pending');
+    document.getElementById('state-expired').classList.toggle('active', s === 'expired');
+    document.getElementById('state-accepted').classList.toggle('active', s === 'accepted');
+    // Switching demo state manually starts a fresh scenario each time.
+    reopenLogEntry = null;
+    render();
+  }
+
+  function pillMarkup(s) {
+    if (s === 'pending')  return '<i class="far fa-clock"></i> Pending';
+    if (s === 'expired')  return '<i class="fas fa-exclamation-triangle"></i> Expired';
+    if (s === 'accepted') return '<i class="fas fa-check"></i> Accepted';
+  }
+
+  function effectiveState() {
+    // Re-opening returns the proposal to Pending (BR-7), even though the demo
+    // state selector stays on "Expired" so the banner/log history stays visible.
+    if (state === 'expired' && reopenLogEntry) return 'pending';
+    return state;
+  }
+
+  function render() {
+    const eff = effectiveState();
+
+    // ── Portal view ──
+    const portalPill = document.getElementById('portal-status-pill');
+    portalPill.className = 'status-pill ' + eff;
+    portalPill.innerHTML = pillMarkup(eff);
+    document.getElementById('portal-status-text').textContent = eff === 'pending' ? 'Pending' : (eff === 'expired' ? 'Expired' : 'Accepted');
+    document.getElementById('portal-expired-alert').style.display = eff === 'expired' ? 'flex' : 'none';
+    document.getElementById('portal-br4-note').style.display = eff === 'expired' ? 'block' : 'none';
+
+    const actionbar = document.getElementById('portal-actionbar');
+    if (eff === 'pending') {
+      actionbar.innerHTML = `
+        <button class="portal-btn primary"><i class="fas fa-check"></i> Approve</button>
+        <button class="portal-btn"><i class="far fa-edit"></i> Request Changes</button>
+        <button class="portal-btn"><i class="fas fa-times"></i> Reject</button>
+        <button class="portal-btn"><i class="fas fa-download"></i> Download Proposal PDF</button>`;
+    } else if (eff === 'expired') {
+      actionbar.innerHTML = `
+        <button class="portal-btn disabled" title="Signing disabled — proposal expired (BR-4)"><i class="fas fa-lock"></i> Approve</button>
+        <button class="portal-btn"><i class="fas fa-download"></i> Download Proposal PDF</button>`;
+    } else {
+      actionbar.innerHTML = `
+        <span class="portal-approved-badge"><i class="fas fa-check-circle"></i> Approved</span>
+        <button class="portal-btn"><i class="fas fa-download"></i> Download Proposal PDF</button>`;
+    }
+
+    // ── Builder view ──
+    const builderPill = document.getElementById('builder-status-pill');
+    builderPill.className = 'status-pill ' + eff;
+    builderPill.innerHTML = pillMarkup(eff);
+
+    const expEl = document.getElementById('builder-exp-date');
+    const pdfExpRow = document.getElementById('pdf-exp-row');
+    const pdfCaption = document.getElementById('pdf-preview-caption');
+    if (eff === 'pending' && state !== 'expired') {
+      expEl.textContent = 'Not Set';
+      expEl.classList.remove('danger');
+      pdfExpRow.style.display = 'none';
+      pdfCaption.textContent = 'No expiration date is set, so the Exp. Date field is omitted from the PDF header entirely.';
+    } else if (state === 'expired') {
+      expEl.textContent = reopenLogEntry ? reopenLogEntry.newDate : PREVIOUS_EXP_DATE;
+      expEl.classList.toggle('danger', !reopenLogEntry);
+      pdfExpRow.style.display = 'inline';
+      pdfExpRow.innerHTML = '<strong>Exp. Date:</strong> ' + (reopenLogEntry ? reopenLogEntry.newDate : PREVIOUS_EXP_DATE);
+      pdfCaption.textContent = 'An expiration date is set, so it renders in the PDF header.';
+    } else {
+      expEl.textContent = '7/20/2026';
+      expEl.classList.remove('danger');
+      pdfExpRow.style.display = 'inline';
+      pdfExpRow.innerHTML = '<strong>Exp. Date:</strong> 7/20/2026';
+      pdfCaption.textContent = 'An expiration date is set, so it renders in the PDF header (Accepted proposals are unaffected by expiry, per BR-9).';
+    }
+
+    const showExpiredState = state === 'expired' && !reopenLogEntry;
+    document.getElementById('builder-state-banner').style.display = showExpiredState ? 'flex' : 'none';
+    document.getElementById('builder-drip-note').style.display = showExpiredState ? 'flex' : 'none';
+    document.getElementById('builder-banner-sub').textContent = 'Expiration date: ' + PREVIOUS_EXP_DATE;
+    document.getElementById('builder-areas').classList.toggle('builder-locked', showExpiredState);
+
+    const sendBtn = document.getElementById('send-proposal-btn');
+    const sendHelper = document.getElementById('send-helper');
+    if (showExpiredState) {
+      sendBtn.classList.add('disabled');
+      sendBtn.disabled = true;
+      sendHelper.textContent = 'Disabled — proposal is expired. Re-open it above to edit or resend (BR-6).';
+      sendHelper.classList.add('danger');
+    } else {
+      sendBtn.classList.remove('disabled');
+      sendBtn.disabled = false;
+      sendHelper.textContent = '';
+      sendHelper.classList.remove('danger');
+    }
+
+    // Activity log
+    let entries = ACTIVITY[state].slice();
+    if (state === 'expired' && reopenLogEntry) entries = entries.concat([reopenLogEntry]);
+    document.getElementById('activity-log-list').innerHTML = entries.map(e => `
+      <div class="activity-item${e.flag ? ' flag' : ''}">
+        <i class="fas ${e.icon}"></i>
+        <div>
+          <div>${e.text}</div>
+          <div class="a-time">${e.time}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  document.getElementById('send-proposal-btn').addEventListener('click', function() {
+    if (this.disabled) return;
+    showToast('Proposal sent to customer.');
+  });
+
+  // ── Re-Open modal ──
+  function openReopenModal() {
+    document.getElementById('reopen-date-input').value = '';
+    document.getElementById('reopen-date-input').classList.remove('is-invalid');
+    document.getElementById('reopen-error').classList.remove('visible');
+    document.getElementById('modal-backdrop').style.display = 'block';
+    document.getElementById('modal-card').style.display = 'flex';
+  }
+  function closeReopenModal() {
+    document.getElementById('modal-backdrop').style.display = 'none';
+    document.getElementById('modal-card').style.display = 'none';
+  }
+  function validateReopenInput() {
+    const input = document.getElementById('reopen-date-input');
+    input.classList.remove('is-invalid');
+    document.getElementById('reopen-error').classList.remove('visible');
+  }
+  function confirmReopen() {
+    const input = document.getElementById('reopen-date-input');
+    if (!input.value) {
+      input.classList.add('is-invalid');
+      document.getElementById('reopen-error').classList.add('visible');
+      return;
+    }
+    const d = new Date(input.value + 'T00:00:00');
+    const newDate = (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+    reopenLogEntry = {
+      time: 'Just now',
+      text: 'Proposal re-opened. New expiration date set to ' + newDate + '. Previous expiration date (' + PREVIOUS_EXP_DATE + ') preserved.',
+      icon: 'fa-undo',
+      newDate: newDate
+    };
+    closeReopenModal();
+    render();
+    showToast('Proposal re-opened — new expiration date: ' + newDate + '. Status is back to Pending.');
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-text').textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 4200);
+  }
+
+  render();
+</script>
+
+</body>
+</html>
