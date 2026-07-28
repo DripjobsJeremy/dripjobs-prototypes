@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metrics — AI Predictability | DripJobs Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --color-primary:        #8B85EA;
+  --color-primary-hover:  #736BE3;
+  --color-primary-active: #5C53DC;
+  --color-primary-rgb:    139, 133, 234;
+  --color-text:           #32415B;
+  --color-text-muted:     #80879A;
+  --color-border:         #DAD8E3;
+  --color-card:           #FFFFFF;
+}
+
+body{font-family:'Nunito',sans-serif;background:#F0EFF5;color:#32415B;font-size:14px;min-height:100vh}
+
+/* ── PROTO BAR ── */
+.proto-bar{background:var(--color-card);border-bottom:1px solid var(--color-border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.proto-bar-left{display:flex;align-items:center;gap:10px}
+.back-link{font-size:12px;font-weight:500;color:var(--color-text-muted);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .15s}
+.back-link:hover{color:var(--color-primary)}
+.proto-bar-divider{color:var(--color-border);font-size:16px}
+.proto-bar-title{font-size:14px;font-weight:600}
+.proto-bar-ticket{font-size:11px;font-weight:600;color:var(--color-primary);text-decoration:none;padding:4px 10px;border:1px solid #D6D2F5;background:#E8E6FA;border-radius:999px;letter-spacing:.2px}
+.proto-bar-ticket:hover{background:var(--color-primary);color:#fff}
+
+/* ── DEMO PANEL ── */
+#demo-panel{position:fixed;bottom:0;right:0;left:0;background:#1E1B2E;color:#fff;border-radius:16px 16px 0 0;padding:0;z-index:9999;box-shadow:0 -4px 24px rgba(0,0,0,.35);font-size:12px;transition:transform .25s ease}
+#demo-panel.collapsed{transform:translateY(calc(100% - 44px))}
+#demo-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none}
+#demo-toggle-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--color-primary);display:flex;align-items:center;gap:6px}
+#demo-toggle-chevron{font-size:12px;color:var(--color-primary);transition:transform .25s}
+#demo-panel.collapsed #demo-toggle-chevron{transform:rotate(180deg)}
+#demo-inner{padding:0 14px 14px;display:grid;grid-template-columns:1fr 1fr;gap:5px}
+#demo-inner .demo-col-label{grid-column:1/-1;font-size:10px;color:#5C5878;margin:4px 0 2px;text-transform:uppercase;letter-spacing:.5px}
+.demo-btn{padding:8px 10px;background:rgba(139,133,234,.12);border:1px solid rgba(139,133,234,.28);border-radius:7px;color:#D0CEEE;font-size:11px;font-family:'Nunito',sans-serif;font-weight:600;cursor:pointer;text-align:center;transition:background .15s;min-height:44px;display:flex;align-items:center;justify-content:center}
+.demo-btn:hover{background:rgba(139,133,234,.25)}
+.demo-btn.active{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+.demo-btn.full{grid-column:1/-1}
+
+/* ── TOPBAR ── */
+.metrics-topbar{background:#fff;border-bottom:1px solid #E8E6F0;padding:8px 12px;display:flex;align-items:center;gap:6px;position:sticky;top:0;z-index:100;overflow-x:auto;scrollbar-width:none}
+.metrics-topbar::-webkit-scrollbar{display:none}
+.date-range-pill{display:flex;align-items:center;gap:5px;padding:6px 11px;border:1.5px solid var(--color-primary);border-radius:999px;font-size:12px;font-weight:700;color:var(--color-primary);background:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;min-height:36px}
+.date-filter-btn{padding:6px 11px;border-radius:999px;border:1px solid #E0DCF0;background:#fff;font-size:12px;font-weight:600;color:#6B6885;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .12s;white-space:nowrap;flex-shrink:0;min-height:36px}
+.date-filter-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
+.date-filter-btn.active{background:var(--color-primary);color:#fff;border-color:var(--color-primary)}
+
+/* ── PAGE ── */
+.metrics-page{padding:14px 14px 180px;max-width:1300px;margin:0 auto;width:100%}
+
+/* ── COLLAPSIBLE SECTION WRAPPER ── */
+.metrics-section{margin-bottom:14px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;user-select:none;gap:8px}
+.section-eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#9896A8;margin-bottom:0;flex:1}
+.section-collapse-btn{width:24px;height:24px;border-radius:6px;border:1px solid #DAD8E3;background:#fff;display:flex;align-items:center;justify-content:center;color:#9896A8;font-size:10px;cursor:pointer;flex-shrink:0;transition:all .15s}
+.section-collapse-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
+.section-body{transition:opacity .2s ease}
+.section-body.collapsed{display:none}
+/* Collapsed state shows a slim summary bar */
+.section-collapsed-bar{display:none;background:#fff;border:1px solid #E8E6F0;border-radius:8px;padding:8px 14px;font-size:12px;color:#9896A8;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:0}
+.section-collapsed-bar.visible{display:flex}
+.section-collapsed-bar:hover{border-color:var(--color-primary);color:var(--color-primary)}
+.section-collapsed-summary{display:flex;align-items:center;gap:6px}
+
+/* ── KPI GROUPS ── */
+.kpi-group{background:#fff;border:1px solid #E8E6F0;border-radius:10px;margin-bottom:10px;overflow:hidden}
+.kpi-group:last-child{margin-bottom:0}
+.kpi-group-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#9896A8;padding:10px 14px 7px;border-bottom:1px solid #F0EEF7}
+.kpi-row{display:grid;grid-template-columns:1fr 1fr}
+.kpi-cell{padding:13px 14px;border-right:1px solid #F0EEF7;border-bottom:1px solid #F0EEF7}
+.kpi-cell:nth-child(even){border-right:none}
+.kpi-row.three-col .kpi-cell:nth-child(3){grid-column:1/-1;border-right:none}
+.kpi-cell-top{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.kpi-cell-name{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--color-primary)}
+.kpi-cell-desc{font-size:11px;color:#9896A8;margin-bottom:8px;line-height:1.4}
+.kpi-cell-value{font-size:24px;font-weight:800;color:#32415B;line-height:1;margin-bottom:8px}
+.kpi-view-details{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--color-primary);border:1px solid #E0DCF0;border-radius:999px;padding:5px 10px;cursor:pointer;background:#fff;font-family:'Nunito',sans-serif;transition:background .12s;min-height:32px}
+.kpi-view-details:hover{background:#F5F3FF}
+
+/* ── REPORT CARDS ── */
+.report-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:12px}
+.report-card{background:#fff;border:1px solid #E8E6F0;border-radius:10px;overflow:hidden}
+.report-card-header{padding:12px 14px 9px;border-bottom:1px solid #F0EEF7;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.report-card-title-row{display:flex;align-items:center;gap:6px}
+.report-card-title{font-size:13px;font-weight:700;color:#32415B}
+.report-card-title span{font-weight:400;color:#9896A8;font-size:12px}
+.report-card-desc{font-size:11px;color:#9896A8;margin-top:3px;line-height:1.4}
+.report-card-controls{display:flex;gap:4px;flex-shrink:0}
+.report-ctrl-btn{width:32px;height:32px;border:1px solid #E0DCF0;border-radius:5px;background:#fff;color:#9896A8;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.report-ctrl-btn:hover,.report-ctrl-btn.active{border-color:var(--color-primary);color:var(--color-primary)}
+.report-card-body{padding:11px 14px;min-height:90px}
+.report-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 0;color:#B0AEC0;gap:6px}
+.report-empty i{font-size:20px}
+.report-empty span{font-size:12px}
+.report-table{width:100%;border-collapse:collapse;font-size:12px}
+.report-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9896A8;padding:0 0 7px;text-align:left;border-bottom:1px solid #F0EEF7}
+.report-table th:not(:first-child){text-align:right}
+.report-table td{padding:7px 0;border-bottom:1px solid #F7F6FA;color:#32415B;font-weight:500}
+.report-table td:not(:first-child){text-align:right}
+.bar-wrap{display:inline-block;width:100%;max-width:140px;height:8px;background:#F0EEF7;border-radius:99px;overflow:hidden}
+.bar-col{min-width:60px}
+.bar-fill-green{height:100%;background:#22C55E;border-radius:99px}
+.bar-fill-purple{height:100%;background:var(--color-primary);border-radius:99px}
+.bar-fill-gray{height:100%;background:#D1D5DB;border-radius:99px}
+.report-table .total-row td{font-weight:700;border-bottom:none;border-top:1px solid #E8E6F0;padding-top:9px}
+.report-card-footer{padding:8px 14px 10px;display:flex;justify-content:flex-end}
+.pdf-btn{display:inline-flex;align-items:center;gap:5px;background:#DC2626;color:#fff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:5px;cursor:pointer;border:none;font-family:'Nunito',sans-serif;min-height:32px}
+
+/* ── KEY INSIGHTS ── */
+.key-insights-strip{background:#fff;border:1px solid #E8E6F0;border-radius:10px;padding:13px 16px}
+.key-insights-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--color-primary);margin-bottom:7px}
+.ki-list{list-style:none}
+.ki-list li{font-size:12px;color:#32415B;padding:2px 0;display:flex;align-items:flex-start;gap:5px;line-height:1.55}
+.ki-list li::before{content:'•';color:var(--color-primary);flex-shrink:0;margin-top:1px}
+
+/* ════════════════════════════════════════
+   ★ AI PREDICTABILITY PANEL
+════════════════════════════════════════ */
+#ai-panel{border-radius:10px;overflow:hidden;margin-bottom:0;border:1.5px solid #D6D2F5;box-shadow:0 2px 12px rgba(var(--color-primary-rgb),.14)}
+
+/* Header */
+.ai-ph{background:linear-gradient(135deg,var(--color-primary) 0%,var(--color-primary-active) 100%);padding:12px 14px;display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.ai-ph-icon{width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0;margin-top:1px}
+.ai-ph-text{flex:1;min-width:0}
+.ai-ph-title{font-size:13px;font-weight:800;color:#fff;line-height:1.2}
+.ai-ph-sub{font-size:11px;color:rgba(255,255,255,.72);margin-top:1px;line-height:1.4}
+.ai-ph-right{font-size:11px;color:rgba(255,255,255,.65);width:100%;padding-top:6px;border-top:1px solid rgba(255,255,255,.15);margin-top:4px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.ai-ph-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.ai-ph-meta strong{font-size:11px;color:#fff;font-weight:700}
+
+/* ★ RUN BUTTON */
+.ai-run-btn{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--color-primary);font-size:12px;font-weight:800;padding:7px 14px;border-radius:999px;cursor:pointer;border:none;font-family:'Nunito',sans-serif;transition:all .15s;min-height:34px;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.ai-run-btn:hover{background:#F5F3FF;transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.15)}
+.ai-run-btn:active{transform:translateY(0);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.ai-run-btn:disabled{background:rgba(255,255,255,.35);color:rgba(255,255,255,.7);cursor:not-allowed;transform:none;box-shadow:none}
+
+/* Range-change notice banner */
+.ai-range-notice{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:7px;padding:7px 12px;font-size:11px;color:#fff;display:none;align-items:center;gap:7px;width:100%;margin-top:0;flex-wrap:wrap}
+.ai-range-notice.visible{display:flex}
+.ai-range-notice strong{font-weight:700}
+.ai-range-rerun{background:rgba(255,255,255,.25);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap}
+.ai-range-rerun:hover{background:rgba(255,255,255,.35)}
+
+/* Never-run state */
+.ai-never-run{background:#FAF8FF;padding:28px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.ai-never-run-ico{width:48px;height:48px;background:#EDE9FE;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--color-primary)}
+.ai-never-run-title{font-size:14px;font-weight:700;color:#32415B}
+.ai-never-run-body{font-size:12px;color:#6B6885;line-height:1.6;max-width:320px}
+.ai-never-run-cta{display:inline-flex;align-items:center;gap:6px;background:var(--color-primary);color:#fff;font-size:13px;font-weight:700;padding:10px 20px;border-radius:999px;cursor:pointer;border:none;font-family:'Nunito',sans-serif;min-height:44px;margin-top:2px;transition:background .15s}
+.ai-never-run-cta:hover{background:var(--color-primary-hover)}
+
+/* Callout (trending) */
+.ai-callout{background:#FAF8FF;border-bottom:1px solid #E8E4F5;padding:13px 14px;display:flex;align-items:flex-start;gap:11px}
+.ai-callout-icon{width:34px;height:34px;background:var(--color-primary);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0;margin-top:2px}
+.ai-callout-body{flex:1;min-width:0}
+.ai-headline{font-size:14px;font-weight:700;color:#32415B;line-height:1.45;margin-bottom:5px}
+.ai-headline .amount{color:var(--color-primary);font-weight:800}
+.ai-support{font-size:12px;color:#6B6885;line-height:1.55}
+.ai-conf-row{display:flex;align-items:center;gap:7px;margin-top:8px}
+.ai-conf-track{width:100px;height:5px;background:#E0DCF0;border-radius:99px;overflow:hidden}
+.ai-conf-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--color-primary),var(--color-primary-active));transition:width .5s ease}
+.ai-conf-text{font-size:11px;font-weight:700;color:var(--color-primary)}
+
+/* Insights body */
+.ai-body{background:#fff;padding:13px 14px}
+.ai-body-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#9896A8;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ai-grid{display:grid;grid-template-columns:1fr;gap:9px}
+.ai-card{background:#FAFAFA;border:1px solid #EDEBF5;border-radius:8px;padding:11px 12px;display:flex;gap:10px;align-items:flex-start;transition:border-color .14s}
+.ai-card:active{border-color:var(--color-primary)}
+.ai-ico{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.ico-r{background:#FEE2E2;color:#DC2626}
+.ico-g{background:#D1FAE5;color:#059669}
+.ico-b{background:#DBEAFE;color:#2563EB}
+.ico-a{background:#FEF3C7;color:#D97706}
+.ico-p{background:#EDE9FE;color:var(--color-primary)}
+.ai-card-metric{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#9896A8;margin-bottom:3px}
+.ai-card-text{font-size:12px;font-weight:500;color:#32415B;line-height:1.5}
+.ai-delta{font-size:11px;font-weight:700;margin-top:5px;display:flex;align-items:center;gap:3px}
+.d-up{color:#16A34A}.d-dn{color:#DC2626}.d-fl{color:#9896A8}
+
+/* Footer */
+.ai-footer{background:#F7F5FF;border-top:1px solid #E8E4F5;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.ai-footer-note{font-size:11px;color:#9896A8;display:flex;align-items:center;gap:5px}
+.ai-status{display:inline-flex;align-items:center;gap:4px;background:#EDE9FE;color:var(--color-primary-active);font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.4px}
+
+/* No-data */
+.no-data-body{padding:26px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.nd-ico{width:46px;height:46px;background:#F5F3FF;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;color:var(--color-primary)}
+.nd-title{font-size:14px;font-weight:700;color:#32415B}
+.nd-text{font-size:12px;color:#9896A8;line-height:1.6;max-width:320px}
+.nd-prog{width:160px;height:6px;background:#E0DCF0;border-radius:99px;overflow:hidden;margin-top:4px}
+.nd-fill{height:100%;width:38%;background:linear-gradient(90deg,var(--color-primary),var(--color-primary-active));border-radius:99px;animation:pulse 1.8s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:.55}to{opacity:1}}
+.nd-cap{font-size:11px;color:#B5B2C4;text-align:center}
+
+/* Skeleton */
+.skel{background:linear-gradient(90deg,#F0EEF7 25%,#E6E3F5 50%,#F0EEF7 75%);background-size:400% 100%;animation:sk 1.3s ease infinite;border-radius:6px}
+@keyframes sk{0%{background-position:100% 50%}100%{background-position:0% 50%}}
+.load-body{padding:14px;background:#fff;display:flex;flex-direction:column;gap:9px}
+
+/* Failure */
+.ai-fail-callout{background:#FFFBEB;border-bottom:1px solid #FDE68A;padding:13px 14px;display:flex;align-items:flex-start;gap:11px}
+.ai-fail-ico{width:34px;height:34px;background:#FEF3C7;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#D97706;flex-shrink:0;margin-top:2px}
+
+/* ── BREAKPOINTS ── */
+@media(min-width:480px){
+  .ai-grid{grid-template-columns:repeat(2,1fr)}
+  .report-grid{grid-template-columns:repeat(2,1fr)}
+  .ai-ph-right{width:auto;padding-top:0;border-top:none;margin-top:0;margin-left:auto;flex-wrap:nowrap;justify-content:flex-end}
+  .ai-range-notice{width:auto;margin-top:0}
+}
+@media(min-width:640px){
+  .kpi-row{grid-template-columns:repeat(3,1fr)}
+  .kpi-cell{border-bottom:none}
+  .kpi-cell:nth-child(even){border-right:1px solid #F0EEF7}
+  .kpi-cell:last-child{border-right:none}
+  .kpi-row.three-col .kpi-cell:nth-child(3){grid-column:auto}
+  .kpi-cell-value{font-size:26px}
+  .metrics-page{padding:18px 20px 180px}
+}
+@media(min-width:768px){
+  #demo-panel{bottom:20px;right:20px;left:auto;border-radius:12px;transform:none !important;width:232px}
+  #demo-panel.collapsed{transform:none !important}
+  #demo-toggle{display:none}
+  #demo-inner{display:flex;flex-direction:column;padding:0 14px 14px;gap:0}
+  #demo-inner .demo-col-label{display:block}
+  .demo-btn{text-align:left;justify-content:flex-start;min-height:auto;padding:6px 10px;margin-bottom:5px}
+  .demo-btn.full{grid-column:auto}
+  .metrics-page{padding:20px 24px 100px}
+  .metrics-topbar{padding:10px 24px;gap:8px}
+  .kpi-cell{padding:16px 20px}
+  .report-card-body{padding:12px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── PROTO BAR ── -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="proto-bar-divider">|</span>
+    <span class="proto-bar-title">Metrics — AI Predictability</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/86b9bmc1u" target="_blank">86b9bmc1u</a>
+</div>
+
+<!-- ── DATE FILTER BAR ── -->
+<div class="metrics-topbar">
+  <div class="date-range-pill"><i class="far fa-calendar-alt"></i> 04/29/2026 – 05/29/2026</div>
+  <button class="date-filter-btn" data-range="today">Today</button>
+  <button class="date-filter-btn" data-range="week">Week</button>
+  <button class="date-filter-btn" data-range="lastwk">Last Wk</button>
+  <button class="date-filter-btn active" data-range="month">Month</button>
+  <button class="date-filter-btn" data-range="lastmo">Last Mo</button>
+  <button class="date-filter-btn" data-range="ytd">YTD</button>
+  <button class="date-filter-btn" data-range="all">All</button>
+</div>
+
+<div class="metrics-page">
+
+  <!-- ════════════════════════════════════
+       SECTION: OVERVIEW (KPIs)
+  ═════════════════════════════════════ -->
+  <div class="metrics-section" id="sec-overview">
+    <div class="section-header" onclick="toggleSection('overview')">
+      <div class="section-eyebrow">Overview</div>
+      <button class="section-collapse-btn" id="sec-overview-btn" title="Collapse section"><i class="fas fa-chevron-up"></i></button>
+    </div>
+    <div class="section-collapsed-bar" id="sec-overview-bar" onclick="toggleSection('overview')">
+      <div class="section-collapsed-summary"><i class="fas fa-chart-bar" style="font-size:12px;color:var(--color-primary)"></i> Overview — Sales $64,200 · Jobs Won 27 · Closing Ratio 58%</div>
+      <i class="fas fa-chevron-down" style="font-size:10px"></i>
+    </div>
+    <div class="section-body" id="sec-overview-body">
+      <div class="kpi-group">
+        <div class="kpi-group-label">REVENUE & WINS</div>
+        <div class="kpi-row three-col">
+          <div class="kpi-cell">
+            <div class="kpi-cell-top"><span>💰</span><span class="kpi-cell-name">SALES</span></div>
+            <div class="kpi-cell-desc">Pipeline + Manual Invoice Revenue.</div>
+            <div class="kpi-cell-value">$64,200</div>
+            <button class="kpi-view-details">View details <i class="fas fa-arrow-right" style="font-size:9px"></i></button>
+          </div>
+          <div class="kpi-cell">
+            <div class="kpi-cell-top"><span>🏆</span><span class="kpi-cell-name">JOBS WON</span></div>
+            <div class="kpi-cell-desc">Accepted Proposals + Manual Invoices.</div>
+            <div class="kpi-cell-value">27</div>
+            <button class="kpi-view-details">View details <i class="fas fa-arrow-right" style="font-size:9px"></i></button>
+          </div>
+          <div class="kpi-cell">
+            <div class="kpi-cell-top"><span>📊</span><span class="kpi-cell-name">AVG JOB SIZE</span></div>
+            <div class="kpi-cell-desc">Total Sales Per Job Won.</div>
+            <div class="kpi-cell-value">$2,377</div>
+            <button class="kpi-view-details">View details <i class="fas fa-arrow-right" style="font-size:9px"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-group">
+        <div class="kpi-group-label">CONVERSIONS & VOLUME</div>
+        <div class="kpi-row three-col">
+          <div class="kpi-cell">
+            <div class="kpi-cell-top"><span>%</span><span class="kpi-cell-name">CLOSING RATIO</span></div>
+            <div class="kpi-cell-desc">Accepted Proposals / Qualified Proposals.<br><span style="color:#B0AEC0;font-size:10px">Note: Jobs Won may differ.</span></div>
+            <div class="kpi-cell-value">58%</div>
+            <button class="kpi-view-details">View details <i class="fas fa-arrow-right" style="font-size:9px"></i></button>
+          </div>
+          <div class="kpi-cell">
+            <div class="kpi-cell-top"><span>🎯</span><span class="kpi-cell-name">SET RATE</span></div>
+            <div class="kpi-cell-desc">Contacts Created To Booked Rate.</div>
+            <div class="kpi-cell-value">60%</div>
+            <button class="kpi-view-details">View details <i class="fas fa-arrow-right" style="font-size:9px"></i></button>
+          </div>
+          <div class="kpi-cell">
+            <div class="kpi-cell-top"><span>📅</span><span class="kpi-cell-name">APPOINTMENTS</span></div>
+            <div class="kpi-cell-desc">Total appointments booked in period, by customer type.</div>
+            <div class="kpi-cell-value">47</div>
+            <button class="kpi-view-details">View details <i class="fas fa-arrow-right" style="font-size:9px"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       SECTION: AI PREDICTABILITY
+  ═════════════════════════════════════ -->
+  <div class="metrics-section" id="sec-ai">
+    <div class="section-header" onclick="toggleSection('ai')">
+      <div class="section-eyebrow" style="color:var(--color-primary);display:flex;align-items:center;gap:5px"><i class="fas fa-brain" style="font-size:10px"></i> AI Predictability</div>
+      <button class="section-collapse-btn" id="sec-ai-btn" title="Collapse section"><i class="fas fa-chevron-up"></i></button>
+    </div>
+    <div class="section-collapsed-bar" id="sec-ai-bar" onclick="toggleSection('ai')">
+      <div class="section-collapsed-summary"><i class="fas fa-brain" style="font-size:12px;color:var(--color-primary)"></i> AI Predictability — Last run May 26, 2026 for Month</div>
+      <i class="fas fa-chevron-down" style="font-size:10px"></i>
+    </div>
+    <div class="section-body" id="sec-ai-body">
+      <div id="ai-panel">
+
+        <!-- PANEL HEADER -->
+        <div class="ai-ph">
+          <div class="ai-ph-icon"><i class="fas fa-brain"></i></div>
+          <div class="ai-ph-text">
+            <div class="ai-ph-title">AI Predictability</div>
+            <div class="ai-ph-sub">Your AI predictability for home service business — plain-English insights from your data</div>
+          </div>
+          <div class="ai-ph-right">
+            <div class="ai-ph-meta" id="panel-meta">
+              <strong>Last run May 26, 2026</strong>&nbsp;· for Month period
+            </div>
+            <button class="ai-run-btn" id="run-btn" onclick="runInsights()">
+              <i class="fas fa-play" style="font-size:10px"></i> Run Insights
+            </button>
+          </div>
+          <!-- Range-change notice (shown when date range changes after a prior run) -->
+          <div class="ai-range-notice" id="range-notice">
+            <i class="fas fa-info-circle" style="flex-shrink:0"></i>
+            <span id="range-notice-text">Date range changed to <strong id="range-notice-range">YTD</strong>. Insights shown are from <strong>Month</strong> period.</span>
+            <button class="ai-range-rerun" onclick="runInsights()"><i class="fas fa-sync-alt" style="font-size:9px"></i> Re-run</button>
+          </div>
+        </div>
+
+        <!-- STATE: NEVER RUN -->
+        <div id="s-neverrun" style="display:none">
+          <div class="ai-never-run">
+            <div class="ai-never-run-ico"><i class="fas fa-brain"></i></div>
+            <div class="ai-never-run-title">No insights yet for this account</div>
+            <div class="ai-never-run-body">Run AI Predictability to get plain-English insights about your closing ratio, revenue trend, average job value, and more. Insights are generated on demand — they won't run automatically.</div>
+            <button class="ai-never-run-cta" onclick="runInsights()"><i class="fas fa-play" style="font-size:11px"></i> Run Insights Now</button>
+          </div>
+        </div>
+
+        <!-- STATE: ACTIVE (has results) -->
+        <div id="s-active">
+          <div class="ai-callout">
+            <div class="ai-callout-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="ai-callout-body">
+              <div class="ai-headline" id="ai-hl">You're trending toward <span class="amount">$96,300</span> in sales this month — your strongest May on record.</div>
+              <div class="ai-support" id="ai-sup">Based on your current proposal pipeline, average close rate, and job schedule through May 31. Exterior painting jobs in the $6,000–$9,000 range are driving the uptick.</div>
+              <div class="ai-conf-row">
+                <div class="ai-conf-track"><div class="ai-conf-fill" id="ai-conf" style="width:78%"></div></div>
+                <span class="ai-conf-text" id="ai-conf-lbl">78% confidence</span>
+              </div>
+            </div>
+          </div>
+          <div class="ai-body">
+            <div class="ai-body-label"><i class="fas fa-lightbulb"></i> What your numbers are telling you</div>
+            <div class="ai-grid">
+              <div class="ai-card"><div class="ai-ico ico-r"><i class="fas fa-percentage"></i></div><div><div class="ai-card-metric">Closing Ratio</div><div class="ai-card-text">Your closing ratio dropped 9% this month. Proposals sent increased but appointments converted at a lower rate than last quarter.</div><div class="ai-delta d-dn"><i class="fas fa-arrow-down"></i> 9% vs last month</div></div></div>
+              <div class="ai-card"><div class="ai-ico ico-g"><i class="fas fa-dollar-sign"></i></div><div><div class="ai-card-metric">Avg Job Value</div><div class="ai-card-text">Your average job value is up 14% year-over-year, driven by exterior jobs in the $8,000+ range.</div><div class="ai-delta d-up"><i class="fas fa-arrow-up"></i> +14% YoY</div></div></div>
+              <div class="ai-card"><div class="ai-ico ico-b"><i class="fas fa-file-alt"></i></div><div><div class="ai-card-metric">Proposal Volume</div><div class="ai-card-text">You sent 47 proposals this month — 6 more than April. Volume is the highest in 90 days.</div><div class="ai-delta d-up"><i class="fas fa-arrow-up"></i> +15% vs last month</div></div></div>
+              <div class="ai-card"><div class="ai-ico ico-a"><i class="fas fa-calendar-check"></i></div><div><div class="ai-card-metric">Appt → Proposal Rate</div><div class="ai-card-text">Appointment-to-proposal conversion held steady at 71%. No meaningful change from last quarter.</div><div class="ai-delta d-fl"><i class="fas fa-minus"></i> No change</div></div></div>
+              <div class="ai-card"><div class="ai-ico ico-p"><i class="fas fa-chart-line"></i></div><div><div class="ai-card-metric">Revenue Trend</div><div class="ai-card-text">MTD revenue is $64,200 — up 12% from April. On pace for your best month since November 2025.</div><div class="ai-delta d-up"><i class="fas fa-arrow-up"></i> +12% vs April</div></div></div>
+            </div>
+          </div>
+          <div class="ai-footer">
+            <div class="ai-footer-note"><i class="fas fa-lock" style="font-size:10px"></i> Read-only · Insights describe your data, not prescriptions</div>
+            <div class="ai-status"><i class="fas fa-circle" style="font-size:6px;color:#16A34A"></i> AI Insights Active</div>
+          </div>
+        </div>
+
+        <!-- STATE: NO DATA -->
+        <div id="s-nodata" style="display:none">
+          <div class="no-data-body">
+            <div class="nd-ico"><i class="fas fa-database"></i></div>
+            <div class="nd-title">Insights are on their way</div>
+            <div class="nd-text">AI Predictability insights will appear here once your account has at least 30 days of Metrics data. Keep running proposals and closing jobs — your numbers are building.</div>
+            <div class="nd-prog"><div class="nd-fill"></div></div>
+            <div class="nd-cap">Data collection started Jan 14, 2025 · 14 days until insights unlock</div>
+          </div>
+          <div class="ai-footer">
+            <div class="ai-footer-note"><i class="fas fa-info-circle"></i> Requires a 30-day data baseline</div>
+            <div class="ai-status" style="background:#E5E7EB;color:#6B7280">Awaiting Data</div>
+          </div>
+        </div>
+
+        <!-- STATE: FAILURE -->
+        <div id="s-failure" style="display:none">
+          <div class="ai-fail-callout">
+            <div class="ai-fail-ico"><i class="fas fa-exclamation-triangle"></i></div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#92400E;margin-bottom:3px">Insights couldn't be generated</div>
+              <div style="font-size:12px;color:#78350F;line-height:1.55">Something went wrong during this run. Your KPI cards and report data above are unaffected. Try running again or check back later.</div>
+            </div>
+          </div>
+          <div class="ai-footer">
+            <div class="ai-footer-note"><i class="fas fa-clock"></i> Last attempted May 29, 2026 at 9:14 AM</div>
+            <div class="ai-status" style="background:#FEE2E2;color:#DC2626">Run Failed</div>
+          </div>
+        </div>
+
+        <!-- STATE: LOADING -->
+        <div id="s-loading" style="display:none">
+          <div class="load-body">
+            <div class="skel" style="height:58px"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="skel" style="height:80px"></div><div class="skel" style="height:80px"></div>
+              <div class="skel" style="height:80px"></div><div class="skel" style="height:80px"></div>
+            </div>
+          </div>
+          <div class="ai-footer">
+            <div class="ai-footer-note"><i class="fas fa-sync-alt fa-spin"></i>&nbsp;Generating your insights…</div>
+            <div class="ai-status">Running</div>
+          </div>
+        </div>
+
+      </div><!-- /ai-panel -->
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       SECTION: KEY INSIGHTS
+  ═════════════════════════════════════ -->
+  <div class="metrics-section" id="sec-insights">
+    <div class="section-header" onclick="toggleSection('insights')">
+      <div class="section-eyebrow">Key Insights</div>
+      <button class="section-collapse-btn" id="sec-insights-btn" title="Collapse section"><i class="fas fa-chevron-up"></i></button>
+    </div>
+    <div class="section-collapsed-bar" id="sec-insights-bar" onclick="toggleSection('insights')">
+      <div class="section-collapsed-summary"><i class="fas fa-lightbulb" style="font-size:12px;color:var(--color-primary)"></i> Key Insights — 2 insights for this period</div>
+      <i class="fas fa-chevron-down" style="font-size:10px"></i>
+    </div>
+    <div class="section-body" id="sec-insights-body">
+      <div class="key-insights-strip">
+        <div class="key-insights-label">KEY INSIGHTS</div>
+        <ul class="ki-list">
+          <li><strong>A Little Bird</strong> generated the most leads with <strong>2</strong> new contacts.</li>
+          <li>Closing ratio is <strong>0%</strong> and set rate is <strong>60%</strong> for the selected period.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       SECTION: LEAD REPORTS
+  ═════════════════════════════════════ -->
+  <div class="metrics-section" id="sec-leads">
+    <div class="section-header" onclick="toggleSection('leads')">
+      <div class="section-eyebrow">Leads & Conversions</div>
+      <button class="section-collapse-btn" id="sec-leads-btn" title="Collapse section"><i class="fas fa-chevron-up"></i></button>
+    </div>
+    <div class="section-collapsed-bar" id="sec-leads-bar" onclick="toggleSection('leads')">
+      <div class="section-collapsed-summary"><i class="fas fa-users" style="font-size:12px;color:var(--color-primary)"></i> Leads & Conversions — 4 report cards</div>
+      <i class="fas fa-chevron-down" style="font-size:10px"></i>
+    </div>
+    <div class="section-body" id="sec-leads-body">
+      <div class="report-grid">
+        <div class="report-card">
+          <div class="report-card-header">
+            <div><div class="report-card-title-row"><span style="color:#22C55E;font-size:14px">🏠</span><span class="report-card-title">Leads By Source <span>(Total Leads: 5)</span></span></div><div class="report-card-desc">New contacts added during this period, grouped by the lead source assigned to each contact</div></div>
+            <div class="report-card-controls"><button class="report-ctrl-btn active"><i class="fas fa-list"></i></button><button class="report-ctrl-btn"><i class="fas fa-chart-bar"></i></button></div>
+          </div>
+          <div class="report-card-body">
+            <table class="report-table">
+              <thead><tr><th>SOURCE</th><th style="text-align:left">VOLUME</th><th>AMOUNT</th><th>SHARE</th></tr></thead>
+              <tbody>
+                <tr><td>A Little Bird</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-green" style="width:100%"></div></div></td><td>2</td><td>(40%)</td></tr>
+                <tr><td>Fortune C...</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-purple" style="width:50%"></div></div></td><td>1</td><td>(20%)</td></tr>
+                <tr><td>Google</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-purple" style="width:50%"></div></div></td><td>1</td><td>(20%)</td></tr>
+                <tr><td>None of Y...</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-purple" style="width:50%"></div></div></td><td>1</td><td>(20%)</td></tr>
+                <tr class="total-row"><td><strong>Total</strong></td><td></td><td><strong>5</strong></td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="report-card-footer"><button class="pdf-btn"><i class="fas fa-file-pdf"></i> PDF</button></div>
+        </div>
+        <div class="report-card">
+          <div class="report-card-header">
+            <div><div class="report-card-title-row"><span style="color:#22C55E;font-size:14px">📅</span><span class="report-card-title">Leads To Appointments <span>(Total Booked: 3)</span></span></div><div class="report-card-desc">Of the contacts created during this period, how many from each lead source were eventually booked</div></div>
+            <div class="report-card-controls"><button class="report-ctrl-btn active"><i class="fas fa-list"></i></button><button class="report-ctrl-btn"><i class="fas fa-chart-bar"></i></button></div>
+          </div>
+          <div class="report-card-body">
+            <table class="report-table">
+              <thead><tr><th>SOURCE</th><th style="text-align:left">VOLUME</th><th>BOOKED</th><th>SET RATE</th></tr></thead>
+              <tbody>
+                <tr><td>A Little Bird</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-green" style="width:100%"></div></div></td><td>2</td><td>(100%)</td></tr>
+                <tr><td>Google</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-green" style="width:100%"></div></div></td><td>1</td><td>(100%)</td></tr>
+                <tr><td>Fortune C...</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-gray" style="width:50%"></div></div></td><td>0</td><td>(0%)</td></tr>
+                <tr class="total-row"><td><strong>Total Booked</strong></td><td></td><td><strong>3</strong></td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="report-card-footer"><button class="pdf-btn"><i class="fas fa-file-pdf"></i> PDF</button></div>
+        </div>
+      </div>
+      <div class="report-grid">
+        <div class="report-card">
+          <div class="report-card-header">
+            <div><div class="report-card-title-row"><span style="color:#22C55E;font-size:14px">$</span><span class="report-card-title">Sales By Source <span>(Total: $0.00)</span></span></div><div class="report-card-desc">Total revenue invoiced during this period, broken down by lead source.</div></div>
+            <div class="report-card-controls"><button class="report-ctrl-btn active"><i class="fas fa-list"></i></button><button class="report-ctrl-btn"><i class="fas fa-chart-bar"></i></button></div>
+          </div>
+          <div class="report-card-body"><div class="report-empty"><i class="fas fa-chart-bar"></i><span>No results found for this period</span></div></div>
+          <div class="report-card-footer"><button class="pdf-btn"><i class="fas fa-file-pdf"></i> PDF</button></div>
+        </div>
+        <div class="report-card">
+          <div class="report-card-header">
+            <div><div class="report-card-title-row"><span style="color:#22C55E;font-size:14px">🎯</span><span class="report-card-title">Closing Ratio by Source <span>(Total Closed Deals: 0)</span></span></div><div class="report-card-desc">For each lead source, the number of qualified proposals during this period that were eventually accepted (jobs won).</div></div>
+            <div class="report-card-controls"><button class="report-ctrl-btn active"><i class="fas fa-list"></i></button><button class="report-ctrl-btn"><i class="fas fa-chart-bar"></i></button></div>
+          </div>
+          <div class="report-card-body">
+            <table class="report-table">
+              <thead><tr><th>SOURCE</th><th style="text-align:left">VOLUME</th><th>WON</th><th>CLOSE RATE</th></tr></thead>
+              <tbody>
+                <tr><td>Google</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-gray" style="width:100%"></div></div></td><td>0</td><td>(0%)</td></tr>
+                <tr><td>Door to D...</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-gray" style="width:80%"></div></div></td><td>0</td><td>(0%)</td></tr>
+                <tr><td>Door Knoc...</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-gray" style="width:70%"></div></div></td><td>0</td><td>(0%)</td></tr>
+                <tr class="total-row"><td><strong>Total Closed Deals</strong></td><td></td><td><strong>0</strong></td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="report-card-footer"><button class="pdf-btn"><i class="fas fa-file-pdf"></i> PDF</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       SECTION: GEO & TERRITORY REPORTS
+  ═════════════════════════════════════ -->
+  <div class="metrics-section" id="sec-geo">
+    <div class="section-header" onclick="toggleSection('geo')">
+      <div class="section-eyebrow">Geography & Territory</div>
+      <button class="section-collapse-btn" id="sec-geo-btn" title="Collapse section"><i class="fas fa-chevron-up"></i></button>
+    </div>
+    <div class="section-collapsed-bar" id="sec-geo-bar" onclick="toggleSection('geo')">
+      <div class="section-collapsed-summary"><i class="fas fa-map-marker-alt" style="font-size:12px;color:var(--color-primary)"></i> Geography & Territory — 2 report cards</div>
+      <i class="fas fa-chevron-down" style="font-size:10px"></i>
+    </div>
+    <div class="section-body" id="sec-geo-body">
+      <div class="report-grid">
+        <div class="report-card">
+          <div class="report-card-header">
+            <div><div class="report-card-title-row"><span style="color:#22C55E;font-size:14px">📍</span><span class="report-card-title">Sales By Zip Code <span>(Total: $0.00)</span></span></div><div class="report-card-desc">Total revenue from deals during this period, grouped by the job site zip code</div></div>
+            <div class="report-card-controls"><button class="report-ctrl-btn active"><i class="fas fa-list"></i></button><button class="report-ctrl-btn"><i class="fas fa-chart-bar"></i></button></div>
+          </div>
+          <div class="report-card-body"><div class="report-empty"><i class="fas fa-chart-bar"></i><span>No results found for this period</span></div></div>
+          <div class="report-card-footer"><button class="pdf-btn"><i class="fas fa-file-pdf"></i> PDF</button></div>
+        </div>
+        <div class="report-card">
+          <div class="report-card-header">
+            <div><div class="report-card-title-row"><span style="color:#22C55E;font-size:14px">📍</span><span class="report-card-title">Closing Ratio by Zip Code <span>(Total Closed Deals: 0)</span></span></div><div class="report-card-desc">For each zip code, qualified proposals eventually accepted (jobs won). Manual invoices not included.</div></div>
+            <div class="report-card-controls"><button class="report-ctrl-btn active"><i class="fas fa-list"></i></button><button class="report-ctrl-btn"><i class="fas fa-chart-bar"></i></button></div>
+          </div>
+          <div class="report-card-body">
+            <table class="report-table">
+              <thead><tr><th>ZIP CODE</th><th style="text-align:left">VOLUME</th><th>WON</th><th>CLOSE RATE</th></tr></thead>
+              <tbody>
+                <tr><td>34442</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-gray" style="width:100%"></div></div></td><td>0</td><td>(0%)</td></tr>
+                <tr><td>33761</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-gray" style="width:90%"></div></div></td><td>0</td><td>(0%)</td></tr>
+                <tr><td>34428</td><td class="bar-col"><div class="bar-wrap"><div class="bar-fill-gray" style="width:80%"></div></div></td><td>0</td><td>(0%)</td></tr>
+                <tr class="total-row"><td><strong>Total Closed Deals</strong></td><td></td><td><strong>0</strong></td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="report-card-footer"><button class="pdf-btn"><i class="fas fa-file-pdf"></i> PDF</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       SECTION: PRODUCTION RATES
+  ═════════════════════════════════════ -->
+  <div class="metrics-section" id="sec-prod">
+    <div class="section-header" onclick="toggleSection('prod')">
+      <div class="section-eyebrow">Production Rates</div>
+      <button class="section-collapse-btn" id="sec-prod-btn" title="Collapse section"><i class="fas fa-chevron-up"></i></button>
+    </div>
+    <div class="section-collapsed-bar" id="sec-prod-bar" onclick="toggleSection('prod')">
+      <div class="section-collapsed-summary"><i class="fas fa-paint-roller" style="font-size:12px;color:var(--color-primary)"></i> Production Rates — Interior & Exterior</div>
+      <i class="fas fa-chevron-down" style="font-size:10px"></i>
+    </div>
+    <div class="section-body" id="sec-prod-body">
+      <div class="report-grid">
+        <div class="report-card">
+          <div class="report-card-header">
+            <div><div class="report-card-title-row"><span style="color:#22C55E;font-size:14px">🏠</span><span class="report-card-title">Interior Sales By Production Rates <span>(Total: $0.00)</span></span></div><div class="report-card-desc">Total interior revenue during this period, broken down by the production rate applied to each area</div></div>
+            <div class="report-card-controls"><button class="report-ctrl-btn active"><i class="fas fa-list"></i></button><button class="report-ctrl-btn"><i class="fas fa-chart-bar"></i></button></div>
+          </div>
+          <div class="report-card-body"><div class="report-empty"><i class="fas fa-chart-bar"></i><span>No results found for this period</span></div></div>
+          <div class="report-card-footer"><button class="pdf-btn"><i class="fas fa-file-pdf"></i> PDF</button></div>
+        </div>
+        <div class="report-card">
+          <div class="report-card-header">
+            <div><div class="report-card-title-row"><span style="color:#22C55E;font-size:14px">🌲</span><span class="report-card-title">Exterior Sales By Production Rates <span>(Total: $0.00)</span></span></div><div class="report-card-desc">Total exterior revenue during this period, broken down by the production rate applied to each area</div></div>
+            <div class="report-card-controls"><button class="report-ctrl-btn active"><i class="fas fa-list"></i></button><button class="report-ctrl-btn"><i class="fas fa-chart-bar"></i></button></div>
+          </div>
+          <div class="report-card-body"><div class="report-empty"><i class="fas fa-chart-bar"></i><span>No results found for this period</span></div></div>
+          <div class="report-card-footer"><button class="pdf-btn"><i class="fas fa-file-pdf"></i> PDF</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /metrics-page -->
+
+<!-- ── DEMO PANEL ── -->
+<div id="demo-panel" class="collapsed">
+  <div id="demo-toggle" onclick="document.getElementById('demo-panel').classList.toggle('collapsed')">
+    <span id="demo-toggle-label">⚡ Demo Scenarios</span>
+    <i class="fas fa-chevron-up" id="demo-toggle-chevron"></i>
+  </div>
+  <div id="demo-inner">
+    <div class="demo-col-label">AI Panel State</div>
+    <button class="demo-btn active full" id="btn-active" onclick="setS('active')">✅ Active — Has Results</button>
+    <button class="demo-btn" id="btn-neverrun" onclick="setS('neverrun')">🆕 Never Run</button>
+    <button class="demo-btn" id="btn-nodata" onclick="setS('nodata')">📊 No Data Yet</button>
+    <button class="demo-btn" id="btn-failure" onclick="setS('failure')">⚠️ Run Failed</button>
+    <button class="demo-btn" id="btn-loading" onclick="setS('loading')">⏳ Running…</button>
+    <div class="demo-col-label">Prediction Variant</div>
+    <button class="demo-btn" id="btn-up" onclick="setP('up')">📈 Strong</button>
+    <button class="demo-btn" id="btn-flat" onclick="setP('flat')">➡️ Steady</button>
+    <button class="demo-btn full" id="btn-down" onclick="setP('down')">📉 Below Pace</button>
+    <div class="demo-col-label">Range Change Notice</div>
+    <button class="demo-btn" id="btn-notice-on" onclick="setNotice(true)">🔔 Show Notice</button>
+    <button class="demo-btn" id="btn-notice-off" onclick="setNotice(false)">🔕 Hide Notice</button>
+  </div>
+</div>
+
+<script>
+// ── STATE MACHINE ──────────────────────────────────
+var STATES=['active','neverrun','nodata','failure','loading'];
+var lastRunRange='Month';
+var currentRange='Month';
+var rangeLabels={today:'Today',week:'This Week',lastwk:'Last Week',month:'Month',lastmo:'Last Month',ytd:'YTD',all:'All Time'};
+var rangeIsFuture={today:true,week:true,lastwk:false,month:true,lastmo:false,ytd:true,all:false};
+
+var PREDS={
+  up:{
+    hl:'You\'re trending toward <span class="amount">$96,300</span> in sales this month — your strongest May on record.',
+    sup:'Based on your current proposal pipeline, average close rate, and job schedule through May 31. Exterior painting jobs in the $6,000–$9,000 range are driving the uptick.',
+    conf:78,ct:'78% confidence'
+  },
+  flat:{
+    hl:'You\'re on pace for approximately <span class="amount">$71,400</span> in sales this month — in line with your recent averages.',
+    sup:'Your pipeline and close rate suggest a steady month. No major acceleration or slowdown signals detected compared to April.',
+    conf:82,ct:'82% confidence'
+  },
+  down:{
+    hl:'Sales are tracking toward <span class="amount">$52,000</span> this month — about 18% below your April close.',
+    sup:'Your proposal volume is strong but your closing ratio drop is weighing on projected revenue. Pipeline has 14 open proposals not yet converted.',
+    conf:64,ct:'64% confidence'
+  },
+  // Historical (past range) — retrospective framing
+  hist_up:{
+    hl:'You closed <span class="amount">$184,500</span> in total sales for this period — up 22% from the prior year.',
+    sup:'YTD revenue tracked consistently above plan. Exterior painting drove the majority of volume, with Q1 outperforming Q2 by 14%.',
+    conf:95,ct:'Actual data'
+  },
+  hist_flat:{
+    hl:'You closed <span class="amount">$28,100</span> last month — roughly in line with the prior month.',
+    sup:'Last month\'s revenue was steady. Closing ratio held at 56% and proposal volume was consistent with the 90-day trend.',
+    conf:95,ct:'Actual data'
+  }
+};
+
+function setS(s){
+  STATES.forEach(function(st){
+    var b=document.getElementById('btn-'+st);
+    if(b) b.classList.remove('active');
+    var el=document.getElementById('s-'+st);
+    if(el) el.style.display='none';
+  });
+  var btn=document.getElementById('btn-'+s);
+  if(btn) btn.classList.add('active');
+  var el=document.getElementById('s-'+s);
+  if(el) el.style.display='block';
+
+  var runBtn=document.getElementById('run-btn');
+  if(s==='loading'){runBtn.disabled=true;runBtn.innerHTML='<i class="fas fa-sync-alt fa-spin" style="font-size:10px"></i> Running…';}
+  else{runBtn.disabled=false;runBtn.innerHTML='<i class="fas fa-play" style="font-size:10px"></i> Run Insights';}
+
+  // Update meta
+  updateMeta(s);
+}
+
+function updateMeta(s){
+  var meta=document.getElementById('panel-meta');
+  if(s==='active') meta.innerHTML='<strong>Last run May 26, 2026</strong>&nbsp;· for '+lastRunRange+' period';
+  else if(s==='neverrun') meta.innerHTML='<strong>Never run</strong>&nbsp;· Run to generate insights';
+  else if(s==='nodata') meta.innerHTML='<strong>Insufficient data</strong>&nbsp;· &lt;30 days of history';
+  else if(s==='failure') meta.innerHTML='<strong>Last run failed</strong>&nbsp;· May 29, 2026 at 9:14 AM';
+  else if(s==='loading') meta.innerHTML='<strong>Running now…</strong>&nbsp;· Please wait';
+}
+
+function setP(t){
+  ['up','flat','down'].forEach(function(k){
+    var b=document.getElementById('btn-'+k);
+    if(b) b.classList.remove('active');
+  });
+  var b=document.getElementById('btn-'+t);
+  if(b) b.classList.add('active');
+  setS('active');
+  var p=PREDS[t];
+  document.getElementById('ai-hl').innerHTML=p.hl;
+  document.getElementById('ai-sup').textContent=p.sup;
+  document.getElementById('ai-conf').style.width=p.conf+'%';
+  document.getElementById('ai-conf-lbl').textContent=p.ct;
+}
+
+function setNotice(show){
+  document.getElementById('range-notice').classList.toggle('visible',show);
+  document.getElementById('btn-notice-on').classList.toggle('active',show);
+  document.getElementById('btn-notice-off').classList.toggle('active',!show);
+}
+
+// ── DATE RANGE SELECTION ──────────────────────────
+document.querySelectorAll('.date-filter-btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.date-filter-btn').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    currentRange=b.getAttribute('data-range');
+    var label=rangeLabels[currentRange]||currentRange;
+
+    // If there's an active result and range changed from what was run, show notice
+    var activeEl=document.getElementById('s-active');
+    if(activeEl && activeEl.style.display!=='none' && label!==lastRunRange){
+      var notice=document.getElementById('range-notice');
+      notice.classList.add('visible');
+      document.getElementById('range-notice-range').textContent=label;
+      document.getElementById('range-notice-text').innerHTML='Date range changed to <strong>'+label+'</strong>. Insights shown are from the <strong>'+lastRunRange+'</strong> period.';
+
+      // Swap prediction language for fully historical ranges
+      var isPast=!rangeIsFuture[currentRange];
+      if(isPast){
+        var p=currentRange==='lastmo'?PREDS.hist_flat:PREDS.hist_up;
+        document.getElementById('ai-hl').innerHTML=p.hl;
+        document.getElementById('ai-sup').textContent=p.sup;
+        document.getElementById('ai-conf').style.width=p.conf+'%';
+        document.getElementById('ai-conf-lbl').textContent=p.ct;
+      } else {
+        // Restore forward-looking
+        var p=PREDS.up;
+        document.getElementById('ai-hl').innerHTML=p.hl;
+        document.getElementById('ai-sup').textContent=p.sup;
+        document.getElementById('ai-conf').style.width=p.conf+'%';
+        document.getElementById('ai-conf-lbl').textContent=p.ct;
+      }
+    }
+  });
+});
+
+// ── RUN INSIGHTS ──────────────────────────────────
+function runInsights(){
+  // Hide range notice if visible
+  document.getElementById('range-notice').classList.remove('visible');
+  // Show loading
+  setS('loading');
+  // Simulate 2.2s generation
+  setTimeout(function(){
+    lastRunRange=rangeLabels[currentRange]||currentRange;
+    setS('active');
+    document.getElementById('panel-meta').innerHTML='<strong>Last run May 29, 2026</strong>&nbsp;· for '+lastRunRange+' period';
+    // Update collapsed bar text
+    document.getElementById('sec-ai-bar').querySelector('.section-collapsed-summary').innerHTML=
+      '<i class="fas fa-brain" style="font-size:12px;color:var(--color-primary)"></i> AI Predictability — Last run May 29, 2026 for '+lastRunRange;
+  },2200);
+}
+
+// ── SECTION COLLAPSE ──────────────────────────────
+function toggleSection(id){
+  var body=document.getElementById('sec-'+id+'-body');
+  var bar=document.getElementById('sec-'+id+'-bar');
+  var btn=document.getElementById('sec-'+id+'-btn');
+  var isCollapsed=body.classList.contains('collapsed');
+  if(isCollapsed){
+    body.classList.remove('collapsed');
+    bar.classList.remove('visible');
+    btn.innerHTML='<i class="fas fa-chevron-up"></i>';
+  } else {
+    body.classList.add('collapsed');
+    bar.classList.add('visible');
+    btn.innerHTML='<i class="fas fa-chevron-down"></i>';
+  }
+}
+</script>
+</body>
+</html>
