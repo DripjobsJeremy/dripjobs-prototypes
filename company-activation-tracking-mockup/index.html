@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activation Dashboard — Accordion Filters Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f9fa;color:#212529;font-size:13px;line-height:1.4;}
+
+.proto-banner{background:linear-gradient(135deg,#7C3AED 0%,#9F7AEA 100%);color:white;padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;flex-wrap:wrap;}
+.proto-tag{background:rgba(255,255,255,0.22);padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.proto-right{margin-left:auto;opacity:.85;font-size:11px;}
+
+#adt-mockup{
+  --pri:#8B85EA;
+  --pri-hover:#736BE3;
+  --pri-active:#5C53DC;
+  --pri-rgb:139,133,234;
+  --text:#32415B;
+  --text-muted:#80879A;
+  --border:#DAD8E3;
+  --card:#FFFFFF;
+  max-width:100%;
+  padding:16px 20px 32px;
+}
+
+.header{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 0 16px;}
+.header h1{font-size:22px;font-weight:700;color:#111827;}
+.btn-export{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:var(--pri);color:#fff;font-family:inherit;}
+.btn-export:hover{background:var(--pri-hover);}
+
+/* --- Accordion filter sections --- */
+.filters-accordion{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;}
+.acc-section{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.acc-header{width:100%;display:flex;align-items:center;gap:14px;padding:14px 18px;background:none;border:none;cursor:pointer;text-align:left;font-family:inherit;}
+.acc-header:hover{background:#FAFAFD;}
+.acc-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.acc-icon svg{width:18px;height:18px;}
+.acc-icon-search{background:#E8E6FA;color:#5C53DC;}
+.acc-icon-account{background:#E6FAF0;color:#0D9F6E;}
+.acc-icon-integrations{background:#FAF0E6;color:#C2660C;}
+.acc-title-group{flex:1;min-width:0;}
+.acc-title{font-size:14px;font-weight:700;color:#1f2430;}
+.acc-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:7px;border-radius:9px;background:#E8E6FA;color:#5C53DC;font-size:11px;font-weight:700;}
+.acc-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.acc-chevron{font-size:13px;color:var(--text-muted);transition:transform .15s;flex-shrink:0;}
+.acc-section.acc-open .acc-chevron{transform:rotate(90deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .18s ease;border-top:1px solid transparent;}
+.acc-section.acc-open .acc-body{max-height:600px;border-top:1px solid #f1f0f8;}
+.acc-body-inner{display:flex;flex-wrap:wrap;gap:14px 12px;padding:16px 18px 18px;}
+
+.filter-group{display:flex;flex-direction:column;gap:4px;min-width:150px;}
+.filter-label{font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;}
+.filter-select,.search-box{padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:#fff;cursor:pointer;min-height:38px;outline:none;font-family:inherit;}
+.filter-select:focus,.search-box:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(var(--pri-rgb),.16);}
+.search-box{min-width:220px;}
+
+/* --- Clear All Filters row (restyled to match Proposals tab Show/Clear scheme) --- */
+.clear-all-row{display:flex;justify-content:flex-end;margin-bottom:16px;}
+.btn-clear-all{height:38px;padding:0 16px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.btn-clear-all:hover{background:#F7F7FB;border-color:#B9B6D6;}
+
+/* --- Metrics row --- */
+.metrics-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.metric-card{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:11px 14px;flex:1;min-width:150px;position:relative;}
+.metric-card.c-purple{border-left:3px solid #7C3AED;}
+.metric-card.c-green{border-left:3px solid #10b981;}
+.metric-card.c-amber{border-left:3px solid #f59e0b;}
+.metric-card.c-red{border-left:3px solid #ef4444;}
+.mc-icon{position:absolute;top:10px;right:12px;color:#c7cbd6;}
+.mc-icon svg{width:15px;height:15px;}
+.mc-label{font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
+.mc-value{font-size:22px;font-weight:700;color:#111827;}
+.mc-value.v-green{color:#059669;}
+.mc-value.v-amber{color:#d97706;}
+.mc-value.v-red{color:#dc2626;}
+.mc-sub{font-size:11px;color:#9ca3af;margin-top:2px;}
+
+/* --- Table card --- */
+.table-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;}
+.table-toolbar{display:flex;align-items:center;justify-content:flex-end;padding:14px 16px;border-bottom:1px solid #e5e7eb;gap:10px;}
+
+/* Floating-label "Show" control + companion "Clear" — matches Proposals tab scheme */
+.show-field{position:relative;display:inline-flex;flex-direction:column;}
+.show-field-label{position:absolute;top:-8px;left:10px;background:#fff;padding:0 6px;font-size:11px;font-weight:500;color:var(--text-muted);z-index:1;pointer-events:none;letter-spacing:.2px;}
+.show-field-input{height:40px;padding:0 30px 0 14px;border:1.5px solid var(--pri);border-radius:8px;font-size:14px;color:var(--text);background:#fff;cursor:pointer;font-family:inherit;appearance:none;-webkit-appearance:none;min-width:78px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235C53DC' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat;background-position:right 9px center;background-size:13px 13px;}
+.show-field-input:focus{outline:none;box-shadow:0 0 0 3px rgba(var(--pri-rgb),.18);}
+.btn-clear-compact{height:40px;padding:0 18px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;}
+.btn-clear-compact:hover{background:#F7F7FB;border-color:#B9B6D6;}
+
+.table-scroll{overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 420px);min-height:280px;position:relative;}
+table{border-collapse:collapse;width:100%;min-width:1900px;}
+thead tr.group-row{height:28px;}
+thead tr.group-row th{position:sticky;top:0;z-index:14;padding:5px 10px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#fff;white-space:nowrap;}
+.cg-account{background:#7C3AED;}
+.cg-core{background:#0DCECE;}
+.cg-plan{background:#059669;}
+thead tr.col-row th{position:sticky;top:28px;z-index:14;background:#f9fafb;padding:7px 10px;font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid #e5e7eb;white-space:nowrap;}
+thead tr.col-row th.col-plan{background:#f0fdf8;}
+thead tr.col-row th.group-sep{border-left:2px solid #c4c9d4;}
+tbody tr{border-bottom:1px solid #f3f4f6;}
+tbody td{padding:9px 10px;color:#374151;white-space:nowrap;vertical-align:middle;background:#fff;}
+tbody td.col-plan{background:#fafffe;}
+tbody td.group-sep{border-left:2px solid #e5e7eb;}
+tbody tr:hover td{background:#f9fafb !important;}
+tbody tr:hover td.col-plan{background:#f3fdf8 !important;}
+
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap;line-height:1.5;}
+.b-success{background:#d1fae5;color:#065f46;}
+.b-danger{background:#fee2e2;color:#991b1b;}
+.b-gray{background:#f3f4f6;color:#6b7280;}
+.h-high-risk{background:#ffe4cc;color:#9a3412;}
+.s-trial{background:#dbeafe;color:#1e40af;}
+.t-new{background:#dcfce7;color:#166534;}
+.p-adv{background:#fff7ed;color:#c2410c;}
+.p-pro{background:#f3f4f6;color:#374151;}
+.yn-no{color:#d1d5db;font-size:12px;}
+.tid{font-size:12px;color:#374151;font-weight:500;}
+.muted-dash{color:#d1d5db;}
+
+.pagination-bar{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-top:1px solid #e5e7eb;font-size:12px;color:#6b7280;}
+.pg-controls{display:flex;gap:6px;align-items:center;}
+.pg-btn{padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:12px;color:var(--text);font-family:inherit;}
+.pg-btn:hover{background:#f9fafb;}
+.pg-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+.assumption-note{background:#FFFBEB;border:1px solid #FDE68A;border-left:3px solid #F59E0B;border-radius:6px;padding:9px 12px;margin-bottom:14px;font-size:12px;color:#92400E;}
+.assumption-note strong{font-weight:700;}
+</style>
+</head>
+<body>
+<div class="proto-banner">
+  <a href="../index.html" style="color:#fff;text-decoration:none;opacity:.9;font-weight:600;">&#8592; Hub</a>
+  <span class="proto-tag">Prototype</span>
+  <strong>Activation Dashboard</strong> &mdash; Accordion Filter Sections + Show/Clear Restyle &nbsp;&middot;&nbsp; <span style="background:rgba(255,255,255,.18);padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">MOCKUP OF ali.dripjobs.com/companyactivationtrackings</span>
+  <span class="proto-right">Sample data only, not connected to live tenant records</span>
+</div>
+<div id="adt-mockup">
+  <div class="header">
+    <h1>Activation Dashboard</h1>
+    <button class="btn-export">&#x2B07; Export CSV</button>
+  </div>
+
+  <div class="assumption-note">
+    <strong>Assumption flagged:</strong> the 7 / 8 / 3 filter groupings below are a best-guess bucketing of the existing Activation Dashboard filters (Search &amp; Segment: Search, Account Type, Subscription, Health, Plan, OBCSS, Industry &middot; Account Data: Active Users, Contacts, Est. Sent, Prop. Viewed, Deals (90d), $10K, A2P Applied, A2P Status &middot; Integrations/Automations/Add-Ons: Integration, Automation, Add-On) based on the attached screenshot's counts. The "Clear" button beside the table's Show selector resets the same filter state as "Clear All Filters" &mdash; confirm both groupings and that shared behavior against the real ticket before build.
+  </div>
+
+  <div class="filters-accordion">
+    <div class="acc-section" id="acc-search">
+      <button class="acc-header" onclick="toggleAcc('acc-search')">
+        <span class="acc-icon acc-icon-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="acc-title-group">
+          <div class="acc-title">Search &amp; Segment<span class="acc-count">7</span></div>
+          <div class="acc-sub">Who you&rsquo;re looking at - always visible, used on nearly every search</div>
+        </span>
+        <span class="acc-chevron">&#10095;</span>
+      </button>
+      <div class="acc-body" id="acc-body-acc-search">
+        <div class="acc-body-inner">
+          <div class="filter-group">
+            <label class="filter-label">Search</label>
+            <input type="text" class="search-box" id="f-search" placeholder="Company name or Tenant ID&hellip;">
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Account Type</label>
+            <select class="filter-select" id="f-type"><option value="">All Accounts</option><option value="new">New</option><option value="legacy">Legacy</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Subscription</label>
+            <select class="filter-select" id="f-sub"><option value="">All</option><option>Active</option><option>Inactive</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Health Status</label>
+            <select class="filter-select" id="f-health"><option value="">All Statuses</option><option>On Track</option><option>Needs Attention</option><option>At Risk</option><option>Inactive</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Plan</label>
+            <select class="filter-select" id="f-plan"><option value="">All Plans</option><option>Pro</option><option>Advanced</option><option>No Active Plan</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">OBCSS</label>
+            <select class="filter-select" id="f-obcss"><option value="">All Team Members</option><option>Matt Fournier</option><option>Ximena Jimenez</option><option>Daniel Lee</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Industry</label>
+            <select class="filter-select" id="f-industry"><option value="">All Industries</option><option>Painting - Residential</option><option>Painting - Commercial</option><option>Gutters &amp; Drainage</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-section" id="acc-account">
+      <button class="acc-header" onclick="toggleAcc('acc-account')">
+        <span class="acc-icon acc-icon-account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+        <span class="acc-title-group">
+          <div class="acc-title">Account Data<span class="acc-count">8</span></div>
+          <div class="acc-sub">Engagement &amp; billing signals - used for deeper investigation, not every search</div>
+        </span>
+        <span class="acc-chevron">&#10095;</span>
+      </button>
+      <div class="acc-body" id="acc-body-acc-account">
+        <div class="acc-body-inner">
+          <div class="filter-group">
+            <label class="filter-label">Active Users</label>
+            <select class="filter-select" id="f-users"><option value="">All</option><option>Flagged &mdash; 0&ndash;1</option><option>2+ Users</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Contacts</label>
+            <select class="filter-select" id="f-contacts"><option value="">All</option><option>100+ (Green)</option><option>50&ndash;99 (Yellow)</option><option>Under 50 (Red)</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Est. Sent</label>
+            <select class="filter-select" id="f-estsent"><option value="">All</option><option>Yes</option><option>No</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Prop. Viewed</label>
+            <select class="filter-select" id="f-propviewed"><option value="">All</option><option>Yes</option><option>No</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Deals (90d)</label>
+            <select class="filter-select" id="f-deals"><option value="">All</option><option>3+</option><option>Under 3</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">$10K</label>
+            <select class="filter-select" id="f-10k"><option value="">All</option><option>Yes</option><option>No</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">A2P Applied</label>
+            <select class="filter-select" id="f-a2papplied"><option value="">All</option><option>Yes</option><option>No</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">A2P Status</label>
+            <select class="filter-select" id="f-a2pstatus"><option value="">All</option><option>Active</option><option>Pending</option><option>None</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-section" id="acc-integrations">
+      <button class="acc-header" onclick="toggleAcc('acc-integrations')">
+        <span class="acc-icon acc-icon-integrations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+        <span class="acc-title-group">
+          <div class="acc-title">Integrations, Automations &amp; Add-Ons<span class="acc-count">3</span></div>
+          <div class="acc-sub">System/product configuration - niche, low-frequency filters</div>
+        </span>
+        <span class="acc-chevron">&#10095;</span>
+      </button>
+      <div class="acc-body" id="acc-body-acc-integrations">
+        <div class="acc-body-inner">
+          <div class="filter-group">
+            <label class="filter-label">Integration</label>
+            <select class="filter-select" id="f-integration"><option value="">All Integrations</option><option>Google</option><option>QBO</option><option>QBT</option><option>CompanyCam</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Automation</label>
+            <select class="filter-select" id="f-automation"><option value="">All Automations</option><option>Zapier</option><option>Angi Leads</option></select>
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">Add-On</label>
+            <select class="filter-select" id="f-addon"><option value="">All Add-Ons</option><option>Prod Rates</option><option>Job Cost</option><option>Text MSG</option><option>Jobi AI</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="clear-all-row">
+    <button class="btn-clear-all" onclick="clearAllFilters()">Clear All Filters</button>
+  </div>
+
+  <div class="metrics-row">
+    <div class="metric-card c-purple">
+      <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+      <div class="mc-label">Total Accounts</div>
+      <div class="mc-value">275</div>
+      <div class="mc-sub">130 new &middot; 145 legacy</div>
+    </div>
+    <div class="metric-card c-green">
+      <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span>
+      <div class="mc-label">Active Subscriptions</div>
+      <div class="mc-value v-green">275</div>
+      <div class="mc-sub">275 of 275 accounts &middot; 100%</div>
+    </div>
+    <div class="metric-card c-green">
+      <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+      <div class="mc-label">Healthy Accounts</div>
+      <div class="mc-value v-green">0</div>
+      <div class="mc-sub">0 of 275 &middot; 0% fully activated</div>
+    </div>
+    <div class="metric-card c-green">
+      <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
+      <div class="mc-label">Prop. Viewed</div>
+      <div class="mc-value v-green">7</div>
+      <div class="mc-sub">7 of 130 new accounts &middot; 5%</div>
+    </div>
+    <div class="metric-card c-amber">
+      <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+      <div class="mc-label">High Risk</div>
+      <div class="mc-value v-amber">6</div>
+      <div class="mc-sub">10&ndash;29 days left, missing milestone</div>
+    </div>
+    <div class="metric-card c-red">
+      <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
+      <div class="mc-label">Critical</div>
+      <div class="mc-value v-red">124</div>
+      <div class="mc-sub">&lt;10 days left, needs action</div>
+    </div>
+    <div class="metric-card c-purple">
+      <span class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+      <div class="mc-label">Total Plan Rev. (visible)</div>
+      <div class="mc-value">$37,311.00</div>
+      <div class="mc-sub">Active plan subscriptions only</div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-toolbar">
+      <div class="show-field">
+        <label class="show-field-label">Show</label>
+        <select class="show-field-input" id="page-size-sel" onchange="onPageSizeChange()">
+          <option value="10">10</option>
+          <option value="15" selected>15</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+      <button class="btn-clear-compact" onclick="clearAllFilters()">Clear</button>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr class="group-row">
+            <th class="cg-account" colspan="6">Account Info</th>
+            <th class="cg-core" colspan="14">Core Activation Tracking</th>
+            <th class="cg-plan" colspan="2">Plan &amp; Billing</th>
+          </tr>
+          <tr class="col-row">
+            <th>Tenant ID</th>
+            <th>Company Name</th>
+            <th>Industry</th>
+            <th>Type</th>
+            <th>Created</th>
+            <th>Account Age</th>
+            <th class="group-sep">Active Users</th>
+            <th>Contacts</th>
+            <th>Health</th>
+            <th>Status</th>
+            <th>Total Sales</th>
+            <th>$10K</th>
+            <th>Est. Sent</th>
+            <th>Prop. Viewed</th>
+            <th>Last Est.</th>
+            <th>Deals (90D)</th>
+            <th>A2P Applied</th>
+            <th>A2P Status</th>
+            <th>OBCSS</th>
+            <th>Days Rem.</th>
+            <th class="col-plan group-sep">Plan</th>
+            <th class="col-plan">/Month</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div class="pagination-bar">
+      <span id="pg-info-text">Showing 1&ndash;6 of 275 accounts</span>
+      <div class="pg-controls">
+        <button class="pg-btn" disabled>&#8592; Prev</button>
+        <span id="pg-label">Page 1 of 19</span>
+        <button class="pg-btn">Next &#8594;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var ROWS=[
+  {tid:'Account #11547',name:'JT',industry:null,type:'New',created:'May 18, 2026',age:'2mo',users:1,contacts:1,health:'High Risk',status:'In Trial',sales:'$0.00',tenK:false,estSent:false,propViewed:false,lastEst:null,deals:1,a2pApplied:false,a2pStatus:'None',obcss:'No OBCSS assigned',daysRem:18,plan:'Advanced',perMonth:'$147'},
+  {tid:'Account #11546',name:'asd',industry:null,type:'New',created:'May 18, 2026',age:'2mo',users:1,contacts:1,health:'High Risk',status:'In Trial',sales:'$0.00',tenK:false,estSent:false,propViewed:false,lastEst:null,deals:1,a2pApplied:false,a2pStatus:'None',obcss:'No OBCSS assigned',daysRem:18,plan:'Advanced',perMonth:'$147'},
+  {tid:'Account #11545',name:'asd',industry:null,type:'New',created:'May 18, 2026',age:'2mo',users:1,contacts:1,health:'High Risk',status:'In Trial',sales:'$0.00',tenK:false,estSent:false,propViewed:false,lastEst:null,deals:1,a2pApplied:false,a2pStatus:'None',obcss:'No OBCSS assigned',daysRem:18,plan:'Advanced',perMonth:'$147'},
+  {tid:'Account #11544',name:'Template',industry:null,type:'New',created:'May 18, 2026',age:'2mo',users:1,contacts:1,health:'High Risk',status:'In Trial',sales:'$0.00',tenK:false,estSent:false,propViewed:false,lastEst:null,deals:1,a2pApplied:false,a2pStatus:'None',obcss:'No OBCSS assigned',daysRem:18,plan:'Advanced',perMonth:'$147'},
+  {tid:'Account #11543',name:'Growth Painting Inc.',industry:null,type:'New',created:'May 11, 2026',age:'2mo',users:1,contacts:1,health:'High Risk',status:'In Trial',sales:'$0.00',tenK:false,estSent:false,propViewed:false,lastEst:null,deals:1,a2pApplied:false,a2pStatus:'None',obcss:'No OBCSS assigned',daysRem:11,plan:null,perMonth:null},
+  {tid:'Account #11542',name:"Paulie's Pro Painters",industry:'Painting',type:'New',created:'May 11, 2026',age:'2mo',users:1,contacts:2,health:'High Risk',status:'In Trial',sales:'$0.00',tenK:false,estSent:false,propViewed:false,lastEst:null,deals:2,a2pApplied:false,a2pStatus:'None',obcss:'Daniel Lee',daysRem:11,plan:'Pro',perMonth:'$97'}
+];
+
+function yn(v){return v?'<span class="badge b-success">Yes</span>':'<span class="badge b-gray">No</span>';}
+function dash(){return'<span class="muted-dash">&mdash;</span>';}
+function planBadge(p){if(!p)return dash();return'<span class="badge '+(p==='Advanced'?'p-adv':'p-pro')+'">'+p+'</span>';}
+
+function renderRows(){
+  var html='';
+  ROWS.forEach(function(r){
+    html+='<tr>'+
+      '<td><span class="tid">'+r.tid+'</span></td>'+
+      '<td><strong>'+r.name+'</strong></td>'+
+      '<td>'+(r.industry||dash())+'</td>'+
+      '<td><span class="badge t-new">'+r.type+'</span></td>'+
+      '<td>'+r.created+'</td>'+
+      '<td style="color:#6b7280;">'+r.age+'</td>'+
+      '<td class="group-sep">'+r.users+'</td>'+
+      '<td>'+r.contacts+'</td>'+
+      '<td><span class="badge h-high-risk">'+r.health+'</span></td>'+
+      '<td><span class="badge s-trial">'+r.status+'</span></td>'+
+      '<td>'+r.sales+'</td>'+
+      '<td>'+yn(r.tenK)+'</td>'+
+      '<td>'+yn(r.estSent)+'</td>'+
+      '<td>'+yn(r.propViewed)+'</td>'+
+      '<td>'+(r.lastEst||dash())+'</td>'+
+      '<td>'+r.deals+'</td>'+
+      '<td>'+yn(r.a2pApplied)+'</td>'+
+      '<td>'+r.a2pStatus+'</td>'+
+      '<td>'+r.obcss+'</td>'+
+      '<td style="color:'+(r.daysRem<10?'#ef4444':'#f59e0b')+';font-weight:600;">'+r.daysRem+'</td>'+
+      '<td class="col-plan group-sep">'+planBadge(r.plan)+'</td>'+
+      '<td class="col-plan">'+(r.perMonth||dash())+'</td>'+
+      '</tr>';
+  });
+  document.getElementById('table-body').innerHTML=html;
+}
+renderRows();
+
+function toggleAcc(id){
+  document.getElementById(id).classList.toggle('acc-open');
+}
+
+function onPageSizeChange(){
+  var n=document.getElementById('page-size-sel').value;
+  document.getElementById('pg-info-text').textContent='Showing 1–'+Math.min(ROWS.length,parseInt(n,10))+' of 275 accounts';
+}
+
+function clearAllFilters(){
+  var ids=['f-search','f-type','f-sub','f-health','f-plan','f-obcss','f-industry','f-users','f-contacts','f-estsent','f-propviewed','f-deals','f-10k','f-a2papplied','f-a2pstatus','f-integration','f-automation','f-addon'];
+  ids.forEach(function(id){
+    var el=document.getElementById(id);
+    if(!el)return;
+    if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';
+  });
+  document.getElementById('page-size-sel').value='15';
+  onPageSizeChange();
+}
+</script>
+</body>
+</html>
