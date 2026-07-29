@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-07-29] Activation Dashboard: accordion filters + Show/Clear restyle mockup
+
+- Decision: Built a new mockup (`company-activation-tracking-mockup/`, no ticket given) of the live Activation Dashboard at ali.dripjobs.com/companyactivationtrackings, grouping its filters into the three collapsible sections shown in Jeremy's screenshot (Search & Segment [7], Account Data [8], Integrations/Automations/Add-Ons [3]), and restyling the table's "Show" entries selector plus the "Clear"/"Clear All Filters" buttons to match the floating-label pill pattern from the attached Proposals-tab reference screenshot (purple-bordered select with notched label, paired with a plain bordered "Clear" button).
+- Why: no existing file in this repo had the accordion filter treatment shown in the live screenshot (closest sibling, `dj-health-score-v2/`, uses an always-expanded filter grid), so this is a new page rather than an edit to that prototype. The 18 filters were bucketed into the 7/8/3 groups by matching each filter's purpose to the screenshot's own subtitles ("always visible" vs. "deeper investigation" vs. "niche, low-frequency"); this bucketing wasn't specified and is flagged as an assumption both in-page and here.
+- Open question: whether the compact "Clear" button next to "Show" should reset the same filter state as "Clear All Filters" (built that way here) or something narrower (e.g. just sort/search); also whether a ticket exists for this ask that should be linked on the hub card instead of "No Ticket."
+
+---
+
 ## [2026-07-28] Proposal Expiration Enforcement & Re-Open Flow: new clickable prototype
 
 - Decision: Built a new clickable prototype (ticket 86b2xn7hx) covering BR-1 through BR-12: expired-state enforcement in both the Proposal Builder (Edit/Send disabled, Re-Open available) and Customer Portal (signing disabled, expired message, content stays visible), the Re-Open modal, Activity Log entries, PDF export omission/inclusion of the Exp. Date field, and the Accepted-overrides-expiry edge case (BR-9). Jeremy provided live screenshots and narration of the existing Rejected Proposal flow (Customer Portal reject modal, the Rejected banner + Re-Open Proposal button in the Proposal Builder, pill badge behavior) so the Re-Open flow's modal, banner placement, and button could mirror that real pattern per BR-8, rather than being approximated.
