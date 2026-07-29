@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-07-29] Business Entity Records V1: clickable prototype built from PRD v1.4
+
+- Decision: Built a full clickable prototype (`business-entity-records/`) covering the Businesses nav item + list, a New Business form (Legal Name required; DBA, multi-email/phone, Industry, Address, Billing Address with "same as Address" toggle, Display DBA toggle), a tabbed Business profile (all 12 tabs from the PRD), Contact list Business column + filter, Contact-to-Business association (one entity per contact), and the shared Business/Individual 2x2 selector demoed once in depth and reused across all four creation entry points (New Lead, New Appointment, New Proposal, Create Invoice) rather than building four full standalone wizards. Used the current-product app shell (Nunito, `#7C3AED` sidebar/topbar, matching `tasks-ui-refresh`) for chrome, and the design system's softer `#8B85EA` tokens for the Information tab, New Business form, and tab-chip pattern, per the CLAUDE.md guidance to split shell vs. in-page-settings coloring.
+- Why: The PRD's own Open Items are unresolved (whether Deals/Proposals/Appointments/Invoices/Payments tabs get real aggregation or ship "coming soon"; whether Delete is blocked by open Deals/Jobs/Invoices; whether Call Business uses the entity's own phone or the Primary Contact's). Rather than silently picking one, the prototype populates the data tabs with sample "snapshot" rows (matching the confirmed contact-snapshot behavior from the dependency ticket) and visibly flags the Delete-block and Call Business behaviors with an amber "Assumption" badge tied to the PRD's Open Item numbers, so reviewers see exactly where the prototype is guessing.
+- Open question: Same four items already tracked in the PRD's "Remaining Open Items Before Ticketing" table (owner: Jason / Jesus) — nothing new surfaced during the build.
+
+---
+
 ## [2026-07-29] Customer Health Scoring training guide: naming update + color path confirmed
 
 - Decision: Renamed every reference from "Activation Dashboard" to "HealthScore" throughout the training guide and its hub card, per Jeremy's note that the product name has been upgraded. Added an explicit "Naming Update" callout in Section 3 so readers who saw the old name aren't confused. Swapped the "See It Live" link from the local `dj-health-score-v2` prototype to the current testing site (`ali.dripjobs.com/companyactivationtrackings`). Also resolved the previously-flagged color-count open item: Jeremy confirmed the target is the 3-color Green/Yellow/Red system from Section 9, superseding the ticket QA note's 4-color (green/yellow/orange/red) direction. Updated the correlation table (High Risk now maps cleanly to Red, no asterisk) and replaced the "Flagged, Not Resolved" warn callout with a "Confirmed" success callout; removed the resolved question from the Open Items list.
