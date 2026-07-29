@@ -5,6 +5,8 @@
 **Source:** Rick's Retention & Churn Full-Population Analysis (4,974 tenants, 46.3M activity events, as of 2026-07-08)
 **Reference:** [DripJobs Prototype Hub](https://dripjobsjeremy.github.io/dripjobs-prototypes/)
 
+> **Naming note:** this document is dated July 8–10, 2026. References below to "Activation Dashboard" reflect that name at the time — it was renamed **HealthScore** on July 29, 2026.
+
 ---
 
 ## Progress Update: July 10, 2026

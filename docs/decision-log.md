@@ -19,6 +19,14 @@ Format:
 
 ---
 
+## [2026-07-29] Full hub sweep: "Activation Dashboard" → "HealthScore," chronology preserved
+
+- Decision: Completed the naming sweep across the remaining hub surfaces, applying two different treatments by content type. **Evergreen/current** descriptions (things still true today, not a dated snapshot) were renamed directly to HealthScore with a "(formerly 'Activation Dashboard,' renamed Jul 29, 2026)" annotation on first mention: the Account Lifecycle card, the Accordion Filters mockup card and its prototype page/title/h1 (`company-activation-tracking-mockup/`), and `dj-health-score-lifecycle/`'s title/banner/h1. **Dated historical snapshots** (roadmap docs and the superseded v1.5 prototype) were left with their original "Activation Dashboard" wording intact throughout the body, since that's what it was accurately called at the time, and instead got exactly one added naming note near the top (or, for the v1.5 prototype's banner, an inline "Renamed HealthScore, Jul 29, 2026" tag) pointing forward to the new name: `cs-roadmap-jun20/` (Jun 20 snapshot), `product-roadmap-retention-response/` index and markdown source (Jul 8-10 snapshot), and `health-score/` (v1.5, the oldest surviving prototype iteration, superseded by v2 and the Lifecycle variant). The two Release Notes card blurbs on the hub for those roadmap docs got the same inline "(renamed HealthScore, Jul 29, 2026)" treatment as the other one-liners.
+- Why: Jeremy asked for a full sweep but to preserve a chronological identifier, so dated/historical content isn't silently rewritten to imply the new name existed before it did, while current/ongoing material reads consistently under the new name.
+- Open question: None. `docs/decision-log.md`'s own past entries (including the ones earlier today) were intentionally left untouched, since rewriting prior dated log entries would be the same kind of history-erasure this sweep was designed to avoid.
+
+---
+
 ## [2026-07-29] DJ Health Score v2.0 prototype + hub card: renamed to HealthScore
 
 - Decision: Followed up on the training guide's naming update by renaming the linked live prototype too: `dj-health-score-v2/index.html`'s `<title>`, banner strap, and `<h1>` now read "HealthScore" instead of "Activation Dashboard" (each noting "formerly 'Activation Dashboard'" once, on first mention). Updated that prototype's own hub card description to match.
