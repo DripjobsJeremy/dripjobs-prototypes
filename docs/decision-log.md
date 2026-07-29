@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-07-29] Customer Health Scoring training guide: naming update + color path confirmed
+
+- Decision: Renamed every reference from "Activation Dashboard" to "HealthScore" throughout the training guide and its hub card, per Jeremy's note that the product name has been upgraded. Added an explicit "Naming Update" callout in Section 3 so readers who saw the old name aren't confused. Swapped the "See It Live" link from the local `dj-health-score-v2` prototype to the current testing site (`ali.dripjobs.com/companyactivationtrackings`). Also resolved the previously-flagged color-count open item: Jeremy confirmed the target is the 3-color Green/Yellow/Red system from Section 9, superseding the ticket QA note's 4-color (green/yellow/orange/red) direction. Updated the correlation table (High Risk now maps cleanly to Red, no asterisk) and replaced the "Flagged, Not Resolved" warn callout with a "Confirmed" success callout; removed the resolved question from the Open Items list.
+- Why: Jeremy provided both updates directly in conversation as corrections to his own initial framing, not new open questions.
+- Open question: None new. Inactive accounts still have no defined place in the confirmed 3-color model — carried forward as its own open item, separate from the now-resolved color-count question. Note the underlying `dj-health-score-v2` prototype page/card elsewhere on the hub still says "Activation Dashboard" in its own text; left untouched since it wasn't specified as in scope, flagging for Jeremy to confirm if that should be renamed too for consistency.
+
+---
+
 ## [2026-07-29] Customer Health Scoring: training guide (pre-work for Aug 7 session)
 
 - Decision: Built a new reading-guide page (`health-scoring-training-guide/`, ticket 86b9512kq) as CS training pre-work, combining the Green/Yellow/Red target framework from the Customer Team Guide (Section 9, pg. 12-13, uploaded as reference) with a correlation guide showing how to read the V1 Activation Dashboard's current six raw Health badges (Healthy, On Track, Warning, High Risk, Critical, Inactive) against that target. Used the "guide" template style (`tax-registration-number-help-guide/`) rather than the "prototype" or "changelog" templates, since this is reading content, not a UI mockup. Added as a `status-shipped` card under the Resources tab, not the main Prototypes pipeline grid.
