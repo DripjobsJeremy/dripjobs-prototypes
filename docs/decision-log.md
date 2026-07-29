@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-07-29] Customer Health Scoring: training guide (pre-work for Aug 7 session)
+
+- Decision: Built a new reading-guide page (`health-scoring-training-guide/`, ticket 86b9512kq) as CS training pre-work, combining the Green/Yellow/Red target framework from the Customer Team Guide (Section 9, pg. 12-13, uploaded as reference) with a correlation guide showing how to read the V1 Activation Dashboard's current six raw Health badges (Healthy, On Track, Warning, High Risk, Critical, Inactive) against that target. Used the "guide" template style (`tax-registration-number-help-guide/`) rather than the "prototype" or "changelog" templates, since this is reading content, not a UI mockup. Added as a `status-shipped` card under the Resources tab, not the main Prototypes pipeline grid.
+- Why: Jeremy's Slack reply to Mary confirmed V1 intentionally ships with the original six status labels (Ali was already far into this round of dev; Jesus' call not to redirect mid-build) and asked for a "correlation training" bridging that build to the long-term 3-color goal. Cross-referenced ticket 86b9512kq directly (BR 12's own Health-badge-to-filter mapping, and the QA note deferring a "streamlined color-based ranking system") to build the crosswalk table accurately rather than guessing at the mapping.
+- Open question: flagged in the guide itself, not resolved here. The ticket's QA notes describe a future 4-color system (green/yellow/orange/red) as the deferred direction, which doesn't match Jeremy's/Section 9's 3-color Green/Yellow/Red framing. Also open: whether/when the six-category relationship framework will ever feed the automated dashboard score (a related option, Prop. Viewed/Deals (90d), was evaluated and explicitly not adopted this pass), and whether this same doc covers what Nicole needs for her Aug 7 session.
+
+---
+
 ## [2026-07-29] Activation Dashboard: accordion filters + Show/Clear restyle mockup
 
 - Decision: Built a new mockup (`company-activation-tracking-mockup/`, no ticket given) of the live Activation Dashboard at ali.dripjobs.com/companyactivationtrackings, grouping its filters into the three collapsible sections shown in Jeremy's screenshot (Search & Segment [7], Account Data [8], Integrations/Automations/Add-Ons [3]), and restyling the table's "Show" entries selector plus the "Clear"/"Clear All Filters" buttons to match the floating-label pill pattern from the attached Proposals-tab reference screenshot (purple-bordered select with notched label, paired with a plain bordered "Clear" button).

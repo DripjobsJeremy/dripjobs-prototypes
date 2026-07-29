@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Health Scoring — Training Guide (Pre-Work)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple-deep: #4A2D7A;
+    --purple-primary: #6B4C9A;
+    --purple-mid: #8B6BB1;
+    --purple-light: #C4AEDD;
+    --purple-pale: #EDE7F6;
+    --purple-faint: #F8F5FD;
+    --green: #166534;
+    --green-light: #D1FAE5;
+    --green-border: #A8D5BC;
+    --red: #991B1B;
+    --red-light: #FEE2E2;
+    --red-border: #F3B8B8;
+    --orange: #9A3412;
+    --orange-light: #FFE4CC;
+    --orange-border: #F0B984;
+    --yellow: #92400E;
+    --yellow-light: #FEF3C7;
+    --yellow-border: #F0C060;
+    --grey: #6B7280;
+    --grey-light: #F3F4F6;
+    --grey-border: #D8DAE0;
+    --ink: #1A1225;
+    --ink-mid: #3D2B5A;
+    --ink-light: #6B5A80;
+    --border: #DDD3EC;
+    --white: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--ink); line-height: 1.7; font-size: 16px; }
+
+  .topbar { background: var(--purple-deep); padding: 14px 48px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar-brand { font-family: 'DM Serif Display', serif; color: white; font-size: 20px; }
+  .topbar-tag { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; }
+  .topbar-back { color: rgba(255,255,255,0.7); font-size: 12.5px; text-decoration: none; }
+  .topbar-back:hover { color: white; }
+
+  .hero { background: linear-gradient(135deg, var(--purple-deep) 0%, var(--purple-primary) 60%, var(--purple-mid) 100%); padding: 64px 48px 56px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 320px; height: 320px; border-radius: 50%; background: rgba(255,255,255,0.04); }
+  .hero-breadcrumb { color: var(--purple-light); font-size: 13px; font-weight: 500; margin-bottom: 20px; position: relative; }
+  .hero-breadcrumb span { color: rgba(255,255,255,0.4); margin: 0 6px; }
+  .hero h1 { font-family: 'DM Serif Display', serif; color: white; font-size: 36px; line-height: 1.2; max-width: 680px; margin-bottom: 20px; position: relative; }
+  .hero-sub { color: rgba(255,255,255,0.75); font-size: 16px; max-width: 620px; line-height: 1.6; position: relative; }
+  .hero-meta { margin-top: 32px; display: flex; gap: 14px; align-items: center; position: relative; flex-wrap: wrap; }
+  .hero-badge { display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 14px; color: rgba(255,255,255,0.85); font-size: 12.5px; font-weight: 500; }
+  .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #6DFFAA; flex-shrink: 0; }
+  .hero-badge a { color: rgba(255,255,255,0.9); }
+
+  .layout { max-width: 920px; margin: 0 auto; padding: 56px 48px 80px; }
+
+  .toc { background: var(--purple-faint); border: 1px solid var(--border); border-radius: 12px; padding: 28px 32px; margin-bottom: 56px; }
+  .toc-label { font-size: 11px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; color: var(--purple-mid); margin-bottom: 14px; }
+  .toc ol { list-style: none; counter-reset: toc; }
+  .toc li { counter-increment: toc; padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 10px; }
+  .toc li:last-child { border-bottom: none; }
+  .toc li::before { content: counter(toc, decimal-leading-zero); font-size: 11px; font-weight: 700; color: var(--purple-light); flex-shrink: 0; width: 22px; }
+  .toc a { color: var(--purple-primary); text-decoration: none; font-size: 14.5px; font-weight: 500; }
+  .toc a:hover { color: var(--purple-deep); text-decoration: underline; }
+
+  .section { margin-bottom: 56px; }
+  .section-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+  .section-num { background: var(--purple-primary); color: white; font-size: 12px; font-weight: 700; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 4px; }
+  h2 { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--ink); line-height: 1.2; }
+  h3 { font-size: 16px; font-weight: 600; color: var(--ink-mid); margin: 28px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  p { margin-bottom: 16px; color: var(--ink); }
+  ul.plain, ol.plain { margin: 0 0 16px 22px; }
+  ul.plain li, ol.plain li { margin-bottom: 8px; font-size: 15px; }
+
+  .callout { border-radius: 10px; padding: 20px 24px; margin: 24px 0; display: flex; gap: 14px; align-items: flex-start; }
+  .callout-icon { font-size: 20px; flex-shrink: 0; line-height: 1.4; }
+  .callout-body { flex: 1; }
+  .callout-title { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout-body p:last-child { margin-bottom: 0; }
+  .callout-body p { font-size: 14.5px; line-height: 1.6; }
+  .callout.info { background: var(--purple-pale); border: 1px solid var(--border); }
+  .callout.info .callout-title { color: var(--purple-primary); }
+  .callout.good { background: #F0FDF4; border: 1px solid var(--green-border); }
+  .callout.good .callout-title { color: var(--green); }
+  .callout.warn { background: #FFFBEB; border: 1px solid var(--yellow-border); }
+  .callout.warn .callout-title { color: var(--yellow); }
+
+  .table-wrap { overflow-x: auto; margin: 20px 0; border-radius: 10px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead tr { background: var(--purple-primary); }
+  thead th { color: white; font-weight: 600; padding: 12px 14px; text-align: left; font-size: 12px; }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) { background: var(--purple-faint); }
+  tbody td { padding: 11px 14px; vertical-align: top; line-height: 1.5; }
+
+  .swatch { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; font-size: 12.5px; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+  .swatch.green  { background: var(--green-light);  color: var(--green);  border: 1px solid var(--green-border); }
+  .swatch.yellow { background: var(--yellow-light); color: var(--yellow); border: 1px solid var(--yellow-border); }
+  .swatch.orange { background: var(--orange-light); color: var(--orange); border: 1px solid var(--orange-border); }
+  .swatch.red    { background: var(--red-light);    color: var(--red);    border: 1px solid var(--red-border); }
+  .swatch.grey   { background: var(--grey-light);   color: var(--grey);   border: 1px solid var(--grey-border); }
+
+  .quote-block { background: var(--purple-faint); border-left: 3px solid var(--purple-primary); border-radius: 0 8px 8px 0; padding: 14px 20px; margin: 14px 0; font-size: 14.5px; font-style: italic; color: var(--ink-mid); }
+  .quote-attr { display: block; margin-top: 6px; font-size: 12.5px; font-style: normal; color: var(--ink-light); }
+
+  hr.section-divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+  code { background: var(--purple-pale); color: var(--purple-deep); font-family: 'Courier New', monospace; font-size: 13px; padding: 2px 6px; border-radius: 4px; }
+
+  .footer { background: var(--purple-faint); border-top: 1px solid var(--border); padding: 32px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .footer-text { font-size: 13px; color: var(--ink-light); }
+  .footer-text strong { color: var(--ink-mid); }
+
+  @media (max-width: 640px) {
+    .topbar, .hero, .layout, .footer { padding-left: 24px; padding-right: 24px; }
+    .hero h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">dripjobs</div>
+  <a class="topbar-back" href="../index.html">← Prototype Hub</a>
+  <div class="topbar-tag">CS Team · Internal Training</div>
+</div>
+
+<div class="hero">
+  <div class="hero-breadcrumb">CS Training <span>›</span> Pre-Work <span>›</span> Customer Health Scoring</div>
+  <h1>Customer Health Scoring — Training Guide</h1>
+  <p class="hero-sub">Pre-work for the Friday, August 7 virtual training with Jeremy and Nicole. Combines the health scoring framework from the Customer Team Guide with a correlation guide showing how to read what's actually live today on the Activation Dashboard.</p>
+  <div class="hero-meta">
+    <div class="hero-badge"><div class="dot"></div>Source: CS Strategy Playbook, Section 9 (pg. 12&ndash;13)</div>
+    <div class="hero-badge"><div class="dot"></div>Live build: <a href="https://app.clickup.com/t/8633445/86b9512kq" target="_blank">Ticket 86b9512kq</a></div>
+    <div class="hero-badge"><div class="dot"></div>Training: Fri, Aug 7, 2026</div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <div class="toc">
+    <div class="toc-label">In This Guide</div>
+    <ol>
+      <li><a href="#why-it-matters">Why Health Scoring Matters</a></li>
+      <li><a href="#target-framework">The Target Framework — Green / Yellow / Red</a></li>
+      <li><a href="#v1-today">What's Live Today — the V1 Activation Dashboard</a></li>
+      <li><a href="#correlation">Correlation Guide — Reading V1 Through the Target Lens</a></li>
+      <li><a href="#in-practice">Putting It Into Practice</a></li>
+      <li><a href="#open-items">Open Items for Friday — Flagged, Not Resolved</a></li>
+    </ol>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="section" id="why-it-matters">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <h2>Why Health Scoring Matters</h2>
+    </div>
+    <p>Customer health scoring is one of the most important measures in the DripJobs Customer Success toolkit. It assesses each customer's engagement with the platform and their relationship with the organization &mdash; giving every team member a way to gauge whether a customer is satisfied, engaged, and likely to renew. Tracking it well surfaces upsell opportunities and, just as importantly, surfaces risk before it becomes a cancellation.</p>
+    <div class="quote-block">
+      "The score is only as useful as the discipline behind it; a health score that is not updated is not a health score, it is a guess."
+      <span class="quote-attr">CS Strategy, Structure &amp; Playbooks &middot; Section 9, pg. 12</span>
+    </div>
+    <p>Every customer with an active subscription carries a health score at all times, calculated through a combination of automation and personal interaction, and presented on a dashboard in the DripJobs company "King Kong" account (Super Admin view).</p>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Section 2 -->
+  <div class="section" id="target-framework">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <h2>The Target Framework — Green / Yellow / Red</h2>
+    </div>
+    <p>This is the long-term model documented in the Customer Team Guide, Section 9 (pg. 12&ndash;13). It's the framework we're training toward. It is <strong>not</strong> yet what the Activation Dashboard calculates automatically today &mdash; see Section 3 and the Correlation Guide below for how the two relate right now.</p>
+
+    <h3>Health Status Labels</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:16%">Status</th><th style="width:42%">Definition</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="swatch green">🟢 Green &middot; On Track</span></td>
+            <td>Consistently engaged, logging in regularly, progressing through milestones, consistent platform activity. <strong>Low risk of churn.</strong></td>
+            <td>Maintain cadence with touchpoints, for new features and satisfaction reflected in surveys. Eligible for referral or testimonial at appropriate milestones.</td>
+          </tr>
+          <tr>
+            <td><span class="swatch yellow">🟡 Yellow &middot; Needs Attention</span></td>
+            <td>Signs of slowing engagement, features still to be activated, incomplete milestones, or reduced activity. <strong>Medium risk &mdash; intervention needed.</strong></td>
+            <td>Proactive personalized outreach, identify barriers, escalate if Yellow status persists beyond the defined threshold.</td>
+          </tr>
+          <tr>
+            <td><span class="swatch red">🔴 Red &middot; High Risk</span></td>
+            <td>Disengaged, missed multiple touchpoints, rare or no login, payments missing, no meaningful platform activity. <strong>High risk of cancellation.</strong></td>
+            <td>Immediate escalation to aligned departments, personalized connection to the customer. Save-conversation initiated, real reason for disengagement documented.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>The Six Categories Behind the Color</h3>
+    <p>A customer's overall status is judged across six categories. These criteria are a starting point, not a complete checklist &mdash; the quality of personal interaction and relationship depth still carries the most weight.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Category</th><th>🟢 Green</th><th>🟡 Yellow</th><th>🔴 Red</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Onboarding Timeframe</strong></td>
+            <td>OB1 &amp; OB2 completed on schedule. Boost Session completed. All activation milestones achieved within 90 days.</td>
+            <td>OB1 complete but OB2 not yet booked. Some milestones past target date. Cold-lead signup using a promotion coupon.</td>
+            <td>OB1 never completed. Customer indicates potential cancellation. No onboarding sessions attended after signup. Activation milestones not on track.</td>
+          </tr>
+          <tr>
+            <td><strong>Platform Engagement</strong></td>
+            <td>Active daily/weekly usage. Pipeline configured. Estimates sent. Automations live. SMS active. 2+ users engaged.</td>
+            <td>Inconsistent logins. Estimates sent but nothing closed. SMS inactive or pending. Automations not yet set up.</td>
+            <td>No platform activity in 14+ days. No estimates sent. No revenue closed after 60 days. No SMS activation attempted.</td>
+          </tr>
+          <tr>
+            <td><strong>Support Services</strong></td>
+            <td>Intercom engagement, issues resolved at first contact. Positive CSAT. Engages in Refresher and advanced learning sessions.</td>
+            <td>Recurring support contacts on the same issue. Low Intercom CSAT. Missed Refresher session without rescheduling.</td>
+            <td>Repeated unresolved issues. No response to Support outreach. Low CSAT or complaint filed.</td>
+          </tr>
+          <tr>
+            <td><strong>Billing</strong></td>
+            <td>Payments current. Plan active and appropriate to usage. Add-on transactions successful.</td>
+            <td>One failed payment, recovered. Plan mismatch flagged. Customer has asked about cost or downgrading.</td>
+            <td>Multiple failed payments. Account past due. Active billing dispute. Cost cited as reason to cancel.</td>
+          </tr>
+          <tr>
+            <td><strong>Social Media</strong></td>
+            <td>Positive public mentions (Facebook, Instagram, LinkedIn). Engages with DripJobs content.</td>
+            <td>No public engagement. Has not responded to review/testimonial ask. Neutral sentiment observed.</td>
+            <td>Complaint posted publicly. Low product ratings.</td>
+          </tr>
+          <tr>
+            <td><strong>Advocacy</strong></td>
+            <td>Has introduced at least one referral. Actively participates in events/webinars/networking. Supports new product launches.</td>
+            <td>Willing to refer, but limited follow-through.</td>
+            <td>Has shared strong product concerns, low ratings including specialized features.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout info">
+      <div class="callout-icon">📌</div>
+      <div class="callout-body">
+        <div class="callout-title">Reminder</div>
+        <p>Health scores must be updated after every meaningful touchpoint to stay accurate. This is the framework CS reps use when logging the Health Status field on a customer record in the internal CRM (see Section 5 below).</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Section 3 -->
+  <div class="section" id="v1-today">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <h2>What's Live Today — the V1 Activation Dashboard</h2>
+    </div>
+    <p>The Activation Dashboard (DJ Health Score v2.0, Super Admin &gt; King Kong) is the automated system that currently powers the <code>Health</code> column CS sees for every tenant account. It ships this round with the <strong>original six status labels</strong>, not the streamlined three-color model above.</p>
+    <div class="quote-block">
+      "Ali was already fairly far down the road on this round of development, so it was Jesus' decision not to change direction on him and delay this first iteration with changes to the logic. This first version will have the original (6) status."
+      <span class="quote-attr">Jeremy, Slack thread with Mary Murphy</span>
+    </div>
+    <p>The dashboard's Health column runs on just two hard data signals &mdash; <strong>Total Sales &ge; $10,000</strong> and <strong>A2P (text messaging) activated</strong> &mdash; layered with account age and legacy status. It evaluates seven conditions in priority order (first match wins), which collapse into six visible badge states:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:16%">Badge</th><th>Trigger Condition</th></tr></thead>
+        <tbody>
+          <tr><td><span class="swatch grey">⚫ Inactive</span></td><td>Account is not active (cancelled/churned). Always wins regardless of other signals.</td></tr>
+          <tr><td><span class="swatch green">🟢 Healthy</span></td><td>Account is active, Total Sales &ge; $10,000, and A2P is activated.</td></tr>
+          <tr><td><span class="swatch red">🔴 Critical</span></td><td>New account, fewer than 10 days remaining in the 90-day window, and $10k or A2P milestone still unmet.</td></tr>
+          <tr><td><span class="swatch orange">🟠 High Risk</span></td><td>New account, fewer than 30 days remaining, and $10k or A2P milestone still unmet.</td></tr>
+          <tr><td><span class="swatch yellow">🟡 Warning</span></td><td>New account, fewer than 60 days remaining, and $10k or A2P milestone still unmet &mdash; <em>or</em> a legacy account with either milestone still unmet, regardless of age.</td></tr>
+          <tr><td><span class="swatch green">🟢 On Track</span></td><td>Fallback: none of the above conditions matched.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">🔗</div>
+      <div class="callout-body">
+        <div class="callout-title">See It Live</div>
+        <p>The dashboard itself is prototyped at <a href="../dj-health-score-v2/index.html">dj-health-score-v2</a> on this hub, including the 18-filter panel and the four-option Health filter described below.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Section 4 -->
+  <div class="section" id="correlation">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <h2>Correlation Guide — Reading V1 Through the Target Lens</h2>
+    </div>
+    <p>This is the bridge Jeremy referenced in Slack: how to interpret this first build through the lens of the longer-term Green/Yellow/Red goal. The dashboard's own Health <em>filter</em> already consolidates the six raw badges into four options &mdash; use that as the middle step.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Raw Dashboard Badge</th><th>Health Filter Option</th><th>Nearest Target Color</th></tr></thead>
+        <tbody>
+          <tr><td><span class="swatch green">Healthy</span></td><td>On Track</td><td><span class="swatch green">🟢 Green</span></td></tr>
+          <tr><td><span class="swatch green">On Track</span></td><td>On Track</td><td><span class="swatch green">🟢 Green</span></td></tr>
+          <tr><td><span class="swatch yellow">Warning</span></td><td>Needs Attention</td><td><span class="swatch yellow">🟡 Yellow</span></td></tr>
+          <tr><td><span class="swatch orange">High Risk</span></td><td>At Risk</td><td><span class="swatch red">🔴 Red*</span></td></tr>
+          <tr><td><span class="swatch red">Critical</span></td><td>At Risk</td><td><span class="swatch red">🔴 Red</span></td></tr>
+          <tr><td><span class="swatch grey">Inactive</span></td><td>Inactive</td><td>no direct match*</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <div class="callout-title">This Is a Reading Aid, Not a System Change</div>
+        <p>The ticket is explicit that this pass makes <strong>no change to Health, the $10k filter, or the A2P filters</strong>. The Health filter's four options (On Track / Needs Attention / At Risk / Inactive) are the same consolidation logic the build already uses &mdash; they're not a new streamlined system, just the existing six badges grouped for filtering.</p>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <div class="callout-title">Two Different "Health Scores" Coexist Right Now</div>
+        <p>The Activation Dashboard's Health column is a narrow, automated, two-signal score (Total Sales + A2P). The CS Strategy Playbook's Green/Yellow/Red framework is a broader, human-judged relationship score across six categories (Onboarding, Platform Engagement, Support, Billing, Social, Advocacy). They're related in spirit and this guide maps them for training purposes, but they are not the same calculation. Don't tell a customer they're "Green" in one system and assume it automatically means Green in the other.</p>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">❓</div>
+      <div class="callout-body">
+        <div class="callout-title">Color-Count Discrepancy — Flagged, Not Resolved</div>
+        <p>Jeremy's direction (and Section 9 of the Playbook) points to a <strong>3-color</strong> target: Green / Yellow / Red. Separately, the ticket's own QA notes describe holding "High Risk" as its own tier in a future <strong>4-color</strong> system: green / yellow / orange / red. Those two targets don't currently agree with each other, and this guide isn't the place to settle it &mdash; that's the "*" on High Risk and Inactive above. Raise it at Friday's session rather than assuming an answer.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Section 5 -->
+  <div class="section" id="in-practice">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <h2>Putting It Into Practice</h2>
+    </div>
+    <p>Use the two systems for what each is actually good at, rather than treating them as interchangeable:</p>
+    <ul class="plain">
+      <li><strong>Activation Dashboard (King Kong &gt; Super Admin):</strong> the objective, automated signal. Best for spotting which accounts need attention right now, especially within the 90-day activation window for new accounts, or the $10k/A2P milestone check for legacy accounts.</li>
+      <li><strong>CRM Health Status field (customer record):</strong> the human judgment call. Per Section 8 of the Playbook, update this &mdash; along with risk factors for engagement, notable behavior shifts, churn risk, and upsell opportunity &mdash; after every meaningful interaction, using the six-category Green/Yellow/Red framework from Section 2 above as the lens.</li>
+    </ul>
+    <p>The Green/Yellow/Red language is already how reps talk about accounts in outreach planning today, even while the dashboard build catches up to it. For example, the Month 12 advocacy touchpoint in Section 6 of the Playbook reads:</p>
+    <div class="quote-block">
+      "Celebration of one year with DripJobs, account in Green Health score: potential referral ask or testimonial request. If Yellow or Red Health Score: specific communication around the risk factors (usage, features)."
+      <span class="quote-attr">CS Strategy, Structure &amp; Playbooks &middot; Section 6, pg. 8</span>
+    </div>
+    <p>Dashboard tells you <strong>who</strong> to look at. The CRM Health Status and six-category judgment tell you <strong>why</strong>, and what to say.</p>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Section 6 -->
+  <div class="section" id="open-items">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <h2>Open Items for Friday — Flagged, Not Resolved</h2>
+    </div>
+    <p>These are questions this guide intentionally does not answer. Bring them to the Aug 7 session rather than assuming a direction:</p>
+    <ol class="plain">
+      <li>Which target color count is correct: the 3-color Green/Yellow/Red framework in Section 9 of the Playbook, or the 4-color green/yellow/orange/red direction noted in the ticket's QA findings?</li>
+      <li>Is there a timeline for folding the six-category relationship framework (Support, Billing, Social, Advocacy, etc.) into the automated dashboard score, beyond the current $10k + A2P logic? The ticket confirms a related option (using Prop. Viewed / Deals (90d) signals) was evaluated and explicitly <strong>not</strong> adopted this pass &mdash; a parallel-signal approach was chosen instead.</li>
+      <li>How should Inactive (cancelled/churned) accounts be described in outreach language, given neither the 3-color nor the 4-color target model currently defines a place for that state?</li>
+      <li>Does this pre-work also cover what Nicole needs for her Aug 7 session, or does her training require additional onboarding-specific material Mary should prepare separately?</li>
+    </ol>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-text">
+    <strong>DripJobs CS Team</strong> · Prepared by Jeremy for the Aug 7, 2026 training with Mary Murphy &amp; Nicole<br>
+    Sources: CS Strategy, Structure &amp; Playbooks (Section 9, pg. 12&ndash;13) · Ticket 86b9512kq · DJ Health Score v2.0 prototype
+  </div>
+</div>
+
+</body>
+</html>
