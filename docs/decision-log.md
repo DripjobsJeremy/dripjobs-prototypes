@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-07-30] Shareable personal portfolio page added (`portfolio/`)
+
+- Decision: Built a standalone `portfolio/index.html`, separate from the internal `index.html` hub, as a general-audience personal portfolio: short first-person intro, then a visual gallery of six hand-picked prototypes (Business Entity Records, Metrics AI Predictability, Proposal Expiration Enforcement, Jobs List Column Management, Job Costing Workbench, HealthScore+ Lifecycle). No ClickUp links or ticket references anywhere on the page. Each card uses a real Playwright screenshot of the live prototype (demo/proto-bar scaffolding hidden before capture) rather than an icon placeholder, styled with the marketing brand tokens (`#7C3AED` purple, `#0DCECE` teal, Nunito) since this is a marketing-style surface, not an in-app settings page. Not linked from the main hub yet.
+- Why: Jeremy wanted a slick, modern, "not overwhelming" page shareable outside the team, distinct from the internal ClickUp-linked hub. Curation and framing (general portfolio, not job-search-specific) were his explicit choices via Q&A before building.
+- Open question: Whether to link this page from the main hub `index.html` for discoverability, and whether to add contact/social links to the footer, both left open pending Jeremy's input.
+
+---
+
 ## [2026-07-29] Business Entity Records V1: clickable prototype built from PRD v1.4
 
 - Decision: Built a full clickable prototype (`business-entity-records/`) covering the Businesses nav item + list, a New Business form (Legal Name required; DBA, multi-email/phone, Industry, Address, Billing Address with "same as Address" toggle, Display DBA toggle), a tabbed Business profile (all 12 tabs from the PRD), Contact list Business column + filter, Contact-to-Business association (one entity per contact), and the shared Business/Individual 2x2 selector demoed once in depth and reused across all four creation entry points (New Lead, New Appointment, New Proposal, Create Invoice) rather than building four full standalone wizards. Used the current-product app shell (Nunito, `#7C3AED` sidebar/topbar, matching `tasks-ui-refresh`) for chrome, and the design system's softer `#8B85EA` tokens for the Information tab, New Business form, and tab-chip pattern, per the CLAUDE.md guidance to split shell vs. in-page-settings coloring.
