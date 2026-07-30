@@ -15,7 +15,7 @@ Format:
 
 - Decision: Built a standalone `portfolio/index.html`, separate from the internal `index.html` hub, as a general-audience personal portfolio: short first-person intro, then a visual gallery of six hand-picked prototypes (Business Entity Records, Metrics AI Predictability, Proposal Expiration Enforcement, Jobs List Column Management, Job Costing Workbench, HealthScore+ Lifecycle). No ClickUp links or ticket references anywhere on the page. Each card uses a real Playwright screenshot of the live prototype (demo/proto-bar scaffolding hidden before capture) rather than an icon placeholder, styled with the marketing brand tokens (`#7C3AED` purple, `#0DCECE` teal, Nunito) since this is a marketing-style surface, not an in-app settings page. Not linked from the main hub yet.
 - Why: Jeremy wanted a slick, modern, "not overwhelming" page shareable outside the team, distinct from the internal ClickUp-linked hub. Curation and framing (general portfolio, not job-search-specific) were his explicit choices via Q&A before building.
-- Open question: Contact/social links in the footer, left open pending Jeremy's input. Resolved: Jeremy confirmed the page stays standalone, not linked from the main hub `index.html`.
+- Open question: none remaining. Resolved: Jeremy confirmed the page stays standalone, not linked from the main hub `index.html`. Resolved: added a LinkedIn link (topbar icon + footer text link) to https://www.linkedin.com/in/jeremywharrison/, no other contact links requested.
 
 ---
 
