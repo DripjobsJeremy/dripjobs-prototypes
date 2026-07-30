@@ -11,6 +11,13 @@ Format:
 
 ---
 
+## [2026-07-30] Release Notes | July 2026: added to hub, sourced from ClickUp
+- Decision: Built `release-notes-july-2026/` (index.html + Release_Notes_July_2026.md) matching June's exact structure and voice, and added its card to the Product Release Notes tab. Content was compiled from ClickUp's 5 July release tags (07-01 through 07-27, ~50 "pushed to production" tickets) rather than drafted from memory. Excluded single-tenant bug tickets (company name + account ID in the title) and internal-only ops tickets (Zapier payload cleanup, API key rotation, superadmin tooling) from the customer-facing copy. Also cut 2 drafted "Upcoming" teasers after confirming with Jeremy that they described internal CS/support tooling, not customer-facing features.
+- Why: This repo has no ClickUp connection by default and the prior release-notes pages establish that customer-facing notes must reflect only genuinely customer-visible changes, not internal engineering housekeeping or one-off account fixes.
+- Open question: None. Full excluded-ticket list with reasons was reviewed before publishing.
+
+---
+
 ## [2026-07-30] HealthScore+ Lifecycle Status: synced with HealthScore Phase 1 UI updates
 
 - Decision: Brought `dj-health-score-lifecycle/` up to date with the Phase 1 UI changes already reflected on the base HealthScore dashboard (per ticket 86b9512kq's QA Round 2 notes and the `company-activation-tracking-mockup/` restyle it was built from): renamed the page from "HealthScore" to "HealthScore+" (title, h1, proto banner) to distinguish this Lifecycle-extension prototype from the base dashboard; restyled the Export CSV button to the purple pill treatment; moved the "Show" entries selector out of the table toolbar into a floating-label pill next to a single "Clear All Filters" button (dropping the old separate "Clear All" text link, matching the "Move Show selector next to Clear All Filters, drop redundant Clear button" precedent); and removed the `[+]`/`[-]` collapse/expand toggle on the Integrations and Automations table column groups, which QA Round 2 flagged as a stale control after that requirement was removed (both groups now always render expanded, no toggle). Reorganized the flat filters grid into the same accordion pattern as the mockup (Search & Segment, Account Data, Integrations/Automations/Add-Ons) and added three new accordion sections unique to this prototype's own features: Account Lifecycle (Pause/Cancellation Reason), Login Data, and CS Flags.

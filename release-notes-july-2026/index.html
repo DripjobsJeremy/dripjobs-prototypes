@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DripJobs Release Notes: July 2026</title>
+<style>
+  :root{
+    --purple-deep:#5B1A96;
+    --purple:#6B21A8;
+    --purple-med:#9333EA;
+    --purple-light:#DDD6FE;
+    --purple-wash:#F6F1FC;
+    --ink:#1E1530;
+    --ink-soft:#5B5468;
+    --line:#E7DFF5;
+    --amber:#B45309;
+    --amber-wash:#FEF3E2;
+    --green:#15803D;
+    --green-wash:#EAFBF1;
+    --white:#FFFFFF;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Inter","Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
+    color:var(--ink);
+    background:var(--white);
+    line-height:1.55;
+  }
+  a{color:var(--purple-med);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:linear-gradient(135deg,var(--purple-deep) 0%,var(--purple) 55%,var(--purple-med) 100%);
+    color:#fff;
+    padding:64px 24px 56px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:-120px; right:-120px;
+    width:380px; height:380px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.08);
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    bottom:-160px; left:-80px;
+    width:320px; height:320px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.06);
+  }
+  .hero-inner{
+    max-width:780px;
+    margin:0 auto;
+    position:relative;
+    z-index:2;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(255,255,255,0.16);
+    border:1px solid rgba(255,255,255,0.28);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:22px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:#fff;display:inline-block;}
+  .hero h1{
+    font-size:44px;
+    line-height:1.1;
+    margin:0 0 14px;
+    font-weight:800;
+    letter-spacing:-0.02em;
+  }
+  .hero p.sub{
+    font-size:17px;
+    color:rgba(255,255,255,0.86);
+    max-width:560px;
+    margin:0 0 30px;
+  }
+  .hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+    border-top:1px solid rgba(255,255,255,0.22);
+    padding-top:22px;
+  }
+  .hero-meta .stat-label{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:rgba(255,255,255,0.65);
+    margin-bottom:4px;
+  }
+  .hero-meta .stat-value{
+    font-size:16px;
+    font-weight:700;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{max-width:780px;margin:0 auto;padding:0 24px;}
+  .toc{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    padding:28px 0 8px;
+  }
+  .toc a{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--purple);
+    background:var(--purple-wash);
+    border:1px solid var(--purple-light);
+    padding:7px 14px;
+    border-radius:999px;
+    text-decoration:none;
+    transition:background .15s ease;
+  }
+  .toc a:hover{background:var(--purple-light);}
+
+  .section{padding:46px 0 8px;}
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    margin-bottom:22px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .section-head:hover h2{color:var(--purple-med);}
+  .section-head .icon{
+    font-size:20px;
+  }
+  .section-head h2{
+    font-size:22px;
+    font-weight:800;
+    margin:0;
+    color:var(--purple-deep);
+    letter-spacing:-0.01em;
+    transition:color .15s ease;
+  }
+  .section-head .count{
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    background:var(--purple-wash);
+    padding:3px 10px;
+    border-radius:999px;
+  }
+  .section-head .chevron{
+    margin-left:auto;
+    width:20px;
+    height:20px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--purple-med);
+    transition:transform .2s ease;
+  }
+  .section.collapsed .chevron{transform:rotate(-90deg);}
+  .section-body{
+    overflow:hidden;
+    max-height:none;
+  }
+  .section.collapsed .section-body{
+    display:none;
+  }
+  .section.collapsed{padding-bottom:46px;}
+
+  /* ---------- FEATURE CARD ---------- */
+  .card{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px 24px;
+    margin-bottom:16px;
+    background:#fff;
+    transition:box-shadow .15s ease, border-color .15s ease;
+  }
+  .card:hover{
+    border-color:var(--purple-light);
+    box-shadow:0 4px 18px rgba(107,33,168,0.08);
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .card-title{
+    font-size:16.5px;
+    font-weight:700;
+    color:var(--ink);
+    margin:0;
+  }
+  .badge{
+    flex-shrink:0;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .badge.released{color:var(--ink-soft);background:#F2F0F6;}
+
+  .field{
+    display:grid;
+    grid-template-columns:128px 1fr;
+    gap:6px 14px;
+    padding:10px 0;
+    border-top:1px solid #F1ECFA;
+    font-size:14.5px;
+  }
+  .field:first-of-type{border-top:none;padding-top:0;}
+  .field .label{
+    font-weight:700;
+    font-size:12.5px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    padding-top:2px;
+  }
+  .field.what .label{color:var(--purple);}
+  .field.why .label{color:var(--amber);}
+  .field.action .label{color:var(--green);}
+  .field .value{color:var(--ink-soft);}
+  .field.action .value.none{color:var(--green);font-weight:600;}
+
+  @media (max-width:560px){
+    .field{grid-template-columns:1fr;}
+    .field .label{padding-top:0;}
+  }
+
+  /* ---------- UPCOMING / OTHER (always-visible detail) ---------- */
+  .future-card{
+    border:1px solid var(--purple-light);
+    background:var(--purple-wash);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    margin-bottom:14px;
+  }
+  .future-card.alt{
+    border-color:#E9E1F7;
+    background:#FBF9FE;
+  }
+  .future-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:8px;
+  }
+  .future-title{
+    font-size:16px;
+    font-weight:700;
+    color:var(--purple-deep);
+    margin:0;
+  }
+  .future-desc{
+    font-size:14.5px;
+    color:var(--ink-soft);
+    margin:0 0 12px;
+  }
+  .future-link{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--purple-med);
+    text-decoration:none;
+  }
+  .future-link:hover{text-decoration:underline;}
+  .pill{
+    flex-shrink:0;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:999px;
+    background:#fff;
+    border:1px solid var(--purple-light);
+    color:var(--purple);
+    white-space:nowrap;
+  }
+
+  /* ---------- FOOTER ---------- */
+  .footer{
+    margin-top:54px;
+    padding:36px 0 56px;
+    border-top:1px solid var(--line);
+    text-align:center;
+  }
+  .footer p{
+    color:var(--ink-soft);
+    font-size:14px;
+    margin:0 0 6px;
+  }
+  .footer .gear{
+    width:34px;height:34px;
+    margin-bottom:14px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow"><span class="dot"></span>Product Release Notes</span>
+      <h1>What's new in DripJobs</h1>
+      <p class="sub">Your monthly recap of everything shipped, fixed, and on the way, written for the way you actually use DripJobs day to day.</p>
+      <div class="hero-meta">
+        <div>
+          <div class="stat-label">Period</div>
+          <div class="stat-value">July 1 – July 31, 2026</div>
+        </div>
+        <div>
+          <div class="stat-label">Releases</div>
+          <div class="stat-value">5 deployments</div>
+        </div>
+        <div>
+          <div class="stat-label">Improvements</div>
+          <div class="stat-value">40+ updates</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="toc">
+      <a href="#proposals">Proposals</a>
+      <a href="#portal">Customer Portal & Invoicing</a>
+      <a href="#workorders">Work Orders</a>
+      <a href="#booking">Booking Forms</a>
+      <a href="#pipeline">Pipeline & Mobile</a>
+      <a href="#messaging">Messaging & Notifications</a>
+      <a href="#integrations">Integrations</a>
+      <a href="#metrics">Metrics & Reports</a>
+      <a href="#settings">Settings</a>
+      <a href="#upcoming">Upcoming</a>
+      <a href="#soon">Coming Soon</a>
+    </div>
+
+    <!-- PROPOSALS -->
+    <div class="section" id="proposals">
+      <div class="section-head"><span class="icon">📄</span><h2>Proposals & Proposal Builder</h2><span class="count">9 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New Proposals Now Inherit Your Company Tax Rate</h3><span class="badge released">Jul 27</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where new proposals started with no tax rate applied, even when a company-wide tax rate was configured.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Your default tax settings should carry over automatically so you don't have to re-enter them on every proposal.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">Double check the tax rate on any proposals created before July 27 if the totals looked off.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Builder UI Now Used in Proposal Template Builder</h3><span class="badge released">Jul 27</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Building and editing proposal templates now uses the same interface as building proposals themselves.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">A consistent experience between proposals and templates means less relearning when you switch between the two.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Tax Rate Row Redesigned in Proposal Builder</h3><span class="badge released">Jul 15</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Setting or editing the tax rate on a proposal or template now happens through a focused popup, with a confirmation message showing exactly how the change affected your totals.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">A dedicated tax rate popup makes it much harder to accidentally change tax while browsing other settings.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Drag and Drop Proposal Section Reordering</h3><span class="badge released">Jul 15</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Reordering the sections of your Customer Portal proposal layout now works by dragging and dropping instead of clicking through a menu.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">The new drag and drop interaction is faster and more intuitive than the previous click based reordering.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Line Item Cards Restored to White Background</h3><span class="badge released">Jul 15</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where line item cards in the client facing proposal view had lost their white background and blended into the page.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Clear visual separation between line items makes proposals easier for your customers to read.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Fixed Garbled Character on Change Request Status Badge</h3><span class="badge released">Jul 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed a display bug that showed a garbled character in the proposal status badge whenever a change request was submitted.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">A clean status badge keeps your pipeline looking professional and easy to read at a glance.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Signed Proposals Now Save a Permanent Copy</h3><span class="badge released">Jul 1</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A permanent, point in time copy of a proposal (or Change Order) is now saved at the exact moment it's signed or accepted, so the record can't be affected by later edits or data issues.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You now have a reliable, unchanging copy of exactly what your customer agreed to, whenever you need it for legal or accounting purposes.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">More Control Over Proposal Section Order</h3><span class="badge released">Jul 1</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Position control for reordering proposal sections has been expanded to cover more sections, including Client Notes, Trust Builders, Packages, and more.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can tailor the flow of your proposals to match your own sales process.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Expanded Proposal Rejection Reasons</h3><span class="badge released">Jul 1</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The proposal rejection reason list now includes a broader set of options, plus an "Other" choice with a required explanation field.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">More specific rejection reasons help you understand patterns in lost deals so you can adjust your pricing or process.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER PORTAL & INVOICING -->
+    <div class="section" id="portal">
+      <div class="section-head"><span class="icon">💳</span><h2>Customer Portal & Invoicing</h2><span class="count">3 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Archived and Deleted Proposals Hidden From Customer Portal</h3><span class="badge released">Jul 27</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Archived or deleted proposals no longer appear in your customer's Proposals list, and a direct link to an archived proposal now shows a closure message instead of the proposal itself.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Customers should never be able to act on a proposal you've already closed out.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Change Order Line Item Photos Now Display in Customer Portal</h3><span class="badge released">Jul 20</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where photos attached to change order line items weren't showing up when a customer viewed the change order in the Customer Portal.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Customers need to see the supporting photos for a change order without hunting through a separate media section.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Tax Registration Number Field for Invoices</h3><span class="badge released">Jul 15</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Company Settings now includes a dedicated field for your tax registration number (such as a GST/HST number), with a toggle to automatically display it on every invoice.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">If your business is required to show a tax registration number on invoices, you no longer need to manually add it every time.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">Add your tax registration number and turn on the toggle in Company Settings if you'd like it to appear on your invoices.</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- WORK ORDERS -->
+    <div class="section" id="workorders">
+      <div class="section-head"><span class="icon">🧰</span><h2>Work Orders</h2><span class="count">2 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Hide Hours on Work Orders</h3><span class="badge released">Jul 20</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A new toggle lets you hide hour related details from Work Orders without affecting whether hours show on your customer facing proposals.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">If you pay your crew per job rather than hourly, you can now keep hour estimates off their Work Orders without hiding that information from your customers.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None, look for the new toggle in Production Rates settings if you'd like to turn it on.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Work Orders Now Show Both Labels</h3><span class="badge released">Jul 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Customer facing views like proposal PDFs now show only the client facing label, while Work Orders show both labels so the information is clear for crews and contractors.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Work Orders are often shared with people outside the customer relationship, so they need the fuller label information.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- BOOKING FORMS -->
+    <div class="section" id="booking">
+      <div class="section-head"><span class="icon">📝</span><h2>Booking Forms</h2><span class="count">1 update</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Bulk Archive for Booking Requests</h3><span class="badge released">Jul 27</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">You can now select multiple booking requests at once and archive them together, with the option to also cancel their related deals.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Cleaning out your booking request queue no longer means archiving requests one at a time.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- PIPELINE & MOBILE -->
+    <div class="section" id="pipeline">
+      <div class="section-head"><span class="icon">📱</span><h2>Pipeline & Mobile</h2><span class="count">6 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Scheduled Job Dates Now Visible on Contact Profiles</h3><span class="badge released">Jul 15</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A contact's profile now shows their upcoming scheduled jobs, not just sales appointments, right from the Appointments tab.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can answer scheduling questions on a call without digging through deal cards or message history.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Clearer Error Screens When the App Has a Problem</h3><span class="badge released">Jul 15</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Crash and loading error screens now explain in plain language that something went wrong, along with a simple way to retry or reload.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">A blank or confusing error screen makes the app feel broken; a clear message and next step keeps you moving.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Frozen Customer Name Column in Jobs and Sales Lists</h3><span class="badge released">Jul 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The customer name column, and everything to its left, now stays fixed in place when you scroll right in the Jobs List or Sales List. The Jobs List "Name" column is also now labeled "Customer Name."</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You always know which customer a row belongs to, even when scrolling through a wide table.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Android: Client Notes Save Button No Longer Hidden</h3><span class="badge released">Jul 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue on Android where the Save button for Client Notes on a proposal was partially hidden and hard to tap.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">A save button you can't reliably tap risks losing a note you just wrote.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Deal Cards Now Show Proposal Link Even Before Sending</h3><span class="badge released">Jul 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where a deal card would show an appointment date instead of a "View Proposal" link when a proposal existed but hadn't been sent yet.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Consistent deal card layout means less guessing about what's going on with a deal at a glance.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Call With Quo Only Appears When Quo Is Active</h3><span class="badge released">Jul 1</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The Call with Quo option, along with a refreshed design, now only appears if you actually have the Quo integration turned on.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You won't see a calling option that doesn't apply to your account.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- MESSAGING & NOTIFICATIONS -->
+    <div class="section" id="messaging">
+      <div class="section-head"><span class="icon">💬</span><h2>Messaging & Notifications</h2><span class="count">4 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: All Company Admins CC'd on Proposal Accepted Notifications</h3><span class="badge released">Jul 20</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Every user with the Administrator role on your account is now automatically CC'd when a proposal is accepted, regardless of which salesperson owns the deal.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Admins get visibility into new deal activity without depending on a salesperson to forward the news.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Search Results in DJ Chat Now Highlight Your Search Term</h3><span class="badge released">Jul 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Searching across conversations in DJ Chat now highlights the matching word or phrase in the results.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can spot why a result matched and find the relevant text much faster.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: First Name Dynamic Keywords</h3><span class="badge released">Jul 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Two new dynamic keywords let you insert just a first name, for either the assigned salesperson or the sending user, into drip messages, reminders, and templates.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Messages that use a first name instead of a full name read more like a natural, personal note.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None, look for the new keywords in the keyword picker when composing a message.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Drip Opt-Out Status Now Visible Across the App</h3><span class="badge released">Jul 1</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A "Drips Opted Out" tag now appears on the Contact Record, Command Center, Deal Card, and Job Card whenever a contact has opted out of drip sequences.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can spot at a glance that automated messages won't go out to a contact, without digging into their record.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- INTEGRATIONS -->
+    <div class="section" id="integrations">
+      <div class="section-head"><span class="icon">🔌</span><h2>Integrations</h2><span class="count">10 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Move Job Zapier Action: Drip Sequence No Longer Required</h3><span class="badge released">Jul 27</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The Drip Sequence field on the Move Job Zapier action is no longer required. If you leave it blank, a deal's existing drip sequence assignment stays untouched.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can automate moving a job between stages without being forced to also set a drip sequence every time.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New Zapier Trigger: Payment Marked as Received</h3><span class="badge released">Jul 27</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A new Zapier trigger fires whenever any payment, including partial payments, is registered in DripJobs, with detailed payment, invoice, customer, and deal fields.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can build automations around payments without needing to piece the data together yourself.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New Zapier Trigger: Proposal Rejected</h3><span class="badge released">Jul 27</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A new Zapier trigger fires whenever a proposal is rejected, including the proposal ID, total, status, and related deal and contact records.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can automate follow up or reporting the moment a proposal is declined.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New Zapier Trigger: New Invoice Created</h3><span class="badge released">Jul 20</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A new Zapier trigger fires once whenever a new invoice is created, whether generated manually or off an accepted proposal.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can kick off downstream automations the moment an invoice exists, without waiting on payment status.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Acorn Financing Now Available on the Pro Plan</h3><span class="badge released">Jul 15</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Pro plan accounts can now access and use the Acorn Financing integration, previously limited to the Advanced plan.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can offer financing to your customers without needing to upgrade your plan.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Acorn Financing Now Available in Massachusetts</h3><span class="badge released">Jul 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Acorn Financing is now enabled for Massachusetts based accounts, with a $6,700 minimum financed amount required to submit an application.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Massachusetts customers can now offer financing just like accounts in other supported states.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New Zapier Trigger: Incoming Text Message Received</h3><span class="badge released">Jul 20</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A new Zapier trigger fires whenever a text message is received, including the sender's number, timestamp, message content, and related contact.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can build automations off incoming texts the same way you already can for other events.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New Zapier Trigger: Full Job Costing Payload</h3><span class="badge released">Jul 1</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A new Zapier trigger sends the complete job costing payload with every available field in one event.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can build automations from the full job costing dataset without reconstructing it from individual fields.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New Zapier Action: Move Deal</h3><span class="badge released">Jul 1</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A new Zapier action lets you move a deal or job to a new pipeline stage, choose the drip sequence tied to that stage, and optionally pause drips during the move.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can now automate pipeline moves that used to require manually updating a deal.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New Zapier Action: Find Most Recent Deal</h3><span class="badge released">Jul 1</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A new Zapier action looks up a customer's most recently created deal by matching on email and phone number.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can pull in the latest deal for a customer without building your own lookup logic.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- METRICS & REPORTS -->
+    <div class="section" id="metrics">
+      <div class="section-head"><span class="icon">📊</span><h2>Metrics & Reports</h2><span class="count">3 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Job Costing Search Now Returns Results</h3><span class="badge released">Jul 27</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where searching for a job by name on the Job Costing page didn't filter the results or show a "no results" message.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can now trust that a job costing search either shows the matching job or tells you clearly that nothing matched.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Clickable Drill-Downs in Metric Breakdown Details</h3><span class="badge released">Jul 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The individual counts inside a Metric Breakdown popup on the dashboard are now clickable, taking you straight to the full detail report, filtered and ready to go.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can dig into the specific numbers behind a metric without manually setting up report filters.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None, try clicking a count inside any Metric Breakdown popup to explore.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Sales by Source Now Reflects Current Lead Source</h3><span class="badge released">Jul 1</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where the Sales by Source chart kept crediting revenue to a contact's original lead source, even after you corrected it.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Revenue attribution now stays accurate whenever you update a contact's lead source.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="section" id="settings">
+      <div class="section-head"><span class="icon">⚙️</span><h2>Settings</h2><span class="count">2 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Deactivated Accounts Now Pause Communications and Document Links</h3><span class="badge released">Jul 27</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">When an account is deactivated, active drip sequences, appointment reminders, and scheduled blasts now pause automatically, and public links to proposals, invoices, and change orders show a "no longer available" message instead of the document.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">An inactive account should never keep sending messages or exposing customer facing documents.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Company Settings Page No Longer Errors</h3><span class="badge released">Jul 15</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue causing the Company Settings page to show an error instead of loading normally.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You need reliable access to your company settings without hitting a dead end.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- UPCOMING RELEASES -->
+    <div class="section" id="upcoming">
+      <div class="section-head"><span class="icon">🚀</span><h2>Upcoming Releases</h2><span class="count">1 in progress</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="future-card">
+        <div class="future-top">
+          <h3 class="future-title">Column Management for the Jobs List</h3>
+          <span class="pill">PR in review</span>
+        </div>
+        <p class="future-desc">You'll soon be able to show or hide columns in the Jobs List, drag them into whatever order fits your workflow, and save your own named views, alongside a set of built in presets for common roles like Sales or Accounting. A freeze option keeps the columns you rely on most, like Customer Name, pinned in place while the rest of the table scrolls.</p>
+      </div>
+      </div>
+    </div>
+
+    <!-- OTHER UPDATES COMING SOON -->
+    <div class="section" id="soon">
+      <div class="section-head"><span class="icon">✨</span><h2>Other Exciting Updates Coming Soon</h2><span class="count">3 planned</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="future-card alt">
+        <div class="future-top">
+          <h3 class="future-title">More QuickBooks Integration Improvements</h3>
+          <span class="pill">Ready for dev</span>
+        </div>
+        <p class="future-desc">Additional improvements are planned for the QuickBooks integration, including clear visibility when a sync fails, plain language explanations of what went wrong, and the ability to manually retry a failed sync without disconnecting and reconnecting your account.</p>
+      </div>
+
+      <div class="future-card alt">
+        <div class="future-top">
+          <h3 class="future-title">Direct Thumbtack Integration</h3>
+          <span class="pill">In progress</span>
+        </div>
+        <p class="future-desc">A direct Thumbtack integration is in the works. Once live, new Thumbtack leads will flow straight into DripJobs as contacts and deals, tagged with Thumbtack as the lead source, and dropped automatically into your Sales Pipeline and drip sequences, no manual entry required.</p>
+      </div>
+
+      <div class="future-card alt">
+        <div class="future-top">
+          <h3 class="future-title">Multiple Documents Per Category in Customer Portal Settings</h3>
+          <span class="pill">In progress</span>
+        </div>
+        <p class="future-desc">We're expanding document management in Customer Portal Settings so each of your document categories, like Insurance, Warranty, and License Information, can hold multiple files instead of just one. You'll also be able to create your own custom categories to share anything else your customers need.</p>
+      </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p><strong>Questions about anything above?</strong></p>
+      <p>Visit <a href="https://help.dripjobs.com" target="_blank" rel="noopener">help.dripjobs.com</a> or reach out to your DripJobs support team.</p>
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('.section-head').forEach(function(head){
+      head.addEventListener('click', function(){
+        head.closest('.section').classList.toggle('collapsed');
+      });
+    });
+  </script>
+</body>
+</html>
