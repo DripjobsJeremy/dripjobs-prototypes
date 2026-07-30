@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jeremy Harrison — Product Prototypes</title>
+<meta name="description" content="A small collection of clickable product prototypes: how I think through problems by building them." />
+<meta property="og:title" content="Jeremy Harrison — Product Prototypes" />
+<meta property="og:description" content="A small collection of clickable product prototypes: how I think through problems by building them." />
+<meta name="theme-color" content="#7C3AED" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple:        #7C3AED;
+    --purple-hover:  #6D28D9;
+    --purple-rgb:    124, 58, 237;
+    --teal:          #0DCECE;
+    --bg:            #FAFAFC;
+    --card:          #FFFFFF;
+    --text:          #1F2430;
+    --text-muted:    #6B7280;
+    --border:        #E7E5EF;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:          #121218;
+      --card:        #191922;
+      --text:        #EDEDF2;
+      --text-muted:  #9A9AA8;
+      --border:      #2A2A35;
+    }
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    padding: 28px 0 0;
+  }
+  .topbar .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .wordmark {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+  }
+  .wordmark span { color: var(--purple); }
+
+  /* ── Hero ── */
+  .hero {
+    position: relative;
+    padding: 64px 0 56px;
+    overflow: hidden;
+  }
+  .hero-glow {
+    position: absolute;
+    top: -160px;
+    right: -120px;
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, rgba(var(--purple-rgb), 0.16) 0%, rgba(var(--purple-rgb), 0) 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero-glow--teal {
+    top: 60px;
+    right: auto;
+    left: -180px;
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, rgba(13, 206, 206, 0.12) 0%, rgba(13, 206, 206, 0) 70%);
+  }
+  .hero .wrap { position: relative; z-index: 1; }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--purple);
+    background: rgba(var(--purple-rgb), 0.09);
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 20px;
+  }
+  .eyebrow-dot {
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    background: var(--teal);
+  }
+  h1 {
+    font-size: clamp(32px, 5vw, 46px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
+    margin-bottom: 18px;
+  }
+  .hero-lede {
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--text-muted);
+    max-width: 620px;
+  }
+  .hero-lede strong { color: var(--text); font-weight: 700; }
+
+  /* ── Section heading ── */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 8px 0 28px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .section-head h2 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    padding-top: 24px;
+  }
+  .section-head .count {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding-top: 24px;
+  }
+
+  /* ── Gallery grid ── */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    padding-bottom: 72px;
+  }
+  @media (max-width: 760px) {
+    .gallery { grid-template-columns: 1fr; }
+  }
+
+  .work-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .work-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(var(--purple-rgb), 0.35);
+    box-shadow: 0 14px 32px rgba(20, 10, 50, 0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    .work-card:hover { box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35); }
+  }
+
+  .work-shot {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .work-shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+  .work-card:hover .work-shot img { transform: scale(1.035); }
+
+  .work-body {
+    padding: 20px 22px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+  .work-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.1px;
+  }
+  .work-desc {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    flex: 1;
+  }
+  .work-link {
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--purple);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .work-link svg {
+    width: 13px; height: 13px;
+    transition: transform 0.2s ease;
+  }
+  .work-card:hover .work-link svg { transform: translateX(3px); }
+
+  /* ── Footer ── */
+  .footer {
+    padding: 32px 0 56px;
+    border-top: 1px solid var(--border);
+  }
+  .footer .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 24px;
+  }
+  .footer-text {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .footer-text strong { color: var(--text); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="wordmark">Jeremy Harrison<span>.</span></div>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow hero-glow--teal"></div>
+  <div class="wrap">
+    <div class="eyebrow"><span class="eyebrow-dot"></span>Product Prototypes</div>
+    <h1>I prototype ideas in code before they're built.</h1>
+    <p class="hero-lede">
+      I'm a product manager who'd rather show you the thing than describe it. Most of my work happens on
+      <strong>DripJobs</strong>, a CRM and job management platform built for painting contractors, where I build
+      clickable prototypes to pressure-test ideas, edge cases, and interaction details before a single line of
+      production code gets written. Here are a few I'm proud of.
+    </p>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="section-head">
+    <h2>Selected Work</h2>
+    <span class="count">6 prototypes</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="gallery">
+
+    <a class="work-card" href="../business-entity-records/index.html">
+      <div class="work-shot"><img src="img/business-entity-records.png" alt="Business Entity Records prototype screenshot" loading="lazy" /></div>
+      <div class="work-body">
+        <div class="work-title">Business Entity Records</div>
+        <div class="work-desc">A standalone Business Entity record type: tabbed company profiles, contact-to-business linking, and one unified creation flow across the app.</div>
+        <span class="work-link">View prototype
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+    </a>
+
+    <a class="work-card" href="../metrics-ai-predictability/index.html">
+      <div class="work-shot"><img src="img/metrics-ai-predictability.png" alt="Metrics AI Predictability prototype screenshot" loading="lazy" /></div>
+      <div class="work-body">
+        <div class="work-title">Metrics: AI Predictability</div>
+        <div class="work-desc">Turns a metrics dashboard into a plain-English weekly digest, translating closing ratio, job value, and revenue trends into insights anyone can read.</div>
+        <span class="work-link">View prototype
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+    </a>
+
+    <a class="work-card" href="../proposal-expiration-enforcement/index.html">
+      <div class="work-shot"><img src="img/proposal-expiration-enforcement.png" alt="Proposal Expiration Enforcement prototype screenshot" loading="lazy" /></div>
+      <div class="work-body">
+        <div class="work-title">Proposal Expiration &amp; Re-Open Flow</div>
+        <div class="work-desc">What happens when a proposal expires: signing locks automatically, and a re-open flow gives the sales team a clear way back in.</div>
+        <span class="work-link">View prototype
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+    </a>
+
+    <a class="work-card" href="../jobs-list-column-mgmt/index.html">
+      <div class="work-shot"><img src="img/jobs-list-column-mgmt.png" alt="Jobs List Column Management prototype screenshot" loading="lazy" /></div>
+      <div class="work-body">
+        <div class="work-title">Jobs List: Column Management</div>
+        <div class="work-desc">Show, hide, reorder, and freeze columns on a dense jobs table, with saved views so every user gets their own default.</div>
+        <span class="work-link">View prototype
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+    </a>
+
+    <a class="work-card" href="../job-costing-proposal/index.html">
+      <div class="work-shot"><img src="img/job-costing-proposal.png" alt="Job Costing Workbench prototype screenshot" loading="lazy" /></div>
+      <div class="work-body">
+        <div class="work-title">Job Costing Workbench</div>
+        <div class="work-desc">A profitability view built right into the proposal: live margin tracking, labor entry, and suggested pricing as the job comes together.</div>
+        <span class="work-link">View prototype
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+    </a>
+
+    <a class="work-card" href="../dj-health-score-lifecycle/index.html">
+      <div class="work-shot"><img src="img/dj-health-score-lifecycle.png" alt="HealthScore Lifecycle prototype screenshot" loading="lazy" /></div>
+      <div class="work-body">
+        <div class="work-title">HealthScore+ Lifecycle</div>
+        <div class="work-desc">Account health scoring that understands the difference between churned and just on pause, with reasons, dates, and filters to match.</div>
+        <span class="work-link">View prototype
+          <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <span class="footer-text"><strong>Jeremy Harrison</strong> · Product Manager</span>
+    <span class="footer-text">Prototypes built for DripJobs</span>
+  </div>
+</footer>
+
+</body>
+</html>
