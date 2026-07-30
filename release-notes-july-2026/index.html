@@ -111,11 +111,17 @@
 
   /* ---------- LAYOUT ---------- */
   .wrap{max-width:780px;margin:0 auto;padding:0 24px;}
+  .toc-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:center;
+    padding:28px 0 8px;
+  }
   .toc{
     display:flex;
     flex-wrap:wrap;
     gap:10px;
-    padding:28px 0 8px;
   }
   .toc a{
     font-size:13.5px;
@@ -129,6 +135,21 @@
     transition:background .15s ease;
   }
   .toc a:hover{background:var(--purple-light);}
+  .toggle-all-btn{
+    flex-shrink:0;
+    margin-left:auto;
+    font-size:13.5px;
+    font-weight:700;
+    color:#fff;
+    background:var(--purple-med);
+    border:1px solid var(--purple-med);
+    padding:7px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s ease;
+    font-family:inherit;
+  }
+  .toggle-all-btn:hover{background:var(--purple-deep);border-color:var(--purple-deep);}
 
   .section{padding:46px 0 8px;}
   .section-head{
@@ -343,18 +364,21 @@
   </div>
 
   <div class="wrap">
-    <div class="toc">
-      <a href="#proposals">Proposals</a>
-      <a href="#portal">Customer Portal & Invoicing</a>
-      <a href="#workorders">Work Orders</a>
-      <a href="#booking">Booking Forms</a>
-      <a href="#pipeline">Pipeline & Mobile</a>
-      <a href="#messaging">Messaging & Notifications</a>
-      <a href="#integrations">Integrations</a>
-      <a href="#metrics">Metrics & Reports</a>
-      <a href="#settings">Settings</a>
-      <a href="#upcoming">Upcoming</a>
-      <a href="#soon">Coming Soon</a>
+    <div class="toc-row">
+      <div class="toc">
+        <a href="#proposals">Proposals</a>
+        <a href="#portal">Customer Portal & Invoicing</a>
+        <a href="#workorders">Work Orders</a>
+        <a href="#booking">Booking Forms</a>
+        <a href="#pipeline">Pipeline & Mobile</a>
+        <a href="#messaging">Messaging & Notifications</a>
+        <a href="#integrations">Integrations</a>
+        <a href="#metrics">Metrics & Reports</a>
+        <a href="#settings">Settings</a>
+        <a href="#upcoming">Upcoming</a>
+        <a href="#soon">Coming Soon</a>
+      </div>
+      <button class="toggle-all-btn" id="toggleAllBtn" type="button">Collapse All</button>
     </div>
 
     <!-- PROPOSALS -->
@@ -767,6 +791,16 @@
       head.addEventListener('click', function(){
         head.closest('.section').classList.toggle('collapsed');
       });
+    });
+
+    var toggleAllBtn = document.getElementById('toggleAllBtn');
+    var allCollapsed = false;
+    toggleAllBtn.addEventListener('click', function(){
+      allCollapsed = !allCollapsed;
+      document.querySelectorAll('.section').forEach(function(section){
+        section.classList.toggle('collapsed', allCollapsed);
+      });
+      toggleAllBtn.textContent = allCollapsed ? 'Expand All' : 'Collapse All';
     });
   </script>
 </body>
