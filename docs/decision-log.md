@@ -11,6 +11,13 @@ Format:
 
 ---
 
+## [2026-07-31] Stripe Instant Payouts: built from ticket 86b62np7t
+- Decision: Built `stripe-instant-payouts/`, a clickable prototype for connected accounts to request Instant Payouts of a paid invoice's proceeds. Placed the "Get Paid Instantly" capability directly on the invoice's payment context (matching the ticket's "instant payout option on an associated invoice" AC), with a persona toggle to also show a lightweight admin summary (volume, fee revenue, per-account table) rather than a full dedicated reporting tab, since the ticket explicitly marks a filterable Payments/Earnings reporting tab as out of scope/V2. Modeled all four eligibility states called out in the ticket (eligible, no eligible payout method, approaching daily limit, daily limit reached) plus the fee-disclosure-before-confirm step, min/max ($0.50-$9,999 US) and available-balance validation, and both success and simulated-failure outcomes via the dashed "Prototype Controls" panel (same pattern as `send-test-email-drips`).
+- Why: The ticket's own business rules and acceptance criteria are unusually thorough (17 business rules, 6 edge cases, 10 ACs) and already flag several open gaps, so the prototype follows that document closely rather than inventing new scope.
+- Open question: The ticket flags the actual convenience fee amount as TBD pending a business decision; this prototype uses Stripe's own baseline 1% platform fee (from the Pricing section of the dev doc) purely as a placeholder to demonstrate the disclosure UI, not as a proposed rate. Also unaddressed here, per the ticket's own noted gap: refund/dispute clawback handling on funds already paid out instantly, and whether payout confirmations should also send via email/SMS (Postmark/Twilio) versus in-app only.
+
+---
+
 ## [2026-07-31] Proposal Builder mobile section list: fixed jumbled text-wrap bug
 - Decision: Built `proposal-builder-mobile-fix/index.html`, a high-fidelity before/after mockup fixing a reported mobile bug where the proposal builder's section list (Hero Image, Trust Builders, Client Notes, About Us) wrapped titles and descriptions one word per line. Fix: let the text column take its full share of row width and truncate an overly long title/description to one line with an ellipsis, rather than a fixed narrow column that force-wrapped every word.
 - Why: The user-supplied mobile screenshot showed the text column constrained far narrower than the row's available space; the comparison Misc Documents screenshot showed the same settings page already truncates long filenames on one line instead of wrapping, so the fix reuses that existing pattern rather than inventing a new one.

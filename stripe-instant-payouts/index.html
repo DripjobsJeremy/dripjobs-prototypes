@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stripe Instant Payouts — DripJobs</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #F3F1FC;
+    color: #32415B;
+  }
+
+  /* ── Proto bar (hub scaffolding) ── */
+  .proto-bar {
+    background: #FFFFFF;
+    border-bottom: 1px solid #DAD8E3;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: relative;
+    z-index: 500;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; }
+  .back-link {
+    font-size: 12px; font-weight: 500; color: #80879A; text-decoration: none;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .back-link:hover { color: #8B85EA; }
+  .divider { color: #DAD8E3; font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; }
+  .proto-bar-ticket {
+    font-size: 11px; font-weight: 600; color: #8B85EA; text-decoration: none;
+    padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA;
+    border-radius: 999px; letter-spacing: 0.2px;
+  }
+  .proto-bar-ticket:hover { background: #8B85EA; color: #fff; }
+
+  /* ══════════════════════════════════════════════════════════
+     Scoped page styles (#instant-payouts-page)
+     ══════════════════════════════════════════════════════════ */
+  #instant-payouts-page {
+    --pri:        #8B85EA;
+    --pri-hover:  #736BE3;
+    --pri-active: #5C53DC;
+    --pri-rgb:    139, 133, 234;
+    --text:       #32415B;
+    --text-muted: #80879A;
+    --border:     #DAD8E3;
+    --card:       #FFFFFF;
+    position: relative;
+    min-height: calc(100vh - 49px);
+    padding: 28px 32px 100px;
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+
+  /* ── View toggle chips (top of content, not dimmed) ── */
+  .view-toggle { display: flex; gap: 8px; margin-bottom: 20px; }
+  .view-chip {
+    font-size: 12.5px; font-weight: 600; padding: 8px 16px; border-radius: 999px;
+    background: #EFEFF3; color: var(--text); border: none; cursor: pointer; font-family: inherit;
+  }
+  .view-chip.active { background: var(--pri); color: #fff; }
+
+  /* ── Dimmed invoice context (real page, non-interactive) ── */
+  .invoice-bg {
+    filter: saturate(0.9);
+    opacity: 0.6;
+    pointer-events: none;
+    user-select: none;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 18px;
+  }
+  .invoice-bg .crumb { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+  .invoice-bg .head-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .invoice-bg .inv-title { font-size: 18px; font-weight: 700; }
+  .invoice-bg .inv-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .paid-badge { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+  .invoice-bg table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .invoice-bg th { text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; color: var(--text-muted); text-transform: uppercase; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .invoice-bg td { font-size: 13px; padding: 8px 0; border-bottom: 1px solid #F0EFF5; }
+  .invoice-bg .pay-line { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+
+  /* ── Focused feature card (the actual new UI — NOT dimmed) ── */
+  .payout-card {
+    background: #fff; border: 1.5px solid var(--pri); border-radius: 10px; padding: 20px 22px;
+    margin-bottom: 18px; box-shadow: 0 4px 18px rgba(var(--pri-rgb), 0.14);
+  }
+  .payout-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .payout-card-head .ic { width: 30px; height: 30px; border-radius: 8px; background: #E8E6FA; color: var(--pri-active); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .payout-card-head .title { font-size: 15px; font-weight: 700; }
+  .new-badge {
+    background: #1F2937; color: #fff; font-size: 9.5px; font-weight: 700;
+    padding: 2px 8px; border-radius: 6px; letter-spacing: 0.4px;
+  }
+  .payout-card-sub { font-size: 12.5px; color: var(--text-muted); margin: 6px 0 16px; }
+
+  .balance-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 16px; }
+  .balance-amt { font-size: 26px; font-weight: 700; color: var(--text); }
+  .balance-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+  .alert { display: flex; align-items: flex-start; gap: 10px; border-radius: 8px; padding: 12px 14px; font-size: 12.5px; line-height: 1.55; margin-bottom: 16px; }
+  .alert i { margin-top: 1px; flex-shrink: 0; }
+  .alert-title { font-weight: 700; margin-bottom: 2px; }
+  .alert--warn  { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+  .alert--info  { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+  .alert--danger{ background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+  .alert--success{ background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534; }
+  .alert-action { margin-top: 8px; }
+
+  .helper-text { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 20px; border-radius: 8px; font-size: 13.5px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+  .btn-primary { background: var(--pri); color: #fff; }
+  .btn-primary:hover { background: var(--pri-hover); }
+  .btn-primary:disabled { background: #D9D6F5; color: #fff; cursor: not-allowed; }
+  .btn-outline { background: #fff; border: 1px solid var(--pri); color: var(--pri-active); }
+  .btn-outline:hover { background: var(--pri); color: #fff; }
+  .btn-plain { background: #fff; border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-plain:hover { border-color: #B9B7C6; color: var(--text); }
+  .btn-sm { height: 32px; padding: 0 14px; font-size: 12.5px; border-radius: 7px; }
+
+  /* ── Recent payouts card ── */
+  .history-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; }
+  .history-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .history-head .title { font-size: 13.5px; font-weight: 700; }
+  table.history-table { width: 100%; border-collapse: collapse; }
+  .history-table th { text-align: left; font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; color: var(--text-muted); text-transform: uppercase; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  .history-table td { font-size: 12.5px; padding: 10px 8px; border-bottom: 1px solid #F0EFF5; }
+  .history-table tr:last-child td { border-bottom: none; }
+  .status-pill { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .status-pill.paid { background: #F0FDF4; color: #166534; }
+  .status-pill.failed { background: #FEF2F2; color: #991B1B; }
+
+  /* ── Admin view ── */
+  .admin-head { margin-bottom: 18px; }
+  .admin-head .title { font-size: 18px; font-weight: 700; }
+  .admin-head .sub { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+  .stat-tile { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .stat-tile .stat-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+  .stat-tile .stat-value { font-size: 20px; font-weight: 700; }
+  .admin-table-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; }
+  .admin-note { font-size: 11.5px; color: var(--text-muted); margin-top: 12px; }
+
+  /* ── Modal ── */
+  .modal-center { position: fixed; z-index: 1000; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(20,20,30,0.5); }
+  .modal-center.visible { display: flex; }
+  .modal-card { background: #fff; border-radius: 12px; width: 100%; max-width: 440px; box-shadow: 0 20px 50px rgba(20,20,30,0.3); overflow: hidden; }
+  .modal-card-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .modal-card-head h3 { font-size: 15.5px; font-weight: 700; }
+  .modal-close { background: none; border: none; font-size: 18px; color: var(--text-muted); cursor: pointer; line-height: 1; }
+  .modal-close:hover { color: var(--text); }
+  .modal-card-body { padding: 20px 22px; }
+  .modal-card-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 22px; background: #FAFAFB; border-top: 1px solid var(--border); }
+
+  .avail-row { display: flex; justify-content: space-between; align-items: center; background: #F7F6FE; border: 1px solid #E1DEFA; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 12.5px; }
+  .avail-row b { font-size: 14px; }
+
+  .field-label { font-size: 11px; font-weight: 700; letter-spacing: 0.4px; color: var(--text-muted); display: block; margin-bottom: 8px; text-transform: uppercase; }
+  .amt-input-group { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .amt-input-group span { padding: 0 12px; height: 42px; display: flex; align-items: center; font-size: 15px; font-weight: 600; color: var(--text-muted); background: #FAFAFB; border-right: 1px solid var(--border); }
+  .amt-input-group input { flex: 1; height: 42px; border: none; padding: 0 12px; font-size: 15px; font-family: inherit; color: var(--text); }
+  .amt-input-group input:focus { outline: none; }
+  .amt-input-group.focus-ring { border-color: var(--pri); box-shadow: 0 0 0 3px rgba(var(--pri-rgb), 0.18); }
+  .field-error { font-size: 11.5px; color: #DC2626; margin-top: 6px; display: none; }
+  .field-error.show { display: block; }
+
+  .fee-breakdown { margin-top: 16px; font-size: 12.5px; }
+  .fee-row { display: flex; justify-content: space-between; padding: 5px 0; color: var(--text-muted); }
+  .fee-row.total { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 8px; font-weight: 700; color: var(--text); font-size: 13.5px; }
+  .dest-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 12.5px; color: var(--text-muted); }
+  .dest-row i { color: var(--pri-active); }
+
+  /* ── Modal result states ── */
+  .result-state { text-align: center; padding: 8px 0 4px; }
+  .result-state .icon-circle { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 14px; }
+  .result-state.success .icon-circle { background: #DCFCE7; color: #16A34A; }
+  .result-state.failure .icon-circle { background: #FEE2E2; color: #DC2626; }
+  .result-state h4 { font-size: 15.5px; font-weight: 700; margin-bottom: 8px; }
+  .result-state p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .spinner { width: 34px; height: 34px; border: 3px solid #E4E2EC; border-top-color: var(--pri); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 8px auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 1100; max-width: 360px;
+    background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 14px 16px;
+    display: flex; gap: 10px; box-shadow: 0 12px 30px rgba(20,20,30,0.15);
+    transform: translateY(20px); opacity: 0; pointer-events: none; transition: all 0.2s ease;
+  }
+  .toast.visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .toast i.check { color: #16A34A; font-size: 16px; margin-top: 1px; }
+  .toast .t-title { font-size: 13px; font-weight: 700; color: #166534; margin-bottom: 2px; }
+  .toast .t-sub { font-size: 12px; color: #166534; opacity: 0.85; }
+
+  /* ── Prototype controls (dev-only helper, not part of real UI) ── */
+  .proto-controls {
+    position: fixed; left: 20px; bottom: 20px; z-index: 1200; background: #fff;
+    border: 1.5px dashed #C9C5F2; border-radius: 10px; padding: 12px 14px; width: 260px;
+    box-shadow: 0 8px 24px rgba(20,20,30,0.12); font-size: 11.5px;
+  }
+  .proto-controls .pc-label { font-weight: 700; color: #5C53DC; letter-spacing: 0.4px; text-transform: uppercase; font-size: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+  .proto-controls select { width: 100%; height: 32px; border: 1px solid var(--border); border-radius: 6px; font-size: 11.5px; font-family: inherit; color: var(--text); margin-bottom: 10px; padding: 0 8px; }
+  .proto-controls .pc-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+  .proto-controls .pc-row span { color: var(--text); font-weight: 500; line-height: 1.4; }
+  .mini-switch { position: relative; width: 34px; height: 19px; flex-shrink: 0; }
+  .mini-switch input { opacity: 0; width: 0; height: 0; }
+  .mini-switch .track { position: absolute; inset: 0; background: #D1D5DB; border-radius: 999px; cursor: pointer; transition: background 0.15s; }
+  .mini-switch input:checked + .track { background: var(--pri); }
+  .mini-switch .thumb { position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; background: #fff; border-radius: 50%; transition: left 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+  .mini-switch input:checked ~ .thumb { left: 17px; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- Top bar — hub scaffolding -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Stripe Instant Payouts</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/86b62np7t" target="_blank">86b62np7t</a>
+</div>
+
+<div id="instant-payouts-page">
+
+  <!-- View toggle: which persona is looking at this -->
+  <div class="view-toggle">
+    <button type="button" class="view-chip active" id="viewChipContractor" onclick="setView('contractor')">Connected Account View</button>
+    <button type="button" class="view-chip" id="viewChipAdmin" onclick="setView('admin')">Admin Reporting View</button>
+  </div>
+
+  <!-- ═══════════════════════ CONTRACTOR VIEW ═══════════════════════ -->
+  <div id="contractorView">
+
+    <!-- Dimmed background: the invoice this payment came from (context only) -->
+    <div class="invoice-bg">
+      <div class="crumb">Invoices &nbsp;/&nbsp; INV-2265789</div>
+      <div class="head-row">
+        <div>
+          <div class="inv-title">Invoice #INV-2265789</div>
+          <div class="inv-sub">Jeremy Harrison &nbsp;·&nbsp; 412 Sunrise Blvd, Citrus Heights</div>
+        </div>
+        <span class="paid-badge">Paid</span>
+      </div>
+      <table>
+        <thead><tr><th>Description</th><th>Qty</th><th style="text-align:right;">Amount</th></tr></thead>
+        <tbody>
+          <tr><td>Exterior repaint — full house</td><td>1</td><td style="text-align:right;">$3,450.00</td></tr>
+          <tr><td>Deck staining add-on</td><td>1</td><td style="text-align:right;">$400.00</td></tr>
+        </tbody>
+      </table>
+      <div class="pay-line"><i class="far fa-credit-card"></i> Paid in full via Visa Debit •••• 4242 on Jul 29, 2026 &nbsp;·&nbsp; Total $3,850.00</div>
+    </div>
+
+    <!-- Focused feature: the new Instant Payout capability -->
+    <div class="payout-card">
+      <div class="payout-card-head">
+        <div class="ic"><i class="fas fa-bolt"></i></div>
+        <div class="title">Get Paid Instantly</div>
+        <span class="new-badge">NEW</span>
+      </div>
+      <div class="payout-card-sub">This payment is in your available balance. Skip the standard payout schedule and access it now.</div>
+
+      <div class="balance-row">
+        <span class="balance-amt" id="availAmt">$3,811.50</span>
+        <span class="balance-label">available for Instant Payout</span>
+      </div>
+
+      <!-- Scenario: ELIGIBLE -->
+      <div id="stateEligible">
+        <button type="button" class="btn btn-primary" onclick="openPayoutModal()"><i class="fas fa-bolt"></i> Get Paid Instantly</button>
+        <div class="helper-text">Available 24/7, including weekends and holidays. Funds typically arrive within 30 minutes. A 1% instant payout fee applies, shown before you confirm.</div>
+      </div>
+
+      <!-- Scenario: INELIGIBLE — no eligible external account -->
+      <div id="stateIneligible" class="hidden">
+        <div class="alert alert--warn">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div>
+            <div class="alert-title">No eligible payout method on file</div>
+            Instant Payouts require an eligible debit card or supported bank account. Add one to unlock instant access to your balance.
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline"><i class="fas fa-plus"></i> Add Payout Method</button>
+      </div>
+
+      <!-- Scenario: APPROACHING DAILY LIMIT -->
+      <div id="stateApproaching" class="hidden">
+        <div class="alert alert--info">
+          <i class="fas fa-info-circle"></i>
+          <div>
+            <div class="alert-title">Approaching today's Instant Payout limit</div>
+            $8,200.00 of today's $10,000.00 platform-wide limit has been used. $1,800.00 remains available today.
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="openPayoutModal()"><i class="fas fa-bolt"></i> Get Paid Instantly</button>
+        <div class="helper-text">You can request up to the remaining daily limit. Funds typically arrive within 30 minutes.</div>
+      </div>
+
+      <!-- Scenario: DAILY LIMIT REACHED -->
+      <div id="stateLimitReached" class="hidden">
+        <div class="alert alert--danger">
+          <i class="fas fa-ban"></i>
+          <div>
+            <div class="alert-title">Today's Instant Payout limit has been reached</div>
+            All Instant Payouts are paused platform-wide until the daily limit resets at midnight Central Time. This payment remains safely in your available balance.
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" disabled><i class="fas fa-bolt"></i> Get Paid Instantly</button>
+      </div>
+    </div>
+
+    <!-- Recent Instant Payouts -->
+    <div class="history-card">
+      <div class="history-head">
+        <div class="title">Recent Instant Payouts</div>
+      </div>
+      <table class="history-table">
+        <thead>
+          <tr><th>Date</th><th>Amount</th><th>Fee</th><th>Net</th><th>Status</th><th>Arrival</th></tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr>
+            <td>Jul 24, 2026</td><td>$1,240.00</td><td>$12.40</td><td>$1,227.60</td>
+            <td><span class="status-pill paid">Paid</span></td><td>14 min</td>
+          </tr>
+          <tr>
+            <td>Jul 18, 2026</td><td>$2,050.00</td><td>$20.50</td><td>$2,029.50</td>
+            <td><span class="status-pill paid">Paid</span></td><td>22 min</td>
+          </tr>
+          <tr>
+            <td>Jul 10, 2026</td><td>$640.00</td><td>$6.40</td><td>—</td>
+            <td><span class="status-pill failed">Failed</span></td><td>Funds returned to balance</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ ADMIN VIEW ═══════════════════════ -->
+  <div id="adminView" class="hidden">
+    <div class="admin-head">
+      <div class="title">Instant Payouts — Admin Overview</div>
+      <div class="sub">Activity and fee revenue across all connected accounts, this month.</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-tile">
+        <div class="stat-label">Instant Payout Volume</div>
+        <div class="stat-value">$34,420.00</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">Fee Revenue Collected</div>
+        <div class="stat-value">$344.20</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">Instant Payouts</div>
+        <div class="stat-value">29</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">Accounts Using It</div>
+        <div class="stat-value">3</div>
+      </div>
+    </div>
+
+    <div class="admin-table-card">
+      <table class="history-table">
+        <thead>
+          <tr><th>Connected Account</th><th>Payouts</th><th>Volume</th><th>Fees Collected</th><th>Last Payout</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Jeremy's Painting LLC</td><td>14</td><td>$18,420.00</td><td>$184.20</td><td>Jul 29, 2026</td></tr>
+          <tr><td>Coastal Pro Painters</td><td>9</td><td>$9,860.00</td><td>$98.60</td><td>Jul 28, 2026</td></tr>
+          <tr><td>Summit Exteriors</td><td>6</td><td>$6,140.00</td><td>$61.40</td><td>Jul 26, 2026</td></tr>
+        </tbody>
+      </table>
+      <div class="admin-note">Filtering, date-range selection, and export are planned for a dedicated Payments/Earnings reporting tab (future enhancement, out of scope here).</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════ MODAL: Get Paid Instantly ═══════════════════════ -->
+<div class="modal-center" id="payoutModal">
+  <div class="modal-card">
+
+    <!-- Step 1: amount entry -->
+    <div id="modalStepForm">
+      <div class="modal-card-head">
+        <h3><i class="fas fa-bolt" style="color:#8B85EA;margin-right:6px;"></i> Get Paid Instantly</h3>
+        <button class="modal-close" onclick="closePayoutModal()">&times;</button>
+      </div>
+      <div class="modal-card-body">
+        <div class="avail-row">
+          <span>Available for Instant Payout</span>
+          <b id="modalAvail">$3,811.50</b>
+        </div>
+
+        <label class="field-label" for="payoutAmount">Payout amount</label>
+        <div class="amt-input-group" id="amtGroup">
+          <span>$</span>
+          <input type="number" id="payoutAmount" step="0.01" value="3811.50" oninput="onAmountChange()" onfocus="amtGroup.classList.add('focus-ring')" onblur="amtGroup.classList.remove('focus-ring')" />
+        </div>
+        <div class="field-error" id="amtError"></div>
+        <div class="helper-text">Min $0.50 · Max $9,999.00 per payout (US)</div>
+
+        <div class="fee-breakdown">
+          <div class="fee-row"><span>Instant Payout fee (1%)</span><span id="feeAmt">$38.12</span></div>
+          <div class="fee-row total"><span>You'll receive</span><span id="netAmt">$3,773.38</span></div>
+        </div>
+
+        <div class="dest-row"><i class="far fa-credit-card"></i> Visa Debit •••• 4242</div>
+      </div>
+      <div class="modal-card-foot">
+        <button class="btn btn-plain" onclick="closePayoutModal()">Cancel</button>
+        <button class="btn btn-primary" id="confirmPayoutBtn" onclick="submitPayout()">Confirm Payout</button>
+      </div>
+    </div>
+
+    <!-- Step 2: processing -->
+    <div id="modalStepProcessing" class="hidden">
+      <div class="modal-card-body result-state">
+        <div class="spinner"></div>
+        <h4>Sending your payout…</h4>
+        <p>This usually takes just a moment.</p>
+      </div>
+    </div>
+
+    <!-- Step 3a: success -->
+    <div id="modalStepSuccess" class="hidden">
+      <div class="modal-card-body result-state success">
+        <div class="icon-circle"><i class="fas fa-check"></i></div>
+        <h4>Instant Payout Requested</h4>
+        <p><b id="successNet">$3,773.38</b> is on its way to Visa Debit •••• 4242. Funds typically arrive within 30 minutes.</p>
+      </div>
+      <div class="modal-card-foot">
+        <button class="btn btn-primary" onclick="closePayoutModal()">Done</button>
+      </div>
+    </div>
+
+    <!-- Step 3b: failure -->
+    <div id="modalStepFailure" class="hidden">
+      <div class="modal-card-body result-state failure">
+        <div class="icon-circle"><i class="fas fa-times"></i></div>
+        <h4>Instant Payout Failed</h4>
+        <p>We couldn't complete this payout. Your funds remain safely in your available balance — no charge was made.</p>
+      </div>
+      <div class="modal-card-foot">
+        <button class="btn btn-plain" onclick="closePayoutModal()">Use Standard Payout Instead</button>
+        <button class="btn btn-primary" onclick="retryPayout()">Try Again</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <i class="fas fa-check-circle check"></i>
+  <div>
+    <div class="t-title">Instant Payout sent</div>
+    <div class="t-sub" id="toastSub">$3,773.38 is on its way to Visa Debit •••• 4242.</div>
+  </div>
+</div>
+
+<!-- Prototype controls (not part of the real UI) -->
+<div class="proto-controls">
+  <div class="pc-label"><i class="fas fa-sliders-h"></i> Prototype Controls</div>
+  <select id="scenarioSelect" onchange="setScenario(this.value)">
+    <option value="eligible">Eligible &amp; available</option>
+    <option value="ineligible">Ineligible — no payout method</option>
+    <option value="approaching">Approaching daily limit</option>
+    <option value="limit">Daily limit reached</option>
+  </select>
+  <div class="pc-row">
+    <span>Simulate payout failure</span>
+    <label class="mini-switch">
+      <input type="checkbox" id="failToggle" />
+      <span class="track"></span>
+      <span class="thumb"></span>
+    </label>
+  </div>
+</div>
+
+<script>
+  var amtGroup = document.getElementById('amtGroup');
+  var AVAILABLE = 3811.50;
+  var MIN_AMT = 0.50;
+  var MAX_AMT = 9999.00;
+  var FEE_RATE = 0.01;
+
+  function fmt(n) {
+    return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function setView(view) {
+    document.getElementById('contractorView').classList.toggle('hidden', view !== 'contractor');
+    document.getElementById('adminView').classList.toggle('hidden', view !== 'admin');
+    document.getElementById('viewChipContractor').classList.toggle('active', view === 'contractor');
+    document.getElementById('viewChipAdmin').classList.toggle('active', view === 'admin');
+  }
+
+  function setScenario(scenario) {
+    ['stateEligible', 'stateIneligible', 'stateApproaching', 'stateLimitReached'].forEach(function (id) {
+      document.getElementById(id).classList.add('hidden');
+    });
+    var map = {
+      eligible: 'stateEligible',
+      ineligible: 'stateIneligible',
+      approaching: 'stateApproaching',
+      limit: 'stateLimitReached'
+    };
+    document.getElementById(map[scenario]).classList.remove('hidden');
+
+    if (scenario === 'approaching') {
+      AVAILABLE = 1800.00;
+    } else {
+      AVAILABLE = 3811.50;
+    }
+    document.getElementById('availAmt').textContent = fmt(AVAILABLE);
+  }
+
+  function openPayoutModal() {
+    document.getElementById('modalStepForm').classList.remove('hidden');
+    document.getElementById('modalStepProcessing').classList.add('hidden');
+    document.getElementById('modalStepSuccess').classList.add('hidden');
+    document.getElementById('modalStepFailure').classList.add('hidden');
+    document.getElementById('modalAvail').textContent = fmt(AVAILABLE);
+    document.getElementById('payoutAmount').value = Math.min(AVAILABLE, MAX_AMT).toFixed(2);
+    onAmountChange();
+    document.getElementById('payoutModal').classList.add('visible');
+  }
+
+  function closePayoutModal() {
+    document.getElementById('payoutModal').classList.remove('visible');
+  }
+
+  function onAmountChange() {
+    var input = document.getElementById('payoutAmount');
+    var amt = parseFloat(input.value) || 0;
+    var err = document.getElementById('amtError');
+    var confirmBtn = document.getElementById('confirmPayoutBtn');
+    var message = '';
+
+    if (amt < MIN_AMT) {
+      message = 'Minimum Instant Payout is ' + fmt(MIN_AMT) + '.';
+    } else if (amt > MAX_AMT) {
+      message = 'Maximum Instant Payout is ' + fmt(MAX_AMT) + ' per transaction.';
+    } else if (amt > AVAILABLE) {
+      message = 'Amount exceeds your available balance of ' + fmt(AVAILABLE) + '.';
+    }
+
+    if (message) {
+      err.textContent = message;
+      err.classList.add('show');
+      confirmBtn.disabled = true;
+    } else {
+      err.classList.remove('show');
+      confirmBtn.disabled = false;
+    }
+
+    var fee = amt * FEE_RATE;
+    var net = amt - fee;
+    document.getElementById('feeAmt').textContent = fmt(fee);
+    document.getElementById('netAmt').textContent = fmt(net);
+  }
+
+  function submitPayout() {
+    document.getElementById('modalStepForm').classList.add('hidden');
+    document.getElementById('modalStepProcessing').classList.remove('hidden');
+
+    setTimeout(function () {
+      document.getElementById('modalStepProcessing').classList.add('hidden');
+      var willFail = document.getElementById('failToggle').checked;
+
+      if (willFail) {
+        document.getElementById('modalStepFailure').classList.remove('hidden');
+      } else {
+        var amt = parseFloat(document.getElementById('payoutAmount').value) || 0;
+        var fee = amt * FEE_RATE;
+        var net = amt - fee;
+        document.getElementById('successNet').textContent = fmt(net);
+        document.getElementById('modalStepSuccess').classList.remove('hidden');
+        prependHistoryRow(amt, fee, net);
+        showToast(net);
+      }
+    }, 1400);
+  }
+
+  function retryPayout() {
+    document.getElementById('modalStepFailure').classList.add('hidden');
+    document.getElementById('modalStepForm').classList.remove('hidden');
+  }
+
+  function prependHistoryRow(amt, fee, net) {
+    var tbody = document.getElementById('historyBody');
+    var row = document.createElement('tr');
+    row.innerHTML =
+      '<td>Today</td><td>' + fmt(amt) + '</td><td>' + fmt(fee) + '</td><td>' + fmt(net) + '</td>' +
+      '<td><span class="status-pill paid">Paid</span></td><td>Pending (~30 min)</td>';
+    tbody.insertBefore(row, tbody.firstChild);
+  }
+
+  function showToast(net) {
+    document.getElementById('toastSub').textContent = fmt(net) + ' is on its way to Visa Debit •••• 4242.';
+    var toast = document.getElementById('toast');
+    toast.classList.add('visible');
+    setTimeout(function () { toast.classList.remove('visible'); }, 4000);
+  }
+</script>
+
+</body>
+</html>
