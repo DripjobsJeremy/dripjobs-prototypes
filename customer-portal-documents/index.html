@@ -206,6 +206,8 @@
   }
   #portal-docs-page .doc-visibility-toggle.on { background: var(--st-color-primary); }
   #portal-docs-page .doc-visibility-toggle.on::after { transform: translateX(13px); }
+  #portal-docs-page .hidden-text { font-size: 10.5px; font-weight: 600; font-style: italic; color: var(--st-color-text-muted); white-space: nowrap; flex-shrink: 0; }
+  #portal-docs-page .compare-helper-text { font-size: 11.5px; color: var(--st-color-text-muted); margin: 8px 0 0; }
 
   /* Alerts */
   #portal-docs-page .settings-alert {
@@ -536,6 +538,7 @@ let selectedIcon = ICON_CHOICES[0];
 
 /* ============== Design comparison: per-document Show/Hide ============== */
 function renderCompare() {
+  const atCap = compareDocs.length >= DOC_CAP;
   const rowA = (d, i) => `
     <div class="doc-file-row ${!d.visible ? 'is-hidden-row' : ''}">
       <i class="doc-file-icon fa-solid fa-file-pdf"></i>
@@ -545,26 +548,67 @@ function renderCompare() {
       <button class="eye-toggle-btn" onclick="toggleCompareVisibility(${i})" title="${d.visible ? 'Hide from portal' : 'Show on portal'}">
         <i class="fa-solid ${d.visible ? 'fa-eye' : 'fa-eye-slash'}"></i>
       </button>
+      <button class="pill-remove" onclick="removeCompareDoc(${i})">Remove</button>
     </div>`;
   const rowB = (d, i) => `
     <div class="doc-file-row ${!d.visible ? 'is-hidden-row' : ''}">
       <i class="doc-file-icon fa-solid fa-file-pdf"></i>
       <span class="doc-file-name" title="${d.name}">${d.name}</span>
       <span class="doc-file-date">${d.date}</span>
+      ${!d.visible ? '<span class="hidden-text">Hidden</span>' : ''}
       <span class="doc-visibility-toggle ${d.visible ? 'on' : ''}" onclick="toggleCompareVisibility(${i})"
         title="${d.visible ? 'Visible on Customer Portal — click to hide' : 'Hidden from Customer Portal — click to show'}"></span>
+      <button class="pill-remove" onclick="removeCompareDoc(${i})">Remove</button>
+    </div>`;
+  const metaRow = `
+    <div class="doc-meta-row">
+      <span class="doc-count-label ${atCap ? 'at-cap' : ''}">${compareDocs.length}/${DOC_CAP} documents</span><br>
+      ${atCap
+        ? `<span class="cap-note">Maximum of ${DOC_CAP} documents reached. Remove one to upload another.</span>`
+        : `<span class="add-file-link" onclick="addCompareDoc()">+ Add another document</span>`}
     </div>`;
 
   document.getElementById('compareCardA').innerHTML = `
-    <div class="doc-card-head"><i class="doc-card-icon fa-solid fa-file-pdf" style="color:#2563EB;"></i><span class="doc-card-title">Insurance</span></div>
-    <div class="doc-card-body"><div class="doc-file-list">${compareDocs.map(rowA).join('')}</div></div>`;
+    <div class="doc-card-head">
+      <i class="doc-card-icon fa-solid fa-file-pdf" style="color:#2563EB;"></i>
+      <span class="doc-card-title">Insurance</span>
+      <button class="pill-upload" ${atCap ? 'disabled' : ''} onclick="addCompareDoc()">Upload</button>
+    </div>
+    <div class="doc-card-body">
+      <div class="doc-file-list">${compareDocs.map(rowA).join('')}</div>
+      ${metaRow}
+    </div>`;
   document.getElementById('compareCardB').innerHTML = `
-    <div class="doc-card-head"><i class="doc-card-icon fa-solid fa-file-pdf" style="color:#2563EB;"></i><span class="doc-card-title">Insurance</span></div>
-    <div class="doc-card-body"><div class="doc-file-list">${compareDocs.map(rowB).join('')}</div></div>`;
+    <div class="doc-card-head">
+      <i class="doc-card-icon fa-solid fa-file-pdf" style="color:#2563EB;"></i>
+      <span class="doc-card-title">Insurance</span>
+      <button class="pill-upload" ${atCap ? 'disabled' : ''} onclick="addCompareDoc()">Upload</button>
+    </div>
+    <p class="compare-helper-text">Toggle shows or hides a document on the Customer Portal.</p>
+    <div class="doc-card-body">
+      <div class="doc-file-list">${compareDocs.map(rowB).join('')}</div>
+      ${metaRow}
+    </div>`;
 }
 function toggleCompareVisibility(i) {
   compareDocs[i].visible = !compareDocs[i].visible;
   renderCompare();
+}
+function removeCompareDoc(i) {
+  compareDocs.splice(i, 1);
+  renderCompare();
+  showToast('Document removed.');
+}
+function addCompareDoc() {
+  if (compareDocs.length >= DOC_CAP) {
+    showToast(`This category has reached the maximum of ${DOC_CAP} documents.`, true);
+    return;
+  }
+  const names = ['Signed_Disclaimer.pdf', 'Right_to_Lien_Notice.pdf', 'Privacy_Notice.pdf', 'OR_Contractor_License.pdf'];
+  const name = names[Math.floor(Math.random() * names.length)];
+  compareDocs.push({ name, date: today(), visible: true });
+  renderCompare();
+  showToast('Document uploaded.');
 }
 
 /* ============== Tabs ============== */
