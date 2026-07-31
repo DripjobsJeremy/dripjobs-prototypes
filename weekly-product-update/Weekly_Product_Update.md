@@ -1,73 +1,78 @@
 # DripJobs Weekly Product Update
 
-**Period:** July 13 – July 17, 2026
-**Release:** Jul 15 deployment · 8 updates
-
----
-
-## Financing
-
-### Acorn Financing Now Available on the Pro Plan — *New · Jul 15*
-**What changed:** Acorn Financing is now available to DripJobs Pro plan companies under Company Settings > Integrations, with the same eligibility rules, state exclusions, and Massachusetts $6,700 minimum that already apply to Advanced plan accounts.
-**Why it matters:** Pro plan companies can offer financing to their customers without needing to upgrade to Advanced.
-**Action needed:** None
+**Period:** July 27 – July 31, 2026
+**Release:** Jul 27 deployment · 10 updates
 
 ---
 
 ## Proposal Builder
 
-### Inline Tax Rate Entry in Proposal Builder & Templates — *New · Jul 15*
-**What changed:** Enter tax rates directly inside a proposal or proposal template instead of navigating to settings.
-**Why it matters:** One less trip to a different screen when a job needs a different tax rate.
+### Fixed Proposals Not Inheriting Company Tax Rate — *Jul 27*
+**What changed:** Fixed a bug where new proposals started with a blank tax rate instead of automatically inheriting the company tax rate configured in Company Settings, which threw off proposal totals until the rate was set manually.
+**Why it matters:** New proposals now calculate tax correctly from the start, without an extra manual step.
 **Action needed:** None
 
-### Drag-and-Drop Proposal Section Reordering — *New · Jul 15*
-**What changed:** Replaced the old button-based Move/Before-After controls in Proposal Section Order with drag-and-drop.
-**Why it matters:** Reordering sections in a proposal template is faster and feels more natural.
+### Fixed Substrate Measurements Reverting on Proposals — *Jul 27*
+**What changed:** Fixed a bug where certain SQFT-based substrate measurements could revert to an old saved value after clicking Next, with the incorrect value also showing up in Customer View.
+**Why it matters:** Substrate measurements you enter now save and display correctly everywhere, so proposals reflect the numbers you actually measured.
 **Action needed:** None
 
-### Fixed Missing White Background on Proposal Line Item Cards — *Jul 15*
-**What changed:** Line item cards in the client-facing proposal view had lost their white background and were blending into the page. Restored the white background so cards stand out again.
-**Why it matters:** Customers can clearly read and distinguish each line item again, on both browser and mobile.
-**Action needed:** None
-
----
-
-## Contacts
-
-### Contact Profiles Now Show Upcoming Job Schedule Dates — *New · Jul 15*
-**What changed:** A contact's profile now shows their upcoming scheduled jobs from the Jobs Pipeline directly on the Appointments tab, with a Job Detail modal for quick access.
-**Why it matters:** No more digging through deal cards or old texts to find when a customer's job is scheduled.
+### Archived and Deleted Proposals No Longer Visible to Customers — *New · Jul 27*
+**What changed:** Archived or deleted proposals no longer appear in a customer's Proposals list in the Customer Portal. If a customer opens a direct link to a proposal that's since been archived, they now see a closure message instead of the proposal content.
+**Why it matters:** Customers can't act on a proposal you've already closed out, and won't see stale pricing or job details through old links.
 **Action needed:** None
 
 ---
 
-## Billing & Invoicing
+## Sales Pipeline
 
-### New Tax Registration Number Field in Company Settings — *New · Jul 15*
-**What changed:** Added a Tax Registration Number field in Company Settings (for GST/HST on Canadian accounts), with a toggle to automatically display it on invoice PDFs and in the Customer Portal.
-**Why it matters:** Canadian accounts can show their tax registration number on invoices without manually editing every PDF.
-**Action needed:** Add your tax registration number in Company Settings if you'd like it to appear on invoices.
+### Bulk Archive Booking Requests — *New · Jul 27*
+**What changed:** You can now select multiple booking requests in the Requests list and archive them all at once, instead of archiving them one at a time. A confirmation step lets you choose whether to archive just the requests or the requests and their associated deal cards.
+**Why it matters:** Clearing out a backlog of stale booking requests takes one bulk action instead of dozens of individual ones.
+**Action needed:** None
+
+---
+
+## Job Costing
+
+### Fixed Job Costing Search by Job Name — *Jul 27*
+**What changed:** Fixed a bug where searching for a job by name on the Job Costing page and clicking Go just refreshed the page instead of returning results. Search now returns matching job costings, or a clear message when nothing matches.
+**Why it matters:** You can find the job costing you're looking for by name instead of scrolling to find it manually.
+**Action needed:** None
+
+---
+
+## Text Messaging
+
+### Fixed False Error Banner After Successful Proposal Text — *Jul 27*
+**What changed:** Fixed a bug where sending a proposal by text could show a red error banner claiming the text failed to send, even though the message was delivered and the chat should have updated normally.
+**Why it matters:** You won't see a false failure warning on a proposal text that actually went through.
+**Action needed:** None
+
+---
+
+## Integrations
+
+### New Zapier Trigger: Payment Marked as Received — *New · Jul 27*
+**What changed:** Added a new Zapier trigger that fires whenever a payment is registered, including partial payments and deposits, with payment, invoice, customer, and deal details exposed as individually mappable fields.
+**Why it matters:** You can build automations off any payment event, including partials, without extra lookups.
+**Action needed:** The new trigger is available now in your Zapier account under DripJobs triggers.
+
+### New Zapier Trigger: Proposal Rejected — *New · Jul 27*
+**What changed:** Added a new Zapier trigger that fires when a proposal is rejected, including the proposal ID, total, status, and the associated deal and contact IDs.
+**Why it matters:** You can automate follow-up workflows the moment a proposal is rejected instead of checking manually.
+**Action needed:** The new trigger is available now in your Zapier account under DripJobs triggers.
+
+### Cleaned Up Fields on Three Zap Steps — *Jul 27*
+**What changed:** Removed a set of unused fields from the Find Most Recent Deal or Job, Move Job, and Job Costing Completed Zap steps to simplify the field list when mapping them, and made Drip Sequence an optional field on the Move Job action instead of required.
+**Why it matters:** Less clutter when building a Zap, and Move Job no longer forces you to specify a drip sequence you don't need.
+**Action needed:** If an existing Zap maps one of the removed fields, it may need updating. Reach out to your Customer Success contact if a Zap stops working as expected.
 
 ---
 
 ## Admin Settings
 
-### Fixed Company Settings Page Error — *Jul 15*
-**What changed:** Fixed a bug where the Company Settings page showed a "Whoops" error instead of loading, for both super admin and user-side access.
-**Why it matters:** Company Settings is reliably accessible again for everyone.
-**Action needed:** None
-
-### Fixed Broken Help Link in Email Settings — *Jul 15*
-**What changed:** The "Detailed Setup Instructions" link in Company Settings > Email Settings now points to the correct, current custom email domain setup article instead of a dead page.
-**Why it matters:** A working link when you actually need the setup instructions.
-**Action needed:** None
-
----
-
-## Mobile App & DJ Chat
-
-### Clearer Error Screen When DJ Chat Has a Connection Issue — *Jul 14*
-**What changed:** When DJ Chat has a loading or network error, it now shows a clear, plain-language message explaining the app is unavailable, with a simple retry/reload option — instead of a blank or confusing screen.
-**Why it matters:** You know what happened and what to do next instead of wondering if the app is broken.
+### Account Deactivation Now Pauses Communications and Locks Public Document Links — *New · Jul 27*
+**What changed:** Deactivating a tenant account now automatically pauses that account's active drip sequences and scheduled appointment reminders, halts unsent blasts, and shows a "no longer available" message on public proposal, invoice, and change order links instead of rendering them. Reactivating the account resumes everything normally.
+**Why it matters:** A deactivated account can't keep messaging customers or exposing pricing and job details through old public links.
 **Action needed:** None
