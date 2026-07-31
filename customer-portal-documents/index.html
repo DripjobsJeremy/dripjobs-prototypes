@@ -173,6 +173,40 @@
   }
   #portal-docs-page .custom-empty i { font-size: 22px; margin-bottom: 8px; display: block; color: #C7C9D6; }
 
+  /* Design comparison: per-document Show/Hide (Jul 29 Slack thread) */
+  #portal-docs-page .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { #portal-docs-page .compare-grid { grid-template-columns: 1fr; } }
+  #portal-docs-page .compare-col-title { font-size: 12.5px; font-weight: 700; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+  #portal-docs-page .compare-tag { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; padding: 2px 7px; border-radius: 999px; background: #EFEFF3; color: var(--st-color-text-muted); }
+  #portal-docs-page .compare-tag--rec { background: #E6FAF0; color: #1B9C6E; }
+  #portal-docs-page .doc-file-row.is-hidden-row .doc-file-name,
+  #portal-docs-page .doc-file-row.is-hidden-row .doc-file-date,
+  #portal-docs-page .doc-file-row.is-hidden-row .doc-file-icon { opacity: .45; }
+
+  /* Option A: eye icon + HIDDEN badge */
+  #portal-docs-page .hidden-badge {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px;
+    background: #FDF3E0; color: #B8860B; padding: 2px 6px; border-radius: 5px; white-space: nowrap; flex-shrink: 0;
+  }
+  #portal-docs-page .eye-toggle-btn {
+    background: transparent; border: none; cursor: pointer; color: var(--st-color-text-muted);
+    width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+    border-radius: 6px; flex-shrink: 0; font-size: 12px;
+  }
+  #portal-docs-page .eye-toggle-btn:hover { background: #F3F3F6; color: var(--st-color-text); }
+
+  /* Option B: small switchery-style toggle */
+  #portal-docs-page .doc-visibility-toggle {
+    width: 30px; height: 17px; border-radius: 999px; background: #DAD8E3; position: relative;
+    cursor: pointer; flex-shrink: 0; transition: background .15s ease;
+  }
+  #portal-docs-page .doc-visibility-toggle::after {
+    content: ''; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s ease;
+  }
+  #portal-docs-page .doc-visibility-toggle.on { background: var(--st-color-primary); }
+  #portal-docs-page .doc-visibility-toggle.on::after { transform: translateX(13px); }
+
   /* Alerts */
   #portal-docs-page .settings-alert {
     display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 10px;
@@ -327,6 +361,22 @@
       </div>
     </div>
 
+    <!-- DESIGN COMPARISON: per-document Show/Hide (Jul 29 Slack thread) -->
+    <div class="settings-section">
+      <p class="settings-section-title">Design comparison — per-document Show/Hide</p>
+      <p class="settings-section-subtitle">From the Jul 29 Slack thread on ticket #86b7p31xb: comparing Ali's eye-icon mockup against a small switchery-style toggle for letting admins control which multi-doc uploads appear on the Customer Portal. Both sides read from the same underlying state — toggle either one and watch the other update.</p>
+      <div class="compare-grid">
+        <div>
+          <p class="compare-col-title">Option A — Eye icon <span class="compare-tag">Ali's mockup</span></p>
+          <div class="doc-card" id="compareCardA"></div>
+        </div>
+        <div>
+          <p class="compare-col-title">Option B — Toggle switch <span class="compare-tag compare-tag--rec">Recommended</span></p>
+          <div class="doc-card" id="compareCardB"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- FIXED CATEGORIES -->
     <div class="settings-section">
       <p class="settings-section-title">Company Documents</p>
@@ -462,6 +512,16 @@ let fixedCategories = [
     docs: [ {name:'Invoice_365516.pdf', type:'pdf', date:'Jan 09, 2026'} ] },
 ];
 
+/* Design comparison dataset — mirrors the Insurance category from Ali's mockup screenshot
+   (3 hidden, 2 visible) so both options below are judged against the same real example. */
+let compareDocs = [
+  { name:'invoice-28826-download (4).pdf', date:'Jul 28, 2026', visible:false },
+  { name:'invoice-28826-download (3).pdf', date:'Jul 28, 2026', visible:false },
+  { name:'invoice-28826-download (2).pdf', date:'Jul 28, 2026', visible:false },
+  { name:'invoice-28826-download.pdf',     date:'Jul 28, 2026', visible:true },
+  { name:'proposal-43264-download (1).pdf', date:'Jul 28, 2026', visible:true },
+];
+
 let customCategories = [
   { id: 'cc1', title: 'WA State Licensing', color: PASTELS[3], icon: 'fa-solid fa-id-card',
     docs: [ {name:'WA_Contractor_License.pdf', type:'pdf', date:'Jul 18, 2026'} ] },
@@ -473,6 +533,39 @@ let pendingDelete = null;
 let pendingDocRemoval = null;
 let selectedColor = PASTELS[0];
 let selectedIcon = ICON_CHOICES[0];
+
+/* ============== Design comparison: per-document Show/Hide ============== */
+function renderCompare() {
+  const rowA = (d, i) => `
+    <div class="doc-file-row ${!d.visible ? 'is-hidden-row' : ''}">
+      <i class="doc-file-icon fa-solid fa-file-pdf"></i>
+      <span class="doc-file-name" title="${d.name}">${d.name}</span>
+      <span class="doc-file-date">${d.date}</span>
+      ${!d.visible ? '<span class="hidden-badge">HIDDEN</span>' : ''}
+      <button class="eye-toggle-btn" onclick="toggleCompareVisibility(${i})" title="${d.visible ? 'Hide from portal' : 'Show on portal'}">
+        <i class="fa-solid ${d.visible ? 'fa-eye' : 'fa-eye-slash'}"></i>
+      </button>
+    </div>`;
+  const rowB = (d, i) => `
+    <div class="doc-file-row ${!d.visible ? 'is-hidden-row' : ''}">
+      <i class="doc-file-icon fa-solid fa-file-pdf"></i>
+      <span class="doc-file-name" title="${d.name}">${d.name}</span>
+      <span class="doc-file-date">${d.date}</span>
+      <span class="doc-visibility-toggle ${d.visible ? 'on' : ''}" onclick="toggleCompareVisibility(${i})"
+        title="${d.visible ? 'Visible on Customer Portal — click to hide' : 'Hidden from Customer Portal — click to show'}"></span>
+    </div>`;
+
+  document.getElementById('compareCardA').innerHTML = `
+    <div class="doc-card-head"><i class="doc-card-icon fa-solid fa-file-pdf" style="color:#2563EB;"></i><span class="doc-card-title">Insurance</span></div>
+    <div class="doc-card-body"><div class="doc-file-list">${compareDocs.map(rowA).join('')}</div></div>`;
+  document.getElementById('compareCardB').innerHTML = `
+    <div class="doc-card-head"><i class="doc-card-icon fa-solid fa-file-pdf" style="color:#2563EB;"></i><span class="doc-card-title">Insurance</span></div>
+    <div class="doc-card-body"><div class="doc-file-list">${compareDocs.map(rowB).join('')}</div></div>`;
+}
+function toggleCompareVisibility(i) {
+  compareDocs[i].visible = !compareDocs[i].visible;
+  renderCompare();
+}
 
 /* ============== Tabs ============== */
 function switchTab(tab) {
@@ -798,6 +891,7 @@ function showToast(msg, isWarn) {
 }
 
 /* ============== Init ============== */
+renderCompare();
 renderFixed();
 renderCustom();
 </script>
