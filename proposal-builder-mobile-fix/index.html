@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Proposal Builder — Mobile Section List Fix — DripJobs</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --color-primary:        #8B85EA;
+    --color-primary-hover:  #736BE3;
+    --color-primary-active: #5C53DC;
+    --color-primary-rgb:    139, 133, 234;
+    --color-brand:          #7C3AED;
+    --color-teal:           #0DCECE;
+    --color-text:           #32415B;
+    --color-text-muted:     #80879A;
+    --color-border:         #DAD8E3;
+    --color-card:           #FFFFFF;
+    --color-bg:             #F3F1FC;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100vh;
+  }
+
+  /* Top bar */
+  .proto-bar {
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; }
+  .back-link {
+    font-size: 12px; font-weight: 500; color: var(--color-text-muted);
+    text-decoration: none; display: flex; align-items: center; gap: 4px;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--color-primary); }
+  .divider { color: var(--color-border); font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; }
+  .proto-bar-ticket {
+    font-size: 11px; font-weight: 600; color: var(--color-primary);
+    text-decoration: none; padding: 4px 10px; border: 1px solid #D6D2F5;
+    background: #E8E6FA; border-radius: 999px; letter-spacing: 0.2px;
+  }
+  .proto-bar-ticket:hover { background: var(--color-primary); color: #fff; }
+
+  .proto-content {
+    max-width: 900px;
+    margin: 32px auto;
+    padding: 0 24px 60px;
+  }
+
+  .proto-intro { margin-bottom: 20px; }
+  .proto-intro h1 { font-size: 19px; font-weight: 800; margin-bottom: 6px; }
+  .proto-intro p { font-size: 13px; color: var(--color-text-muted); line-height: 1.6; max-width: 640px; }
+
+  /* Before/After toggle */
+  .ba-toggle {
+    display: inline-flex;
+    background: #EFEFF3;
+    border-radius: 999px;
+    padding: 3px;
+    margin-bottom: 24px;
+    gap: 2px;
+  }
+  .ba-toggle button {
+    font-family: 'Nunito', sans-serif;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .ba-toggle button.active {
+    background: #fff;
+    color: var(--color-text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .ba-toggle button.active.is-before { color: #991B1B; }
+  .ba-toggle button.active.is-after { color: var(--color-primary-active); }
+
+  /* Layout: frame + annotation side by side on desktop */
+  .compare-wrap {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  /* Phone frame */
+  .phone-frame-outer { flex: none; }
+  .phone-frame-label {
+    font-size: 11px; font-weight: 700; color: var(--color-text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .frame-state-chip {
+    font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 999px;
+    text-transform: none; letter-spacing: 0;
+  }
+  .frame-state-chip.is-before { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+  .frame-state-chip.is-after { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+
+  .phone-frame {
+    width: 375px;
+    max-width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(50,65,91,0.10);
+  }
+
+  /* App chrome — context only, not the subject of this fix */
+  .app-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; border-bottom: 1px solid var(--color-border);
+  }
+  .app-topbar-icon { color: var(--color-text); font-size: 16px; line-height: 1; }
+  .app-logo { display: flex; align-items: center; gap: 6px; }
+  .app-logo-mark {
+    width: 22px; height: 22px; border-radius: 6px;
+    background: var(--color-brand);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .app-logo-mark svg { width: 13px; height: 13px; color: #fff; }
+  .app-logo-word { font-size: 17px; font-weight: 800; color: var(--color-brand); letter-spacing: -0.3px; }
+
+  /* Section list — the widget in question */
+  .sl-card { padding: 6px; }
+  .sl-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 8px;
+  }
+  .sl-row + .sl-row { border-top: 1px solid #F0F0F5; }
+  .sl-handle {
+    flex: none; width: 20px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    color: #C7CBDA;
+  }
+  .sl-handle-spacer { flex: none; width: 20px; }
+  .sl-pos {
+    flex: none; width: 24px; height: 24px; border-radius: 50%;
+    background: #EFEFF3; color: var(--color-text-muted);
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sl-icon {
+    flex: none; width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sl-icon svg { width: 18px; height: 18px; }
+  .sl-icon.hero { background: #F0EEFC; color: var(--color-primary-active); }
+  .sl-icon.check { background: #E6FAF0; color: #1a8a57; }
+  .sl-icon.note { background: #FFF3DF; color: #9A5B00; }
+  .sl-icon.building { background: #F0EEFC; color: var(--color-primary-active); }
+
+  .sl-text { min-width: 0; }
+  .sl-name { font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .sl-desc { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+
+  /* BEFORE state — reproduces the reported bug:
+     the text column is squeezed far narrower than the row has room for,
+     so every word of the title and description breaks onto its own line. */
+  .sl-card.is-before .sl-row { gap: 8px; }
+  .sl-card.is-before .sl-text {
+    flex: 0 1 78px;
+    width: 78px;
+    word-break: break-word;
+  }
+
+  /* AFTER state — full-width text column, single-line truncation with
+     ellipsis instead of wrapping, matching the Misc Documents row pattern
+     already used elsewhere in the Customer Portal settings. */
+  .sl-card.is-after .sl-text { flex: 1 1 auto; }
+  .sl-card.is-after .sl-name {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .sl-card.is-after .sl-desc {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* Bottom nav — context only */
+  .app-bottomnav {
+    display: flex; border-top: 1px solid var(--color-border);
+    padding: 10px 4px 12px;
+  }
+  .app-bottomnav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: var(--color-text-muted); font-size: 10px; font-weight: 600;
+  }
+  .app-bottomnav-item svg { width: 18px; height: 18px; }
+
+  /* Annotation column */
+  .annotate-col { flex: 1 1 320px; min-width: 280px; }
+  .settings-alert {
+    display: flex; gap: 10px; align-items: flex-start;
+    border-radius: 8px; padding: 14px 16px; font-size: 13px; line-height: 1.55;
+  }
+  .settings-alert--info { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+  .settings-alert-title { font-weight: 700; margin-bottom: 4px; }
+  .settings-alert svg { flex: none; margin-top: 2px; }
+
+  .change-list { margin-top: 16px; }
+  .change-list h3 {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--color-text-muted); margin-bottom: 10px;
+  }
+  .change-list ul { list-style: none; }
+  .change-list li {
+    font-size: 13px; color: var(--color-text); padding: 8px 0;
+    border-bottom: 1px solid #F0F0F5; display: flex; gap: 8px;
+  }
+  .change-list li:last-child { border-bottom: none; }
+  .change-list li svg { flex: none; margin-top: 2px; color: #1a8a57; }
+
+  .assumption-note {
+    margin-top: 18px; font-size: 12px; color: var(--color-text-muted);
+    background: #FAFAFC; border: 1px dashed var(--color-border);
+    border-radius: 8px; padding: 10px 12px; line-height: 1.6;
+  }
+  .assumption-note b { color: var(--color-text); }
+
+  @media (max-width: 780px) {
+    .compare-wrap { flex-direction: column; }
+    .phone-frame { width: 100%; max-width: 375px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Proposal Builder — Mobile Section List Fix</span>
+  </div>
+  <a class="proto-bar-ticket" href="#" target="_blank">No Ticket</a>
+</div>
+
+<div class="proto-content">
+
+  <div class="proto-intro">
+    <h1>Fixing the jumbled mobile section list</h1>
+    <p>On mobile, the proposal builder's section list (Hero Image, Trust Builders, Client Notes, About Us, etc.) squeezes the title and description into a column far narrower than the row has room for, so text breaks one word per line. The fix gives that column its full share of row width and truncates a too-long title or description on one line with an ellipsis instead of wrapping, the same pattern already used by the Misc Documents list on the same settings page.</p>
+  </div>
+
+  <div class="ba-toggle" id="baToggle">
+    <button type="button" class="is-before active" data-state="before">Before</button>
+    <button type="button" class="is-after" data-state="after">After</button>
+  </div>
+
+  <div class="compare-wrap">
+
+    <div class="phone-frame-outer">
+      <div class="phone-frame-label">
+        375px mobile viewport
+        <span class="frame-state-chip is-before" id="frameChip">Reported bug</span>
+      </div>
+      <div class="phone-frame">
+        <div class="app-topbar">
+          <span class="app-topbar-icon">&#9776;</span>
+          <div class="app-logo">
+            <span class="app-logo-mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="15.5" cy="12" r="1"/></svg>
+            </span>
+            <span class="app-logo-word">dripjobs</span>
+          </div>
+          <span class="app-topbar-icon">&#8942;</span>
+        </div>
+
+        <div class="sl-card is-before" id="slCard">
+          <div class="sl-row">
+            <span class="sl-handle-spacer"></span>
+            <span class="sl-pos">1</span>
+            <span class="sl-icon hero">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 15l4.5-4.5a2 2 0 0 1 2.8 0L14 14l1.8-1.8a2 2 0 0 1 2.8 0L21 15"/><circle cx="8" cy="8.5" r="1.2"/></svg>
+            </span>
+            <span class="sl-text">
+              <div class="sl-name">Hero Image</div>
+              <div class="sl-desc">Cover banner at the very top</div>
+            </span>
+          </div>
+          <div class="sl-row">
+            <span class="sl-handle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M8 6h8M8 12h8M8 18h8"/></svg>
+            </span>
+            <span class="sl-pos">2</span>
+            <span class="sl-icon check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>
+            </span>
+            <span class="sl-text">
+              <div class="sl-name">Trust Builders</div>
+              <div class="sl-desc">Credibility highlights</div>
+            </span>
+          </div>
+          <div class="sl-row">
+            <span class="sl-handle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M8 6h8M8 12h8M8 18h8"/></svg>
+            </span>
+            <span class="sl-pos">3</span>
+            <span class="sl-icon note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H8l-4 4z"/></svg>
+            </span>
+            <span class="sl-text">
+              <div class="sl-name">Client Notes</div>
+              <div class="sl-desc">Skips rendering if no note on the proposal</div>
+            </span>
+          </div>
+          <div class="sl-row">
+            <span class="sl-handle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M8 6h8M8 12h8M8 18h8"/></svg>
+            </span>
+            <span class="sl-pos">4</span>
+            <span class="sl-icon building">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 7h.01M15 7h.01M9 11h.01M15 11h.01M9 15h.01M15 15h.01"/></svg>
+            </span>
+            <span class="sl-text">
+              <div class="sl-name">About Us</div>
+              <div class="sl-desc">Your company story</div>
+            </span>
+          </div>
+        </div>
+
+        <div class="app-bottomnav">
+          <span class="app-bottomnav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+            Deals
+          </span>
+          <span class="app-bottomnav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l5 5v13H6z"/><path d="M14 3v5h5"/></svg>
+            Proposals
+          </span>
+          <span class="app-bottomnav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h16v11H4z"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+            Jobs
+          </span>
+          <span class="app-bottomnav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
+            Request
+          </span>
+          <span class="app-bottomnav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>
+            Calendar
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotate-col">
+      <div class="settings-alert settings-alert--info">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <div>
+          <div class="settings-alert-title">Root cause</div>
+          The row's text column was constrained to a fixed width far smaller than the space actually available next to the drag handle, position number, and icon &mdash; so both the title and description wrapped one word per line instead of using the row's full width.
+        </div>
+      </div>
+
+      <div class="change-list">
+        <h3>What changed</h3>
+        <ul>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            Text column now takes the row's remaining width instead of a fixed narrow width.
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            Title truncates to a single line with an ellipsis if it's too long for the row, instead of wrapping.
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            Description truncates the same way, matching the Misc Documents list's filename truncation on the same settings page.
+          </li>
+          <li>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            Drag handle, position number, and icon keep their fixed sizes &mdash; only the text column's width behavior changed.
+          </li>
+        </ul>
+      </div>
+
+      <div class="assumption-note">
+        <b>Assumption flagged:</b> this mockup fixes the text column's mobile layout only, the specific issue shown in the screenshot. It doesn't change the drag-and-drop behavior, row order, or icon set of the underlying Proposal Section Order prototype (see <code>proposal-section-order-dragdrop</code> in this repo). If the actual production bug has a different root cause (e.g. a viewport or column-width issue upstream of this component), flag that back and this mockup can be adjusted.
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  (function () {
+    var toggle = document.getElementById('baToggle');
+    var card = document.getElementById('slCard');
+    var chip = document.getElementById('frameChip');
+    toggle.addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-state]');
+      if (!btn) return;
+      var state = btn.getAttribute('data-state');
+      toggle.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      card.classList.remove('is-before', 'is-after');
+      card.classList.add('is-' + state);
+      chip.classList.remove('is-before', 'is-after');
+      chip.classList.add('is-' + state);
+      chip.textContent = state === 'before' ? 'Reported bug' : 'Fixed';
+    });
+  })();
+</script>
+
+</body>
+</html>
