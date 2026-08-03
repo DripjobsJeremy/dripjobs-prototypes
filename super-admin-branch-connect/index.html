@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Super Admin: Connect Branches - DripJobs</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ══════════════════════════════════════════════
+     PROTO BAR (hub chrome, DM Sans, matches hub)
+     ══════════════════════════════════════════════ */
+  :root {
+    --color-primary:        #8B85EA;
+    --color-primary-hover:  #736BE3;
+    --color-primary-active: #5C53DC;
+    --color-primary-rgb:    139, 133, 234;
+    --color-bg:             #F3F1FC;
+    --color-text:           #32415B;
+    --color-text-muted:     #80879A;
+    --color-border:         #DAD8E3;
+    --color-card:           #FFFFFF;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--color-bg); color: var(--color-text); }
+
+  .proto-bar {
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .back-link {
+    font-size: 12px; font-weight: 500; color: var(--color-text-muted);
+    text-decoration: none; display: flex; align-items: center; gap: 4px;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--color-primary); }
+  .divider { color: var(--color-border); font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; }
+  .proto-bar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .proto-bar-pill {
+    font-size: 11px; font-weight: 600; color: var(--color-primary-active);
+    padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA;
+    border-radius: 999px; letter-spacing: 0.2px; text-decoration: none;
+  }
+  .proto-bar-pill.muted { color: var(--color-text-muted); background: #F3F1FC; border-color: var(--color-border); }
+  .proto-bar-pill:hover { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  .proto-bar-pill.muted:hover { background: #F3F1FC; color: var(--color-text-muted); }
+  .guide-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 700; color: #fff; background: var(--color-primary);
+    border: none; padding: 7px 14px; border-radius: 999px; cursor: pointer;
+  }
+  .guide-btn:hover { background: var(--color-primary-hover); }
+
+  /* ══════════════════════════════════════════════
+     APP SHELL (Nunito, current-product purple #7C3AED)
+     ══════════════════════════════════════════════ */
+  #sa-app {
+    --purple: #7C3AED;
+    --purple-light: #EDE9FE;
+    --purple-dark: #5B21B6;
+    --teal: #0DCECE;
+    --green: #10B981;
+    --green-light: #D1FAE5;
+    --red: #EF4444;
+    --red-light: #FEE2E2;
+    --amber: #D97706;
+    --amber-light: #FFFBEB;
+    --amber-border: #FDE68A;
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --gray-900: #111827;
+    --sidebar-w: 220px;
+    --radius: 10px;
+    --radius-sm: 8px;
+    --shadow-md: 0 4px 16px rgba(17,24,39,0.10);
+    --shadow-lg: 0 12px 32px rgba(17,24,39,0.16);
+
+    font-family: 'Nunito', sans-serif;
+    color: var(--gray-800);
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    height: calc(100vh - 57px);
+    min-height: 640px;
+    background: var(--gray-50);
+    border-top: 1px solid var(--color-border);
+  }
+  #sa-app * { box-sizing: border-box; }
+  #sa-app button, #sa-app input, #sa-app select, #sa-app textarea { font-family: inherit; }
+
+  /* ─── Sidebar ─── */
+  #sa-app .sidebar {
+    width: var(--sidebar-w);
+    background: var(--gray-900);
+    flex-shrink: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  #sa-app .sidebar-logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 18px 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  #sa-app .logo-mark {
+    width: 30px; height: 30px; background: var(--purple); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; font-weight: 800;
+  }
+  #sa-app .logo-text { font-size: 14px; font-weight: 800; color: #fff; }
+  #sa-app .logo-sub { font-size: 10px; font-weight: 700; color: var(--gray-400); letter-spacing: 0.06em; text-transform: uppercase; margin-top: -2px; }
+  #sa-app .sidebar-section { padding: 10px 0; }
+  #sa-app .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 16px; color: var(--gray-400); font-weight: 700; font-size: 13.5px;
+    cursor: pointer; position: relative; transition: background 0.15s, color 0.15s;
+  }
+  #sa-app .sidebar-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+  #sa-app .sidebar-item.active { background: rgba(124,58,237,0.22); color: #fff; }
+  #sa-app .sidebar-item.active::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--purple); border-radius: 0 3px 3px 0;
+  }
+  #sa-app .sidebar-icon { width: 18px; text-align: center; font-size: 15px; }
+
+  /* ─── Main / topbar ─── */
+  #sa-app .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  #sa-app .topbar {
+    height: 58px; background: #fff; border-bottom: 1px solid var(--gray-200);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0;
+  }
+  #sa-app .topbar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  #sa-app .page-title { font-size: 18px; font-weight: 800; color: var(--gray-900); white-space: nowrap; }
+  #sa-app .breadcrumb-link { font-size: 13px; font-weight: 700; color: var(--gray-400); cursor: pointer; white-space: nowrap; }
+  #sa-app .breadcrumb-link:hover { color: var(--purple); }
+  #sa-app .breadcrumb-sep { color: var(--gray-300); }
+  #sa-app .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+  #sa-app .content-scroll { flex: 1; overflow-y: auto; padding: 22px 24px 60px; }
+
+  /* ─── Buttons ─── */
+  #sa-app .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 38px; padding: 0 16px; border-radius: var(--radius-sm);
+    font-size: 13.5px; font-weight: 700; cursor: pointer; border: none;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  #sa-app .btn-primary { background: var(--purple); color: #fff; }
+  #sa-app .btn-primary:hover { background: var(--purple-dark); }
+  #sa-app .btn-primary:disabled { background: var(--gray-300); cursor: not-allowed; }
+  #sa-app .btn-outline { background: #fff; color: var(--gray-700); border: 1.5px solid var(--gray-300); }
+  #sa-app .btn-outline:hover { border-color: var(--purple); color: var(--purple); }
+  #sa-app .btn-sm { height: 32px; padding: 0 12px; font-size: 12.5px; border-radius: 7px; }
+  #sa-app .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  #sa-app .btn-link {
+    background: none; border: none; color: var(--purple); font-weight: 700; font-size: 12.5px;
+    cursor: pointer; padding: 0; text-decoration: none;
+  }
+  #sa-app .btn-link:hover { text-decoration: underline; }
+  #sa-app .btn-link.muted { color: var(--gray-500); }
+
+  /* ─── Toolbar row ─── */
+  #sa-app .toolbar-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  #sa-app .search-input-wrap { position: relative; flex: 1; min-width: 200px; max-width: 340px; }
+  #sa-app .search-input-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--gray-400); }
+  #sa-app .search-input {
+    width: 100%; height: 38px; padding: 0 12px 0 34px; border: 1.5px solid var(--gray-300);
+    border-radius: var(--radius-sm); font-size: 13.5px; background: #fff;
+  }
+  #sa-app .search-input:focus { outline: none; border-color: var(--purple); box-shadow: 0 0 0 3px rgba(124,58,237,0.12); }
+  #sa-app .toolbar-spacer { flex: 1; }
+
+  /* ─── Data table ─── */
+  #sa-app .table-card { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; }
+  #sa-app .table-scroll { overflow-x: auto; }
+  #sa-app table.data-table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  #sa-app table.data-table thead th {
+    text-align: left; font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--gray-400); padding: 11px 16px; border-bottom: 1px solid var(--gray-200); white-space: nowrap; background: var(--gray-50);
+  }
+  #sa-app table.data-table tbody td { padding: 12px 16px; border-bottom: 1px solid var(--gray-100); color: var(--gray-700); vertical-align: middle; }
+  #sa-app table.data-table tbody tr:last-child td { border-bottom: none; }
+  #sa-app .cell-name { font-weight: 700; color: var(--gray-900); }
+  #sa-app .cell-muted { color: var(--gray-400); }
+
+  #sa-app .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 14px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+  #sa-app .status-active { background: var(--green-light); color: #0F7A56; }
+  #sa-app .status-trial { background: #E6F3FA; color: #1D6FA5; }
+
+  #sa-app .branch-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--purple-light); color: var(--purple-dark);
+    font-weight: 700; font-size: 11.5px; padding: 4px 10px; border-radius: 999px;
+    cursor: pointer; border: none; white-space: nowrap;
+  }
+  #sa-app .branch-pill:hover { background: #DFD6FB; }
+  #sa-app .no-branch { color: var(--gray-400); font-size: 12.5px; }
+
+  /* ─── Row action menu ─── */
+  #sa-app .row-actions { position: relative; }
+  #sa-app .row-actions-btn {
+    width: 30px; height: 30px; border-radius: 7px; border: none; background: transparent;
+    color: var(--gray-500); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  #sa-app .row-actions-btn:hover { background: var(--gray-100); color: var(--gray-800); }
+  #sa-app .row-actions-menu {
+    position: absolute; right: 0; top: 34px; background: #fff; border: 1px solid var(--gray-200);
+    border-radius: 9px; box-shadow: var(--shadow-md); z-index: 40; min-width: 190px; display: none; overflow: hidden;
+  }
+  #sa-app .row-actions-menu.open { display: block; }
+  #sa-app .row-actions-menu button {
+    display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 10px 14px;
+    border: none; background: none; font-size: 13px; font-weight: 700; color: var(--gray-700); cursor: pointer;
+  }
+  #sa-app .row-actions-menu button:hover { background: var(--gray-50); color: var(--purple); }
+
+  /* ─── Modal ─── */
+  #sa-app .modal-overlay { position: fixed; inset: 0; background: rgba(17,24,39,0.45); z-index: 800; display: none; align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto; }
+  #sa-app .modal-overlay.open { display: flex; }
+  #sa-app .modal-card { background: #fff; border-radius: 14px; width: 100%; max-width: 560px; box-shadow: var(--shadow-lg); }
+  #sa-app .modal-card.modal-wide { max-width: 640px; }
+  #sa-app .modal-header { padding: 18px 22px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  #sa-app .modal-header h3 { font-size: 15px; font-weight: 800; }
+  #sa-app .modal-header-sub { font-size: 12px; color: var(--gray-500); font-weight: 600; margin-top: 2px; }
+  #sa-app .modal-close { background: none; border: none; font-size: 18px; color: var(--gray-400); cursor: pointer; line-height: 1; }
+  #sa-app .modal-close:hover { color: var(--gray-700); }
+  #sa-app .modal-body { padding: 20px 22px; max-height: 62vh; overflow-y: auto; }
+  #sa-app .modal-footer { padding: 16px 22px; border-top: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+  /* ─── Wizard step label ─── */
+  #sa-app .step-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--purple); margin-bottom: 6px; }
+  #sa-app .field-label { font-size: 12.5px; font-weight: 700; color: var(--gray-700); margin-bottom: 6px; display: block; }
+
+  /* ─── Selected account chip (parent) ─── */
+  #sa-app .selected-account-card {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1.5px solid var(--purple-light);
+    background: var(--purple-light); border-radius: 10px;
+  }
+  #sa-app .account-avatar {
+    width: 34px; height: 34px; border-radius: 8px; background: var(--purple); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0;
+  }
+  #sa-app .selected-account-name { font-size: 13.5px; font-weight: 800; color: var(--gray-900); }
+  #sa-app .selected-account-meta { font-size: 11.5px; color: var(--gray-500); font-weight: 600; }
+
+  /* ─── Typeahead ─── */
+  #sa-app .typeahead-results { margin-top: 8px; border: 1px solid var(--gray-200); border-radius: 9px; overflow: hidden; }
+  #sa-app .typeahead-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; border-bottom: 1px solid var(--gray-100);
+  }
+  #sa-app .typeahead-item:last-child { border-bottom: none; }
+  #sa-app .typeahead-item:hover:not(.disabled) { background: var(--purple-light); }
+  #sa-app .typeahead-item.disabled { cursor: not-allowed; opacity: 0.6; background: var(--gray-50); }
+  #sa-app .typeahead-name { font-size: 13px; font-weight: 700; color: var(--gray-900); }
+  #sa-app .typeahead-meta { font-size: 11.5px; color: var(--gray-500); }
+  #sa-app .typeahead-blocked-tag {
+    margin-left: auto; font-size: 10px; font-weight: 800; color: var(--amber); background: var(--amber-light);
+    border: 1px solid var(--amber-border); padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  }
+  #sa-app .typeahead-empty { padding: 14px 12px; font-size: 12.5px; color: var(--gray-400); text-align: center; }
+
+  /* ─── Existing/pending branch lists ─── */
+  #sa-app .branch-list-card { border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; margin-top: 8px; }
+  #sa-app .branch-list-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--gray-100);
+  }
+  #sa-app .branch-list-row:last-child { border-bottom: none; }
+  #sa-app .branch-list-name { font-size: 13px; font-weight: 700; color: var(--gray-900); flex: 1; }
+  #sa-app .branch-list-remove {
+    background: none; border: none; color: var(--gray-400); font-size: 15px; cursor: pointer; padding: 4px; line-height: 1;
+  }
+  #sa-app .branch-list-remove:hover { color: var(--red); }
+  #sa-app .existing-tag { font-size: 10.5px; font-weight: 800; color: var(--gray-500); background: var(--gray-100); padding: 2px 8px; border-radius: 999px; }
+  #sa-app .pending-tag { font-size: 10.5px; font-weight: 800; color: #0F7A56; background: var(--green-light); padding: 2px 8px; border-radius: 999px; }
+
+  #sa-app .empty-mini { padding: 14px 12px; font-size: 12.5px; color: var(--gray-400); text-align: center; border: 1px dashed var(--gray-200); border-radius: 10px; }
+
+  /* ─── Alerts ─── */
+  #sa-app .alert { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 9px; margin-bottom: 14px; font-size: 12.5px; }
+  #sa-app .alert-icon { font-size: 15px; line-height: 1.3; }
+  #sa-app .alert-title { font-weight: 800; margin-bottom: 2px; }
+  #sa-app .alert--info { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+  #sa-app .alert--success { background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534; }
+  #sa-app .alert--danger { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+  #sa-app .alert-action-row { display: flex; gap: 8px; margin-top: 8px; }
+
+  /* ─── Sync log ─── */
+  #sa-app .sync-log-row { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
+  #sa-app .sync-log-row:last-child { border-bottom: none; }
+  #sa-app .sync-log-icon { width: 26px; height: 26px; border-radius: 7px; background: var(--green-light); color: #0F7A56; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  #sa-app .sync-log-text { font-size: 12.5px; color: var(--gray-700); line-height: 1.5; }
+  #sa-app .sync-log-time { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+  /* ─── Toast ─── */
+  #sa-app .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0;
+    background: var(--gray-900); color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 700;
+    z-index: 1000; transition: all 0.2s; display: flex; align-items: center; gap: 10px; pointer-events: none; max-width: 420px;
+  }
+  #sa-app .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #sa-app .toast-icon { width: 20px; height: 20px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+
+  /* ─── Spinner ─── */
+  #sa-app .spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: sa-spin 0.7s linear infinite; }
+  @keyframes sa-spin { to { transform: rotate(360deg); } }
+
+  /* ─── Demo control (prototype-only, clearly marked) ─── */
+  #sa-app .demo-control {
+    border: 1.5px dashed var(--gray-300); border-radius: 9px; padding: 10px 12px; margin-top: 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--gray-50);
+  }
+  #sa-app .demo-control-label { font-size: 11px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.03em; }
+  #sa-app .demo-control-label span { color: var(--gray-400); font-weight: 700; text-transform: none; letter-spacing: 0; display: block; margin-top: 2px; font-size: 11.5px; }
+
+  @media (max-width: 860px) {
+    #sa-app .sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ Hub proto-bar ═══ -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Super Admin: Connect Branches</span>
+  </div>
+  <div class="proto-bar-right">
+    <span class="proto-bar-pill muted">Needs Design</span>
+    <a class="proto-bar-pill" href="https://app.clickup.com/t/86b2uvyy7" target="_blank">86b2uvyy7</a>
+    <button class="guide-btn" onclick="toggleGuide(true)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3.5"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
+      How to use this prototype
+    </button>
+  </div>
+</div>
+
+<!-- ═══ App shell ═══ -->
+<div id="sa-app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">DJ</div>
+      <div>
+        <div class="logo-text">DripJobs</div>
+        <div class="logo-sub">Super Admin</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-item"><span class="sidebar-icon">🖼️</span> CMS</div>
+      <div class="sidebar-item"><span class="sidebar-icon">⚙️</span> Admin Settings</div>
+      <div class="sidebar-item"><span class="sidebar-icon">🏷️</span> Promo Codes</div>
+      <div class="sidebar-item active"><span class="sidebar-icon">🏢</span> Tenants</div>
+      <div class="sidebar-item"><span class="sidebar-icon">🧪</span> Test Sites</div>
+      <div class="sidebar-item"><span class="sidebar-icon">📞</span> Twilio Management</div>
+      <div class="sidebar-item"><span class="sidebar-icon">✉️</span> Postmark Management</div>
+      <div class="sidebar-item"><span class="sidebar-icon">💓</span> HealthScore</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="page-title">Tenants</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="openConnectModal(null)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+          Connect Branches
+        </button>
+      </div>
+    </div>
+
+    <div class="content-scroll">
+
+      <div class="toolbar-row">
+        <div class="search-input-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input class="search-input" id="tenantsSearch" placeholder="Search tenants..." oninput="renderTenantsTable(this.value)" />
+        </div>
+        <div class="toolbar-spacer"></div>
+        <span style="font-size:12px; color:var(--gray-500); font-weight:600;" id="tenantsCount"></span>
+      </div>
+
+      <div class="table-card">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Account</th>
+                <th>Owner</th>
+                <th>Plan</th>
+                <th>Status</th>
+                <th>Branch Group</th>
+                <th style="width:44px;"></th>
+              </tr>
+            </thead>
+            <tbody id="tenantsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<!-- ═══════════════════════════════════════════════
+     MODAL: Connect Branches wizard
+     ═══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="connectModalOverlay">
+  <div class="modal-card modal-wide">
+    <div class="modal-header">
+      <div>
+        <h3>Connect Branches</h3>
+        <div class="modal-header-sub" id="connectModalSub">Link one or more accounts as branches of a parent account.</div>
+      </div>
+      <button class="modal-close" onclick="closeConnectModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- STEP: Parent account search/select -->
+      <div id="stepParent">
+        <div class="step-label">Step 1 · Parent Account</div>
+        <div id="parentSearchArea">
+          <label class="field-label" for="parentSearchInput">Search for the account to use as the Parent Account</label>
+          <div class="search-input-wrap" style="max-width:none;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input class="search-input" id="parentSearchInput" placeholder="Search accounts by name..." oninput="renderParentResults(this.value)" />
+          </div>
+          <div class="typeahead-results" id="parentResults" style="display:none;"></div>
+        </div>
+        <div id="parentSelectedArea" style="display:none;"></div>
+      </div>
+
+      <!-- STEP: Existing + add branches (shown once parent is selected) -->
+      <div id="stepBranches" style="display:none; margin-top:20px;">
+        <div class="step-label">Step 2 · Existing Branch Connections</div>
+        <div id="existingBranchesArea"></div>
+
+        <div class="step-label" style="margin-top:20px;">Step 3 · Add Branch Accounts</div>
+        <label class="field-label" for="branchSearchInput">Search for accounts to connect as branches</label>
+        <div class="search-input-wrap" style="max-width:none;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input class="search-input" id="branchSearchInput" placeholder="Search accounts by name..." oninput="renderBranchResults(this.value)" />
+        </div>
+        <div class="typeahead-results" id="branchResults" style="display:none;"></div>
+
+        <div style="margin-top:14px;">
+          <label class="field-label">Accounts to connect (<span id="pendingCount">0</span>)</label>
+          <div id="pendingBranchesArea"><div class="empty-mini">Search above and select accounts to add them here.</div></div>
+        </div>
+
+        <div class="demo-control">
+          <div class="demo-control-label">Prototype demo control
+            <span>Preview what happens if the Branch Admin access sync fails after confirming.</span>
+          </div>
+          <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--gray-600); cursor:pointer; white-space:nowrap;">
+            <input type="checkbox" id="simulateFailureToggle" style="width:15px; height:15px; accent-color:var(--purple);" />
+            Simulate failure
+          </label>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-link muted" onclick="closeConnectModal()">Cancel</button>
+      <button class="btn btn-primary" id="confirmConnectBtn" onclick="confirmConnect()" disabled>
+        <span id="confirmConnectLabel">Connect Branches</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MODAL: Branch Group viewer
+     ═══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="groupModalOverlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <h3>Branch Group</h3>
+        <div class="modal-header-sub" id="groupModalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeGroupModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="field-label">Parent</label>
+      <div id="groupParentArea" style="margin-bottom:16px;"></div>
+
+      <label class="field-label">Connected Branches (<span id="groupBranchCount">0</span>)</label>
+      <div id="groupBranchesArea" style="margin-bottom:18px;"></div>
+
+      <div class="alert alert--info" style="margin-bottom:0;">
+        <div class="alert-icon">🔄</div>
+        <div>
+          <div class="alert-title">Branch Admin Access: kept in sync automatically</div>
+          <div>Any user with the Branch Admin role on one account in this group automatically has access to the others. This stays current going forward, no manual re-sync needed when a new Branch Admin is assigned later.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <label class="field-label">Recent sync activity</label>
+        <div id="groupSyncLog"></div>
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeGroupModal()">Close</button>
+      <button class="btn btn-primary" id="groupAddMoreBtn">Add More Branches</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="toast-icon">✓</span><span id="toastMsg"></span></div>
+
+</div><!-- /#sa-app -->
+
+<!-- ═══════════════════════════════════════════════
+     GUIDE PANEL
+     ═══════════════════════════════════════════════ -->
+<div class="guide-overlay-wrap"></div>
+<div id="guideOverlay" style="position:fixed; inset:0; background:rgba(17,24,39,0.35); z-index:900; opacity:0; pointer-events:none; transition:opacity 0.18s;"></div>
+<div id="guidePanel" style="position:fixed; top:0; right:0; height:100%; width:380px; max-width:92vw; background:#fff; z-index:950; box-shadow:-8px 0 24px rgba(17,24,39,0.14); transform:translateX(100%); transition:transform 0.2s; display:flex; flex-direction:column; font-family:'DM Sans', sans-serif;">
+  <div style="padding:18px 18px 14px; border-bottom:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between;">
+    <h3 style="font-size:15px; font-weight:700; color:var(--color-text);">How to use this prototype</h3>
+    <button onclick="toggleGuide(false)" style="background:none; border:none; font-size:18px; color:var(--color-text-muted); cursor:pointer;">✕</button>
+  </div>
+  <div style="padding:16px 18px; overflow-y:auto; flex:1; font-size:12.5px; color:var(--color-text-muted); line-height:1.6;">
+    <div style="margin-bottom:18px;">
+      <div style="font-size:13px; font-weight:700; color:var(--color-text); margin-bottom:3px;">1. Start from Tenants</div>
+      <div>This is the Super Admin nav as it exists today, with <strong>Tenants</strong> active. There's no standalone "Branches" item; the connect flow lives inside Tenants, per the ticket's Access Point.</div>
+    </div>
+    <div style="margin-bottom:18px;">
+      <div style="font-size:13px; font-weight:700; color:var(--color-text); margin-bottom:3px;">2. Two entry points, one flow</div>
+      <div>Click <strong>Connect Branches</strong> in the top-right to start unscoped (search picks the Parent Account). Or click the <strong>⋮</strong> menu on any tenant row and choose Connect Branches to jump in with that account pre-selected as Parent.</div>
+    </div>
+    <div style="margin-bottom:18px;">
+      <div style="font-size:13px; font-weight:700; color:var(--color-text); margin-bottom:3px;">3. Try the duplicate block</div>
+      <div>In the branch search step, type "sunrise": Sunrise Coatings is already a branch of Coastal Painters Group, so it appears disabled with a tag instead of being selectable.</div>
+    </div>
+    <div style="margin-bottom:18px;">
+      <div style="font-size:13px; font-weight:700; color:var(--color-text); margin-bottom:3px;">4. Add multiple, then confirm</div>
+      <div>Add more than one branch before confirming, remove one you added by mistake, then click Connect Branches. A toast confirms the connection and the auto-sync of Branch Admin access.</div>
+    </div>
+    <div style="margin-bottom:18px;">
+      <div style="font-size:13px; font-weight:700; color:var(--color-text); margin-bottom:3px;">5. View an existing group</div>
+      <div>Click the purple "Parent · 2 branches" pill on <strong>Coastal Painters Group</strong>'s row to see existing connections and a sample of the ongoing access-sync log.</div>
+    </div>
+    <div style="margin-bottom:6px;">
+      <div style="font-size:13px; font-weight:700; color:var(--color-text); margin-bottom:3px;">6. See the failure state</div>
+      <div>Check "Simulate failure" in the demo control before confirming to preview the notification shown if Branch Admin sync fails (Edge Case / AC10). That control only exists in this prototype.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ═══════════════════════════════════════════════
+  // Sample data
+  // ═══════════════════════════════════════════════
+  var tenants = [
+    { id: 1, name: "Acme Painting Co.", owner: "John Smith", plan: "Pro", status: "Active", parentId: null },
+    { id: 2, name: "Acme Painting - Westside", owner: "Maria Lopez", plan: "Pro", status: "Active", parentId: null },
+    { id: 3, name: "Acme Painting - Eastside", owner: "Carlos Diaz", plan: "Pro", status: "Active", parentId: null },
+    { id: 4, name: "Coastal Painters Group", owner: "Denise Fox", plan: "Pro", status: "Active", parentId: null },
+    { id: 5, name: "Sunrise Coatings", owner: "Aaron Wells", plan: "Pro", status: "Active", parentId: 4 },
+    { id: 6, name: "Coastal Painters - North", owner: "Priya Nair", plan: "Pro", status: "Active", parentId: 4 },
+    { id: 7, name: "Blue Ridge Painting", owner: "Tom Baker", plan: "Pro", status: "Active", parentId: null },
+    { id: 8, name: "Premier Wall Works", owner: "Sam Ito", plan: "Trial", status: "Trial", parentId: null },
+    { id: 9, name: "Lakeside Coatings", owner: "Grace Kim", plan: "Pro", status: "Active", parentId: null },
+    { id: 10, name: "Northgate Painting Pros", owner: "Ray Turner", plan: "Pro", status: "Active", parentId: null }
+  ];
+
+  var syncLogByParent = {
+    4: [
+      { text: "<strong>Aaron Wells</strong> was assigned the Branch Admin role on Sunrise Coatings; access auto-extended to 1 other account in this group.", time: "Jul 28, 2026 · 9:14 AM" },
+      { text: "Branch group created: Sunrise Coatings and Coastal Painters - North connected to Coastal Painters Group. No Branch Admin assignments to sync yet.", time: "Jul 12, 2026 · 2:03 PM" }
+    ]
+  };
+
+  var wizardParentId = null;   // currently selected parent in the connect modal
+  var wizardParentLocked = false;
+  var wizardPending = [];      // ids added but not yet confirmed
+  var openMenuId = null;
+
+  function accountById(id) { return tenants.find(function (t) { return t.id === id; }); }
+
+  function branchesOf(parentId) {
+    return tenants.filter(function (t) { return t.parentId === parentId; });
+  }
+
+  function initials(name) {
+    var parts = name.split(" ").filter(Boolean);
+    return ((parts[0] || "")[0] || "") + ((parts[1] || "")[0] || "");
+  }
+
+  // ═══════════════════════════════════════════════
+  // Tenants table
+  // ═══════════════════════════════════════════════
+  function renderTenantsTable(filterText) {
+    filterText = (filterText || "").toLowerCase();
+    var tbody = document.getElementById("tenantsTbody");
+    var rows = tenants.filter(function (t) { return t.name.toLowerCase().indexOf(filterText) !== -1; });
+    document.getElementById("tenantsCount").textContent = rows.length + " account" + (rows.length === 1 ? "" : "s");
+
+    tbody.innerHTML = rows.map(function (t) {
+      var branchCell;
+      if (t.parentId === null) {
+        var kids = branchesOf(t.id);
+        if (kids.length > 0) {
+          branchCell = '<button class="branch-pill" onclick="openGroupModal(' + t.id + ')">🔗 Parent · ' + kids.length + ' branch' + (kids.length === 1 ? '' : 'es') + '</button>';
+        } else {
+          branchCell = '<span class="no-branch">-</span>';
+        }
+      } else {
+        var parent = accountById(t.parentId);
+        branchCell = '<button class="branch-pill" onclick="openGroupModal(' + t.parentId + ')">🔗 Branch of ' + parent.name + '</button>';
+      }
+
+      var statusClass = t.status === "Active" ? "status-active" : "status-trial";
+
+      return '' +
+        '<tr>' +
+          '<td class="cell-name">' + t.name + '</td>' +
+          '<td>' + t.owner + '</td>' +
+          '<td>' + t.plan + '</td>' +
+          '<td><span class="status-pill ' + statusClass + '">' + t.status + '</span></td>' +
+          '<td>' + branchCell + '</td>' +
+          '<td>' +
+            '<div class="row-actions">' +
+              '<button class="row-actions-btn" onclick="toggleRowMenu(event, ' + t.id + ')">⋮</button>' +
+              '<div class="row-actions-menu" id="rowMenu' + t.id + '">' +
+                '<button onclick="openConnectModal(' + t.id + ')">🔗 Connect Branches</button>' +
+              '</div>' +
+            '</div>' +
+          '</td>' +
+        '</tr>';
+    }).join("") || '<tr><td colspan="6" style="text-align:center; color:var(--gray-400); padding:30px;">No tenants match your search.</td></tr>';
+  }
+
+  function toggleRowMenu(evt, id) {
+    evt.stopPropagation();
+    var menu = document.getElementById("rowMenu" + id);
+    var wasOpen = menu.classList.contains("open");
+    document.querySelectorAll("#sa-app .row-actions-menu.open").forEach(function (m) { m.classList.remove("open"); });
+    if (!wasOpen) menu.classList.add("open");
+  }
+  document.addEventListener("click", function () {
+    document.querySelectorAll("#sa-app .row-actions-menu.open").forEach(function (m) { m.classList.remove("open"); });
+  });
+
+  // ═══════════════════════════════════════════════
+  // Connect Branches modal
+  // ═══════════════════════════════════════════════
+  function openConnectModal(preselectParentId) {
+    wizardPending = [];
+    document.getElementById("simulateFailureToggle").checked = false;
+    document.getElementById("parentSearchInput").value = "";
+    document.getElementById("branchSearchInput").value = "";
+    document.getElementById("parentResults").style.display = "none";
+    document.getElementById("branchResults").style.display = "none";
+
+    if (preselectParentId) {
+      selectParent(preselectParentId, true);
+    } else {
+      wizardParentId = null;
+      wizardParentLocked = false;
+      document.getElementById("parentSearchArea").style.display = "block";
+      document.getElementById("parentSelectedArea").style.display = "none";
+      document.getElementById("stepBranches").style.display = "none";
+    }
+    updateConfirmButton();
+    document.getElementById("connectModalOverlay").classList.add("open");
+  }
+
+  function closeConnectModal() {
+    document.getElementById("connectModalOverlay").classList.remove("open");
+  }
+
+  function renderParentResults(query) {
+    var box = document.getElementById("parentResults");
+    if (!query) { box.style.display = "none"; box.innerHTML = ""; return; }
+    var q = query.toLowerCase();
+    var matches = tenants.filter(function (t) { return t.name.toLowerCase().indexOf(q) !== -1; }).slice(0, 6);
+    box.style.display = "block";
+    if (matches.length === 0) {
+      box.innerHTML = '<div class="typeahead-empty">No accounts match "' + query + '"</div>';
+      return;
+    }
+    box.innerHTML = matches.map(function (t) {
+      return '' +
+        '<div class="typeahead-item" onclick="selectParent(' + t.id + ', false)">' +
+          '<div class="account-avatar">' + initials(t.name) + '</div>' +
+          '<div><div class="typeahead-name">' + t.name + '</div><div class="typeahead-meta">' + t.owner + ' · ' + t.plan + '</div></div>' +
+        '</div>';
+    }).join("");
+  }
+
+  function selectParent(id, locked) {
+    wizardParentId = id;
+    wizardParentLocked = !!locked;
+    wizardPending = [];
+    var t = accountById(id);
+
+    document.getElementById("parentSearchArea").style.display = "none";
+    var area = document.getElementById("parentSelectedArea");
+    area.style.display = "block";
+    area.innerHTML = '' +
+      '<div class="selected-account-card">' +
+        '<div class="account-avatar">' + initials(t.name) + '</div>' +
+        '<div style="flex:1;">' +
+          '<div class="selected-account-name">' + t.name + '</div>' +
+          '<div class="selected-account-meta">' + t.owner + ' · ' + t.plan + '</div>' +
+        '</div>' +
+        (locked ? '<button class="btn-link muted" onclick="unlockParent()">Change</button>' : '<button class="btn-link muted" onclick="unlockParent()">Change</button>') +
+      '</div>';
+
+    document.getElementById("stepBranches").style.display = "block";
+    document.getElementById("branchSearchInput").value = "";
+    document.getElementById("branchResults").style.display = "none";
+    renderExistingBranches();
+    renderPendingBranches();
+    updateConfirmButton();
+  }
+
+  function unlockParent() {
+    wizardParentId = null;
+    document.getElementById("parentSearchArea").style.display = "block";
+    document.getElementById("parentSelectedArea").style.display = "none";
+    document.getElementById("stepBranches").style.display = "none";
+    document.getElementById("parentSearchInput").value = "";
+    document.getElementById("parentSearchInput").focus();
+    updateConfirmButton();
+  }
+
+  function renderExistingBranches() {
+    var kids = branchesOf(wizardParentId);
+    var el = document.getElementById("existingBranchesArea");
+    if (kids.length === 0) {
+      el.innerHTML = '<div class="empty-mini">No branches connected yet.</div>';
+      return;
+    }
+    el.innerHTML = '<div class="branch-list-card">' + kids.map(function (t) {
+      return '<div class="branch-list-row"><div class="branch-list-name">' + t.name + '</div><span class="existing-tag">ALREADY CONNECTED</span></div>';
+    }).join("") + '</div>';
+  }
+
+  function renderBranchResults(query) {
+    var box = document.getElementById("branchResults");
+    if (!query) { box.style.display = "none"; box.innerHTML = ""; return; }
+    var q = query.toLowerCase();
+    var matches = tenants.filter(function (t) {
+      return t.id !== wizardParentId && t.name.toLowerCase().indexOf(q) !== -1;
+    }).slice(0, 6);
+    box.style.display = "block";
+    if (matches.length === 0) {
+      box.innerHTML = '<div class="typeahead-empty">No accounts match "' + query + '"</div>';
+      return;
+    }
+    box.innerHTML = matches.map(function (t) {
+      var alreadyThisGroup = t.parentId === wizardParentId;
+      var connectedElsewhere = t.parentId !== null && !alreadyThisGroup;
+      var pending = wizardPending.indexOf(t.id) !== -1;
+      var blocked = connectedElsewhere || alreadyThisGroup || pending;
+
+      var tag = "";
+      if (alreadyThisGroup) tag = '<span class="typeahead-blocked-tag">ALREADY CONNECTED</span>';
+      else if (connectedElsewhere) tag = '<span class="typeahead-blocked-tag">CONNECTED TO ' + accountById(t.parentId).name.toUpperCase() + '</span>';
+      else if (pending) tag = '<span class="typeahead-blocked-tag" style="color:#0F7A56; background:var(--green-light); border-color:#BBF7D0;">ADDED</span>';
+
+      return '' +
+        '<div class="typeahead-item' + (blocked ? ' disabled' : '') + '" ' + (blocked ? '' : 'onclick="addPendingBranch(' + t.id + ')"') + '>' +
+          '<div class="account-avatar">' + initials(t.name) + '</div>' +
+          '<div><div class="typeahead-name">' + t.name + '</div><div class="typeahead-meta">' + t.owner + ' · ' + t.plan + '</div></div>' +
+          tag +
+        '</div>';
+    }).join("");
+  }
+
+  function addPendingBranch(id) {
+    if (wizardPending.indexOf(id) === -1) wizardPending.push(id);
+    document.getElementById("branchSearchInput").value = "";
+    document.getElementById("branchResults").style.display = "none";
+    renderPendingBranches();
+    updateConfirmButton();
+  }
+
+  function removePendingBranch(id) {
+    wizardPending = wizardPending.filter(function (x) { return x !== id; });
+    renderPendingBranches();
+    updateConfirmButton();
+  }
+
+  function renderPendingBranches() {
+    document.getElementById("pendingCount").textContent = wizardPending.length;
+    var el = document.getElementById("pendingBranchesArea");
+    if (wizardPending.length === 0) {
+      el.innerHTML = '<div class="empty-mini">Search above and select accounts to add them here.</div>';
+      return;
+    }
+    el.innerHTML = '<div class="branch-list-card">' + wizardPending.map(function (id) {
+      var t = accountById(id);
+      return '' +
+        '<div class="branch-list-row">' +
+          '<div class="branch-list-name">' + t.name + '</div>' +
+          '<span class="pending-tag">PENDING</span>' +
+          '<button class="branch-list-remove" onclick="removePendingBranch(' + id + ')" title="Remove">✕</button>' +
+        '</div>';
+    }).join("") + '</div>';
+  }
+
+  function updateConfirmButton() {
+    document.getElementById("confirmConnectBtn").disabled = !(wizardParentId && wizardPending.length > 0);
+  }
+
+  function confirmConnect() {
+    if (!wizardParentId || wizardPending.length === 0) return;
+    var simulateFailure = document.getElementById("simulateFailureToggle").checked;
+    var btn = document.getElementById("confirmConnectBtn");
+    var label = document.getElementById("confirmConnectLabel");
+    btn.disabled = true;
+    label.innerHTML = '<span class="spinner"></span> Connecting...';
+
+    setTimeout(function () {
+      var parent = accountById(wizardParentId);
+      var addedNames = wizardPending.map(function (id) { return accountById(id).name; });
+
+      if (!simulateFailure) {
+        wizardPending.forEach(function (id) {
+          var t = accountById(id);
+          t.parentId = wizardParentId;
+        });
+      }
+
+      closeConnectModal();
+      label.innerHTML = "Connect Branches";
+      renderTenantsTable(document.getElementById("tenantsSearch").value);
+
+      if (simulateFailure) {
+        showFailureAlert(parent, addedNames);
+      } else {
+        var msg = parent.name + " now has " + addedNames.length + " new branch account" + (addedNames.length === 1 ? "" : "s") +
+          " connected. Branch Admin access synced automatically.";
+        showToast(msg);
+      }
+    }, 900);
+  }
+
+  function showFailureAlert(parent, addedNames) {
+    var overlay = document.getElementById("connectModalOverlay");
+    var card = document.createElement("div");
+    card.className = "modal-card";
+    card.style.maxWidth = "460px";
+    card.innerHTML = '' +
+      '<div class="modal-header"><h3>Branch Admin Sync Failed</h3><button class="modal-close" onclick="this.closest(\'.modal-overlay\').remove()">✕</button></div>' +
+      '<div class="modal-body">' +
+        '<div class="alert alert--danger" style="margin-bottom:0;">' +
+          '<div class="alert-icon">⚠️</div>' +
+          '<div>' +
+            '<div class="alert-title">Couldn\'t sync Branch Admin access</div>' +
+            '<div>The account connection to ' + parent.name + ' did not fully complete for ' + addedNames.join(", ") + '. Branch Admin role access was not synced across the group.</div>' +
+            '<div class="alert-action-row">' +
+              '<button class="btn btn-sm btn-primary" onclick="this.closest(\'.modal-overlay\').remove(); showToast(\'Retrying sync...\');">Retry</button>' +
+              '<button class="btn btn-sm btn-outline" onclick="this.closest(\'.modal-overlay\').remove(); showToast(\'Escalated to engineering.\');">Escalate to Dev</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    var wrap = document.createElement("div");
+    wrap.className = "modal-overlay open";
+    wrap.appendChild(card);
+    document.getElementById("sa-app").appendChild(wrap);
+  }
+
+  // ═══════════════════════════════════════════════
+  // Branch Group viewer modal
+  // ═══════════════════════════════════════════════
+  function openGroupModal(parentId) {
+    var parent = accountById(parentId);
+    var kids = branchesOf(parentId);
+
+    document.getElementById("groupModalSub").textContent = kids.length + " connected account" + (kids.length === 1 ? "" : "s");
+
+    document.getElementById("groupParentArea").innerHTML = '' +
+      '<div class="selected-account-card">' +
+        '<div class="account-avatar">' + initials(parent.name) + '</div>' +
+        '<div><div class="selected-account-name">' + parent.name + '</div><div class="selected-account-meta">' + parent.owner + ' · ' + parent.plan + '</div></div>' +
+      '</div>';
+
+    document.getElementById("groupBranchCount").textContent = kids.length;
+    document.getElementById("groupBranchesArea").innerHTML = kids.length ?
+      '<div class="branch-list-card">' + kids.map(function (t) {
+        return '<div class="branch-list-row"><div class="branch-list-name">' + t.name + '</div><span class="existing-tag">CONNECTED</span></div>';
+      }).join("") + '</div>' :
+      '<div class="empty-mini">No branches connected yet.</div>';
+
+    var log = syncLogByParent[parentId] || [];
+    document.getElementById("groupSyncLog").innerHTML = log.length ?
+      log.map(function (entry) {
+        return '<div class="sync-log-row"><div class="sync-log-icon">✓</div><div><div class="sync-log-text">' + entry.text + '</div><div class="sync-log-time">' + entry.time + '</div></div></div>';
+      }).join("") :
+      '<div class="empty-mini">No Branch Admin roles assigned in this group yet. Nothing to sync until one is.</div>';
+
+    document.getElementById("groupAddMoreBtn").onclick = function () {
+      closeGroupModal();
+      openConnectModal(parentId);
+    };
+
+    document.getElementById("groupModalOverlay").classList.add("open");
+  }
+
+  function closeGroupModal() {
+    document.getElementById("groupModalOverlay").classList.remove("open");
+  }
+
+  // ═══════════════════════════════════════════════
+  // Toast + guide panel
+  // ═══════════════════════════════════════════════
+  function showToast(msg) {
+    var toast = document.getElementById("toast");
+    document.getElementById("toastMsg").textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 3800);
+  }
+
+  function toggleGuide(open) {
+    var overlay = document.getElementById("guideOverlay");
+    var panel = document.getElementById("guidePanel");
+    if (open) {
+      overlay.style.opacity = "1"; overlay.style.pointerEvents = "auto";
+      panel.style.transform = "translateX(0)";
+    } else {
+      overlay.style.opacity = "0"; overlay.style.pointerEvents = "none";
+      panel.style.transform = "translateX(100%)";
+    }
+  }
+  document.getElementById("guideOverlay").addEventListener("click", function () { toggleGuide(false); });
+
+  // ═══════════════════════════════════════════════
+  // Init
+  // ═══════════════════════════════════════════════
+  renderTenantsTable("");
+</script>
+
+</body>
+</html>
