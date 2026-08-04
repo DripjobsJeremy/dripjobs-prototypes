@@ -143,12 +143,13 @@ body{font-family:'Nunito',sans-serif;background:#F0EFF5;color:#32415B;font-size:
 .ai-run-btn:active{transform:translateY(0);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 .ai-run-btn:disabled{background:rgba(255,255,255,.35);color:rgba(255,255,255,.7);cursor:not-allowed;transform:none;box-shadow:none}
 
-/* Range-change notice banner */
-.ai-range-notice{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:7px;padding:7px 12px;font-size:11px;color:#fff;display:none;align-items:center;gap:7px;width:100%;margin-top:0;flex-wrap:wrap}
-.ai-range-notice.visible{display:flex}
-.ai-range-notice strong{font-weight:700}
-.ai-range-rerun{background:rgba(255,255,255,.25);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap}
-.ai-range-rerun:hover{background:rgba(255,255,255,.35)}
+/* Run button + stale-results helper text, grouped so the hint sits directly under the button */
+.ai-ph-run-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+
+/* Stale-results helper text (BR-9 / UX Considerations): shown near the Run Insights button
+   whenever the selected period no longer matches the period the displayed results were run for. */
+.ai-stale-hint{display:none;align-items:flex-start;gap:5px;font-size:10.5px;font-weight:600;color:rgba(255,255,255,.9);text-align:right;max-width:230px;line-height:1.4}
+.ai-stale-hint.visible{display:flex}
 
 /* Never-run state */
 .ai-never-run{background:#FAF8FF;padding:28px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
@@ -231,7 +232,6 @@ body{font-family:'Nunito',sans-serif;background:#F0EFF5;color:#32415B;font-size:
   .ai-grid{grid-template-columns:repeat(2,1fr)}
   .report-grid{grid-template-columns:repeat(2,1fr)}
   .ai-ph-right{width:auto;padding-top:0;border-top:none;margin-top:0;margin-left:auto;flex-wrap:nowrap;justify-content:flex-end}
-  .ai-range-notice{width:auto;margin-top:0}
 }
 @media(min-width:640px){
   .kpi-row{grid-template-columns:repeat(3,1fr)}
@@ -371,15 +371,18 @@ body{font-family:'Nunito',sans-serif;background:#F0EFF5;color:#32415B;font-size:
             <div class="ai-ph-meta" id="panel-meta">
               <strong>Last run May 26, 2026</strong>&nbsp;· for Month period
             </div>
-            <button class="ai-run-btn" id="run-btn" onclick="runInsights()">
-              <i class="fas fa-play" style="font-size:10px"></i> Run Insights
-            </button>
-          </div>
-          <!-- Range-change notice (shown when date range changes after a prior run) -->
-          <div class="ai-range-notice" id="range-notice">
-            <i class="fas fa-info-circle" style="flex-shrink:0"></i>
-            <span id="range-notice-text">Date range changed to <strong id="range-notice-range">YTD</strong>. Insights shown are from <strong>Month</strong> period.</span>
-            <button class="ai-range-rerun" onclick="runInsights()"><i class="fas fa-sync-alt" style="font-size:9px"></i> Re-run</button>
+            <div class="ai-ph-run-wrap">
+              <button class="ai-run-btn" id="run-btn" onclick="runInsights()">
+                <i class="fas fa-play" style="font-size:10px"></i> Run Insights
+              </button>
+              <!-- Stale-results helper text (BR-9 / UX Considerations): insights only regenerate on a
+                   manual Run Insights click, never automatically on period change, so the panel must
+                   flag when the displayed results no longer match the selected period. -->
+              <div class="ai-stale-hint" id="stale-hint">
+                <i class="fas fa-info-circle" style="font-size:9px;margin-top:1px"></i>
+                <span>You've changed the date range. Run insights again to recalculate for this period.</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -684,9 +687,9 @@ body{font-family:'Nunito',sans-serif;background:#F0EFF5;color:#32415B;font-size:
     <button class="demo-btn" id="btn-up" onclick="setP('up')">📈 Strong</button>
     <button class="demo-btn" id="btn-flat" onclick="setP('flat')">➡️ Steady</button>
     <button class="demo-btn full" id="btn-down" onclick="setP('down')">📉 Below Pace</button>
-    <div class="demo-col-label">Range Change Notice</div>
-    <button class="demo-btn" id="btn-notice-on" onclick="setNotice(true)">🔔 Show Notice</button>
-    <button class="demo-btn" id="btn-notice-off" onclick="setNotice(false)">🔕 Hide Notice</button>
+    <div class="demo-col-label">Stale Results Hint</div>
+    <button class="demo-btn" id="btn-notice-on" onclick="setNotice(true)">🔔 Show Hint</button>
+    <button class="demo-btn" id="btn-notice-off" onclick="setNotice(false)">🔕 Hide Hint</button>
     <div class="demo-col-label">Edge Cases (BR-8 / BR-10)</div>
     <button class="demo-btn full" id="btn-early" onclick="toggleEarly()">⏱ Early In Period (headline gate fails)</button>
     <button class="demo-btn full" id="btn-suppress" onclick="toggleSuppressClosing()">🚫 Suppress Closing Ratio (pre-Jan 14 2025)</button>
@@ -860,36 +863,35 @@ function setP(t){
 }
 
 function setNotice(show){
-  document.getElementById('range-notice').classList.toggle('visible',show);
+  document.getElementById('stale-hint').classList.toggle('visible',show);
   document.getElementById('btn-notice-on').classList.toggle('active',show);
   document.getElementById('btn-notice-off').classList.toggle('active',!show);
 }
 
 // ── DATE RANGE SELECTION ──────────────────────────
-// BR-9: insights regenerate only on manual re-run (or period change + re-run), not automatically
-// on every filter click. Changing the range while a stale result is showing surfaces the notice
-// below rather than silently swapping the displayed insights out from under the "last run for X" label.
+// BR-9 (corrected Aug 4 2026): changing the selected period must NEVER auto-trigger a new insights
+// run — only a manual "Run Insights" click regenerates results, so the user always controls when AI
+// credits are spent. While a stale result is showing, the panel keeps displaying it labeled with its
+// original run period, and a helper hint appears next to the Run Insights button (UX Considerations)
+// prompting a re-run rather than silently swapping the displayed insights out from under that label.
 document.querySelectorAll('.date-filter-btn').forEach(function(b){
   b.addEventListener('click',function(){
     document.querySelectorAll('.date-filter-btn').forEach(function(x){x.classList.remove('active');});
     b.classList.add('active');
     currentRange=b.getAttribute('data-range');
-    var label=(PERIOD_META[currentRange]||PERIOD_META.month).label;
 
-    // If there's an active result and range changed from what was run, show notice
+    // Show the stale-results hint only once results exist and the selection no longer matches
+    // the period they were run for; hide it again if the user switches back to that period.
     var activeEl=document.getElementById('s-active');
-    if(activeEl && activeEl.style.display!=='none' && currentRange!==lastRunKey){
-      var notice=document.getElementById('range-notice');
-      notice.classList.add('visible');
-      document.getElementById('range-notice-text').innerHTML='Date range changed to <strong>'+label+'</strong>. Insights shown are from the <strong>'+lastRunRange+'</strong> period.';
-    }
+    var hasResults=activeEl && activeEl.style.display!=='none';
+    document.getElementById('stale-hint').classList.toggle('visible', hasResults && currentRange!==lastRunKey);
   });
 });
 
 // ── RUN INSIGHTS ──────────────────────────────────
 function runInsights(){
-  // Hide range notice if visible
-  document.getElementById('range-notice').classList.remove('visible');
+  // Hide the stale-results hint now that we're regenerating for the currently selected period
+  document.getElementById('stale-hint').classList.remove('visible');
   // Show loading
   setS('loading');
   // Simulate 2.2s generation
