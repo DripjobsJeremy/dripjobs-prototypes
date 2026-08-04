@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Metrics — AI Predictability | DripJobs Prototype</title>
+<title>Metrics — DripSense | DripJobs Prototype</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <style>
@@ -187,6 +187,21 @@ body{font-family:'Nunito',sans-serif;background:#F0EFF5;color:#32415B;font-size:
 .ai-delta{font-size:11px;font-weight:700;margin-top:5px;display:flex;align-items:center;gap:3px}
 .d-up{color:#16A34A}.d-dn{color:#DC2626}.d-fl{color:#9896A8}
 
+/* No-change card (BR-11) */
+.ico-fl{background:#EEF0F3;color:#6B7280}
+
+/* Suppressed insight card (BR-10 / pre-Jan 14 2025 edge case) */
+.ai-card.suppressed{background:#FAFAFA;border-style:dashed;border-color:#D8D5E5}
+.ico-sup{background:#EDEBF5;color:var(--color-primary)}
+
+/* Elapsed-time comparison basis note (BR-4) */
+.ai-basis-note{font-size:11px;color:var(--color-primary-active);margin-top:8px;display:flex;align-items:center;gap:5px}
+
+/* Milestone framing tag (BR-3, "All" period) */
+.ai-milestone-tag{display:inline-flex;align-items:center;gap:4px;background:#EDE9FE;color:var(--color-primary-active);font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+
+.hidden{display:none !important}
+
 /* Footer */
 .ai-footer{background:#F7F5FF;border-top:1px solid #E8E4F5;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .ai-footer-note{font-size:11px;color:#9896A8;display:flex;align-items:center;gap:5px}
@@ -249,7 +264,7 @@ body{font-family:'Nunito',sans-serif;background:#F0EFF5;color:#32415B;font-size:
   <div class="proto-bar-left">
     <a class="back-link" href="../index.html">← Hub</a>
     <span class="proto-bar-divider">|</span>
-    <span class="proto-bar-title">Metrics — AI Predictability</span>
+    <span class="proto-bar-title">Metrics — DripSense</span>
   </div>
   <a class="proto-bar-ticket" href="https://app.clickup.com/t/86b9bmc1u" target="_blank">86b9bmc1u</a>
 </div>
@@ -335,11 +350,11 @@ body{font-family:'Nunito',sans-serif;background:#F0EFF5;color:#32415B;font-size:
   ═════════════════════════════════════ -->
   <div class="metrics-section" id="sec-ai">
     <div class="section-header" onclick="toggleSection('ai')">
-      <div class="section-eyebrow" style="color:var(--color-primary);display:flex;align-items:center;gap:5px"><i class="fas fa-brain" style="font-size:10px"></i> AI Predictability</div>
+      <div class="section-eyebrow" style="color:var(--color-primary);display:flex;align-items:center;gap:5px"><i class="fas fa-brain" style="font-size:10px"></i> DripSense</div>
       <button class="section-collapse-btn" id="sec-ai-btn" title="Collapse section"><i class="fas fa-chevron-up"></i></button>
     </div>
     <div class="section-collapsed-bar" id="sec-ai-bar" onclick="toggleSection('ai')">
-      <div class="section-collapsed-summary"><i class="fas fa-brain" style="font-size:12px;color:var(--color-primary)"></i> AI Predictability — Last run May 26, 2026 for Month</div>
+      <div class="section-collapsed-summary"><i class="fas fa-brain" style="font-size:12px;color:var(--color-primary)"></i> DripSense — Last run May 26, 2026 for Month</div>
       <i class="fas fa-chevron-down" style="font-size:10px"></i>
     </div>
     <div class="section-body" id="sec-ai-body">
@@ -349,8 +364,8 @@ body{font-family:'Nunito',sans-serif;background:#F0EFF5;color:#32415B;font-size:
         <div class="ai-ph">
           <div class="ai-ph-icon"><i class="fas fa-brain"></i></div>
           <div class="ai-ph-text">
-            <div class="ai-ph-title">AI Predictability</div>
-            <div class="ai-ph-sub">Your AI predictability for home service business — plain-English insights from your data</div>
+            <div class="ai-ph-title">DripSense</div>
+            <div class="ai-ph-sub">Plain-English insights from your Metrics data, for home service businesses</div>
           </div>
           <div class="ai-ph-right">
             <div class="ai-ph-meta" id="panel-meta">
@@ -373,32 +388,42 @@ body{font-family:'Nunito',sans-serif;background:#F0EFF5;color:#32415B;font-size:
           <div class="ai-never-run">
             <div class="ai-never-run-ico"><i class="fas fa-brain"></i></div>
             <div class="ai-never-run-title">No insights yet for this account</div>
-            <div class="ai-never-run-body">Run AI Predictability to get plain-English insights about your closing ratio, revenue trend, average job value, and more. Insights are generated on demand — they won't run automatically.</div>
+            <div class="ai-never-run-body">Run DripSense to get plain-English insights about your closing ratio, revenue trend, average job value, and more. Insights are generated on demand — they won't run automatically.</div>
             <button class="ai-never-run-cta" onclick="runInsights()"><i class="fas fa-play" style="font-size:11px"></i> Run Insights Now</button>
           </div>
         </div>
 
         <!-- STATE: ACTIVE (has results) -->
         <div id="s-active">
-          <div class="ai-callout">
-            <div class="ai-callout-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="ai-callout" id="ai-callout">
+            <div class="ai-callout-icon" id="ai-callout-icon"><i class="fas fa-chart-line"></i></div>
             <div class="ai-callout-body">
+              <div class="ai-milestone-tag hidden" id="ai-milestone-tag"><i class="fas fa-trophy" style="font-size:9px"></i> Milestone</div>
               <div class="ai-headline" id="ai-hl">You're trending toward <span class="amount">$96,300</span> in sales this month — your strongest May on record.</div>
               <div class="ai-support" id="ai-sup">Based on your current proposal pipeline, average close rate, and job schedule through May 31. Exterior painting jobs in the $6,000–$9,000 range are driving the uptick.</div>
+              <div class="ai-basis-note hidden" id="ai-basis-note"><i class="fas fa-info-circle"></i> <span id="ai-basis-note-text"></span></div>
               <div class="ai-conf-row">
                 <div class="ai-conf-track"><div class="ai-conf-fill" id="ai-conf" style="width:78%"></div></div>
                 <span class="ai-conf-text" id="ai-conf-lbl">78% confidence</span>
               </div>
             </div>
           </div>
+          <!-- Headline suppressed (BR-8: elapsed-time / confidence gate not met) -->
+          <div class="ai-callout" id="ai-callout-suppressed" style="display:none">
+            <div class="ai-callout-icon" style="background:#B0AEC0"><i class="fas fa-eye-slash"></i></div>
+            <div class="ai-callout-body">
+              <div class="ai-headline" style="font-size:12px;font-weight:600;color:#6B6885">Headline projection suppressed — not enough of the period has elapsed, or confidence is below the 70% threshold. Standard insight cards below are unaffected.</div>
+            </div>
+          </div>
           <div class="ai-body">
             <div class="ai-body-label"><i class="fas fa-lightbulb"></i> What your numbers are telling you</div>
             <div class="ai-grid">
-              <div class="ai-card"><div class="ai-ico ico-r"><i class="fas fa-percentage"></i></div><div><div class="ai-card-metric">Closing Ratio</div><div class="ai-card-text">Your closing ratio dropped 9% this month. Proposals sent increased but appointments converted at a lower rate than last quarter.</div><div class="ai-delta d-dn"><i class="fas fa-arrow-down"></i> 9% vs last month</div></div></div>
-              <div class="ai-card"><div class="ai-ico ico-g"><i class="fas fa-dollar-sign"></i></div><div><div class="ai-card-metric">Avg Job Value</div><div class="ai-card-text">Your average job value is up 14% year-over-year, driven by exterior jobs in the $8,000+ range.</div><div class="ai-delta d-up"><i class="fas fa-arrow-up"></i> +14% YoY</div></div></div>
-              <div class="ai-card"><div class="ai-ico ico-b"><i class="fas fa-file-alt"></i></div><div><div class="ai-card-metric">Proposal Volume</div><div class="ai-card-text">You sent 47 proposals this month — 6 more than April. Volume is the highest in 90 days.</div><div class="ai-delta d-up"><i class="fas fa-arrow-up"></i> +15% vs last month</div></div></div>
-              <div class="ai-card"><div class="ai-ico ico-a"><i class="fas fa-calendar-check"></i></div><div><div class="ai-card-metric">Appt → Proposal Rate</div><div class="ai-card-text">Appointment-to-proposal conversion held steady at 71%. No meaningful change from last quarter.</div><div class="ai-delta d-fl"><i class="fas fa-minus"></i> No change</div></div></div>
-              <div class="ai-card"><div class="ai-ico ico-p"><i class="fas fa-chart-line"></i></div><div><div class="ai-card-metric">Revenue Trend</div><div class="ai-card-text">MTD revenue is $64,200 — up 12% from April. On pace for your best month since November 2025.</div><div class="ai-delta d-up"><i class="fas fa-arrow-up"></i> +12% vs April</div></div></div>
+              <div class="ai-card" id="card-closing"><div class="ai-ico ico-r"><i class="fas fa-percentage"></i></div><div><div class="ai-card-metric">Closing Ratio</div><div class="ai-card-text">Your closing ratio dropped 9% this period. Proposals sent increased but appointments converted at a lower rate.</div><div class="ai-delta d-dn"><i class="fas fa-arrow-down"></i> 9% <span class="cmp-basis">vs last month</span></div></div></div>
+              <div class="ai-card suppressed" id="card-closing-suppressed" style="display:none"><div class="ai-ico ico-sup"><i class="fas fa-ban"></i></div><div><div class="ai-card-metric">Closing Ratio</div><div class="ai-card-text">Insight unavailable — this comparison would span before your Jan 14, 2025 data start.</div></div></div>
+              <div class="ai-card"><div class="ai-ico ico-g"><i class="fas fa-dollar-sign"></i></div><div><div class="ai-card-metric">Avg Job Value</div><div class="ai-card-text">Your average job value is up 14% this period, driven by exterior jobs in the $8,000+ range.</div><div class="ai-delta d-up"><i class="fas fa-arrow-up"></i> +14% <span class="cmp-basis">vs last month</span></div></div></div>
+              <div class="ai-card"><div class="ai-ico ico-b"><i class="fas fa-file-alt"></i></div><div><div class="ai-card-metric">Proposal Volume</div><div class="ai-card-text">You sent 47 proposals this period — 6 more than the comparison period. Volume is the highest in 90 days.</div><div class="ai-delta d-up"><i class="fas fa-arrow-up"></i> +15% <span class="cmp-basis">vs last month</span></div></div></div>
+              <div class="ai-card no-change"><div class="ai-ico ico-fl"><i class="fas fa-equals"></i></div><div><div class="ai-card-metric">Appt → Proposal Rate</div><div class="ai-card-text">No meaningful change in Appointment → Proposal Conversion this period.</div></div></div>
+              <div class="ai-card"><div class="ai-ico ico-p"><i class="fas fa-chart-line"></i></div><div><div class="ai-card-metric">Revenue Trend</div><div class="ai-card-text">Revenue this period is $64,200 — up 12% from the comparison period. On pace for your best month since November 2025.</div><div class="ai-delta d-up"><i class="fas fa-arrow-up"></i> +12% <span class="cmp-basis">vs last month</span></div></div></div>
             </div>
           </div>
           <div class="ai-footer">
@@ -412,7 +437,7 @@ body{font-family:'Nunito',sans-serif;background:#F0EFF5;color:#32415B;font-size:
           <div class="no-data-body">
             <div class="nd-ico"><i class="fas fa-database"></i></div>
             <div class="nd-title">Insights are on their way</div>
-            <div class="nd-text">AI Predictability insights will appear here once your account has at least 30 days of Metrics data. Keep running proposals and closing jobs — your numbers are building.</div>
+            <div class="nd-text">DripSense insights will appear here once your account has at least 30 days of Metrics data. Keep running proposals and closing jobs — your numbers are building.</div>
             <div class="nd-prog"><div class="nd-fill"></div></div>
             <div class="nd-cap">Data collection started Jan 14, 2025 · 14 days until insights unlock</div>
           </div>
@@ -662,45 +687,136 @@ body{font-family:'Nunito',sans-serif;background:#F0EFF5;color:#32415B;font-size:
     <div class="demo-col-label">Range Change Notice</div>
     <button class="demo-btn" id="btn-notice-on" onclick="setNotice(true)">🔔 Show Notice</button>
     <button class="demo-btn" id="btn-notice-off" onclick="setNotice(false)">🔕 Hide Notice</button>
+    <div class="demo-col-label">Edge Cases (BR-8 / BR-10)</div>
+    <button class="demo-btn full" id="btn-early" onclick="toggleEarly()">⏱ Early In Period (headline gate fails)</button>
+    <button class="demo-btn full" id="btn-suppress" onclick="toggleSuppressClosing()">🚫 Suppress Closing Ratio (pre-Jan 14 2025)</button>
   </div>
 </div>
 
 <script>
 // ── STATE MACHINE ──────────────────────────────────
 var STATES=['active','neverrun','nodata','failure','loading'];
-var lastRunRange='Month';
-var currentRange='Month';
-var rangeLabels={today:'Today',week:'This Week',lastwk:'Last Week',month:'Month',lastmo:'Last Month',ytd:'YTD',all:'All Time'};
-var rangeIsFuture={today:true,week:true,lastwk:false,month:true,lastmo:false,ytd:true,all:false};
+
+// BR-2: comparison basis is uniform across all 5 metrics and driven entirely by the
+// selected period filter. BR-4: incomplete periods carry an explicit elapsed-time-equivalent
+// disclosure and compare against the same elapsed slice of the prior period; Last Wk / Last Mo
+// are excluded since both are complete, calendar-anchored periods (per Aug 4 2026 correction).
+var PERIOD_META={
+  today:  {label:'Today',      compareBasis:'vs. yesterday',                    complete:false, elapsedPct:34},
+  week:   {label:'This Week',  compareBasis:'vs. the same days last week',      complete:false, elapsedPct:43},
+  lastwk: {label:'Last Week',  compareBasis:'vs. the full week before that',    complete:true},
+  month:  {label:'Month',      compareBasis:'vs. the same days last month',     complete:false, elapsedPct:84},
+  lastmo: {label:'Last Month', compareBasis:'vs. the full month before that',   complete:true},
+  ytd:    {label:'YTD',        compareBasis:'vs. the same days last year',      complete:false, elapsedPct:41},
+  all:    {label:'All Time',   compareBasis:'since you joined DripJobs',        complete:true, milestone:true}
+};
+
+var lastRunKey='month';
+var lastRunRange=PERIOD_META.month.label;
+var currentRange='month';
+var activeVariant='up';
+var earlyOverride=false;
+var suppressClosing=false;
 
 var PREDS={
   up:{
-    hl:'You\'re trending toward <span class="amount">$96,300</span> in sales this month — your strongest May on record.',
-    sup:'Based on your current proposal pipeline, average close rate, and job schedule through May 31. Exterior painting jobs in the $6,000–$9,000 range are driving the uptick.',
+    hl:'You\'re trending toward <span class="amount">$96,300</span> in sales this period — your strongest stretch on record.',
+    sup:'Based on your current proposal pipeline, average close rate, and job schedule through the end of this period. Exterior painting jobs in the $6,000–$9,000 range are driving the uptick.',
     conf:78,ct:'78% confidence'
   },
   flat:{
-    hl:'You\'re on pace for approximately <span class="amount">$71,400</span> in sales this month — in line with your recent averages.',
-    sup:'Your pipeline and close rate suggest a steady month. No major acceleration or slowdown signals detected compared to April.',
+    hl:'You\'re on pace for approximately <span class="amount">$71,400</span> in sales this period — in line with your recent averages.',
+    sup:'Your pipeline and close rate suggest a steady period. No major acceleration or slowdown signals detected in the data.',
     conf:82,ct:'82% confidence'
   },
   down:{
-    hl:'Sales are tracking toward <span class="amount">$52,000</span> this month — about 18% below your April close.',
+    hl:'Sales are tracking toward <span class="amount">$52,000</span> this period — about 18% below your comparison period.',
     sup:'Your proposal volume is strong but your closing ratio drop is weighing on projected revenue. Pipeline has 14 open proposals not yet converted.',
     conf:64,ct:'64% confidence'
   },
-  // Historical (past range) — retrospective framing
+  // Complete, calendar-anchored periods (Last Wk / Last Mo) — retrospective, not a pace projection,
+  // so BR-8's confidence/elapsed-time gate does not apply.
   hist_up:{
-    hl:'You closed <span class="amount">$184,500</span> in total sales for this period — up 22% from the prior year.',
-    sup:'YTD revenue tracked consistently above plan. Exterior painting drove the majority of volume, with Q1 outperforming Q2 by 14%.',
+    hl:'You closed <span class="amount">$184,500</span> in total sales for this period — up 22% from the prior period.',
+    sup:'Revenue tracked consistently above plan across the full period. Exterior painting drove the majority of volume.',
     conf:95,ct:'Actual data'
   },
   hist_flat:{
-    hl:'You closed <span class="amount">$28,100</span> last month — roughly in line with the prior month.',
-    sup:'Last month\'s revenue was steady. Closing ratio held at 56% and proposal volume was consistent with the 90-day trend.',
+    hl:'You closed <span class="amount">$28,100</span> for this period — roughly in line with the prior period.',
+    sup:'This period\'s revenue was steady. Closing ratio held at 56% and proposal volume was consistent with the 90-day trend.',
+    conf:95,ct:'Actual data'
+  },
+  // BR-3: "All" period uses milestone/trend framing, never a period-over-period delta.
+  milestone:{
+    hl:'Your average job value has grown steadily since you joined DripJobs — up from <span class="amount">$1,850</span> to <span class="amount">$2,377</span>.',
+    sup:'Reflects your full account history through today. April 2026 was your strongest month on record, with exterior painting driving most of the gain.',
     conf:95,ct:'Actual data'
   }
 };
+
+// BR-8: headline projection requires the period to be incomplete, at least 20% elapsed, and
+// a confidence score of 70%+. Never shown for the "All" period or for ratio/percentage metrics
+// (this headline is always a dollar projection). Complete periods and "All" use retrospective /
+// milestone framing instead, which is not a projection and so isn't gated.
+function applyFraming(rangeKey){
+  var meta=PERIOD_META[rangeKey]||PERIOD_META.month;
+  var calloutEl=document.getElementById('ai-callout');
+  var calloutSuppressed=document.getElementById('ai-callout-suppressed');
+  var milestoneTag=document.getElementById('ai-milestone-tag');
+  var basisNote=document.getElementById('ai-basis-note');
+
+  var p, showMilestoneTag=false, showBasis=false, gateOpen=true;
+
+  if(meta.milestone){
+    p=PREDS.milestone;
+    showMilestoneTag=true;
+  } else if(meta.complete){
+    p=(rangeKey==='lastmo')?PREDS.hist_flat:PREDS.hist_up;
+  } else {
+    p=PREDS[activeVariant];
+    var elapsed=earlyOverride?8:meta.elapsedPct;
+    gateOpen=(elapsed>=20 && p.conf>=70);
+    showBasis=true;
+  }
+
+  if(gateOpen){
+    calloutEl.style.display='flex';
+    calloutSuppressed.style.display='none';
+    document.getElementById('ai-hl').innerHTML=p.hl;
+    document.getElementById('ai-sup').textContent=p.sup;
+    document.getElementById('ai-conf').style.width=p.conf+'%';
+    document.getElementById('ai-conf-lbl').textContent=p.ct;
+  } else {
+    calloutEl.style.display='none';
+    calloutSuppressed.style.display='flex';
+  }
+
+  milestoneTag.classList.toggle('hidden',!showMilestoneTag);
+  if(showBasis){
+    document.getElementById('ai-basis-note-text').textContent='Comparing the elapsed portion of '+meta.label+' to the same elapsed stretch of the prior period.';
+    basisNote.classList.remove('hidden');
+  } else {
+    basisNote.classList.add('hidden');
+  }
+
+  // BR-2: same comparison basis label applied uniformly to every trend card's delta tag.
+  document.querySelectorAll('.cmp-basis').forEach(function(el){
+    el.textContent=meta.compareBasis;
+  });
+}
+
+function toggleEarly(){
+  earlyOverride=!earlyOverride;
+  document.getElementById('btn-early').classList.toggle('active',earlyOverride);
+  applyFraming(lastRunKey);
+}
+
+function toggleSuppressClosing(){
+  suppressClosing=!suppressClosing;
+  document.getElementById('btn-suppress').classList.toggle('active',suppressClosing);
+  document.getElementById('card-closing').style.display=suppressClosing?'none':'flex';
+  document.getElementById('card-closing-suppressed').style.display=suppressClosing?'flex':'none';
+}
 
 function setS(s){
   STATES.forEach(function(st){
@@ -738,12 +854,9 @@ function setP(t){
   });
   var b=document.getElementById('btn-'+t);
   if(b) b.classList.add('active');
+  activeVariant=t;
   setS('active');
-  var p=PREDS[t];
-  document.getElementById('ai-hl').innerHTML=p.hl;
-  document.getElementById('ai-sup').textContent=p.sup;
-  document.getElementById('ai-conf').style.width=p.conf+'%';
-  document.getElementById('ai-conf-lbl').textContent=p.ct;
+  applyFraming(lastRunKey);
 }
 
 function setNotice(show){
@@ -753,37 +866,22 @@ function setNotice(show){
 }
 
 // ── DATE RANGE SELECTION ──────────────────────────
+// BR-9: insights regenerate only on manual re-run (or period change + re-run), not automatically
+// on every filter click. Changing the range while a stale result is showing surfaces the notice
+// below rather than silently swapping the displayed insights out from under the "last run for X" label.
 document.querySelectorAll('.date-filter-btn').forEach(function(b){
   b.addEventListener('click',function(){
     document.querySelectorAll('.date-filter-btn').forEach(function(x){x.classList.remove('active');});
     b.classList.add('active');
     currentRange=b.getAttribute('data-range');
-    var label=rangeLabels[currentRange]||currentRange;
+    var label=(PERIOD_META[currentRange]||PERIOD_META.month).label;
 
     // If there's an active result and range changed from what was run, show notice
     var activeEl=document.getElementById('s-active');
-    if(activeEl && activeEl.style.display!=='none' && label!==lastRunRange){
+    if(activeEl && activeEl.style.display!=='none' && currentRange!==lastRunKey){
       var notice=document.getElementById('range-notice');
       notice.classList.add('visible');
-      document.getElementById('range-notice-range').textContent=label;
       document.getElementById('range-notice-text').innerHTML='Date range changed to <strong>'+label+'</strong>. Insights shown are from the <strong>'+lastRunRange+'</strong> period.';
-
-      // Swap prediction language for fully historical ranges
-      var isPast=!rangeIsFuture[currentRange];
-      if(isPast){
-        var p=currentRange==='lastmo'?PREDS.hist_flat:PREDS.hist_up;
-        document.getElementById('ai-hl').innerHTML=p.hl;
-        document.getElementById('ai-sup').textContent=p.sup;
-        document.getElementById('ai-conf').style.width=p.conf+'%';
-        document.getElementById('ai-conf-lbl').textContent=p.ct;
-      } else {
-        // Restore forward-looking
-        var p=PREDS.up;
-        document.getElementById('ai-hl').innerHTML=p.hl;
-        document.getElementById('ai-sup').textContent=p.sup;
-        document.getElementById('ai-conf').style.width=p.conf+'%';
-        document.getElementById('ai-conf-lbl').textContent=p.ct;
-      }
     }
   });
 });
@@ -796,14 +894,19 @@ function runInsights(){
   setS('loading');
   // Simulate 2.2s generation
   setTimeout(function(){
-    lastRunRange=rangeLabels[currentRange]||currentRange;
+    lastRunKey=currentRange;
+    lastRunRange=(PERIOD_META[currentRange]||PERIOD_META.month).label;
     setS('active');
+    applyFraming(lastRunKey);
     document.getElementById('panel-meta').innerHTML='<strong>Last run May 29, 2026</strong>&nbsp;· for '+lastRunRange+' period';
     // Update collapsed bar text
     document.getElementById('sec-ai-bar').querySelector('.section-collapsed-summary').innerHTML=
-      '<i class="fas fa-brain" style="font-size:12px;color:var(--color-primary)"></i> AI Predictability — Last run May 29, 2026 for '+lastRunRange;
+      '<i class="fas fa-brain" style="font-size:12px;color:var(--color-primary)"></i> DripSense — Last run May 29, 2026 for '+lastRunRange;
   },2200);
 }
+
+// Initialize card comparison-basis tags / gate state to match the default displayed result
+applyFraming(lastRunKey);
 
 // ── SECTION COLLAPSE ──────────────────────────────
 function toggleSection(id){

@@ -11,6 +11,20 @@ Format:
 
 ---
 
+## [2026-08-04] Metrics — AI Predictability, updated for ticket 86b9bmc1u revision (DripSense)
+- Decision: Reworked the AI Predictability panel's demo logic to match the ticket's full BR-1 through BR-11 rewrite (renamed DripSense in ClickUp, kept the existing "AI Predictability" UI label here since that rename wasn't confirmed for this surface, flagged below). Comparison-basis tags on all 5 insight cards are now driven uniformly by the selected date filter (BR-2), including the Aug 4 correction that Last Wk/Last Mo are complete calendar-anchored periods with no elapsed-time caveat (BR-4 exclusion). Added: milestone framing for the "All" period instead of a delta headline (BR-3); a headline suppression state when the elapsed-time or 70% confidence gate isn't met, demoable via a new "Early In Period" toggle (BR-8); a distinct "No meaningful change" card for Appt → Proposal Rate with no explanatory language (BR-11, the other Aug 4 decision); and a "Suppress Closing Ratio" demo toggle showing the pre-Jan 14 2025 suppressed-comparison edge case (BR-10) as a dashed/muted card, visually distinct from both the no-change card and the generic no-data placeholder. Also fixed a latent bug while in there: the range-change notice's innerHTML rewrite was destroying its own nested `#range-notice-range` node, throwing null on the second notice.
+- Why: The ticket's Aug 4 decision-log comments explicitly call out BR-11 (no-change) and the BR-2 Last Wk correction as the newest changes, but the panel as built still reflected the pre-revision ticket (only a color/token restyle had been done since). Rebuilding the comparison-basis and gating logic was necessary to make the ticket's business rules demonstrable rather than just described.
+- Open question: Whether the panel/section label should be renamed from "AI Predictability" to "DripSense" per the ticket rename, since that wasn't confirmed this session, kept the existing name as the safer default.
+
+---
+
+## [2026-08-04] Metrics — AI Predictability, renamed to DripSense
+- Decision: Resolved the open naming question above — renamed all user-facing panel/section labels (page title, proto-bar title, section eyebrow, panel header title, collapsed-bar summary, never-run/no-data copy) from "AI Predictability" to "DripSense" to match the ClickUp ticket rename. Also updated the matching card name on the hub landing page (`index.html`) and its search keywords. Left the file path/folder (`metrics-ai-predictability/`) and the public portfolio page (`portfolio/index.html`) untouched, since renaming the path would break the existing shared prototype URL and the portfolio entry is a separate public-facing deliverable not tied to this ticket.
+- Why: Jeremy confirmed the rename directly.
+- Open question: None.
+
+---
+
 ## [2026-08-04] Active Company Toggle: Billing Confirmation, updated for ticket 86bb85q08 revision
 - Decision: Ticket added Business Rules 7-9: after Confirm, show a one-time on-screen reminder to notify Billing, with copy that differs by direction ("Company activated. Please notify Billing of this change." / "Company deactivated. Please notify Billing of this change."). Replaced the prior generic green success toast with a distinct amber reminder toast (reusing the `settings-alert--warn` color tokens, not the success-green ones) carrying a bell icon and a manual "Got it" dismiss button, plus a 6s auto-fade fallback. Nothing is logged, tracked, or persisted; dismissing just removes the DOM node, matching AC8's "does not persist after dismissal."
 - Why: The ticket is explicit that this reminder is a distinct instruction to the user (not a "saved successfully" confirmation), so it needed visually different treatment from a routine toast, and a deliberate dismiss action rather than only relying on a timed fade, since it's asking the user to go do something outside the app.
