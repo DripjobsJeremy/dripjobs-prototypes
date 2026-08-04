@@ -187,9 +187,16 @@
 
   /* ── Toast ── */
   #toast-container { position: fixed; top: 16px; right: 16px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-  .toast { background: #166534; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Nunito', sans-serif; display: flex; align-items: center; gap: 8px; min-width: 240px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: toast-in 0.25s ease; opacity: 1; transition: opacity 0.3s; }
+  .toast { background: #166534; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Nunito', sans-serif; display: flex; align-items: center; gap: 8px; min-width: 240px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: toast-in 0.25s ease; opacity: 1; transition: opacity 0.3s; pointer-events: auto; }
   .toast.fading { opacity: 0; }
   @keyframes toast-in { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+  /* Billing-notify reminder (BR 7/8/9): on-screen only, dismissible, never logged */
+  .toast--reminder { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; align-items: flex-start; max-width: 320px; }
+  .toast--reminder i { color: #D97706; font-size: 14px; margin-top: 2px; }
+  .toast--reminder-text { flex: 1; line-height: 1.4; }
+  .toast-dismiss { flex-shrink: 0; background: transparent; border: 1px solid #FDE68A; color: #92400E; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-family: 'Nunito', sans-serif; }
+  .toast-dismiss:hover { background: #FDE68A; }
 </style>
 </head>
 <body>
@@ -481,20 +488,27 @@
   function confirmActiveCompanyChange() {
     var isOn = toggleEl.classList.contains('on');
     modalEl.classList.remove('active');
-    showToast(isOn ? 'Active Company turned on' : 'Active Company turned off');
+    showBillingReminder(isOn
+      ? 'Company activated. Please notify Billing of this change.'
+      : 'Company deactivated. Please notify Billing of this change.');
   }
 
-  function showToast(msg) {
+  // BR 7/8/9: one-time, on-screen only reminder. No input required, nothing
+  // logged or persisted — dismissing (or the timeout) simply removes it.
+  function showBillingReminder(msg) {
     var container = document.getElementById('toast-container');
     var t = document.createElement('div');
-    t.className = 'toast';
-    t.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + msg;
+    t.className = 'toast toast--reminder';
+    t.innerHTML = '<i class="fa-solid fa-bell"></i>' +
+      '<span class="toast--reminder-text">' + msg + '</span>' +
+      '<button class="toast-dismiss" onclick="this.closest(\'.toast\').remove()">Got it</button>';
     container.appendChild(t);
     setTimeout(function () {
       t.classList.add('fading');
       setTimeout(function () { t.remove(); }, 300);
-    }, 2600);
+    }, 6000);
   }
+
 </script>
 
 </body>

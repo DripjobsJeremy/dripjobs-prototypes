@@ -11,6 +11,13 @@ Format:
 
 ---
 
+## [2026-08-04] Active Company Toggle: Billing Confirmation, updated for ticket 86bb85q08 revision
+- Decision: Ticket added Business Rules 7-9: after Confirm, show a one-time on-screen reminder to notify Billing, with copy that differs by direction ("Company activated. Please notify Billing of this change." / "Company deactivated. Please notify Billing of this change."). Replaced the prior generic green success toast with a distinct amber reminder toast (reusing the `settings-alert--warn` color tokens, not the success-green ones) carrying a bell icon and a manual "Got it" dismiss button, plus a 6s auto-fade fallback. Nothing is logged, tracked, or persisted; dismissing just removes the DOM node, matching AC8's "does not persist after dismissal."
+- Why: The ticket is explicit that this reminder is a distinct instruction to the user (not a "saved successfully" confirmation), so it needed visually different treatment from a routine toast, and a deliberate dismiss action rather than only relying on a timed fade, since it's asking the user to go do something outside the app.
+- Open question: None new. Same backend-persistence-timing question noted in the original entry below still applies.
+
+---
+
 ## [2026-08-04] Active Company Toggle: Billing Confirmation, built from ticket 86bb85q08
 - Decision: Built `active-company-confirmation-modal/`, a clickable prototype replicating the existing Company Settings > Company Information > Admin Controls page (from the provided screenshot) and adding a confirmation modal on the "Active Company" toggle. Clicking the toggle in either direction optimistically flips it, then opens a modal with the exact required message ("This impacts billing and requires manager approval. Are you sure you want to do this?"); Cancel reverts the toggle to its prior state, Confirm keeps the change and shows a toast. Modal header text ("Turn On/Off Active Company") is dynamic based on direction, purely for prototype clarity during demo since both directions use the same required message; this is a minor addition beyond the ticket's literal text, flagged here per scope-discipline guidance rather than added silently.
 - Why: The ticket explicitly defers the "super admin permission tier" alternative to V2, so the modal applies uniformly regardless of role, with no new gating introduced. Reused the existing `.toggle-switch`/`.modal-overlay`/toast patterns already established elsewhere in this repo instead of inventing new component styling.
