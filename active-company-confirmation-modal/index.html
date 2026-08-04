@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Active Company Toggle: Billing Confirmation - DripJobs</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ══════════════════════════════════════════════
+     PROTO BAR (hub chrome, DM Sans, matches hub)
+     ══════════════════════════════════════════════ */
+  :root {
+    --color-primary:        #8B85EA;
+    --color-primary-hover:  #736BE3;
+    --color-primary-active: #5C53DC;
+    --color-primary-rgb:    139, 133, 234;
+    --color-bg:             #F3F1FC;
+    --color-text:           #32415B;
+    --color-text-muted:     #80879A;
+    --color-border:         #DAD8E3;
+    --color-card:           #FFFFFF;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--color-bg); color: var(--color-text); }
+
+  .proto-bar {
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .back-link {
+    font-size: 12px; font-weight: 500; color: var(--color-text-muted);
+    text-decoration: none; display: flex; align-items: center; gap: 4px;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--color-primary); }
+  .divider { color: var(--color-border); font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; }
+  .proto-bar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .proto-bar-pill {
+    font-size: 11px; font-weight: 600; color: var(--color-primary-active);
+    padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA;
+    border-radius: 999px; letter-spacing: 0.2px; text-decoration: none;
+  }
+  .proto-bar-pill.muted { color: var(--color-text-muted); background: #F3F1FC; border-color: var(--color-border); }
+  .proto-bar-pill:hover { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  .proto-bar-pill.muted:hover { background: #F3F1FC; color: var(--color-text-muted); }
+
+  /* ══════════════════════════════════════════════
+     APP SHELL (Nunito, in-app soft purple #8B85EA)
+     ══════════════════════════════════════════════ */
+  #dj-app { font-family: 'Nunito', sans-serif; font-size: 14px; color: #32415B; }
+
+  /* ── Top header ── */
+  .app-header {
+    background: #fff; border-bottom: 1px solid #DAD8E3;
+    padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .app-header-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+  .app-logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .app-logo-mark { width: 28px; height: 28px; background: linear-gradient(135deg,#7C3AED,#0DCECE); border-radius: 7px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; }
+  .app-logo-text { font-size: 16px; font-weight: 700; color: #7C3AED; }
+  .app-search { flex: 1; max-width: 420px; position: relative; }
+  .app-search input {
+    width: 100%; height: 34px; border: 1px solid #DAD8E3; border-radius: 8px;
+    padding: 0 34px 0 12px; font-size: 13px; font-family: 'Nunito', sans-serif; background: #F9FAFC; color: #32415B;
+  }
+  .app-search i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #9CA3AF; font-size: 12px; }
+  .app-header-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+  .app-header-icon { color: #9CA3AF; font-size: 15px; position: relative; cursor: default; }
+  .app-header-icon.alert { color: #F59E0B; }
+  .app-user { display: flex; align-items: center; gap: 8px; cursor: default; }
+  .app-user-avatar { width: 30px; height: 30px; border-radius: 50%; background: #EDE9FE; color: #7C3AED; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .app-user-name { font-size: 13px; font-weight: 600; color: #32415B; }
+  .app-user i { color: #9CA3AF; font-size: 11px; }
+
+  /* ── Body layout ── */
+  .app-body { display: flex; }
+
+  /* ── Sidebar ── */
+  .sidebar { width: 200px; min-width: 200px; background: #fff; border-right: 1px solid #DAD8E3; padding: 14px 0; }
+  .sidebar-company { padding: 4px 16px 12px; font-size: 13px; font-weight: 700; color: #32415B; border-bottom: 1px solid #DAD8E3; margin-bottom: 8px; }
+  .sidebar-section-label { padding: 12px 16px 4px; font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.6px; }
+  .sidebar-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 16px; font-size: 12.5px; font-weight: 500; color: #4B5563; cursor: default; }
+  .sidebar-item .sidebar-item-label { display: flex; align-items: center; gap: 8px; }
+  .sidebar-item i.chev { font-size: 10px; color: #C4C9D4; }
+  .sidebar-badge { background: #7C3AED; color: #fff; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 8px; }
+  .sidebar-footer { border-top: 1px solid #DAD8E3; }
+  .sidebar-footer .sidebar-item { padding: 12px 16px; font-weight: 600; color: #32415B; background: #F4F3F8; }
+
+  /* ── Main content ── */
+  .main-content { flex: 1; min-width: 0; }
+
+  /* ── Settings tabs ── */
+  .settings-tabs { background: #fff; border-bottom: 1px solid #DAD8E3; padding: 0 24px; display: flex; align-items: center; gap: 6px; overflow-x: auto; }
+  .settings-tab { padding: 12px 14px; font-size: 13px; font-weight: 500; color: #80879A; cursor: default; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .settings-tab.active { color: #8B85EA; border-bottom-color: #8B85EA; font-weight: 700; }
+
+  /* ── Settings page (design-system.md tokens) ── */
+  #settings-page {
+    --st-color-primary: #8B85EA; --st-color-primary-hover: #736BE3; --st-color-primary-rgb: 139,133,234;
+    --st-color-text: #32415B; --st-color-text-muted: #80879A;
+    --st-color-border: #DAD8E3; --st-color-card-bg: #FFFFFF;
+    padding: 24px; max-width: 1220px;
+  }
+  .settings-section { background: var(--st-color-card-bg); border: 1px solid var(--st-color-border); border-radius: 10px; padding: 18px; margin-bottom: 18px; }
+  .settings-section-title { font-size: 14px; font-weight: 700; margin: 0 0 14px 0; color: var(--st-color-text); }
+  .settings-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 18px 14px; }
+  .settings-field { grid-column: span 2; position: relative; display: flex; flex-direction: column; }
+  .settings-field--half { grid-column: span 3; }
+  .settings-field--full { grid-column: 1/-1; }
+  .settings-field--compact { grid-column: span 2; max-width: 180px; }
+  .settings-field-label { position: absolute; top: -8px; left: 10px; background: #fff; padding: 0 6px; font-size: 11px; font-weight: 500; color: var(--st-color-text-muted); z-index: 1; pointer-events: none; letter-spacing: 0.2px; }
+  .settings-field-label.is-required::after { content: " *"; color: #DC2626; }
+  .settings-field-input, .settings-field select { height: 40px; padding: 0 14px; border: 1px solid var(--st-color-border); border-radius: 8px; font-size: 14px; font-family: 'Nunito', sans-serif; background: #fff; color: var(--st-color-text); width: 100%; appearance: none; }
+  .settings-field-input:focus, .settings-field select:focus { outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+  .select-wrapper { position: relative; }
+  .select-wrapper::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 10px; color: var(--st-color-text-muted); position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+  .settings-field-group { display: flex; border: 1px solid var(--st-color-border); border-radius: 8px; overflow: hidden; }
+  .settings-field-group:focus-within { border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+  .settings-field-group .settings-field-input { border: none; border-radius: 0; flex: 1; }
+  .settings-field-group-suffix { display: flex; align-items: center; padding: 0 12px; background: #F4F3F8; border-left: 1px solid var(--st-color-border); font-size: 13px; font-weight: 600; color: var(--st-color-text-muted); }
+  .settings-field-help { font-size: 12px; color: var(--st-color-text-muted); margin-top: -8px; }
+
+  .account-status-row { display: flex; align-items: center; gap: 28px; margin-bottom: 14px; flex-wrap: wrap; }
+  .account-meta-label { font-size: 11px; font-weight: 600; color: var(--st-color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; }
+  .account-meta-value { font-size: 15px; font-weight: 700; color: var(--st-color-text); }
+
+  .settings-alert { border-radius: 8px; padding: 10px 14px; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .settings-alert-title { font-size: 12px; font-weight: 700; display: block; }
+  .settings-alert--info { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+  .settings-alert--info i { color: #2563EB; margin-top: 2px; }
+  .settings-alert--success { background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534; }
+  .settings-alert--success i { color: #16A34A; margin-top: 2px; }
+  .settings-alert--warn { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+  .settings-alert--warn i { color: #D97706; margin-top: 2px; }
+  .badge-active { display: inline-block; background: #D1FAE5; color: #065F46; border-radius: 10px; font-size: 11px; font-weight: 700; padding: 2px 8px; margin-left: 8px; }
+
+  /* Admin Controls */
+  .admin-controls-toggle-row { grid-column: 1/-1; display: flex; align-items: center; gap: 12px; padding-top: 6px; border-top: 1px solid var(--st-color-border); margin-top: 4px; }
+  .toggle-switch { position: relative; width: 44px; min-width: 44px; height: 24px; cursor: pointer; }
+  .toggle-switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+  .toggle-track { width: 44px; height: 24px; border-radius: 12px; background: #DAD8E3; transition: background 0.2s; position: relative; }
+  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
+  .toggle-switch.on .toggle-track { background: var(--st-color-primary); }
+  .toggle-switch.on .toggle-thumb { transform: translateX(20px); }
+  .toggle-label-text { font-size: 14px; font-weight: 600; color: var(--st-color-text); }
+  .toggle-label-sub { font-size: 12px; font-weight: 500; color: var(--st-color-text-muted); }
+  .field-meta-note { font-size: 11px; color: var(--st-color-text-muted); margin-top: 6px; }
+
+  .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; font-size: 13px; font-weight: 600; color: var(--st-color-text); cursor: default; }
+  .checkbox-row input { width: 15px; height: 15px; accent-color: var(--st-color-primary); }
+  .subsection-label { font-size: 11px; font-weight: 700; color: var(--st-color-text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+
+  .save-bar { display: flex; gap: 10px; padding-top: 4px; padding-bottom: 32px; }
+  .btn-save { padding: 9px 22px; background: var(--st-color-primary); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; font-family: 'Nunito',sans-serif; cursor: pointer; }
+  .btn-save:hover { background: var(--st-color-primary-hover); }
+  .btn-cancel-return { padding: 9px 16px; background: transparent; color: var(--st-color-text-muted); border: 1px solid var(--st-color-border); border-radius: 10px; font-size: 14px; font-weight: 600; font-family: 'Nunito',sans-serif; cursor: pointer; }
+
+  /* ══════════════════════════════════════════════
+     CONFIRMATION MODAL
+     ══════════════════════════════════════════════ */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(17,24,39,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 16px; }
+  .modal-overlay.active { display: flex; }
+  .modal-box { background: #fff; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); max-width: 440px; width: 100%; overflow: hidden; font-family: 'Nunito', sans-serif; }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #DAD8E3; }
+  .modal-header h3 { font-size: 15px; font-weight: 700; color: #32415B; display: flex; align-items: center; gap: 8px; }
+  .modal-header h3 i { color: #D97706; font-size: 15px; }
+  .modal-close { background: none; border: none; font-size: 18px; color: #9CA3AF; cursor: pointer; line-height: 1; }
+  .modal-close:hover { color: #32415B; }
+  .modal-body { padding: 18px 20px; }
+  .modal-message { font-size: 14px; font-weight: 600; color: #32415B; line-height: 1.5; margin-bottom: 12px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid #DAD8E3; background: #FAFAFC; }
+  .modal-btn { height: 38px; padding: 0 18px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer; border: none; }
+  .modal-btn-cancel { background: #fff; border: 1px solid #DAD8E3; color: #32415B; }
+  .modal-btn-cancel:hover { border-color: #8B85EA; color: #8B85EA; }
+  .modal-btn-confirm { background: #8B85EA; color: #fff; }
+  .modal-btn-confirm:hover { background: #736BE3; }
+
+  /* ── Toast ── */
+  #toast-container { position: fixed; top: 16px; right: 16px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .toast { background: #166534; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Nunito', sans-serif; display: flex; align-items: center; gap: 8px; min-width: 240px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: toast-in 0.25s ease; opacity: 1; transition: opacity 0.3s; }
+  .toast.fading { opacity: 0; }
+  @keyframes toast-in { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+</style>
+</head>
+<body>
+
+<!-- ── Proto bar ── -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Active Company Toggle: Billing Confirmation</span>
+  </div>
+  <div class="proto-bar-right">
+    <span class="proto-bar-pill muted">Needs Design</span>
+    <a class="proto-bar-pill" href="https://app.clickup.com/t/86bb85q08" target="_blank">86bb85q08</a>
+  </div>
+</div>
+
+<!-- ── App shell ── -->
+<div id="dj-app">
+
+  <div class="app-header">
+    <div class="app-header-left">
+      <div class="app-logo">
+        <div class="app-logo-mark">D</div>
+        <div class="app-logo-text">dripjobs</div>
+      </div>
+      <div class="app-search"><input type="text" placeholder="Search leads, contacts, tags..." readonly><i class="fa-solid fa-arrow-right"></i></div>
+    </div>
+    <div class="app-header-right">
+      <i class="fa-regular fa-circle-question app-header-icon alert"></i>
+      <i class="fa-regular fa-bell app-header-icon"></i>
+      <div class="app-user">
+        <div class="app-user-avatar">JH</div>
+        <span class="app-user-name">Jeremy Harrison</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-company">The Nest</div>
+
+      <div class="sidebar-section-label">Sales</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-address-book" style="color:#9CA3AF;font-size:12px;"></i> Contacts</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-list" style="color:#9CA3AF;font-size:12px;"></i> Sales List</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-diagram-project" style="color:#9CA3AF;font-size:12px;"></i> Sales Pipeline</span></div>
+
+      <div class="sidebar-section-label">Jobs</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-arrows-rotate" style="color:#9CA3AF;font-size:12px;"></i> Change Orders</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-regular fa-calendar" style="color:#9CA3AF;font-size:12px;"></i> Job Schedule</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-list-check" style="color:#9CA3AF;font-size:12px;"></i> Jobs List</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-diagram-project" style="color:#9CA3AF;font-size:12px;"></i> Jobs Pipeline</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-file-pen" style="color:#9CA3AF;font-size:12px;"></i> Work Orders</span></div>
+
+      <div class="sidebar-section-label">Daily Operations</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-regular fa-calendar-check" style="color:#9CA3AF;font-size:12px;"></i> Appointments</span><span class="sidebar-badge">2 new</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-regular fa-comment" style="color:#9CA3AF;font-size:12px;"></i> Chat</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-regular fa-envelope" style="color:#9CA3AF;font-size:12px;"></i> Email</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-regular fa-square-check" style="color:#9CA3AF;font-size:12px;"></i> Tasks</span></div>
+
+      <div class="sidebar-section-label">Documents</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-file-invoice-dollar" style="color:#9CA3AF;font-size:12px;"></i> Invoices</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-file-lines" style="color:#9CA3AF;font-size:12px;"></i> Proposals</span><i class="fa-solid fa-chevron-right chev"></i></div>
+
+      <div class="sidebar-section-label">Financials</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-coins" style="color:#9CA3AF;font-size:12px;"></i> Job Costing</span><i class="fa-solid fa-chevron-right chev"></i></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-gauge-high" style="color:#9CA3AF;font-size:12px;"></i> Production Rates</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-chart-line" style="color:#9CA3AF;font-size:12px;"></i> Metrics</span><i class="fa-solid fa-chevron-right chev"></i></div>
+
+      <div class="sidebar-section-label">Marketing</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-bolt" style="color:#9CA3AF;font-size:12px;"></i> Activity</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-bullhorn" style="color:#9CA3AF;font-size:12px;"></i> Blast</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-droplet" style="color:#9CA3AF;font-size:12px;"></i> Drips</span></div>
+
+      <div class="sidebar-section-label">Resources</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-graduation-cap" style="color:#9CA3AF;font-size:12px;"></i> DJ Academy</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-gears" style="color:#9CA3AF;font-size:12px;"></i> Automations</span></div>
+
+      <div class="sidebar-section-label">Super Admin</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-code" style="color:#9CA3AF;font-size:12px;"></i> CMS</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-user-shield" style="color:#9CA3AF;font-size:12px;"></i> Admin Settings</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-tag" style="color:#9CA3AF;font-size:12px;"></i> Promo Codes</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-building" style="color:#9CA3AF;font-size:12px;"></i> Tenants</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-flask" style="color:#9CA3AF;font-size:12px;"></i> Test Sites</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-phone" style="color:#9CA3AF;font-size:12px;"></i> Twilio Management</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-envelope-open-text" style="color:#9CA3AF;font-size:12px;"></i> Postmark Manage...</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-heart-pulse" style="color:#9CA3AF;font-size:12px;"></i> HealthScore</span></div>
+
+      <div style="height:8px;"></div>
+      <div class="sidebar-footer">
+        <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-gear" style="color:#32415B;font-size:12px;"></i> Settings</span><i class="fa-solid fa-chevron-up chev" style="color:#32415B;"></i></div>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="main-content">
+      <div class="settings-tabs">
+        <div class="settings-tab active">Company Information</div>
+        <div class="settings-tab">Brand</div>
+        <div class="settings-tab">Email Settings</div>
+        <div class="settings-tab">App Settings</div>
+        <div class="settings-tab">Calendar</div>
+        <div class="settings-tab">Templates</div>
+        <div class="settings-tab">Notifications</div>
+        <div class="settings-tab">Payments</div>
+        <div class="settings-tab">Integrations</div>
+        <div class="settings-tab">Customer Portal</div>
+        <div class="settings-tab">Add-Ons</div>
+      </div>
+
+      <div id="settings-page">
+
+        <!-- Account Status -->
+        <div class="settings-section">
+          <h4 class="settings-section-title">Account Status</h4>
+          <div class="account-status-row">
+            <div><span class="account-meta-label">Account</span><span class="account-meta-value">#11265</span></div>
+            <div><span class="account-meta-label">Plan</span><span class="account-meta-value">DripJobs Advanced - $147/mo</span></div>
+          </div>
+          <div class="settings-alert settings-alert--info">
+            <i class="fa-regular fa-calendar"></i>
+            <div><span class="settings-alert-title">Next Billing Date</span>August 14, 2026</div>
+          </div>
+          <div class="settings-alert settings-alert--success">
+            <i class="fa-solid fa-tag"></i>
+            <div><span class="settings-alert-title">Coupon Applied (PARTNER8322)</span>Gives a 100% lifetime discount (automatically applied each billing cycle). Applied on July 14, 2026 <span class="badge-active">Active</span></div>
+          </div>
+        </div>
+
+        <!-- Admin Controls -->
+        <div class="settings-section">
+          <h4 class="settings-section-title">Admin Controls</h4>
+          <div class="settings-grid">
+            <div class="settings-field">
+              <label class="settings-field-label">Plan</label>
+              <div class="select-wrapper"><select class="settings-field-input"><option>DripJobs Advanced</option></select></div>
+            </div>
+            <div class="settings-field">
+              <label class="settings-field-label">Subscription ID</label>
+              <input class="settings-field-input" type="text" value="AzZfGBUTpYiKC3aY2">
+            </div>
+            <div class="settings-field">
+              <label class="settings-field-label">OBCSS Representative</label>
+              <div class="select-wrapper"><select class="settings-field-input"><option>-</option></select></div>
+              <div class="field-meta-note">Last changed: -</div>
+            </div>
+
+            <div class="admin-controls-toggle-row">
+              <label class="toggle-switch on" id="activeCompanyToggle">
+                <input type="checkbox" id="activeCompanyCheckbox" checked>
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+              <div>
+                <div class="toggle-label-text">Active Company <span class="toggle-label-sub">(allow all users to log in)</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Company Details -->
+        <div class="settings-section">
+          <h4 class="settings-section-title">Company Details</h4>
+          <div class="settings-grid">
+            <div class="settings-field settings-field--half"><label class="settings-field-label is-required">Company Name</label><input class="settings-field-input" type="text" value="Sparrow's Nest Painting"></div>
+            <div class="settings-field"><label class="settings-field-label is-required">Short Name</label><input class="settings-field-input" type="text" value="The Nest"></div>
+            <div class="settings-field"><label class="settings-field-label">Business Type</label><div class="select-wrapper"><select class="settings-field-input"><option>Painting</option></select></div></div>
+            <div class="settings-field settings-field--half"><label class="settings-field-label is-required">Time Zone</label><div class="select-wrapper"><select class="settings-field-input"><option>Eastern Standard Time</option></select></div></div>
+            <div class="settings-field"><label class="settings-field-label">License Number</label><input class="settings-field-input" type="text" value="L987616"></div>
+            <div class="settings-field"><label class="settings-field-label">Phone</label><input class="settings-field-input" type="text" value="(555) 555-5555"></div>
+            <div class="settings-field settings-field--compact"><label class="settings-field-label">Tax Rate</label><div class="settings-field-group"><input class="settings-field-input" type="text" value="5.000"><span class="settings-field-group-suffix">%</span></div></div>
+          </div>
+        </div>
+
+        <!-- Tax Information -->
+        <div class="settings-section">
+          <h4 class="settings-section-title">Tax Information</h4>
+          <p class="settings-field-help" style="margin-bottom:14px;">Your business tax registration number and how it appears on invoices.</p>
+          <div class="settings-grid">
+            <div class="settings-field settings-field--half">
+              <label class="settings-field-label">Tax Registration Number</label>
+              <input class="settings-field-input" type="text" value="123456789">
+            </div>
+          </div>
+          <p class="settings-field-help" style="margin-top:8px;">Enter your business tax registration number to display it on invoices (e.g., VAT number, GST number, state tax permit).</p>
+
+          <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--st-color-border);">
+            <div class="subsection-label">Invoice Display Options</div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <label class="toggle-switch on" id="showTaxToggle">
+                <input type="checkbox" checked>
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+              <div>
+                <div class="toggle-label-text" style="font-size:13px;">Show tax registration number on invoices</div>
+                <div class="toggle-label-sub">Automatically include your tax registration number on every invoice.</div>
+              </div>
+            </div>
+            <div class="settings-alert settings-alert--info" style="margin-top:14px;">
+              <i class="fa-solid fa-circle-info"></i>
+              <div>The label "Tax Reg #:" and your registration number will appear in the company information block at the top of every invoice PDF.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Addresses -->
+        <div class="settings-section">
+          <h4 class="settings-section-title">Addresses</h4>
+          <p class="settings-field-help" style="margin-bottom:14px;">Where your business is located and where invoices are billed.</p>
+          <label class="checkbox-row"><input type="checkbox" checked> Billing same as physical</label>
+
+          <div class="subsection-label">Physical Address</div>
+          <div class="settings-grid" style="margin-bottom:18px;">
+            <div class="settings-field settings-field--full"><label class="settings-field-label">Company Address</label><input class="settings-field-input" type="text" value="1234 Reynolds Rd"></div>
+            <div class="settings-field settings-field--half"><label class="settings-field-label">City</label><input class="settings-field-input" type="text" value="Lakeland"></div>
+            <div class="settings-field"><label class="settings-field-label">State</label><input class="settings-field-input" type="text" value="GA"></div>
+            <div class="settings-field"><label class="settings-field-label">Zip</label><input class="settings-field-input" type="text" value="33801"></div>
+          </div>
+
+          <div class="subsection-label">Billing Address</div>
+          <div class="settings-grid">
+            <div class="settings-field settings-field--full"><label class="settings-field-label">Billing Company Name</label><input class="settings-field-input" type="text" value=""></div>
+            <div class="settings-field settings-field--full"><label class="settings-field-label">Billing Address</label><input class="settings-field-input" type="text" value="1234 Reynolds Rd"></div>
+            <div class="settings-field settings-field--half"><label class="settings-field-label">City</label><input class="settings-field-input" type="text" value="Lakeland"></div>
+            <div class="settings-field"><label class="settings-field-label">State</label><input class="settings-field-input" type="text" value="GA"></div>
+            <div class="settings-field"><label class="settings-field-label">Zip</label><input class="settings-field-input" type="text" value="33801"></div>
+          </div>
+        </div>
+
+        <div class="save-bar">
+          <button class="btn-save">Save</button>
+          <button class="btn-cancel-return">Cancel - Return to Dashboard</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     CONFIRMATION MODAL — Active Company toggle
+     ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="activeCompanyModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3><i class="fa-solid fa-triangle-exclamation"></i> <span id="activeCompanyModalTitle">Turn Off Active Company</span></h3>
+      <button class="modal-close" onclick="cancelActiveCompanyChange()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-message">This impacts billing and requires manager approval. Are you sure you want to do this?</div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-cancel" onclick="cancelActiveCompanyChange()">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" onclick="confirmActiveCompanyChange()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+  var activeCompanyPriorState = true;
+
+  var toggleEl = document.getElementById('activeCompanyToggle');
+  var checkboxEl = document.getElementById('activeCompanyCheckbox');
+  var modalEl = document.getElementById('activeCompanyModal');
+  var modalTitleEl = document.getElementById('activeCompanyModalTitle');
+
+  toggleEl.addEventListener('click', function (e) {
+    e.preventDefault();
+    activeCompanyPriorState = toggleEl.classList.contains('on');
+    var turningOn = !activeCompanyPriorState;
+
+    toggleEl.classList.toggle('on', turningOn);
+    checkboxEl.checked = turningOn;
+
+    modalTitleEl.textContent = turningOn ? 'Turn On Active Company' : 'Turn Off Active Company';
+    modalEl.classList.add('active');
+  });
+
+  function cancelActiveCompanyChange() {
+    toggleEl.classList.toggle('on', activeCompanyPriorState);
+    checkboxEl.checked = activeCompanyPriorState;
+    modalEl.classList.remove('active');
+  }
+
+  function confirmActiveCompanyChange() {
+    var isOn = toggleEl.classList.contains('on');
+    modalEl.classList.remove('active');
+    showToast(isOn ? 'Active Company turned on' : 'Active Company turned off');
+  }
+
+  function showToast(msg) {
+    var container = document.getElementById('toast-container');
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + msg;
+    container.appendChild(t);
+    setTimeout(function () {
+      t.classList.add('fading');
+      setTimeout(function () { t.remove(); }, 300);
+    }, 2600);
+  }
+</script>
+
+</body>
+</html>
