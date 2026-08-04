@@ -18,6 +18,13 @@ Format:
 
 ---
 
+## [2026-08-04] Metrics — AI Predictability, renamed to DripSense
+- Decision: Resolved the open naming question above — renamed all user-facing panel/section labels (page title, proto-bar title, section eyebrow, panel header title, collapsed-bar summary, never-run/no-data copy) from "AI Predictability" to "DripSense" to match the ClickUp ticket rename. Also updated the matching card name on the hub landing page (`index.html`) and its search keywords. Left the file path/folder (`metrics-ai-predictability/`) and the public portfolio page (`portfolio/index.html`) untouched, since renaming the path would break the existing shared prototype URL and the portfolio entry is a separate public-facing deliverable not tied to this ticket.
+- Why: Jeremy confirmed the rename directly.
+- Open question: None.
+
+---
+
 ## [2026-08-04] Active Company Toggle: Billing Confirmation, updated for ticket 86bb85q08 revision
 - Decision: Ticket added Business Rules 7-9: after Confirm, show a one-time on-screen reminder to notify Billing, with copy that differs by direction ("Company activated. Please notify Billing of this change." / "Company deactivated. Please notify Billing of this change."). Replaced the prior generic green success toast with a distinct amber reminder toast (reusing the `settings-alert--warn` color tokens, not the success-green ones) carrying a bell icon and a manual "Got it" dismiss button, plus a 6s auto-fade fallback. Nothing is logged, tracked, or persisted; dismissing just removes the DOM node, matching AC8's "does not persist after dismissal."
 - Why: The ticket is explicit that this reminder is a distinct instruction to the user (not a "saved successfully" confirmation), so it needed visually different treatment from a routine toast, and a deliberate dismiss action rather than only relying on a timed fade, since it's asking the user to go do something outside the app.
