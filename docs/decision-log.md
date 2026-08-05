@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore (health-score/): Export CSV scoped to the current page only
+
+- Decision: Export CSV's row count now matches whatever is currently visible on-screen (the active page at the current "Show" page size), not the full filtered result set. Changing Show to 50, paging to page 2, or setting Show to "All" all update the export count to match exactly what's displayed.
+- Why: Jeremy asked for this directly — export was previously exporting every filtered row regardless of pagination.
+- Open question: None.
+
+---
+
 ## [2026-08-05] HealthScore (health-score/): v2.1, grid cut to health-relevant columns + per-account Details drawer, per Slack thread (Jason/Rick/Mary)
 
 - Decision: Rebuilt `health-score/index.html` around a Slack thread flagging three problems: the grid was slow, most of its 34 columns aren't things anyone scans, and Jason noted fewer than 10 fields actually drive `computeHealth()`. The grid is now 10 columns (Tenant ID, Company Name, Type, Created, Health, Status, Total Sales, A2P Status, Days Rem., OBCSS) plus a "Details" link per row/click-row that opens a slide-over drawer containing everything that used to be a column: Industry/Account Age, Engagement Signals (Active Users, Contacts, Est. Sent, Last Est., Prop. Viewed, Deals 90d), Plan & Add-Ons, Integrations, and Automations. Dropped two redundant columns in the process: $10K (folded into a colored/badged Total Sales cell) and A2P Applied (A2P Status already covers it). Added a static "Precomputed" note near the table ("Health, Status & A2P fields last calculated Aug 5, 2026 6:00 AM · recalculates nightly") to visually address Rick's concern that these should be batch-computed, not computed live — the real precompute architecture is a backend decision outside this mockup. Also fixed a pre-existing bug surfaced while rewriting the Days Rem. cell: inactive, non-legacy accounts (`daysRemaining === null`) rendered literally as red "nulld" text; now renders as a dash like legacy accounts do. All 18 existing filters (including ones for fields that now only live in the drawer, like Integrations/Add-Ons/Contacts) were left completely unchanged, since filtering doesn't require the column to be rendered. `computeHealth()` itself was not touched. Removed the now-unnecessary two-row sticky header (group coloring + Integrations/Automations `[+]`/`[-]` expand toggle) since there's only one column group left.
