@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore (health-score/): every generated account now has a Plan
+
+- Decision: The mock data generator previously left `plan` as `null` for any inactive account and for ~22% of active new (non-legacy) accounts, showing as "No Active Plan" / a dash. Per Jeremy's correction that this can't happen in the real system, every account now gets a plan regardless of subscription status: legacy accounts keep the 55/45 Advanced/Pro split, new accounts always get Pro (Advanced stays legacy-only, matching the existing "Advanced — Legacy" filter label). Removed the now-impossible "No Active Plan" option from the Plan filter and simplified its matching logic accordingly.
+- Why: Jeremy said this state wouldn't happen in the real system and asked for every account to have a plan.
+- Open question: None. Verified across all 1,400 generated accounts: zero have no plan, and zero non-legacy accounts have "Advanced."
+
+---
+
 ## [2026-08-05] HealthScore (health-score/): moved Plan again, from top snapshot into Company Info
 
 - Decision: Superseding the immediately prior entry — moved Plan out of the drawer's top snapshot strip and into the "Company Info" section instead (placed after Account Type, before Created).
