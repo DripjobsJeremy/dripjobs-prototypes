@@ -13,7 +13,7 @@ The core rework. Jason's Slack feedback: the page was slow, most of its 34 colum
 - **Grid cut from 34 columns to 10**: Tenant ID, Company Name, Type, Created, Health, Status, Total Sales, A2P Status, Days Rem., OBCSS — the fields that actually feed `computeHealth()`, plus identity/ownership context.
 - **New "Account Details" slide-over drawer**: click any row (or its "Details ›" link) to see everything that used to be a column — Industry, Account Age, Active Users, Contacts, Est. Sent, Last Est., Prop. Viewed, Deals (90d), Plan, Add-Ons, Integrations, Automations — loaded per-account instead of rendered for all 1,400+ rows on every load.
 - **Two redundant columns folded in**: $10K became a badge on the Total Sales cell; A2P Applied was dropped since A2P Status already covers it.
-- **"Precomputed" note added** near the table signaling Health/Status/A2P fields come from a scheduled batch job, not live computation. (The real precompute cadence is a backend decision, not addressed by this prototype — flagged as an open item.)
+- **"Precomputed" note added** near the table signaling Health/Status/A2P fields come from a scheduled batch job (recalculates nightly), not live computation.
 - **Removed** the two-row sticky header and the Integrations/Automations `[+]`/`[−]` expand toggle, since only one column group remains.
 - **Fixed a pre-existing bug**: inactive, non-legacy accounts were rendering "nulld" in the Days Rem. cell; now shows a dash like legacy accounts do.
 - All 18 existing filters and `computeHealth()` itself were left untouched.
@@ -49,5 +49,4 @@ Per Jason's explicit feedback that total revenue shouldn't be visible on this pa
 ## Open items for PM / dev review
 
 1. **Column set confirmation** — the 10-column "health-relevant" grid was this session's best-guess bucketing; Jason said "fewer than 10" fields matter but didn't enumerate them.
-2. **Precompute cadence** — the "recalculates nightly" copy is a placeholder to demonstrate the concept, not a proposed SLA.
-3. **Account Details drawer scope** — confirm its five sections (Company Info, Engagement Signals, Plan & Add-Ons, Integrations, Automations) are the right grouping for a CS pre-call snapshot.
+2. **Account Details drawer scope** — confirm its five sections (Company Info, Engagement Signals, Plan & Add-Ons, Integrations, Automations) are the right grouping for a CS pre-call snapshot.

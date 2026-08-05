@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore: dropped the "precompute cadence" open item
+
+- Decision: Removed the "Precompute cadence" open item (the note that the prototype's "recalculates nightly" copy is a placeholder, not a proposed SLA) from `health-score/CHANGES.md` and from ClickUp ticket [86bb90q17](https://app.clickup.com/t/86bb90q17)'s "Open items for PM review" list, per Jeremy's direct instruction. Also simplified the ticket's and CHANGES.md's v2.1 description of the "Health last calculated" note to drop the same caveat language, rather than just relocating it elsewhere in the same documents.
+- Why: Jeremy asked directly to remove it.
+- Open question: None. (Earlier dated entries above that reference this same open item — the original v2.1 build and the ClickUp-ticket-creation entries — were left untouched, consistent with this log's own convention of not rewriting prior dated entries.)
+
+---
+
 ## [2026-08-05] HealthScore hub card: fixed broken GitHub link
 
 - Decision: The card's "GitHub" button pointed to `github.com/DripjobsJeremy/DJ-HealthScore-v1.5`, a separate external repo that 404s (confirmed via curl: old URL returns 403/not found, likely private or deleted). Changed it to `github.com/DripjobsJeremy/dripjobs-prototypes/tree/main/health-score`, matching the pattern already used by the sibling `dj-health-score-v2` and `dj-health-score-lifecycle` cards, which correctly link into this same repo's folder rather than an external one. Confirmed the new URL returns 200.
