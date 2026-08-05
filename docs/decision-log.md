@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore (health-score/): metric cards restyled to icon/label/description/button-left, value-right layout
+
+- Decision: Restyled the 6 metrics-row cards (Total Accounts, Active Subscriptions, Healthy Accounts, High Risk, Critical, Prop. Viewed) to match the horizontal card format Jeremy referenced (a screenshot matching the "SALES" KPI cell pattern already used in `metrics-ai-predictability/index.html`): emoji icon + colored uppercase label and description stacked on the left, a "View details →" pill button below them, and a large bold value vertically centered on the right. Kept each card's existing semantic accent color (purple/green/amber/red) applied to its label, value, and button instead of making everything purple like the single reference example, since these 6 cards represent different states that the color-coding already communicated. Removed the old left-border color stripe since the new text/button coloring carries that signal instead. The "View details" button has no separate click handler — it relies on bubbling up to the card's existing `onclick="filterByCard(...)"` so clicking it filters once, not twice.
+- Why: Jeremy supplied a screenshot and asked for the value-to-the-right layout "like we do in the metrics cards format."
+- Open question: None.
+
+---
+
 ## [2026-08-05] HealthScore (health-score/): fixed non-green $ marker, removed "recalculates nightly" from the live page
 
 - Decision: Two fixes. (1) The high-value-account marker used the 💲 emoji, which rendered in its default (non-green) color on Jeremy's system since CSS `color` doesn't reliably override full-color emoji glyphs across platforms; switched to a bold text "$" character styled with `color:#059669`, which is guaranteed to render green everywhere since it's plain text, not an emoji sprite. (2) Removed "· recalculates nightly" from the in-page "Precomputed" note near the table — that exact phrase had already been dropped from CHANGES.md and the ClickUp ticket in an earlier session turn, but the live prototype copy itself was never updated to match; the note now just says fields were "last calculated Aug 5, 2026 6:00 AM" without asserting a specific refresh cadence.
