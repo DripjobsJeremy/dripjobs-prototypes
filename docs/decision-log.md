@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore (health-score/): renamed page title/h1 from "Activation Dashboard" to "HealthScore," hub card updated to "HealthScore 2.1"
+
+- Decision: Renamed the `<title>`, proto-banner strap, and `<h1>` in `health-score/index.html` from "Activation Dashboard" to "HealthScore," keeping a "(formerly 'Activation Dashboard,' renamed Jul 29, 2026)" annotation on first mention in the banner rather than dropping the history outright. Updated the hub's card title (`index.html`) from "DJ Health Score v1.5" to "HealthScore 2.1" to reflect both the name and the file's actual current version. Left the card's `data-name` search keywords, status badge, and external GitHub link untouched since none were part of this request.
+- Why: Jeremy asked for both renames directly. This supersedes the 2026-07-29 sweep's decision to leave this specific file's body wording as "Activation Dashboard" (it had been treated as a historical/superseded snapshot at the time), since the file has since been actively developed through v1.6-v2.1 and Jeremy is now asking for the current name directly.
+- Open question: None.
+
+---
+
 ## [2026-08-05] HealthScore (health-score/): table columns left-aligned, Total Sales formatted as accounting
 
 - Decision: Column headers were defaulting to center alignment (the browser default for `<th>`) while body cells were left-aligned (the browser default for `<td>`), so headers didn't line up with the data below them. Added an explicit left-align to all headers to match. Total Sales is the one exception: it's now right-aligned (header and cells) with tabular-nums, and its dollar figures show two decimal places with thousand separators (e.g. "$3,507,872.00" instead of "$3,507,872"), matching standard accounting-number convention.
