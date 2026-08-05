@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore hub card: fixed broken GitHub link
+
+- Decision: The card's "GitHub" button pointed to `github.com/DripjobsJeremy/DJ-HealthScore-v1.5`, a separate external repo that 404s (confirmed via curl: old URL returns 403/not found, likely private or deleted). Changed it to `github.com/DripjobsJeremy/dripjobs-prototypes/tree/main/health-score`, matching the pattern already used by the sibling `dj-health-score-v2` and `dj-health-score-lifecycle` cards, which correctly link into this same repo's folder rather than an external one. Confirmed the new URL returns 200.
+- Why: Jeremy reported the 404 directly.
+- Open question: None.
+
+---
+
 ## [2026-08-05] HealthScore (health-score/): trimmed oversized column widths
 
 - Decision: Measured the true minimum content width needed per column (header label + sort icon vs. the longest possible cell value, rendered in isolation to avoid the table's own `width:100%` auto-layout masking the real numbers) across all 1,400 generated accounts. Most columns were already close to their real minimum (some, like Total Sales and A2P Status, are technically tighter than their true worst-case content but rely on `table{width:100%}` distributing extra space, which is safe and not worth changing). Three columns had genuine excess and were trimmed: Created (88px→86px), Health (90px→88px), OBCSS (130px→120px, the longest name "Alexis Calderon" only needs ~117px). Also tightened the table's own `min-width` floor from 1180px to 1085px to match the new column-width sum instead of carrying an arbitrary buffer from the original v2.1 rebuild.
