@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore (health-score/): "Status" column renamed to "Subscription" to match its filter
+
+- Decision: The grid column and Account Details drawer both labeled this field "Status" while its accordion filter was labeled "Subscription" — same underlying field (`c.sub`, Active/Inactive), two different names. Renamed the column header and drawer label to "Subscription" to match the filter, rather than the reverse, since "Status" would clash with the adjacent "Health Status" filter and "A2P Status" column (both already using "Status" for a different concept), while "Subscription" is unambiguous. Re-measured the column's natural minimum width for the new, longer header text and widened it from 72px to 112px (no cell overflow, verified across all 1,400 rows); bumped the table's own `min-width` floor from 1085px to 1125px to match.
+- Why: Jeremy asked directly for the column and filter to use matching titles.
+- Open question: None.
+
+---
+
 ## [2026-08-05] HealthScore (health-score/): removed plan pricing from the Plan filter dropdown
 
 - Decision: Removed "($97/m)" and "($147/m)" from the Plan multi-select filter's option labels ("Pro ($97/m)" → "Pro", "Advanced — Legacy ($147/m)" → "Advanced — Legacy"). Filter values/behavior unchanged.
