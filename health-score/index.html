@@ -21,7 +21,28 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .filters-card{background:white;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:14px;}
 .filters-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .filters-title{font-size:12px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:.4px;}
-.filters-grid{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;}
+
+/* --- Accordion filter sections --- */
+.filters-accordion{display:flex;flex-direction:column;gap:10px;}
+.acc-section{background:white;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;}
+.acc-section.acc-open{overflow:visible;}
+.acc-header{width:100%;display:flex;align-items:center;gap:14px;padding:12px 16px;background:none;border:none;cursor:pointer;text-align:left;font-family:inherit;}
+.acc-header:hover{background:#fafafa;}
+.acc-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.acc-icon svg{width:17px;height:17px;}
+.acc-icon-search{background:#ede9fe;color:#7C3AED;}
+.acc-icon-account{background:#d1fae5;color:#059669;}
+.acc-icon-integrations{background:#fef3c7;color:#92400e;}
+.acc-title-group{flex:1;min-width:0;}
+.acc-title{font-size:13px;font-weight:700;color:#111827;}
+.acc-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:7px;border-radius:9px;background:#ede9fe;color:#7C3AED;font-size:11px;font-weight:700;}
+.acc-sub{font-size:11px;color:#9ca3af;margin-top:2px;}
+.acc-chevron{font-size:13px;color:#9ca3af;transition:transform .15s;flex-shrink:0;}
+.acc-section.acc-open .acc-chevron{transform:rotate(90deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .18s ease;border-top:1px solid transparent;}
+.acc-section.acc-open .acc-body{max-height:700px;overflow:visible;border-top:1px solid #f3f4f6;}
+.acc-body-inner{display:flex;flex-wrap:wrap;gap:14px 12px;padding:14px 16px 16px;}
+
 .filter-group{display:flex;flex-direction:column;gap:3px;}
 .filter-label{font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;}
 .filter-select,.search-box{padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;color:#374151;background:white;cursor:pointer;min-height:32px;outline:none;font-family:inherit;}
@@ -122,8 +143,6 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
 .legend strong{color:#374151;}
 .info-note{background:#f0fdf4;border:1px solid #a7f3d0;border-left:3px solid #059669;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#065f46;}
 .info-note strong{font-weight:600;}
-.filter-divider{width:100%;height:1px;background:#f3f4f6;margin:6px 0 2px;}
-.filter-section-label{width:100%;font-size:10px;font-weight:700;color:#c4b5fd;text-transform:uppercase;letter-spacing:.5px;margin-bottom:-4px;}
 .multi-select{position:relative;}
 .ms-btn{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;color:#374151;background:white;cursor:pointer;min-height:32px;font-family:inherit;white-space:nowrap;min-width:150px;text-align:left;width:100%;}
 .ms-btn:focus{outline:none;border-color:#7C3AED;box-shadow:0 0 0 2px rgba(124,58,237,.1);}
@@ -142,7 +161,7 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
 <body>
 <div class="proto-banner">
   <span class="proto-tag">Prototype</span>
-  <strong>Ticket #86b9512kq</strong> &mdash; Activation Dashboard: All Tenants, New Columns &amp; Totals Row &nbsp;&middot;&nbsp; v1.7 &nbsp;&middot;&nbsp; <span style="background:rgba(255,255,255,.18);padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">Renamed HealthScore, Jul 29, 2026</span>
+  <strong>Ticket #86b9512kq</strong> &mdash; Activation Dashboard: All Tenants, New Columns &amp; Totals Row &nbsp;&middot;&nbsp; v1.8 &nbsp;&middot;&nbsp; <span style="background:rgba(255,255,255,.18);padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">Renamed HealthScore, Jul 29, 2026</span>
   <span class="proto-right">Plan &amp; /Month sourced from Company Settings &gt; Company Information (local DB) &nbsp;&middot;&nbsp; No Chargebee API call</span>
 </div>
 <div class="page-wrapper">
@@ -154,7 +173,8 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
     <div><button class="btn" onclick="exportCSV()">&#x2B07; Export CSV</button></div>
   </div>
   <div class="info-note">
-    <strong>What&rsquo;s new in v1.7:</strong> Added <strong>Prop. Viewed</strong> and <strong>Deals (90d)</strong> as parallel leading-indicator columns (new accounts only; legacy shows &mdash;) with matching filters &mdash; these do not change Health scoring.
+    <strong>What&rsquo;s new in v1.8:</strong> The flat filters grid is now three collapsible sections &mdash; <strong>Search &amp; Segment</strong> (7, open by default), <strong>Account Data</strong> (8), and <strong>Integrations, Automations &amp; Add-Ons</strong> (3) &mdash; matching the accordion pattern from the Accordion Filters mockup. No filter behavior changed, only how the 18 filters are grouped and revealed.
+    Added <strong>Prop. Viewed</strong> and <strong>Deals (90d)</strong> as parallel leading-indicator columns (new accounts only; legacy shows &mdash;) with matching filters &mdash; these do not change Health scoring.
     Health badge now evaluates the full 7-condition priority table (Healthy / Critical / High Risk / Warning / On Track / Inactive); the Health filter still uses the 4-option set (On Track / Needs Attention / At Risk / Inactive).
     Metrics Bar expanded to 7 KPI cards: Total Accounts, Active Subscriptions, Healthy Accounts, High Risk, Critical, Total Plan Rev. (visible), and Prop. Viewed.
     Pro plan pricing corrected to <strong>$97/mo</strong> (was $79/mo). The 9 core filters now persist across page refresh via session storage.
@@ -164,177 +184,217 @@ tfoot td:nth-child(2){position:sticky;left:96px;z-index:10;background:#f3f4f6;}
       <span class="filters-title">Filters</span>
       <button class="btn-clear" onclick="clearAllFilters()">Clear All</button>
     </div>
-    <div class="filters-grid">
-      <div class="filter-group">
-        <label class="filter-label">Search</label>
-        <input type="text" class="search-box" id="f-search" placeholder="Company name or Tenant ID&hellip;" oninput="debounceSearch()">
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Account Type</label>
-        <select class="filter-select" id="f-type" onchange="applyFilters()">
-          <option value="">All Accounts</option>
-          <option value="new">New (after 12/28/25)</option>
-          <option value="legacy">Legacy (before 12/28/25)</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Plan</label>
-        <div class="multi-select" id="ms-plan">
-          <button class="ms-btn" onclick="toggleMS('ms-plan')"><span class="ms-label">All Plans</span><span class="ms-caret">&#9660;</span></button>
-          <div class="ms-panel" id="ms-plan-panel">
-            <label class="ms-item"><input type="checkbox" value="Pro" onchange="msChange('ms-plan')"> Pro ($97/m)</label>
-            <label class="ms-item"><input type="checkbox" value="Advanced" onchange="msChange('ms-plan')"> Advanced &mdash; Legacy ($147/m)</label>
-            <label class="ms-item"><input type="checkbox" value="none" onchange="msChange('ms-plan')"> No Active Plan</label>
-            <div class="ms-footer" onclick="clearMS('ms-plan')">Clear</div>
+    <div class="filters-accordion">
+      <div class="acc-section acc-open" id="acc-search">
+        <button class="acc-header" onclick="toggleAcc('acc-search')" type="button">
+          <span class="acc-icon acc-icon-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <span class="acc-title-group">
+            <div class="acc-title">Search &amp; Segment<span class="acc-count">7</span></div>
+            <div class="acc-sub">Who you&rsquo;re looking at &mdash; always visible, used on nearly every search</div>
+          </span>
+          <span class="acc-chevron">&#10095;</span>
+        </button>
+        <div class="acc-body" id="acc-body-acc-search">
+          <div class="acc-body-inner">
+            <div class="filter-group">
+              <label class="filter-label">Search</label>
+              <input type="text" class="search-box" id="f-search" placeholder="Company name or Tenant ID&hellip;" oninput="debounceSearch()">
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Account Type</label>
+              <select class="filter-select" id="f-type" onchange="applyFilters()">
+                <option value="">All Accounts</option>
+                <option value="new">New (after 12/28/25)</option>
+                <option value="legacy">Legacy (before 12/28/25)</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Plan</label>
+              <div class="multi-select" id="ms-plan">
+                <button class="ms-btn" onclick="toggleMS('ms-plan')"><span class="ms-label">All Plans</span><span class="ms-caret">&#9660;</span></button>
+                <div class="ms-panel" id="ms-plan-panel">
+                  <label class="ms-item"><input type="checkbox" value="Pro" onchange="msChange('ms-plan')"> Pro ($97/m)</label>
+                  <label class="ms-item"><input type="checkbox" value="Advanced" onchange="msChange('ms-plan')"> Advanced &mdash; Legacy ($147/m)</label>
+                  <label class="ms-item"><input type="checkbox" value="none" onchange="msChange('ms-plan')"> No Active Plan</label>
+                  <div class="ms-footer" onclick="clearMS('ms-plan')">Clear</div>
+                </div>
+              </div>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Health Status</label>
+              <div class="multi-select" id="ms-health">
+                <button class="ms-btn" onclick="toggleMS('ms-health')"><span class="ms-label">All Statuses</span><span class="ms-caret">&#9660;</span></button>
+                <div class="ms-panel" id="ms-health-panel">
+                  <label class="ms-item"><input type="checkbox" value="On Track" onchange="msChange('ms-health')"> &#x1F7E2; On Track</label>
+                  <label class="ms-item"><input type="checkbox" value="Needs Attention" onchange="msChange('ms-health')"> &#x1F7E1; Needs Attention</label>
+                  <label class="ms-item"><input type="checkbox" value="At Risk" onchange="msChange('ms-health')"> &#x1F534; At Risk</label>
+                  <label class="ms-item"><input type="checkbox" value="Inactive" onchange="msChange('ms-health')"> &#x25A1; Inactive</label>
+                  <div class="ms-footer" onclick="clearMS('ms-health')">Clear</div>
+                </div>
+              </div>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Subscription</label>
+              <select class="filter-select" id="f-sub" onchange="applyFilters()">
+                <option value="">All</option>
+                <option>Active</option>
+                <option>Inactive</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">OBCSS</label>
+              <div class="multi-select" id="ms-obcss">
+                <button class="ms-btn" onclick="toggleMS('ms-obcss')"><span class="ms-label">All Team Members</span><span class="ms-caret">&#9660;</span></button>
+                <div class="ms-panel" id="ms-obcss-panel">
+                  <div class="ms-footer" onclick="clearMS('ms-obcss')">Clear</div>
+                </div>
+              </div>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Industry</label>
+              <div class="multi-select" id="ms-industry">
+                <button class="ms-btn" onclick="toggleMS('ms-industry')"><span class="ms-label">All Industries</span><span class="ms-caret">&#9660;</span></button>
+                <div class="ms-panel" id="ms-industry-panel">
+                  <div class="ms-footer" onclick="clearMS('ms-industry')">Clear</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="filter-group">
-        <label class="filter-label">Health Status</label>
-        <div class="multi-select" id="ms-health">
-          <button class="ms-btn" onclick="toggleMS('ms-health')"><span class="ms-label">All Statuses</span><span class="ms-caret">&#9660;</span></button>
-          <div class="ms-panel" id="ms-health-panel">
-            <label class="ms-item"><input type="checkbox" value="On Track" onchange="msChange('ms-health')"> &#x1F7E2; On Track</label>
-            <label class="ms-item"><input type="checkbox" value="Needs Attention" onchange="msChange('ms-health')"> &#x1F7E1; Needs Attention</label>
-            <label class="ms-item"><input type="checkbox" value="At Risk" onchange="msChange('ms-health')"> &#x1F534; At Risk</label>
-            <label class="ms-item"><input type="checkbox" value="Inactive" onchange="msChange('ms-health')"> &#x25A1; Inactive</label>
-            <div class="ms-footer" onclick="clearMS('ms-health')">Clear</div>
+
+      <div class="acc-section" id="acc-account">
+        <button class="acc-header" onclick="toggleAcc('acc-account')" type="button">
+          <span class="acc-icon acc-icon-account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+          <span class="acc-title-group">
+            <div class="acc-title">Account Data<span class="acc-count">8</span></div>
+            <div class="acc-sub">Engagement &amp; billing signals &mdash; used for deeper investigation, not every search</div>
+          </span>
+          <span class="acc-chevron">&#10095;</span>
+        </button>
+        <div class="acc-body" id="acc-body-acc-account">
+          <div class="acc-body-inner">
+            <div class="filter-group">
+              <label class="filter-label">Active Users</label>
+              <select class="filter-select" id="f-users" onchange="applyFilters()">
+                <option value="">All</option>
+                <option value="flagged">Flagged &mdash; 0&ndash;1</option>
+                <option value="2plus">2+ Users</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Contacts</label>
+              <select class="filter-select" id="f-contacts" onchange="applyFilters()">
+                <option value="">All</option>
+                <option value="100plus">100+ (Green)</option>
+                <option value="50to99">50&ndash;99 (Yellow)</option>
+                <option value="under50">Under 50 (Red)</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Est. Sent</label>
+              <select class="filter-select" id="f-estsent" onchange="applyFilters()">
+                <option value="">All</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">$10K</label>
+              <select class="filter-select" id="f-10k" onchange="applyFilters()">
+                <option value="">All</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">A2P Applied</label>
+              <select class="filter-select" id="f-a2papplied" onchange="applyFilters()">
+                <option value="">All</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">A2P Status</label>
+              <select class="filter-select" id="f-a2pstatus" onchange="applyFilters()">
+                <option value="">All</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Prop. Viewed</label>
+              <select class="filter-select" id="f-propviewed" onchange="applyFilters()">
+                <option value="">All</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Deals (90d)</label>
+              <select class="filter-select" id="f-deals90" onchange="applyFilters()">
+                <option value="">All</option>
+                <option value="3plus">3+</option>
+                <option value="under3">Under 3</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
-      <div class="filter-group">
-        <label class="filter-label">Subscription</label>
-        <select class="filter-select" id="f-sub" onchange="applyFilters()">
-          <option value="">All</option>
-          <option>Active</option>
-          <option>Inactive</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">OBCSS</label>
-        <div class="multi-select" id="ms-obcss">
-          <button class="ms-btn" onclick="toggleMS('ms-obcss')"><span class="ms-label">All Team Members</span><span class="ms-caret">&#9660;</span></button>
-          <div class="ms-panel" id="ms-obcss-panel">
-            <div class="ms-footer" onclick="clearMS('ms-obcss')">Clear</div>
-          </div>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Industry</label>
-        <div class="multi-select" id="ms-industry">
-          <button class="ms-btn" onclick="toggleMS('ms-industry')"><span class="ms-label">All Industries</span><span class="ms-caret">&#9660;</span></button>
-          <div class="ms-panel" id="ms-industry-panel">
-            <div class="ms-footer" onclick="clearMS('ms-industry')">Clear</div>
-          </div>
-        </div>
-      </div>
-      <div class="filter-divider"></div>
-      <div class="filter-section-label">Account Data</div>
-      <div class="filter-group">
-        <label class="filter-label">Active Users</label>
-        <select class="filter-select" id="f-users" onchange="applyFilters()">
-          <option value="">All</option>
-          <option value="flagged">Flagged &mdash; 0&ndash;1</option>
-          <option value="2plus">2+ Users</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Contacts</label>
-        <select class="filter-select" id="f-contacts" onchange="applyFilters()">
-          <option value="">All</option>
-          <option value="100plus">100+ (Green)</option>
-          <option value="50to99">50&ndash;99 (Yellow)</option>
-          <option value="under50">Under 50 (Red)</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Est. Sent</label>
-        <select class="filter-select" id="f-estsent" onchange="applyFilters()">
-          <option value="">All</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">$10K</label>
-        <select class="filter-select" id="f-10k" onchange="applyFilters()">
-          <option value="">All</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">A2P Applied</label>
-        <select class="filter-select" id="f-a2papplied" onchange="applyFilters()">
-          <option value="">All</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">A2P Status</label>
-        <select class="filter-select" id="f-a2pstatus" onchange="applyFilters()">
-          <option value="">All</option>
-          <option value="active">Active</option>
-          <option value="pending">Pending</option>
-          <option value="none">None</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Prop. Viewed</label>
-        <select class="filter-select" id="f-propviewed" onchange="applyFilters()">
-          <option value="">All</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Deals (90d)</label>
-        <select class="filter-select" id="f-deals90" onchange="applyFilters()">
-          <option value="">All</option>
-          <option value="3plus">3+</option>
-          <option value="under3">Under 3</option>
-        </select>
-      </div>
-      <div class="filter-divider"></div>
-      <div class="filter-section-label">Integrations, Automations, &amp; Add-Ons</div>
-      <div class="filter-group">
-        <label class="filter-label">Integration</label>
-        <div class="multi-select" id="ms-integration">
-          <button class="ms-btn" onclick="toggleMS('ms-integration')"><span class="ms-label">All Integrations</span><span class="ms-caret">&#9660;</span></button>
-          <div class="ms-panel" id="ms-integration-panel">
-            <label class="ms-item"><input type="checkbox" value="google" onchange="msChange('ms-integration')"> Google</label>
-            <label class="ms-item"><input type="checkbox" value="qbo" onchange="msChange('ms-integration')"> QBO</label>
-            <label class="ms-item"><input type="checkbox" value="qbt" onchange="msChange('ms-integration')"> QBT</label>
-            <label class="ms-item"><input type="checkbox" value="acorn" onchange="msChange('ms-integration')"> Acorn</label>
-            <label class="ms-item"><input type="checkbox" value="quo" onchange="msChange('ms-integration')"> Quo</label>
-            <label class="ms-item"><input type="checkbox" value="companyCam" onchange="msChange('ms-integration')"> CompanyCam</label>
-            <label class="ms-item"><input type="checkbox" value="routemize" onchange="msChange('ms-integration')"> Routemize</label>
-            <div class="ms-footer" onclick="clearMS('ms-integration')">Clear</div>
-          </div>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Automation</label>
-        <div class="multi-select" id="ms-automation">
-          <button class="ms-btn" onclick="toggleMS('ms-automation')"><span class="ms-label">All Automations</span><span class="ms-caret">&#9660;</span></button>
-          <div class="ms-panel" id="ms-automation-panel">
-            <label class="ms-item"><input type="checkbox" value="zapier" onchange="msChange('ms-automation')"> Zapier</label>
-            <label class="ms-item"><input type="checkbox" value="angi" onchange="msChange('ms-automation')"> Angi Leads</label>
-            <div class="ms-footer" onclick="clearMS('ms-automation')">Clear</div>
-          </div>
-        </div>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label">Add-On</label>
-        <div class="multi-select" id="ms-addon">
-          <button class="ms-btn" onclick="toggleMS('ms-addon')"><span class="ms-label">All Add-Ons</span><span class="ms-caret">&#9660;</span></button>
-          <div class="ms-panel" id="ms-addon-panel">
-            <label class="ms-item"><input type="checkbox" value="prodRates" onchange="msChange('ms-addon')"> Prod Rates</label>
-            <label class="ms-item"><input type="checkbox" value="jobCost" onchange="msChange('ms-addon')"> Job Cost</label>
-            <label class="ms-item"><input type="checkbox" value="textMsg" onchange="msChange('ms-addon')"> Text MSG</label>
-            <label class="ms-item"><input type="checkbox" value="jobiAi" onchange="msChange('ms-addon')"> Jobi AI</label>
-            <div class="ms-footer" onclick="clearMS('ms-addon')">Clear</div>
+
+      <div class="acc-section" id="acc-integrations">
+        <button class="acc-header" onclick="toggleAcc('acc-integrations')" type="button">
+          <span class="acc-icon acc-icon-integrations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span class="acc-title-group">
+            <div class="acc-title">Integrations, Automations &amp; Add-Ons<span class="acc-count">3</span></div>
+            <div class="acc-sub">System/product configuration &mdash; niche, low-frequency filters</div>
+          </span>
+          <span class="acc-chevron">&#10095;</span>
+        </button>
+        <div class="acc-body" id="acc-body-acc-integrations">
+          <div class="acc-body-inner">
+            <div class="filter-group">
+              <label class="filter-label">Integration</label>
+              <div class="multi-select" id="ms-integration">
+                <button class="ms-btn" onclick="toggleMS('ms-integration')"><span class="ms-label">All Integrations</span><span class="ms-caret">&#9660;</span></button>
+                <div class="ms-panel" id="ms-integration-panel">
+                  <label class="ms-item"><input type="checkbox" value="google" onchange="msChange('ms-integration')"> Google</label>
+                  <label class="ms-item"><input type="checkbox" value="qbo" onchange="msChange('ms-integration')"> QBO</label>
+                  <label class="ms-item"><input type="checkbox" value="qbt" onchange="msChange('ms-integration')"> QBT</label>
+                  <label class="ms-item"><input type="checkbox" value="acorn" onchange="msChange('ms-integration')"> Acorn</label>
+                  <label class="ms-item"><input type="checkbox" value="quo" onchange="msChange('ms-integration')"> Quo</label>
+                  <label class="ms-item"><input type="checkbox" value="companyCam" onchange="msChange('ms-integration')"> CompanyCam</label>
+                  <label class="ms-item"><input type="checkbox" value="routemize" onchange="msChange('ms-integration')"> Routemize</label>
+                  <div class="ms-footer" onclick="clearMS('ms-integration')">Clear</div>
+                </div>
+              </div>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Automation</label>
+              <div class="multi-select" id="ms-automation">
+                <button class="ms-btn" onclick="toggleMS('ms-automation')"><span class="ms-label">All Automations</span><span class="ms-caret">&#9660;</span></button>
+                <div class="ms-panel" id="ms-automation-panel">
+                  <label class="ms-item"><input type="checkbox" value="zapier" onchange="msChange('ms-automation')"> Zapier</label>
+                  <label class="ms-item"><input type="checkbox" value="angi" onchange="msChange('ms-automation')"> Angi Leads</label>
+                  <div class="ms-footer" onclick="clearMS('ms-automation')">Clear</div>
+                </div>
+              </div>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Add-On</label>
+              <div class="multi-select" id="ms-addon">
+                <button class="ms-btn" onclick="toggleMS('ms-addon')"><span class="ms-label">All Add-Ons</span><span class="ms-caret">&#9660;</span></button>
+                <div class="ms-panel" id="ms-addon-panel">
+                  <label class="ms-item"><input type="checkbox" value="prodRates" onchange="msChange('ms-addon')"> Prod Rates</label>
+                  <label class="ms-item"><input type="checkbox" value="jobCost" onchange="msChange('ms-addon')"> Job Cost</label>
+                  <label class="ms-item"><input type="checkbox" value="textMsg" onchange="msChange('ms-addon')"> Text MSG</label>
+                  <label class="ms-item"><input type="checkbox" value="jobiAi" onchange="msChange('ms-addon')"> Jobi AI</label>
+                  <div class="ms-footer" onclick="clearMS('ms-addon')">Clear</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -431,6 +491,7 @@ var MS={};
 var MS_LABELS={'ms-plan':'All Plans','ms-health':'All Statuses','ms-obcss':'All Team Members','ms-industry':'All Industries','ms-addon':'All Add-Ons','ms-integration':'All Integrations','ms-automation':'All Automations'};
 function getMS(id){return MS[id]?Array.from(MS[id]):[];}
 function toggleMS(id){var panel=document.getElementById(id+'-panel'),isOpen=panel.classList.contains('ms-open');document.querySelectorAll('.ms-panel.ms-open').forEach(function(p){p.classList.remove('ms-open');});if(!isOpen)panel.classList.add('ms-open');}
+function toggleAcc(id){document.getElementById(id).classList.toggle('acc-open');}
 function msChange(id){if(!MS[id])MS[id]=new Set();MS[id].clear();document.querySelectorAll('#'+id+'-panel input[type=checkbox]:checked').forEach(function(cb){MS[id].add(cb.value);});updateMSBtn(id);applyFilters();}
 function updateMSBtn(id){var count=MS[id]?MS[id].size:0,lbl=document.querySelector('#'+id+' .ms-label'),btn=document.querySelector('#'+id+' .ms-btn');if(lbl)lbl.textContent=count?(count+' selected'):MS_LABELS[id];if(btn)btn.classList.toggle('ms-active',count>0);}
 function clearMS(id){if(MS[id])MS[id].clear();var panel=document.getElementById(id+'-panel');if(panel)panel.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.checked=false;});updateMSBtn(id);applyFilters();}
