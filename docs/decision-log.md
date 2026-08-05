@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore (health-score/): trimmed oversized column widths
+
+- Decision: Measured the true minimum content width needed per column (header label + sort icon vs. the longest possible cell value, rendered in isolation to avoid the table's own `width:100%` auto-layout masking the real numbers) across all 1,400 generated accounts. Most columns were already close to their real minimum (some, like Total Sales and A2P Status, are technically tighter than their true worst-case content but rely on `table{width:100%}` distributing extra space, which is safe and not worth changing). Three columns had genuine excess and were trimmed: Created (88px→86px), Health (90px→88px), OBCSS (130px→120px, the longest name "Alexis Calderon" only needs ~117px). Also tightened the table's own `min-width` floor from 1180px to 1085px to match the new column-width sum instead of carrying an arbitrary buffer from the original v2.1 rebuild.
+- Why: Jeremy asked to remove unnecessary column space directly. Verified with a full-dataset scan (all 1,400 rows, every column) that no cell overflows its new width and no horizontal scroll is introduced at normal viewport widths.
+- Open question: None.
+
+---
+
 ## [2026-08-05] HealthScore (health-score/): follow-up ClickUp ticket created for the v1.8–v2.1 UX rework
 
 - Decision: Created ticket [86bb90q17](https://app.clickup.com/t/86bb90q17) in DripJobs Product Management > V1 > Active Triage, status "Needs PM Analysis," summarizing this session's full v1.8–v2.1 changes (accordion filters, plan/billing revenue removal, 34→10 column grid reduction + Account Details drawer, Export CSV page-scoping, Show/Clear restyle, column alignment/accounting format, HealthScore rename) so PM can review whether/how to formalize them against the original ticket 86b9512kq. Added the new ticket as a second `ticket-link` on the hub card (`index.html`), preserving the original 86b9512kq link rather than replacing it, matching the existing multi-ticket-link pattern already used on the "Job Address + Column Management" card.
