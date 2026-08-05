@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore (health-score/): fixed non-green $ marker, removed "recalculates nightly" from the live page
+
+- Decision: Two fixes. (1) The high-value-account marker used the 💲 emoji, which rendered in its default (non-green) color on Jeremy's system since CSS `color` doesn't reliably override full-color emoji glyphs across platforms; switched to a bold text "$" character styled with `color:#059669`, which is guaranteed to render green everywhere since it's plain text, not an emoji sprite. (2) Removed "· recalculates nightly" from the in-page "Precomputed" note near the table — that exact phrase had already been dropped from CHANGES.md and the ClickUp ticket in an earlier session turn, but the live prototype copy itself was never updated to match; the note now just says fields were "last calculated Aug 5, 2026 6:00 AM" without asserting a specific refresh cadence.
+- Why: Jeremy reported the $ wasn't rendering green, then flagged that the nightly-cadence copy should have been removed from the page itself too, not just the docs/ticket.
+- Open question: None.
+
+---
+
 ## [2026-08-05] HealthScore (health-score/): green dollar-sign marker for high-value accounts
 
 - Decision: Added a green 💲 emoji to the right of an account's name when Plan = Advanced AND 3 or more of its 4 Add-Ons (Production Rates, Job Costing, Text Messaging, Jobi AI) are Yes. Shown in both the main table's Company Name cell and the Account Details drawer's company name header, driven by one shared `isHighValueAccount()` helper so both stay in sync. Has a hover tooltip ("Advanced plan with 3+ Add-Ons") for clarity. 114 of 1,400 generated accounts currently qualify.
