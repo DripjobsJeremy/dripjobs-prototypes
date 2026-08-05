@@ -11,6 +11,46 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore (health-score/): moved Plan again, from top snapshot into Company Info
+
+- Decision: Superseding the immediately prior entry — moved Plan out of the drawer's top snapshot strip and into the "Company Info" section instead (placed after Account Type, before Created).
+- Why: Jeremy asked for this placement directly, right after the previous move.
+- Open question: None.
+
+---
+
+## [2026-08-05] HealthScore (health-score/): moved Plan into the Account Details drawer's top snapshot, renamed "Plan & Add-Ons" to "Add-Ons"
+
+- Decision: Moved the Plan badge out of the drawer's "Plan & Add-Ons" section and into the top snapshot strip (alongside Health, Subscription, Total Sales, A2P Status, Days Rem., OBCSS Owner), placed right after Subscription. Renamed the now-Plan-less section from "Plan & Add-Ons" to "Add-Ons" (still holds Production Rates, Job Costing, Text Messaging, Jobi AI).
+- Why: Jeremy asked directly to move Plan to the top and rename the section.
+- Open question: None.
+
+---
+
+## [2026-08-05] HealthScore (health-score/): "Status" column renamed to "Subscription" to match its filter
+
+- Decision: The grid column and Account Details drawer both labeled this field "Status" while its accordion filter was labeled "Subscription" — same underlying field (`c.sub`, Active/Inactive), two different names. Renamed the column header and drawer label to "Subscription" to match the filter, rather than the reverse, since "Status" would clash with the adjacent "Health Status" filter and "A2P Status" column (both already using "Status" for a different concept), while "Subscription" is unambiguous. Re-measured the column's natural minimum width for the new, longer header text and widened it from 72px to 112px (no cell overflow, verified across all 1,400 rows); bumped the table's own `min-width` floor from 1085px to 1125px to match.
+- Why: Jeremy asked directly for the column and filter to use matching titles.
+- Open question: None.
+
+---
+
+## [2026-08-05] HealthScore (health-score/): removed plan pricing from the Plan filter dropdown
+
+- Decision: Removed "($97/m)" and "($147/m)" from the Plan multi-select filter's option labels ("Pro ($97/m)" → "Pro", "Advanced — Legacy ($147/m)" → "Advanced — Legacy"). Filter values/behavior unchanged.
+- Why: Jeremy asked directly. This resolves the open question flagged in the 2026-08-05 "removed plan/billing revenue" entry above, about whether the no-revenue-on-this-page intent extended to these filter labels too.
+- Open question: None.
+
+---
+
+## [2026-08-05] HealthScore: dropped the "precompute cadence" open item
+
+- Decision: Removed the "Precompute cadence" open item (the note that the prototype's "recalculates nightly" copy is a placeholder, not a proposed SLA) from `health-score/CHANGES.md` and from ClickUp ticket [86bb90q17](https://app.clickup.com/t/86bb90q17)'s "Open items for PM review" list, per Jeremy's direct instruction. Also simplified the ticket's and CHANGES.md's v2.1 description of the "Health last calculated" note to drop the same caveat language, rather than just relocating it elsewhere in the same documents.
+- Why: Jeremy asked directly to remove it.
+- Open question: None. (Earlier dated entries above that reference this same open item — the original v2.1 build and the ClickUp-ticket-creation entries — were left untouched, consistent with this log's own convention of not rewriting prior dated entries.)
+
+---
+
 ## [2026-08-05] HealthScore hub card: fixed broken GitHub link
 
 - Decision: The card's "GitHub" button pointed to `github.com/DripjobsJeremy/DJ-HealthScore-v1.5`, a separate external repo that 404s (confirmed via curl: old URL returns 403/not found, likely private or deleted). Changed it to `github.com/DripjobsJeremy/dripjobs-prototypes/tree/main/health-score`, matching the pattern already used by the sibling `dj-health-score-v2` and `dj-health-score-lifecycle` cards, which correctly link into this same repo's folder rather than an external one. Confirmed the new URL returns 200.
