@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore (health-score/): moved Plan again, from top snapshot into Company Info
+
+- Decision: Superseding the immediately prior entry — moved Plan out of the drawer's top snapshot strip and into the "Company Info" section instead (placed after Account Type, before Created).
+- Why: Jeremy asked for this placement directly, right after the previous move.
+- Open question: None.
+
+---
+
 ## [2026-08-05] HealthScore (health-score/): moved Plan into the Account Details drawer's top snapshot, renamed "Plan & Add-Ons" to "Add-Ons"
 
 - Decision: Moved the Plan badge out of the drawer's "Plan & Add-Ons" section and into the top snapshot strip (alongside Health, Subscription, Total Sales, A2P Status, Days Rem., OBCSS Owner), placed right after Subscription. Renamed the now-Plan-less section from "Plan & Add-Ons" to "Add-Ons" (still holds Production Rates, Job Costing, Text Messaging, Jobi AI).
