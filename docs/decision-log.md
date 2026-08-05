@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore (health-score/): table columns left-aligned, Total Sales formatted as accounting
+
+- Decision: Column headers were defaulting to center alignment (the browser default for `<th>`) while body cells were left-aligned (the browser default for `<td>`), so headers didn't line up with the data below them. Added an explicit left-align to all headers to match. Total Sales is the one exception: it's now right-aligned (header and cells) with tabular-nums, and its dollar figures show two decimal places with thousand separators (e.g. "$3,507,872.00" instead of "$3,507,872"), matching standard accounting-number convention.
+- Why: Jeremy asked directly for left-aligned columns and accounting-formatted Total Sales.
+- Open question: None.
+
+---
+
 ## [2026-08-05] HealthScore (health-score/): Show selector + Clear All Filters restyled to floating-label pill pattern
 
 - Decision: Restyled the "Show [n] entries" page-size control into the floating-label pill (`.show-field`) already used in `company-activation-tracking-mockup/` and `dj-health-score-lifecycle/` — purple-bordered select with a notched "Show" label and custom chevron — paired with a plain bordered "Clear All Filters" button, dropping the old separate "Clear All" text link from the filters card header. Per Jeremy's follow-up, kept both controls in their existing table-toolbar location (right of "All Company Data") rather than moving them up next to the filter accordion like the mockup does. Colors adapted to this page's own hardcoded `#7C3AED` accent instead of the mockup's `#8B85EA` token, consistent with prior sessions on this file.
