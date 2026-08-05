@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore (health-score/): removed plan pricing from the Plan filter dropdown
+
+- Decision: Removed "($97/m)" and "($147/m)" from the Plan multi-select filter's option labels ("Pro ($97/m)" → "Pro", "Advanced — Legacy ($147/m)" → "Advanced — Legacy"). Filter values/behavior unchanged.
+- Why: Jeremy asked directly. This resolves the open question flagged in the 2026-08-05 "removed plan/billing revenue" entry above, about whether the no-revenue-on-this-page intent extended to these filter labels too.
+- Open question: None.
+
+---
+
 ## [2026-08-05] HealthScore: dropped the "precompute cadence" open item
 
 - Decision: Removed the "Precompute cadence" open item (the note that the prototype's "recalculates nightly" copy is a placeholder, not a proposed SLA) from `health-score/CHANGES.md` and from ClickUp ticket [86bb90q17](https://app.clickup.com/t/86bb90q17)'s "Open items for PM review" list, per Jeremy's direct instruction. Also simplified the ticket's and CHANGES.md's v2.1 description of the "Health last calculated" note to drop the same caveat language, rather than just relocating it elsewhere in the same documents.
