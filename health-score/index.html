@@ -17,7 +17,15 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .header p{color:#6b7280;font-size:13px;margin-top:3px;}
 .btn{padding:7px 14px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid #d1d5db;background:white;color:#374151;font-family:inherit;}
 .btn:hover{background:#f9fafb;}
-.btn-clear{background:none;border:none;color:#7C3AED;font-size:12px;font-weight:500;cursor:pointer;padding:4px 0;font-family:inherit;}
+.clear-all-row{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-bottom:14px;}
+.btn-clear-all{height:38px;padding:0 16px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:#374151;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.btn-clear-all:hover{background:#f9fafb;border-color:#9ca3af;}
+.show-field{position:relative;display:inline-flex;flex-direction:column;}
+.show-field-label{position:absolute;top:-8px;left:10px;background:#fff;padding:0 6px;font-size:11px;font-weight:500;color:#9ca3af;z-index:1;pointer-events:none;letter-spacing:.2px;}
+.show-field-input{height:38px;padding:0 30px 0 14px;border:1.5px solid #7C3AED;border-radius:8px;font-size:14px;color:#374151;background:#fff;cursor:pointer;font-family:inherit;appearance:none;-webkit-appearance:none;min-width:78px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237C3AED' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat;background-position:right 9px center;background-size:13px 13px;}
+.show-field-input:focus{outline:none;box-shadow:0 0 0 3px rgba(124,58,237,.18);}
 .filters-card{background:white;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:14px;}
 .filters-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .filters-title{font-size:12px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:.4px;}
@@ -64,9 +72,6 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e5e7eb;gap:12px;}
 .table-title{font-size:15px;font-weight:600;color:#111827;}
 .table-subtitle{font-size:12px;color:#6b7280;margin-top:1px;}
-.show-entries{display:flex;align-items:center;gap:7px;font-size:13px;color:#6b7280;white-space:nowrap;}
-.show-entries select{padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;color:#374151;background:white;cursor:pointer;outline:none;font-family:inherit;}
-.show-entries select:focus{border-color:#7C3AED;box-shadow:0 0 0 2px rgba(124,58,237,.1);}
 .table-scroll{overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 340px);min-height:300px;position:relative;}
 table{border-collapse:collapse;width:100%;min-width:1180px;}
 thead tr.col-row th{position:sticky;top:0;z-index:14;background:#f9fafb;padding:9px 10px;font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid #e5e7eb;white-space:nowrap;cursor:pointer;user-select:none;}
@@ -174,7 +179,6 @@ tbody tr:hover .td-details-link{text-decoration:underline;}
   <div class="filters-card">
     <div class="filters-header">
       <span class="filters-title">Filters</span>
-      <button class="btn-clear" onclick="clearAllFilters()">Clear All</button>
     </div>
     <div class="filters-accordion">
       <div class="acc-section acc-open" id="acc-search">
@@ -400,18 +404,20 @@ tbody tr:hover .td-details-link{text-decoration:underline;}
         <div class="table-subtitle" id="table-subtitle">Loading&hellip;</div>
         <div class="calc-note"><span class="calc-badge">Precomputed</span> Health, Status &amp; A2P fields last calculated Aug 5, 2026 6:00 AM &middot; recalculates nightly</div>
       </div>
-      <div class="show-entries">
-        Show
-        <select id="page-size-sel" onchange="changePageSize()">
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="25" selected>25</option>
-          <option value="35">35</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
-          <option value="0">All</option>
-        </select>
-        entries
+      <div class="clear-all-row" style="margin-bottom:0;">
+        <div class="show-field">
+          <label class="show-field-label">Show</label>
+          <select class="show-field-input" id="page-size-sel" onchange="changePageSize()">
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="25" selected>25</option>
+            <option value="35">35</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="0">All</option>
+          </select>
+        </div>
+        <button class="btn-clear-all" onclick="clearAllFilters()">Clear All Filters</button>
       </div>
     </div>
     <div class="table-scroll" id="table-scroll">

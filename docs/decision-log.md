@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## [2026-08-05] HealthScore (health-score/): Show selector + Clear All Filters restyled to floating-label pill pattern
+
+- Decision: Restyled the "Show [n] entries" page-size control into the floating-label pill (`.show-field`) already used in `company-activation-tracking-mockup/` and `dj-health-score-lifecycle/` — purple-bordered select with a notched "Show" label and custom chevron — paired with a plain bordered "Clear All Filters" button, dropping the old separate "Clear All" text link from the filters card header. Per Jeremy's follow-up, kept both controls in their existing table-toolbar location (right of "All Company Data") rather than moving them up next to the filter accordion like the mockup does. Colors adapted to this page's own hardcoded `#7C3AED` accent instead of the mockup's `#8B85EA` token, consistent with prior sessions on this file.
+- Why: Jeremy supplied a screenshot of the target pill/button styling directly; the placement correction came from his own follow-up during the same turn.
+- Open question: None.
+
+---
+
 ## [2026-08-05] HealthScore (health-score/): Export CSV scoped to the current page only
 
 - Decision: Export CSV's row count now matches whatever is currently visible on-screen (the active page at the current "Show" page size), not the full filtered result set. Changing Show to 50, paging to page 2, or setting Show to "All" all update the export count to match exactly what's displayed.
