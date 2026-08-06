@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Activation Dashboard vs. HealthScore (Split Concept) - DripJobs</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ══════════════════════════════════════════════
+     PROTO BAR (hub chrome, DM Sans, matches hub)
+     ══════════════════════════════════════════════ */
+  :root {
+    --color-primary:        #8B85EA;
+    --color-primary-hover:  #736BE3;
+    --color-primary-active: #5C53DC;
+    --color-bg:             #F3F1FC;
+    --color-text:           #32415B;
+    --color-text-muted:     #80879A;
+    --color-border:         #DAD8E3;
+    --color-card:           #FFFFFF;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--color-bg); color: var(--color-text); }
+
+  .proto-bar {
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .back-link { font-size: 12px; font-weight: 500; color: var(--color-text-muted); text-decoration: none; display: flex; align-items: center; gap: 4px; transition: color 0.15s; }
+  .back-link:hover { color: var(--color-primary); }
+  .divider { color: var(--color-border); font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; }
+  .proto-bar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .proto-bar-pill { font-size: 11px; font-weight: 600; color: var(--color-primary-active); padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA; border-radius: 999px; letter-spacing: 0.2px; text-decoration: none; }
+  .proto-bar-pill.muted { color: var(--color-text-muted); background: #F3F1FC; border-color: var(--color-border); }
+  .proto-bar-pill:hover { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  .proto-bar-pill.muted:hover { background: #F3F1FC; color: var(--color-text-muted); }
+
+  /* ══════════════════════════════════════════════
+     APP SHELL (Nunito, current-product purple #7C3AED)
+     ══════════════════════════════════════════════ */
+  #sa-app {
+    --purple: #7C3AED;
+    --purple-light: #EDE9FE;
+    --purple-dark: #5B21B6;
+    --green: #10B981;
+    --green-light: #D1FAE5;
+    --red: #EF4444;
+    --red-light: #FEE2E2;
+    --amber: #D97706;
+    --amber-light: #FFFBEB;
+    --amber-border: #FDE68A;
+    --blue: #1D6FA5;
+    --blue-light: #E6F3FA;
+    --gray-50: #F9FAFB; --gray-100: #F3F4F6; --gray-200: #E5E7EB; --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF; --gray-500: #6B7280; --gray-600: #4B5563; --gray-700: #374151;
+    --gray-800: #1F2937; --gray-900: #111827;
+    --sidebar-w: 220px; --radius: 10px; --radius-sm: 8px;
+    --shadow-md: 0 4px 16px rgba(17,24,39,0.10);
+
+    font-family: 'Nunito', sans-serif;
+    color: var(--gray-800);
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    min-height: calc(100vh - 57px);
+    background: var(--gray-50);
+    border-top: 1px solid var(--color-border);
+  }
+  #sa-app * { box-sizing: border-box; }
+  #sa-app button, #sa-app input { font-family: inherit; }
+
+  /* ─── Sidebar ─── */
+  #sa-app .sidebar { width: var(--sidebar-w); background: var(--gray-900); flex-shrink: 0; display: flex; flex-direction: column; }
+  #sa-app .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 18px 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  #sa-app .logo-mark { width: 30px; height: 30px; background: var(--purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; }
+  #sa-app .logo-text { font-size: 14px; font-weight: 800; color: #fff; }
+  #sa-app .logo-sub { font-size: 10px; font-weight: 700; color: var(--gray-400); letter-spacing: 0.06em; text-transform: uppercase; margin-top: -2px; }
+  #sa-app .sidebar-section { padding: 10px 0; }
+  #sa-app .sidebar-section-label { padding: 12px 16px 4px; font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.06em; }
+  #sa-app .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: var(--gray-400); font-weight: 700; font-size: 13.5px; cursor: pointer; position: relative; transition: background 0.15s, color 0.15s; }
+  #sa-app .sidebar-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+  #sa-app .sidebar-item.active { background: rgba(124,58,237,0.22); color: #fff; }
+  #sa-app .sidebar-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--purple); border-radius: 0 3px 3px 0; }
+  #sa-app .sidebar-icon { width: 18px; text-align: center; font-size: 15px; }
+  #sa-app .sidebar-item.new-item::after { content: 'NEW'; margin-left: auto; font-size: 8.5px; font-weight: 800; background: var(--teal, #0DCECE); color: #05403f; padding: 2px 6px; border-radius: 999px; letter-spacing: .3px; }
+
+  /* ─── Main / topbar ─── */
+  #sa-app .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  #sa-app .topbar { min-height: 58px; background: #fff; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; flex-shrink: 0; flex-wrap: wrap; gap: 8px; }
+  #sa-app .topbar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  #sa-app .page-title { font-size: 18px; font-weight: 800; color: var(--gray-900); white-space: nowrap; }
+  #sa-app .page-title-sub { font-size: 12px; color: var(--gray-500); font-weight: 700; }
+  #sa-app .breadcrumb-sep { color: var(--gray-300); }
+  #sa-app .tab-switch { display: flex; gap: 4px; background: var(--gray-100); border-radius: 999px; padding: 3px; }
+  #sa-app .tab-switch-btn { border: none; background: none; padding: 7px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 800; color: var(--gray-500); cursor: pointer; font-family: inherit; }
+  #sa-app .tab-switch-btn.active { background: #fff; color: var(--purple); box-shadow: 0 1px 4px rgba(17,24,39,0.12); }
+
+  #sa-app .content-scroll { flex: 1; padding: 22px 24px 60px; }
+  #sa-app .view-panel { display: none; }
+  #sa-app .view-panel.active { display: block; }
+
+  /* ─── Explainer callout ─── */
+  #sa-app .explainer { border-radius: 10px; padding: 14px 16px; margin-bottom: 18px; display: flex; gap: 12px; align-items: flex-start; font-size: 12.8px; line-height: 1.55; }
+  #sa-app .explainer.e-blue { background: var(--blue-light); border: 1px solid #BFDBFE; color: #1E40AF; }
+  #sa-app .explainer.e-purple { background: var(--purple-light); border: 1px solid #DDD6FE; color: var(--purple-dark); }
+  #sa-app .explainer-icon { font-size: 17px; line-height: 1.3; flex-shrink: 0; }
+  #sa-app .explainer b { font-weight: 800; }
+  #sa-app .explainer .src { display: block; margin-top: 6px; font-size: 11.3px; opacity: .8; font-weight: 600; }
+
+  /* ─── Metrics row ─── */
+  #sa-app .metrics-row { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  #sa-app .metric-card { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 14px 16px; flex: 1; min-width: 165px; border-left: 3px solid var(--gray-300); }
+  #sa-app .metric-card.m-purple { border-left-color: var(--purple); }
+  #sa-app .metric-card.m-green { border-left-color: var(--green); }
+  #sa-app .metric-card.m-amber { border-left-color: var(--amber); }
+  #sa-app .metric-card.m-red { border-left-color: var(--red); }
+  #sa-app .metric-card.m-blue { border-left-color: var(--blue); }
+  #sa-app .m-label { font-size: 10.5px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
+  #sa-app .m-value { font-size: 24px; font-weight: 800; color: var(--gray-900); line-height: 1; }
+  #sa-app .m-sub { font-size: 11px; color: var(--gray-500); font-weight: 600; margin-top: 4px; }
+
+  /* ─── Data table ─── */
+  #sa-app .table-card { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; }
+  #sa-app .table-card-header { padding: 12px 16px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  #sa-app .table-card-title { font-size: 13.5px; font-weight: 800; color: var(--gray-900); }
+  #sa-app .table-card-sub { font-size: 11.5px; color: var(--gray-500); font-weight: 600; }
+  #sa-app .table-scroll { overflow-x: auto; }
+  #sa-app table.data-table { border-collapse: collapse; width: 100%; font-size: 12.8px; min-width: 900px; }
+  #sa-app table.data-table thead th { text-align: left; font-weight: 800; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--gray-400); padding: 10px 14px; border-bottom: 1px solid var(--gray-200); white-space: nowrap; background: var(--gray-50); }
+  #sa-app table.data-table tbody td { padding: 11px 14px; border-bottom: 1px solid var(--gray-100); color: var(--gray-700); vertical-align: middle; white-space: nowrap; }
+  #sa-app table.data-table tbody tr:last-child td { border-bottom: none; }
+  #sa-app table.data-table tbody tr.row-story { background: #FFFBEB; }
+  #sa-app table.data-table tbody tr.row-story:hover td { background: #FEF3C7 !important; }
+  #sa-app table.data-table tbody tr:hover td { background: var(--gray-50); }
+  #sa-app .cell-name { font-weight: 800; color: var(--gray-900); }
+  #sa-app .tid { font-family: 'SF Mono','Fira Code',Consolas,monospace; font-size: 10.5px; color: var(--gray-500); }
+
+  #sa-app .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+  #sa-app .b-green { background: var(--green-light); color: #0F7A56; }
+  #sa-app .b-amber { background: var(--amber-light); color: var(--amber); border: 1px solid var(--amber-border); }
+  #sa-app .b-red { background: var(--red-light); color: #B91C1C; }
+  #sa-app .b-blue { background: var(--blue-light); color: var(--blue); }
+  #sa-app .b-gray { background: var(--gray-100); color: var(--gray-500); }
+  #sa-app .b-legacy { background: #FEF9C3; color: #854D0E; }
+  #sa-app .b-new { background: #DCFCE7; color: #166534; }
+
+  #sa-app table.data-table tbody td.reason-text { font-size: 11.8px; color: var(--gray-600); white-space: normal; max-width: 260px; }
+  #sa-app .story-tag { display: inline-block; margin-top: 3px; font-size: 10px; font-weight: 800; color: #92400E; }
+
+  #sa-app .progress-wrap { display: flex; flex-direction: column; gap: 4px; min-width: 130px; }
+  #sa-app .progress-track { width: 100%; height: 6px; border-radius: 999px; background: var(--gray-200); overflow: hidden; }
+  #sa-app .progress-fill { height: 100%; border-radius: 999px; }
+  #sa-app .progress-fill.p-blue { background: var(--blue); }
+  #sa-app .progress-fill.p-amber { background: var(--amber); }
+  #sa-app .progress-fill.p-red { background: var(--red); }
+  #sa-app .progress-fill.p-green { background: var(--green); }
+  #sa-app .progress-label { font-size: 10.8px; font-weight: 700; color: var(--gray-500); }
+
+  #sa-app .legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 10px 16px; background: var(--gray-50); border-top: 1px solid var(--gray-200); font-size: 11px; color: var(--gray-600); align-items: center; }
+  #sa-app .legend b { color: var(--gray-800); }
+
+  @media (max-width: 900px) {
+    #sa-app { flex-direction: column; }
+    #sa-app .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
+    #sa-app .sidebar-logo { display: none; }
+    #sa-app .sidebar-section { display: flex; padding: 8px; }
+    #sa-app .sidebar-item.active::before { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">&larr; Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Activation Dashboard vs. HealthScore &mdash; Split Concept</span>
+  </div>
+  <div class="proto-bar-right">
+    <span class="proto-bar-pill muted">Needs PM Analysis</span>
+    <a class="proto-bar-pill muted" href="../health-score/index.html">View retained combined version &rarr;</a>
+  </div>
+</div>
+
+<div id="sa-app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">DJ</div>
+      <div>
+        <div class="logo-text">DripJobs</div>
+        <div class="logo-sub">Super Admin</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-item"><span class="sidebar-icon">&#128444;&#65039;</span> CMS</div>
+      <div class="sidebar-item"><span class="sidebar-icon">&#9881;&#65039;</span> Admin Settings</div>
+      <div class="sidebar-item"><span class="sidebar-icon">&#127991;&#65039;</span> Promo Codes</div>
+      <div class="sidebar-item"><span class="sidebar-icon">&#127970;</span> Tenants</div>
+      <div class="sidebar-item"><span class="sidebar-icon">&#129514;</span> Test Sites</div>
+      <div class="sidebar-item"><span class="sidebar-icon">&#128222;</span> Twilio Management</div>
+      <div class="sidebar-item"><span class="sidebar-icon">&#9993;&#65039;</span> Postmark Management</div>
+    </div>
+    <div class="sidebar-section-label">Reports</div>
+    <div class="sidebar-section">
+      <div class="sidebar-item new-item active" data-view="activation" onclick="switchView('activation')"><span class="sidebar-icon">&#128197;</span> Activation Dashboard</div>
+      <div class="sidebar-item new-item" data-view="health" onclick="switchView('health')"><span class="sidebar-icon">&#128147;</span> HealthScore</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="page-title" id="pageTitle">Activation Dashboard</span>
+        <span class="breadcrumb-sep">&middot;</span>
+        <span class="page-title-sub" id="pageTitleSub">New accounts, first 90 days</span>
+      </div>
+      <div class="tab-switch">
+        <button class="tab-switch-btn active" id="tabBtnActivation" onclick="switchView('activation')">Activation Dashboard</button>
+        <button class="tab-switch-btn" id="tabBtnHealth" onclick="switchView('health')">HealthScore</button>
+      </div>
+    </div>
+
+    <div class="content-scroll">
+
+      <!-- ═══════════════ ACTIVATION DASHBOARD VIEW ═══════════════ -->
+      <div class="view-panel active" id="view-activation">
+
+        <div class="explainer e-blue">
+          <div class="explainer-icon">&#128197;</div>
+          <div>
+            <b>What this report is for:</b> tracks <b>new (non-legacy) accounts only</b>, for exactly the first 90 days after signup, against one goal &mdash; reach <b>$10,000 in sales with an approved A2P registration</b>. Legacy accounts never appear here; there is no ongoing health judgment made on this page, only pace against a clock. Once an account's 90-day window closes, it leaves this report and is handed off to <b>HealthScore</b> with an outcome.
+          </div>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-card m-purple">
+            <div class="m-label">In Activation Window</div>
+            <div class="m-value">14</div>
+            <div class="m-sub">New accounts, day 0&ndash;90</div>
+          </div>
+          <div class="metric-card m-blue">
+            <div class="m-label">On Pace</div>
+            <div class="m-value">8</div>
+            <div class="m-sub">Tracking to hit $10K + A2P</div>
+          </div>
+          <div class="metric-card m-amber">
+            <div class="m-label">Behind Pace</div>
+            <div class="m-value">6</div>
+            <div class="m-sub">At risk of missing day 90</div>
+          </div>
+          <div class="metric-card m-gray" style="border-left-color:#9CA3AF;">
+            <div class="m-label">Graduated This Week</div>
+            <div class="m-value">2</div>
+            <div class="m-sub">Moved on to HealthScore &rarr;</div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-header">
+            <div>
+              <div class="table-card-title">New Accounts &mdash; 90-Day Activation Window</div>
+              <div class="table-card-sub">Sorted by days remaining. Highlighted rows continue in the HealthScore example below.</div>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Tenant ID</th>
+                  <th>Company Name</th>
+                  <th>Created</th>
+                  <th>Day</th>
+                  <th>Progress to $10K</th>
+                  <th>A2P Status</th>
+                  <th>Pace</th>
+                  <th>Outcome</th>
+                </tr>
+              </thead>
+              <tbody id="activationTbody"></tbody>
+            </table>
+          </div>
+          <div class="legend">
+            <span><b>On Pace</b> &mdash; trending to hit both milestones by day 90</span>
+            <span><b>Behind Pace</b> &mdash; unlikely to hit both without intervention</span>
+            <span><b>Graduated</b> &mdash; window closed, handed to HealthScore</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ HEALTHSCORE VIEW ═══════════════ -->
+      <div class="view-panel" id="view-health">
+
+        <div class="explainer e-purple">
+          <div class="explainer-icon">&#128147;</div>
+          <div>
+            <b>What this report is for:</b> the ongoing health status of every account that is <b>past activation</b> &mdash; every legacy account (always here, no 90-day clock ever applied) plus every new account once its Activation Dashboard window closes. Status is <b>Green / Yellow / Red</b> and can move in either direction over time based on continued platform engagement, not a one-time milestone.
+            <span class="src">Status definitions and promotion criteria per CS Strategy &amp; Playbooks, Section 9 &mdash; Customer Health Scoring.</span>
+          </div>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-card m-purple">
+            <div class="m-label">Total Accounts</div>
+            <div class="m-value">24</div>
+            <div class="m-sub">Legacy + graduated new accounts</div>
+          </div>
+          <div class="metric-card m-green">
+            <div class="m-label">Green &middot; On Track</div>
+            <div class="m-value">14</div>
+            <div class="m-sub">Low risk of churn</div>
+          </div>
+          <div class="metric-card m-amber">
+            <div class="m-label">Yellow &middot; Needs Attention</div>
+            <div class="m-value">7</div>
+            <div class="m-sub">Medium risk &mdash; intervention needed</div>
+          </div>
+          <div class="metric-card m-red">
+            <div class="m-label">Red &middot; At Risk</div>
+            <div class="m-value">3</div>
+            <div class="m-sub">High risk of cancellation</div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-card-header">
+            <div>
+              <div class="table-card-title">All Accounts &mdash; Health Status</div>
+              <div class="table-card-sub">Highlighted rows are the same two accounts shown graduating out of Activation Dashboard above.</div>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Tenant ID</th>
+                  <th>Company Name</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Why this status</th>
+                  <th>Total Sales</th>
+                  <th>A2P Status</th>
+                  <th>Last Activity</th>
+                </tr>
+              </thead>
+              <tbody id="healthTbody"></tbody>
+            </table>
+          </div>
+          <div class="legend">
+            <span>&#128994; <b>Green</b> &mdash; consistently engaged, low churn risk</span>
+            <span>&#128993; <b>Yellow</b> &mdash; slowing engagement or a milestone still incomplete, flagged for CS follow-up</span>
+            <span>&#128308; <b>Red</b> &mdash; disengaged or missed activation, high risk</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function switchView(view){
+  document.getElementById('view-activation').classList.toggle('active', view==='activation');
+  document.getElementById('view-health').classList.toggle('active', view==='health');
+  document.querySelectorAll('.sidebar-item[data-view]').forEach(function(el){ el.classList.toggle('active', el.getAttribute('data-view')===view); });
+  document.getElementById('tabBtnActivation').classList.toggle('active', view==='activation');
+  document.getElementById('tabBtnHealth').classList.toggle('active', view==='health');
+  if(view==='activation'){
+    document.getElementById('pageTitle').textContent='Activation Dashboard';
+    document.getElementById('pageTitleSub').textContent='New accounts, first 90 days';
+  } else {
+    document.getElementById('pageTitle').textContent='HealthScore';
+    document.getElementById('pageTitleSub').textContent='All accounts past activation';
+  }
+}
+
+// ─── Activation Dashboard sample data ───
+var activationRows = [
+  {tid:'TID-88214', name:'Blue Ridge Exteriors', created:'May 8, 2026', day:74, sales:2800, a2p:'Applied', pace:'amber', paceLabel:'Behind Pace', outcome:'6 days left &mdash; unlikely to hit $10K', story:false},
+  {tid:'TID-88301', name:'Rustic Restorations LLC', created:'May 4, 2026', day:90, sales:4100, a2p:'Not Started', pace:'red', paceLabel:'Missed Window', outcome:'Graduated &rarr; HealthScore (Red)', story:true},
+  {tid:'TID-88190', name:'Sunrise Painting Co.', created:'May 4, 2026', day:90, sales:12400, a2p:'Approved', pace:'green', paceLabel:'Hit Milestone', outcome:'Graduated &rarr; HealthScore (Yellow)', story:true},
+  {tid:'TID-88420', name:'Palmetto Pro Coatings', created:'Jun 2, 2026', day:59, sales:9100, a2p:'Approved', pace:'blue', paceLabel:'On Pace', outcome:'22 days left, trending to hit both', story:false},
+  {tid:'TID-88455', name:'Northgate Painting Group', created:'Jun 9, 2026', day:52, sales:1200, a2p:'Not Started', pace:'amber', paceLabel:'Behind Pace', outcome:'A2P not yet applied', story:false},
+  {tid:'TID-88510', name:'Coastal Trim & Paint', created:'Jun 20, 2026', day:41, sales:6700, a2p:'Applied', pace:'blue', paceLabel:'On Pace', outcome:'49 days left, tracking well', story:false},
+  {tid:'TID-88562', name:'Ironclad Home Services', created:'Jul 1, 2026', day:30, sales:15200, a2p:'Approved', pace:'green', paceLabel:'Hit Milestone Early', outcome:'Already qualifies, window still open', story:false},
+  {tid:'TID-88601', name:'Valley View Contractors', created:'Jul 9, 2026', day:22, sales:400, a2p:'Not Started', pace:'amber', paceLabel:'Behind Pace', outcome:'Slow start, no A2P yet', story:false},
+  {tid:'TID-88633', name:'Summit Peak Painting', created:'Jul 14, 2026', day:17, sales:3900, a2p:'Applied', pace:'blue', paceLabel:'On Pace', outcome:'73 days left, tracking well', story:false}
+];
+
+function paceFillClass(p){ return 'progress-fill p-'+p; }
+
+function activationRow(r){
+  var pct = Math.min(100, Math.round(r.sales/10000*100));
+  var a2pBadge = r.a2p==='Approved' ? '<span class="badge b-green">Approved</span>' : (r.a2p==='Applied' ? '<span class="badge b-amber">Applied</span>' : '<span class="badge b-gray">Not Started</span>');
+  var paceBadge = {blue:'b-blue',amber:'b-amber',green:'b-green',red:'b-red'}[r.pace];
+  return '<tr class="'+(r.story?'row-story':'')+'">'+
+    '<td><span class="tid">'+r.tid+'</span></td>'+
+    '<td><span class="cell-name">'+r.name+'</span>'+(r.story?'<span class="story-tag">&#9733; linked example</span>':'')+'</td>'+
+    '<td>'+r.created+'</td>'+
+    '<td>Day '+r.day+' / 90</td>'+
+    '<td><div class="progress-wrap"><div class="progress-track"><div class="'+paceFillClass(r.pace)+'" style="width:'+pct+'%;"></div></div><span class="progress-label">$'+r.sales.toLocaleString('en-US')+' / $10,000</span></div></td>'+
+    '<td>'+a2pBadge+'</td>'+
+    '<td><span class="badge '+paceBadge+'">'+r.paceLabel+'</span></td>'+
+    '<td class="reason-text">'+r.outcome+'</td>'+
+  '</tr>';
+}
+
+document.getElementById('activationTbody').innerHTML = activationRows.map(activationRow).join('');
+
+// ─── HealthScore sample data ───
+var healthRows = [
+  {tid:'TID-88190', name:'Sunrise Painting Co.', type:'new', status:'yellow', reason:'Hit $10K + A2P on day 90. Successfully activated, but flagged for a CS follow-up touchpoint per policy.', sales:12400, a2p:'Approved', last:'Today', story:true},
+  {tid:'TID-88301', name:'Rustic Restorations LLC', type:'new', status:'red', reason:'Missed the 90-day window: $4,100 of $10K, A2P never started. Failed to activate.', sales:4100, a2p:'Not Started', last:'6 days ago', story:true},
+  {tid:'TID-71022', name:'Heritage Home Painters', type:'legacy', status:'green', reason:'Active daily, 3 users engaged, automations live, SMS active.', sales:187400, a2p:'Approved', last:'Today', story:false},
+  {tid:'TID-65310', name:'Apex Coating Solutions', type:'legacy', status:'green', reason:'Consistent weekly usage, estimates sent regularly, pipeline configured.', sales:94200, a2p:'Approved', last:'Yesterday', story:false},
+  {tid:'TID-59981', name:'Lakeside Painting Crew', type:'legacy', status:'yellow', reason:'Inconsistent logins in the last 30 days, automations not yet set up.', sales:41300, a2p:'Approved', last:'9 days ago', story:false},
+  {tid:'TID-60215', name:'Granite State Exteriors', type:'legacy', status:'red', reason:'No platform activity in 21 days, one failed payment not yet recovered.', sales:28900, a2p:'Applied', last:'21 days ago', story:false},
+  {tid:'TID-77742', name:'Copper Canyon Painting', type:'legacy', status:'green', reason:'2+ users engaged, SMS active, positive CSAT on recent support ticket.', sales:212000, a2p:'Approved', last:'Today', story:false},
+  {tid:'TID-88025', name:'Whitewater Home Pros', type:'new', status:'yellow', reason:'Activated on day 84 (graduated last week). Early engagement still building.', sales:11800, a2p:'Approved', last:'2 days ago', story:false},
+  {tid:'TID-54432', name:'Trailhead Contracting', type:'legacy', status:'yellow', reason:'Estimates sent but nothing closed in 45 days, SMS inactive.', sales:15600, a2p:'Applied', last:'12 days ago', story:false},
+  {tid:'TID-49981', name:'Redwood Painting Collective', type:'legacy', status:'green', reason:'Daily usage, add-ons active, positive social mentions.', sales:305600, a2p:'Approved', last:'Today', story:false},
+  {tid:'TID-88077', name:'Foothill Finish Works', type:'new', status:'red', reason:'Timed out at day 90 with no A2P application ever submitted.', sales:2200, a2p:'Not Started', last:'14 days ago', story:false},
+  {tid:'TID-63301', name:'Cascade Painting Co.', type:'legacy', status:'green', reason:'Referral submitted this quarter, active in DripJobs webinar.', sales:158900, a2p:'Approved', last:'Today', story:false}
+];
+
+function statusBadge(s){
+  var map = {green:['b-green','&#128994; Green'],yellow:['b-amber','&#128993; Yellow'],red:['b-red','&#128308; Red']};
+  return '<span class="badge '+map[s][0]+'">'+map[s][1]+'</span>';
+}
+
+function healthRow(r){
+  var typeBadge = r.type==='legacy' ? '<span class="badge b-legacy">Legacy</span>' : '<span class="badge b-new">New</span>';
+  var a2pBadge = r.a2p==='Approved' ? '<span class="badge b-green">Approved</span>' : (r.a2p==='Applied' ? '<span class="badge b-amber">Applied</span>' : '<span class="badge b-gray">Not Started</span>');
+  return '<tr class="'+(r.story?'row-story':'')+'">'+
+    '<td><span class="tid">'+r.tid+'</span></td>'+
+    '<td><span class="cell-name">'+r.name+'</span>'+(r.story?'<span class="story-tag">&#9733; linked example</span>':'')+'</td>'+
+    '<td>'+typeBadge+'</td>'+
+    '<td>'+statusBadge(r.status)+'</td>'+
+    '<td class="reason-text">'+r.reason+'</td>'+
+    '<td>$'+r.sales.toLocaleString('en-US')+'</td>'+
+    '<td>'+a2pBadge+'</td>'+
+    '<td>'+r.last+'</td>'+
+  '</tr>';
+}
+
+document.getElementById('healthTbody').innerHTML = healthRows.map(healthRow).join('');
+</script>
+
+</body>
+</html>

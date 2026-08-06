@@ -9,6 +9,11 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-06] Activation Dashboard vs. HealthScore: un-merged back into two reports
+- Decision: Built a new prototype (`activation-vs-healthscore-split/`) demonstrating Activation Dashboard and HealthScore as two separate Super Admin nav items again, reversing the earlier `health-score/` decision (v2.1) that renamed and merged Activation Dashboard into HealthScore. Activation Dashboard now tracks only new accounts against the 90-day / $10K + A2P milestone; HealthScore carries Green/Yellow/Red status for every account past activation (legacy accounts always, new accounts once their window closes), per Section 9 of the CS Strategy & Playbooks doc. The prior combined `health-score/` version was left untouched and is still linked from the hub and the new prototype's top bar, in case the merge is preferred after review.
+- Why: Session-long discussion with Jeremy confirmed new business rules that only make sense as two reports: Red = missed the 90-day activation window, Yellow = activated but flagged for CS follow-up, and ongoing promotion/demotion (Yellow↔Green) is driven by Platform Engagement signals that don't apply to the 90-day countdown at all. Cramming both into one page hid that these are different questions (pace against a deadline vs. ongoing health).
+- Open question: Whether the automated Yellow→Green/Red promotion logic should stay scoped to Platform Engagement only (as prototyped) or eventually pull in the other four CS-doc categories (Support Services, Billing, Social Media, Advocacy) as CS tooling matures; flagged to Jesus for PM review.
+
 ---
 
 ## [2026-08-05] HealthScore (health-score/): metric cards restyled to icon/label/description/button-left, value-right layout
