@@ -74,20 +74,26 @@
   #sa-app * { box-sizing: border-box; }
   #sa-app button, #sa-app input { font-family: inherit; }
 
-  /* ─── Sidebar ─── */
-  #sa-app .sidebar { width: var(--sidebar-w); background: var(--gray-900); flex-shrink: 0; display: flex; flex-direction: column; }
-  #sa-app .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 18px 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-  #sa-app .logo-mark { width: 30px; height: 30px; background: var(--purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; }
-  #sa-app .logo-text { font-size: 14px; font-weight: 800; color: #fff; }
-  #sa-app .logo-sub { font-size: 10px; font-weight: 700; color: var(--gray-400); letter-spacing: 0.06em; text-transform: uppercase; margin-top: -2px; }
-  #sa-app .sidebar-section { padding: 10px 0; }
-  #sa-app .sidebar-section-label { padding: 12px 16px 4px; font-size: 10px; font-weight: 800; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.06em; }
-  #sa-app .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; color: var(--gray-400); font-weight: 700; font-size: 13.5px; cursor: pointer; position: relative; transition: background 0.15s, color 0.15s; }
-  #sa-app .sidebar-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
-  #sa-app .sidebar-item.active { background: rgba(124,58,237,0.22); color: #fff; }
-  #sa-app .sidebar-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--purple); border-radius: 0 3px 3px 0; }
-  #sa-app .sidebar-icon { width: 18px; text-align: center; font-size: 15px; }
-  #sa-app .sidebar-item.new-item::after { content: 'NEW'; margin-left: auto; font-size: 8.5px; font-weight: 800; background: var(--teal, #0DCECE); color: #05403f; padding: 2px 6px; border-radius: 999px; letter-spacing: .3px; }
+  /* ─── Sidebar (matches production DripJobs left nav) ─── */
+  #sa-app .sidebar { width: var(--sidebar-w); background: #fff; border-right: 1px solid var(--gray-200); flex-shrink: 0; display: flex; flex-direction: column; }
+  #sa-app .sidebar-scroll { flex: 1; overflow-y: auto; padding: 6px 10px 12px; }
+  #sa-app .sidebar-logo { display: flex; align-items: center; gap: 8px; padding: 16px 14px 12px; }
+  #sa-app .logo-mark { width: 24px; height: 24px; color: var(--purple); flex-shrink: 0; }
+  #sa-app .logo-text { font-size: 17px; font-weight: 800; color: var(--purple); letter-spacing: -0.02em; }
+  #sa-app .sidebar-section { padding: 6px 0; }
+  #sa-app .sidebar-section + .sidebar-section { border-top: 1px solid var(--gray-100); margin-top: 4px; padding-top: 10px; }
+  #sa-app .sidebar-section-label { padding: 4px 10px 6px; font-size: 10px; font-weight: 800; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; }
+  #sa-app .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; margin: 1px 0; border-radius: 8px; color: var(--gray-600); font-weight: 700; font-size: 13px; cursor: pointer; position: relative; transition: background 0.15s, color 0.15s; }
+  #sa-app .sidebar-item:hover { background: var(--gray-50); color: var(--gray-900); }
+  #sa-app .sidebar-item.active { background: linear-gradient(135deg, #9C8FF0, #7C6AE8); color: #fff; box-shadow: 0 2px 8px rgba(124,58,237,0.25); }
+  #sa-app .sidebar-icon { width: 18px; height: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  #sa-app .sidebar-icon svg { width: 18px; height: 18px; }
+  #sa-app .sidebar-item-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #sa-app .sidebar-chevron { width: 14px; height: 14px; flex-shrink: 0; opacity: .55; }
+  #sa-app .sidebar-item.active .sidebar-chevron { opacity: .85; }
+  #sa-app .sidebar-footer { flex-shrink: 0; background: var(--gray-900); color: #fff; display: flex; align-items: center; gap: 8px; padding: 12px 16px; font-size: 13px; font-weight: 700; cursor: pointer; }
+  #sa-app .sidebar-footer svg { width: 16px; height: 16px; flex-shrink: 0; }
+  #sa-app .sidebar-footer-chevron { margin-left: auto; width: 14px; height: 14px; opacity: .7; }
 
   /* ─── Main / topbar ─── */
   #sa-app .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -192,26 +198,51 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <div class="logo-mark">DJ</div>
-      <div>
-        <div class="logo-text">DripJobs</div>
-        <div class="logo-sub">Super Admin</div>
+      <svg class="logo-mark" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2s6.5 7.6 6.5 12.2A6.5 6.5 0 0 1 5.5 14.2C5.5 9.6 12 2 12 2z"/></svg>
+      <span class="logo-text">dripjobs</span>
+    </div>
+    <div class="sidebar-scroll">
+      <div class="sidebar-section">
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-4.28 7.32A8.5 8.5 0 0 1 8 19.4L3 21l1.9-5.1A8.38 8.38 0 0 1 3.5 11.5 8.5 8.5 0 0 1 12 3a8.5 8.5 0 0 1 9 8.5z"/></svg></span><span class="sidebar-item-label">Chat</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span><span class="sidebar-item-label">Email</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12l3 3 6-6"/></svg></span><span class="sidebar-item-label">Tasks</span></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Documents</div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 17h6"/><path d="M9 13h6"/></svg></span><span class="sidebar-item-label">Invoices</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg></span><span class="sidebar-item-label">Proposals</span><span class="sidebar-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Financials</div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 6.5A3.5 3.5 0 0 0 13.5 4h-3a3.5 3.5 0 0 0 0 7h3a3.5 3.5 0 0 1 0 7h-3A3.5 3.5 0 0 1 7 15.5"/></svg></span><span class="sidebar-item-label">Job Costing</span><span class="sidebar-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="6" r="2" fill="#fff"/><circle cx="16" cy="12" r="2" fill="#fff"/><circle cx="11" cy="18" r="2" fill="#fff"/></svg></span><span class="sidebar-item-label">Production Rates</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg></span><span class="sidebar-item-label">Metrics</span><span class="sidebar-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Marketing</div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span class="sidebar-item-label">Activity</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1z"/><path d="M16 8a4 4 0 0 1 0 8"/><path d="M19 5a8 8 0 0 1 0 14"/></svg></span><span class="sidebar-item-label">Blast</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s6.5 7.6 6.5 12.2A6.5 6.5 0 0 1 5.5 14.2C5.5 9.6 12 2 12 2z"/></svg></span><span class="sidebar-item-label">Drips</span></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Resources</div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></span><span class="sidebar-item-label">DJ Academy</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span><span class="sidebar-item-label">Automations</span></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Super Admin</div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span><span class="sidebar-item-label">CMS</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="sidebar-item-label">Admin Settings</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor" stroke="none"/></svg></span><span class="sidebar-item-label">Promo Codes</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span><span class="sidebar-item-label">Tenants</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6L4 20a1 1 0 0 0 1 2h14a1 1 0 0 0 1-2L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="7.5" y1="16" x2="16.5" y2="16"/></svg></span><span class="sidebar-item-label">Test Sites</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span><span class="sidebar-item-label">Twilio Management</span></div>
+        <div class="sidebar-item"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span><span class="sidebar-item-label">Postmark Management</span></div>
+        <div class="sidebar-item active" data-view="activation" onclick="switchView('activation')"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span class="sidebar-item-label">Activation Dashboard</span></div>
+        <div class="sidebar-item" data-view="health" onclick="switchView('health')"><span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span><span class="sidebar-item-label">HealthScore</span></div>
       </div>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-item"><span class="sidebar-icon">&#128444;&#65039;</span> CMS</div>
-      <div class="sidebar-item"><span class="sidebar-icon">&#9881;&#65039;</span> Admin Settings</div>
-      <div class="sidebar-item"><span class="sidebar-icon">&#127991;&#65039;</span> Promo Codes</div>
-      <div class="sidebar-item"><span class="sidebar-icon">&#127970;</span> Tenants</div>
-      <div class="sidebar-item"><span class="sidebar-icon">&#129514;</span> Test Sites</div>
-      <div class="sidebar-item"><span class="sidebar-icon">&#128222;</span> Twilio Management</div>
-      <div class="sidebar-item"><span class="sidebar-icon">&#9993;&#65039;</span> Postmark Management</div>
-    </div>
-    <div class="sidebar-section-label">Reports</div>
-    <div class="sidebar-section">
-      <div class="sidebar-item new-item active" data-view="activation" onclick="switchView('activation')"><span class="sidebar-icon">&#128197;</span> Activation Dashboard</div>
-      <div class="sidebar-item new-item" data-view="health" onclick="switchView('health')"><span class="sidebar-icon">&#128147;</span> HealthScore</div>
-    </div>
+    <div class="sidebar-footer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Settings</span><span class="sidebar-footer-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></span></div>
   </aside>
 
   <!-- Main -->
