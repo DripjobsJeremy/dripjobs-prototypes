@@ -111,11 +111,9 @@ tbody tr:hover .td-details-link{text-decoration:underline;}
 .b-danger{background:#fee2e2;color:#991b1b;}
 .b-warning{background:#fef3c7;color:#92400e;}
 .b-gray{background:#f3f4f6;color:#6b7280;}
-.h-on-track{background:#d1fae5;color:#065f46;}
-.h-healthy{background:#d1fae5;color:#065f46;}
-.h-warning{background:#fef3c7;color:#92400e;}
-.h-highrisk{background:#ffedd5;color:#9a3412;}
-.h-critical{background:#fee2e2;color:#991b1b;}
+.h-green{background:#d1fae5;color:#065f46;}
+.h-yellow{background:#fef3c7;color:#92400e;}
+.h-red{background:#fee2e2;color:#991b1b;}
 .h-inactive{background:#f3f4f6;color:#6b7280;}
 .p-pro{background:#f3f4f6;color:#374151;}
 .p-advanced{background:#fff7ed;color:#c2410c;}
@@ -175,7 +173,7 @@ tbody tr:hover .td-details-link{text-decoration:underline;}
 <body>
 <div class="proto-banner">
   <span class="proto-tag">Prototype</span>
-  <strong>Ticket #86bb90q17</strong> &mdash; HealthScore (formerly &ldquo;Activation Dashboard,&rdquo; renamed Jul 29, 2026): Confirmed Grid Reduction, Account Details Drawer &amp; UX Polish &nbsp;&middot;&nbsp; v2.2
+  <strong>Ticket #86bb90q17</strong> &mdash; HealthScore (formerly &ldquo;Activation Dashboard,&rdquo; renamed Jul 29, 2026): Confirmed Grid Reduction, Account Details Drawer, UX Polish &amp; 3-Color Health Display &nbsp;&middot;&nbsp; v2.3
   <span class="proto-right">Plan sourced from Company Settings &gt; Company Information (local DB) &nbsp;&middot;&nbsp; No Chargebee API call</span>
 </div>
 <div class="page-wrapper">
@@ -187,7 +185,8 @@ tbody tr:hover .td-details-link{text-decoration:underline;}
     <div><button class="btn" onclick="exportCSV()">&#x2B07; Export CSV</button></div>
   </div>
   <div class="info-note">
-    <strong>What&rsquo;s new in v2.2:</strong> Updated per the confirmed requirements in ticket 86bb90q17. Two things v2.1 added were explicitly moved out of scope by PM direction and have been removed from the page entirely: the green &ldquo;$&rdquo; high-value-account marker (Advanced plan plus 3+ Add-Ons), to avoid CS de-prioritizing accounts based on lower monthly revenue alone, and the &ldquo;Health, Status &amp; A2P fields last calculated&rdquo; precomputed note near the table, since no refresh-cadence commitment is in scope. Added a new <strong>Branch Account icon</strong> to the right of the company name, in both the main grid and the Account Details panel: a purple branch icon marks a Parent account, a teal corner-arrow icon marks a Child account, matching the existing linked-account/branch-switching relationship. Branch accounts aren&rsquo;t grouped or repositioned because of this icon; sort and filter behavior is unchanged. The 10-column grid and 5-section Account Details drawer from v2.1 already match the ticket's confirmed column set and drawer grouping exactly, so nothing changed there. The ticket also formalizes a Super Admin-only access restriction and a data-integrity rule that every account must show Pro or Advanced (Legacy), never a blank Plan; both were already true of this prototype's data and filters, so no visual change was needed there either. Real access enforcement is a backend/auth concern outside what this static mockup can demonstrate; flagging that here per this repo's convention for out-of-scope business rules rather than faking a login gate.
+    <strong>What&rsquo;s new in v2.3:</strong> The Health column now displays the confirmed 3-color model (Green / Yellow / Red) from the CS Strategy Playbook instead of the six raw trigger labels: Healthy and On Track both read as <strong>Green</strong>, Warning reads as <strong>Yellow</strong>, and High Risk and Critical both read as <strong>Red</strong> (no separate orange tier). Inactive stays its own state, outside the three-color scale, since it's a subscription status rather than an engagement level. Hover any Health badge to see the original six-state label in a tooltip. This is a display change only: <code>computeHealth()</code>'s underlying two-signal logic, the $10k filter, the A2P filters, and the Health filter's four options (On Track / Needs Attention / At Risk / Inactive) are unchanged.
+    <br><br><strong>Earlier &ldquo;What&rsquo;s new in v2.2&rdquo;:</strong> Updated per the confirmed requirements in ticket 86bb90q17. Two things v2.1 added were explicitly moved out of scope by PM direction and have been removed from the page entirely: the green &ldquo;$&rdquo; high-value-account marker (Advanced plan plus 3+ Add-Ons), to avoid CS de-prioritizing accounts based on lower monthly revenue alone, and the &ldquo;Health, Status &amp; A2P fields last calculated&rdquo; precomputed note near the table, since no refresh-cadence commitment is in scope. Added a new <strong>Branch Account icon</strong> to the right of the company name, in both the main grid and the Account Details panel: a purple branch icon marks a Parent account, a teal corner-arrow icon marks a Child account, matching the existing linked-account/branch-switching relationship. Branch accounts aren&rsquo;t grouped or repositioned because of this icon; sort and filter behavior is unchanged. The 10-column grid and 5-section Account Details drawer from v2.1 already match the ticket's confirmed column set and drawer grouping exactly, so nothing changed there. The ticket also formalizes a Super Admin-only access restriction and a data-integrity rule that every account must show Pro or Advanced (Legacy), never a blank Plan; both were already true of this prototype's data and filters, so no visual change was needed there either. Real access enforcement is a backend/auth concern outside what this static mockup can demonstrate; flagging that here per this repo's convention for out-of-scope business rules rather than faking a login gate.
     <br><br><strong>Earlier versions:</strong> v2.1 cut the grid from 34 to 10 health-relevant columns and moved the rest into a per-account Account Details slide-over. v1.9 removed DripJobs' own plan/billing revenue from the page. v1.8 reorganized filters into a collapsible accordion. See <code>CHANGES.md</code> for full history.
   </div>
   <div class="filters-card">
@@ -485,7 +484,8 @@ function getSortVal(c,col){switch(col){case 0:return c.tenantId;case 1:return c.
 function applySort(){if(sortCol===null)return;filtered.sort(function(a,b){var av=getSortVal(a,sortCol),bv=getSortVal(b,sortCol),r=typeof av==='string'?av.localeCompare(bv):av-bv;return sortDir==='asc'?r:-r;});}
 function updateSortUI(){var ths=document.querySelectorAll('#col-headers th');for(var i=0;i<ths.length;i++){var th=ths[i];if(!th.hasAttribute('data-col'))continue;var col=parseInt(th.getAttribute('data-col')),icon=th.querySelector('.sort-icon');if(col===sortCol){th.classList.add('sort-active');if(icon)icon.innerHTML=sortDir==='asc'?'&#x2191;':'&#x2193;';}else{th.classList.remove('sort-active');if(icon)icon.innerHTML='&#x21C5;';}}}
 function initSortHeaders(){var ths=document.querySelectorAll('#col-headers th');for(var i=0;i<ths.length;i++){if(!ths[i].hasAttribute('data-col'))continue;ths[i].addEventListener('click',(function(th){return function(){var col=parseInt(th.getAttribute('data-col'));if(sortCol===col){sortDir=sortDir==='asc'?'desc':'asc';}else{sortCol=col;sortDir='asc';}applySort();updateSortUI();page=1;render();};})(ths[i]));}}
-function hBadge(h){var m={'Healthy':'h-healthy','On Track':'h-on-track','Needs Attention':'h-warning','Warning':'h-warning','High Risk':'h-highrisk','Critical':'h-critical','At Risk':'h-critical','Inactive':'h-inactive'};return'<span class="badge '+(m[h]||'h-inactive')+'">'+h+'</span>';}
+function healthColor(h){if(h==='Healthy'||h==='On Track')return'Green';if(h==='Warning')return'Yellow';if(h==='High Risk'||h==='Critical')return'Red';return'Inactive';}
+function hBadge(h){var color=healthColor(h),m={'Green':'h-green','Yellow':'h-yellow','Red':'h-red','Inactive':'h-inactive'};return'<span class="badge '+m[color]+'" title="'+h+'">'+color+'</span>';}
 function pBadge(p){if(!p)return'<span style="color:#d1d5db;">\u2014</span>';var m={Pro:'p-pro',Advanced:'p-advanced'};return'<span class="badge '+(m[p]||'p-pro')+'">'+p+(p==='Advanced'?' \u2605':'')+'</span>';}
 function ynCell(ao){return ao.active?'<span class="badge b-success">Yes</span>':'<span class="badge b-gray">No</span>';}
 function intCell(v){return v?'<span class="badge b-success">Yes</span>':'<span class="badge b-gray">No</span>';}

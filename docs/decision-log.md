@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-07] HealthScore v2.3: Health column displays 3-color model; training guide follow-up
+
+- Decision: Per Jeremy's direct request, `health-score/index.html`'s Health column now displays the confirmed Green/Yellow/Red model instead of the six raw trigger labels (Healthy/On Track &rarr; Green, Warning &rarr; Yellow, High Risk/Critical &rarr; Red; Inactive stays its own grey state). Added a `healthColor()` helper; the original six-state label is preserved as a hover tooltip. Display-only: `computeHealth()`, the $10k/A2P filters, the Health filter's four options, and sort order are untouched. Updated `health-score/CHANGES.md` (new v2.3 entry) and the page's own version banner/info-note to match. Also updated `health-scoring-training-guide/index.html`: removed the ali.dripjobs.com "live testing site" references (that build was taken down for dev rework; the guide now says today's training runs off this repo's prototype only), and removed the "6-status vs. 3-color discrepancy" framing throughout Sections 2&ndash;4 since the badge itself now shows the color directly. Section 4 was reframed from a "correlation guide bridging two systems" to a note that only the Health filter's option labels (not the badge) still use the old four-way wording.
+- Why: Jeremy confirmed both changes directly in this session ahead of the Aug 7 training: the old testing-site build no longer exists, and the color-vs-status gap the guide previously described as unresolved has been closed by this prototype update.
+- Open question: None from this session. The guide's Section 6 open items (six-category framework timeline, Inactive outreach language, Nicole's material, Super Admin access enforcement) carry forward unresolved.
+
 ## [2026-08-07] Customer Health Scoring training guide: aligned to HealthScore v2.2
 
 - Decision: Updated `health-scoring-training-guide/` (Section 3) to describe the current live build: the 10-column grid plus per-account Account Details drawer (v2.1, confirmed by ticket 86bb90q17), and the new Branch Account icon (v2.2). Added a second ticket badge (86bb90q17) to the hero and footer, updated the footer's stale "v2.0" reference to v2.2, and added Business Rule 11 (Super Admin access enforcement) as a fourth open item for the Aug 7 session.

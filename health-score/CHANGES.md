@@ -2,9 +2,16 @@
 
 Prototype: `health-score/index.html` · Parent ticket [86b9512kq](https://app.clickup.com/t/86b9512kq) · Ticket [86bb90q17](https://app.clickup.com/t/86bb90q17)
 
-This log covers changes taking the prototype from v1.7 through v2.2. v1.7 to v2.1 were driven by post-launch feedback from Jason, Rick, and Mary in Slack, plus several direct follow-up requests; v2.2 implements the confirmed business rules formalized in ticket 86bb90q17. Full rationale for each change lives in the repo's `docs/decision-log.md`; this file is a scannable summary.
+This log covers changes taking the prototype from v1.7 through v2.3. v1.7 to v2.1 were driven by post-launch feedback from Jason, Rick, and Mary in Slack, plus several direct follow-up requests; v2.2 implements the confirmed business rules formalized in ticket 86bb90q17; v2.3 is a direct follow-up request from Jeremy ahead of the Aug 7 CS training. Full rationale for each change lives in the repo's `docs/decision-log.md`; this file is a scannable summary.
 
 ---
+
+## v2.3 — Health column displays the confirmed 3-color model
+
+- **Health column now renders Green / Yellow / Red instead of the six raw trigger labels**, in both the main grid and the Account Details panel: Healthy and On Track both display as Green, Warning as Yellow, and High Risk and Critical both display as Red (no separate orange tier), matching the CS Strategy Playbook's Section 9 target model one-for-one. Inactive still renders as its own grey state, outside the three-color scale, since it's a subscription status rather than an engagement level.
+- The original six-state label (Healthy, On Track, Warning, High Risk, Critical, Inactive) is preserved as a hover tooltip on the badge, so the underlying trigger reason isn't lost, just no longer the primary read.
+- **Display-only change**: `computeHealth()`'s two-signal calculation (Total Sales + A2P), the $10k filter, the A2P filters, the Health filter's four options (On Track / Needs Attention / At Risk / Inactive), and sort order are all unchanged. New `healthColor()` helper does the six-to-three mapping; the CSS badge classes `h-healthy`/`h-on-track`/`h-warning`/`h-highrisk`/`h-critical` were replaced by `h-green`/`h-yellow`/`h-red` (`h-inactive` unchanged), since `hBadge()` was their only consumer.
+- Not built: renaming the Health filter's four options or the metrics-bar cards (High Risk, Critical) to match the new color terminology. Neither was requested; flagged here so a future pass doesn't have to rediscover the inconsistency.
 
 ## v2.2 — Ticket 86bb90q17 confirmed requirements
 
