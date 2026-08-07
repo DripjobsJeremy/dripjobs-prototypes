@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-07] HealthScore (health-score/): confirmed requirements from ticket 86bb90q17
+
+- Decision: Removed two v2.1 features that ticket 86bb90q17 moved out of scope: the green "$" high-value-account marker and the "Health, Status & A2P fields last calculated" precomputed note. Added a new Branch Account icon (purple for Parent, teal for Child) next to the company name in the grid and Account Details panel, backed by a new `branchRole` field on about 9% of generated accounts. Confirmed the existing 10-column grid and 5-section drawer already match the ticket's Business Rules 3 and 4, so left both untouched.
+- Why: The ticket formalized post-launch feedback into explicit business rules; two prior additions were reversed by PM direction (Aug 5 and Aug 6, 2026) and one new rule (Branch Account icon, Business Rule 12) needed building.
+- Open question: Business Rule 11 (Super Admin-only access, blocking direct URL entry for non-Super-Admin sessions) is a real auth/routing requirement that this static prototype can't demonstrate. Flagged in the page copy and in `CHANGES.md`; needs implementation at the application layer, not in this mockup.
+
 ## [2026-08-06] Activation Dashboard vs. HealthScore: un-merged back into two reports
 - Decision: Built a new prototype (`activation-vs-healthscore-split/`) demonstrating Activation Dashboard and HealthScore as two separate Super Admin nav items again, reversing the earlier `health-score/` decision (v2.1) that renamed and merged Activation Dashboard into HealthScore. Activation Dashboard now tracks only new accounts against the 90-day / $10K + A2P milestone; HealthScore carries Green/Yellow/Red status for every account past activation (legacy accounts always, new accounts once their window closes), per Section 9 of the CS Strategy & Playbooks doc. The prior combined `health-score/` version was left untouched and is still linked from the hub and the new prototype's top bar, in case the merge is preferred after review.
 - Why: Session-long discussion with Jeremy confirmed new business rules that only make sense as two reports: Red = missed the 90-day activation window, Yellow = activated but flagged for CS follow-up, and ongoing promotion/demotion (Yellow↔Green) is driven by Platform Engagement signals that don't apply to the 90-day countdown at all. Cramming both into one page hid that these are different questions (pace against a deadline vs. ongoing health).
