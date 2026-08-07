@@ -2,9 +2,18 @@
 
 Prototype: `health-score/index.html` · Parent ticket [86b9512kq](https://app.clickup.com/t/86b9512kq) · Ticket [86bb90q17](https://app.clickup.com/t/86bb90q17)
 
-This log covers changes taking the prototype from v1.7 through v2.4. v1.7 to v2.1 were driven by post-launch feedback from Jason, Rick, and Mary in Slack, plus several direct follow-up requests; v2.2 and v2.4 implement the confirmed business rules formalized in ticket 86bb90q17 (added across two rounds as the ticket was updated); v2.3 was a direct follow-up request from Jeremy ahead of the Aug 7 CS training, made in a separate session, and is partially superseded by v2.4 (see below). Full rationale for each change lives in the repo's `docs/decision-log.md`; this file is a scannable summary.
+This log covers changes taking the prototype from v1.7 through v2.5. v1.7 to v2.1 were driven by post-launch feedback from Jason, Rick, and Mary in Slack, plus several direct follow-up requests; v2.2 and v2.4 implement the confirmed business rules formalized in ticket 86bb90q17 (added across two rounds as the ticket was updated); v2.3 was a direct follow-up request from Jeremy ahead of the Aug 7 CS training, made in a separate session, and is partially superseded by v2.4 (see below); v2.5 is a direct follow-up fix from Jeremy on the Branch Account feature added in v2.2. Full rationale for each change lives in the repo's `docs/decision-log.md`; this file is a scannable summary.
 
 ---
+
+## v2.5 — Branch accounts now carry real linked-family data
+
+Jeremy flagged that the Branch icon (added in v2.2) was confusing: a Parent and a Child each got an independent random role with no data connecting a specific Child to its Parent, so there was no way to tell which accounts belonged together.
+
+- **Replaced independent random role assignment with real branch families.** `generateCompanies()` now calls a new `assignBranchFamilies()` pass after generating all 1,400 accounts: it builds 45 families, each with 1 Parent and 1–3 Children (weighted 60%/30%/10%), and cross-links them by tenant ID and name (`branchParent` on a Child, `branchChildren` on a Parent). No account can belong to more than one family. This produced 45 Parents and 72 Children in the current dataset, consistent with v2.2's original ~9% branch-account proportion.
+- **Account Details panel gets a new "Branch Relationship" section** (only rendered for Branch accounts): a Parent shows "Child Accounts (N)" listing up to 3 child names (then "+N more"); a Child shows its one Parent's name. Every name is a clickable link (`openDetails()`) that jumps straight to that account's own details panel, so a CS rep can walk an entire branch family without leaving the drawer.
+- **Grid icon tooltip now names the specific linked account(s)** instead of a generic "Parent branch account" / "Child branch account, linked to a parent" string, so even a quick hover in the grid (without opening the drawer) answers "linked to what?"
+- No change to the icon's visual treatment, sort behavior, or filter behavior (including the v2.4 Branched Accounts filter, which still just checks whether `branchRole` is set).
 
 ## v2.4 — Ticket 86bb90q17 update: simplified Health tiers, Branch filter, and a label reconciliation
 

@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-07] HealthScore (health-score/): Branch accounts now carry real linked-family data
+
+- Decision: Jeremy reported the Branch icon (v2.2) was confusing since Parent and Child roles were assigned independently at random with no data connecting a specific Child to its Parent. Replaced that with real branch families: a new `assignBranchFamilies()` pass builds 45 families (1 Parent, 1–3 Children each, weighted 60/30/10) and cross-links them by tenant ID and name. Added a "Branch Relationship" section to the Account Details panel showing the specific linked account(s) by name, each clickable to jump straight to that account (Parent shows up to 3 child names plus "+N more"; Child shows its one parent). Grid icon tooltips now name the linked account(s) too.
+- Why: Jeremy's direct feedback that the feature was confusing as shipped; confirmed the fix should cap the displayed list rather than showing an unbounded number of children.
+- Open question: None.
+
 ## [2026-08-07] HealthScore (health-score/): ticket 86bb90q17 updated again; reconciled with the separately-merged Green/Yellow/Red change
 
 - Decision: Ticket 86bb90q17 was revised with two more confirmed rules (simplified 3-tier Health display, Branched Accounts filter) after a v2.2 update had already shipped. While implementing them, found that `main` had independently picked up a v2.3 change (a direct Jeremy request in another session, ahead of Aug 7 CS training) that displayed the Health badge as literal Green/Yellow/Red text, sourced from the CS Strategy Playbook, not from this ticket. The ticket instead specifies On Track/Needs Attention/At Risk as the display text, matching the existing Health Status filter. Surfaced the conflict directly rather than silently picking one; confirmed to go with the ticket's wording. Rebuilt the branch from the current `main` (the prior PR had already merged) and applied: the Metrics Bar's On Track/Needs Attention/At Risk cards (replacing Healthy/High Risk/Critical), the Health badge label reconciliation, a new Branched Accounts filter, and a Branch icon restyle from outlined glyph to solid color chip for better at-a-glance contrast per the ticket's updated UX note.
