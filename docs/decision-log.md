@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-07] Customer Health Scoring training guide: aligned to HealthScore v2.2
+
+- Decision: Updated `health-scoring-training-guide/` (Section 3) to describe the current live build: the 10-column grid plus per-account Account Details drawer (v2.1, confirmed by ticket 86bb90q17), and the new Branch Account icon (v2.2). Added a second ticket badge (86bb90q17) to the hero and footer, updated the footer's stale "v2.0" reference to v2.2, and added Business Rule 11 (Super Admin access enforcement) as a fourth open item for the Aug 7 session.
+- Why: The guide was written against an earlier build and hadn't caught up to `health-score/`'s v2.1/v2.2 changes (grid reduction, drawer, branch icon) documented in `health-score/CHANGES.md`. Friday's training is explicitly focused on this alignment.
+- Open question: None from this session; the guide's existing Section 6 open items (six-category framework timeline, Inactive-state language, Nicole's material) carry forward unresolved, now joined by the Super Admin access question.
+
 ## [2026-08-07] HealthScore (health-score/): confirmed requirements from ticket 86bb90q17
 
 - Decision: Removed two v2.1 features that ticket 86bb90q17 moved out of scope: the green "$" high-value-account marker and the "Health, Status & A2P fields last calculated" precomputed note. Added a new Branch Account icon (purple for Parent, teal for Child) next to the company name in the grid and Account Details panel, backed by a new `branchRole` field on about 9% of generated accounts. Confirmed the existing 10-column grid and 5-section drawer already match the ticket's Business Rules 3 and 4, so left both untouched.
