@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-12] HealthScore v2.10: fixed "not backfilled" vs. "never tracked" for legacy accounts
+
+- Decision: Corrected the v2.8 "Limited History" note and its underlying data. The note previously said Deal Created and Proposal Viewed "aren't tracked for legacy accounts," which overstated the gap. Per Jeremy: the real situation is that historical data wasn't backfilled, but new activity on a legacy account since this HealthScore release is tracked normally. Changed `propViewed`/`dealEverCreated` generation so Legacy accounts can get a real `true` (post-release signal, same roll as New accounts) and only fall back to `null` on a "no signal" result, instead of being hardcoded `null` regardless of any real activity. Rewrote the note text to match.
+- Why: Direct correction from Jeremy — the previous wording and data model made every Legacy account look permanently blind on these two fields, which isn't accurate to how the real system would behave (ongoing tracking works the same for everyone; only pre-existing history is the gap).
+- Open question: None from this session. Still open from v2.8: whether these signals are truly obtainable as booleans from the real event tables, which is unaffected by this correction.
+
 ## [2026-08-12] HealthScore v2.9: No Activity filter changed from a select to a toggle button
 
 - Decision: Replaced the "All / No Activity Since Signup" `<select>` (v2.8) with a toggle button, styled after the Metrics Bar cards' existing active/pressed state rather than a new pattern. Visible label is "No Activity Since Signup"; the fuller phrasing ("Show accounts with no activity since signup") is the hover tooltip.
