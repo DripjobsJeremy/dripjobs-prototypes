@@ -2,9 +2,16 @@
 
 Prototype: `health-score/index.html` · Parent ticket [86b9512kq](https://app.clickup.com/t/86b9512kq) · Ticket [86bb90q17](https://app.clickup.com/t/86bb90q17)
 
-This log covers changes taking the prototype from v1.7 through v2.11. v1.7 to v2.1 were driven by post-launch feedback from Jason, Rick, and Mary in Slack, plus several direct follow-up requests; v2.2, v2.4, and v2.6 implement the confirmed business rules formalized in ticket 86bb90q17 (added across three rounds as the ticket was updated); v2.3 was a direct follow-up request from Jeremy ahead of the Aug 7 CS training, made in a separate session, and is partially superseded by v2.4 (see below); v2.5 is a direct follow-up fix from Jeremy on the Branch Account feature added in v2.2; v2.7 through v2.11 are direct follow-up requests reworking the No Activity filter beyond what ticket 86bb90q17 originally specified. Full rationale for each change lives in the repo's `docs/decision-log.md`; this file is a scannable summary.
+This log covers changes taking the prototype from v1.7 through v2.12. v1.7 to v2.1 were driven by post-launch feedback from Jason, Rick, and Mary in Slack, plus several direct follow-up requests; v2.2, v2.4, and v2.6 implement the confirmed business rules formalized in ticket 86bb90q17 (added across three rounds as the ticket was updated); v2.3 was a direct follow-up request from Jeremy ahead of the Aug 7 CS training, made in a separate session, and is partially superseded by v2.4 (see below); v2.5 is a direct follow-up fix from Jeremy on the Branch Account feature added in v2.2; v2.7 through v2.11 are direct follow-up requests reworking the No Activity filter beyond what ticket 86bb90q17 originally specified; v2.12 is a copy fix unrelated to the No Activity work. Full rationale for each change lives in the repo's `docs/decision-log.md`; this file is a scannable summary.
 
 ---
+
+## v2.12 — Fixed inaccurate Export CSV alert copy
+
+Jeremy flagged that the Export CSV button's confirmation alert claimed "Full engagement/plan/integration detail exports separately from each account's Details panel" — that's not true. The Details panel has no export control at all, just a close button; that data is viewable per-account but was never exportable from there.
+
+- Reworded the alert to state the actual limitation instead of a nonexistent capability: engagement/plan/integration detail is not included in the CSV export, and is only visible per-account in the Details panel today (no export claim attached to it).
+- Not built: an actual per-account export from the Details panel. That would be a real feature addition, not a copy fix, and wasn't requested — flagged here in case it's wanted as a follow-up.
 
 ## v2.11 — Added a tooltip icon next to the No Activity toggle button, with a much faster reveal
 
