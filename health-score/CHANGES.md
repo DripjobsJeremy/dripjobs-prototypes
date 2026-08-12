@@ -2,9 +2,17 @@
 
 Prototype: `health-score/index.html` · Parent ticket [86b9512kq](https://app.clickup.com/t/86b9512kq) · Ticket [86bb90q17](https://app.clickup.com/t/86bb90q17)
 
-This log covers changes taking the prototype from v1.7 through v2.9. v1.7 to v2.1 were driven by post-launch feedback from Jason, Rick, and Mary in Slack, plus several direct follow-up requests; v2.2, v2.4, and v2.6 implement the confirmed business rules formalized in ticket 86bb90q17 (added across three rounds as the ticket was updated); v2.3 was a direct follow-up request from Jeremy ahead of the Aug 7 CS training, made in a separate session, and is partially superseded by v2.4 (see below); v2.5 is a direct follow-up fix from Jeremy on the Branch Account feature added in v2.2; v2.7 through v2.9 are direct follow-up requests reworking the No Activity filter beyond what ticket 86bb90q17 originally specified. Full rationale for each change lives in the repo's `docs/decision-log.md`; this file is a scannable summary.
+This log covers changes taking the prototype from v1.7 through v2.10. v1.7 to v2.1 were driven by post-launch feedback from Jason, Rick, and Mary in Slack, plus several direct follow-up requests; v2.2, v2.4, and v2.6 implement the confirmed business rules formalized in ticket 86bb90q17 (added across three rounds as the ticket was updated); v2.3 was a direct follow-up request from Jeremy ahead of the Aug 7 CS training, made in a separate session, and is partially superseded by v2.4 (see below); v2.5 is a direct follow-up fix from Jeremy on the Branch Account feature added in v2.2; v2.7 through v2.10 are direct follow-up requests reworking the No Activity filter beyond what ticket 86bb90q17 originally specified. Full rationale for each change lives in the repo's `docs/decision-log.md`; this file is a scannable summary.
 
 ---
+
+## v2.10 — Corrected the "not backfilled" vs. "never tracked" distinction for legacy accounts
+
+Jeremy flagged that the v2.8 "Limited History" note overstated the gap: it read as "Deal Created and Proposal Viewed aren't tracked for legacy accounts," implying those signals are permanently blind for legacy. The real situation is narrower: historical data wasn't backfilled, but new Deal/Proposal activity on a legacy account since this HealthScore release is tracked exactly like it is for any other account.
+
+- **Data model fix**: `propViewed` and `dealEverCreated` no longer default to `null` unconditionally for every Legacy account. Both now run the same random roll used for New accounts; a `true` result stays `true` for Legacy accounts too (real, current signal), and only a "no signal" result becomes `null` for Legacy (can't distinguish "genuinely never" from "happened before the unbackfilled cutoff"). In the current dataset this gives 240 of 602 Legacy accounts a real Proposal Viewed signal and 164 a real Deal Created signal, rather than all 602 being permanently dashed.
+- **Note text corrected** to: historical data "wasn't backfilled before this release," a dash means "missing history, not confirmed inactivity," and "any new deal or proposal activity on a legacy account since release is tracked and shown here." Removed the inaccurate "aren't tracked for legacy accounts" phrasing entirely.
+- **Effect on the No Activity filter**: fewer false positives on Legacy accounts, since accounts with a real post-release signal now correctly clear the filter instead of being flagged purely because that signal was previously hardcoded blind for all Legacy accounts.
 
 ## v2.9 — No Activity filter changed from a select to a toggle button
 
