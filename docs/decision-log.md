@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-12] HealthScore v2.11: tooltip icon + faster reveal for the No Activity toggle
+
+- Decision: Added a visible "i" tooltip icon next to the No Activity toggle button (previously the explanation only lived in a native `title` attribute, invisible until a user happened to hover the button itself), and replaced the native tooltip with a custom CSS one that fades in in ~80ms instead of the browser's own ~700&ndash;1500ms hover delay. Reused the existing `.tooltip-icon`/`.tooltip-pop` idiom from `tax-registration-number/index.html` rather than the Font-Awesome-based `.info-icon` variant in `notifications-ux/index.html`, since this page doesn't load Font Awesome and adding it for one icon wasn't worth a new external dependency.
+- Why: Direct request — the tooltip existed but nothing signaled it was there, and native tooltip delay felt slow.
+- Open question: None.
+
 ## [2026-08-12] HealthScore v2.10: fixed "not backfilled" vs. "never tracked" for legacy accounts
 
 - Decision: Corrected the v2.8 "Limited History" note and its underlying data. The note previously said Deal Created and Proposal Viewed "aren't tracked for legacy accounts," which overstated the gap. Per Jeremy: the real situation is that historical data wasn't backfilled, but new activity on a legacy account since this HealthScore release is tracked normally. Changed `propViewed`/`dealEverCreated` generation so Legacy accounts can get a real `true` (post-release signal, same roll as New accounts) and only fall back to `null` on a "no signal" result, instead of being hardcoded `null` regardless of any real activity. Rewrote the note text to match.

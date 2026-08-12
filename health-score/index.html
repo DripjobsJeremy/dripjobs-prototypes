@@ -57,6 +57,13 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .toggle-filter-btn{padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;color:#374151;background:white;cursor:pointer;min-height:32px;font-family:inherit;white-space:nowrap;text-align:left;}
 .toggle-filter-btn:hover{background:#f9fafb;}
 .toggle-filter-btn.active{border-color:#7C3AED;background:#f5f3ff;color:#7C3AED;font-weight:600;}
+.toggle-with-tip{display:flex;align-items:center;gap:5px;}
+.tooltip-wrap{position:relative;display:inline-flex;}
+.tooltip-icon{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#ede9fe;color:#7C3AED;font-size:10px;font-weight:700;font-style:italic;font-family:Georgia,'Times New Roman',serif;cursor:help;flex-shrink:0;}
+.tooltip-wrap:hover .tooltip-icon{background:#7C3AED;color:#fff;}
+.tooltip-pop{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;font-size:11px;font-weight:400;line-height:1.45;padding:8px 11px;border-radius:7px;width:230px;z-index:400;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .08s ease,visibility .08s ease;box-shadow:0 4px 14px rgba(0,0,0,.2);}
+.tooltip-pop::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1f2937;}
+.tooltip-wrap:hover .tooltip-pop{opacity:1;visibility:visible;}
 .filter-select:focus,.search-box:focus{border-color:#7C3AED;box-shadow:0 0 0 2px rgba(124,58,237,.1);}
 .search-box{min-width:220px;}
 .metrics-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
@@ -196,7 +203,7 @@ tbody tr:hover .td-details-link{text-decoration:underline;}
 <body>
 <div class="proto-banner">
   <span class="proto-tag">Prototype</span>
-  <strong>Ticket #86bb90q17</strong> &mdash; HealthScore (formerly &ldquo;Activation Dashboard,&rdquo; renamed Jul 29, 2026): Confirmed Grid Reduction, Account Details Drawer &amp; UX Polish &nbsp;&middot;&nbsp; v2.10
+  <strong>Ticket #86bb90q17</strong> &mdash; HealthScore (formerly &ldquo;Activation Dashboard,&rdquo; renamed Jul 29, 2026): Confirmed Grid Reduction, Account Details Drawer &amp; UX Polish &nbsp;&middot;&nbsp; v2.11
   <span class="proto-right">Plan sourced from Company Settings &gt; Company Information (local DB) &nbsp;&middot;&nbsp; No Chargebee API call</span>
 </div>
 <div class="page-wrapper">
@@ -214,6 +221,7 @@ tbody tr:hover .td-details-link{text-decoration:underline;}
     </button>
     <div class="info-note-body">
     <ul class="updates-list">
+      <li><strong>Aug 12, 2026 &mdash; v2.11:</strong> Added a visible tooltip icon next to the No Activity toggle, with a much faster (~80ms) hover reveal than the browser&rsquo;s native tooltip delay.</li>
       <li><strong>Aug 12, 2026 &mdash; v2.10:</strong> Corrected the Legacy account &ldquo;Limited History&rdquo; note and data &mdash; historical Deal/Proposal data wasn&rsquo;t backfilled, but new activity since release is tracked normally, not permanently blind.</li>
       <li><strong>Aug 12, 2026 &mdash; v2.9:</strong> No Activity filter changed from a confusing 2-option dropdown to a toggle button, matching the Metrics Bar cards&rsquo; existing click-to-filter pattern.</li>
       <li><strong>Aug 12, 2026 &mdash; v2.8:</strong> No Activity filter rebuilt as a single &ldquo;Since Signup&rdquo; check (Estimate Sent / Deal Created / Proposal Viewed, 14-day minimum age); dropped Active Users from the check; added a &ldquo;Limited History&rdquo; note for Legacy accounts.</li>
@@ -315,7 +323,13 @@ tbody tr:hover .td-details-link{text-decoration:underline;}
             </div>
             <div class="filter-group">
               <label class="filter-label">No Activity</label>
-              <button type="button" class="toggle-filter-btn" id="f-noactivity" onclick="toggleNoActivityFilter()" title="Show accounts with no activity since signup: 14+ days old, no Estimate ever sent, no Deal ever created, no Proposal ever viewed">No Activity Since Signup</button>
+              <div class="toggle-with-tip">
+                <button type="button" class="toggle-filter-btn" id="f-noactivity" onclick="toggleNoActivityFilter()">No Activity Since Signup</button>
+                <span class="tooltip-wrap">
+                  <span class="tooltip-icon">i</span>
+                  <span class="tooltip-pop">Shows accounts with no activity since signup: 14+ days old, no Estimate ever sent, no Deal ever created, no Proposal ever viewed.</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>

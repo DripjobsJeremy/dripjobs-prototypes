@@ -2,9 +2,17 @@
 
 Prototype: `health-score/index.html` · Parent ticket [86b9512kq](https://app.clickup.com/t/86b9512kq) · Ticket [86bb90q17](https://app.clickup.com/t/86bb90q17)
 
-This log covers changes taking the prototype from v1.7 through v2.10. v1.7 to v2.1 were driven by post-launch feedback from Jason, Rick, and Mary in Slack, plus several direct follow-up requests; v2.2, v2.4, and v2.6 implement the confirmed business rules formalized in ticket 86bb90q17 (added across three rounds as the ticket was updated); v2.3 was a direct follow-up request from Jeremy ahead of the Aug 7 CS training, made in a separate session, and is partially superseded by v2.4 (see below); v2.5 is a direct follow-up fix from Jeremy on the Branch Account feature added in v2.2; v2.7 through v2.10 are direct follow-up requests reworking the No Activity filter beyond what ticket 86bb90q17 originally specified. Full rationale for each change lives in the repo's `docs/decision-log.md`; this file is a scannable summary.
+This log covers changes taking the prototype from v1.7 through v2.11. v1.7 to v2.1 were driven by post-launch feedback from Jason, Rick, and Mary in Slack, plus several direct follow-up requests; v2.2, v2.4, and v2.6 implement the confirmed business rules formalized in ticket 86bb90q17 (added across three rounds as the ticket was updated); v2.3 was a direct follow-up request from Jeremy ahead of the Aug 7 CS training, made in a separate session, and is partially superseded by v2.4 (see below); v2.5 is a direct follow-up fix from Jeremy on the Branch Account feature added in v2.2; v2.7 through v2.11 are direct follow-up requests reworking the No Activity filter beyond what ticket 86bb90q17 originally specified. Full rationale for each change lives in the repo's `docs/decision-log.md`; this file is a scannable summary.
 
 ---
+
+## v2.11 — Added a tooltip icon next to the No Activity toggle button, with a much faster reveal
+
+Direct follow-up: the v2.9 toggle button relied on a native `title` attribute for its explanation, which gives no visual hint that a tooltip exists and pops up on the browser's own (slow, ~700&ndash;1500ms) delay.
+
+- Added a small purple "i" icon (`.tooltip-icon` inside `.tooltip-wrap`) next to the button, so the explanation is visually discoverable instead of a hidden hover-only affordance. Reuses the icon-in-a-circle idiom already established in `tax-registration-number/index.html`'s `.tooltip-icon`/`.tooltip-pop` pattern rather than adding a new one or pulling in Font Awesome (which this page doesn't otherwise load) for the FA-based variant used in `notifications-ux/index.html`.
+- New `.tooltip-pop` bubble fades in on `:hover` in ~80ms (CSS `transition`), replacing the native `title`'s browser-controlled delay entirely — removed the `title` attribute from the button so there's exactly one tooltip source, not two competing ones.
+- Tooltip copy is unchanged from the old `title` text (14-day floor, three-signal rule), just relocated to the new bubble.
 
 ## v2.10 — Corrected the "not backfilled" vs. "never tracked" distinction for legacy accounts
 
