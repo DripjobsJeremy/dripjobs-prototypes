@@ -203,7 +203,7 @@ tbody tr:hover .td-details-link{text-decoration:underline;}
 <body>
 <div class="proto-banner">
   <span class="proto-tag">Prototype</span>
-  <strong>Ticket #86bb90q17</strong> &mdash; HealthScore (formerly &ldquo;Activation Dashboard,&rdquo; renamed Jul 29, 2026): Confirmed Grid Reduction, Account Details Drawer &amp; UX Polish &nbsp;&middot;&nbsp; v2.11
+  <strong>Ticket #86bb90q17</strong> &mdash; HealthScore (formerly &ldquo;Activation Dashboard,&rdquo; renamed Jul 29, 2026): Confirmed Grid Reduction, Account Details Drawer &amp; UX Polish &nbsp;&middot;&nbsp; v2.12
   <span class="proto-right">Plan sourced from Company Settings &gt; Company Information (local DB) &nbsp;&middot;&nbsp; No Chargebee API call</span>
 </div>
 <div class="page-wrapper">
@@ -221,6 +221,7 @@ tbody tr:hover .td-details-link{text-decoration:underline;}
     </button>
     <div class="info-note-body">
     <ul class="updates-list">
+      <li><strong>Aug 12, 2026 &mdash; v2.12:</strong> Fixed the Export CSV alert, which falsely claimed a per-account export existed in the Details panel &mdash; it doesn&rsquo;t.</li>
       <li><strong>Aug 12, 2026 &mdash; v2.11:</strong> Added a visible tooltip icon next to the No Activity toggle, with a much faster (~80ms) hover reveal than the browser&rsquo;s native tooltip delay.</li>
       <li><strong>Aug 12, 2026 &mdash; v2.10:</strong> Corrected the Legacy account &ldquo;Limited History&rdquo; note and data &mdash; historical Deal/Proposal data wasn&rsquo;t backfilled, but new activity since release is tracked normally, not permanently blind.</li>
       <li><strong>Aug 12, 2026 &mdash; v2.9:</strong> No Activity filter changed from a confusing 2-option dropdown to a toggle button, matching the Metrics Bar cards&rsquo; existing click-to-filter pattern.</li>
@@ -608,7 +609,7 @@ function changePage(dir){var eff=pageSize===0?filtered.length:pageSize,total=Mat
 function changePageSize(){var sel=document.getElementById('page-size-sel'),val=parseInt(sel.value)||0;if(val===0){if(!confirm('This will load all '+filtered.length.toLocaleString()+' accounts. Continue?')){sel.value=pageSize===0?'0':String(pageSize);return;}}pageSize=val;page=1;render();}
 function populateDropdowns(){var obPanel=document.getElementById('ms-obcss-panel'),obFooter=obPanel.querySelector('.ms-footer');OBCSS_TEAM.forEach(function(n){var lbl=document.createElement('label');lbl.className='ms-item';lbl.innerHTML='<input type="checkbox" value="'+n+'" onchange="msChange(\'ms-obcss\')"> '+n;obPanel.insertBefore(lbl,obFooter);});var indPanel=document.getElementById('ms-industry-panel'),indFooter=indPanel.querySelector('.ms-footer');INDUSTRIES.slice().sort().forEach(function(n){var lbl=document.createElement('label');lbl.className='ms-item';lbl.innerHTML='<input type="checkbox" value="'+n+'" onchange="msChange(\'ms-industry\')"> '+n;indPanel.insertBefore(lbl,indFooter);});}
 function currentPageCount(){var eff=pageSize===0?filtered.length:pageSize,start=(page-1)*eff,end=Math.min(start+eff,filtered.length);return end-start;}
-function exportCSV(){var n=currentPageCount();alert('[Prototype] Export would generate CSV \u2014 '+n.toLocaleString()+' rows (this page only, matching the Show selector) across the grid\'s 10 health fields. Full engagement/plan/integration detail exports separately from each account\'s Details panel.');}
+function exportCSV(){var n=currentPageCount();alert('[Prototype] Export would generate CSV \u2014 '+n.toLocaleString()+' rows (this page only, matching the Show selector) across the grid\'s 10 health fields. Engagement, Plan, and Integration detail are not included in this export; that data is only visible per-account in the Details panel today.');}
 populateDropdowns();initSortHeaders();
 sortCol=5;sortDir='desc';
 updateSortUI();

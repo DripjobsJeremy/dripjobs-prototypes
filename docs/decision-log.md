@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-12] HealthScore v2.12: fixed inaccurate Export CSV alert copy
+
+- Decision: Removed the Export CSV alert's claim that "Full engagement/plan/integration detail exports separately from each account's Details panel." That capability doesn't exist — the Details panel has no export control. Reworded to state the actual limitation (that data isn't in the CSV export, only viewable per-account) without implying an export path that isn't there.
+- Why: Direct correction from Jeremy after noticing the alert text didn't match the actual page.
+- Open question: Whether a real per-account export from the Details panel should be built as a follow-up feature — not resolved here, just no longer falsely claimed.
+
 ## [2026-08-12] HealthScore v2.11: tooltip icon + faster reveal for the No Activity toggle
 
 - Decision: Added a visible "i" tooltip icon next to the No Activity toggle button (previously the explanation only lived in a native `title` attribute, invisible until a user happened to hover the button itself), and replaced the native tooltip with a custom CSS one that fades in in ~80ms instead of the browser's own ~700&ndash;1500ms hover delay. Reused the existing `.tooltip-icon`/`.tooltip-pop` idiom from `tax-registration-number/index.html` rather than the Font-Awesome-based `.info-icon` variant in `notifications-ux/index.html`, since this page doesn't load Font Awesome and adding it for one icon wasn't worth a new external dependency.
