@@ -6,6 +6,14 @@ This log covers changes taking the prototype from v1.7 through v2.6. v1.7 to v2.
 
 ---
 
+## v2.7 — Copy icon extended to Company Name and Primary Contact Name
+
+Direct follow-up request from Jeremy: extend the Copy affordance introduced in v2.6 (Business Rule 16, which only covered Phone and Email) to the Company Name in the drawer header and the Name field in the Primary Contact section, in the Account Details slide-over. Not a ticket 86bb90q17 requirement; a scope addition on top of it.
+
+- Refactored the copy-button markup out of `copyRow()` into a shared `copyBtn(value,label)` helper so the same icon/confirmation behavior could be reused outside a `.detail-row` context.
+- Company Name in the drawer header (`.details-company-name`) now gets a Copy icon next to the branch icon (when present); the header was switched to a flex layout so the name, branch icon, and copy button line up on one baseline.
+- Primary Contact's Name row now uses `copyRow()` like Phone and Email, instead of rendering as a plain non-copyable row.
+
 ## v2.6 — Ticket 86bb90q17 update: Primary Contact, No Activity filter, Copy affordance
 
 Ticket 86bb90q17 was updated again (Aug 12, 2026) to incorporate Tanner's HealthScore feedback (via Eli), adding three new confirmed business rules.

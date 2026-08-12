@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-12] HealthScore v2.7: Copy icon extended to Company Name and Primary Contact Name
+
+- Decision: Per Jeremy's direct request, extended the Copy-to-clipboard affordance from v2.6 (Business Rule 16 covered only Phone and Email) to also cover Company Name (drawer header) and Primary Contact's Name field, using the same icon/checkmark-confirmation pattern. Refactored the copy button markup into a shared `copyBtn()` helper reused by both the header and the detail rows.
+- Why: Direct request, not sourced from ticket 86bb90q17; a scope addition on top of the ticket's confirmed rules rather than a correction to them.
+- Open question: None.
+
 ## [2026-08-12] HealthScore v2.6: Primary Contact, No Activity filter, Copy affordance
 
 - Decision: Ticket 86bb90q17 was updated with three new confirmed rules (Business Rules 14–16), incorporating Tanner's feedback via Eli. Built a Primary Contact section in the Account Details panel (directly below Company Info) backed by a new synthetic per-account user roster and a `getPrimaryContact()` resolver (oldest Admin, falling back to oldest user of any role, or a "No Contact Available" placeholder if zero users); a new single-select "No Activity" filter in Search & Segment (30 Days/90 Days/to Date, accordion count 8→9); and Copy-to-clipboard icons on Phone/Email with a checkmark-flash confirmation, hidden when the value is missing.
