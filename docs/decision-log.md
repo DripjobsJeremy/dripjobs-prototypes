@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-12] HealthScore v2.9: No Activity filter changed from a select to a toggle button
+
+- Decision: Replaced the "All / No Activity Since Signup" `<select>` (v2.8) with a toggle button, styled after the Metrics Bar cards' existing active/pressed state rather than a new pattern. Visible label is "No Activity Since Signup"; the fuller phrasing ("Show accounts with no activity since signup") is the hover tooltip.
+- Why: Jeremy flagged that a 2-option dropdown for a true boolean was confusing — "All" looked like a category choice rather than an off switch. Considered a checkbox first, then a button once we noticed the Metrics Bar cards already establish a click-to-filter/pressed-state pattern on this exact page, so a button reuses an existing interaction instead of introducing a new one.
+- Open question: None. Underlying filter logic (`noActivitySinceSignup()`, 14-day floor) is unchanged from v2.8, only the control type.
+
 ## [2026-08-12] HealthScore v2.8: No Activity filter rebuilt as a boolean "since signup" check, 14-day floor
 
 - Decision: Replaced the v2.6 No Activity filter (three time-windowed options, gated on zero Active Users + a synthetic recency field) with a single toggle: an account matches if it's 14+ days old and has never had an Estimate Sent, Deal Created, or Proposal Viewed. Dropped Active Users from the check entirely (it's a headcount, not a recency signal — a 1-2 user account isn't inherently inactive). Added a real `dealEverCreated` boolean field (reusing `estimateSent`/`propViewed` as-is) and a visible "Deal Created" row in Engagement Signals so the check isn't based on hidden data. Added a "Limited History" note to every Legacy account's Engagement Signals section, since Deal Created and Proposal Viewed are structurally untracked (`null`) for all Legacy accounts, not just ones that happen to match this filter — confirmed this matters in testing when a Legacy account with 7 Active Users and 120 Contacts still matched the filter, flagged by one missing signal alone.

@@ -2,9 +2,18 @@
 
 Prototype: `health-score/index.html` · Parent ticket [86b9512kq](https://app.clickup.com/t/86b9512kq) · Ticket [86bb90q17](https://app.clickup.com/t/86bb90q17)
 
-This log covers changes taking the prototype from v1.7 through v2.8. v1.7 to v2.1 were driven by post-launch feedback from Jason, Rick, and Mary in Slack, plus several direct follow-up requests; v2.2, v2.4, and v2.6 implement the confirmed business rules formalized in ticket 86bb90q17 (added across three rounds as the ticket was updated); v2.3 was a direct follow-up request from Jeremy ahead of the Aug 7 CS training, made in a separate session, and is partially superseded by v2.4 (see below); v2.5 is a direct follow-up fix from Jeremy on the Branch Account feature added in v2.2; v2.7 and v2.8 are direct follow-up requests reworking the No Activity filter beyond what ticket 86bb90q17 originally specified. Full rationale for each change lives in the repo's `docs/decision-log.md`; this file is a scannable summary.
+This log covers changes taking the prototype from v1.7 through v2.9. v1.7 to v2.1 were driven by post-launch feedback from Jason, Rick, and Mary in Slack, plus several direct follow-up requests; v2.2, v2.4, and v2.6 implement the confirmed business rules formalized in ticket 86bb90q17 (added across three rounds as the ticket was updated); v2.3 was a direct follow-up request from Jeremy ahead of the Aug 7 CS training, made in a separate session, and is partially superseded by v2.4 (see below); v2.5 is a direct follow-up fix from Jeremy on the Branch Account feature added in v2.2; v2.7 through v2.9 are direct follow-up requests reworking the No Activity filter beyond what ticket 86bb90q17 originally specified. Full rationale for each change lives in the repo's `docs/decision-log.md`; this file is a scannable summary.
 
 ---
+
+## v2.9 — No Activity filter changed from a select to a toggle button
+
+Direct follow-up: Jeremy flagged that the "All / No Activity Since Signup" `<select>` from v2.8 was confusing — with only one real "on" state, the dropdown made "All" look like it was being weighed against a category instead of just being the off switch.
+
+- Replaced the `<select>` with a toggle `<button>` (`No Activity Since Signup`), styled after the existing active/pressed state already used by the Metrics Bar cards (`filterByCard()`'s highlighted-border treatment) rather than inventing a new on/off visual. Click to filter, click again to clear.
+- Underlying logic is unchanged from v2.8 (`noActivitySinceSignup()`, 14-day floor, three-signal OR check) — only the control type changed, from a `<select>`'s `.value` to a `noActivityFilterOn` boolean flipped by `toggleNoActivityFilter()`.
+- The button's full-sentence phrasing ("Show accounts with no activity since signup") lives in its hover tooltip; the visible label is the shorter "No Activity Since Signup," per Jeremy's call that the full sentence was too long to sit inline with the other short filter chips.
+- `clearAllFilters()` and `filterByCard()` (the Metrics Bar card click-to-filter shortcuts) both reset the button's active state along with every other filter, same as before.
 
 ## v2.8 — No Activity filter rebuilt: boolean "since signup" check with a 14-day floor, replacing time-bucketed windows
 
