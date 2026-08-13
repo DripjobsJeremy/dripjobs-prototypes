@@ -1,44 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>BR-13 Card Indicator Design: DripJobs</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<title>BR-13: Drips Auto-Preserved Indicator | Deal Card</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --color-primary:        #8B85EA;
-    --color-primary-hover:  #736BE3;
-    --color-primary-active: #5C53DC;
-    --color-primary-rgb:    139, 133, 234;
-    --color-bg:             #F3F1FC;
-    --color-text:           #32415B;
-    --color-text-muted:     #80879A;
-    --color-border:         #DAD8E3;
-    --color-card:           #FFFFFF;
-
-    --pill-bg:     #E8E6FA;
-    --pill-border: #D6D2F5;
-    --pill-text:   #5C53DC;
-
-    --warn-bg:     #FFFBEB;
-    --warn-border: #FDE68A;
-    --warn-text:   #92400E;
-  }
-
+  /* Icons below are inlined feather-icons SVG paths (external-link, calendar,
+     users, file-text, bell-off, info) rather than loaded from a CDN, so the
+     page renders identically offline or on a locked-down network. */
+  .icon-svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  * { box-sizing: border-box; }
   body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--color-bg);
-    color: var(--color-text);
-    min-height: 100vh;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #F3F4F8;
+    padding: 0 16px 80px;
+    color: #32415B;
   }
 
-  /* ── Top bar ── */
+  /* ---------- Hub proto-bar (every prototype page carries this) ---------- */
   .proto-bar {
-    background: var(--color-card);
-    border-bottom: 1px solid var(--color-border);
+    background: #FFFFFF;
+    border-bottom: 1px solid #DAD8E3;
     padding: 12px 24px;
     display: flex;
     align-items: center;
@@ -48,221 +31,415 @@
     position: sticky;
     top: 0;
     z-index: 20;
+    margin: 0 -16px;
   }
   .proto-bar-left { display: flex; align-items: center; gap: 10px; }
   .back-link {
-    font-size: 12px; font-weight: 500; color: var(--color-text-muted);
+    font-size: 12px; font-weight: 500; color: #80879A;
     text-decoration: none; display: flex; align-items: center; gap: 4px;
     transition: color 0.15s;
   }
-  .back-link:hover { color: var(--color-primary); }
-  .divider { color: var(--color-border); font-size: 16px; }
-  .proto-bar-title { font-size: 14px; font-weight: 600; }
+  .back-link:hover { color: #8B85EA; }
+  .proto-bar-divider { color: #DAD8E3; font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; color: #32415B; }
   .proto-bar-ticket {
-    font-size: 11px; font-weight: 600; color: var(--color-primary);
+    font-size: 11px; font-weight: 600; color: #8B85EA;
     text-decoration: none; padding: 4px 10px; border: 1px solid #D6D2F5;
     background: #E8E6FA; border-radius: 999px; letter-spacing: 0.2px;
   }
-  .proto-bar-ticket:hover { background: var(--color-primary); color: #fff; }
+  .proto-bar-ticket:hover { background: #8B85EA; color: #fff; }
 
-  /* ── Content ── */
-  .proto-content { max-width: 1080px; margin: 32px auto 80px; padding: 0 24px; }
-
-  .page-intro { margin-bottom: 24px; }
-  .page-intro h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-  .page-intro p { font-size: 13px; color: var(--color-text-muted); line-height: 1.6; max-width: 720px; }
-
-  .section-card {
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 18px;
+  #br13-proto {
+    --st-color-primary: #8B85EA;
+    --st-color-primary-hover: #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb: 139, 133, 234;
+    --st-color-text: #32415B;
+    --st-color-text-muted: #80879A;
+    --st-color-border: #DAD8E3;
+    --st-color-card-bg: #FFFFFF;
+    --st-teal: #0DCECE;
+    --st-teal-bg: #F0FAFA;
+    max-width: 900px;
+    margin: 24px auto 0;
   }
-  .section-eyebrow {
-    font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
-    color: var(--color-primary-active); margin-bottom: 6px;
+
+  /* ---------- Page framing (prototype-only, not product UI) ---------- */
+  .proto-heading { margin-bottom: 22px; }
+  .proto-heading h1 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: var(--st-color-text);
   }
-  .section-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-  .section-subtitle { font-size: 12px; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 16px; max-width: 720px; }
-
-  .rule-recap {
-    background: #F8F8FC; border: 1px solid var(--color-border); border-radius: 8px;
-    padding: 12px 14px; font-size: 12px; color: var(--color-text); line-height: 1.6; margin-bottom: 4px;
+  .proto-heading p {
+    font-size: 13px;
+    color: var(--st-color-text-muted);
+    margin: 0;
+    max-width: 640px;
+    line-height: 1.5;
   }
-  .rule-recap b { color: var(--color-primary-active); }
-
-  .ground-truth-note {
-    display: flex; align-items: flex-start; gap: 10px; background: #F0FDF4;
-    border: 1px solid #BBF7D0; color: #166534; border-radius: 8px; padding: 10px 14px;
-    font-size: 12px; line-height: 1.6; margin-bottom: 16px;
+  .proto-heading code {
+    background: #EFEFF3;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
   }
-  .ground-truth-note .icon { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; }
 
-  /* ── Mini pipeline board (context only) ── */
-  .board-frame {
-    background: #EDEBF9; border: 1px solid var(--color-border); border-radius: 10px;
-    padding: 16px; overflow-x: auto;
+  /* ---------- Demo control banner (amber, clearly non-product) ---------- */
+  .demo-banner {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
   }
-  .board-col-label {
-    font-size: 11px; font-weight: 600; color: var(--color-text-muted);
-    text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 10px;
-    display: flex; align-items: center; gap: 6px;
+  .demo-banner .demo-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #92400E;
+    white-space: nowrap;
   }
-  .board-col-label .count {
-    background: #DAD8E3; color: var(--color-text); border-radius: 999px;
-    font-size: 10px; padding: 1px 7px; font-weight: 700;
+  .demo-toggle-group {
+    display: inline-flex;
+    background: #FFFFFF;
+    border: 1px solid #FDE68A;
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
   }
-  .board-cols { display: flex; gap: 14px; min-width: 600px; align-items: flex-start; }
-  .board-col { flex: 1; min-width: 260px; }
-
-  /* icon helper */
-  .icon { width: 13px; height: 13px; display: inline-block; flex-shrink: 0; }
-
-  /* ── Real deal card anatomy (matches current production UI) ── */
-  .rc-card {
-    background: #fff; border: 1px solid var(--color-border); border-radius: 12px;
-    padding: 14px 16px; margin-bottom: 12px; position: relative;
-    box-shadow: 0 1px 2px rgba(50,65,91,0.05);
+  .demo-toggle-btn {
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    color: #92400E;
+    transition: background 0.15s ease, color 0.15s ease;
   }
-  .rc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-  .rc-title-wrap { display: flex; align-items: center; gap: 6px; min-width: 0; }
-  .rc-title { font-size: 14px; font-weight: 700; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .rc-title-wrap .icon { color: var(--color-text-muted); width: 11px; height: 11px; }
-  .rc-head-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .rc-add-label {
-    display: inline-flex; align-items: center; gap: 3px; border: 1px solid var(--color-border);
-    border-radius: 999px; font-size: 10.5px; font-weight: 600; color: var(--color-text-muted);
-    padding: 3px 9px 3px 6px; background: #fff; white-space: nowrap;
+  .demo-toggle-btn.active {
+    background: #92400E;
+    color: #FFF;
   }
-  .rc-add-label .icon { width: 9px; height: 9px; }
-  .rc-kebab { color: var(--color-text-muted); width: 15px; height: 15px; }
-  .rc-subtitle { font-size: 11.5px; color: var(--color-text-muted); margin-top: 2px; margin-bottom: 10px; }
 
-  .rc-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 9px; font-size: 12.5px; }
-  .rc-row:last-of-type { margin-bottom: 12px; }
-  .rc-row-link { color: var(--color-primary-active); font-weight: 600; display: flex; align-items: center; gap: 6px; }
-  .rc-row-link .icon { color: var(--color-primary-active); }
-  .rc-row-muted { color: var(--color-text-muted); font-weight: 500; display: flex; align-items: center; gap: 6px; }
-  .rc-row-muted .icon { color: var(--color-text-muted); }
-
-  .rc-amount-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 9px; }
-  .rc-amount { font-size: 15px; font-weight: 700; color: var(--color-text); }
-  .rc-amount-sub { font-size: 11px; color: var(--color-text-muted); }
-
-  .rc-content-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
-  .rc-content-right { text-align: right; flex-shrink: 0; }
-  .rc-content-amount { font-size: 15px; font-weight: 700; color: var(--color-text); }
-  .rc-content-status { font-size: 11px; color: var(--color-text-muted); }
-
-  .rc-pill-action {
-    display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--color-border);
-    border-radius: 999px; font-size: 10.5px; font-weight: 600; color: var(--color-text);
-    padding: 3px 9px; background: #fff; white-space: nowrap;
+  /* ---------- Card grid ---------- */
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
   }
-  .rc-pill-action .icon { width: 9px; height: 9px; color: var(--color-text-muted); }
+  @media (max-width: 680px) {
+    .card-grid { grid-template-columns: 1fr; }
+  }
 
-  .rc-divider { border-top: 1px solid var(--color-border); margin: 4px 0 10px; }
-  .rc-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .rc-avatar-name { display: flex; align-items: center; gap: 6px; min-width: 0; }
-  .rc-avatar {
-    width: 20px; height: 20px; border-radius: 50%; background: var(--color-primary);
-    color: #fff; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  /* ---------- Deal card (reproduced from provided screenshots) ---------- */
+  .deal-card {
+    background: var(--st-color-card-bg);
+    border: 1px solid var(--st-color-border);
+    border-radius: 10px;
+    padding: 14px 14px 12px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    position: relative;
+  }
+
+  .deal-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .deal-card-title {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--st-color-text);
+  }
+  .deal-card-title svg { color: var(--st-color-text-muted); width: 14px; height: 14px; }
+  .deal-card-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     flex-shrink: 0;
   }
-  .rc-footer-name { font-size: 12px; font-weight: 600; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .rc-updated { font-size: 11px; color: var(--color-text-muted); white-space: nowrap; flex-shrink: 0; }
-
-  /* ── The BR-13 indicator itself (reuses the existing tag/chip pill tokens) ── */
-  .drips-pill {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: var(--pill-bg); border: 1px solid var(--pill-border); color: var(--pill-text);
-    font-size: 11px; font-weight: 600; border-radius: 14px; padding: 3px 10px 3px 8px;
-    line-height: 1.3; margin-bottom: 10px;
+  .add-label-btn {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--st-color-text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
   }
-  .drips-pill .icon { width: 10px; height: 10px; color: var(--pill-text); }
-  .drips-pill--interactive { cursor: pointer; }
-  .drips-pill--interactive:hover, .drips-pill--interactive:focus-visible { background: #DEDBF7; outline: none; }
+  .kebab { color: var(--st-color-text-muted); font-weight: 700; cursor: pointer; padding: 0 2px; }
 
-  /* Option A: corner badge, icon only */
-  .badge-corner {
-    position: absolute; top: -7px; right: -7px;
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--pill-bg); border: 1.5px solid var(--pill-border);
-    display: flex; align-items: center; justify-content: center;
-    cursor: default;
+  .deal-card-source {
+    font-size: 12px;
+    color: var(--st-color-text-muted);
+    margin: 2px 0 12px;
   }
-  .badge-corner .icon { color: var(--pill-text); }
 
-  /* Option C: left accent bar */
-  .rc-card--accent { border-left: 3px solid var(--pill-text); padding-left: 13px; }
-  .accent-icon-row { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--pill-text); margin-bottom: 10px; }
-  .accent-icon-row .icon { width: 10px; height: 10px; }
-
-  /* ── Option demo grid ── */
-  .option-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-  @media (min-width: 960px) { .option-grid { grid-template-columns: repeat(3, 1fr); } }
-
-  .option-block {
-    border: 1px solid var(--color-border); border-radius: 10px; padding: 14px;
-    background: #FAFAFC; display: flex; flex-direction: column; gap: 10px;
+  .deal-card-financial {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
   }
-  .option-label {
-    font-size: 11px; font-weight: 700; color: var(--color-text-muted);
-    text-transform: uppercase; letter-spacing: 0.4px;
+  .fin-left .fin-amount {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--st-color-text);
+    line-height: 1.1;
   }
-  .option-note { font-size: 11.5px; color: var(--color-text-muted); line-height: 1.55; }
-  .option-note strong { color: var(--color-text); }
-  .option-card-slot { display: flex; justify-content: center; padding: 6px 0; }
-
-  .verdict-tag {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 10px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase;
-    padding: 2px 8px; border-radius: 999px; align-self: flex-start;
+  .fin-left .fin-sub {
+    font-size: 12px;
+    color: var(--st-color-text-muted);
+    margin-top: 2px;
   }
-  .verdict-tag.reject { background: #FEF2F2; color: #991B1B; }
-  .verdict-tag.accept { background: #F0FDF4; color: #166534; }
-
-  /* ── Recommended detail block ── */
-  .rec-banner {
-    display: flex; align-items: center; gap: 10px; background: #F0FDF4;
-    border: 1px solid #BBF7D0; color: #166534; border-radius: 8px; padding: 10px 14px;
-    font-size: 12.5px; font-weight: 600; margin-bottom: 16px;
+  .fin-right { text-align: right; }
+  .fin-right .fin-label {
+    font-size: 12px;
+    color: var(--st-color-text-muted);
+    margin-bottom: 2px;
   }
-  .rec-banner .icon { width: 16px; height: 16px; flex-shrink: 0; }
-
-  .variant-toggle { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-  .variant-btn {
-    font-family: inherit; font-size: 12px; font-weight: 600; padding: 7px 14px;
-    border-radius: 999px; border: 1px solid var(--color-border); background: #fff;
-    color: var(--color-text-muted); cursor: pointer; transition: all 0.15s;
+  .fin-right .fin-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--st-color-primary-active);
+    text-decoration: underline;
+    cursor: pointer;
   }
-  .variant-btn.active { border-color: var(--color-primary); color: var(--color-primary-active); background: #F3F1FC; }
-
-  .rec-card-wrap { display: flex; justify-content: center; padding: 10px 0 4px; }
-
-  .popover {
-    position: absolute; top: calc(100% + 8px); left: 0; width: 260px; z-index: 10;
-    background: #fff; border: 1px solid var(--pill-border); border-radius: 8px;
-    padding: 10px 12px; box-shadow: 0 8px 20px rgba(50,65,91,0.15);
-    font-size: 11.5px; line-height: 1.55; color: var(--color-text);
-    display: none;
+  .fin-right .fin-status {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--st-color-text-muted);
   }
-  .popover.open { display: block; }
-  .popover-title { font-weight: 700; color: var(--pill-text); margin-bottom: 4px; font-size: 11.5px; }
-  .drips-pill-wrap { position: relative; display: inline-block; }
-
-  /* ── Spec table ── */
-  .spec-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .spec-table th, .spec-table td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
-  .spec-table th { color: var(--color-text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
-  .spec-table code { background: #F3F1FC; border: 1px solid var(--color-border); border-radius: 5px; padding: 1px 6px; font-size: 11px; color: var(--color-primary-active); }
-
-  .assumption-box {
-    background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--warn-text);
-    border-radius: 8px; padding: 12px 14px; font-size: 12px; line-height: 1.6; display: flex; gap: 10px;
+  .fin-icon-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--st-color-primary-active);
+    cursor: pointer;
   }
-  .assumption-box .icon { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+  .fin-icon-link svg { width: 15px; height: 15px; }
+
+  .deal-card-divider {
+    border-top: 1px solid var(--st-color-border);
+    margin: 10px -14px;
+  }
+
+  .deal-card-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--st-color-text-muted);
+    padding: 2px 0;
+  }
+  .meta-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-left svg { width: 15px; height: 15px; }
+  .meta-link { color: var(--st-color-primary-active); font-weight: 600; text-decoration: underline; cursor: pointer; }
+
+  .work-order-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #EFEFF3;
+    color: var(--st-color-text);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 8px;
+  }
+  .work-order-chip svg { width: 13px; height: 13px; color: var(--st-color-text-muted); }
+
+  .deal-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  .footer-assignee {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--st-color-text);
+  }
+  .avatar-initials {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #E8E6FA;
+    color: #5C53DC;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .footer-updated {
+    font-size: 12px;
+    color: var(--st-color-text-muted);
+  }
+
+  /* ================================================================
+     BR-13: Drips auto-preserved indicator
+     Reuses the existing "helper text" callout pattern already used
+     elsewhere in the app (light teal fill + teal left border) rather
+     than introducing a new alert style. Neutral/informational tone:
+     this confirms the system did the right thing automatically, it
+     is not a warning and requires no action (per BR-7 framing).
+     ================================================================ */
+  .drips-preserved-row {
+    display: none; /* toggled on via .is-preserved on the card */
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--st-teal-bg);
+    border-left: 4px solid var(--st-teal);
+    border-radius: 6px;
+    padding: 7px 9px;
+    margin: 10px 0 2px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--st-color-text);
+    position: relative;
+  }
+  .deal-card.is-preserved .drips-preserved-row { display: flex; }
+
+  .drips-preserved-row svg.icon-bell {
+    width: 14px;
+    height: 14px;
+    color: var(--st-teal);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .drips-preserved-row .drips-text { flex: 1; }
+  .drips-preserved-row .drips-text strong {
+    font-weight: 700;
+    color: var(--st-color-text);
+  }
+  .drips-preserved-row .drips-info-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--st-color-text-muted);
+    cursor: help;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Tooltip on the info icon, shows the "why" per BR-13 */
+  .drips-tooltip-wrap { position: relative; display: inline-flex; }
+  .drips-tooltip {
+    position: absolute;
+    bottom: 22px;
+    right: -6px;
+    width: 220px;
+    background: #32415B;
+    color: #fff;
+    font-size: 11px;
+    line-height: 1.45;
+    padding: 8px 10px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(16,24,40,0.18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+    z-index: 5;
+  }
+  .drips-tooltip::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    background: #32415B;
+    transform: rotate(45deg);
+  }
+  .drips-tooltip-wrap:hover .drips-tooltip,
+  .drips-tooltip-wrap:focus-within .drips-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* ---------- BR annotation chip (stakeholder traceability) ---------- */
+  .br-chip {
+    position: absolute;
+    top: -9px;
+    left: 10px;
+    background: #FFF4E5;
+    border: 1px solid #F5C27A;
+    color: #9A5B0A;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    cursor: help;
+    z-index: 4;
+  }
+  .br-chip .br-tooltip {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 260px;
+    background: #32415B;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.45;
+    padding: 9px 11px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(16,24,40,0.18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-3px);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+    letter-spacing: 0;
+  }
+  .br-chip:hover .br-tooltip,
+  .br-chip:focus .br-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .drips-row-wrap { position: relative; }
+  /* The BR-13 chip is absolutely positioned inside this wrapper, so when the
+     indicator row below it is display:none (Normal state) the wrapper has
+     no in-flow height left to anchor against, and the chip floats and
+     overlaps whatever sits next to it. Collapse the whole wrapper together
+     instead of just the row inside it. */
+  .deal-card:not(.is-preserved) .drips-row-wrap { display: none; }
+
+  /* ---------- Card caption under each card ---------- */
+  .card-caption {
+    text-align: center;
+    font-size: 11px;
+    color: var(--st-color-text-muted);
+    margin-top: 8px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
 </style>
 </head>
 <body>
@@ -270,333 +447,182 @@
 <div class="proto-bar">
   <div class="proto-bar-left">
     <a class="back-link" href="../index.html">← Hub</a>
-    <span class="divider">|</span>
+    <span class="proto-bar-divider">|</span>
     <span class="proto-bar-title">BR-13: Deal Card Drips Indicator, Visual Design</span>
   </div>
   <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bbdqm72" target="_blank">86bbdqm72</a>
 </div>
 
-<div class="proto-content">
+<div id="br13-proto">
 
-  <div class="page-intro">
-    <h1>BR-13 Card Indicator: Design Options</h1>
-    <p>The parent ticket locks BR-13's visual treatment as "TBD, in Design next." This page proposes and compares options for that one open item, then recommends a direction. Everything else in the parent ticket (the toggle lock, the modal reminders, the API carryover logic) is unchanged and out of scope here.</p>
+  <div class="proto-heading">
+    <h1>BR-13: Deal card visual indicator</h1>
+    <p>
+      Ticket <code>86bbdqm72</code>: when an API-initiated stage change carries forward a
+      previously-disabled Drips state (BR-12/BR-14), the Deal card must show a visual
+      indicator so a user viewing it later understands drips were kept off automatically.
+      Toggle the state below to preview the indicator on both existing card layouts.
+    </p>
   </div>
 
-  <div class="section-card">
-    <div class="section-eyebrow">Rule recap</div>
-    <div class="rule-recap">
-      <b>BR-12:</b> when an API-initiated stage move happens while Drips are disabled at the Deal level, the disabled state carries over into the new stage instead of resetting to the sequence default.<br/>
-      <b>BR-13:</b> when that carryover happens, the Deal card needs a visual indicator so the next person to open the pipeline can see Drips were kept disabled automatically, without digging into the deal.<br/>
-      <b>BR-14:</b> the same carryover + indicator applies when the reason is Contact-level opt-out rather than a Deal-level toggle, and that reason takes precedence in the messaging (reuses the BR-2 copy: "This contact has opted out of all drips.").
-    </div>
-  </div>
-
-  <div class="section-card">
-    <div class="section-eyebrow">Context</div>
-    <div class="section-title">Where this shows up</div>
-    <div class="ground-truth-note">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      <div>Card anatomy below (header row, subtitle, content rows, divider, avatar/name/timestamp footer) is rebuilt from the actual Command Center card screenshots, not invented. The BR-13 pill is the only new element added to this existing structure.</div>
-    </div>
-    <div class="board-frame">
-      <div class="board-cols">
-
-        <div class="board-col">
-          <div class="board-col-label">Proposal Sent <span class="count">1</span></div>
-          <div class="rc-card">
-            <div class="rc-head">
-              <div class="rc-title-wrap">
-                <div class="rc-title">Marcus Webb</div>
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              </div>
-              <div class="rc-head-actions">
-                <span class="rc-add-label">
-                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  add label
-                </span>
-                <svg class="icon rc-kebab" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-              </div>
-            </div>
-            <div class="rc-subtitle">Special Event</div>
-            <div class="rc-content-row">
-              <div class="rc-row-link" style="margin:0;">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                View Proposal
-              </div>
-              <div class="rc-content-right">
-                <div class="rc-content-amount">$8,400.00</div>
-                <div class="rc-content-status">Pending</div>
-              </div>
-            </div>
-            <div class="rc-divider"></div>
-            <div class="rc-footer">
-              <div class="rc-avatar-name">
-                <div class="rc-avatar">JT</div>
-                <div class="rc-footer-name">Marcus Webb</div>
-              </div>
-              <div class="rc-updated">Updated 2h ago</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="board-col">
-          <div class="board-col-label">Project Accepted <span class="count">1</span></div>
-          <div class="rc-card">
-            <div class="rc-head">
-              <div class="rc-title-wrap">
-                <div class="rc-title">Dana Whitfield</div>
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              </div>
-              <div class="rc-head-actions">
-                <span class="rc-add-label">
-                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  add label
-                </span>
-                <svg class="icon rc-kebab" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-              </div>
-            </div>
-            <div class="rc-subtitle">Google · <span style="color:var(--pill-text); font-weight:700;">this is the BR-13 case, stage moved via API</span></div>
-
-            <span class="drips-pill"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>Drips paused</span>
-
-            <div class="rc-amount-row">
-              <div class="rc-amount">$12,900.00</div>
-              <div class="rc-amount-sub">of $12,900.00</div>
-            </div>
-            <div class="rc-row">
-              <span class="rc-row-muted">Balance</span>
-              <span class="rc-row-link">Invoice #500214</span>
-            </div>
-            <div class="rc-row">
-              <span class="rc-row-link">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                Pending Schedule
-              </span>
-            </div>
-            <div class="rc-row">
-              <span class="rc-row-muted">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                No Crew Assigned
-              </span>
-              <span class="rc-pill-action">
-                Work Order
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              </span>
-            </div>
-            <div class="rc-divider"></div>
-            <div class="rc-footer">
-              <div class="rc-avatar-name">
-                <div class="rc-avatar">JT</div>
-                <div class="rc-footer-name">Dana Whitfield</div>
-              </div>
-              <div class="rc-updated">Updated 1h ago</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
+  <div class="demo-banner">
+    <span class="demo-label">Demo control</span>
+    <div class="demo-toggle-group">
+      <button type="button" class="demo-toggle-btn active" data-state="normal" onclick="setDripsState('normal', this)">Normal</button>
+      <button type="button" class="demo-toggle-btn" data-state="preserved" onclick="setDripsState('preserved', this)">Drips auto-kept-disabled (BR-13)</button>
     </div>
   </div>
 
-  <div class="section-card">
-    <div class="section-eyebrow">Exploration</div>
-    <div class="section-title">Three placements considered</div>
-    <div class="section-subtitle">Same underlying signal, three ways to surface it on the actual card. All three reuse the existing lavender tag/chip tokens already used for status badges elsewhere in the product (design-system.md section 3), rather than introducing a new color, since nothing on this card is currently blue.</div>
+  <div class="card-grid">
 
-    <div class="option-grid">
-
-      <div class="option-block">
-        <div class="option-label">Option A · Corner badge, icon only</div>
-        <div class="option-card-slot">
-          <div class="rc-card" style="width:250px;">
-            <div class="badge-corner" title="Drips kept disabled automatically">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-            </div>
-            <div class="rc-head">
-              <div class="rc-title-wrap"><div class="rc-title">Dana Whitfield</div></div>
-              <svg class="icon rc-kebab" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-            </div>
-            <div class="rc-subtitle">Google</div>
-            <div class="rc-amount-row"><div class="rc-amount">$12,900.00</div><div class="rc-amount-sub">of $12,900.00</div></div>
-            <div class="rc-divider"></div>
-            <div class="rc-footer">
-              <div class="rc-avatar-name"><div class="rc-avatar">JT</div><div class="rc-footer-name">Dana Whitfield</div></div>
-              <div class="rc-updated">Updated 1h ago</div>
-            </div>
+    <!-- Card 1: reproduced from screenshot 1 (job / work order style) -->
+    <div>
+      <div class="deal-card" id="card1">
+        <div class="deal-card-header">
+          <div class="deal-card-title">
+            Adam Addams II <svg class="icon-svg" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </div>
+          <div class="deal-card-header-actions">
+            <button class="add-label-btn">+ add label</button>
+            <span class="kebab">&#8942;</span>
           </div>
         </div>
-        <div class="option-note">Smallest footprint, doesn't compete with card content. But the meaning only exists in a hover tooltip <strong>and hover doesn't exist on the tablets/phones this audience actually uses in the field</strong>, so it fails the "visible on next view" requirement for mobile.</div>
-        <span class="verdict-tag reject">Not recommended</span>
-      </div>
+        <div class="deal-card-source">Google</div>
 
-      <div class="option-block">
-        <div class="option-label">Option B · Inline pill, icon + label</div>
-        <div class="option-card-slot">
-          <div class="rc-card" style="width:250px;">
-            <div class="rc-head">
-              <div class="rc-title-wrap"><div class="rc-title">Dana Whitfield</div></div>
-              <svg class="icon rc-kebab" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-            </div>
-            <div class="rc-subtitle">Google</div>
-            <span class="drips-pill"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>Drips paused</span>
-            <div class="rc-amount-row"><div class="rc-amount">$12,900.00</div><div class="rc-amount-sub">of $12,900.00</div></div>
-            <div class="rc-divider"></div>
-            <div class="rc-footer">
-              <div class="rc-avatar-name"><div class="rc-avatar">JT</div><div class="rc-footer-name">Dana Whitfield</div></div>
-              <div class="rc-updated">Updated 1h ago</div>
-            </div>
+        <div class="deal-card-financial">
+          <div class="fin-left">
+            <div class="fin-amount">$4,120.00</div>
+            <div class="fin-sub">Balance</div>
+          </div>
+          <div class="fin-right">
+            <div class="fin-label">of $4,120.00</div>
+            <div class="fin-icon-link">Invoice #498956</div>
           </div>
         </div>
-        <div class="option-note">Label is readable at a glance with no interaction required, satisfies "visible next time a user views the card" on any device. Tapping it can still open a detail popover for the "why."</div>
-        <span class="verdict-tag accept">Recommended</span>
-      </div>
 
-      <div class="option-block">
-        <div class="option-label">Option C · Left accent bar</div>
-        <div class="option-card-slot">
-          <div class="rc-card rc-card--accent" style="width:250px;">
-            <div class="accent-icon-row">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-              Drips paused
-            </div>
-            <div class="rc-head">
-              <div class="rc-title-wrap"><div class="rc-title">Dana Whitfield</div></div>
-              <svg class="icon rc-kebab" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-            </div>
-            <div class="rc-subtitle">Google</div>
-            <div class="rc-amount-row"><div class="rc-amount">$12,900.00</div><div class="rc-amount-sub">of $12,900.00</div></div>
-            <div class="rc-divider"></div>
-            <div class="rc-footer">
-              <div class="rc-avatar-name"><div class="rc-avatar">JT</div><div class="rc-footer-name">Dana Whitfield</div></div>
-              <div class="rc-updated">Updated 1h ago</div>
-            </div>
+        <div class="deal-card-divider"></div>
+
+        <div class="deal-card-meta-row">
+          <div class="meta-left">
+            <svg class="icon-svg" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="meta-link">Pending Schedule</span>
           </div>
         </div>
-        <div class="option-note">Also visible without interaction, but the accent bar changes the card's silhouette in a way that reads as "flagged/at risk" at a glance across the whole board, more than this status warrants. Better suited to something urgent.</div>
-        <span class="verdict-tag reject">Not recommended</span>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="section-card">
-    <div class="section-eyebrow">Recommendation</div>
-    <div class="section-title">Option B: inline pill, tap for detail</div>
-    <div class="rec-banner">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      Always-visible label, works without hover, reuses the same lavender tag/chip tokens already on this card family, no new color introduced.
-    </div>
-    <div class="section-subtitle" style="margin-bottom:14px;">The message text changes depending on why Drips are paused. Toggle between the two cases below (BR-12/13 deal-level carryover vs. BR-14 contact-level opt-out), then click the pill on the card to see the detail popover.</div>
-
-    <div class="variant-toggle">
-      <button class="variant-btn active" id="btn-deal" onclick="setVariant('deal')">BR-12 / BR-13: Deal-level carryover</button>
-      <button class="variant-btn" id="btn-contact" onclick="setVariant('contact')">BR-14: Contact-level opt-out</button>
-    </div>
-
-    <div class="rec-card-wrap">
-      <div class="rc-card" style="width:270px;">
-        <div class="rc-head">
-          <div class="rc-title-wrap">
-            <div class="rc-title">Dana Whitfield</div>
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        <div class="deal-card-meta-row">
+          <div class="meta-left">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>No Crew Assigned</span>
           </div>
-          <div class="rc-head-actions">
-            <span class="rc-add-label">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              add label
+          <div class="work-order-chip"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Work Order</div>
+        </div>
+
+        <!-- BR-13 indicator -->
+        <div class="drips-row-wrap">
+          <span class="br-chip" tabindex="0">BR-13
+            <span class="br-tooltip">
+              BR-13: Deal card must show a visual indicator when an API-initiated stage
+              change carried forward an existing "Drips disabled" state, so a user
+              reviewing the card later can see drips were automatically kept off.
             </span>
-            <svg class="icon rc-kebab" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+          </span>
+          <div class="drips-preserved-row">
+            <svg class="icon-svg icon-bell" viewBox="0 0 24 24"><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M18.63 13A17.89 17.89 0 0 1 18 8"/><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"/><path d="M18 8a6 6 0 0 0-9.33-5"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            <div class="drips-text">
+              <strong>Drips kept disabled</strong>, preserved automatically during a system stage change
+            </div>
+            <span class="drips-tooltip-wrap" tabindex="0">
+              <svg class="icon-svg drips-info-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span class="drips-tooltip">
+                This Deal had Drips disabled. An API-initiated stage change moved it to a
+                new stage on Aug 12, 2026, and the disabled state carried over, so no drip
+                sequence was started.
+              </span>
+            </span>
           </div>
         </div>
-        <div class="rc-subtitle">Google</div>
 
-        <div class="drips-pill-wrap">
-          <span class="drips-pill drips-pill--interactive" onclick="togglePopover()" id="pill">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-            Drips paused
-          </span>
-          <div class="popover" id="popover">
-            <div class="popover-title" id="popover-title">Kept disabled automatically</div>
-            <div id="popover-body">This deal's stage changed via API on Aug 12. Drips were already disabled, so that setting carried over into the new stage instead of resetting.</div>
+        <div class="deal-card-footer">
+          <div class="footer-assignee">
+            <span class="avatar-initials">AA</span> Adam Addams II
           </div>
-        </div>
-
-        <div class="rc-amount-row">
-          <div class="rc-amount">$12,900.00</div>
-          <div class="rc-amount-sub">of $12,900.00</div>
-        </div>
-        <div class="rc-row">
-          <span class="rc-row-muted">Balance</span>
-          <span class="rc-row-link">Invoice #500214</span>
-        </div>
-        <div class="rc-row">
-          <span class="rc-row-link">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Pending Schedule
-          </span>
-        </div>
-        <div class="rc-row">
-          <span class="rc-row-muted">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            No Crew Assigned
-          </span>
-          <span class="rc-pill-action">
-            Work Order
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          </span>
-        </div>
-        <div class="rc-divider"></div>
-        <div class="rc-footer">
-          <div class="rc-avatar-name"><div class="rc-avatar">JT</div><div class="rc-footer-name">Dana Whitfield</div></div>
-          <div class="rc-updated">Updated 1h ago</div>
+          <div class="footer-updated">Updated 1h ago</div>
         </div>
       </div>
+      <div class="card-caption">Job card layout</div>
     </div>
-  </div>
 
-  <div class="section-card">
-    <div class="section-eyebrow">Assumption to confirm</div>
-    <div class="assumption-box">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      <div>The ticket says the indicator must be visible "the next time a user views that card," but doesn't say whether it should disappear after that first view or persist. This design assumes the pill reflects <b>current state</b>: it shows as long as Drips remain disabled on that deal, and goes away on its own if Drips are re-enabled or a Contact-level opt-out is cleared, rather than being a one-time "new" flag a user dismisses. Flagging this for confirmation before build, since the ticket doesn't specify it.</div>
+    <!-- Card 2: reproduced from screenshot 2 (proposal / special event style) -->
+    <div>
+      <div class="deal-card" id="card2">
+        <div class="deal-card-header">
+          <div class="deal-card-title">
+            Dripjobs Harrison <svg class="icon-svg" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </div>
+          <div class="deal-card-header-actions">
+            <button class="add-label-btn">+ add label</button>
+            <span class="kebab">&#8942;</span>
+          </div>
+        </div>
+        <div class="deal-card-source">Special Event</div>
+
+        <div class="deal-card-financial">
+          <div class="fin-left">
+            <div class="fin-icon-link"><svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> View Proposal</div>
+          </div>
+          <div class="fin-right">
+            <div class="fin-amount" style="font-size:16px;">$3,349.49</div>
+            <div class="fin-status">Pending</div>
+          </div>
+        </div>
+
+        <div class="deal-card-divider"></div>
+
+        <!-- BR-13 indicator -->
+        <div class="drips-row-wrap">
+          <span class="br-chip" tabindex="0">BR-13
+            <span class="br-tooltip">
+              BR-13: Deal card must show a visual indicator when an API-initiated stage
+              change carried forward an existing "Drips disabled" state, so a user
+              reviewing the card later can see drips were automatically kept off.
+            </span>
+          </span>
+          <div class="drips-preserved-row">
+            <svg class="icon-svg icon-bell" viewBox="0 0 24 24"><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M18.63 13A17.89 17.89 0 0 1 18 8"/><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"/><path d="M18 8a6 6 0 0 0-9.33-5"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            <div class="drips-text">
+              <strong>Drips kept disabled</strong>, preserved automatically during a system stage change
+            </div>
+            <span class="drips-tooltip-wrap" tabindex="0">
+              <svg class="icon-svg drips-info-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span class="drips-tooltip">
+                This Deal had Drips disabled. An API-initiated stage change moved it to a
+                new stage on Aug 12, 2026, and the disabled state carried over, so no drip
+                sequence was started.
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div class="deal-card-footer">
+          <div class="footer-assignee">
+            <span class="avatar-initials" style="background:#E6F3FA;color:#1E6FBF;">DH</span> Dripjobs Harrison
+          </div>
+          <div class="footer-updated">Updated 1h ago</div>
+        </div>
+      </div>
+      <div class="card-caption">Proposal card layout</div>
     </div>
-  </div>
 
-  <div class="section-card">
-    <div class="section-eyebrow">Spec</div>
-    <div class="section-title">Build notes</div>
-    <table class="spec-table">
-      <tr><th>Property</th><th>Value</th></tr>
-      <tr><td>Placement</td><td>Inline on the card, directly under the subtitle line and above any job-specific content rows (Balance, Schedule, Crew, etc). Same slot regardless of how many content rows a given card has, so it's always found in the same place.</td></tr>
-      <tr><td>Visibility condition</td><td><code>deal.dripsDisabled === true</code> at render time (covers both the BR-12 deal-level and BR-14 contact-level cases, contact opt-out takes precedence per BR-14, so check contact opt-out first, then fall back to the deal toggle).</td></tr>
-      <tr><td>Icon</td><td>Pause glyph (two vertical bars), 10×10px inside the pill.</td></tr>
-      <tr><td>Colors</td><td>Background <code>#E8E6FA</code>, border <code>#D6D2F5</code>, text/icon <code>#5C53DC</code>, the same lavender tag/chip tokens already used for status badges elsewhere (design-system.md section 3), not a new color.</td></tr>
-      <tr><td>Label</td><td>"Drips paused" (11px, 600 weight), always visible, no truncation at any card width.</td></tr>
-      <tr><td>Tap/click behavior</td><td>Opens a small popover anchored to the pill with the reason. Popover title + body text swaps based on cause (deal-level carryover vs. Contact-level opt-out, reusing the exact BR-2 string for the latter).</td></tr>
-      <tr><td>Does not affect</td><td>Move / Change / Send Proposal / Approve Without Signature modal reminders: those are separate, already covered by BR-4 through BR-10. This pill is the passive, card-level signal for the no-user-present API path only.</td></tr>
-    </table>
   </div>
 
 </div>
 
 <script>
-  function togglePopover() {
-    document.getElementById('popover').classList.toggle('open');
-  }
-  function setVariant(kind) {
-    document.getElementById('btn-deal').classList.toggle('active', kind === 'deal');
-    document.getElementById('btn-contact').classList.toggle('active', kind === 'contact');
-    var title = document.getElementById('popover-title');
-    var body = document.getElementById('popover-body');
-    if (kind === 'deal') {
-      title.textContent = 'Kept disabled automatically';
-      body.textContent = "This deal's stage changed via API on Aug 12. Drips were already disabled, so that setting carried over into the new stage instead of resetting.";
-    } else {
-      title.textContent = 'Contact opted out';
-      body.textContent = 'This contact has opted out of all drips.';
-    }
-    document.getElementById('popover').classList.remove('open');
+  function setDripsState(state, btn) {
+    document.querySelectorAll('.demo-toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.deal-card').forEach(card => {
+      card.classList.toggle('is-preserved', state === 'preserved');
+    });
   }
 </script>
 
