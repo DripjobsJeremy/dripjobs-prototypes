@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-13] BR-13 card indicator: recommended inline pill over corner badge or accent bar
+
+- Decision: Built a design exploration for the open BR-13/BR-14 item on ticket 86bbdqm72 (the Deal card indicator for an API-carried-over disabled Drips state). Compared three placements and recommended an always-visible inline pill ("Drips paused," reusing the existing `--info` alert tokens) with a tap-to-reveal popover for the reason, rather than a hover-only corner badge or a left accent bar.
+- Why: The AC requires the indicator be visible "the next time a user views that card," and this audience is field contractors on mobile, where hover doesn't exist. A hover-only icon badge (the smallest, least intrusive option) fails that requirement outright. The accent bar was visible without interaction too, but its full-card silhouette change reads as "flagged/at risk," stronger than an informational status warrants.
+- Open question: The ticket doesn't specify whether the indicator should persist as long as Drips remain disabled, or disappear after the first view. Built assuming it reflects current state (shows while disabled, clears itself once re-enabled or the Contact-level opt-out clears) and flagged this on the prototype page for Jeremy to confirm before build.
+
 ## [2026-08-13] DripJobs Command Center: moved out of the hub into a private standalone repo
 
 - Decision: Removed `command-center/` and its Resources-tab hub card from this repo entirely. The tool now lives in its own private GitHub repo with its own GitHub Pages deployment, unrelated to this hub.
