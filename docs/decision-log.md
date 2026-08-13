@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-13] DripJobs Command Center: moved out of the hub into a private standalone repo
+
+- Decision: Removed `command-center/` and its Resources-tab hub card from this repo entirely. The tool now lives in its own private GitHub repo with its own GitHub Pages deployment, unrelated to this hub.
+- Why: Resolves the open question from the entry below. Jeremy confirmed he wants this kept fully outside the DripJobs Prototype Hub and accessible only to him, not just placed in a lower-visibility tab within this shared repo.
+- Open question: None. Noting for future readers: if you're looking for the Command Center tool, it is intentionally not in this repo anymore.
+
 ## [2026-08-13] DripJobs Command Center: new standalone personal PM tool (GitHub as database)
 
 - Decision: Built a full working v1 of "DripJobs Command Center" per the provided build spec: a vanilla HTML/CSS/JS task and deadline manager living at `command-center/`, with no build step and no framework. Tasks persist in `command-center/data/tasks.json` in this same repo, read and written directly from the browser via the GitHub Contents API (PAT-based single-user auth, debounced/retrying writes, offline queue so a failed sync never drops data). Ships Today/Week/Month/Year/Completed views, quick-add with a collapsible details panel, simple non-RRULE recurrence, overdue surfacing across every view, dark mode by default with a light toggle, and a JSON backup export. This is a meta-tool for the PM's own workflow, not a DripJobs product prototype.
