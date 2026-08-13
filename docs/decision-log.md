@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-13] DripJobs Command Center: new standalone personal PM tool (GitHub as database)
+
+- Decision: Built a full working v1 of "DripJobs Command Center" per the provided build spec: a vanilla HTML/CSS/JS task and deadline manager living at `command-center/`, with no build step and no framework. Tasks persist in `command-center/data/tasks.json` in this same repo, read and written directly from the browser via the GitHub Contents API (PAT-based single-user auth, debounced/retrying writes, offline queue so a failed sync never drops data). Ships Today/Week/Month/Year/Completed views, quick-add with a collapsible details panel, simple non-RRULE recurrence, overdue surfacing across every view, dark mode by default with a light toggle, and a JSON backup export. This is a meta-tool for the PM's own workflow, not a DripJobs product prototype.
+- Why: This isn't a ticketed DripJobs feature, so it doesn't fit the ClickUp-ticket-pipeline framing the main "Prototypes" grid and its status filters are built around. Placed it in the Resources tab instead (alongside other non-pipeline artifacts like the training/help guides), using `status-shipped` since it's a complete, working tool rather than a stage in a dev pipeline, and "No ticket, personal tool" in place of a ClickUp link. Flagging this placement as a judgment call rather than a confirmed-with-Jeremy decision, since this was executed as a self-contained build task with no interactive back-and-forth available.
+- Open question: Whether Jeremy wants this hub card at all (vs. keeping the tool unlisted/linked only directly, the way `portfolio/` was deliberately kept off the hub), and whether the default data file path (`command-center/data/tasks.json`, configurable in Settings) is the right home versus a separate private repo, given the hub repo is otherwise entirely DripJobs-product-prototype content.
+
 ## [2026-08-12] HealthScore v2.12: fixed inaccurate Export CSV alert copy
 
 - Decision: Removed the Export CSV alert's claim that "Full engagement/plan/integration detail exports separately from each account's Details panel." That capability doesn't exist — the Details panel has no export control. Reworded to state the actual limitation (that data isn't in the CSV export, only viewable per-account) without implying an export path that isn't there.
