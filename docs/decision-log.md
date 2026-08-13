@@ -9,7 +9,11 @@ Format:
 - Why:
 - Open question (if any):
 
-## [2026-08-13] BR-13 card indicator: recommended inline pill over corner badge or accent bar
+## [2026-08-13] BR-13 card indicator: replaced lavender pill recommendation with a teal "kept disabled" callout row
+
+- Decision: Superseded the earlier inline-pill recommendation (lavender tag/chip tokens) with a teal "helper text" callout row (bell-off icon, light teal fill, teal left border) plus a BR-13 traceability chip and an info tooltip explaining the cause. Also rebuilt both example cards to match the exact two real card layouts (job card and proposal card) at higher fidelity than the first pass, and added a Normal/Preserved toggle so the indicator can be demoed on or off without needing two separate screenshots.
+- Why: Jeremy supplied this treatment directly as the design to use. It reuses the app's existing informational-callout visual language instead of the lavender tag/chip pattern, and keeps the same underlying decision from the earlier entry (always visible, not hover-dependent). Also inlined the feather icon SVGs instead of loading them from a CDN, and fixed a layout bug in the supplied markup where the BR-13 chip would float and overlap the footer row when the indicator was toggled off, since the chip's wrapper only collapsed the row inside it, not itself.
+- Open question: Same as before, unresolved by this visual update: whether the indicator should persist as long as Drips remain disabled, or disappear after the first view. Still flagged for Jeremy to confirm before this is build-ready.
 
 - Decision: Built a design exploration for the open BR-13/BR-14 item on ticket 86bbdqm72 (the Deal card indicator for an API-carried-over disabled Drips state). Compared three placements and recommended an always-visible inline pill ("Drips paused," reusing the existing `--info` alert tokens) with a tap-to-reveal popover for the reason, rather than a hover-only corner badge or a left accent bar.
 - Why: The AC requires the indicator be visible "the next time a user views that card," and this audience is field contractors on mobile, where hover doesn't exist. A hover-only icon badge (the smallest, least intrusive option) fails that requirement outright. The accent bar was visible without interaction too, but its full-card silhouette change reads as "flagged/at risk," stronger than an informational status warrants.
