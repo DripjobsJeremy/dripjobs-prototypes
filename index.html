@@ -461,7 +461,7 @@
   </div>
   <div class="hub-meta">
     <strong id="last-updated">26 prototypes</strong><br/>
-    Last updated July 2026
+    Last updated <span id="last-updated-date">July 2026</span>
   </div>
 </header>
 
@@ -1429,6 +1429,13 @@
     document.getElementById('stat-analysis').textContent = byStatus('analysis');
     document.getElementById('stat-postponed').textContent = byStatus('postponed');
     document.getElementById('last-updated').textContent = total + ' prototypes';
+
+    const addedDates = pipelineCards.map(c => c.dataset.added).filter(Boolean).sort();
+    if (addedDates.length) {
+      const latest = new Date(addedDates[addedDates.length - 1] + 'T00:00:00');
+      const monthYear = latest.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      document.getElementById('last-updated-date').textContent = monthYear;
+    }
   })();
 
   const cards = document.querySelectorAll('.proto-card');
