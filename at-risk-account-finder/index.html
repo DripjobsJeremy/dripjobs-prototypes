@@ -13,7 +13,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .proto-back{color:#fff;text-decoration:none;font-weight:600;opacity:.9;}
 .proto-back:hover{opacity:1;text-decoration:underline;}
 .proto-right{margin-left:auto;opacity:.85;font-size:11px;}
-.page-wrapper{max-width:1100px;margin:0 auto;padding:16px 20px 32px;}
+.page-wrapper{max-width:1280px;margin:0 auto;padding:16px 20px 32px;}
 .header{padding:14px 0 12px;}
 .header h1{font-size:22px;font-weight:700;color:#111827;}
 .header p{color:#6b7280;font-size:13px;margin-top:3px;}
@@ -96,14 +96,15 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   background-repeat:no-repeat;background-position:right 8px center;background-size:12px 12px;}
 .show-field-input:focus{outline:none;box-shadow:0 0 0 3px rgba(124,58,237,.18);}
 .table-scroll{overflow-x:auto;}
-table{border-collapse:collapse;width:100%;min-width:1120px;}
-thead th{padding:9px 12px;font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid #e5e7eb;background:#f9fafb;white-space:nowrap;text-align:left;cursor:pointer;user-select:none;}
+table{border-collapse:collapse;width:100%;table-layout:fixed;min-width:820px;}
+thead th{padding:9px 10px;font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid #e5e7eb;background:#f9fafb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;cursor:pointer;user-select:none;}
 thead th:hover{background:#efefef;color:#374151;}
 .sort-icon{font-size:9px;opacity:.3;margin-left:3px;display:inline-block;}
 thead th.sort-active .sort-icon{opacity:1;color:#7C3AED;}
-tbody td{padding:10px 12px;color:#374151;vertical-align:middle;border-bottom:1px solid #f3f4f6;}
+tbody td{padding:9px 10px;color:#374151;vertical-align:middle;border-bottom:1px solid #f3f4f6;overflow:hidden;}
 tbody tr:nth-child(even) td{background:#f8f8fc;}
 tbody tr:hover td{background:#f3f0fc;}
+.truncate{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .col-phone{white-space:nowrap;}
 .col-sales{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap;line-height:1.5;}
@@ -185,6 +186,7 @@ tbody tr:hover td{background:#f3f0fc;}
     </div>
     <div class="table-scroll">
       <table>
+        <colgroup id="col-group"></colgroup>
         <thead>
           <tr id="col-headers"></tr>
         </thead>
@@ -278,18 +280,21 @@ function fmtD(n){return'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,max
 
 /* Column set, order, and sortability per Business Rules 3 and 6. Account Type was added during earlier prototype
    review, then removed per Business Rule 3: it carried no behavior, no rule treats Legacy/New differently by display. */
+/* Column widths are percentages summing to 100, sized to content, so the table fits the page width
+   without horizontal scroll on a normal desktop viewport (matching how the Sales List fits 12 columns). */
 var COLUMNS=[
-  {label:'Company Name',sort:function(c){return c.name.toLowerCase();}},
-  {label:'Signup Date',sort:function(c){return c.created.getTime();}},
-  {label:'Health Tier',sort:function(c){return HEALTH_ORDER[c.health]!==undefined?HEALTH_ORDER[c.health]:99;}},
-  {label:'Plan',sort:function(c){return c.plan;}},
-  {label:'Total Sales',cls:'col-sales',sort:function(c){return c.totalSales;}},
-  {label:'A2P Status',sort:function(c){return c.a2pActivated?2:(c.a2pApplied?1:0);}},
-  {label:'Contact Name',sort:function(c){var k=getPrimaryContact(c);return k?k.name.toLowerCase():'';}},
-  {label:'Email',sort:function(c){var k=getPrimaryContact(c);return k&&k.email?k.email.toLowerCase():'';}},
-  {label:'Phone',sort:function(c){var k=getPrimaryContact(c);return k&&k.phone?k.phone:'';}}
+  {label:'Company Name',width:15,sort:function(c){return c.name.toLowerCase();}},
+  {label:'Signup Date',width:9,sort:function(c){return c.created.getTime();}},
+  {label:'Health Tier',width:11,sort:function(c){return HEALTH_ORDER[c.health]!==undefined?HEALTH_ORDER[c.health]:99;}},
+  {label:'Plan',width:8,sort:function(c){return c.plan;}},
+  {label:'Total Sales',width:10,cls:'col-sales',sort:function(c){return c.totalSales;}},
+  {label:'A2P Status',width:8,sort:function(c){return c.a2pActivated?2:(c.a2pApplied?1:0);}},
+  {label:'Contact Name',width:13,sort:function(c){var k=getPrimaryContact(c);return k?k.name.toLowerCase():'';}},
+  {label:'Email',width:16,sort:function(c){var k=getPrimaryContact(c);return k&&k.email?k.email.toLowerCase():'';}},
+  {label:'Phone',width:10,sort:function(c){var k=getPrimaryContact(c);return k&&k.phone?k.phone:'';}}
 ];
 var sortCol=1,sortDir='desc';
+function renderColGroup(){document.getElementById('col-group').innerHTML=COLUMNS.map(function(col){return'<col style="width:'+col.width+'%">';}).join('');}
 function renderColHeaders(){document.getElementById('col-headers').innerHTML=COLUMNS.map(function(col,i){return'<th data-col="'+i+'"'+(col.cls?' class="'+col.cls+'"':'')+'>'+col.label+'<span class="sort-icon">&#x21C5;</span></th>';}).join('');}
 function updateSortUI(){document.querySelectorAll('#col-headers th').forEach(function(th){var col=parseInt(th.getAttribute('data-col'),10),icon=th.querySelector('.sort-icon');if(col===sortCol){th.classList.add('sort-active');icon.innerHTML=sortDir==='asc'?'&#x2191;':'&#x2193;';}else{th.classList.remove('sort-active');icon.innerHTML='&#x21C5;';}});}
 function applySort(){var col=COLUMNS[sortCol];filtered.sort(function(a,b){var av=col.sort(a),bv=col.sort(b),r=typeof av==='string'?av.localeCompare(bv):av-bv;return sortDir==='asc'?r:-r;});}
@@ -320,13 +325,14 @@ function applyFilters(){var selHealth=getMS('ms-health');filtered=ALL.filter(fun
 function clearAllFilters(){clearMS('ms-health');activeQuickSelect=null;customStart=null;customEnd=null;draftQuickSelect=null;draftStart='';draftEnd='';updateDateTriggerLabel();filtered=ALL.slice();page=1;render();}
 
 /* Business Rule 4 + Edge Cases 1 & 2: Primary Contact, oldest Admin falling back to oldest user of any role, or a no-contact state */
-function mkRow(c){var contact=getPrimaryContact(c),nameCell,emailCell,phoneCell;if(!contact){nameCell='<span class="contact-empty">No Contact Available</span>';emailCell='<span class="muted">&mdash;</span>';phoneCell='<span class="muted">&mdash;</span>';}else{nameCell='<strong>'+contact.name+'</strong>'+(contact.fallback?'<div class="contact-fallback-note">No Admin user &mdash; oldest user of any role shown</div>':'');emailCell=contact.email||'<span class="muted">&mdash;</span>';phoneCell=contact.phone||'<span class="muted">&mdash;</span>';}return'<tr><td><strong>'+c.name+'</strong></td><td>'+c.createdStr+'</td><td>'+hBadge(c.health)+'</td><td>'+pBadge(c.plan)+'</td><td class="col-sales">'+fmtD(c.totalSales)+'</td><td>'+a2pBadge(c)+'</td><td>'+nameCell+'</td><td>'+emailCell+'</td><td class="col-phone">'+phoneCell+'</td></tr>';}
+function mkRow(c){var contact=getPrimaryContact(c),nameCell,emailCell,phoneCell;if(!contact){nameCell='<span class="contact-empty">No Contact Available</span>';emailCell='<span class="muted">&mdash;</span>';phoneCell='<span class="muted">&mdash;</span>';}else{nameCell='<strong class="truncate" title="'+contact.name+'">'+contact.name+'</strong>'+(contact.fallback?'<div class="contact-fallback-note">No Admin user &mdash; oldest user of any role shown</div>':'');emailCell=contact.email?'<span class="truncate" title="'+contact.email+'">'+contact.email+'</span>':'<span class="muted">&mdash;</span>';phoneCell=contact.phone||'<span class="muted">&mdash;</span>';}return'<tr><td><strong class="truncate" title="'+c.name+'">'+c.name+'</strong></td><td>'+c.createdStr+'</td><td>'+hBadge(c.health)+'</td><td>'+pBadge(c.plan)+'</td><td class="col-sales">'+fmtD(c.totalSales)+'</td><td>'+a2pBadge(c)+'</td><td>'+nameCell+'</td><td>'+emailCell+'</td><td class="col-phone">'+phoneCell+'</td></tr>';}
 
 function updateSubtitleAndPagination(total,start,end){document.getElementById('table-subtitle').textContent='Showing '+filtered.length.toLocaleString()+' accounts · Page '+page+' of '+total;document.getElementById('pg-info-text').textContent='Showing '+(filtered.length?start+1:0).toLocaleString()+'–'+end.toLocaleString()+' of '+filtered.length.toLocaleString()+' accounts';document.getElementById('pg-label').textContent='Page '+page+' of '+total;document.getElementById('prev-btn').disabled=page<=1;document.getElementById('next-btn').disabled=page>=total;}
 function render(){var eff=pageSize===0?filtered.length:pageSize,total=Math.ceil(filtered.length/Math.max(eff,1))||1;var start=(page-1)*eff,end=Math.min(start+eff,filtered.length),slice=filtered.slice(start,end);updateSubtitleAndPagination(total,start,end);var html=slice.length?slice.map(mkRow).join(''):'<tr><td colspan="'+COLUMNS.length+'"><div class="empty-state">No accounts match the current filters.</div></td></tr>';document.getElementById('table-body').innerHTML=html;}
 function changePage(dir){var eff=pageSize===0?filtered.length:pageSize,total=Math.ceil(filtered.length/Math.max(eff,1))||1;page=Math.max(1,Math.min(total,page+dir));render();}
 function changePageSize(){var sel=document.getElementById('page-size-sel');pageSize=parseInt(sel.value)||0;page=1;render();}
 
+renderColGroup();
 renderColHeaders();
 applySort();
 updateSortUI();

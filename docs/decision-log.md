@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-14] At Risk Account Finder: fit all 9 columns without horizontal scroll
+
+- Decision: Switched the Company List to `table-layout:fixed` with a `<colgroup>` of content-sized percentage widths (Company Name 15%, Email 16%, Contact Name 13%, Health Tier 11%, Total Sales/Phone 10% each, Signup Date/Plan/A2P Status 8-9%), dropped the table's forced 1120px min-width down to a much smaller safety floor (820px, only kicks in on genuinely narrow viewports), and widened the page container from 1100px to 1280px. Long values in Company Name, Contact Name, and Email now truncate with an ellipsis and expose the full value via a `title` tooltip on hover, rather than forcing the column wider.
+- Why: Jeremy asked for the 9-column table to fit without scrolling, the way the production Sales List fits 12 columns. Verified in Playwright at 1280/1366/1440px widths that no horizontal scroll is needed; a 700px viewport still falls back to scrolling rather than breaking the layout, since this remains a desktop CS/admin tool, not a mobile surface.
+- Open question: None.
+
 ## [2026-08-14] At Risk Account Finder: reconciled prototype with ticket 86bbe80a3's updated Business Rules 3 and 9
 
 - Decision: Re-pulled ticket 86bbe80a3 (now carrying five rounds of PM decision-log entries reconciling it against prior prototype sessions) and brought the prototype in line with two changes: removed the Account Type (Legacy/New) column entirely, since Business Rule 3 now states it "carried no behavior, no business rule in this ticket treats a Legacy account differently from a New one based on display alone"; and excluded Legacy accounts from the report's underlying result set entirely (new Business Rule 9), not just from display, filtering them out before any Health Tier or Signup Date filter is applied. Also reordered the Company List columns to match Business Rule 3's listed order (Company Name, Signup Date, Health Tier, Plan, Total Sales, A2P Status, Contact Name/Email/Phone) and bumped the prototype banner to v2.
