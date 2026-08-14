@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-14] Weekly Prod Roadmap: added 4 tickets to Next, removed HealthScore login-tracking card
+
+- Decision: Added four tickets to the Next section of `cs-roadmap-jun20/`, pulling current status and scope directly from ClickUp rather than the titles alone: Google Calendar OAuth Feasibility on Mobile App (86bbc3g76, Ready for Dev — an investigation into whether a native-browser OAuth flow fixes mobile Google Calendar sync, not yet a described UI build), Multi-Discounts on a Proposal (86bagb0jj, Needs PM Analysis, with a real open gap flagged in the ticket: whether percentage discounts should recalculate against Customer Portal optional-item toggles, pending Tanner/Jason), Drip Preference Visibility (86bbdqm72, Needs Design — the same Deal-card-indicator ticket from the Aug 13 design-exploration entries below, now scoped with 15 business rules across Command Center and Proposal Builder), and Add MMS to Drip Text Steps (86bawv87z, Needs PM Analysis, gated on unconfirmed Twilio A2P campaign/pricing/library questions). Removed the HealthScore: Login Tracking & Last Login/Last Active User Columns card per Jeremy's request, since HealthScore itself is off this page pending its overhaul.
+- Why: Direct request. Kept the Google Calendar card's actual current ClickUp title ("...OAuth Feasibility...") rather than Jeremy's shorthand ("...OAuth Flow & UI Overhaul") since the ticket itself is still an investigation, not a scoped UI overhaul; flagging in case the overhaul framing reflects a newer conversation not yet written into the ticket.
+- Open question: None from this session. Two of the four new tickets need explicitly named decisions to be unblocked (Multi-Discounts on a Proposal's Customer Portal recalculation question) or external verification (MMS's Twilio A2P/pricing/library questions) — both stay flagged on the roadmap card itself.
+
 ## [2026-08-14] Weekly Prod Roadmap: pulled HealthScore V1 Expansion off the Shipped section
 
 - Decision: Removed the HealthScore V1 Expansion card from the Shipped section of `cs-roadmap-jun20/`, added earlier this session. The Shipped section now just points to the Weekly Product Update tab for the full list of 22 items.
