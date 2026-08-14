@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-14] At Risk Account Finder: zebra striping, Account Type/Plan columns, per-column sort, phone wrap fix
+
+- Decision: Applied four direct follow-up requests to `at-risk-account-finder/`, none from ticket 86bbe80a3 itself: alternating row background color on the accounts table (Jason's suggestion, for easier scanning); new Account Type (Legacy/New, reusing health-score's `t-legacy`/`t-new` badge styling) and Plan (Pro/Advanced, reusing `pBadge`) columns, placed after Company Name; click-to-sort arrows on all 8 columns (Contact Name/Email/Phone sort against the computed Primary Contact, since those aren't stored fields); and a `white-space:nowrap` fix on the Phone column so numbers don't wrap.
+- Why: All four are explicit, scoped UI requests rather than new business logic, so no ticket business rule needed reinterpreting. Plan reuses the same generation odds already established in health-score (Legacy accounts 55% Advanced/45% Pro, New accounts always Pro) rather than inventing a new distribution.
+- Open question: None.
+
 ## [2026-08-14] At Risk Account Finder: new standalone prototype for ticket 86bbe80a3
 
 - Decision: Built a new, separate prototype (`at-risk-account-finder/`) rather than editing `health-score/` in place, matching how ticket 86bbe80a3 itself was scoped: a standalone ticket carved out of the broader HealthScore v2.1 draft (86bb90q17) per Tanner's reduced-scope ask, keeping that draft's remaining work intact. The new page reuses the parent draft's Health tier mapping (`computeHealth`/`healthCategory`) and Primary Contact logic (`getPrimaryContact`, oldest Admin falling back to oldest user of any role) verbatim, but drops every other health-score feature (10-column grid, Account Details drawer, branch icons, No Activity toggle, copy-to-clipboard) since the ticket's Out of Scope section explicitly excludes them, including copy-to-clipboard which the parent draft had already built. Primary Contact fields render directly in the list rows (no drawer), since the ticket's own acceptance criteria say "every account in the list exposes" Name/Email/Phone.
