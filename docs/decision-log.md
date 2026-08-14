@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-14] Weekly Prod Roadmap: pulled HealthScore V1 Expansion off the Shipped section
+
+- Decision: Removed the HealthScore V1 Expansion card from the Shipped section of `cs-roadmap-jun20/`, added earlier this session. The Shipped section now just points to the Weekly Product Update tab for the full list of 22 items.
+- Why: Jeremy flagged that HealthScore is under a major overhaul and asked to hold off representing it on this page until that overhaul settles, rather than showing a status that's about to be stale.
+- Open question: None. Jeremy will provide the update when the overhaul is ready to reflect here.
+
 ## [2026-08-14] Weekly Product Update: two-week catch-up (Aug 3-14), sourced from live ClickUp data
 
 - Decision: Rebuilt both tabs of `weekly-product-update/` covering the two weeks since the last edition (last week's report didn't go out). Sourced content directly from ClickUp rather than guessing at scope: pulled all 24 tasks tagged `release-2026-08-03`, `release-2026-08-10`, and `release-2026-08-13` (Active Development list) for the Weekly Product Update tab, writing up 22 of them under 10 grouped sections (Proposal Builder, Job Costing, Jobs List & Sales List, Appointments, Metrics & Reporting, Invoices & Payments, Customer Portal, Communications, Address & Data Quality, Mobile App). Excluded two tickets from the customer-facing tab: the HealthScore V1 Expansion (an internal CS tool, not a contractor-facing feature) and a single-tenant reactivation investigation with no describable customer-facing behavior change. For the Weekly Prod Roadmap tab (`cs-roadmap-jun20/`), re-queried current status on every Now/Next item from the prior edition rather than carrying forward stale labels: HealthScore V1 Expansion moved from Now to Shipped (pushed to production Aug 3); QuickBooks Integration Improvements moved from "In Progress" to "PR Created"; Multiple Phone/Email/Address on Contacts regressed from "Testing Ready (56/56 passed)" to "QA Kickback"; Thumbtack Direct Lead Integration regressed from "In Progress" to "Need More Context"; the three login-tracking follow-on tasks (previously described as "Ready for Dev") are actually still at ClickUp status "New" in Active Triage, unstarted, moved from Now to Next and labeled accurately.
