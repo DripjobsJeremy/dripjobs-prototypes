@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>At Risk Account Finder — Ticket 86bbe80a3</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f9fa;color:#212529;font-size:13px;line-height:1.4;}
+.proto-banner{background:linear-gradient(135deg,#7C3AED 0%,#9F7AEA 100%);color:white;padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;flex-wrap:wrap;}
+.proto-tag{background:rgba(255,255,255,0.22);padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.proto-back{color:#fff;text-decoration:none;font-weight:600;opacity:.9;}
+.proto-back:hover{opacity:1;text-decoration:underline;}
+.proto-right{margin-left:auto;opacity:.85;font-size:11px;}
+.page-wrapper{max-width:1100px;margin:0 auto;padding:16px 20px 32px;}
+.header{padding:14px 0 12px;}
+.header h1{font-size:22px;font-weight:700;color:#111827;}
+.header p{color:#6b7280;font-size:13px;margin-top:3px;}
+.info-note{background:#f0fdf4;border:1px solid #a7f3d0;border-left:3px solid #059669;border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#065f46;}
+.info-note strong{font-weight:700;}
+.filters-card{background:white;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:14px;}
+.filters-title{font-size:12px;font-weight:600;color:#374151;text-transform:uppercase;letter-spacing:.4px;margin-bottom:12px;}
+.filters-row{display:flex;flex-wrap:wrap;gap:22px;}
+.filter-group{display:flex;flex-direction:column;gap:5px;}
+.filter-label{font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;}
+.filter-helper{font-size:11px;color:#9ca3af;max-width:230px;}
+.filter-select{padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;color:#374151;background:white;min-height:34px;outline:none;font-family:inherit;}
+.filter-select:focus{border-color:#7C3AED;box-shadow:0 0 0 2px rgba(124,58,237,.1);}
+
+/* Health tier multi-select */
+.multi-select{position:relative;}
+.ms-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;color:#374151;background:white;cursor:pointer;min-height:34px;font-family:inherit;white-space:nowrap;min-width:190px;text-align:left;}
+.ms-btn:focus{outline:none;border-color:#7C3AED;box-shadow:0 0 0 2px rgba(124,58,237,.1);}
+.ms-btn.ms-active{border-color:#7C3AED;color:#7C3AED;font-weight:600;}
+.ms-caret{font-size:8px;opacity:.35;flex-shrink:0;}
+.ms-btn.ms-active .ms-caret{opacity:1;}
+.ms-panel{position:absolute;top:calc(100% + 3px);left:0;background:white;border:1px solid #d1d5db;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.13);min-width:220px;z-index:300;display:none;}
+.ms-panel.ms-open{display:block;}
+.ms-item{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;font-size:12px;color:#374151;white-space:nowrap;user-select:none;}
+.ms-item:hover{background:#f5f3ff;}
+.ms-item input[type=checkbox]{accent-color:#7C3AED;width:13px;height:13px;cursor:pointer;flex-shrink:0;}
+.ms-footer{padding:6px 14px;font-size:11px;color:#7C3AED;cursor:pointer;font-weight:600;text-align:center;border-top:1px solid #f3f4f6;border-radius:0 0 8px 8px;}
+.ms-footer:hover{background:#faf5ff;}
+
+/* Signup date filter */
+.date-quick-row{display:flex;gap:6px;}
+.qs-btn{padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;color:#374151;background:white;cursor:pointer;min-height:34px;font-family:inherit;white-space:nowrap;}
+.qs-btn:hover{background:#f9fafb;}
+.qs-btn.active{border-color:#7C3AED;background:#f5f3ff;color:#7C3AED;font-weight:600;}
+.date-sep{display:flex;align-items:center;color:#d1d5db;font-size:11px;font-weight:600;text-transform:uppercase;padding:0 2px;}
+.date-range-row{display:flex;align-items:center;gap:6px;}
+.date-range-row input[type=date]{padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;color:#374151;background:white;min-height:34px;font-family:inherit;}
+.date-range-row input[type=date]:focus{outline:none;border-color:#7C3AED;box-shadow:0 0 0 2px rgba(124,58,237,.1);}
+.date-range-row span{color:#9ca3af;font-size:12px;}
+.clear-all-row{display:flex;align-items:center;justify-content:flex-end;margin-top:14px;}
+.btn-clear-all{height:34px;padding:0 14px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;}
+.btn-clear-all:hover{background:#f9fafb;border-color:#9ca3af;}
+
+.table-card{background:white;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e5e7eb;gap:12px;flex-wrap:wrap;}
+.table-title{font-size:15px;font-weight:600;color:#111827;}
+.table-subtitle{font-size:12px;color:#6b7280;margin-top:1px;}
+.show-field{position:relative;display:inline-flex;flex-direction:column;}
+.show-field-label{position:absolute;top:-8px;left:10px;background:#fff;padding:0 6px;font-size:11px;font-weight:500;color:#9ca3af;z-index:1;pointer-events:none;letter-spacing:.2px;}
+.show-field-input{height:34px;padding:0 28px 0 12px;border:1.5px solid #7C3AED;border-radius:8px;font-size:13px;color:#374151;background:#fff;cursor:pointer;font-family:inherit;appearance:none;-webkit-appearance:none;min-width:70px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237C3AED' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat;background-position:right 8px center;background-size:12px 12px;}
+.show-field-input:focus{outline:none;box-shadow:0 0 0 3px rgba(124,58,237,.18);}
+.table-scroll{overflow-x:auto;}
+table{border-collapse:collapse;width:100%;min-width:760px;}
+thead th{padding:9px 12px;font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid #e5e7eb;background:#f9fafb;white-space:nowrap;text-align:left;}
+tbody td{padding:10px 12px;color:#374151;vertical-align:middle;border-bottom:1px solid #f3f4f6;}
+tbody tr:hover td{background:#f9fafb;}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap;line-height:1.5;}
+.h-green{background:#d1fae5;color:#065f46;}
+.h-yellow{background:#fef3c7;color:#92400e;}
+.h-red{background:#fee2e2;color:#991b1b;}
+.h-inactive{background:#f3f4f6;color:#6b7280;}
+.contact-empty{color:#9ca3af;font-style:italic;}
+.contact-fallback-note{font-size:10.5px;color:#9ca3af;margin-top:2px;}
+.muted{color:#d1d5db;}
+.pagination-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid #e5e7eb;font-size:12px;color:#6b7280;}
+.pg-controls{display:flex;gap:6px;align-items:center;}
+.pg-btn{padding:5px 12px;border:1px solid #d1d5db;border-radius:6px;background:white;cursor:pointer;font-size:12px;color:#374151;font-family:inherit;}
+.pg-btn:hover{background:#f9fafb;}
+.pg-btn:disabled{opacity:.35;cursor:not-allowed;}
+.empty-state{padding:36px 16px;text-align:center;color:#9ca3af;font-size:13px;}
+</style>
+</head>
+<body>
+<div class="proto-banner">
+  <a class="proto-back" href="../index.html">&larr; Hub</a>
+  <span class="proto-tag">Prototype</span>
+  <strong>Ticket #86bbe80a3</strong> &mdash; At Risk Account Finder (Health Tier &amp; Signup Date Filters)
+  <span class="proto-right">Standalone, reduced-scope split from ticket 86bb90q17 &nbsp;&middot;&nbsp; v1</span>
+</div>
+<div class="page-wrapper">
+  <div class="header">
+    <h1>At Risk Account Finder</h1>
+    <p>CS Team &middot; Super Admin View (Onboarding Reps included) &middot; Find accounts at risk of churning by Health tier and signup date</p>
+  </div>
+  <div class="info-note">
+    <strong>Scope note:</strong> this is a reduced-scope tool, split from the broader HealthScore v2.1 draft (ticket 86bb90q17) per Tanner&rsquo;s feedback: filter by Health tier and signup date, then give the rep enough contact info to reach out without impersonating the account. Everything else from the v2.1 draft (grid reduction, Account Details drawer, branch icons, copy-to-clipboard, etc.) is out of scope here and stays preserved on the <a href="../health-score/index.html" style="color:#065f46;font-weight:600;">HealthScore</a> prototype.
+  </div>
+  <div class="filters-card">
+    <div class="filters-title">Filters</div>
+    <div class="filters-row">
+      <div class="filter-group">
+        <label class="filter-label">Health Tier</label>
+        <div class="multi-select" id="ms-health">
+          <button class="ms-btn" type="button" onclick="toggleMS('ms-health')"><span class="ms-label">All Tiers</span><span class="ms-caret">&#9660;</span></button>
+          <div class="ms-panel" id="ms-health-panel">
+            <label class="ms-item"><input type="checkbox" value="At Risk" onchange="msChange('ms-health')"> &#x1F534; At Risk</label>
+            <label class="ms-item"><input type="checkbox" value="Needs Attention" onchange="msChange('ms-health')"> &#x1F7E1; Needs Attention</label>
+            <label class="ms-item"><input type="checkbox" value="On Track" onchange="msChange('ms-health')"> &#x1F7E2; On Track</label>
+            <div class="ms-footer" onclick="clearMS('ms-health')">Clear</div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Signup Date &mdash; Quick Select</label>
+        <div class="date-quick-row">
+          <button type="button" class="qs-btn" id="qs-30" onclick="setQuickSelect('30')">Last 30 Days</button>
+          <button type="button" class="qs-btn" id="qs-60" onclick="setQuickSelect('60')">Last 60 Days</button>
+          <button type="button" class="qs-btn" id="qs-90" onclick="setQuickSelect('90')">Last 90 Days</button>
+        </div>
+        <div class="filter-helper">Cumulative from today (e.g. Last 60 Days includes everything in Last 30 Days).</div>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Signup Date &mdash; Custom Range</label>
+        <div class="date-range-row">
+          <input type="date" id="f-start" onchange="onCustomDateChange()">
+          <span>to</span>
+          <input type="date" id="f-end" onchange="onCustomDateChange()">
+        </div>
+        <div class="filter-helper">Choosing a custom date clears the quick select above. Leave Start blank with only an End date to find accounts signed up on or before that date.</div>
+      </div>
+    </div>
+    <div class="clear-all-row">
+      <button class="btn-clear-all" onclick="clearAllFilters()">Clear All Filters</button>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-toolbar">
+      <div>
+        <div class="table-title">Accounts</div>
+        <div class="table-subtitle" id="table-subtitle">Loading&hellip;</div>
+      </div>
+      <div class="show-field">
+        <label class="show-field-label">Show</label>
+        <select class="show-field-input" id="page-size-sel" onchange="changePageSize()">
+          <option value="25" selected>25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="0">All</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Company Name</th>
+            <th>Signup Date</th>
+            <th>Health Tier</th>
+            <th>Contact Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div class="pagination-bar">
+      <span id="pg-info-text">Loading&hellip;</span>
+      <div class="pg-controls">
+        <button class="pg-btn" id="prev-btn" onclick="changePage(-1)" disabled>&#8592; Previous</button>
+        <span id="pg-label" style="font-weight:600;color:#374151;font-size:13px;">Page 1</span>
+        <button class="pg-btn" id="next-btn" onclick="changePage(1)">Next &#8594;</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+/* --- Shared generation + Health/Primary Contact logic, reused verbatim from the health-score prototype (ticket 86bb90q17) per Business Rules 1 and 4 --- */
+var HEALTH_ORDER={'Critical':0,'High Risk':1,'Warning':2,'Inactive':3,'On Track':4,'Healthy':5};
+function healthCategory(h){if(h==='Healthy'||h==='On Track')return'On Track';if(h==='Warning')return'Needs Attention';if(h==='High Risk'||h==='Critical')return'At Risk';return'Inactive';}
+function computeHealth(isActive,totalSales,a2pActivated,isLegacy,daysRemaining){if(!isActive)return'Inactive';if(totalSales>=10000&&a2pActivated)return'Healthy';var milestoneMissing=totalSales<10000||!a2pActivated;if(!isLegacy&&daysRemaining!==null&&daysRemaining<10&&milestoneMissing)return'Critical';if(!isLegacy&&daysRemaining!==null&&daysRemaining<30&&milestoneMissing)return'High Risk';if(!isLegacy&&daysRemaining!==null&&daysRemaining<60&&milestoneMissing)return'Warning';if(isLegacy&&milestoneMissing)return'Warning';return'On Track';}
+var PREFIXES=['Elite','Premium','Pro','Master','Superior','Quality','Precision','Expert','Prime','Apex','Summit','Peak','Crown','Royal','Diamond','Platinum','Certified','Licensed','Heritage','Legacy','Custom','Artisan','Craftsman','Professional','Reliable'];
+var MIDDLES=['Painting','Paint','Coatings','Finishes','Colors','Gutters','Seamless Gutters','Epoxy','Floor Coating','Garage Floor','Concrete','Flatwork','Deck','Fence','Drywall','Texture','Cabinet','Exterior','Power Wash','Stamped Concrete'];
+var SUFFIXES=['LLC','Inc','Co','Corp','Services','Solutions','Pros','Group','Team','Masters','Works','Experts','Specialists','Enterprises'];
+var LOCS=['Phoenix','Dallas','Houston','Austin','Denver','Seattle','Chicago','Atlanta','Miami','Tampa','Nashville','Charlotte','Raleigh','Boston','Las Vegas','San Diego','LA','Sacramento','Salt Lake','Boise','Tucson','Columbus','Pittsburgh','Indianapolis'];
+var FN=['Mike','John','David','James','Robert','Chris','Matt','Dan','Steve','Tom','Mark','Brian','Kevin','Jason','Jeff','Scott','Eric','Andrew','Maria','Jennifer','Sarah','Ashley','Jose','Carlos','Juan','Luis'];
+var LN=['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Wilson','Taylor','Moore','Jackson','Lee','Perez','Sanchez','Clark','Ramirez','Lewis','Robinson','Walker','Young','King','Wright','Torres'];
+function ri(a){return a[Math.floor(Math.random()*a.length)];}
+function rd(lo,hi){return Math.floor(Math.random()*(hi-lo))+lo;}
+function fmtDate(d){return(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();}
+function slugify(n){var words=(n||'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);return words.slice(0,3).join('-')||'company';}
+function genPhone(){return'('+rd(200,989)+') '+rd(200,999)+'-'+String(rd(0,9999)).padStart(4,'0');}
+function genEmail(fn,ln,slug){return(fn+'.'+ln+'@'+slug+'.com').toLowerCase();}
+function genUsers(companyName,created,daysAgo){var r=Math.random(),count;if(r<0.03)count=0;else if(r<0.10)count=1;else count=rd(2,6);var slug=slugify(companyName),users=[];for(var i=0;i<count;i++){var fn=ri(FN),ln=ri(LN),isAdmin=i===0?Math.random()<0.85:Math.random()<0.35,offsetDays=rd(0,Math.max(daysAgo,1)),uCreated=new Date(created.getTime()+offsetDays*86400000);users.push({name:fn+' '+ln,email:Math.random()<0.03?null:genEmail(fn,ln,slug),phone:Math.random()<0.06?null:genPhone(),isAdmin:isAdmin,dateCreated:uCreated});}return users;}
+function getPrimaryContact(c){var admins=c.users.filter(function(u){return u.isAdmin;}),pool=admins.length?admins:c.users;if(!pool.length)return null;pool=pool.slice().sort(function(a,b){return a.dateCreated-b.dateCreated;});var u=pool[0];return{name:u.name,email:u.email,phone:u.phone,fallback:admins.length===0};}
+function genName(){var r=Math.random();if(r<0.22)return ri(LOCS)+' '+ri(MIDDLES)+' '+ri(SUFFIXES);if(r<0.42)return ri(FN)+' '+ri(LN)+' '+ri(MIDDLES)+' '+ri(SUFFIXES);if(r<0.60)return ri(LN)+"'s "+ri(MIDDLES);if(r<0.80)return ri(PREFIXES)+' '+ri(MIDDLES)+' '+ri(SUFFIXES);var cr=['Brush Strokes','Color Theory','Paint Perfect','Smooth Finish','Fresh Coat','True Colors','Clean Lines','Sharp Edge','Solid Ground','Rain Guard','Floor Glow','Epoxy Elite','Garage Armor','Surface Pro','Coat Masters'];return ri(cr)+' '+ri(SUFFIXES);}
+
+function generateAccounts(total){var out=[],used={},now=new Date(),legacyCount=Math.floor(total*0.43);for(var i=0;i<total;i++){var name,tries=0;do{name=genName();tries++;}while(used[name]&&tries<20);used[name]=true;var isLegacy=i<legacyCount,created;if(isLegacy){var lo=new Date('2022-01-01').getTime(),hi=new Date('2025-12-27').getTime();created=new Date(lo+Math.random()*(hi-lo));}else{var lo2=new Date('2025-12-28').getTime(),hi2=now.getTime();created=new Date(lo2+Math.random()*(hi2-lo2));}var daysAgo=Math.floor((now-created)/86400000);var isActive=isLegacy?Math.random()<0.76:Math.random()<0.89;var totalSales=0;if(isActive&&daysAgo>14){var sf=Math.random(),base=isLegacy?40000:0;if(sf<0.18)totalSales=base+rd(0,5000);else if(sf<0.42)totalSales=base+rd(5000,35000);else if(sf<0.68)totalSales=base+rd(35000,150000);else if(sf<0.88)totalSales=base+rd(150000,650000);else totalSales=base+rd(650000,3500000);}var a2pApplied=isActive&&(daysAgo>7?Math.random()<0.78:Math.random()<0.25);var a2pActivated=a2pApplied&&(daysAgo>14?Math.random()<0.87:Math.random()<0.42);var daysRemaining=(!isLegacy&&isActive)?Math.max(0,90-daysAgo):null;var health=computeHealth(isActive,totalSales,a2pActivated,isLegacy,daysRemaining);var users=genUsers(name,created,daysAgo);out.push({name:name,created:created,createdStr:fmtDate(created),daysAgo:daysAgo,isActive:isActive,isLegacy:isLegacy,health:health,users:users});}return out;}
+
+/* --- Page-specific: Business Rules 1 (Health Tier filter), 2 (Signup Date filter), 3 (Company List), 4 (Contact info) --- */
+var ALL=generateAccounts(900),filtered=ALL.slice(),page=1,pageSize=25;
+var activeQuickSelect=null,customStart=null,customEnd=null;
+var MS={};
+
+function hBadge(h){var cat=healthCategory(h),m={'On Track':'h-green','Needs Attention':'h-yellow','At Risk':'h-red','Inactive':'h-inactive'};return'<span class="badge '+m[cat]+'">'+cat+'</span>';}
+
+function toggleMS(id){var panel=document.getElementById(id+'-panel'),isOpen=panel.classList.contains('ms-open');document.querySelectorAll('.ms-panel.ms-open').forEach(function(p){p.classList.remove('ms-open');});if(!isOpen)panel.classList.add('ms-open');}
+document.addEventListener('click',function(e){if(!e.target.closest('.multi-select'))document.querySelectorAll('.ms-panel.ms-open').forEach(function(p){p.classList.remove('ms-open');});});
+function getMS(id){return MS[id]?Array.from(MS[id]):[];}
+function msChange(id){if(!MS[id])MS[id]=new Set();MS[id].clear();document.querySelectorAll('#'+id+'-panel input[type=checkbox]:checked').forEach(function(cb){MS[id].add(cb.value);});updateMSBtn(id);applyFilters();}
+function updateMSBtn(id){var count=MS[id]?MS[id].size:0,lbl=document.querySelector('#'+id+' .ms-label'),btn=document.querySelector('#'+id+' .ms-btn');if(lbl)lbl.textContent=count?(count+' selected'):'All Tiers';if(btn)btn.classList.toggle('ms-active',count>0);}
+function clearMS(id){if(MS[id])MS[id].clear();var panel=document.getElementById(id+'-panel');if(panel)panel.querySelectorAll('input[type=checkbox]').forEach(function(cb){cb.checked=false;});updateMSBtn(id);applyFilters();}
+
+/* Business Rule 2: quick select and custom range are mutually exclusive; choosing one clears the other */
+function setQuickSelect(days){activeQuickSelect=(activeQuickSelect===days)?null:days;if(activeQuickSelect){document.getElementById('f-start').value='';document.getElementById('f-end').value='';customStart=null;customEnd=null;}updateQuickSelectUI();applyFilters();}
+function updateQuickSelectUI(){['30','60','90'].forEach(function(d){document.getElementById('qs-'+d).classList.toggle('active',activeQuickSelect===d);});}
+function onCustomDateChange(){activeQuickSelect=null;updateQuickSelectUI();var sv=document.getElementById('f-start').value,ev=document.getElementById('f-end').value;customStart=sv?new Date(sv+'T00:00:00'):null;customEnd=ev?new Date(ev+'T23:59:59.999'):null;applyFilters();}
+
+function applyFilters(){var selHealth=getMS('ms-health');filtered=ALL.filter(function(c){var cat=healthCategory(c.health);if(selHealth.length&&selHealth.indexOf(cat)<0)return false;if(activeQuickSelect){if(c.daysAgo>parseInt(activeQuickSelect,10))return false;}else{if(customStart&&c.created<customStart)return false;if(customEnd&&c.created>customEnd)return false;}return true;});page=1;render();}
+
+function clearAllFilters(){clearMS('ms-health');activeQuickSelect=null;updateQuickSelectUI();document.getElementById('f-start').value='';document.getElementById('f-end').value='';customStart=null;customEnd=null;filtered=ALL.slice();page=1;render();}
+
+/* Business Rule 4 + Edge Cases 1 & 2: Primary Contact, oldest Admin falling back to oldest user of any role, or a no-contact state */
+function mkRow(c){var contact=getPrimaryContact(c),nameCell,emailCell,phoneCell;if(!contact){nameCell='<span class="contact-empty">No Contact Available</span>';emailCell='<span class="muted">&mdash;</span>';phoneCell='<span class="muted">&mdash;</span>';}else{nameCell='<strong>'+contact.name+'</strong>'+(contact.fallback?'<div class="contact-fallback-note">No Admin user &mdash; oldest user of any role shown</div>':'');emailCell=contact.email||'<span class="muted">&mdash;</span>';phoneCell=contact.phone||'<span class="muted">&mdash;</span>';}return'<tr><td><strong>'+c.name+'</strong></td><td>'+c.createdStr+'</td><td>'+hBadge(c.health)+'</td><td>'+nameCell+'</td><td>'+emailCell+'</td><td>'+phoneCell+'</td></tr>';}
+
+function updateSubtitleAndPagination(total,start,end){document.getElementById('table-subtitle').textContent='Showing '+filtered.length.toLocaleString()+' accounts · Page '+page+' of '+total;document.getElementById('pg-info-text').textContent='Showing '+(filtered.length?start+1:0).toLocaleString()+'–'+end.toLocaleString()+' of '+filtered.length.toLocaleString()+' accounts';document.getElementById('pg-label').textContent='Page '+page+' of '+total;document.getElementById('prev-btn').disabled=page<=1;document.getElementById('next-btn').disabled=page>=total;}
+function render(){var eff=pageSize===0?filtered.length:pageSize,total=Math.ceil(filtered.length/Math.max(eff,1))||1;var start=(page-1)*eff,end=Math.min(start+eff,filtered.length),slice=filtered.slice(start,end);updateSubtitleAndPagination(total,start,end);var html=slice.length?slice.map(mkRow).join(''):'<tr><td colspan="6"><div class="empty-state">No accounts match the current filters.</div></td></tr>';document.getElementById('table-body').innerHTML=html;}
+function changePage(dir){var eff=pageSize===0?filtered.length:pageSize,total=Math.ceil(filtered.length/Math.max(eff,1))||1;page=Math.max(1,Math.min(total,page+dir));render();}
+function changePageSize(){var sel=document.getElementById('page-size-sel');pageSize=parseInt(sel.value)||0;page=1;render();}
+
+render();
+</script>
+</body>
+</html>

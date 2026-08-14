@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-14] At Risk Account Finder: new standalone prototype for ticket 86bbe80a3
+
+- Decision: Built a new, separate prototype (`at-risk-account-finder/`) rather than editing `health-score/` in place, matching how ticket 86bbe80a3 itself was scoped: a standalone ticket carved out of the broader HealthScore v2.1 draft (86bb90q17) per Tanner's reduced-scope ask, keeping that draft's remaining work intact. The new page reuses the parent draft's Health tier mapping (`computeHealth`/`healthCategory`) and Primary Contact logic (`getPrimaryContact`, oldest Admin falling back to oldest user of any role) verbatim, but drops every other health-score feature (10-column grid, Account Details drawer, branch icons, No Activity toggle, copy-to-clipboard) since the ticket's Out of Scope section explicitly excludes them, including copy-to-clipboard which the parent draft had already built. Primary Contact fields render directly in the list rows (no drawer), since the ticket's own acceptance criteria say "every account in the list exposes" Name/Email/Phone.
+- Why: Ticket 86bb90q17's broader scope is meant to stay revisitable later (per the ticket's own decision-log comment); folding this narrower ask into that file would have entangled the two. A new page also let the two out-of-scope exclusions (no drawer, no copy affordance) apply cleanly without touching working health-score code.
+- Open question: None from the ticket itself. Flagging one implementation choice: when no Health tier is selected, the list includes Inactive accounts (not one of the ticket's three named tiers) rather than excluding them, matching the existing convention on this page's sibling filters where an empty multi-select means no restriction, not an implicit filter.
+
 ## [2026-08-13] BR-13 card indicator: replaced lavender pill recommendation with a teal "kept disabled" callout row
 
 - Decision: Superseded the earlier inline-pill recommendation (lavender tag/chip tokens) with a teal "helper text" callout row (bell-off icon, light teal fill, teal left border) plus a BR-13 traceability chip and an info tooltip explaining the cause. Also rebuilt both example cards to match the exact two real card layouts (job card and proposal card) at higher fidelity than the first pass, and added a Normal/Preserved toggle so the indicator can be demoed on or off without needing two separate screenshots.
