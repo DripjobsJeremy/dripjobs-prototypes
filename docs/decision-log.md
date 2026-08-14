@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-14] At Risk Account Finder: Total Sales/A2P Status columns, toolbar cleanup
+
+- Decision: Added Total Sales and A2P Status columns (placed after Health Tier, matching health-score's own field grouping), reusing `totalSales`/`a2pApplied`/`a2pActivated`, which the data generator already computed for the health calculation but hadn't exposed on the account object. A2P Status badge reuses the existing `h-green`/`h-yellow`/`h-red` classes rather than adding a duplicate `b-success`/`b-warning`/`b-danger` set with identical colors. Also moved "Clear All Filters" out of the Filters card into the Accounts table toolbar, to the left of the Show selector, and tightened the Filters card's padding/title margin now that it only holds the two filter controls.
+- Why: Both are direct, explicit requests. Removing the button freed up the vertical space it and its margin were holding in the Filters card, which was the main source of the excess white space.
+- Open question: None.
+
 ## [2026-08-14] At Risk Account Finder: zebra striping, Account Type/Plan columns, per-column sort, phone wrap fix
 
 - Decision: Applied four direct follow-up requests to `at-risk-account-finder/`, none from ticket 86bbe80a3 itself: alternating row background color on the accounts table (Jason's suggestion, for easier scanning); new Account Type (Legacy/New, reusing health-score's `t-legacy`/`t-new` badge styling) and Plan (Pro/Advanced, reusing `pBadge`) columns, placed after Company Name; click-to-sort arrows on all 8 columns (Contact Name/Email/Phone sort against the computed Primary Contact, since those aren't stored fields); and a `white-space:nowrap` fix on the Phone column so numbers don't wrap.
