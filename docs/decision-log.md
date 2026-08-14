@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-14] Weekly Prod Roadmap: Multiple Phone/Email/Address status corrected to In Progress
+
+- Decision: Re-checked ticket 86b91n3rj against ClickUp per Jeremy's note that it had updated 41 minutes prior; status has moved from QA Kickback back to In Progress. Updated the Now section card accordingly (badge, dropped the red "blocked" left-border styling, rewrote the description around what's back in active development instead of the earlier QA regression).
+- Why: Direct correction from Jeremy, confirmed against live ClickUp data before writing it.
+- Open question: None.
+
 ## [2026-08-14] Weekly Prod Roadmap: added 4 tickets to Next, removed HealthScore login-tracking card
 
 - Decision: Added four tickets to the Next section of `cs-roadmap-jun20/`, pulling current status and scope directly from ClickUp rather than the titles alone: Google Calendar OAuth Feasibility on Mobile App (86bbc3g76, Ready for Dev — an investigation into whether a native-browser OAuth flow fixes mobile Google Calendar sync, not yet a described UI build), Multi-Discounts on a Proposal (86bagb0jj, Needs PM Analysis, with a real open gap flagged in the ticket: whether percentage discounts should recalculate against Customer Portal optional-item toggles, pending Tanner/Jason), Drip Preference Visibility (86bbdqm72, Needs Design — the same Deal-card-indicator ticket from the Aug 13 design-exploration entries below, now scoped with 15 business rules across Command Center and Proposal Builder), and Add MMS to Drip Text Steps (86bawv87z, Needs PM Analysis, gated on unconfirmed Twilio A2P campaign/pricing/library questions). Removed the HealthScore: Login Tracking & Last Login/Last Active User Columns card per Jeremy's request, since HealthScore itself is off this page pending its overhaul.
