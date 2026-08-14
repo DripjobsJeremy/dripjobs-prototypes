@@ -1419,6 +1419,18 @@
 </div><!-- /hub-body -->
 
 <script>
+  // ── Keep header/stat counts in sync with the actual card list, so they can't go stale again ──
+  (function updateProtoCounts() {
+    const pipelineCards = Array.from(document.querySelectorAll('#protoGrid .proto-card'));
+    const total = pipelineCards.length;
+    const byStatus = status => pipelineCards.filter(c => c.dataset.status === status).length;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-triage').textContent = byStatus('triage');
+    document.getElementById('stat-analysis').textContent = byStatus('analysis');
+    document.getElementById('stat-postponed').textContent = byStatus('postponed');
+    document.getElementById('last-updated').textContent = total + ' prototypes';
+  })();
+
   const cards = document.querySelectorAll('.proto-card');
   const chips = document.querySelectorAll('.chip');
   const searchInput = document.getElementById('searchInput');
