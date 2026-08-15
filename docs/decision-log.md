@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-15] At Risk Account Finder: OBCSS column/filter back, A2P Status hover tooltip
+
+- Decision: Re-added the OBCSS column and its multi-select filter, reused verbatim from `health-score/index.html` (same six team members, same "All Team Members" default label). Added a hover tooltip on the A2P Status badge showing the 3-step A2P Application Progress breakdown (Customer Profile, Brand Registration, Campaign Verification, each with status and an "Updated" timestamp), modeled after the real flow in Super Admin > Twilio Management per Jeremy's screenshots, using a native `title` attribute (multi-line via `\n`) rather than a custom popover, since the table card's `overflow:hidden` would clip an absolutely-positioned popover near the top/bottom edges of the visible rows. Rebalanced all 10 column widths so the table still fits without horizontal scroll.
+- Why: Direct, explicit requests. The step-generation logic derives each step's status/date from the row's existing `a2pApplied`/`a2pActivated` flags (Customer Profile approved once applied, Campaign Verification only fully approved once activated) rather than storing three redundant fields, and clamps every generated step date to "now" so a freshly-signed-up account can never show a future "Updated" timestamp.
+- Open question: None.
+
 ## [2026-08-14] Weekly Prod Roadmap: Multiple Phone/Email/Address status corrected to In Progress
 
 - Decision: Re-checked ticket 86b91n3rj against ClickUp per Jeremy's note that it had updated 41 minutes prior; status has moved from QA Kickback back to In Progress. Updated the Now section card accordingly (badge, dropped the red "blocked" left-border styling, rewrote the description around what's back in active development instead of the earlier QA regression).
