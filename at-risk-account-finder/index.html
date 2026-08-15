@@ -158,11 +158,15 @@ tbody tr:hover td{background:#f3f0fc;}
         </div>
       </div>
       <div class="filter-group">
-        <label class="filter-label">Signup Date</label>
-        <button type="button" class="date-trigger-pill" id="date-trigger" onclick="openDateModal()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span id="date-trigger-label">All Time</span>
-        </button>
+        <label class="filter-label">Plan</label>
+        <div class="multi-select" id="ms-plan">
+          <button class="ms-btn" type="button" onclick="toggleMS('ms-plan')"><span class="ms-label">All Plans</span><span class="ms-caret">&#9660;</span></button>
+          <div class="ms-panel" id="ms-plan-panel">
+            <label class="ms-item"><input type="checkbox" value="Pro" onchange="msChange('ms-plan')"> Pro</label>
+            <label class="ms-item"><input type="checkbox" value="Advanced" onchange="msChange('ms-plan')"> Advanced &#9733;</label>
+            <div class="ms-footer" onclick="clearMS('ms-plan')">Clear</div>
+          </div>
+        </div>
       </div>
       <div class="filter-group">
         <label class="filter-label">OBCSS</label>
@@ -178,6 +182,13 @@ tbody tr:hover td{background:#f3f0fc;}
             <div class="ms-footer" onclick="clearMS('ms-obcss')">Clear</div>
           </div>
         </div>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Signup Date</label>
+        <button type="button" class="date-trigger-pill" id="date-trigger" onclick="openDateModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span id="date-trigger-label">All Time</span>
+        </button>
       </div>
     </div>
   </div>
@@ -285,7 +296,7 @@ function genUsers(companyName,created,daysAgo){var r=Math.random(),count;if(r<0.
 function getPrimaryContact(c){var admins=c.users.filter(function(u){return u.isAdmin;}),pool=admins.length?admins:c.users;if(!pool.length)return null;pool=pool.slice().sort(function(a,b){return a.dateCreated-b.dateCreated;});var u=pool[0];return{name:u.name,email:u.email,phone:u.phone,fallback:admins.length===0};}
 function genName(){var r=Math.random();if(r<0.22)return ri(LOCS)+' '+ri(MIDDLES)+' '+ri(SUFFIXES);if(r<0.42)return ri(FN)+' '+ri(LN)+' '+ri(MIDDLES)+' '+ri(SUFFIXES);if(r<0.60)return ri(LN)+"'s "+ri(MIDDLES);if(r<0.80)return ri(PREFIXES)+' '+ri(MIDDLES)+' '+ri(SUFFIXES);var cr=['Brush Strokes','Color Theory','Paint Perfect','Smooth Finish','Fresh Coat','True Colors','Clean Lines','Sharp Edge','Solid Ground','Rain Guard','Floor Glow','Epoxy Elite','Garage Armor','Surface Pro','Coat Masters'];return ri(cr)+' '+ri(SUFFIXES);}
 
-function generateAccounts(total){var out=[],used={},now=new Date(),legacyCount=Math.floor(total*0.43);for(var i=0;i<total;i++){var name,tries=0;do{name=genName();tries++;}while(used[name]&&tries<20);used[name]=true;var isLegacy=i<legacyCount,created;if(isLegacy){var lo=new Date('2022-01-01').getTime(),hi=new Date('2025-12-27').getTime();created=new Date(lo+Math.random()*(hi-lo));}else{var lo2=new Date('2025-12-28').getTime(),hi2=now.getTime();created=new Date(lo2+Math.random()*(hi2-lo2));}var daysAgo=Math.floor((now-created)/86400000);var isActive=isLegacy?Math.random()<0.76:Math.random()<0.89;var totalSales=0;if(isActive&&daysAgo>14){var sf=Math.random(),base=isLegacy?40000:0;if(sf<0.18)totalSales=base+rd(0,5000);else if(sf<0.42)totalSales=base+rd(5000,35000);else if(sf<0.68)totalSales=base+rd(35000,150000);else if(sf<0.88)totalSales=base+rd(150000,650000);else totalSales=base+rd(650000,3500000);}var a2pApplied=isActive&&(daysAgo>7?Math.random()<0.78:Math.random()<0.25);var a2pActivated=a2pApplied&&(daysAgo>14?Math.random()<0.87:Math.random()<0.42);var daysRemaining=(!isLegacy&&isActive)?Math.max(0,90-daysAgo):null;var health=computeHealth(isActive,totalSales,a2pActivated,isLegacy,daysRemaining);var plan;var planRoll=Math.random();if(isLegacy){plan=(planRoll<0.55)?'Advanced':'Pro';}else{plan='Pro';}var obcss=ri(OBCSS_TEAM);var a2pSteps=genA2PSteps(created,a2pApplied,a2pActivated,now);var users=genUsers(name,created,daysAgo);out.push({name:name,created:created,createdStr:fmtDate(created),daysAgo:daysAgo,isActive:isActive,isLegacy:isLegacy,plan:plan,totalSales:totalSales,a2pApplied:a2pApplied,a2pActivated:a2pActivated,a2pSteps:a2pSteps,obcss:obcss,health:health,users:users});}return out;}
+function generateAccounts(total){var out=[],used={},now=new Date(),legacyCount=Math.floor(total*0.43);for(var i=0;i<total;i++){var name,tries=0;do{name=genName();tries++;}while(used[name]&&tries<20);used[name]=true;var isLegacy=i<legacyCount,created;if(isLegacy){var lo=new Date('2022-01-01').getTime(),hi=new Date('2025-12-27').getTime();created=new Date(lo+Math.random()*(hi-lo));}else{var lo2=new Date('2025-12-28').getTime(),hi2=now.getTime();created=new Date(lo2+Math.random()*(hi2-lo2));}var daysAgo=Math.floor((now-created)/86400000);var isActive=isLegacy?Math.random()<0.76:Math.random()<0.89;var totalSales=0;if(isActive&&daysAgo>14){var sf=Math.random(),base=isLegacy?40000:0;if(sf<0.18)totalSales=base+rd(0,5000);else if(sf<0.42)totalSales=base+rd(5000,35000);else if(sf<0.68)totalSales=base+rd(35000,150000);else if(sf<0.88)totalSales=base+rd(150000,650000);else totalSales=base+rd(650000,3500000);}var a2pApplied=isActive&&(daysAgo>7?Math.random()<0.78:Math.random()<0.25);var a2pActivated=a2pApplied&&(daysAgo>14?Math.random()<0.87:Math.random()<0.42);var daysRemaining=(!isLegacy&&isActive)?Math.max(0,90-daysAgo):null;var health=computeHealth(isActive,totalSales,a2pActivated,isLegacy,daysRemaining);var plan=(Math.random()<0.3)?'Advanced':'Pro';var obcss=ri(OBCSS_TEAM);var a2pSteps=genA2PSteps(created,a2pApplied,a2pActivated,now);var users=genUsers(name,created,daysAgo);out.push({name:name,created:created,createdStr:fmtDate(created),daysAgo:daysAgo,isActive:isActive,isLegacy:isLegacy,plan:plan,totalSales:totalSales,a2pApplied:a2pApplied,a2pActivated:a2pActivated,a2pSteps:a2pSteps,obcss:obcss,health:health,users:users});}return out;}
 
 /* --- Page-specific: Business Rules 1 (Health Tier filter), 2 (Signup Date filter), 3 (Company List), 4 (Contact info), 9 (Legacy exclusion) --- */
 /* Business Rule 9: Legacy accounts are excluded from this report entirely, not filtered by a UI control. Nearly every
@@ -325,7 +336,7 @@ document.getElementById('col-headers').addEventListener('click',function(e){var 
 
 function toggleMS(id){var panel=document.getElementById(id+'-panel'),isOpen=panel.classList.contains('ms-open');document.querySelectorAll('.ms-panel.ms-open').forEach(function(p){p.classList.remove('ms-open');});if(!isOpen)panel.classList.add('ms-open');}
 document.addEventListener('click',function(e){if(!e.target.closest('.multi-select'))document.querySelectorAll('.ms-panel.ms-open').forEach(function(p){p.classList.remove('ms-open');});});
-var MS_LABELS={'ms-health':'All Tiers','ms-obcss':'All Team Members'};
+var MS_LABELS={'ms-health':'All Tiers','ms-obcss':'All Team Members','ms-plan':'All Plans'};
 function getMS(id){return MS[id]?Array.from(MS[id]):[];}
 function msChange(id){if(!MS[id])MS[id]=new Set();MS[id].clear();document.querySelectorAll('#'+id+'-panel input[type=checkbox]:checked').forEach(function(cb){MS[id].add(cb.value);});updateMSBtn(id);applyFilters();}
 function updateMSBtn(id){var count=MS[id]?MS[id].size:0,lbl=document.querySelector('#'+id+' .ms-label'),btn=document.querySelector('#'+id+' .ms-btn');if(lbl)lbl.textContent=count?(count+' selected'):MS_LABELS[id];if(btn)btn.classList.toggle('ms-active',count>0);}
@@ -344,9 +355,9 @@ function onModalDateInput(){draftQuickSelect=null;updateModalChipUI();draftStart
 function updateDateTriggerLabel(){var lbl=document.getElementById('date-trigger-label');if(activeQuickSelect){lbl.textContent='Last '+activeQuickSelect+' Days';}else if(customStart&&customEnd){lbl.textContent=fmtDate(customStart)+' – '+fmtDate(customEnd);}else if(customEnd){lbl.textContent='Through '+fmtDate(customEnd);}else if(customStart){lbl.textContent='From '+fmtDate(customStart);}else{lbl.textContent='All Time';}}
 function applyDateModal(){activeQuickSelect=draftQuickSelect;customStart=(!activeQuickSelect&&draftStart)?new Date(draftStart+'T00:00:00'):null;customEnd=(!activeQuickSelect&&draftEnd)?new Date(draftEnd+'T23:59:59.999'):null;updateDateTriggerLabel();applyFilters();closeDateModal();}
 
-function applyFilters(){var selHealth=getMS('ms-health'),selObcss=getMS('ms-obcss');filtered=ALL.filter(function(c){var cat=healthCategory(c.health);if(selHealth.length&&selHealth.indexOf(cat)<0)return false;if(selObcss.length&&selObcss.indexOf(c.obcss)<0)return false;if(activeQuickSelect){if(c.daysAgo>parseInt(activeQuickSelect,10))return false;}else{if(customStart&&c.created<customStart)return false;if(customEnd&&c.created>customEnd)return false;}return true;});applySort();page=1;render();}
+function applyFilters(){var selHealth=getMS('ms-health'),selObcss=getMS('ms-obcss'),selPlan=getMS('ms-plan');filtered=ALL.filter(function(c){var cat=healthCategory(c.health);if(selHealth.length&&selHealth.indexOf(cat)<0)return false;if(selObcss.length&&selObcss.indexOf(c.obcss)<0)return false;if(selPlan.length&&selPlan.indexOf(c.plan)<0)return false;if(activeQuickSelect){if(c.daysAgo>parseInt(activeQuickSelect,10))return false;}else{if(customStart&&c.created<customStart)return false;if(customEnd&&c.created>customEnd)return false;}return true;});applySort();page=1;render();}
 
-function clearAllFilters(){['ms-health','ms-obcss'].forEach(clearMS);activeQuickSelect=null;customStart=null;customEnd=null;draftQuickSelect=null;draftStart='';draftEnd='';updateDateTriggerLabel();filtered=ALL.slice();page=1;render();}
+function clearAllFilters(){['ms-health','ms-obcss','ms-plan'].forEach(clearMS);activeQuickSelect=null;customStart=null;customEnd=null;draftQuickSelect=null;draftStart='';draftEnd='';updateDateTriggerLabel();filtered=ALL.slice();page=1;render();}
 
 /* Business Rule 4 + Edge Cases 1 & 2: Primary Contact, oldest Admin falling back to oldest user of any role, or a no-contact state */
 function mkRow(c){var contact=getPrimaryContact(c),nameCell,emailCell,phoneCell;if(!contact){nameCell='<span class="contact-empty">No Contact Available</span>';emailCell='<span class="muted">&mdash;</span>';phoneCell='<span class="muted">&mdash;</span>';}else{nameCell='<strong class="truncate" title="'+contact.name+'">'+contact.name+'</strong>'+(contact.fallback?'<div class="contact-fallback-note">No Admin user &mdash; oldest user of any role shown</div>':'');emailCell=contact.email?'<span class="truncate" title="'+contact.email+'">'+contact.email+'</span>':'<span class="muted">&mdash;</span>';phoneCell=contact.phone||'<span class="muted">&mdash;</span>';}return'<tr><td><strong class="truncate" title="'+c.name+'">'+c.name+'</strong></td><td>'+c.createdStr+'</td><td>'+hBadge(c.health)+'</td><td>'+pBadge(c.plan)+'</td><td class="col-sales">'+fmtD(c.totalSales)+'</td><td>'+a2pBadge(c)+'</td><td><span class="truncate" title="'+c.obcss+'">'+c.obcss+'</span></td><td>'+nameCell+'</td><td>'+emailCell+'</td><td class="col-phone">'+phoneCell+'</td></tr>';}

@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-15] At Risk Account Finder: fixed Advanced plan never appearing, added Plan filter
+
+- Decision: Fixed a data bug Jeremy caught: every account showed Plan "Pro," never "Advanced." The generator only ever assigned "Advanced" to Legacy accounts (mirroring health-score's real "Advanced — Legacy" grandfathered-pricing concept), but Business Rule 9 excludes Legacy accounts from this report entirely, so Advanced could never appear once that exclusion landed. Decoupled Plan from Legacy status (now a flat 30% Advanced / 70% Pro roll for every account) and re-added the Plan multi-select filter (All Plans / Pro / Advanced), matching the Health Tier and OBCSS filter pattern.
+- Why: Direct bug report plus explicit filter request. Dropped the "— Legacy" qualifier from the Advanced label in this report specifically, since it would misrepresent Advanced as Legacy-only when every account shown here is non-Legacy by definition.
+- Open question: None.
+
 ## [2026-08-15] At Risk Account Finder: OBCSS column/filter back, A2P Status hover tooltip
 
 - Decision: Re-added the OBCSS column and its multi-select filter, reused verbatim from `health-score/index.html` (same six team members, same "All Team Members" default label). Added a hover tooltip on the A2P Status badge showing the 3-step A2P Application Progress breakdown (Customer Profile, Brand Registration, Campaign Verification, each with status and an "Updated" timestamp), modeled after the real flow in Super Admin > Twilio Management per Jeremy's screenshots, using a native `title` attribute (multi-line via `\n`) rather than a custom popover, since the table card's `overflow:hidden` would clip an absolutely-positioned popover near the top/bottom edges of the visible rows. Rebalanced all 10 column widths so the table still fits without horizontal scroll.
