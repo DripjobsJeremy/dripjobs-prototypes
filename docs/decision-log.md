@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-15] At Risk Account Finder: updated OBCSS roster to current team
+
+- Decision: Replaced the OBCSS team roster (column values, filter checkboxes, and the underlying `OBCSS_TEAM` array the generator draws from) with the current team per Jeremy: Nemesis Pena, Seth Brown, Yoseline Bressan, Alex Calderon, Leonardo Motta, Daniel Lee, Ximena Jimenez. Removed Matt Fournier, Juan Quintero, and Kennedy Smith (no longer on the team) and corrected "Alexis Calderon" to "Alex Calderon". No other code change was needed to "randomly re-assign" accounts, since OBCSS was already assigned per-account at random from `OBCSS_TEAM` on data generation — updating the array alone re-distributes every account across the new roster on next load.
+- Why: Direct roster correction from Jeremy.
+- Open question: None.
+
 ## [2026-08-15] At Risk Account Finder: fixed Advanced plan never appearing, added Plan filter
 
 - Decision: Fixed a data bug Jeremy caught: every account showed Plan "Pro," never "Advanced." The generator only ever assigned "Advanced" to Legacy accounts (mirroring health-score's real "Advanced — Legacy" grandfathered-pricing concept), but Business Rule 9 excludes Legacy accounts from this report entirely, so Advanced could never appear once that exclusion landed. Decoupled Plan from Legacy status (now a flat 30% Advanced / 70% Pro roll for every account) and re-added the Plan multi-select filter (All Plans / Pro / Advanced), matching the Health Tier and OBCSS filter pattern.
