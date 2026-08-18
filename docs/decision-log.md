@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-18] Holiday Calendar Display (US/Canada): control placement confirmed
+
+- Decision: Jeremy confirmed the Holiday Calendar preference control belongs on each calendar's own toolbar (as built) for this round, not a My Profile settings page. Removed the in-page "Assumption: control placement" callout since it's no longer an open question; toolbar placement stands as-is.
+- Why: Direct confirmation from Jeremy.
+- Open question: None.
+
 ## [2026-08-18] Holiday Calendar Display (US/Canada): new clickable prototype
 
 - Decision: Built a new clickable prototype for ticket 86bbc0rvr replicating both the Appointments and Job Schedule calendars from Jeremy's screenshots (Month and 3 Days views, matching toolbar and side-panel layout), with a new "Holiday Calendar" select (None / United States / Canada / United States & Canada) added directly into each calendar's own toolbar rather than a separate My Profile settings page, since the ticket didn't specify placement — flagged as an assumption in-page for Jeremy to confirm. The two calendars share one JS state value so the preference behaves identically on both, per BR-8. Holiday dates are computed with real fixed-date and relative-weekday rule functions (not a hardcoded per-year table) so the Month view genuinely resolves holidays for any year when navigated forward/back, directly demonstrating BR-11. Country tags (US/CA) show on every holiday block whenever "United States & Canada" is selected, rather than only on colliding/similarly-named pairs, to avoid inventing fuzzy name-matching logic while still satisfying the disambiguation requirement (BR-6, using US/CA Thanksgiving as the clearest real example of same name, different date).
