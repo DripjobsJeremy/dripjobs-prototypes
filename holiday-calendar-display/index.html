@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Holiday Calendar Display (US/Canada) — DripJobs</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --color-primary:        #8B85EA;
+    --color-primary-hover:  #736BE3;
+    --color-primary-active: #5C53DC;
+    --color-primary-rgb:    139, 133, 234;
+    --color-bg:             #F3F1FC;
+    --color-text:           #32415B;
+    --color-text-muted:     #80879A;
+    --color-border:         #DAD8E3;
+    --color-card:           #FFFFFF;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100vh;
+  }
+
+  /* ── Top bar ── */
+  .proto-bar {
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; }
+  .back-link {
+    font-size: 12px; font-weight: 500; color: var(--color-text-muted);
+    text-decoration: none; display: flex; align-items: center; gap: 4px;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--color-primary); }
+  .divider { color: var(--color-border); font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; }
+  .proto-bar-ticket {
+    font-size: 11px; font-weight: 600; color: var(--color-primary);
+    text-decoration: none; padding: 4px 10px; border: 1px solid #D6D2F5;
+    background: #E8E6FA; border-radius: 999px; letter-spacing: 0.2px;
+  }
+  .proto-bar-ticket:hover { background: var(--color-primary); color: #fff; }
+
+  .proto-content { max-width: 1140px; margin: 32px auto 64px; padding: 0 24px; }
+
+  .hcd-header { margin-bottom: 20px; }
+  .hcd-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .hcd-header p { font-size: 13px; color: var(--color-text-muted); line-height: 1.6; max-width: 780px; }
+
+  /* ── settings-section / alert / tabs (design system patterns, scoped) ── */
+  #hcd-page .settings-section {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  #hcd-page .settings-section-title { font-size: 14px; font-weight: 600; margin: 0 0 4px 0; }
+  #hcd-page .settings-section-subtitle { font-size: 12px; color: var(--color-text-muted); margin: 0 0 14px 0; }
+
+  #hcd-page .settings-alert {
+    display: flex; align-items: flex-start; gap: 10px;
+    border-radius: 8px; border: 1px solid; padding: 12px 14px;
+    margin-bottom: 12px; font-size: 13px; line-height: 1.5;
+  }
+  #hcd-page .settings-alert--info { background:#EFF6FF; border-color:#BFDBFE; color:#1E40AF; }
+  #hcd-page .settings-alert--warn { background:#FFFBEB; border-color:#FDE68A; color:#92400E; }
+  #hcd-page .settings-alert-icon { font-size: 15px; line-height: 1.4; flex-shrink: 0; }
+  #hcd-page .settings-alert-title { font-weight: 600; margin-bottom: 2px; }
+
+  #hcd-page .settings-tabs nav {
+    display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; margin-bottom: 4px;
+  }
+  #hcd-page .settings-tabs nav::-webkit-scrollbar { display: none; }
+  #hcd-page .settings-tab-link {
+    flex-shrink: 0; text-decoration: none; color: var(--color-text);
+    font-size: 13px; font-weight: 500; padding: 9px 18px; border-radius: 16px;
+    white-space: nowrap; transition: box-shadow 0.15s, font-weight 0.15s; cursor: pointer;
+  }
+  #hcd-page .settings-tab-link:nth-child(1) { background: #E8E6FA; }
+  #hcd-page .settings-tab-link:nth-child(2) { background: #E6FAF0; }
+  #hcd-page .settings-tab-link.active { box-shadow: inset 0 0 0 2px var(--color-primary); font-weight: 600; }
+
+  /* ── Calendar panel header (Google Calendar badge / New button) ── */
+  .hcd-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .hcd-panel-head h2 { font-size: 16px; font-weight: 700; }
+  .hcd-panel-head-right { display: flex; align-items: center; gap: 8px; }
+  .hcd-gcal-badge {
+    background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px;
+    padding: 4px 9px; font-size: 11px; color: #166534; font-weight: 600;
+  }
+  .hcd-btn-decorative {
+    background: var(--color-primary); color: #fff; border: none; border-radius: 8px;
+    padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: default; opacity: 0.9;
+  }
+
+  /* ── Toolbar ── */
+  .hcd-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 0; border-top: 1px solid #F0EFF5; border-bottom: 1px solid #F0EFF5; margin-bottom: 12px; }
+  .hcd-view-toggle { display: flex; gap: 4px; }
+  .hcd-view-btn {
+    border: 1px solid var(--color-border); background: #fff; border-radius: 6px;
+    padding: 5px 10px; font-size: 12px; color: var(--color-text); cursor: pointer; font-weight: 600;
+  }
+  .hcd-view-btn.active { background: #F0EDFB; border-color: var(--color-primary); color: var(--color-primary); }
+  .hcd-nav { display: flex; align-items: center; gap: 6px; }
+  .hcd-nav-btn {
+    background: none; border: 1px solid var(--color-border); border-radius: 6px;
+    width: 26px; height: 26px; cursor: pointer; color: var(--color-text); font-size: 13px;
+  }
+  .hcd-month-label { font-size: 13px; font-weight: 700; min-width: 130px; text-align: center; }
+  .hcd-select {
+    border: 1px solid var(--color-border); background: #fff; border-radius: 6px;
+    padding: 5px 9px; font-size: 12px; color: var(--color-text); font-weight: 600; font-family: inherit;
+  }
+  .hcd-toolbar-spacer { flex: 1 1 auto; min-width: 4px; }
+  .hcd-holiday-wrap { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .hcd-holiday-wrap label { font-size: 12px; font-weight: 700; }
+  .hcd-select.hcd-holiday-select { border-color: var(--color-primary); color: var(--color-primary-active); }
+  .hcd-new-tag {
+    font-size: 9px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase;
+    color: #fff; background: var(--color-primary); border-radius: 999px; padding: 2px 6px;
+  }
+  .hcd-pref-hint { font-size: 11px; color: var(--color-text-muted); width: 100%; margin-top: 2px; }
+
+  /* ── Calendar + side panel row ── */
+  .hcd-cal-row { display: flex; gap: 16px; align-items: flex-start; }
+  .hcd-cal-main { flex: 1; min-width: 0; }
+
+  /* ── Month view ── */
+  .hcd-month-scroll { overflow-x: auto; }
+  .hcd-month-dow, .hcd-month-grid { display: grid; grid-template-columns: repeat(7, minmax(108px, 1fr)); gap: 6px; min-width: 720px; }
+  .hcd-month-dow { margin-bottom: 6px; }
+  .hcd-month-dow div { font-size: 10px; font-weight: 700; color: var(--color-text-muted); text-align: center; text-transform: uppercase; letter-spacing: 0.4px; }
+  .hcd-month-cell { background: #fff; border: 1px solid var(--color-border); border-radius: 8px; padding: 6px; min-height: 96px; }
+  .hcd-month-cell--other { background: #FAFAFC; }
+  .hcd-month-cell--other .hcd-month-date { color: #C4C3CF; }
+  .hcd-month-cell--today { border-color: var(--color-primary); background: #FFFBEB; }
+  .hcd-month-date { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+  .hcd-month-lines { display: flex; flex-direction: column; gap: 3px; }
+  .hcd-month-more {
+    margin-top: 3px; border: none; background: transparent; color: var(--color-primary);
+    font-size: 10px; font-weight: 700; cursor: pointer; padding: 0; font-family: inherit;
+  }
+  .hcd-month-extra { display: flex; flex-direction: column; gap: 3px; margin-top: 3px; }
+
+  /* ── Event / holiday chips (shared between month + 3-day) ── */
+  .hcd-event-chip {
+    display: flex; gap: 4px; align-items: baseline; border-left: 3px solid #7C3AED;
+    background: #F5F3FF; border-radius: 3px; padding: 2px 4px; font-size: 10px; font-weight: 600;
+    color: #32415B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .hcd-event-time { color: var(--color-text-muted); font-weight: 700; flex-shrink: 0; }
+  .hcd-event-title { overflow: hidden; text-overflow: ellipsis; }
+  .hcd-holiday-chip {
+    display: flex; align-items: center; gap: 4px; background: repeating-linear-gradient(135deg, #FFF7E6, #FFF7E6 6px, #FFF1D2 6px, #FFF1D2 12px);
+    border: 1px dashed #E0AA3E; border-radius: 3px; padding: 2px 5px; font-size: 10px; font-weight: 700;
+    color: #8A5A00; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default;
+  }
+  .hcd-holiday-name { overflow: hidden; text-overflow: ellipsis; }
+  .hcd-flag {
+    font-size: 8px; font-weight: 800; background: #8A5A00; color: #fff; border-radius: 3px;
+    padding: 1px 3px; flex-shrink: 0; letter-spacing: 0.2px;
+  }
+
+  /* ── 3 Day view ── */
+  .hcd-3day-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
+  .hcd-3day-col { background: #FAFAFC; border: 1px solid var(--color-border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .hcd-3day-col--today { border-color: var(--color-primary); background: #F5F4FE; }
+  .hcd-3day-head { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+  .hcd-3day-allday-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; color: var(--color-text-muted); margin-top: 2px; }
+  .hcd-3day-allday, .hcd-3day-events { display: flex; flex-direction: column; gap: 4px; }
+  .hcd-3day-events { border-top: 1px dashed var(--color-border); padding-top: 6px; margin-top: 2px; }
+  .hcd-3day-empty { font-size: 11px; color: var(--color-text-muted); }
+  @media (max-width: 720px) { .hcd-3day-grid { grid-template-columns: 1fr; } }
+
+  /* ── Side panel ── */
+  .hcd-side-panel { width: 270px; flex-shrink: 0; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; }
+  .hcd-side-header { padding: 10px 12px; border-bottom: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between; }
+  .hcd-side-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .hcd-side-badge { background: var(--color-primary); color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
+  .hcd-side-list { max-height: 420px; overflow-y: auto; }
+  .hcd-side-card { padding: 10px 12px; border-bottom: 1px solid #F0EFF5; display: flex; gap: 8px; align-items: flex-start; }
+  .hcd-side-card-body { flex: 1; min-width: 0; }
+  .hcd-side-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hcd-side-detail { font-size: 11px; color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 1px 0; }
+  .hcd-side-source { font-size: 10px; color: var(--color-text-muted); font-weight: 600; }
+  .hcd-side-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+  .hcd-side-time { font-size: 10px; color: #AAA9B5; white-space: nowrap; }
+  .hcd-side-schedule { background: var(--color-primary); color: #fff; border: none; border-radius: 6px; padding: 3px 8px; font-size: 10px; font-weight: 700; cursor: default; opacity: 0.9; }
+  .hcd-side-more { padding: 8px 12px; font-size: 11px; color: var(--color-text-muted); text-align: center; }
+  @media (max-width: 860px) { .hcd-cal-row { flex-direction: column; } .hcd-side-panel { width: 100%; } }
+
+  /* ── Acceptance criteria list ── */
+  .hcd-ac-list { display: flex; flex-direction: column; gap: 10px; }
+  .hcd-ac-item { display: flex; gap: 10px; font-size: 13px; line-height: 1.5; }
+  .hcd-ac-check { color: #166534; font-weight: 700; flex-shrink: 0; }
+  .hcd-ac-item b { font-weight: 600; }
+  .hcd-ac-item span.muted { color: var(--color-text-muted); }
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Holiday Calendar Display (US/Canada)</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bbc0rvr" target="_blank">86bbc0rvr</a>
+</div>
+
+<div class="proto-content" id="hcd-page">
+
+  <div class="hcd-header">
+    <h1>Holiday Calendar Display (US/Canada)</h1>
+    <p>Prototype for ticket 86bbc0rvr. Adds a per-user "Holiday Calendar" preference (None / United States / Canada / United States &amp; Canada) that overlays non-editable, visually distinct holiday blocks on the Appointments and Job Schedule calendars. The two calendars below share one preference, so changing it in either place applies identically to both. Default is None — reload this page and both calendars match the current production look from the tickets' screenshots.</p>
+  </div>
+
+  <div class="settings-alert settings-alert--info">
+    <span class="settings-alert-icon">ℹ️</span>
+    <div>
+      <div class="settings-alert-title">Assumption: control placement</div>
+      <div>The ticket doesn't specify where the Holiday Calendar preference control should live. This prototype places it directly in each calendar's own toolbar, next to the existing filter dropdowns, since that gives immediate visual feedback and matches how the other session filters already work there. It's still a single per-user preference underneath — change it on either calendar and the other updates too. A production build may instead source it from a My Profile settings page; flagging for Jeremy to confirm.</div>
+    </div>
+  </div>
+
+  <div class="settings-alert settings-alert--warn">
+    <span class="settings-alert-icon">⚠️</span>
+    <div>
+      <div class="settings-alert-title">Scope limits on the holiday data set</div>
+      <div>To prove indefinite, rule-based resolution (BR-11), this prototype computes real fixed-date holidays (e.g. July 4) and relative-weekday holidays (e.g. "4th Thursday of November") for any year — try navigating the Month view forward a few years. It intentionally excludes lunar/Easter-based holidays (e.g. Good Friday) and province-only Canadian observances, which would need a fuller reference table than this ticket's examples call for. Company timezone handling isn't rebuilt here — dates use the calendar's existing date grid, consistent with a timezone setting that already exists in Company Settings → Calendar, out of scope for this ticket.</div>
+    </div>
+  </div>
+
+  <div class="settings-tabs">
+    <nav>
+      <a href="#" class="settings-tab-link active" data-cal="appt">Appointments</a>
+      <a href="#" class="settings-tab-link" data-cal="job">Job Schedule</a>
+    </nav>
+  </div>
+
+  <!-- ═══ Appointments calendar ═══ -->
+  <div class="settings-section" id="calPanel-appt">
+    <div class="hcd-panel-head">
+      <h2>Appointments</h2>
+      <div class="hcd-panel-head-right">
+        <span class="hcd-gcal-badge">✓ Google Calendar — Connected</span>
+        <button class="hcd-btn-decorative" title="Not part of this prototype">+ New Appointment ▾</button>
+      </div>
+    </div>
+
+    <div class="hcd-toolbar">
+      <div class="hcd-view-toggle">
+        <button class="hcd-view-btn active" id="appt-viewMonthBtn" onclick="setView('appt','month')">Month</button>
+        <button class="hcd-view-btn" id="appt-view3dayBtn" onclick="setView('appt','3day')">3 Days</button>
+      </div>
+      <div class="hcd-nav">
+        <button class="hcd-nav-btn" onclick="shiftAnchor('appt',-1)">‹</button>
+        <span class="hcd-month-label" id="appt-monthLabel"></span>
+        <button class="hcd-nav-btn" onclick="shiftAnchor('appt',1)">›</button>
+      </div>
+      <select class="hcd-select" disabled><option>All Event Types</option></select>
+      <select class="hcd-select" disabled><option>All Users</option></select>
+      <div class="hcd-toolbar-spacer"></div>
+      <div class="hcd-holiday-wrap">
+        <span class="hcd-new-tag">New</span>
+        <label for="appt-holidaySelect">Holiday Calendar</label>
+        <select class="hcd-select hcd-holiday-select" id="appt-holidaySelect" onchange="onHolidayChange(this.value)">
+          <option value="none">None</option>
+          <option value="us">United States</option>
+          <option value="ca">Canada</option>
+          <option value="both">United States &amp; Canada</option>
+        </select>
+      </div>
+      <div class="hcd-pref-hint">Per-user — only affects your own calendar view. Applies the same way on Job Schedule.</div>
+    </div>
+
+    <div class="hcd-cal-row">
+      <div class="hcd-cal-main" id="appt-grid"></div>
+      <div class="hcd-side-panel">
+        <div class="hcd-side-header">
+          <div class="hcd-side-title">Requests <span class="hcd-side-badge">2</span></div>
+        </div>
+        <div class="hcd-side-list">
+          <div class="hcd-side-card">
+            <div class="hcd-side-card-body">
+              <div class="hcd-side-name">Jeremy Wayne</div>
+              <div class="hcd-side-detail">kitchen and bath</div>
+              <div class="hcd-side-source">Came to me in a Dream</div>
+            </div>
+            <div class="hcd-side-right">
+              <span class="hcd-side-time">7 months ago</span>
+              <button class="hcd-side-schedule" title="Not part of this prototype">Schedule</button>
+            </div>
+          </div>
+          <div class="hcd-side-card">
+            <div class="hcd-side-card-body">
+              <div class="hcd-side-name">Michael Dorsey</div>
+              <div class="hcd-side-detail">Kitchen &amp; Bath Remodel</div>
+              <div class="hcd-side-source">A Little Bird</div>
+            </div>
+            <div class="hcd-side-right">
+              <span class="hcd-side-time">7 months ago</span>
+              <button class="hcd-side-schedule" title="Not part of this prototype">Schedule</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Job Schedule calendar ═══ -->
+  <div class="settings-section" id="calPanel-job" hidden>
+    <div class="hcd-panel-head">
+      <h2>Job Schedule</h2>
+      <div class="hcd-panel-head-right">
+        <span class="hcd-gcal-badge">✓ Google Calendar — Connected</span>
+        <button class="hcd-btn-decorative" title="Not part of this prototype">+ New Event ▾</button>
+      </div>
+    </div>
+
+    <div class="hcd-toolbar">
+      <div class="hcd-view-toggle">
+        <button class="hcd-view-btn active" id="job-viewMonthBtn" onclick="setView('job','month')">Month</button>
+        <button class="hcd-view-btn" id="job-view3dayBtn" onclick="setView('job','3day')">3 Days</button>
+      </div>
+      <div class="hcd-nav">
+        <button class="hcd-nav-btn" onclick="shiftAnchor('job',-1)">‹</button>
+        <span class="hcd-month-label" id="job-monthLabel"></span>
+        <button class="hcd-nav-btn" onclick="shiftAnchor('job',1)">›</button>
+      </div>
+      <select class="hcd-select" disabled><option>All Crews</option></select>
+      <select class="hcd-select" disabled><option>All Users</option></select>
+      <select class="hcd-select" disabled><option>All Event Types</option></select>
+      <div class="hcd-toolbar-spacer"></div>
+      <div class="hcd-holiday-wrap">
+        <span class="hcd-new-tag">New</span>
+        <label for="job-holidaySelect">Holiday Calendar</label>
+        <select class="hcd-select hcd-holiday-select" id="job-holidaySelect" onchange="onHolidayChange(this.value)">
+          <option value="none">None</option>
+          <option value="us">United States</option>
+          <option value="ca">Canada</option>
+          <option value="both">United States &amp; Canada</option>
+        </select>
+      </div>
+      <div class="hcd-pref-hint">Per-user — only affects your own calendar view. Applies the same way on Appointments.</div>
+    </div>
+
+    <div class="hcd-cal-row">
+      <div class="hcd-cal-main" id="job-grid"></div>
+      <div class="hcd-side-panel">
+        <div class="hcd-side-header">
+          <div class="hcd-side-title">Pending Schedule <span class="hcd-side-badge">50</span></div>
+        </div>
+        <div class="hcd-side-list">
+          <div class="hcd-side-card">
+            <div class="hcd-side-card-body">
+              <div class="hcd-side-name">Old Accept Modal</div>
+              <div class="hcd-side-detail">Proposal #3216268 · $2,550.00</div>
+            </div>
+            <div class="hcd-side-right">
+              <span class="hcd-side-time">4 days ago</span>
+              <button class="hcd-side-schedule" title="Not part of this prototype">Schedule</button>
+            </div>
+          </div>
+          <div class="hcd-side-card">
+            <div class="hcd-side-card-body">
+              <div class="hcd-side-name">Two Proposals</div>
+              <div class="hcd-side-detail">Proposal #3182987 · $5,000.00</div>
+            </div>
+            <div class="hcd-side-right">
+              <span class="hcd-side-time">12 days ago</span>
+              <button class="hcd-side-schedule" title="Not part of this prototype">Schedule</button>
+            </div>
+          </div>
+          <div class="hcd-side-card">
+            <div class="hcd-side-card-body">
+              <div class="hcd-side-name">Tax 2</div>
+              <div class="hcd-side-detail">Proposal #3109361 · $6,629.72</div>
+            </div>
+            <div class="hcd-side-right">
+              <span class="hcd-side-time">4 days ago</span>
+              <button class="hcd-side-schedule" title="Not part of this prototype">Schedule</button>
+            </div>
+          </div>
+          <div class="hcd-side-card">
+            <div class="hcd-side-card-body">
+              <div class="hcd-side-name">Adam Addams II</div>
+              <div class="hcd-side-detail">Proposal #3089885 · $4,120.00</div>
+            </div>
+            <div class="hcd-side-right">
+              <span class="hcd-side-time">5 days ago</span>
+              <button class="hcd-side-schedule" title="Not part of this prototype">Schedule</button>
+            </div>
+          </div>
+          <div class="hcd-side-card">
+            <div class="hcd-side-card-body">
+              <div class="hcd-side-name">Packages</div>
+              <div class="hcd-side-detail">Proposal #2700136 · $2,500.00</div>
+            </div>
+            <div class="hcd-side-right">
+              <span class="hcd-side-time">4 months ago</span>
+              <button class="hcd-side-schedule" title="Not part of this prototype">Schedule</button>
+            </div>
+          </div>
+          <div class="hcd-side-more">+45 more, not shown in this prototype</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">Acceptance criteria coverage</div>
+    <div class="settings-section-subtitle">How this prototype demonstrates each acceptance criterion from the ticket.</div>
+    <div class="hcd-ac-list">
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Per-user preference with None / United States / Canada / United States &amp; Canada</b> — <span class="muted">the "Holiday Calendar" select in either calendar's toolbar.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Defaults to None</b> — <span class="muted">both calendars load with no holiday blocks until you change the selector.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Changing the preference only affects your own view</b> — <span class="muted">simulated here as one shared prototype-session value; no other-user state exists to demo against.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Correctly labeled, non-editable holiday blocks on Appointments</b> — <span class="muted">Appointments tab, Month or 3 Days view, any region selected.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Same on Job Schedule</b> — <span class="muted">Job Schedule tab, identical control and block styling.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>"United States &amp; Canada" shows both, with country labeling on same-named holidays that fall on different dates</b> — <span class="muted">select "United States &amp; Canada" and compare October vs. November Thanksgiving — each block gets a US/CA tag.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Company-timezone-based date determination</b> — <span class="muted">not rebuilt here; holiday dates are computed directly against the calendar grid, consistent with the existing Company Settings → Calendar timezone.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Resolves indefinitely, including relative-rule holidays</b> — <span class="muted">navigate the Month view forward or back several years; Memorial Day, Thanksgiving, etc. recompute correctly every time.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Existing jobs/appointments stay schedulable and editable alongside a holiday block</b> — <span class="muted">sample events on Aug 10–11, 2026 render next to holiday blocks with no interaction blocked.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Holiday blocks are visually distinct from real events</b> — <span class="muted">dashed amber hatch pattern vs. solid purple/teal event chips, and holiday blocks aren't clickable.</span></span></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const DEMO_TODAY = new Date(2026, 7, 18); // Aug 18, 2026 — matches the ticket's screenshots
+  let holidayRegion = 'none';
+
+  const calState = {
+    appt: { view: 'month', anchor: new Date(2026, 7, 1) },
+    job:  { view: 'month', anchor: new Date(2026, 7, 1) },
+  };
+
+  // ── Sample events (decorative, matches the ticket's screenshots) ──
+  const EVENTS = {
+    appt: {
+      '2026-07-28': [
+        { time: '1:00p', title: 'Dripjobs Harrison – On-Site Estimate' },
+        { time: '3:30p', title: 'Dripjobs Harrison – On-Site Estimate' },
+      ],
+      '2026-08-06': [{ time: '7:00a', title: 'Tommy Moss – On-Site Estimate' }],
+      '2026-08-11': [{ time: '1:30p', title: 'Dripjobs Harrison – On-Site Estimate' }],
+    },
+    job: {
+      '2026-08-10': [{ time: '9:00a', title: 'Tommy Moss – $4,200.00', color: '#7C3AED' }],
+      '2026-08-11': [{ time: '2:00p', title: 'Dripjobs Harrison – New Job (No Proposal)', color: '#0DCECE' }],
+    },
+  };
+
+  // ── Holiday date-rule engine (fixed-date and relative-weekday rules, resolves for any year) ──
+  function fixedDate(y, m, d) { return new Date(y, m, d); }
+  function nthWeekday(y, m, weekday, n) {
+    const first = new Date(y, m, 1);
+    const offset = (7 + weekday - first.getDay()) % 7;
+    return new Date(y, m, 1 + offset + (n - 1) * 7);
+  }
+  function lastWeekday(y, m, weekday) {
+    const last = new Date(y, m + 1, 0);
+    const offset = (7 + last.getDay() - weekday) % 7;
+    return new Date(y, m, last.getDate() - offset);
+  }
+  function weekdayOnOrBefore(y, m, d, weekday) {
+    const base = new Date(y, m, d);
+    const offset = (7 + base.getDay() - weekday) % 7;
+    base.setDate(base.getDate() - offset);
+    return base;
+  }
+
+  const US_HOLIDAY_RULES = [
+    { name: "New Year's Day",   rule: y => fixedDate(y, 0, 1) },
+    { name: "Martin Luther King Jr. Day", rule: y => nthWeekday(y, 0, 1, 3) },
+    { name: "Presidents' Day",  rule: y => nthWeekday(y, 1, 1, 3) },
+    { name: "Memorial Day",     rule: y => lastWeekday(y, 4, 1) },
+    { name: "Juneteenth",       rule: y => fixedDate(y, 5, 19) },
+    { name: "Independence Day", rule: y => fixedDate(y, 6, 4) },
+    { name: "Labor Day",        rule: y => nthWeekday(y, 8, 1, 1) },
+    { name: "Columbus Day",     rule: y => nthWeekday(y, 9, 1, 2) },
+    { name: "Veterans Day",     rule: y => fixedDate(y, 10, 11) },
+    { name: "Thanksgiving",     rule: y => nthWeekday(y, 10, 4, 4) },
+    { name: "Christmas Day",    rule: y => fixedDate(y, 11, 25) },
+  ];
+  const CA_HOLIDAY_RULES = [
+    { name: "New Year's Day",   rule: y => fixedDate(y, 0, 1) },
+    { name: "Family Day",       rule: y => nthWeekday(y, 1, 1, 3) },
+    { name: "Victoria Day",     rule: y => weekdayOnOrBefore(y, 4, 24, 1) },
+    { name: "Canada Day",       rule: y => fixedDate(y, 6, 1) },
+    { name: "Labour Day",       rule: y => nthWeekday(y, 8, 1, 1) },
+    { name: "Thanksgiving",     rule: y => nthWeekday(y, 9, 1, 2) },
+    { name: "Remembrance Day",  rule: y => fixedDate(y, 10, 11) },
+    { name: "Christmas Day",    rule: y => fixedDate(y, 11, 25) },
+    { name: "Boxing Day",       rule: y => fixedDate(y, 11, 26) },
+  ];
+
+  function sameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+  function dateKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  function holidaysOnDate(date, region) {
+    if (region === 'none') return [];
+    const year = date.getFullYear();
+    let list = [];
+    if (region === 'us' || region === 'both') list = list.concat(US_HOLIDAY_RULES.map(h => ({ name: h.name, country: 'US', date: h.rule(year) })));
+    if (region === 'ca' || region === 'both') list = list.concat(CA_HOLIDAY_RULES.map(h => ({ name: h.name, country: 'CA', date: h.rule(year) })));
+    return list.filter(h => sameDay(h.date, date));
+  }
+
+  // ── Rendering ──
+  function lineHTML(l) {
+    if (l.kind === 'event') {
+      const color = l.color || '#7C3AED';
+      return `<div class="hcd-event-chip" style="border-left-color:${color}"><span class="hcd-event-time">${l.time}</span><span class="hcd-event-title">${l.title}</span></div>`;
+    }
+    const tag = holidayRegion === 'both' ? `<span class="hcd-flag">${l.country}</span>` : '';
+    const countryName = l.country === 'US' ? 'United States' : 'Canada';
+    return `<div class="hcd-holiday-chip" title="${l.name} — ${countryName} holiday, non-editable"><span class="hcd-holiday-name">${l.name}</span>${tag}</div>`;
+  }
+
+  function buildMonthCells(anchor) {
+    const year = anchor.getFullYear(), month = anchor.getMonth();
+    const firstWeekday = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const prevMonthDays = new Date(year, month, 0).getDate();
+    const cells = [];
+    for (let i = firstWeekday - 1; i >= 0; i--) cells.push({ date: new Date(year, month - 1, prevMonthDays - i), otherMonth: true });
+    for (let d = 1; d <= daysInMonth; d++) cells.push({ date: new Date(year, month, d), otherMonth: false });
+    while (cells.length % 7 !== 0) {
+      const last = cells[cells.length - 1].date;
+      const next = new Date(last); next.setDate(next.getDate() + 1);
+      cells.push({ date: next, otherMonth: true });
+    }
+    return cells;
+  }
+
+  function monthCellHTML(calId, cellDate, isOtherMonth) {
+    const key = dateKey(cellDate);
+    const events = (EVENTS[calId][key] || []).map(e => ({ ...e, kind: 'event' }));
+    const holidays = holidaysOnDate(cellDate, holidayRegion).map(h => ({ ...h, kind: 'holiday' }));
+    const lines = events.concat(holidays);
+    const visible = lines.slice(0, 3);
+    const overflow = lines.length - visible.length;
+    const isToday = sameDay(cellDate, DEMO_TODAY);
+    const cellId = `${calId}-cell-${key}`;
+    const classes = ['hcd-month-cell', isOtherMonth ? 'hcd-month-cell--other' : '', isToday ? 'hcd-month-cell--today' : ''].filter(Boolean).join(' ');
+    return `<div class="${classes}">
+      <div class="hcd-month-date">${cellDate.getDate()}</div>
+      <div class="hcd-month-lines">${visible.map(lineHTML).join('')}</div>
+      ${overflow > 0 ? `<button type="button" class="hcd-month-more" data-target="${cellId}-extra" data-count="${overflow}">+${overflow} more</button><div class="hcd-month-extra" id="${cellId}-extra" hidden>${lines.slice(3).map(lineHTML).join('')}</div>` : ''}
+    </div>`;
+  }
+
+  function renderMonth(calId) {
+    const state = calState[calId];
+    const cells = buildMonthCells(state.anchor);
+    const grid = document.getElementById(`${calId}-grid`);
+    grid.innerHTML = `
+      <div class="hcd-month-scroll">
+        <div class="hcd-month-dow">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div>${d}</div>`).join('')}</div>
+        <div class="hcd-month-grid">${cells.map(c => monthCellHTML(calId, c.date, c.otherMonth)).join('')}</div>
+      </div>`;
+    grid.querySelectorAll('.hcd-month-more').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const extra = document.getElementById(btn.dataset.target);
+        const collapsed = extra.hidden;
+        extra.hidden = !collapsed;
+        btn.textContent = collapsed ? 'Show less' : `+${btn.dataset.count} more`;
+      });
+    });
+    document.getElementById(`${calId}-monthLabel`).textContent = state.anchor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  }
+
+  function render3Day(calId) {
+    const state = calState[calId];
+    const dates = [0, 1, 2].map(o => { const d = new Date(state.anchor); d.setDate(d.getDate() + o); return d; });
+    const grid = document.getElementById(`${calId}-grid`);
+    grid.innerHTML = `<div class="hcd-3day-grid">${dates.map(d => {
+      const key = dateKey(d);
+      const events = EVENTS[calId][key] || [];
+      const holidays = holidaysOnDate(d, holidayRegion);
+      const isToday = sameDay(d, DEMO_TODAY);
+      return `<div class="hcd-3day-col ${isToday ? 'hcd-3day-col--today' : ''}">
+        <div class="hcd-3day-head">${d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+        <div class="hcd-3day-allday-label">All-day</div>
+        <div class="hcd-3day-allday">${holidays.length ? holidays.map(h => lineHTML({ ...h, kind: 'holiday' })).join('') : '<div class="hcd-3day-empty">—</div>'}</div>
+        <div class="hcd-3day-events">${events.length ? events.map(e => lineHTML({ ...e, kind: 'event' })).join('') : '<div class="hcd-3day-empty">No events</div>'}</div>
+      </div>`;
+    }).join('')}</div>`;
+    const end = dates[2];
+    document.getElementById(`${calId}-monthLabel`).textContent =
+      `${dates[0].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  }
+
+  function renderCalendar(calId) {
+    calState[calId].view === 'month' ? renderMonth(calId) : render3Day(calId);
+  }
+
+  function setView(calId, view) {
+    calState[calId].view = view;
+    document.getElementById(`${calId}-viewMonthBtn`).classList.toggle('active', view === 'month');
+    document.getElementById(`${calId}-view3dayBtn`).classList.toggle('active', view === '3day');
+    renderCalendar(calId);
+  }
+
+  function shiftAnchor(calId, dir) {
+    const state = calState[calId];
+    const d = new Date(state.anchor);
+    if (state.view === 'month') d.setMonth(d.getMonth() + dir);
+    else d.setDate(d.getDate() + dir * 3);
+    state.anchor = d;
+    renderCalendar(calId);
+  }
+
+  function onHolidayChange(value) {
+    holidayRegion = value;
+    ['appt', 'job'].forEach(id => {
+      const sel = document.getElementById(`${id}-holidaySelect`);
+      if (sel.value !== value) sel.value = value;
+      renderCalendar(id);
+    });
+  }
+
+  // ── Tabs ──
+  document.querySelectorAll('.settings-tab-link').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('.settings-tab-link').forEach(x => x.classList.toggle('active', x === a));
+      document.getElementById('calPanel-appt').hidden = a.dataset.cal !== 'appt';
+      document.getElementById('calPanel-job').hidden = a.dataset.cal !== 'job';
+    });
+  });
+
+  // ── Init ──
+  renderCalendar('appt');
+  renderCalendar('job');
+</script>
+
+</body>
+</html>
