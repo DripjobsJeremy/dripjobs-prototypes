@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-18] Prototype Hub: full ClickUp status sync, removed shipped cards, default sort changed
+
+- Decision: Pulled current status for all 31 ClickUp tickets referenced on the Prototypes tab and reconciled the hub against it. Corrected 6 stale badges (Tasks UI Refresh postponed to needs design; Super Admin: Connect Branches, Metrics DripSense, Customer Portal Unsubscribe UX Improvements, and Active Company Toggle: Billing Confirmation all needs design/analysis/triage to In QA Testing since their tickets are past testing complete/PR created; At Risk Account Finder needs design to Ready for Dev). Updated the Job Address + Column Management mixed-status tooltip since two of its three linked tickets have shipped. Removed 9 cards whose tickets now show "pushed to production": HealthScore 2.12, DJ Health Score v2.0, HealthScore+ Lifecycle Status (all ticket 86b9512kq), QBO State of Integration Report and QuickBooks Initial Connect and Sync (both 86b8nxcm2), Customer Portal Documents, Send Test Email for Drips, Bulk Archive Requests, and Contact Profile Upcoming Jobs. Also changed the hub's default sort on page load from "Default Order" to "Newest First" (select option and an initial `applySort()` call added).
+- Why: Direct request to sync the Prototypes tab with ClickUp and drop shipped prototypes so the hub only shows active pipeline work, newest first by default.
+- Open question: Default Proposal Templates (86b8q5zv7) and Jobs Schedule Calendar — Crew Leveling (86barp4zu) both now show ClickUp status "no fix needed," not "pushed to production." Left both cards in place since the removal instruction was specifically scoped to shipped tickets, not dropped ones. Jeremy should confirm whether "no fix needed" prototypes should also come off the hub.
+
 ## [2026-08-15] At Risk Account Finder: updated OBCSS roster to current team
 
 - Decision: Replaced the OBCSS team roster (column values, filter checkboxes, and the underlying `OBCSS_TEAM` array the generator draws from) with the current team per Jeremy: Nemesis Pena, Seth Brown, Yoseline Bressan, Alex Calderon, Leonardo Motta, Daniel Lee, Ximena Jimenez. Removed Matt Fournier, Juan Quintero, and Kennedy Smith (no longer on the team) and corrected "Alexis Calderon" to "Alex Calderon". No other code change was needed to "randomly re-assign" accounts, since OBCSS was already assigned per-account at random from `OBCSS_TEAM` on data generation — updating the array alone re-distributes every account across the new roster on next load.
