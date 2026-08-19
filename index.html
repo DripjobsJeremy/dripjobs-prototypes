@@ -301,22 +301,58 @@
     font-weight: 600;
     color: var(--color-text);
     line-height: 1.3;
+    min-height: 2.6em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   .proto-desc {
     font-size: 12px;
     color: var(--color-text-muted);
     line-height: 1.5;
+    min-height: 7.5em;
+    max-height: 7.5em;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .proto-desc.expanded {
+    max-height: none;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+  .proto-desc-toggle {
+    appearance: none;
+    border: none;
+    background: none;
+    padding: 0;
+    margin-top: -6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-primary);
+    cursor: pointer;
+    align-self: flex-start;
+  }
+  .proto-desc-toggle:hover { color: var(--color-primary-hover); text-decoration: underline; }
+  .proto-desc-toggle.is-placeholder {
+    visibility: hidden;
+    pointer-events: none;
+    cursor: default;
   }
 
   .proto-card-footer {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     flex-wrap: wrap;
     row-gap: 8px;
     padding-top: 10px;
     border-top: 1px solid var(--color-border);
     gap: 8px;
+    min-height: 61px;
   }
   .ticket-link {
     font-size: 11px;
@@ -1256,6 +1292,30 @@
       const monthYear = latest.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
       document.getElementById('last-updated-date').textContent = monthYear;
     }
+  })();
+
+  // ── Full name on hover (name is visually clamped to 2 lines) + "Show more" for clamped descriptions ──
+  (function setupClampedText() {
+    document.querySelectorAll('.proto-name').forEach(el => {
+      el.setAttribute('title', el.textContent.trim());
+    });
+    document.querySelectorAll('.proto-desc').forEach(desc => {
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'proto-desc-toggle';
+      toggle.textContent = 'Show more';
+      // Reserve the same layout space on every card, even when this description
+      // doesn't overflow, so cards stay a consistent height either way.
+      if (desc.scrollHeight <= desc.clientHeight + 1) {
+        toggle.classList.add('is-placeholder');
+      } else {
+        toggle.addEventListener('click', () => {
+          const expanded = desc.classList.toggle('expanded');
+          toggle.textContent = expanded ? 'Show less' : 'Show more';
+        });
+      }
+      desc.insertAdjacentElement('afterend', toggle);
+    });
   })();
 
   const cards = document.querySelectorAll('.proto-card');
