@@ -195,31 +195,6 @@
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
   }
-  .filter-chips {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-  .chip {
-    height: 32px;
-    padding: 0 14px;
-    border-radius: 999px;
-    border: 1px solid var(--color-border);
-    background: var(--color-card);
-    font-size: 12px;
-    font-weight: 500;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
-  .chip.active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: #fff;
-  }
-
   /* ── Stats row ── */
   .stats-row {
     display: grid;
@@ -501,22 +476,22 @@
   <!-- Filter bar -->
   <div class="filter-bar">
     <input class="filter-search" type="text" id="searchInput" placeholder="Search prototypes…" />
-    <div class="filter-chips">
-      <button class="chip active" data-filter="all">All</button>
-      <button class="chip" data-filter="triage">Active Triage</button>
-      <button class="chip" data-filter="analysis">Needs PM Analysis</button>
-      <button class="chip" data-filter="new">New</button>
-      <button class="chip" data-filter="postponed">Postponed</button>
-      <button class="chip" data-filter="design">Needs Design</button>
-      <button class="chip" data-filter="readydev">Ready for Dev</button>
-      <button class="chip" data-filter="testing">In QA Testing</button>
-      <button class="chip" data-filter="shipped">Pushed to Production</button>
-      <button class="chip" data-filter="mixed">Mixed Status</button>
-    </div>
     <select class="filter-search" id="sortSelect" style="flex:0 0 auto; min-width:170px; cursor:pointer;">
       <option value="default">Sort: Default Order</option>
       <option value="newest" selected>Sort: Newest First</option>
       <option value="oldest">Sort: Oldest First</option>
+    </select>
+    <select class="filter-search" id="statusFilter" style="flex:0 0 auto; min-width:190px; cursor:pointer;">
+      <option value="all" selected>Status: All</option>
+      <option value="triage">Active Triage</option>
+      <option value="analysis">Needs PM Analysis</option>
+      <option value="new">New</option>
+      <option value="postponed">Postponed</option>
+      <option value="design">Needs Design</option>
+      <option value="readydev">Ready for Dev</option>
+      <option value="testing">In QA Testing</option>
+      <option value="shipped">Pushed to Production</option>
+      <option value="mixed">Mixed Status</option>
     </select>
   </div>
 
@@ -1284,13 +1259,13 @@
   })();
 
   const cards = document.querySelectorAll('.proto-card');
-  const chips = document.querySelectorAll('.chip');
+  const statusFilter = document.getElementById('statusFilter');
   const searchInput = document.getElementById('searchInput');
   const emptyState = document.getElementById('emptyState');
-  let activeFilter = 'all';
 
   function applyFilters() {
     const q = searchInput.value.toLowerCase().trim();
+    const activeFilter = statusFilter.value;
     let visible = 0;
     cards.forEach(card => {
       const nameMatch = card.dataset.name.includes(q);
@@ -1305,15 +1280,7 @@
     emptyState.classList.toggle('visible', visible === 0);
   }
 
-  chips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      chips.forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      activeFilter = chip.dataset.filter;
-      applyFilters();
-    });
-  });
-
+  statusFilter.addEventListener('change', applyFilters);
   searchInput.addEventListener('input', applyFilters);
 
   // ── Sort by date added ──
