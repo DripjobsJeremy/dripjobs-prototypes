@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-20] Business Entity Records — V1: linked ClickUp ticket 86bbhhhqd
+
+- Decision: Connected the "Business Entity Records (V1)" epic (86bbhhhqd) to the existing Business Entity Records — V1 card, replacing its "No Ticket" placeholder. Confirmed via ClickUp that the ticket's scope (standalone Business Entity record type, tabbed profile, Businesses nav item, Contact-to-Business association) matches the card's existing description. Updated the status badge from Needs PM Analysis to Needs Design to match the ticket's live ClickUp status.
+- Why: Direct request from Jeremy to link the ticket; status corrected to keep the card in sync per the hub's ClickUp-status convention.
+- Open question: None.
+
 ## [2026-08-20] Prototype Hub: deploy sync from Drippy Slack report, adopted going forward
 
 - Decision: Matched 7 tickets from a pasted Drippy "Deployed to PROD" Slack report against the Prototypes tab. 3 matched and were removed as shipped: Customer Portal — Unsubscribe UX Improvements (86bagq9vf), Super Admin: Connect Branches (86b2uvyy7), Active Company Toggle: Billing Confirmation (86bb85q08). The other 4 deployed tickets (86bb9qypg, 86bbau2q0, 86bb9q4p4, 86bb9kz94) have no corresponding hub card, no action needed. Documented this as the standing "Deploy sync" convention in CLAUDE.md: Jeremy pastes Drippy's deploy report with the lead-in "Sync hub:" and any session matches tickets against the hub and removes shipped cards, no scheduled automation or ClickUp API access required.
