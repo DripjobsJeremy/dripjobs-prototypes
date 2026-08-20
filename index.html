@@ -481,9 +481,9 @@
 
   <!-- Top Tabs -->
   <div class="hub-tabs">
-    <button class="hub-tab active" data-view="prototypesView">Prototypes</button>
-    <button class="hub-tab" data-view="releaseNotesView">Product Release Notes</button>
-    <button class="hub-tab" data-view="resourcesView">Resources</button>
+    <button class="hub-tab active" data-view="prototypesView" data-hash="prototypes">Prototypes</button>
+    <button class="hub-tab" data-view="releaseNotesView" data-hash="release-notes">Product Release Notes</button>
+    <button class="hub-tab" data-view="resourcesView" data-hash="resources">Resources</button>
   </div>
 
   <!-- Prototypes View -->
@@ -1040,6 +1040,18 @@
     <div class="release-grid" id="releaseGrid">
       <div class="release-card">
         <div class="release-card-top">
+          <div class="proto-icon" style="background:#E8E6FA;">🧭</div>
+          <span class="release-date-badge">Updated Aug 20, 2026</span>
+        </div>
+        <div class="release-name">DripJobs Product Roadmap</div>
+        <div class="release-desc">Live snapshot of 🎯 priority-tagged tickets moving through the DripJobs Product Management pipeline, from New through Branch Ready. Pulled from ClickUp, manually refreshed; excludes tickets already pushed to production.</div>
+        <div class="release-card-footer">
+          <a class="proto-btn proto-btn-outline" href="https://github.com/DripjobsJeremy/dripjobs-prototypes/tree/main/dripjobs-product-roadmap" target="_blank">GitHub</a>
+          <a class="proto-btn proto-btn-primary" href="dripjobs-product-roadmap/index.html">View</a>
+        </div>
+      </div>
+      <div class="release-card">
+        <div class="release-card-top">
           <div class="proto-icon" style="background:#EAF2FE;">🗞️</div>
           <span class="release-date-badge">Weekly</span>
         </div>
@@ -1314,14 +1326,20 @@
 
   const hubTabs = document.querySelectorAll('.hub-tab');
   const hubViews = document.querySelectorAll('.hub-view');
+  function activateHubTab(tab) {
+    hubTabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const target = tab.dataset.view;
+    hubViews.forEach(v => v.classList.toggle('active', v.id === target));
+  }
   hubTabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      hubTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const target = tab.dataset.view;
-      hubViews.forEach(v => v.classList.toggle('active', v.id === target));
+      activateHubTab(tab);
+      history.replaceState(null, '', '#' + tab.dataset.hash);
     });
   });
+  const initialTab = [...hubTabs].find(t => t.dataset.hash === location.hash.replace('#', ''));
+  if (initialTab) activateHubTab(initialTab);
 </script>
 </body>
 </html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DripJobs Product Roadmap | Live Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --purple-dark:   #6B21A8;
+  --purple-mid:    #9333EA;
+  --purple-light:  #EEEDFE;
+  --purple-text:   #534AB7;
+  --green-light:   #EAF3DE;
+  --green-text:    #3B6D11;
+  --gray-light:    #F1EFE8;
+  --gray-text:     #5F5E5A;
+  --teal-light:    #E1F5EE;
+  --teal-text:     #0F6E56;
+  --blue-light:    #E6F1FB;
+  --blue-text:     #185FA5;
+  --amber-light:   #FAEEDA;
+  --amber-text:    #854F0B;
+  --pink-light:    #FBEAF0;
+  --pink-text:     #993556;
+  --red-text:      #B42318;
+
+  --bg:            #F5F3FC;
+  --surface:       #FFFFFF;
+  --border:        rgba(0,0,0,0.08);
+  --text-primary:  #1C1B22;
+  --text-secondary:#60586F;
+  --text-muted:    #9991A8;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* ── BACK BAR ── */
+.back-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.back-link {
+  color: var(--purple-text);
+  font-weight: 600;
+  font-size: 13.5px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+.back-link:hover { text-decoration: underline; }
+.clickup-link {
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.clickup-link:hover { border-color: var(--border-hover, rgba(107,33,168,0.3)); color: var(--purple-text); }
+
+/* ── HEADER ── */
+.header {
+  background: var(--purple-dark);
+  padding: 24px 24px 20px;
+}
+.header-top { display: flex; align-items: center; gap: 12px; }
+.header-logo {
+  width: 38px; height: 38px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px;
+  flex-shrink: 0;
+}
+.header-title { font-size: 18px; font-weight: 700; color: #fff; }
+.header-sub { font-size: 12.5px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+.header-desc {
+  color: rgba(255,255,255,0.85);
+  font-size: 13.5px;
+  line-height: 1.5;
+  margin-top: 16px;
+  max-width: 720px;
+}
+.header-stats {
+  display: flex;
+  gap: 20px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.header-stat { color: #fff; }
+.header-stat .num { font-size: 20px; font-weight: 700; }
+.header-stat .lbl { font-size: 11px; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: .04em; }
+
+/* ── BOARD ── */
+.board-wrap {
+  padding: 24px 16px 40px;
+}
+.board {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 14px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.board::-webkit-scrollbar { height: 8px; }
+.board::-webkit-scrollbar-thumb { background: rgba(107,33,168,0.25); border-radius: 8px; }
+
+.lane {
+  flex: 0 0 262px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+}
+.lane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 10px 10px 0 0;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.lane-count {
+  background: rgba(255,255,255,0.6);
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: 11.5px;
+}
+.lane-body {
+  background: rgba(255,255,255,0.5);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  padding: 10px;
+  flex: 1;
+  min-height: 90px;
+}
+.lane.parked .lane-body { background: rgba(255,255,255,0.35); }
+
+.lane-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 14px 10px;
+  text-align: center;
+}
+
+.ticket-card {
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 12px;
+  margin-bottom: 9px;
+  text-decoration: none;
+  color: var(--text-primary);
+  min-height: 48px;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.ticket-card:hover {
+  box-shadow: 0 4px 14px rgba(107,33,168,0.12);
+  border-color: rgba(107,33,168,0.25);
+}
+.ticket-card:last-child { margin-bottom: 0; }
+.ticket-title { font-size: 13px; font-weight: 600; line-height: 1.35; }
+.ticket-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.ticket-assignee {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--purple-text);
+  background: var(--purple-light);
+  border-radius: 20px;
+  padding: 2px 7px;
+}
+.ticket-pill {
+  font-size: 10.5px;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 2px 7px;
+}
+.pill-high { background: var(--amber-light); color: var(--amber-text); }
+.pill-urgent { background: var(--pink-light); color: var(--red-text); }
+.pill-sub { background: var(--gray-light); color: var(--gray-text); }
+
+/* Lane header color families */
+.lane-triage .lane-header { background: var(--purple-light); color: var(--purple-text); }
+.lane-dev .lane-header { background: var(--blue-light); color: var(--blue-text); }
+.lane-test .lane-header { background: var(--teal-light); color: var(--teal-text); }
+.lane-ship .lane-header { background: var(--green-light); color: var(--green-text); }
+.lane-parked .lane-header { background: var(--pink-light); color: var(--pink-text); }
+
+.legend {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 16px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.legend strong { color: var(--text-primary); }
+
+@media (max-width: 640px) {
+  .header { padding: 18px 16px; }
+  .header-title { font-size: 16px; }
+  .lane { flex-basis: 230px; }
+}
+</style>
+</head>
+<body>
+
+<div class="back-bar">
+  <a class="back-link" href="../index.html#release-notes">&larr; Product Release Notes</a>
+  <a class="clickup-link" href="https://app.clickup.com/8633445/v/o/f/90147296942" target="_blank">View source in ClickUp</a>
+</div>
+
+<div class="header">
+  <div class="header-top">
+    <div class="header-logo">🧭</div>
+    <div>
+      <div class="header-title">DripJobs Product Roadmap</div>
+      <div class="header-sub">Live pipeline snapshot &middot; Updated Aug 20, 2026</div>
+    </div>
+  </div>
+  <p class="header-desc">Every 🎯 priority-tagged ticket currently open in DripJobs Product Management (Active Triage) or DripJobs Development V1 (Active Development), grouped by pipeline stage. We don't use ClickUp start/due dates yet, so a ticket's stage is the best signal for where it sits in time &mdash; New is earliest, Branch Ready is closest to shipping. Tickets already Pushed to Production are left off since those are covered by the Release Notes tab instead.</p>
+  <div class="header-stats">
+    <div class="header-stat"><div class="num">36</div><div class="lbl">Tickets in flight</div></div>
+    <div class="header-stat"><div class="num">14</div><div class="lbl">Pipeline stages</div></div>
+    <div class="header-stat"><div class="num">6</div><div class="lbl">On hold / parked</div></div>
+  </div>
+</div>
+
+<div class="legend" style="margin-top:16px;">
+  <strong>How to read this:</strong> tap any ticket to open it in ClickUp. Columns run left to right in pipeline order. The last column collects tickets pulled off the happy path (kickback, postponed, on hold, no fix needed, etc.) regardless of which list they're in.
+</div>
+
+<div class="board-wrap">
+  <div class="board">
+
+    <!-- 1. New -->
+    <div class="lane lane-triage">
+      <div class="lane-header"><span>New</span><span class="lane-count">1</span></div>
+      <div class="lane-body">
+        <a class="ticket-card" href="https://app.clickup.com/t/86baytmj4" target="_blank">
+          <div class="ticket-title">Activation Dashboard: Login Tracking &amp; Last Login/Last Active User Columns</div>
+          <div class="ticket-meta"><span class="ticket-assignee">JH</span><span class="ticket-pill pill-high">High</span></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 2. Needs PM Analysis -->
+    <div class="lane lane-triage">
+      <div class="lane-header"><span>Needs PM Analysis</span><span class="lane-count">23</span></div>
+      <div class="lane-body">
+        <a class="ticket-card" href="https://app.clickup.com/t/86bbfqr1t" target="_blank"><div class="ticket-title">Flashline Integration Evaluation and Path Decision</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bbc3g76" target="_blank"><div class="ticket-title">Investigation: Google Calendar OAuth Feasibility on Mobile App</div><div class="ticket-meta"><span class="ticket-assignee">&mdash;</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bbbm1pm" target="_blank"><div class="ticket-title">Support Multiple Quo Numbers per Company</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bbah6jq" target="_blank"><div class="ticket-title">Cancellation Intercept Modal (Retention Video + Scheduling Options)</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bb67v4e" target="_blank"><div class="ticket-title">Disable Duplicated Drip by Default</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bb5y2w3" target="_blank"><div class="ticket-title">QuickBooks Sync Merges Change Order Removals Into Discount Field, Distorting Taxable Subtotal</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bayx241" target="_blank"><div class="ticket-title">Activation Dashboard: CS Feedback Flag (Manual Satisfaction Signal Flags) [Phase 3]</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bawv87z" target="_blank"><div class="ticket-title">Add MMS (Image Attachment) Support to Drip Text Message Steps</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bagb0jj" target="_blank"><div class="ticket-title">Multiple Discounts on a Proposal &mdash; Stack via Apply Discount Modal</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bacu9e7" target="_blank"><div class="ticket-title">Add SMS Character Limit Enforcement Across All Message Types</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86ba1ggxb" target="_blank"><div class="ticket-title">Epic &mdash; Job Costing V1 Product Overhaul</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86ba0wm15" target="_blank"><div class="ticket-title">Business Days Only Toggle &mdash; Drip Sequences &amp; Job Scheduling</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b9y4f42" target="_blank"><div class="ticket-title">Surface SMS Delivery Errors to Users Within DripJobs</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b9peg42" target="_blank"><div class="ticket-title">Google Local Services Ads (LSA) Lead Integration &mdash; MVP</div><div class="ticket-meta"><span class="ticket-assignee">JH</span><span class="ticket-pill pill-high">High</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b9bm9v2" target="_blank"><div class="ticket-title">V1 AI Opportunities (New Initiatives)</div><div class="ticket-meta"><span class="ticket-assignee">JH</span><span class="ticket-pill pill-high">High</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b9abbcc" target="_blank"><div class="ticket-title">Smart Invoice Due Dates: Net Terms Default, Quick-Select Picker, Progressive Customer Portal Banners</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b8tq9m9" target="_blank"><div class="ticket-title">Enhancement: Production Rates &ndash; Import Data from External Platforms (CSV/Excel)</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b8bmzhr" target="_blank"><div class="ticket-title">Expired Payment Card Alert Banner</div><div class="ticket-meta"><span class="ticket-assignee">JH</span><span class="ticket-pill pill-high">High</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b848td9" target="_blank"><div class="ticket-title">Save &amp; Reuse Packages in Proposal Builder</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b62np7t" target="_blank"><div class="ticket-title">Enable Stripe Instant Payouts for Connected Accounts</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b32d4gr" target="_blank"><div class="ticket-title">Invoice Reminders</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b2xn7hx" target="_blank"><div class="ticket-title">Proposal Expiration Date Enforcement &amp; Re-Open Flow</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86azdbw80" target="_blank"><div class="ticket-title">Add to Calendar Option for Appointment and Job Scheduling Communications</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+      </div>
+    </div>
+
+    <!-- 3. Needs Design -->
+    <div class="lane lane-triage">
+      <div class="lane-header"><span>Needs Design</span><span class="lane-count">5</span></div>
+      <div class="lane-body">
+        <a class="ticket-card" href="https://app.clickup.com/t/86bbhhhqd" target="_blank"><div class="ticket-title">Business Entity Records (V1)</div><div class="ticket-meta"><span class="ticket-assignee">JH</span><span class="ticket-pill pill-high">High</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bbdqm72" target="_blank"><div class="ticket-title">Drip Preference Visibility: Lock Disable Drips Toggle, Alert Users on Stage/Sequence Changes</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bb0tcpe" target="_blank"><div class="ticket-title">CSV Import for Products and Services</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b8yhwwx" target="_blank"><div class="ticket-title">Tasks Page &mdash; UX/UI Overhaul (Consolidated)</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b4ek0j7" target="_blank"><div class="ticket-title">Onboarding Walkthrough: Schedule Onboarding Through Proposal Viewed</div><div class="ticket-meta"><span class="ticket-assignee">JH</span></div></a>
+      </div>
+    </div>
+
+    <!-- 4. In Review -->
+    <div class="lane lane-triage">
+      <div class="lane-header"><span>In Review</span><span class="lane-count">0</span></div>
+      <div class="lane-body"><div class="lane-empty">No tickets in this stage</div></div>
+    </div>
+
+    <!-- 5. Triage -->
+    <div class="lane lane-triage">
+      <div class="lane-header"><span>Triage</span><span class="lane-count">0</span></div>
+      <div class="lane-body"><div class="lane-empty">No tickets in this stage</div></div>
+    </div>
+
+    <!-- 6. Ready for Dev -->
+    <div class="lane lane-dev">
+      <div class="lane-header"><span>Ready for Dev</span><span class="lane-count">0</span></div>
+      <div class="lane-body"><div class="lane-empty">No tickets in this stage</div></div>
+    </div>
+
+    <!-- 7. In Progress -->
+    <div class="lane lane-dev">
+      <div class="lane-header"><span>In Progress</span><span class="lane-count">0</span></div>
+      <div class="lane-body"><div class="lane-empty">No tickets in this stage</div></div>
+    </div>
+
+    <!-- 8. Testing Ready -->
+    <div class="lane lane-test">
+      <div class="lane-header"><span>Testing Ready</span><span class="lane-count">0</span></div>
+      <div class="lane-body"><div class="lane-empty">No tickets in this stage</div></div>
+    </div>
+
+    <!-- 9. Test in Progress -->
+    <div class="lane lane-test">
+      <div class="lane-header"><span>Test in Progress</span><span class="lane-count">0</span></div>
+      <div class="lane-body"><div class="lane-empty">No tickets in this stage</div></div>
+    </div>
+
+    <!-- 10. Testing Complete -->
+    <div class="lane lane-test">
+      <div class="lane-header"><span>Testing Complete</span><span class="lane-count">1</span></div>
+      <div class="lane-body">
+        <a class="ticket-card" href="https://app.clickup.com/t/86b9bmc1u" target="_blank">
+          <div class="ticket-title">DripSense (AI Metrics Insights)</div>
+          <div class="ticket-meta"><span class="ticket-assignee">AR</span><span class="ticket-assignee">+2</span><span class="ticket-pill pill-high">High</span></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 11. PR Created -->
+    <div class="lane lane-dev">
+      <div class="lane-header"><span>PR Created</span><span class="lane-count">0</span></div>
+      <div class="lane-body"><div class="lane-empty">No tickets in this stage</div></div>
+    </div>
+
+    <!-- 12. Code Complete -->
+    <div class="lane lane-dev">
+      <div class="lane-header"><span>Code Complete</span><span class="lane-count">0</span></div>
+      <div class="lane-body"><div class="lane-empty">No tickets in this stage</div></div>
+    </div>
+
+    <!-- 13. Branch Ready -->
+    <div class="lane lane-ship">
+      <div class="lane-header"><span>Branch Ready</span><span class="lane-count">0</span></div>
+      <div class="lane-body"><div class="lane-empty">No tickets in this stage</div></div>
+    </div>
+
+    <!-- 14. On Hold / Parked -->
+    <div class="lane lane-parked parked">
+      <div class="lane-header"><span>On Hold / Parked</span><span class="lane-count">6</span></div>
+      <div class="lane-body">
+        <a class="ticket-card" href="https://app.clickup.com/t/86barp4zu" target="_blank"><div class="ticket-title">Level Scheduled Jobs by Crew on Jobs Schedule Calendar</div><div class="ticket-meta"><span class="ticket-assignee">JH</span><span class="ticket-assignee">+1</span><span class="ticket-pill pill-high">High</span><span class="ticket-pill pill-sub">No Fix Needed</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86ban9v3n" target="_blank"><div class="ticket-title">Metrics Dashboard &mdash; Appointments Report: Add "Booked" &amp; "New vs. Returning" Filters</div><div class="ticket-meta"><span class="ticket-assignee">JR</span><span class="ticket-pill pill-sub">No Fix Needed</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bag818a" target="_blank"><div class="ticket-title">Activation Dashboard &mdash; Last Login &amp; Last Active User Columns</div><div class="ticket-meta"><span class="ticket-assignee">JH</span><span class="ticket-pill pill-sub">No Fix Needed</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86bag7yt5" target="_blank"><div class="ticket-title">User Login Timestamp Tracking</div><div class="ticket-meta"><span class="ticket-assignee">JH</span><span class="ticket-pill pill-sub">No Fix Needed</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86ba7p20e" target="_blank"><div class="ticket-title">Zapier: Add Costing Complete Trigger</div><div class="ticket-meta"><span class="ticket-assignee">JH</span><span class="ticket-pill pill-high">High</span><span class="ticket-pill pill-sub">No Fix Needed</span></div></a>
+        <a class="ticket-card" href="https://app.clickup.com/t/86b5ghmw1" target="_blank"><div class="ticket-title">Zapier Smart Contact &amp; Deal Lookup Actions</div><div class="ticket-meta"><span class="ticket-assignee">JH</span><span class="ticket-assignee">+1</span><span class="ticket-pill pill-sub">No Fix Needed</span></div></a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

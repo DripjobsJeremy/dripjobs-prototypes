@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-20] New DripJobs Product Roadmap card, hub hash-routing, Weekly Prod Roadmap tab removed
+
+- Decision: Built a standalone "DripJobs Product Roadmap" prototype (`dripjobs-product-roadmap/index.html`), added as a new card under the hub's Product Release Notes tab. It's a 14-lane kanban (New through Branch Ready, plus an "On Hold / Parked" exception lane) populated from a manual ClickUp snapshot of Active Triage + Active Development, scoped to 🎯/🎯 focus-tagged tickets only (36 of 400+ open tickets) since the full set was dominated by a stale 2024 "v1 redesign" QA backlog that would have buried anything current. Tickets already Pushed to Production are excluded (that's what Release Notes is for). Removed the "Weekly Prod Roadmap" tab/iframe from Weekly Product Update and replaced that tab button with a same-tab link to the new page. Added hash-based tab routing to the hub (`#prototypes` / `#release-notes` / `#resources`) and gave all 6 existing Release Notes cards' target pages (plus the new one) a back-link to `../index.html#release-notes`, since none of them had any back-navigation before.
+- Why: Direct request from Jeremy. Pulling every open ticket verbatim would have made the board unreadable and mostly stale; the 🎯 tag was already Jeremy's informal "this matters now" marker, so it was the natural filter (confirmed with him before building). Hash routing was needed so a back-link could return to the specific tab a card was opened from, not just the hub root.
+- Open question: This is a manual snapshot (Aug 20, 2026), not a live ClickUp feed, consistent with this repo's prototypes-don't-call-real-backends rule. It'll go stale the same way the other roadmap cards do until someone re-runs the pull and edits the page by hand — there's no scheduled refresh.
+
 ## [2026-08-20] Business Entity Records — V1: linked ClickUp ticket 86bbhhhqd
 
 - Decision: Connected the "Business Entity Records (V1)" epic (86bbhhhqd) to the existing Business Entity Records — V1 card, replacing its "No Ticket" placeholder. Confirmed via ClickUp that the ticket's scope (standalone Business Entity record type, tabbed profile, Businesses nav item, Contact-to-Business association) matches the card's existing description. Updated the status badge from Needs PM Analysis to Needs Design to match the ticket's live ClickUp status.
