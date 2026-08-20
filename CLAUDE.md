@@ -42,6 +42,13 @@ Hub mechanics:
 - Every new card needs `data-status` and `data-name` attributes, the hub's filter/search logic depends on them.
 - Every prototype file needs the proto-bar injected before `</body>`.
 
+Deploy sync (Drippy Slack reports):
+- Jeremy pastes Drippy's "🚀 Deployed to PROD:" Slack messages (each has an `Item name:` and a `Link:` to a ClickUp ticket) with the lead-in "Sync hub:". Treat that lead-in as the trigger for this workflow, no other setup or ClickUp API access needed.
+- Extract the ClickUp ticket ID from each `Link:` and check it against every card's ticket link(s) in the Prototypes tab (`#protoGrid` only, leave Resources and Release Notes alone).
+- Remove any card whose ticket (or, for a multi-ticket card, all of its tickets) matches a deployed link, it has shipped and is no longer needed on the hub. Deployed items with no matching card need no action.
+- If a multi-ticket card only partially matches (some linked tickets deployed, some not), don't remove it, update its status tooltip/description instead to reflect what shipped.
+- Append a dated entry to `docs/decision-log.md` naming which cards were removed and which deployed items had no match. Commit, push a branch named `claude/prototype-hub-sync-<date>`, and open a PR, do not merge it, Jeremy reviews and merges these himself.
+
 GitHub API mechanics:
 - Always fetch a fresh file SHA immediately before any PUT to that file. Stale SHAs cause 409 conflicts. Don't reuse a SHA from earlier in a long session.
 - Poll `/repos/{repo}/pages/builds/latest` to check build status.
