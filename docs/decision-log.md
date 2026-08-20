@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-20] Prototype Hub: deploy sync from Drippy Slack report, adopted going forward
+
+- Decision: Matched 7 tickets from a pasted Drippy "Deployed to PROD" Slack report against the Prototypes tab. 3 matched and were removed as shipped: Customer Portal — Unsubscribe UX Improvements (86bagq9vf), Super Admin: Connect Branches (86b2uvyy7), Active Company Toggle: Billing Confirmation (86bb85q08). The other 4 deployed tickets (86bb9qypg, 86bbau2q0, 86bb9q4p4, 86bb9kz94) have no corresponding hub card, no action needed. Documented this as the standing "Deploy sync" convention in CLAUDE.md: Jeremy pastes Drippy's deploy report with the lead-in "Sync hub:" and any session matches tickets against the hub and removes shipped cards, no scheduled automation or ClickUp API access required.
+- Why: Replaces an earlier attempt at a scheduled daily ClickUp-polling routine, which this org's connector setup couldn't support cheaply (a fresh session per run couldn't carry ClickUp access, and self-binding to a persistent session would reprocess a growing conversation history on every run). Event-driven sync off Jeremy's own deploy notifications avoids both problems entirely.
+- Open question: None.
+
 ## [2026-08-18] Holiday Calendar Display (US/Canada): control placement confirmed
 
 - Decision: Jeremy confirmed the Holiday Calendar preference control belongs on each calendar's own toolbar (as built) for this round, not a My Profile settings page. Removed the in-page "Assumption: control placement" callout since it's no longer an open question; toolbar placement stands as-is.
