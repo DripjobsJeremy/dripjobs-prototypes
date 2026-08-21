@@ -438,6 +438,121 @@
   .empty-state.visible { display: block; }
   .empty-state p { font-size: 14px; margin-top: 8px; }
 
+  /* ── Product Signals Tracker ── */
+  .ps-intro-desc {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin: -4px 0 24px 0;
+    max-width: 720px;
+  }
+  .ps-stats { margin-bottom: 24px; }
+  .ps-stat {
+    text-align: left;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .ps-stat:hover { border-color: var(--color-primary); }
+  .ps-stat.active {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
+  }
+
+  .ps-table {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .ps-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2.6fr) 1.2fr 1.1fr 1fr 100px;
+    gap: 14px;
+    align-items: start;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .ps-row:hover { border-color: var(--color-primary); box-shadow: 0 2px 10px rgba(var(--color-primary-rgb), 0.10); }
+  .ps-row.ps-row-head {
+    background: transparent;
+    border: none;
+    padding: 0 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--color-text-muted);
+  }
+  .ps-row.ps-row-head:hover { box-shadow: none; }
+  .ps-row.hidden { display: none; }
+  .ps-col-label { display: none; }
+  .ps-type-icon { font-size: 14px; line-height: 1; margin-right: 4px; }
+  .ps-signal-title { font-size: 13.5px; font-weight: 600; color: var(--color-text); line-height: 1.4; }
+  .ps-quote {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    font-style: italic;
+    line-height: 1.5;
+    margin-top: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .ps-quote.expanded { -webkit-line-clamp: unset; overflow: visible; }
+  .ps-quote-toggle {
+    appearance: none;
+    border: none;
+    background: none;
+    padding: 0;
+    margin-top: 3px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-primary);
+    cursor: pointer;
+    display: block;
+  }
+  .ps-quote-toggle:hover { color: var(--color-primary-hover); text-decoration: underline; }
+  .ps-quote-toggle.is-placeholder { visibility: hidden; pointer-events: none; }
+  .ps-col-user, .ps-col-date, .ps-col-ref { font-size: 12.5px; color: var(--color-text-muted); padding-top: 2px; }
+  .ps-severity-note { font-size: 12px; color: var(--color-text-muted); }
+  .ps-severity-note strong { color: var(--color-text); font-weight: 600; }
+  .ps-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .ps-status-ticketed    { background: #E6FAF0; color: #166534; }
+  .ps-status-cs          { background: #FFFBEB; color: #92400E; }
+  .ps-status-duplicate   { background: #F3F4F6; color: #4B5563; }
+  .ps-status-featurebase { background: #EFF6FF; color: #1E40AF; }
+  .ps-status-declined    { background: #FAE6E6; color: #991B1B; }
+
+  @media (max-width: 760px) {
+    .ps-row.ps-row-head { display: none; }
+    .ps-row { grid-template-columns: 1fr; gap: 8px; }
+    .ps-col-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--color-text-muted);
+      margin-bottom: 2px;
+    }
+    .ps-col-signal .ps-col-label { display: none; }
+  }
+
   /* ── Footer ── */
   .hub-footer {
     max-width: 1100px;
@@ -482,6 +597,7 @@
   <!-- Top Tabs -->
   <div class="hub-tabs">
     <button class="hub-tab active" data-view="prototypesView" data-hash="prototypes">Prototypes</button>
+    <button class="hub-tab" data-view="productSignalsView" data-hash="product-signals">Product Signals</button>
     <button class="hub-tab" data-view="releaseNotesView" data-hash="release-notes">Product Release Notes</button>
     <button class="hub-tab" data-view="resourcesView" data-hash="resources">Resources</button>
   </div>
@@ -1032,6 +1148,227 @@
 
   </div><!-- /prototypesView -->
 
+  <!-- Product Signals View -->
+  <div class="hub-view" id="productSignalsView">
+
+    <div class="section-heading">Product Signals Tracker</div>
+    <p class="ps-intro-desc">Triage tracker for bug reports and feature requests submitted in #product-signals, so the channel can see what's already ticketed, what's covered by existing work, and what still needs CS follow-up &mdash; without digging back through Slack. Rows below are sample data illustrating the five triage outcomes; replace with each real reviewed batch.</p>
+
+    <!-- Stat filters (click a stat to filter the table) -->
+    <div class="stats-row ps-stats" id="psStats">
+      <button class="stat-card ps-stat active" data-ps-filter="all" type="button">
+        <div class="stat-label">All Signals</div>
+        <div class="stat-value">0</div>
+      </button>
+      <button class="stat-card ps-stat" data-ps-filter="ticketed" type="button">
+        <div class="stat-label">✅ Ticketed</div>
+        <div class="stat-value">0</div>
+      </button>
+      <button class="stat-card ps-stat" data-ps-filter="cs" type="button">
+        <div class="stat-label">🐞 CS Verification</div>
+        <div class="stat-value">0</div>
+      </button>
+      <button class="stat-card ps-stat" data-ps-filter="duplicate" type="button">
+        <div class="stat-label">🔁 Duplicate / Existing</div>
+        <div class="stat-value">0</div>
+      </button>
+      <button class="stat-card ps-stat" data-ps-filter="featurebase" type="button">
+        <div class="stat-label">📋 FeatureBase</div>
+        <div class="stat-value">0</div>
+      </button>
+      <button class="stat-card ps-stat" data-ps-filter="declined" type="button">
+        <div class="stat-label">⛔ Declined</div>
+        <div class="stat-value">0</div>
+      </button>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <input class="filter-search" type="text" id="psSearch" placeholder="Search signals, users…" />
+      <select class="filter-search" id="psSort" style="flex:0 0 auto; min-width:170px; cursor:pointer;">
+        <option value="newest" selected>Sort: Newest First</option>
+        <option value="oldest">Sort: Oldest First</option>
+      </select>
+    </div>
+
+    <div class="section-heading">Signal Queue</div>
+
+    <div class="ps-table" id="psTable">
+
+      <div class="ps-row ps-row-head">
+        <div class="ps-col ps-col-signal">Signal</div>
+        <div class="ps-col ps-col-user">Submitted By</div>
+        <div class="ps-col ps-col-status">Status</div>
+        <div class="ps-col ps-col-ref">Reference</div>
+        <div class="ps-col ps-col-date">Reviewed</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="automated follow-up unpaid invoice northstar painting">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Automated follow-up for completed jobs with an unpaid invoice</div>
+          <div class="ps-quote">&ldquo;An automated follow-up sequence, or a dedicated pipeline stage, for jobs that are complete but still have an unpaid invoice.&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Northstar Painting</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="#" target="_blank">86bs10a1 (sample)</a></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="payment status pipeline view outstanding balance bluerock coatings">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Payment-status visibility in the pipeline view</div>
+          <div class="ps-quote">&ldquo;A payment-status-aware pipeline view, or per-stage outstanding balance visibility, so I can see who still owes money without opening every deal.&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>BlueRock Coatings</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="#" target="_blank">86bs10a2 (sample)</a></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="route optimization map view crew sequencing summit exteriors">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Route optimization / map view for daily crew sequencing</div>
+          <div class="ps-quote">&ldquo;Route optimization or a map view of the day's jobs so the crew can be sequenced geographically instead of by appointment time.&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Summit Exteriors</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="#" target="_blank">86bs10a3 (sample)</a></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="two way contact sync phone google contacts lakeside painting">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Two-way contact sync between DripJobs and phone contacts</div>
+          <div class="ps-quote">&ldquo;Two-way contact sync between DripJobs and my phone's contacts, directly or through Zapier, so new leads land in both places.&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Lakeside Painting Co.</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="#" target="_blank">86bs10a4 (sample)</a></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-20" data-ps-name="work order link text never arrived harborview painting bug">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Work order link sent by text never arrived</div>
+          <div class="ps-quote">&ldquo;A work order link I sent by text from inside DripJobs never reached the customer. Sending the same link from my personal phone worked fine.&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Harborview Painting</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><span class="ps-severity-note">Severity: <strong>High</strong></span></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 20, 2026</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-20" data-ps-name="package view details renders incorrectly customer view cascade coatings bug">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Package "View details" renders incorrectly in Customer View</div>
+          <div class="ps-quote">&ldquo;The 'View details' button on a package renders incorrectly once the proposal is opened in Customer View, the layout breaks.&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Cascade Coatings</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><span class="ps-severity-note">Severity: <strong>Medium</strong></span></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 20, 2026</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-19" data-ps-name="proposal template disappeared data loss union square painters bug">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Proposal template disappeared without being deleted</div>
+          <div class="ps-quote">&ldquo;A proposal template we built ourselves just disappeared from the account. Nobody on our team deleted it.&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Union Square Painters</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><span class="ps-severity-note">Severity: <strong>High</strong> (possible data loss)</span></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 19, 2026</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-19" data-ps-name="estimate requested stage count mobile desktop mismatch prairie wind painting bug">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Estimate Requested count differs between mobile and desktop</div>
+          <div class="ps-quote">&ldquo;The Estimate Requested stage shows a different job count on mobile than it does on the desktop pipeline for the same account.&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Prairie Wind Painting</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><span class="ps-severity-note">Severity: <strong>Medium</strong></span></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 19, 2026</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="duplicate" data-ps-added="2026-08-21" data-ps-name="google local services ads lsa lead ingestion fairview home services duplicate">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Native ingestion of Google Local Services Ads (LSA) leads</div>
+          <div class="ps-quote">&ldquo;Native ingestion of Google Local Services Ads leads directly into DripJobs, without a Zapier workaround.&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Fairview Home Services</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-duplicate">🔁 Existing Workstream</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="#" target="_blank">86bs20a1 (sample, existing)</a></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="duplicate" data-ps-added="2026-08-21" data-ps-name="direct native thumbtack integration lead capture redwood painting group duplicate">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Direct native Thumbtack integration for lead capture</div>
+          <div class="ps-quote">&ldquo;A direct, native integration with Thumbtack for lead capture instead of routing it through a third-party connector.&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Redwood Painting Group</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-duplicate">🔁 Existing Workstream</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="#" target="_blank">86bs20a2 (sample, existing)</a></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="duplicate" data-ps-added="2026-08-20" data-ps-name="annual billing discount option alpine coatings duplicate policy">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Annual billing option at a discount</div>
+          <div class="ps-quote">&ldquo;An annual billing option at a discount for accounts that want to commit for the year up front.&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Alpine Coatings</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-duplicate">🔁 Existing Policy</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><span class="ps-severity-note">Governed by Billing SOP, no new ticket</span></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 20, 2026</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="featurebase" data-ps-added="2026-08-20" data-ps-name="import historical estimates proposals invoices previous crm copper creek painting">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Import historical estimates, proposals, and invoices from a previous CRM</div>
+          <div class="ps-quote">&ldquo;A way to import historical estimates, proposals, and invoices from our previous CRM, not just contacts.&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Copper Creek Painting</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-featurebase">📋 Sent to FeatureBase</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><span class="ps-severity-note">Source CRM/format unspecified</span></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 20, 2026</div>
+      </div>
+
+      <div class="ps-row" data-ps-category="declined" data-ps-added="2026-08-19" data-ps-name="custom per crew mobile app branding skin solstice painting declined">
+        <div class="ps-col ps-col-signal">
+          <span class="ps-col-label">Signal</span>
+          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Custom per-crew mobile app branding/skin</div>
+          <div class="ps-quote">&ldquo;Could we get a custom-branded skin for the crew mobile app, matching our own logo and colors instead of DripJobs branding?&rdquo;</div>
+        </div>
+        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Solstice Painting Co.</div>
+        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-declined">⛔ Declined</span></div>
+        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><span class="ps-severity-note">Out of scope, single-account demand</span></div>
+        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 19, 2026</div>
+      </div>
+
+    </div><!-- /ps-table -->
+
+    <!-- Empty state -->
+    <div class="empty-state" id="psEmptyState">
+      <div style="font-size:32px;">🔍</div>
+      <p>No signals match that filter.</p>
+    </div>
+
+  </div><!-- /productSignalsView -->
+
   <!-- Release Notes View -->
   <div class="hub-view" id="releaseNotesView">
 
@@ -1323,6 +1660,102 @@
 
   sortSelect.addEventListener('change', applySort);
   applySort();
+
+  // ── Product Signals Tracker: stat-filter, search, sort, quote show-more ──
+  (function setupProductSignals() {
+    const table = document.getElementById('psTable');
+    if (!table) return;
+    const rows = Array.from(table.querySelectorAll('.ps-row:not(.ps-row-head)'));
+    const statButtons = Array.from(document.querySelectorAll('.ps-stat'));
+    const psSearch = document.getElementById('psSearch');
+    const psSort = document.getElementById('psSort');
+    const psEmptyState = document.getElementById('psEmptyState');
+    const defaultOrder = [...rows];
+    let activeCategory = 'all';
+
+    function updateCounts() {
+      const counts = { all: rows.length };
+      rows.forEach(r => {
+        const c = r.dataset.psCategory;
+        counts[c] = (counts[c] || 0) + 1;
+      });
+      statButtons.forEach(btn => {
+        const valueEl = btn.querySelector('.stat-value');
+        if (valueEl) valueEl.textContent = counts[btn.dataset.psFilter] || 0;
+      });
+    }
+
+    function applyPsFilters() {
+      const q = psSearch.value.toLowerCase().trim();
+      let visible = 0;
+      rows.forEach(row => {
+        const nameMatch = row.dataset.psName.includes(q);
+        const catMatch = activeCategory === 'all' || row.dataset.psCategory === activeCategory;
+        if (nameMatch && catMatch) {
+          row.classList.remove('hidden');
+          visible++;
+        } else {
+          row.classList.add('hidden');
+        }
+      });
+      psEmptyState.classList.toggle('visible', visible === 0);
+    }
+
+    function applyPsSort() {
+      const mode = psSort.value;
+      const ordered = [...defaultOrder].sort((a, b) => {
+        const cmp = (a.dataset.psAdded || '').localeCompare(b.dataset.psAdded || '');
+        return mode === 'oldest' ? cmp : -cmp;
+      });
+      ordered.forEach(row => table.appendChild(row));
+    }
+
+    statButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeCategory = btn.dataset.psFilter;
+        statButtons.forEach(b => b.classList.toggle('active', b === btn));
+        applyPsFilters();
+      });
+    });
+    psSearch.addEventListener('input', applyPsFilters);
+    psSort.addEventListener('change', applyPsSort);
+
+    function refreshQuoteToggles() {
+      document.querySelectorAll('.ps-quote').forEach(quote => {
+        // Skip a quote the user has expanded — removing the clamp erases the
+        // overflow this function is measuring, which would otherwise hide the
+        // "Show less" control out from under them.
+        if (quote.classList.contains('expanded')) return;
+        const toggle = quote.nextElementSibling;
+        if (!toggle || !toggle.classList.contains('ps-quote-toggle')) return;
+        toggle.classList.toggle('is-placeholder', quote.scrollHeight <= quote.clientHeight + 1);
+      });
+    }
+
+    document.querySelectorAll('.ps-quote').forEach(quote => {
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'ps-quote-toggle';
+      toggle.textContent = 'Show more';
+      toggle.addEventListener('click', () => {
+        const expanded = quote.classList.toggle('expanded');
+        toggle.textContent = expanded ? 'Show less' : 'Show more';
+      });
+      quote.insertAdjacentElement('afterend', toggle);
+    });
+    refreshQuoteToggles();
+    // This tab starts as display:none until clicked, so the row above measures
+    // 0-height quotes. Re-measure whenever a quote's rendered size actually
+    // changes — that covers tab activation, window resize, and orientation change.
+    if (window.ResizeObserver) {
+      const quoteObserver = new ResizeObserver(refreshQuoteToggles);
+      document.querySelectorAll('.ps-quote').forEach(quote => quoteObserver.observe(quote));
+    }
+
+    updateCounts();
+    applyPsSort();
+    applyPsFilters();
+  })();
 
   const hubTabs = document.querySelectorAll('.hub-tab');
   const hubViews = document.querySelectorAll('.hub-view');
