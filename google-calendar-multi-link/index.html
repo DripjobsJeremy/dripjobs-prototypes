@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Link Multiple Google Calendars — DripJobs</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --color-primary:        #8B85EA;
+    --color-primary-hover:  #736BE3;
+    --color-primary-active: #5C53DC;
+    --color-primary-rgb:    139, 133, 234;
+    --color-bg:             #F3F1FC;
+    --color-text:           #32415B;
+    --color-text-muted:     #80879A;
+    --color-border:         #DAD8E3;
+    --color-card:           #FFFFFF;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100vh;
+  }
+
+  /* ── Prototype top bar ── */
+  .proto-bar {
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; }
+  .back-link {
+    font-size: 12px; font-weight: 500; color: var(--color-text-muted);
+    text-decoration: none; display: flex; align-items: center; gap: 4px;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--color-primary); }
+  .divider { color: var(--color-border); font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; }
+  .proto-bar-ticket {
+    font-size: 11px; font-weight: 600; color: var(--color-primary);
+    text-decoration: none; padding: 4px 10px; border: 1px solid #D6D2F5;
+    background: #E8E6FA; border-radius: 999px; letter-spacing: 0.2px;
+  }
+  .proto-bar-ticket:hover { background: var(--color-primary); color: #fff; }
+
+  /* ── Demo control banner (non-product UI) ── */
+  .demo-banner {
+    background: #FFFBEB;
+    border-bottom: 1px solid #FDE68A;
+    color: #92400E;
+    font-size: 12.5px;
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    text-align: center;
+  }
+  .demo-banner strong { font-weight: 700; }
+  .demo-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .demo-chip {
+    font-family: inherit; font-size: 11.5px; font-weight: 600; color: #92400E;
+    background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 999px;
+    padding: 5px 12px; cursor: pointer; transition: background 0.15s, color 0.15s;
+  }
+  .demo-chip.active { background: #92400E; color: #fff; border-color: #92400E; }
+  .demo-reset {
+    font-family: inherit; font-size: 11.5px; font-weight: 600; color: #92400E;
+    background: transparent; border: 1px solid #92400E; border-radius: 999px;
+    padding: 5px 12px; cursor: pointer;
+  }
+  .demo-reset:hover { background: #92400E; color: #fff; }
+
+  .screen-label {
+    background: #EDEDF4;
+    color: var(--color-text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 8px 16px;
+  }
+
+  /* ── Screens ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── Simulated in-app top nav (matches production chrome) ── */
+  .app-topnav {
+    background: #fff;
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .app-search {
+    flex: 1;
+    max-width: 320px;
+    background: #F5F5FA;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    color: var(--color-text-muted);
+  }
+  .app-nav-right { display: flex; align-items: center; gap: 16px; }
+  .app-icon-btn { font-size: 15px; color: var(--color-text-muted); position: relative; }
+  .app-icon-btn .dot { position: absolute; top: -3px; right: -4px; width: 7px; height: 7px; border-radius: 50%; background: #F59E0B; }
+  .app-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #32415B; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .app-user { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--color-text); }
+
+  /* ── Appointments page (context screen — decorative, not interactive) ── */
+  .appt-wrap { max-width: 1180px; margin: 0 auto; padding: 24px; }
+  .appt-header-row {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px; margin-bottom: 18px;
+  }
+  .appt-title { font-size: 22px; font-weight: 700; }
+  .appt-header-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+  .gcal-status { display: flex; align-items: center; gap: 12px; }
+  .gcal-status-text { display: flex; flex-direction: column; gap: 2px; text-align: right; }
+  .gcal-label { font-size: 12.5px; font-weight: 600; color: var(--color-text); }
+  .gcal-value { font-size: 11.5px; }
+  .gcal-value.not-connected { color: #DC2626; }
+  .gcal-value.connected { color: #16A34A; }
+  .gcal-meta { font-size: 11px; color: var(--color-text-muted); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    height: 36px; padding: 0 16px; border-radius: 10px; font-size: 12.5px; font-weight: 600;
+    font-family: 'DM Sans', sans-serif; cursor: pointer; text-decoration: none;
+    border: 1px solid transparent; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-primary  { background: var(--color-primary); color: #fff; }
+  .btn-primary:hover { background: var(--color-primary-hover); }
+  .btn-primary:disabled { background: #C9C6EF; cursor: not-allowed; }
+  .btn-outline  { background: transparent; border-color: var(--color-border); color: var(--color-text-muted); }
+  .btn-outline:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .btn-sm { height: 32px; padding: 0 12px; border-radius: 8px; font-size: 12px; }
+  .btn-google {
+    background: #fff; border: 1px solid var(--color-border); color: var(--color-text);
+  }
+  .btn-google:hover { border-color: var(--color-primary); }
+
+  .appt-toolbar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .toolbar-toggle { display: flex; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; }
+  .toolbar-toggle span { padding: 8px 14px; font-size: 12.5px; font-weight: 600; color: var(--color-text-muted); }
+  .toolbar-toggle span.active { background: #F3F1FC; color: var(--color-primary-active); }
+  .toolbar-month { display: flex; align-items: center; gap: 10px; border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 14px; font-size: 12.5px; font-weight: 600; }
+  .toolbar-select { border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 14px; font-size: 12.5px; color: var(--color-text); background: #fff; }
+
+  .appt-body { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
+  .appt-grid { flex: 1; min-width: 320px; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; }
+  .appt-grid-row { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid var(--color-border); }
+  .appt-grid-row:first-child { border-top: none; background: #FAFAFC; }
+  .appt-grid-row.head span { padding: 8px; font-size: 11px; font-weight: 700; color: var(--color-text-muted); text-align: center; text-transform: uppercase; }
+  .appt-cell { border-left: 1px solid var(--color-border); min-height: 70px; padding: 6px; font-size: 11px; color: var(--color-text-muted); position: relative; }
+  .appt-cell:first-child { border-left: none; }
+  .appt-pill { background: #E8E6FA; border-left: 3px solid var(--color-primary-active); color: var(--color-primary-active); border-radius: 4px; padding: 3px 5px; font-size: 10px; font-weight: 600; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .requests-panel { width: 250px; border: 1px solid var(--color-border); border-radius: 8px; padding: 14px; flex-shrink: 0; }
+  .requests-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .requests-head strong { font-size: 13.5px; }
+  .requests-head a { font-size: 11.5px; color: var(--color-primary); font-weight: 600; text-decoration: none; }
+  .request-card { border-top: 1px solid var(--color-border); padding: 10px 0; }
+  .request-card:first-of-type { border-top: none; padding-top: 0; }
+  .request-card-top { display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 700; }
+  .request-card-top span { font-weight: 400; font-size: 10.5px; color: var(--color-text-muted); }
+  .request-card p { font-size: 11px; color: var(--color-text-muted); margin: 2px 0 6px; }
+  .request-card-bottom { display: flex; justify-content: space-between; align-items: center; }
+  .request-tag { font-size: 10.5px; background: #F3F1FC; border-radius: 6px; padding: 3px 8px; }
+
+  /* ── Choose-calendars screen (full-bleed white, matches production — no card wrapper) ── */
+  .choose-wrap { max-width: 760px; margin: 0 auto; padding: 40px 24px 80px; }
+  .choose-title {
+    font-size: 19px; font-weight: 700; text-align: center; color: var(--color-text);
+    padding-bottom: 18px; border-bottom: 1px solid var(--color-border); margin-bottom: 4px;
+  }
+  .choose-subtitle {
+    font-size: 13px; color: var(--color-text-muted); text-align: center;
+    max-width: 520px; margin: 16px auto 8px; line-height: 1.55;
+  }
+
+  .writeto-strip {
+    display: flex; align-items: center; gap: 10px;
+    background: #F3F1FC; border: 1px solid #E1DEF7; border-radius: 8px;
+    padding: 10px 14px; margin: 18px 0 20px; font-size: 12.5px;
+  }
+  .writeto-strip .star { color: var(--color-primary); font-size: 15px; line-height: 1; }
+  .writeto-strip .label { color: var(--color-text-muted); }
+  .writeto-strip .value { font-weight: 700; color: var(--color-text); }
+  .writeto-strip .value.none { color: var(--color-text-muted); font-weight: 500; font-style: italic; }
+
+  .cal-list-head {
+    display: flex; justify-content: space-between; padding: 0 2px 10px;
+    font-size: 12px; font-weight: 700; color: var(--color-primary-active);
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .cal-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 2px; border-top: 1px solid var(--color-border); flex-wrap: wrap;
+  }
+  .cal-row:first-of-type { border-top: none; }
+  .cal-info { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .cal-name { font-size: 14px; font-weight: 600; color: var(--color-text); word-break: break-word; }
+  .cal-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .cal-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 2px 9px; }
+  .cal-badge.linked { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+  .cal-badge.writeto { background: var(--color-primary); color: #fff; }
+  .cal-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  .btn-link-cal { background: #E8E6FA; color: var(--color-primary-active); }
+  .btn-link-cal:hover { background: var(--color-primary); color: #fff; }
+  .btn-text-danger {
+    background: transparent; border: none; height: auto; padding: 4px 6px;
+    color: var(--color-text-muted); font-size: 12.5px; font-weight: 600;
+  }
+  .btn-text-danger:hover { color: #DC2626; }
+
+  .refresh-notice {
+    display: flex; align-items: center; gap: 14px; background: #FFF3EA;
+    border: 1px solid #FBD9BC; border-radius: 8px; padding: 14px 18px;
+    margin-top: 22px; flex-wrap: wrap; justify-content: center; text-align: center;
+  }
+  .refresh-notice-icon {
+    width: 22px; height: 22px; border-radius: 50%; background: #F0925A; color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .refresh-notice p { font-size: 13px; color: #7A4A26; }
+
+  .info-notice {
+    display: flex; align-items: flex-start; gap: 14px; background: #EAFBF6;
+    border: 1px solid #B7EEDD; border-radius: 8px; padding: 14px 18px; margin-top: 14px;
+  }
+  .info-notice-icon {
+    width: 22px; height: 22px; border-radius: 50%; background: #1FAE8C; color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+  }
+  .info-notice p { font-size: 13px; color: #12634F; line-height: 1.55; }
+
+  .choose-footer {
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    margin-top: 28px; flex-wrap: wrap; text-align: center;
+  }
+  .choose-footer .helper { font-size: 12px; color: var(--color-text-muted); width: 100%; text-align: center; }
+
+  /* ── Success screen ── */
+  .success-wrap { max-width: 560px; margin: 0 auto; padding: 100px 24px; text-align: center; }
+  .success-check { font-size: 17px; font-weight: 700; color: #12A36B; margin-bottom: 10px; }
+  .success-wrap p { font-size: 13.5px; color: var(--color-text); line-height: 1.6; margin-bottom: 10px; }
+  .success-wrap .muted { color: var(--color-text-muted); font-size: 12.5px; }
+  .success-wrap a { color: var(--color-primary); font-weight: 600; text-decoration: none; font-size: 12.5px; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--color-text); color: #fff; font-size: 13px; font-weight: 500;
+    padding: 12px 20px; border-radius: 10px; box-shadow: 0 10px 30px rgba(50,65,91,0.25);
+    max-width: 420px; text-align: center; line-height: 1.5;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; z-index: 200;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+
+  /* ── Modal (write-to reassignment) ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(50, 65, 91, 0.45); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 300; }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: #fff; border-radius: 12px; width: 100%; max-width: 420px; padding: 24px; box-shadow: 0 20px 60px rgba(50,65,91,0.3); }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .modal-body { font-size: 13px; color: var(--color-text-muted); line-height: 1.55; margin-bottom: 18px; }
+  .modal-body strong { color: var(--color-text); }
+  .modal-option-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .modal-option {
+    display: flex; align-items: center; gap: 10px; border: 1px solid var(--color-border); border-radius: 8px;
+    padding: 12px 14px; cursor: pointer; font-size: 13.5px; font-weight: 600; transition: border-color 0.15s, background 0.15s;
+  }
+  .modal-option:hover { border-color: var(--color-primary); }
+  .modal-option.selected { border-color: var(--color-primary); background: #F3F1FC; }
+  .modal-option input { accent-color: var(--color-primary); width: 16px; height: 16px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* ── Business rules slide-over ── */
+  .bizrules-toggle {
+    position: fixed; bottom: 24px; right: 24px; background: var(--color-text); color: #fff; border: none;
+    border-radius: 999px; padding: 10px 18px; font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; box-shadow: 0 8px 24px rgba(50,65,91,0.3); display: flex; align-items: center; gap: 6px; z-index: 150;
+  }
+  .bizrules-toggle:hover { background: #21283A; }
+  .bizrules-panel {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 320px; max-width: 88vw; background: #fff;
+    border-left: 1px solid var(--color-border); box-shadow: -12px 0 40px rgba(50,65,91,0.15);
+    transform: translateX(100%); transition: transform 0.2s ease; z-index: 250; display: flex; flex-direction: column;
+  }
+  .bizrules-panel.show { transform: translateX(0); }
+  .bizrules-head { padding: 18px 20px; border-bottom: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between; }
+  .bizrules-head h3 { font-size: 14px; font-weight: 700; }
+  .bizrules-close { background: none; border: none; font-size: 18px; color: var(--color-text-muted); cursor: pointer; line-height: 1; padding: 4px; }
+  .bizrules-close:hover { color: var(--color-text); }
+  .bizrules-body { padding: 18px 20px; overflow-y: auto; font-size: 12.5px; line-height: 1.6; color: var(--color-text); }
+  .bizrules-body ul { padding-left: 18px; margin-bottom: 16px; }
+  .bizrules-body li { margin-bottom: 8px; }
+  .bizrules-body .rule-id { font-weight: 700; color: var(--color-primary-active); }
+
+  @media (max-width: 640px) {
+    .cal-row { flex-direction: column; align-items: flex-start; }
+    .cal-actions { width: 100%; justify-content: flex-start; }
+    .appt-header-right { width: 100%; justify-content: space-between; }
+    .gcal-status-text { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Link Multiple Google Calendars</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bbkb1vp" target="_blank">86bbkb1vp</a>
+</div>
+
+<div class="demo-banner">
+  <span><strong>Clickable prototype.</strong> Follow the real entry flow: sign in from Appointments, link/unlink calendars, set a write-to calendar. State resets on reload.</span>
+  <div class="demo-controls">
+    <button class="demo-chip active" id="chip3cal" onclick="setScenario(3)">3 calendars available</button>
+    <button class="demo-chip" id="chip1cal" onclick="setScenario(1)">1 calendar available</button>
+    <button class="demo-reset" onclick="resetDemo()">Reset demo</button>
+  </div>
+</div>
+
+<div class="screen-label" id="screenLabel">Screen 1 of 3 — Appointments (Google Calendar not connected)</div>
+
+<!-- ══════════ Screen: Appointments ══════════ -->
+<div class="screen active" id="screen-appt">
+  <div class="app-topnav">
+    <div class="app-search">Search leads, contacts, tags...</div>
+    <div class="app-nav-right">
+      <span class="app-icon-btn">🔔<span class="dot"></span></span>
+      <div class="app-user"><span class="app-avatar">JH</span> Jeremy Harrison ⌄</div>
+    </div>
+  </div>
+
+  <div class="appt-wrap">
+    <div class="appt-header-row">
+      <div class="appt-title">Appointments</div>
+      <div class="appt-header-right">
+        <div class="gcal-status" id="gcalStatusBlock"></div>
+        <button class="btn btn-primary">New Appointment ⌄</button>
+      </div>
+    </div>
+
+    <div class="appt-toolbar">
+      <div class="toolbar-toggle"><span class="active">📅 Month</span><span>☰ 3 Days</span></div>
+      <div class="toolbar-month">‹ August 2026 ›</div>
+      <select class="toolbar-select"><option>All Event Types</option></select>
+      <select class="toolbar-select"><option>All Users</option></select>
+    </div>
+
+    <div class="appt-body">
+      <div class="appt-grid">
+        <div class="appt-grid-row head"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+        <div class="appt-grid-row">
+          <div class="appt-cell">26</div>
+          <div class="appt-cell">27</div>
+          <div class="appt-cell">28
+            <div class="appt-pill">1:00 PM Harrison Estimate</div>
+            <div class="appt-pill">3:30 PM Harrison Estimate</div>
+          </div>
+          <div class="appt-cell">29</div>
+          <div class="appt-cell">30</div>
+          <div class="appt-cell">31</div>
+          <div class="appt-cell">1</div>
+        </div>
+        <div class="appt-grid-row">
+          <div class="appt-cell">2</div>
+          <div class="appt-cell">3</div>
+          <div class="appt-cell">4</div>
+          <div class="appt-cell">5
+            <div class="appt-pill">7:00 AM Tommy Moss Estimate</div>
+          </div>
+          <div class="appt-cell">6</div>
+          <div class="appt-cell">7</div>
+          <div class="appt-cell">8</div>
+        </div>
+      </div>
+
+      <div class="requests-panel">
+        <div class="requests-head"><strong>Requests 3</strong><a href="#">Select</a></div>
+        <div class="request-card">
+          <div class="request-card-top">Bob Smith <span>4 days ago</span></div>
+          <p>Ext Painting</p>
+          <div class="request-card-bottom"><span class="request-tag">Aliens</span><button class="btn btn-primary btn-sm">Schedule</button></div>
+        </div>
+        <div class="request-card">
+          <div class="request-card-top">Jeremy Wayne <span>7 months ago</span></div>
+          <p>kitchen and bath</p>
+          <div class="request-card-bottom"><span class="request-tag">Came to me in a Dream</span><button class="btn btn-primary btn-sm">Schedule</button></div>
+        </div>
+        <div class="request-card">
+          <div class="request-card-top">Michael Dorsey <span>7 months ago</span></div>
+          <p>Kitchen &amp; Bath Remodel</p>
+          <div class="request-card-bottom"><span class="request-tag">A Little Bird</span><button class="btn btn-primary btn-sm">Schedule</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ Screen: Choose calendars to link ══════════ -->
+<div class="screen" id="screen-choose">
+  <div class="app-topnav">
+    <div class="app-search">Search leads, contacts, tags...</div>
+    <div class="app-nav-right">
+      <span class="app-icon-btn">🔔<span class="dot"></span></span>
+      <div class="app-user"><span class="app-avatar">JH</span> Jeremy Harrison ⌄</div>
+    </div>
+  </div>
+
+  <div class="choose-wrap">
+    <div class="choose-title">Please choose a calendar to link to DripJobs</div>
+    <div class="choose-subtitle">
+      Link as many calendars as you'd like, their events show up in DripJobs for reference. Choose one as your <strong>write-to calendar</strong>, that's the only calendar new DripJobs appointments and jobs get copied to.
+    </div>
+
+    <div class="writeto-strip">
+      <span class="star">★</span>
+      <span class="label">Write-to calendar:</span>
+      <span class="value none" id="writeToValue">None selected</span>
+    </div>
+
+    <div class="cal-list-head"><span>Calendar</span><span>Action</span></div>
+    <div id="calList"></div>
+
+    <div class="refresh-notice">
+      <span class="refresh-notice-icon">i</span>
+      <p>
+        If you do not see the calendar you'd like to link, click here to refresh the list.<br />
+        <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="showToast('List refreshed. No new calendars found.')">Refresh</button>
+      </p>
+    </div>
+
+    <div class="info-notice">
+      <span class="info-notice-icon">✓</span>
+      <p>
+        Every calendar you link is synced to DripJobs so its events appear for reference only, they won't block or affect your scheduling availability. Appointments and jobs assigned to you are copied only to your write-to calendar, and you can change which calendar that is at any time from this screen.
+      </p>
+    </div>
+
+    <div class="choose-footer">
+      <span class="helper" id="continueHelper"></span>
+      <button class="btn btn-primary" id="continueBtn" onclick="continueFromChoose()">Continue to Appointments</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ Screen: Success interstitial ══════════ -->
+<div class="screen" id="screen-success">
+  <div class="success-wrap">
+    <div class="success-check">Success!</div>
+    <p id="successLine1">Your Google Calendar is now linked to DripJobs.</p>
+    <p id="successLine2"></p>
+    <p class="muted">Manage your linked calendars anytime from the Appointments page.</p>
+    <a href="#" onclick="finishSuccess(); return false;">Continue now →</a>
+  </div>
+</div>
+
+<!-- Write-to reassignment modal (BR-6) -->
+<div class="modal-overlay" id="reassignModal">
+  <div class="modal-box">
+    <div class="modal-title">Choose a new write-to calendar</div>
+    <div class="modal-body">
+      <strong id="unlinkingName"></strong> is your current write-to calendar. Pick another linked calendar to write new DripJobs events to before unlinking it. Events already synced stay where they are.
+    </div>
+    <div class="modal-option-list" id="modalOptionList"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeReassignModal()">Cancel</button>
+      <button class="btn btn-primary" id="confirmReassignBtn" disabled onclick="confirmReassignAndUnlink()">Confirm &amp; unlink</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<button class="bizrules-toggle" onclick="toggleBizRules(true)">📋 Business rules</button>
+<div class="bizrules-panel" id="bizRulesPanel">
+  <div class="bizrules-head">
+    <h3>What this prototype demonstrates</h3>
+    <button class="bizrules-close" onclick="toggleBizRules(false)">&times;</button>
+  </div>
+  <div class="bizrules-body">
+    <ul>
+      <li><span class="rule-id">BR-1</span> — Link more than one Google Calendar from this screen.</li>
+      <li><span class="rule-id">BR-2</span> — All linked calendars' events are for reference only; they don't affect scheduling availability.</li>
+      <li><span class="rule-id">BR-3</span> — Exactly one linked calendar is the write-to calendar at a time.</li>
+      <li><span class="rule-id">BR-4</span> — Linking a calendar never auto-assigns it as write-to, that's a separate action.</li>
+      <li><span class="rule-id">BR-5</span> — Changing the write-to calendar only applies to new events going forward. Previously synced events aren't moved.</li>
+      <li><span class="rule-id">BR-6</span> — Unlinking the current write-to calendar while others remain linked requires picking a new write-to first. Unlinking it when no other calendars remain linked is a full disconnect.</li>
+    </ul>
+    <p style="color:#80879A;">Ticket 86bbkb1vp scopes this to the desktop/web calendar linking flow only (V1). Mobile linking is a separate, unresolved track. The Appointments page header and the "Continue to Appointments" / "Manage" entry points are this prototype's own connective tissue, not pictured in the ticket, added to show the real flow context from the provided screenshots.</p>
+  </div>
+</div>
+
+<script>
+  const SCENARIOS = {
+    3: [
+      { id: 'marketing', name: 'Marketing', linked: false },
+      { id: 'family', name: 'Family', linked: false },
+      { id: 'grateful', name: 'gratefulpainting2017@gmail.com', linked: false },
+    ],
+    1: [
+      { id: 'primary', name: 'jeremy@dripjobs.com', linked: false },
+    ],
+  };
+
+  let calendars = [];
+  let writeToId = null;
+  let pendingUnlinkId = null;
+  let pendingNewWriteTo = null;
+  let entryMode = null; // 'oauth' | 'manage'
+
+  function setScenario(n) {
+    calendars = JSON.parse(JSON.stringify(SCENARIOS[n]));
+    writeToId = null;
+    entryMode = null;
+    document.getElementById('chip3cal').classList.toggle('active', n === 3);
+    document.getElementById('chip1cal').classList.toggle('active', n === 1);
+    renderCalList();
+    renderApptHeader();
+    goToScreen('appt');
+  }
+
+  function resetDemo() {
+    const active3 = document.getElementById('chip3cal').classList.contains('active');
+    setScenario(active3 ? 3 : 1);
+    showToast('Demo state reset.');
+  }
+
+  function goToScreen(name) {
+    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+    const labels = {
+      appt: 'Screen 1 of 3 — Appointments',
+      choose: 'Screen 2 of 3 — Choose a calendar to link to DripJobs',
+      success: 'Screen 3 of 3 — Success',
+    };
+    document.getElementById('screenLabel').textContent = labels[name];
+  }
+
+  function handleSignIn() {
+    entryMode = 'oauth';
+    goToScreen('choose');
+  }
+
+  function handleManage() {
+    entryMode = 'manage';
+    goToScreen('choose');
+  }
+
+  function renderApptHeader() {
+    const linked = calendars.filter(c => c.linked);
+    const block = document.getElementById('gcalStatusBlock');
+    if (linked.length === 0) {
+      block.innerHTML = `
+        <div class="gcal-status-text">
+          <span class="gcal-label">Google Calendar</span>
+          <span class="gcal-value not-connected">Status: Not Connected</span>
+        </div>
+        <button class="btn btn-google" onclick="handleSignIn()">
+          <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4c-7.6 0-14.1 4.3-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.4C29.6 35.4 26.9 36 24 36c-5.3 0-9.7-3.1-11.3-7.6l-6.5 5C9.9 39.7 16.4 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.6 5.4C39.9 37.1 44 31 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+          Sign in with Google
+        </button>
+      `;
+    } else {
+      const writeToCal = calendars.find(c => c.id === writeToId);
+      const countLabel = linked.length === 1 ? '1 calendar linked' : `${linked.length} calendars linked`;
+      const writeToLabel = writeToCal ? `Write-to: ${writeToCal.name}` : 'No write-to calendar set';
+      block.innerHTML = `
+        <div class="gcal-status-text">
+          <span class="gcal-label">Google Calendar</span>
+          <span class="gcal-value connected">Status: Connected</span>
+          <span class="gcal-meta">${countLabel} · ${writeToLabel}</span>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="handleManage()">Manage</button>
+      `;
+    }
+  }
+
+  function renderCalList() {
+    const list = document.getElementById('calList');
+    list.innerHTML = '';
+
+    calendars.forEach(cal => {
+      const row = document.createElement('div');
+      row.className = 'cal-row';
+
+      const isWriteTo = cal.linked && cal.id === writeToId;
+
+      let badges = '';
+      if (cal.linked) badges += `<span class="cal-badge linked">Linked</span>`;
+      if (isWriteTo) badges += `<span class="cal-badge writeto">★ Write-to</span>`;
+
+      let actions = '';
+      if (!cal.linked) {
+        actions = `<button class="btn btn-link-cal" onclick="linkCalendar('${cal.id}')">Link</button>`;
+      } else if (isWriteTo) {
+        actions = `<button class="btn btn-text-danger" onclick="requestUnlink('${cal.id}')">Unlink</button>`;
+      } else {
+        actions = `
+          <button class="btn btn-outline btn-sm" onclick="setWriteTo('${cal.id}')">Set as write-to</button>
+          <button class="btn btn-text-danger" onclick="requestUnlink('${cal.id}')">Unlink</button>
+        `;
+      }
+
+      row.innerHTML = `
+        <div class="cal-info">
+          <span class="cal-name">${cal.name}</span>
+          <div class="cal-badges">${badges}</div>
+        </div>
+        <div class="cal-actions">${actions}</div>
+      `;
+      list.appendChild(row);
+    });
+
+    const writeToCal = calendars.find(c => c.id === writeToId);
+    const writeToValueEl = document.getElementById('writeToValue');
+    if (writeToCal) {
+      writeToValueEl.textContent = writeToCal.name;
+      writeToValueEl.classList.remove('none');
+    } else {
+      writeToValueEl.textContent = 'None selected';
+      writeToValueEl.classList.add('none');
+    }
+
+    const linkedCount = calendars.filter(c => c.linked).length;
+    const continueBtn = document.getElementById('continueBtn');
+    const helper = document.getElementById('continueHelper');
+    if (entryMode === 'manage') {
+      continueBtn.textContent = 'Done';
+      continueBtn.disabled = false;
+      helper.textContent = '';
+    } else {
+      continueBtn.textContent = 'Continue to Appointments';
+      continueBtn.disabled = linkedCount === 0;
+      helper.textContent = linkedCount === 0 ? 'Link at least one calendar to continue.' : '';
+    }
+  }
+
+  function linkCalendar(id) {
+    const cal = calendars.find(c => c.id === id);
+    if (!cal || cal.linked) return;
+    cal.linked = true;
+    renderCalList();
+    showToast(`${cal.name} linked. Its events are now visible in DripJobs for reference. Set it as your write-to calendar anytime.`);
+  }
+
+  function setWriteTo(id) {
+    const cal = calendars.find(c => c.id === id);
+    if (!cal || !cal.linked) return;
+    const previous = calendars.find(c => c.id === writeToId);
+    writeToId = id;
+    renderCalList();
+    if (previous) {
+      showToast(`New DripJobs events will now be written to ${cal.name}. Events already synced to ${previous.name} stay there.`);
+    } else {
+      showToast(`${cal.name} set as your write-to calendar. New DripJobs events will be copied there.`);
+    }
+  }
+
+  function requestUnlink(id) {
+    const cal = calendars.find(c => c.id === id);
+    if (!cal) return;
+
+    if (id !== writeToId) {
+      cal.linked = false;
+      renderCalList();
+      showToast(`${cal.name} unlinked.`);
+      return;
+    }
+
+    const otherLinked = calendars.filter(c => c.linked && c.id !== id);
+    if (otherLinked.length === 0) {
+      cal.linked = false;
+      writeToId = null;
+      renderCalList();
+      showToast(`${cal.name} unlinked. No calendars remain linked, Google Calendar sync is now fully disconnected.`);
+      return;
+    }
+
+    pendingUnlinkId = id;
+    pendingNewWriteTo = null;
+    document.getElementById('unlinkingName').textContent = cal.name;
+    const optionList = document.getElementById('modalOptionList');
+    optionList.innerHTML = otherLinked.map(c => `
+      <label class="modal-option" id="opt-${c.id}" onclick="selectReassignOption('${c.id}')">
+        <input type="radio" name="reassign" value="${c.id}" />
+        ${c.name}
+      </label>
+    `).join('');
+    document.getElementById('confirmReassignBtn').disabled = true;
+    document.getElementById('reassignModal').classList.add('show');
+  }
+
+  function selectReassignOption(id) {
+    pendingNewWriteTo = id;
+    document.querySelectorAll('.modal-option').forEach(el => el.classList.remove('selected'));
+    document.getElementById(`opt-${id}`).classList.add('selected');
+    document.getElementById(`opt-${id}`).querySelector('input').checked = true;
+    document.getElementById('confirmReassignBtn').disabled = false;
+  }
+
+  function closeReassignModal() {
+    document.getElementById('reassignModal').classList.remove('show');
+    pendingUnlinkId = null;
+    pendingNewWriteTo = null;
+  }
+
+  function confirmReassignAndUnlink() {
+    if (!pendingUnlinkId || !pendingNewWriteTo) return;
+    const unlinked = calendars.find(c => c.id === pendingUnlinkId);
+    const newWriteTo = calendars.find(c => c.id === pendingNewWriteTo);
+    unlinked.linked = false;
+    writeToId = pendingNewWriteTo;
+    closeReassignModal();
+    renderCalList();
+    showToast(`${unlinked.name} unlinked. ${newWriteTo.name} is now your write-to calendar.`);
+  }
+
+  function continueFromChoose() {
+    const linkedCount = calendars.filter(c => c.linked).length;
+    if (entryMode === 'oauth') {
+      if (linkedCount === 0) return;
+      showSuccessScreen();
+    } else {
+      renderApptHeader();
+      goToScreen('appt');
+    }
+  }
+
+  let successTimer = null;
+  function showSuccessScreen() {
+    const writeToCal = calendars.find(c => c.id === writeToId);
+    document.getElementById('successLine2').textContent = writeToCal
+      ? `Appointments assigned to you will be synced to ${writeToCal.name}.`
+      : 'Set a write-to calendar anytime to start syncing new appointments to it.';
+    goToScreen('success');
+    clearTimeout(successTimer);
+    successTimer = setTimeout(finishSuccess, 2200);
+  }
+
+  function finishSuccess() {
+    clearTimeout(successTimer);
+    renderApptHeader();
+    goToScreen('appt');
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3800);
+  }
+
+  function toggleBizRules(open) {
+    document.getElementById('bizRulesPanel').classList.toggle('show', open);
+  }
+
+  setScenario(3);
+</script>
+
+</body>
+</html>
