@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-25] Know Your Numbers webinar recap, real Help Desk screenshot
+
+- Decision: Replaced the hand-built CSS chat-widget mockup on the "We're Here to Help" closing slide with the actual image from source PDF page 24, cropped from a 300dpi render to the open Live Help Desk modal plus its surrounding purple circle backdrop (`know-your-numbers-webinar/images/help-desk-modal.png`). Removed the now-unused `.help-mock*` CSS.
+- Why: Jeremy specifically wanted the real screenshot he already had, not an approximation, so the closing slide shows the actual product UI.
+- Open question: None.
+
 ## [2026-08-25] Know Your Numbers webinar recap, add FAQ + Help slides from source PDF pages 17/18/24
 
 - Decision: The source PDF is actually 24 pages, not the 16 the upload tool initially reported (only 16 were read in the original build session). Read pages 17-24 and added two new dark-theme interstitial slides mirroring PDF pages 17-18 ("Why don't my numbers match?" — Closing Ratio vs. Jobs Won comparison cards + product quote, then the "Looking deeper" explanation box) placed after "More Ways to Slice It" and before Wrap Up, matching the original deck's order. Added a new final "We're Here to Help" slide mirroring PDF page 24 (support email, Live Help Desk blurb, a small chat-widget mockup), moved the existing "Thanks for working along with us!" box and Restart button onto it as the true closing beat, and trimmed the "Why don't my numbers match?" item out of the Wrap Up slide's live-only recap list since it's now covered in the deck itself (Wrap Up dropped from 4 items to 3, renumbered).
