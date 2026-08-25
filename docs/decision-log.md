@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-25] Know Your Numbers webinar recap, add FAQ + Help slides from source PDF pages 17/18/24
+
+- Decision: The source PDF is actually 24 pages, not the 16 the upload tool initially reported (only 16 were read in the original build session). Read pages 17-24 and added two new dark-theme interstitial slides mirroring PDF pages 17-18 ("Why don't my numbers match?" — Closing Ratio vs. Jobs Won comparison cards + product quote, then the "Looking deeper" explanation box) placed after "More Ways to Slice It" and before Wrap Up, matching the original deck's order. Added a new final "We're Here to Help" slide mirroring PDF page 24 (support email, Live Help Desk blurb, a small chat-widget mockup), moved the existing "Thanks for working along with us!" box and Restart button onto it as the true closing beat, and trimmed the "Why don't my numbers match?" item out of the Wrap Up slide's live-only recap list since it's now covered in the deck itself (Wrap Up dropped from 4 items to 3, renumbered).
+- Why: Jeremy asked specifically for pages 17, 18, and 24's content to be included; pages 19-23 (Reports & CSV Export mockup, What's New Recently, On the Roadmap, Open Q&A title card, Suggest a Feature) were not requested, so they were left out per scope discipline.
+- Open question: None. Deck is now 16 slides.
+
 ## [2026-08-25] Know Your Numbers webinar recap, combine period slides
 
 - Decision: Merged the "Changing Your Period" and "What Each Quick-Select Really Means" slides in `know-your-numbers-webinar/index.html` into one slide (deck went 14 → 13 slides), with the quick-select table now living directly under the period banner instead of on its own slide. Clicking a quick-range chip (Today/Week/Last Wk/Month/Last Mo/YTD/All) now highlights the matching row in the "What it includes" table below, and the default "Month" chip highlights its row on load. Opening the Change Period modal and applying a custom range clears the highlight, since a custom range doesn't map to any single quick-select row. Also dropped a redundant quote callout that just repeated the period-hint text verbatim.
