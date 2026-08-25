@@ -267,6 +267,9 @@
   .qs-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--color-text-muted); padding: 10px 12px; border-bottom: 1px solid var(--color-border); }
   .qs-table td { padding: 13px 12px; border-bottom: 1px solid #EFEDF7; vertical-align: middle; }
   .qs-table tr:hover td { background: #FBFAFF; }
+  .qs-table tr.qs-row-active td { background: #F3F1FC; }
+  .qs-table tr.qs-row-active .qs-btn { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  .qs-table tr.qs-row-active .qs-bar-fill { background: var(--color-primary-active); opacity: 1; }
   .qs-btn { display: inline-block; border: 1px solid var(--color-border); background: #F3F1FC; color: var(--color-primary-active); font-weight: 700; font-size: 11.5px; border-radius: 999px; padding: 5px 12px; }
   .qs-bar { position: relative; width: 100%; min-width: 120px; height: 8px; background: #EFEDF7; border-radius: 6px; }
   .qs-bar-fill { position: absolute; top: 0; height: 100%; background: var(--color-primary); border-radius: 6px; opacity: 0.85; }
@@ -625,7 +628,7 @@
       <section class="slide" data-title="Changing Your Period">
         <div class="slide-kicker">Changing Your Period</div>
         <h2 class="slide-title">Two Ways to Change the Range</h2>
-        <p class="slide-sub">Try it — click a quick-range chip below, or open the Change Period modal for a custom date range.</p>
+        <p class="slide-sub">Try it — click a quick-range chip below to see exactly what it includes, or open the Change Period modal for a custom date range.</p>
 
         <div class="period-banner">
           <div class="period-range-display">📅 <span id="periodDisplay">07/21/2026 – 08/20/2026</span></div>
@@ -642,15 +645,9 @@
         </div>
         <div class="period-hint">ℹ️ Go directly to Reports, or click any card title to open its full report. Click a row to drill in.</div>
 
-        <div class="callout" style="margin-top:20px;">“Click any card title to open its full report. Click a row to drill in.”</div>
-      </section>
-
-      <!-- 8 · Quick-select meanings -->
-      <section class="slide" data-title="What Quick-Select Means">
-        <div class="slide-kicker">Changing Your Period</div>
-        <h2 class="slide-title">What Each Quick-Select Really Means</h2>
-        <p class="slide-sub">Confirmed exact date logic behind each quick-range button on the top banner.</p>
-        <div class="section-card">
+        <div class="section-card" style="margin-top:20px;">
+          <div class="section-title">What Each Quick-Select Really Means</div>
+          <div class="section-caps" style="text-transform:none; font-weight:500; color:var(--color-text-muted); margin-bottom:14px;">Confirmed exact date logic behind each quick-range button above — click one to see it highlighted below.</div>
           <table class="qs-table">
             <thead><tr><th>Button</th><th>What it includes</th><th style="min-width:160px;">At a glance</th></tr></thead>
             <tbody id="qsTableBody"></tbody>
@@ -659,7 +656,7 @@
         </div>
       </section>
 
-      <!-- 9 · Insights today vs coming soon -->
+      <!-- 8 · Insights today vs coming soon -->
       <section class="slide" data-title="Insights: Today vs Soon">
         <div class="slide-kicker">Insights</div>
         <h2 class="slide-title">Today vs. Coming Soon</h2>
@@ -867,12 +864,16 @@
     'YTD': '01/01/2026 – 08/25/2026',
     'All': 'Company creation – 08/25/2026'
   };
+  function highlightQsRow(range) {
+    document.querySelectorAll('#qsTableBody tr').forEach(tr => tr.classList.toggle('qs-row-active', tr.dataset.btn === range));
+  }
   document.getElementById('quickChips').addEventListener('click', (e) => {
     const chip = e.target.closest('.chip');
     if (!chip) return;
     document.querySelectorAll('#quickChips .chip').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
     document.getElementById('periodDisplay').textContent = RANGE_TEXT[chip.dataset.range] || '07/21/2026 – 08/20/2026';
+    highlightQsRow(chip.dataset.range);
   });
 
   function openPeriodModal() { document.getElementById('periodModal').classList.add('open'); }
@@ -891,10 +892,11 @@
     const e = document.getElementById('modalEnd').value;
     document.getElementById('periodDisplay').textContent = `${s} – ${e}`;
     document.querySelectorAll('#quickChips .chip').forEach(c => c.classList.remove('active'));
+    highlightQsRow(null);
     closePeriodModal();
   }
 
-  /* ══════════ Quick-select meaning table (slide 8) ══════════ */
+  /* ══════════ Quick-select meaning table (slide 7) ══════════ */
   const QS_ROWS = [
     { btn: 'Today',   desc: 'Today only',                                             left: 92, width: 8 },
     { btn: 'Week',    desc: 'Monday of this week → today',                            left: 75, width: 25 },
@@ -907,6 +909,7 @@
   const qsBody = document.getElementById('qsTableBody');
   QS_ROWS.forEach(r => {
     const tr = document.createElement('tr');
+    tr.dataset.btn = r.btn;
     tr.innerHTML = `
       <td><span class="qs-btn">${r.btn}</span></td>
       <td>${r.desc}</td>
@@ -914,6 +917,7 @@
     `;
     qsBody.appendChild(tr);
   });
+  highlightQsRow(document.querySelector('#quickChips .chip.active')?.dataset.range || null);
 
   /* ══════════ DripSense demo (slide 10) ══════════ */
   const DS_ICON_BG = { lav: '#E8E6FA', mint: '#E6FAF0', sky: '#E6F3FA', peach: '#FAF0E6', coral: '#FAE6E6' };
