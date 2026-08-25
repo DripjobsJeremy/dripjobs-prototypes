@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Know Your Numbers — DripJobs Metrics Webinar</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --color-primary:        #8B85EA;
+    --color-primary-hover:  #736BE3;
+    --color-primary-active: #5C53DC;
+    --color-primary-rgb:    139, 133, 234;
+    --color-bg:             #F3F1FC;
+    --color-text:           #32415B;
+    --color-text-muted:     #80879A;
+    --color-border:         #DAD8E3;
+    --color-card:           #FFFFFF;
+    --color-green:          #22C55E;
+    --color-amber:          #F59E0B;
+    --color-coral:          #F87171;
+    --color-teal:           #0DCECE;
+
+    --cover-bg:    #1C1938;
+    --cover-bg2:   #2C2766;
+    --cover-text:  #F4F3FC;
+    --cover-muted: #ABA6D9;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100vh;
+  }
+
+  /* ── Top bar ── */
+  .proto-bar {
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .back-link {
+    font-size: 12px; font-weight: 500; color: var(--color-text-muted);
+    text-decoration: none; display: flex; align-items: center; gap: 4px;
+    transition: color 0.15s; flex-shrink: 0;
+  }
+  .back-link:hover { color: var(--color-primary); }
+  .divider { color: var(--color-border); font-size: 16px; flex-shrink: 0; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .proto-bar-meta {
+    font-size: 11px; font-weight: 600; color: var(--color-primary);
+    padding: 4px 12px; border: 1px solid #D6D2F5; background: #E8E6FA;
+    border-radius: 999px; letter-spacing: 0.2px; white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* ── Deck shell ── */
+  .deck-shell {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: calc(100vh - 61px);
+  }
+  @media (max-width: 880px) {
+    .deck-shell { grid-template-columns: 1fr; }
+    .deck-sidebar { display: none; }
+  }
+
+  /* ── Sidebar ── */
+  .deck-sidebar {
+    border-right: 1px solid var(--color-border);
+    background: var(--color-card);
+    padding: 18px 10px;
+    overflow-y: auto;
+    position: sticky;
+    top: 61px;
+    height: calc(100vh - 61px);
+  }
+  .deck-sidebar-label {
+    font-size: 11px; font-weight: 600; color: var(--color-text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 10px 10px;
+  }
+  .deck-nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: 8px; cursor: pointer;
+    font-size: 12.5px; font-weight: 500; color: var(--color-text-muted);
+    transition: background 0.15s, color 0.15s; user-select: none;
+  }
+  .deck-nav-item:hover { background: var(--color-bg); color: var(--color-text); }
+  .deck-nav-item.active { background: #E8E6FA; color: var(--color-primary-active); font-weight: 600; }
+  .deck-nav-num {
+    width: 20px; height: 20px; border-radius: 50%; background: var(--color-bg);
+    color: var(--color-text-muted); font-size: 10.5px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .deck-nav-item.active .deck-nav-num { background: var(--color-primary); color: #fff; }
+  .deck-nav-item span.deck-nav-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ── Mobile jump select ── */
+  .deck-mobile-nav { display: none; padding: 10px 20px; background: var(--color-card); border-bottom: 1px solid var(--color-border); }
+  @media (max-width: 880px) { .deck-mobile-nav { display: block; } }
+  .deck-mobile-nav select {
+    width: 100%; height: 38px; border-radius: 8px; border: 1px solid var(--color-border);
+    padding: 0 10px; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--color-text);
+    background: var(--color-bg);
+  }
+
+  /* ── Stage ── */
+  .deck-stage-wrap { display: flex; flex-direction: column; min-width: 0; }
+  .deck-progress-track { height: 4px; background: var(--color-border); }
+  .deck-progress-fill { height: 100%; background: var(--color-primary); width: 0%; transition: width 0.25s ease; }
+
+  .deck-stage {
+    flex: 1;
+    padding: 44px 48px 120px;
+    max-width: 980px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  @media (max-width: 640px) { .deck-stage { padding: 28px 18px 120px; } }
+
+  .slide { display: none; animation: slideIn 0.35s ease; }
+  .slide.active { display: block; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .slide-kicker {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; color: var(--color-primary);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px;
+  }
+  .slide-title { font-family: 'DM Serif Display', serif; font-size: 30px; line-height: 1.2; color: var(--color-text); margin-bottom: 10px; }
+  .slide-sub { font-size: 14.5px; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 28px; max-width: 640px; }
+
+  /* ── Bottom nav bar ── */
+  .deck-controls {
+    position: sticky; bottom: 0;
+    background: var(--color-card); border-top: 1px solid var(--color-border);
+    padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .deck-controls-count { font-size: 12px; font-weight: 600; color: var(--color-text-muted); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 20px;
+    border-radius: 10px; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; text-decoration: none; border: none; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-primary { background: var(--color-primary); color: #fff; }
+  .btn-primary:hover { background: var(--color-primary-hover); }
+  .btn-primary:disabled, .btn-outline:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-outline { background: transparent; border: 1px solid var(--color-border); color: var(--color-text); }
+  .btn-outline:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .btn-sm { height: 32px; padding: 0 14px; border-radius: 8px; font-size: 12px; }
+
+  /* ══════════ Reusable content blocks ══════════ */
+  .section-card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .section-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .section-caps { font-size: 10.5px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+
+  .callout {
+    background: #F3F1FC; border: 1px solid #E1DEF7; border-radius: 12px;
+    padding: 16px 18px; font-size: 13.5px; line-height: 1.6; color: var(--color-text); margin-top: 4px;
+  }
+  .callout b, .callout strong { color: var(--color-primary-active); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 760px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+
+  /* ── Team list ── */
+  .team-row { display: flex; align-items: center; gap: 12px; padding: 10px 4px; }
+  .team-dot { width: 30px; height: 30px; border-radius: 50%; background: var(--color-primary); flex-shrink: 0; }
+  .team-row-text b { font-size: 13.5px; }
+  .team-row-text span { font-size: 12px; color: var(--color-text-muted); }
+
+  .checklist { list-style: none; }
+  .checklist li { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; font-size: 13px; line-height: 1.5; }
+  .checklist li::before { content: "✓"; color: var(--color-green); font-weight: 700; flex-shrink: 0; }
+
+  /* ── Nav path (slide 3) ── */
+  .navpath-step {
+    background: #E8E6FA; color: var(--color-primary-active); font-weight: 700; font-size: 13.5px;
+    text-align: center; border-radius: 10px; padding: 12px; margin-bottom: 6px;
+  }
+  .navpath-arrow { text-align: center; color: var(--color-text-muted); font-size: 15px; margin-bottom: 6px; }
+  .nav-mock { background: #fff; border: 1px solid var(--color-border); border-radius: 12px; padding: 6px; font-size: 12.5px; }
+  .nav-mock-label { font-size: 10px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 10px 4px; }
+  .nav-mock-item { padding: 8px 10px; border-radius: 6px; color: var(--color-text); }
+  .nav-mock-item.highlight { background: #F3F1FC; border: 1.5px solid var(--color-primary); font-weight: 700; color: var(--color-primary-active); }
+  .nav-mock-sub { padding: 6px 10px 6px 22px; border-radius: 6px; font-size: 12px; color: var(--color-text-muted); }
+  .nav-mock-sub.active { color: var(--color-primary-active); font-weight: 700; }
+
+  /* ── Agenda ── */
+  .agenda-row { display: flex; align-items: center; gap: 12px; padding: 9px 4px; font-size: 13.5px; cursor: default; }
+  .agenda-icon { width: 30px; height: 30px; border-radius: 50%; background: var(--color-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+
+  /* ── KPI overview tiles ── */
+  .kpi-board { background: #fff; border: 1px solid var(--color-border); border-radius: 14px; padding: 14px; box-shadow: 0 8px 24px rgba(50,65,91,0.06); }
+  .kpi-row-label { font-size: 10px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 6px 8px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+  .kpi-row:last-child { margin-bottom: 0; }
+  @media (max-width: 700px) { .kpi-row { grid-template-columns: 1fr; } }
+  .kpi-tile {
+    background: #FBFAFF; border: 1px solid var(--color-border); border-radius: 10px; padding: 14px;
+    cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  }
+  .kpi-tile:hover { border-color: var(--color-primary); box-shadow: 0 4px 14px rgba(var(--color-primary-rgb), 0.16); transform: translateY(-1px); }
+  .kpi-tile-top { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--color-primary-active); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .kpi-tile-desc { font-size: 11px; color: var(--color-text-muted); line-height: 1.4; margin-bottom: 10px; min-height: 28px; }
+  .kpi-tile-value { font-size: 22px; font-weight: 700; color: var(--color-text); margin-bottom: 10px; }
+  .kpi-tile-link { font-size: 11px; font-weight: 700; color: var(--color-primary); }
+  .kpi-tile-link::after { content: " →"; }
+
+  .kpi-legend { display: flex; gap: 18px; margin: 16px 2px 4px; flex-wrap: wrap; }
+  .kpi-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--color-text-muted); }
+  .kpi-legend-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary); }
+
+  /* ── Metric detail cards ── */
+  .metric-card { background: #F3F1FC; border: 1px solid #E1DEF7; border-radius: 12px; padding: 16px; }
+  .metric-card h4 { font-size: 14px; color: var(--color-primary-active); margin-bottom: 8px; }
+  .metric-card p { font-size: 13.5px; line-height: 1.6; }
+
+  /* ── Period demo ── */
+  .period-banner { background: #fff; border: 1px solid var(--color-border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .period-range-display { font-size: 12.5px; font-weight: 700; color: var(--color-text); background: var(--color-bg); border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 6px; }
+  .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    border: 1px solid var(--color-border); background: #fff; border-radius: 999px; padding: 7px 14px;
+    font-size: 12px; font-weight: 600; color: var(--color-text-muted); cursor: pointer; transition: all 0.15s;
+  }
+  .chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .chip.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  .period-hint { font-size: 12px; color: var(--color-text-muted); padding: 10px 4px 0; display: flex; gap: 6px; align-items: flex-start; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(28,25,56,0.45); display: none;
+    align-items: center; justify-content: center; z-index: 200; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: #fff; border-radius: 14px; padding: 22px; width: 100%; max-width: 380px; box-shadow: 0 20px 60px rgba(28,25,56,0.3); }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .modal-head h3 { font-size: 15px; font-weight: 700; }
+  .modal-close { background: none; border: none; font-size: 18px; color: var(--color-text-muted); cursor: pointer; line-height: 1; }
+  .modal-close:hover { color: var(--color-text); }
+  .modal-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .modal-field label { font-size: 10.5px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.4px; display: block; margin-bottom: 5px; }
+  .modal-field input { width: 100%; height: 36px; border: 1px solid var(--color-border); border-radius: 8px; padding: 0 10px; font-size: 13px; font-family: inherit; color: var(--color-text); }
+  .modal-quick-label { font-size: 10.5px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+  .modal-chip-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+  .modal-chip {
+    border: none; border-radius: 999px; padding: 6px 12px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* ── Quick-select table ── */
+  .qs-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .qs-table th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--color-text-muted); padding: 8px 10px; border-bottom: 1px solid var(--color-border); }
+  .qs-table td { padding: 10px; border-bottom: 1px solid #EFEDF7; vertical-align: middle; }
+  .qs-table tr:hover td { background: #FBFAFF; }
+  .qs-btn { display: inline-block; border: 1px solid var(--color-border); background: #F3F1FC; color: var(--color-primary-active); font-weight: 700; font-size: 11.5px; border-radius: 999px; padding: 5px 12px; }
+  .qs-bar { position: relative; width: 100%; min-width: 120px; height: 8px; background: #EFEDF7; border-radius: 6px; }
+  .qs-bar-fill { position: absolute; top: 0; height: 100%; background: var(--color-primary); border-radius: 6px; opacity: 0.85; }
+  .qs-bar-today { position: absolute; top: -3px; right: 0; width: 2px; height: 14px; background: var(--color-text); border-radius: 2px; }
+  .qs-legend { font-size: 11px; color: var(--color-text-muted); margin-top: 8px; font-style: italic; }
+
+  /* ── Insights comparison ── */
+  .insight-panel { border-radius: 14px; padding: 20px; height: 100%; }
+  .insight-panel.live { background: #E9FAF0; border: 1px solid #BEEDD1; }
+  .insight-panel.soon { background: #F3F1FC; border: 1px solid #E1DEF7; }
+  .insight-tag { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: inline-block; }
+  .insight-panel.live .insight-tag { color: #166534; }
+  .insight-panel.soon .insight-tag { color: var(--color-primary-active); }
+  .insight-panel h4 { font-size: 17px; margin-bottom: 10px; font-family: 'DM Serif Display', serif; }
+  .insight-panel p { font-size: 13px; line-height: 1.65; margin-bottom: 10px; }
+  .insight-quote { font-style: italic; font-size: 12.5px; color: var(--color-text-muted); border-left: 3px solid var(--color-border); padding-left: 10px; margin-top: 12px; }
+  .insights-bullets { background: #fff; border: 1px solid var(--color-border); border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; }
+  .insights-bullets div { font-size: 11px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .insights-bullets ul { padding-left: 18px; font-size: 13px; line-height: 1.7; }
+
+  /* ── DripSense demo ── */
+  .ds-card { background: linear-gradient(135deg,#F3F1FC,#FFFFFF); border: 1px solid #E1DEF7; border-radius: 16px; padding: 18px; box-shadow: 0 10px 30px rgba(var(--color-primary-rgb),0.1); }
+  .ds-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .ds-head-left { display: flex; align-items: center; gap: 10px; }
+  .ds-avatar { width: 34px; height: 34px; border-radius: 10px; background: var(--color-primary); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; }
+  .ds-head-title { font-size: 14px; font-weight: 700; }
+  .ds-head-sub { font-size: 11px; color: var(--color-text-muted); }
+  .ds-body { display: none; }
+  .ds-body.revealed { display: block; animation: slideIn 0.4s ease; }
+  .ds-pacing { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .ds-pacing-sub { font-size: 11.5px; color: var(--color-text-muted); margin-bottom: 14px; }
+  .ds-confidence { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; float: right; }
+  .ds-confidence-ring { width: 52px; height: 52px; border-radius: 50%; background: conic-gradient(var(--color-primary) 0 74%, #E1DEF7 74% 100%); display: flex; align-items: center; justify-content: center; }
+  .ds-confidence-ring span { width: 40px; height: 40px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--color-primary-active); }
+  .ds-confidence-label { font-size: 9.5px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+  .ds-narrative { clear: both; background: #fff; border: 1px solid var(--color-border); border-radius: 10px; padding: 12px 14px; font-size: 12.5px; line-height: 1.6; margin-bottom: 14px; }
+  .ds-metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  @media (max-width: 900px) { .ds-metrics { grid-template-columns: repeat(2, 1fr); } }
+  .ds-metric { background: #fff; border: 1px solid var(--color-border); border-radius: 10px; padding: 10px; }
+  .ds-metric-label { font-size: 9.5px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+  .ds-metric-text { font-size: 11px; line-height: 1.4; margin-bottom: 6px; }
+  .ds-metric-delta { font-size: 11px; font-weight: 700; }
+  .ds-metric-delta.down { color: #DC2626; }
+  .ds-metric-delta.up { color: #16A34A; }
+  .ds-footnote { font-size: 10.5px; color: var(--color-text-muted); margin-top: 10px; font-style: italic; }
+  .ds-run-btn { display: flex; align-items: center; gap: 6px; }
+  .ds-placeholder { text-align: center; padding: 26px 10px; color: var(--color-text-muted); font-size: 13px; }
+  .ds-placeholder.hidden-when-revealed.gone { display: none; }
+
+  /* ── Report card (drill-downs) ── */
+  .report-card { background: #fff; border: 1px solid var(--color-border); border-radius: 12px; padding: 14px; }
+  .report-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+  .report-title { font-size: 13px; font-weight: 700; }
+  .report-title .report-total { color: var(--color-text-muted); font-weight: 500; }
+  .report-desc { font-size: 11.5px; color: var(--color-text-muted); margin-top: 2px; }
+  .report-toggle { display: flex; gap: 4px; flex-shrink: 0; }
+  .report-toggle button { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--color-border); background: #fff; cursor: pointer; color: var(--color-text-muted); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .report-toggle button.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+
+  .rt-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .rt-table th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--color-text-muted); padding: 6px 8px; border-bottom: 1px solid var(--color-border); }
+  .rt-table td { padding: 8px; border-bottom: 1px solid #F3F1FC; }
+  .rt-table td.num { text-align: right; white-space: nowrap; font-weight: 600; }
+  .rt-bar-cell { min-width: 120px; }
+  .rt-bar-track { height: 9px; background: #F0EFF8; border-radius: 5px; overflow: hidden; }
+  .rt-bar-fill { height: 100%; border-radius: 5px; }
+  .rt-table tfoot td { font-weight: 700; border-bottom: none; padding-top: 10px; }
+
+  .rt-chart { display: none; }
+  .rt-chart.active { display: flex; flex-direction: column; gap: 10px; }
+  .rt-table.active { display: table; }
+  .rt-table:not(.active) { display: none; }
+  .rt-chart-row { display: grid; grid-template-columns: 110px 1fr 70px; align-items: center; gap: 10px; font-size: 12px; }
+  .rt-chart-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rt-chart-bar-track { height: 14px; background: #F0EFF8; border-radius: 7px; overflow: hidden; }
+  .rt-chart-bar-fill { height: 100%; border-radius: 7px; }
+  .rt-chart-value { text-align: right; font-weight: 700; white-space: nowrap; }
+
+  .report-export { display: flex; justify-content: flex-end; margin-top: 10px; }
+  .report-export a { font-size: 10.5px; font-weight: 700; color: #DC2626; background: #FDECEC; border-radius: 6px; padding: 4px 9px; }
+
+  /* ── Pill tabs (design-system pattern) ── */
+  .pill-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; }
+  .pill-tab {
+    flex-shrink: 0; border: none; border-radius: 999px; padding: 9px 16px; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; color: var(--color-text); background: #EFEFF3; transition: box-shadow 0.15s;
+  }
+  .pill-tab:nth-child(4n+1) { background: #E8E6FA; }
+  .pill-tab:nth-child(4n+2) { background: #E6FAF0; }
+  .pill-tab:nth-child(4n+3) { background: #E6F3FA; }
+  .pill-tab:nth-child(4n+4) { background: #FAF0E6; }
+  .pill-tab.active { box-shadow: inset 0 0 0 2px var(--color-primary); font-weight: 700; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: slideIn 0.3s ease; }
+
+  /* ── Wrap up ── */
+  .wrapup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 700px) { .wrapup-grid { grid-template-columns: 1fr; } }
+  .wrapup-item { background: #fff; border: 1px solid var(--color-border); border-radius: 12px; padding: 16px; }
+  .wrapup-item .num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--color-primary); color: #fff; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+  .wrapup-item h5 { font-size: 13.5px; margin-bottom: 4px; }
+  .wrapup-item p { font-size: 12px; color: var(--color-text-muted); line-height: 1.5; }
+  .thankyou-box { text-align: center; padding: 30px 20px; background: var(--cover-bg); border-radius: 16px; color: var(--cover-text); margin-top: 24px; }
+  .thankyou-box h3 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 8px; }
+  .thankyou-box p { font-size: 13px; color: var(--cover-muted); }
+
+  /* ══════════ Cover slide ══════════ */
+  .cover-slide {
+    background: var(--cover-bg); border-radius: 20px; padding: 64px 56px; color: var(--cover-text);
+    position: relative; overflow: hidden; min-height: 420px; display: flex; flex-direction: column; justify-content: center;
+  }
+  .cover-circle { position: absolute; top: -140px; right: -100px; width: 340px; height: 340px; border-radius: 50%; background: var(--cover-bg2); opacity: 0.7; }
+  .cover-logo { position: absolute; top: 26px; right: 32px; font-size: 13px; font-weight: 700; color: var(--cover-muted); display: flex; align-items: center; gap: 6px; }
+  .cover-logo .logo-dot { width: 20px; height: 20px; border-radius: 6px; background: var(--color-primary); display: inline-block; }
+  .cover-kicker { font-size: 12px; font-weight: 700; color: #9F98E0; margin-bottom: 14px; position: relative; z-index: 1; }
+  .cover-title { font-family: 'DM Serif Display', serif; font-size: 46px; line-height: 1.1; margin-bottom: 16px; position: relative; z-index: 1; }
+  .cover-sub { font-size: 15px; color: var(--cover-muted); max-width: 520px; margin-bottom: 26px; position: relative; z-index: 1; }
+  .cover-pills { display: flex; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; }
+  .cover-pill { border: 1px solid #3E3878; border-radius: 999px; padding: 9px 16px; font-size: 12px; font-weight: 700; }
+  .cover-pill.solid { background: var(--color-primary); border-color: var(--color-primary); }
+  .cover-start { margin-top: 30px; position: relative; z-index: 1; }
+
+  code.kbd { background: #F3F1FC; border: 1px solid var(--color-border); border-radius: 5px; padding: 1px 6px; font-size: 11px; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html#resources">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Know Your Numbers — Metrics Webinar</span>
+  </div>
+  <span class="proto-bar-meta" id="slideCounterTop">Slide 1 of 14</span>
+</div>
+
+<div class="deck-mobile-nav">
+  <select id="mobileJump"></select>
+</div>
+
+<div class="deck-shell">
+
+  <!-- Sidebar -->
+  <nav class="deck-sidebar" id="sidebar">
+    <div class="deck-sidebar-label">Session 1 · Aug 25, 2026</div>
+    <div id="navList"></div>
+  </nav>
+
+  <!-- Stage -->
+  <div class="deck-stage-wrap">
+    <div class="deck-progress-track"><div class="deck-progress-fill" id="progressFill"></div></div>
+
+    <div class="deck-stage" id="stage">
+
+      <!-- 0 · Cover -->
+      <section class="slide active" data-title="Welcome">
+        <div class="cover-slide">
+          <div class="cover-circle"></div>
+          <div class="cover-logo"><span class="logo-dot"></span> dripjobs</div>
+          <div class="cover-kicker">LIVE ROUNDTABLE WEBINAR</div>
+          <div class="cover-title">Know Your<br/>Numbers</div>
+          <div class="cover-sub">A working session on the Metrics feature of DripJobs, including KPIs and drill-down reports.</div>
+          <div class="cover-pills">
+            <span class="cover-pill">Aug 25, 2026</span>
+            <span class="cover-pill">4:00 PM ET</span>
+            <span class="cover-pill solid">Presented by: DripJobs Customer Success &amp; Product Team</span>
+          </div>
+          <div class="cover-start">
+            <button class="btn btn-primary" onclick="goToSlide(1)">Start the session →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1 · Team -->
+      <section class="slide" data-title="Meet the Team">
+        <div class="slide-kicker">Welcome</div>
+        <h2 class="slide-title">Meet Our Team</h2>
+        <div class="section-card">
+          <div class="team-row"><span class="team-dot"></span><div class="team-row-text"><b>Jeremy Harrison</b><br/><span>Product Manager</span></div></div>
+          <div class="team-row"><span class="team-dot"></span><div class="team-row-text"><b>Mary Murphy</b><br/><span>Customer Success Manager</span></div></div>
+          <div class="team-row"><span class="team-dot"></span><div class="team-row-text"><b>Yoselin Bressan</b><br/><span>Onboarding Specialist</span></div></div>
+          <div class="team-row"><span class="team-dot"></span><div class="team-row-text"><b>Juan Solano Quintera</b><br/><span>Customer Support Lead</span></div></div>
+        </div>
+        <div class="callout">
+          <b>Zoom norms for this event</b>
+          <ul class="checklist" style="margin-top:8px;">
+            <li>Please keep your microphone muted during the presentation, come unmuted to ask questions.</li>
+            <li>Engage in the chat! Please put comments and questions there, our team will review and respond.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 2 · Nav path -->
+      <section class="slide" data-title="Work Along With Us">
+        <div class="slide-kicker">Before we start</div>
+        <h2 class="slide-title">Work Along With Us!</h2>
+        <p class="slide-sub">Everything we'll cover today lives under one path in the app.</p>
+        <div class="two-col">
+          <div>
+            <div class="navpath-step">Left-hand Navigation</div>
+            <div class="navpath-arrow">↓</div>
+            <div class="navpath-step">Metrics dropdown</div>
+            <div class="navpath-arrow">↓</div>
+            <div class="navpath-step">Reports subtab</div>
+            <div class="callout" style="margin-top:16px;"><b>Tip:</b> Bookmark this path — every tile, drill-down, and report we cover today lives right there.</div>
+          </div>
+          <div class="nav-mock">
+            <div class="nav-mock-label">Left Navigation</div>
+            <div class="nav-mock-item">Job Costing</div>
+            <div class="nav-mock-item">Production Rates</div>
+            <div class="nav-mock-item highlight">Metrics
+              <div class="nav-mock-sub active">— Metrics</div>
+              <div class="nav-mock-sub">— Reports</div>
+            </div>
+            <div class="nav-mock-label">Marketing</div>
+            <div class="nav-mock-item">Activity</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 · Agenda -->
+      <section class="slide" data-title="Today's Agenda">
+        <div class="slide-kicker">Roadmap</div>
+        <h2 class="slide-title">Today's Agenda</h2>
+        <div class="two-col">
+          <div class="section-card">
+            <div class="agenda-row"><span class="agenda-icon">🙂</span> Welcome</div>
+            <div class="agenda-row"><span class="agenda-icon">🎯</span> Metrics Overview: the six KPI tiles</div>
+            <div class="agenda-row"><span class="agenda-icon">📅</span> Changing the period + Key Insights</div>
+            <div class="agenda-row"><span class="agenda-icon">🔍</span> Drill-down cards, live demo</div>
+            <div class="agenda-row"><span class="agenda-icon">❓</span> Why don't my numbers match?</div>
+            <div class="agenda-row"><span class="agenda-icon">⬇️</span> Reports &amp; CSV export</div>
+            <div class="agenda-row"><span class="agenda-icon">💬</span> Open Q&amp;A</div>
+            <div class="agenda-row"><span class="agenda-icon">⭐</span> Where to suggest a feature</div>
+          </div>
+          <div class="callout">
+            <b>By the end of this session, you'll be able to:</b>
+            <ul class="checklist" style="margin-top:8px;">
+              <li>Explain what each of the six KPI tiles measures and how it's calculated.</li>
+              <li>Change the reporting period two different ways.</li>
+              <li>Use drill-down cards to see exactly where a number comes from.</li>
+              <li>Explain, with confidence, why Closing Ratio and Jobs Won can disagree.</li>
+              <li>Know which of the five Reports to run for a given question.</li>
+              <li>Know where to submit a feature idea.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 · Overview -->
+      <section class="slide" data-title="Metrics Overview">
+        <div class="slide-kicker">The Metrics Overview</div>
+        <h2 class="slide-title">Six KPI Tiles</h2>
+        <p class="slide-sub">Grouped into two rows: Revenue &amp; Wins, and Conversions &amp; Volume. Every tile carries its formula right on the card — click one to open the full breakdown.</p>
+
+        <div class="kpi-board">
+          <div class="kpi-row-label">Revenue &amp; Wins</div>
+          <div class="kpi-row">
+            <div class="kpi-tile" onclick="goToSlide(5)">
+              <div class="kpi-tile-top">💰 Sales</div>
+              <div class="kpi-tile-desc">Pipeline + Manual Invoice Revenue.</div>
+              <div class="kpi-tile-value">$26,310</div>
+              <div class="kpi-tile-link">View details</div>
+            </div>
+            <div class="kpi-tile" onclick="goToSlide(5)">
+              <div class="kpi-tile-top">🏆 Jobs Won</div>
+              <div class="kpi-tile-desc">Accepted Proposals + Manual Invoices.</div>
+              <div class="kpi-tile-value">7</div>
+              <div class="kpi-tile-link">View details</div>
+            </div>
+            <div class="kpi-tile" onclick="goToSlide(5)">
+              <div class="kpi-tile-top">📊 Avg Job Size</div>
+              <div class="kpi-tile-desc">Total Sales / Job Won.</div>
+              <div class="kpi-tile-value">$3,758.53</div>
+              <div class="kpi-tile-link">View details</div>
+            </div>
+          </div>
+          <div class="kpi-row-label">Conversions &amp; Volume</div>
+          <div class="kpi-row">
+            <div class="kpi-tile" onclick="goToSlide(6)">
+              <div class="kpi-tile-top">⚖️ Closing Ratio</div>
+              <div class="kpi-tile-desc">Accepted Proposals / Qualified Proposals. Jobs Won may differ.</div>
+              <div class="kpi-tile-value">77.8%</div>
+              <div class="kpi-tile-link">View details</div>
+            </div>
+            <div class="kpi-tile" onclick="goToSlide(6)">
+              <div class="kpi-tile-top">🎯 Set Rate</div>
+              <div class="kpi-tile-desc">Contacts Created To Booked Rate.</div>
+              <div class="kpi-tile-value">25%</div>
+              <div class="kpi-tile-link">View details</div>
+            </div>
+            <div class="kpi-tile" onclick="goToSlide(6)">
+              <div class="kpi-tile-top">📅 Appointments</div>
+              <div class="kpi-tile-desc">Total appointments booked in period, by customer type.</div>
+              <div class="kpi-tile-value">4</div>
+              <div class="kpi-tile-link">View details</div>
+            </div>
+          </div>
+        </div>
+        <div class="kpi-legend">
+          <div class="kpi-legend-item"><span class="kpi-legend-dot"></span> Revenue &amp; Wins: the dollars and the count behind them</div>
+          <div class="kpi-legend-item"><span class="kpi-legend-dot"></span> Conversions &amp; Volume: how efficiently leads turn into jobs</div>
+        </div>
+      </section>
+
+      <!-- 5 · Revenue & Wins -->
+      <section class="slide" data-title="Revenue & Wins">
+        <div class="slide-kicker">Deep dive</div>
+        <h2 class="slide-title">Revenue &amp; Wins</h2>
+        <div class="three-col">
+          <div class="metric-card"><h4>Sales</h4><p>$26,310 Pipeline + $0 Manual = <b>$26,310</b></p></div>
+          <div class="metric-card"><h4>Jobs Won</h4><p>4 Signed + 3 No-Signature + 0 Manual = <b>7</b></p></div>
+          <div class="metric-card"><h4>Avg Job Size</h4><p>$26,310 ÷ 7 jobs = <b>$3,758.53</b></p></div>
+        </div>
+        <div class="callout" style="margin-top:16px;"><b>Use case:</b> watch Sales and Jobs Won together for the month, then use Avg Job Size over time to spot pricing trends before they show up anywhere else.</div>
+        <div style="margin-top:18px;"><button class="btn btn-outline btn-sm" onclick="goToSlide(4)">← Back to overview</button></div>
+      </section>
+
+      <!-- 6 · Conversions & Volume -->
+      <section class="slide" data-title="Conversions & Volume">
+        <div class="slide-kicker">Deep dive</div>
+        <h2 class="slide-title">Conversions &amp; Volume</h2>
+        <div class="three-col">
+          <div class="metric-card"><h4>Closing Ratio</h4><p>7 accepted ÷ 9 qualified = <b>78%</b><br/><span style="color:var(--color-text-muted);font-size:12px;">(same cohort, qualified in period)</span></p></div>
+          <div class="metric-card"><h4>Set Rate</h4><p>1 booked ÷ 4 created = <b>25%</b><br/><span style="color:var(--color-text-muted);font-size:12px;">(same cohort, created in period)</span></p></div>
+          <div class="metric-card"><h4>Appointments</h4><p>1 New + 3 Returning = <b>4 booked</b></p></div>
+        </div>
+        <div class="callout" style="margin-top:16px;"><b>Keep this in mind:</b> Closing Ratio and Set Rate both follow one cohort through to its outcome — that's different from a simple period count. More on why that matters in a few slides.</div>
+        <div style="margin-top:18px;"><button class="btn btn-outline btn-sm" onclick="goToSlide(4)">← Back to overview</button></div>
+      </section>
+
+      <!-- 7 · Period -->
+      <section class="slide" data-title="Changing Your Period">
+        <div class="slide-kicker">Changing Your Period</div>
+        <h2 class="slide-title">Two Ways to Change the Range</h2>
+        <p class="slide-sub">Try it — click a quick-range chip below, or open the Change Period modal for a custom date range.</p>
+
+        <div class="period-banner">
+          <div class="period-range-display">📅 <span id="periodDisplay">07/21/2026 – 08/20/2026</span></div>
+          <div class="chip-row" id="quickChips">
+            <button class="chip" data-range="Today">Today</button>
+            <button class="chip" data-range="Week">Week</button>
+            <button class="chip" data-range="Last Wk">Last Wk</button>
+            <button class="chip active" data-range="Month">Month</button>
+            <button class="chip" data-range="Last Mo">Last Mo</button>
+            <button class="chip" data-range="YTD">YTD</button>
+            <button class="chip" data-range="All">All</button>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="openPeriodModal()">Change Period</button>
+        </div>
+        <div class="period-hint">ℹ️ Go directly to Reports, or click any card title to open its full report. Click a row to drill in.</div>
+
+        <div class="callout" style="margin-top:20px;">“Click any card title to open its full report. Click a row to drill in.”</div>
+      </section>
+
+      <!-- 8 · Quick-select meanings -->
+      <section class="slide" data-title="What Quick-Select Means">
+        <div class="slide-kicker">Changing Your Period</div>
+        <h2 class="slide-title">What Each Quick-Select Really Means</h2>
+        <p class="slide-sub">Confirmed exact date logic behind each quick-range button on the top banner.</p>
+        <div class="section-card">
+          <table class="qs-table">
+            <thead><tr><th>Button</th><th>What it includes</th><th style="min-width:160px;">At a glance</th></tr></thead>
+            <tbody id="qsTableBody"></tbody>
+          </table>
+          <div class="qs-legend">shaded = included · line = today</div>
+        </div>
+      </section>
+
+      <!-- 9 · Insights today vs coming soon -->
+      <section class="slide" data-title="Insights: Today vs Soon">
+        <div class="slide-kicker">Insights</div>
+        <h2 class="slide-title">Today vs. Coming Soon</h2>
+        <div class="insights-bullets">
+          <div>Key Insights</div>
+          <ul>
+            <li>Your top sales source is <b>Door Knocking</b> with $13,010.00 in revenue out of $26,309.72 total sales.</li>
+            <li><b>A Little Bird</b> generated the most leads with 1 new contacts.</li>
+            <li>Closing ratio is 77.8% and set rate is 25% for the selected period.</li>
+            <li>$6,129.72 in revenue has no product category assigned.</li>
+          </ul>
+        </div>
+        <div class="two-col">
+          <div class="insight-panel live">
+            <span class="insight-tag">● Live Today</span>
+            <h4>Key Insights Panel</h4>
+            <p>Simple, rule-based bullets, always visible — no action needed.</p>
+            <div class="insight-quote">"Your top sales source is Door Knocking with $13,010 in revenue."</div>
+          </div>
+          <div class="insight-panel soon">
+            <span class="insight-tag">◆ Coming Soon</span>
+            <h4>DripSense <span style="font-size:11px;">(AI Metrics Insights)</span></h4>
+            <p>User-triggered with a "Run Insights" button — changing the date range never auto-runs it.</p>
+            <p>Compares against the prior equivalent period across 5 metrics: Closing Ratio, Set Rate, Avg Job Value, Proposal Volume, Revenue.</p>
+            <p style="margin-bottom:0;">Describes what changed and why.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 · DripSense -->
+      <section class="slide" data-title="Introducing DripSense">
+        <div class="slide-kicker">Coming soon</div>
+        <h2 class="slide-title">Introducing DripSense</h2>
+        <p class="slide-sub">AI-generated, plain-English insights on your numbers — a narrative, a confidence score, and a projection when the data backs it. Click "Run Insights" below to see it in action.</p>
+
+        <div class="ds-card">
+          <div class="ds-head">
+            <div class="ds-head-left">
+              <div class="ds-avatar">✦</div>
+              <div>
+                <div class="ds-head-title">DripSense</div>
+                <div class="ds-head-sub" id="dsRunStamp">Not run yet · 07/26/2026–08/25/2026</div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm ds-run-btn" id="dsRunBtn" onclick="runDripSense()">▶ Run Insights</button>
+          </div>
+
+          <div class="ds-placeholder" id="dsPlaceholder">Click <b>Run Insights</b> to generate this period's story.</div>
+
+          <div class="ds-body" id="dsBody">
+            <div class="ds-confidence">
+              <div class="ds-confidence-ring"><span>74%</span></div>
+              <div class="ds-confidence-label">Confidence</div>
+            </div>
+            <div class="ds-pacing">At this pace you'd finish the selected range around $6,988.</div>
+            <div class="ds-pacing-sub">Based on your revenue pace through the first 31 days of the selected range, projected to the full period. Comparing the first 31 days of the selected range to the preceding 31 days.</div>
+            <div class="ds-narrative">You sent 4 proposals in the selected range, down from 8 over the previous 31 days, and your closing ratio fell from 62.5% to 25%. Together those moves drove revenue from $30,521 to $6,988.</div>
+            <div class="ds-metrics">
+              <div class="ds-metric"><div class="ds-metric-label">Revenue</div><div class="ds-metric-text">$6,988 this period, down from $37,509.</div><div class="ds-metric-delta down">▼ 81.4% vs prev. 31 days</div></div>
+              <div class="ds-metric"><div class="ds-metric-label">Avg Job Value</div><div class="ds-metric-text">Dropped $1,864.28 to $3,494.13.</div><div class="ds-metric-delta down">▼ 34.8% vs prev. 31 days</div></div>
+              <div class="ds-metric"><div class="ds-metric-label">Proposals Sent</div><div class="ds-metric-text">4 this period, down from 8.</div><div class="ds-metric-delta down">▼ 50% vs prev. 31 days</div></div>
+              <div class="ds-metric"><div class="ds-metric-label">Set Rate</div><div class="ds-metric-text">Climbed to 100%, up from 16.67%.</div><div class="ds-metric-delta up">▲ 83.33 pts vs prev. 31 days</div></div>
+              <div class="ds-metric"><div class="ds-metric-label">Closing Ratio</div><div class="ds-metric-text">25% this period, down from 62.5%.</div><div class="ds-metric-delta down">▼ 37.5 pts vs prev. 31 days</div></div>
+            </div>
+            <div class="ds-footnote">Read-only — Insights describe your data, not prescriptions.</div>
+          </div>
+        </div>
+
+        <div class="callout" style="margin-top:16px;"><b>How it works:</b> DripSense reads your numbers every period and writes the story in plain English, with a confidence score attached. Below 70% confidence it explains why it's holding back — above that line, like here, it also projects where you'll land. Rolling out to all accounts soon, no setup required.</div>
+      </section>
+
+      <!-- 11 · Drill-down by source -->
+      <section class="slide" data-title="Drill-Down: By Source">
+        <div class="slide-kicker">Drill-down cards, live demo</div>
+        <h2 class="slide-title">Drill-Down: By Source</h2>
+        <p class="slide-sub">Start with lead volume, follow the same source all the way to dollars and close rate. Same shape every time: a Volume column, a Booked/Amount column, and a running Total — once you've read one drill-down card, you've read them all.</p>
+
+        <div class="pill-tabs" id="sourceTabs"></div>
+        <div id="sourcePanels"></div>
+      </section>
+
+      <!-- 12 · More ways to slice it -->
+      <section class="slide" data-title="More Ways to Slice It">
+        <div class="slide-kicker">More ways to slice it</div>
+        <h2 class="slide-title">By Salesperson, Zip, Crew, Product &amp; Rate</h2>
+        <p class="slide-sub">The same drill-down pattern repeats everywhere. Every card has a list/chart toggle and a PDF export button in the top right — useful for pulling a single breakdown into a one-off share without running the full report.</p>
+
+        <div class="pill-tabs" id="sliceTabs"></div>
+        <div id="slicePanels"></div>
+      </section>
+
+      <!-- 13 · Wrap up -->
+      <section class="slide" data-title="Wrap Up">
+        <div class="slide-kicker">From here, live</div>
+        <h2 class="slide-title">Rest of Today's Session</h2>
+        <p class="slide-sub">We covered the tiles, the period controls, and the drill-downs interactively above. The rest of today's agenda continues live on the call:</p>
+        <div class="wrapup-grid">
+          <div class="wrapup-item"><span class="num">1</span><h5>Why don't my numbers match?</h5><p>Live walkthrough of common mismatches between reports.</p></div>
+          <div class="wrapup-item"><span class="num">2</span><h5>Reports &amp; CSV export</h5><p>Live demo of the five Reports and exporting to CSV.</p></div>
+          <div class="wrapup-item"><span class="num">3</span><h5>Open Q&amp;A</h5><p>Bring your questions — drop them in the chat.</p></div>
+          <div class="wrapup-item"><span class="num">4</span><h5>Where to suggest a feature</h5><p>We'll share where to submit a feature idea.</p></div>
+        </div>
+        <div class="thankyou-box">
+          <h3>Thanks for working along with us!</h3>
+          <p>Know Your Numbers — DripJobs Metrics Webinar · Session 1 · Aug 25, 2026</p>
+        </div>
+        <div style="margin-top:18px; text-align:center;"><button class="btn btn-outline" onclick="goToSlide(0)">↺ Restart deck</button></div>
+      </section>
+
+    </div>
+
+    <!-- Bottom controls -->
+    <div class="deck-controls">
+      <button class="btn btn-outline" id="prevBtn" onclick="prevSlide()">← Prev</button>
+      <span class="deck-controls-count" id="slideCounterBottom">1 / 14</span>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextSlide()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Period modal -->
+<div class="modal-overlay" id="periodModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Change Period</h3>
+      <button class="modal-close" onclick="closePeriodModal()">✕</button>
+    </div>
+    <div class="modal-field-row">
+      <div class="modal-field"><label>Start Date</label><input type="text" id="modalStart" value="07/21/2026" /></div>
+      <div class="modal-field"><label>End Date</label><input type="text" id="modalEnd" value="08/20/2026" /></div>
+    </div>
+    <div class="modal-quick-label">Quick Select</div>
+    <div class="modal-chip-grid" id="modalChips">
+      <button class="modal-chip" style="background:#E6FAF0;color:#166534;" data-start="08/25/2026" data-end="08/25/2026">Today</button>
+      <button class="modal-chip" style="background:#E6F3FA;color:#1E40AF;" data-start="08/24/2026" data-end="08/25/2026">This Week</button>
+      <button class="modal-chip" style="background:#FAF7E6;color:#92400E;" data-start="08/01/2026" data-end="08/25/2026">This Month</button>
+      <button class="modal-chip" style="background:#FAE6E6;color:#991B1B;" data-start="07/26/2026" data-end="08/25/2026">Last 30 Days</button>
+      <button class="modal-chip" style="background:#E8E6FA;color:#5C53DC;" data-start="07/01/2026" data-end="08/25/2026">This Quarter</button>
+      <button class="modal-chip" style="background:#E6FAFA;color:#0E7490;" data-start="01/01/2026" data-end="08/25/2026">This Year</button>
+      <button class="modal-chip" style="background:#EFEFF3;color:#32415B;" data-start="01/01/2020" data-end="08/25/2026">All Time</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closePeriodModal()">Close</button>
+      <button class="btn btn-primary btn-sm" onclick="applyPeriodModal()">View</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ══════════ Slide navigation ══════════ */
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const navList = document.getElementById('navList');
+  const mobileJump = document.getElementById('mobileJump');
+  let current = 0;
+
+  slides.forEach((s, i) => {
+    const title = s.dataset.title;
+    const item = document.createElement('div');
+    item.className = 'deck-nav-item';
+    item.innerHTML = `<span class="deck-nav-num">${i + 1}</span><span class="deck-nav-title">${title}</span>`;
+    item.addEventListener('click', () => goToSlide(i));
+    navList.appendChild(item);
+
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = `${i + 1}. ${title}`;
+    mobileJump.appendChild(opt);
+  });
+
+  mobileJump.addEventListener('change', () => goToSlide(parseInt(mobileJump.value, 10)));
+
+  function goToSlide(i) {
+    if (i < 0 || i >= slides.length) return;
+    slides[current].classList.remove('active');
+    current = i;
+    slides[current].classList.add('active');
+
+    document.querySelectorAll('.deck-nav-item').forEach((el, idx) => el.classList.toggle('active', idx === current));
+    mobileJump.value = current;
+
+    const pct = ((current + 1) / slides.length) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('slideCounterTop').textContent = `Slide ${current + 1} of ${slides.length}`;
+    document.getElementById('slideCounterBottom').textContent = `${current + 1} / ${slides.length}`;
+
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').textContent = current === slides.length - 1 ? 'Restart ↺' : 'Next →';
+
+    document.getElementById('stage').scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+  function nextSlide() { current === slides.length - 1 ? goToSlide(0) : goToSlide(current + 1); }
+  function prevSlide() { goToSlide(current - 1); }
+
+  document.addEventListener('keydown', (e) => {
+    if (document.getElementById('periodModal').classList.contains('open')) {
+      if (e.key === 'Escape') closePeriodModal();
+      return;
+    }
+    if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); nextSlide(); }
+    if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); prevSlide(); }
+  });
+
+  goToSlide(0);
+
+  /* ══════════ Period demo (slide 7) ══════════ */
+  const RANGE_TEXT = {
+    'Today': '08/25/2026',
+    'Week': '08/24/2026 – 08/25/2026',
+    'Last Wk': '08/17/2026 – 08/23/2026',
+    'Month': '08/01/2026 – 08/25/2026',
+    'Last Mo': '07/01/2026 – 07/31/2026',
+    'YTD': '01/01/2026 – 08/25/2026',
+    'All': 'Company creation – 08/25/2026'
+  };
+  document.getElementById('quickChips').addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    document.querySelectorAll('#quickChips .chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    document.getElementById('periodDisplay').textContent = RANGE_TEXT[chip.dataset.range] || '07/21/2026 – 08/20/2026';
+  });
+
+  function openPeriodModal() { document.getElementById('periodModal').classList.add('open'); }
+  function closePeriodModal() { document.getElementById('periodModal').classList.remove('open'); }
+  document.getElementById('periodModal').addEventListener('click', (e) => { if (e.target.id === 'periodModal') closePeriodModal(); });
+  document.getElementById('modalChips').addEventListener('click', (e) => {
+    const chip = e.target.closest('.modal-chip');
+    if (!chip) return;
+    document.querySelectorAll('#modalChips .modal-chip').forEach(c => c.style.boxShadow = 'none');
+    chip.style.boxShadow = 'inset 0 0 0 2px rgba(0,0,0,0.25)';
+    document.getElementById('modalStart').value = chip.dataset.start;
+    document.getElementById('modalEnd').value = chip.dataset.end;
+  });
+  function applyPeriodModal() {
+    const s = document.getElementById('modalStart').value;
+    const e = document.getElementById('modalEnd').value;
+    document.getElementById('periodDisplay').textContent = `${s} – ${e}`;
+    document.querySelectorAll('#quickChips .chip').forEach(c => c.classList.remove('active'));
+    closePeriodModal();
+  }
+
+  /* ══════════ Quick-select meaning table (slide 8) ══════════ */
+  const QS_ROWS = [
+    { btn: 'Today',   desc: 'Today only',                                             left: 92, width: 8 },
+    { btn: 'Week',    desc: 'Monday of this week → today',                            left: 75, width: 25 },
+    { btn: 'Last Wk', desc: 'Previous Monday → previous Sunday (full week)',           left: 55, width: 20 },
+    { btn: 'Month',   desc: '1st of this month → today',                              left: 55, width: 45 },
+    { btn: 'Last Mo', desc: '1st → last day of the previous calendar month (full month)', left: 25, width: 30 },
+    { btn: 'YTD',     desc: 'Jan 1 → today',                                          left: 5,  width: 95 },
+    { btn: 'All',     desc: 'Company creation date → today',                          left: 0,  width: 100 },
+  ];
+  const qsBody = document.getElementById('qsTableBody');
+  QS_ROWS.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="qs-btn">${r.btn}</span></td>
+      <td>${r.desc}</td>
+      <td><div class="qs-bar"><div class="qs-bar-fill" style="left:${r.left}%;width:${r.width}%;"></div><div class="qs-bar-today"></div></div></td>
+    `;
+    qsBody.appendChild(tr);
+  });
+
+  /* ══════════ DripSense demo (slide 10) ══════════ */
+  function runDripSense() {
+    const btn = document.getElementById('dsRunBtn');
+    const body = document.getElementById('dsBody');
+    const placeholder = document.getElementById('dsPlaceholder');
+    if (body.classList.contains('revealed')) return;
+    btn.textContent = 'Running…';
+    btn.disabled = true;
+    setTimeout(() => {
+      placeholder.style.display = 'none';
+      body.classList.add('revealed');
+      document.getElementById('dsRunStamp').textContent = 'Last run: just now · 07/26/2026–08/25/2026';
+      btn.textContent = '↺ Re-run Insights';
+      btn.disabled = false;
+    }, 850);
+  }
+
+  /* ══════════ Report card renderer (shared by drill-downs) ══════════ */
+  const PALETTE = ['#22C55E', '#8B85EA', '#F59E0B', '#F87171', '#0DCECE'];
+
+  function renderReportCard(cfg) {
+    // cfg: { title, totalLabel, desc, cols: [colLabel...], rows: [{label, primary, secondary}], colorBy }
+    const wrap = document.createElement('div');
+    wrap.className = 'report-card';
+    const cardId = 'rc_' + Math.random().toString(36).slice(2, 9);
+
+    wrap.innerHTML = `
+      <div class="report-head">
+        <div>
+          <div class="report-title">${cfg.title} <span class="report-total">(${cfg.totalLabel})</span></div>
+          <div class="report-desc">${cfg.desc}</div>
+        </div>
+        <div class="report-toggle">
+          <button class="rc-view-btn active" data-view="list" title="List view">☰</button>
+          <button class="rc-view-btn" data-view="chart" title="Chart view">📊</button>
+        </div>
+      </div>
+      <table class="rt-table active">
+        <thead><tr><th>${cfg.cols[0]}</th><th>Volume</th><th style="text-align:right;">${cfg.cols[1]}</th><th style="text-align:right;">${cfg.cols[2]}</th></tr></thead>
+        <tbody></tbody>
+        <tfoot><tr><td>Total</td><td></td><td class="num" colspan="2">${cfg.totalValue}</td></tr></tfoot>
+      </table>
+      <div class="rt-chart"></div>
+      <div class="report-export"><a href="#" onclick="return false;">⬇ PDF</a></div>
+    `;
+
+    const tbody = wrap.querySelector('tbody');
+    const chartWrap = wrap.querySelector('.rt-chart');
+    const maxVal = Math.max(...cfg.rows.map(r => r.barPct));
+
+    cfg.rows.forEach((r, idx) => {
+      const color = PALETTE[idx % PALETTE.length];
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.label}</td>
+        <td class="rt-bar-cell"><div class="rt-bar-track"><div class="rt-bar-fill" style="width:${r.barPct}%;background:${color};"></div></div></td>
+        <td class="num">${r.primary}</td>
+        <td class="num">${r.secondary}</td>
+      `;
+      tbody.appendChild(tr);
+
+      const crow = document.createElement('div');
+      crow.className = 'rt-chart-row';
+      crow.innerHTML = `
+        <div class="rt-chart-label">${r.label}</div>
+        <div class="rt-chart-bar-track"><div class="rt-chart-bar-fill" style="width:${(r.barPct / (maxVal || 1)) * 100}%;background:${color};"></div></div>
+        <div class="rt-chart-value">${r.primary}</div>
+      `;
+      chartWrap.appendChild(crow);
+    });
+
+    wrap.querySelectorAll('.rc-view-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        wrap.querySelectorAll('.rc-view-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const isChart = btn.dataset.view === 'chart';
+        wrap.querySelector('.rt-table').classList.toggle('active', !isChart);
+        wrap.querySelector('.rt-chart').classList.toggle('active', isChart);
+      });
+    });
+
+    return wrap;
+  }
+
+  /* ══════════ Data: Drill-down by Source (slide 11) ══════════ */
+  const SOURCE_TABS = [
+    {
+      key: 'leads', label: 'Leads By Source',
+      title: 'Leads By Source', totalLabel: 'Total Leads: 4', totalValue: '4',
+      desc: 'New contacts added during this period, grouped by the lead source assigned to each contact.',
+      cols: ['Source', 'Amount', 'Share'],
+      rows: [
+        { label: 'A Little Bird', primary: '1', secondary: '(25%)', barPct: 100 },
+        { label: 'Aliens', primary: '1', secondary: '(25%)', barPct: 100 },
+        { label: 'Door Knocking', primary: '1', secondary: '(25%)', barPct: 100 },
+        { label: 'None of the above', primary: '1', secondary: '(25%)', barPct: 100 },
+      ]
+    },
+    {
+      key: 'appts', label: 'Leads To Appointments',
+      title: 'Leads To Appointments', totalLabel: 'Total Booked: 1', totalValue: '1',
+      desc: "Of the contacts created this period, how many from each lead source were eventually booked — regardless of when they booked.",
+      cols: ['Source', 'Booked', 'Set Rate'],
+      rows: [
+        { label: 'Door Knocking', primary: '1', secondary: '(100%)', barPct: 100 },
+        { label: 'A Little Bird', primary: '0', secondary: '(0%)', barPct: 3 },
+        { label: 'Aliens', primary: '0', secondary: '(0%)', barPct: 3 },
+        { label: 'None of the above', primary: '0', secondary: '(0%)', barPct: 3 },
+      ]
+    },
+    {
+      key: 'sales', label: 'Sales By Source',
+      title: 'Sales By Source', totalLabel: 'Total: $26,309.72', totalValue: '$26,309.72',
+      desc: 'Total revenue invoiced during this period, broken down by lead source.',
+      cols: ['Source', 'Amount', 'Share'],
+      rows: [
+        { label: 'Door Knocking', primary: '$13,010.00', secondary: '(49%)', barPct: 100 },
+        { label: 'Special…', primary: '$6,629.00', secondary: '(25%)', barPct: 51 },
+        { label: 'Google', primary: '$4,120.00', secondary: '(16%)', barPct: 32 },
+        { label: 'None of the above', primary: '$2,550.00', secondary: '(10%)', barPct: 20 },
+      ]
+    },
+    {
+      key: 'closing', label: 'Closing Ratio by Source',
+      title: 'Closing Ratio by Source', totalLabel: 'Total Closed Deals: 7', totalValue: '7',
+      desc: 'For each lead source, the number of qualified proposals during this period that eventually became accepted (jobs won). Manual invoices are not included.',
+      cols: ['Source', 'Won', 'Close Rate'],
+      rows: [
+        { label: 'Door Knocking', primary: '4', secondary: '(100%)', barPct: 100 },
+        { label: 'Special…', primary: '1', secondary: '(50%)', barPct: 25 },
+        { label: 'None of the above', primary: '1', secondary: '(50%)', barPct: 25 },
+        { label: 'Google', primary: '1', secondary: '(100%)', barPct: 25 },
+      ]
+    },
+  ];
+
+  const SLICE_TABS = [
+    {
+      key: 'people', label: 'By Salesperson & Zip',
+      cards: [
+        { title: 'Sales By Salesperson', totalLabel: 'Total: $26,309.72', totalValue: '$26,309.72',
+          desc: 'Total revenue attributed to each salesperson based on deal assignment during this period.',
+          cols: ['Salesperson', 'Amount', 'Share'],
+          rows: [ { label: 'Jeremy H.', primary: '$26,309.72', secondary: '(100%)', barPct: 100 } ] },
+        { title: 'Closing Ratio by Zip Code', totalLabel: 'Total Closed Deals: 7', totalValue: '7',
+          desc: 'For each zip code, the number of qualified proposals during this period that were eventually accepted (jobs won).',
+          cols: ['Zip Code', 'Won', 'Close Rate'],
+          rows: [
+            { label: '30341', primary: '4', secondary: '(100%)', barPct: 100 },
+            { label: '34442', primary: '2', secondary: '(67%)', barPct: 50 },
+            { label: '07042', primary: '1', secondary: '(50%)', barPct: 25 },
+          ] },
+      ],
+      note: '<b>This account today:</b> one salesperson and three service zip codes — as headcount and coverage grow, these same cards scale with no extra setup required.'
+    },
+    {
+      key: 'crew', label: 'By Crew & Product',
+      cards: [
+        { title: 'Sales By Crew', totalLabel: 'Total: $26,309.72', totalValue: '$26,309.72',
+          desc: 'Total revenue from jobs assigned to each crew during this period. Crew names are managed in Company Settings.',
+          cols: ['Crew', 'Amount', 'Share'],
+          rows: [ { label: 'No Crew Assigned', primary: '$26,309.72', secondary: '(100%)', barPct: 100 } ] },
+        { title: 'Sales By Product', totalLabel: 'Total: $26,309.72', totalValue: '$26,309.72',
+          desc: 'Total revenue by product or service during this period. Products and services are configured in Settings › Products / Services.',
+          cols: ['Product', 'Amount', 'Share'],
+          rows: [
+            { label: 'EXT Painting', primary: '$8,320.00', secondary: '(32%)', barPct: 100 },
+            { label: 'Exterior…', primary: '$5,000.00', secondary: '(19%)', barPct: 60 },
+            { label: 'Interior…', primary: '$2,000.00', secondary: '(8%)', barPct: 24 },
+            { label: 'Interior…', primary: '$1,600.00', secondary: '(6%)', barPct: 19 },
+            { label: 'Interior…', primary: '$1,500.00', secondary: '(6%)', barPct: 18 },
+            { label: 'Interior…', primary: '$550.00', secondary: '(2%)', barPct: 7 },
+            { label: 'General…', primary: '$210.00', secondary: '(1%)', barPct: 3 },
+            { label: '5-Year…', primary: '$0.00', secondary: '(0%)', barPct: 1 },
+            { label: 'Premium…', primary: '$0.00', secondary: '(0%)', barPct: 1 },
+            { label: 'Pressure…', primary: '$0.00', secondary: '(0%)', barPct: 1 },
+            { label: 'Color Co…', primary: '$0.00', secondary: '(0%)', barPct: 1 },
+            { label: 'No Product Assigned', primary: '$6,129.72', secondary: '(23%)', barPct: 74 },
+          ] },
+      ],
+      note: null
+    },
+    {
+      key: 'rate', label: 'By Production Rate',
+      cards: [
+        { title: 'Exterior Sales By Production Rates', totalLabel: 'Total: $6,129.72', totalValue: '$6,129.72',
+          desc: 'Total exterior revenue during this period, broken down by the production rate applied to each area.',
+          cols: ['Rate', 'Amount', 'Share'],
+          rows: [ { label: 'Whole House', primary: '$6,129.72', secondary: '(100%)', barPct: 100 } ] },
+      ],
+      note: '<b>Every card has a list/chart toggle and a PDF export button</b> in the top right — useful for pulling a single breakdown into a one-off share without running the full report.'
+    },
+  ];
+
+  function buildTabs(container, panelsContainer, tabs, cardsKey) {
+    tabs.forEach((tab, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'pill-tab' + (i === 0 ? ' active' : '');
+      btn.textContent = tab.label;
+      btn.addEventListener('click', () => {
+        container.querySelectorAll('.pill-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        panelsContainer.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        panelsContainer.querySelector(`[data-key="${tab.key}"]`).classList.add('active');
+      });
+      container.appendChild(btn);
+
+      const panel = document.createElement('div');
+      panel.className = 'tab-panel' + (i === 0 ? ' active' : '');
+      panel.dataset.key = tab.key;
+      panelsContainer.appendChild(panel);
+    });
+  }
+
+  // Drill-down by source: one report card per tab
+  const sourceTabsEl = document.getElementById('sourceTabs');
+  const sourcePanelsEl = document.getElementById('sourcePanels');
+  buildTabs(sourceTabsEl, sourcePanelsEl, SOURCE_TABS);
+  SOURCE_TABS.forEach(tab => {
+    const panel = sourcePanelsEl.querySelector(`[data-key="${tab.key}"]`);
+    panel.appendChild(renderReportCard(tab));
+  });
+
+  // More ways to slice it: one or two report cards + optional note per tab
+  const sliceTabsEl = document.getElementById('sliceTabs');
+  const slicePanelsEl = document.getElementById('slicePanels');
+  buildTabs(sliceTabsEl, slicePanelsEl, SLICE_TABS);
+  SLICE_TABS.forEach(tab => {
+    const panel = slicePanelsEl.querySelector(`[data-key="${tab.key}"]`);
+    const grid = document.createElement('div');
+    grid.className = tab.cards.length > 1 ? 'two-col' : '';
+    tab.cards.forEach(c => grid.appendChild(renderReportCard(c)));
+    panel.appendChild(grid);
+    if (tab.note) {
+      const note = document.createElement('div');
+      note.className = 'callout';
+      note.style.marginTop = '14px';
+      note.innerHTML = tab.note;
+      panel.appendChild(note);
+    }
+  });
+</script>
+
+</body>
+</html>
