@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Send Marketing Agency Info — Zapier Card · DripJobs Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<style>
+/* ── Reset ───────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:#F4F5F8;color:#32415B;font-size:14px;min-height:100vh;}
+
+/* ── Design tokens ───────────────────────────────── */
+:root{
+  --primary:#8B85EA;
+  --primary-hover:#736BE3;
+  --primary-rgb:139,133,234;
+  --text:#32415B;
+  --text-muted:#80879A;
+  --border:#DAD8E3;
+  --card-bg:#FFFFFF;
+  --teal:#0DCECE;
+  --danger-bg:#FEF2F2;--danger-border:#FECACA;--danger-text:#991B1B;
+  --warn-bg:#FFFBEB;--warn-border:#FDE68A;--warn-text:#92400E;
+  --info-bg:#EFF6FF;--info-border:#BFDBFE;--info-text:#1E40AF;
+  --success-bg:#F0FDF4;--success-border:#BBF7D0;--success-text:#166534;
+}
+
+/* ── Proto top bar ───────────────────────────────── */
+.proto-bar{
+  background:#fff;border-bottom:1px solid var(--border);
+  padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.proto-bar-left{display:flex;align-items:center;gap:10px;}
+.back-link{font-size:12px;font-weight:500;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .15s;}
+.back-link:hover{color:var(--primary);}
+.divider{color:var(--border);font-size:16px;}
+.proto-bar-title{font-size:14px;font-weight:600;}
+.proto-bar-ticket{
+  font-size:11px;font-weight:600;color:var(--primary);text-decoration:none;
+  padding:4px 10px;border:1px solid #D6D2F5;background:#E8E6FA;border-radius:999px;letter-spacing:.2px;
+}
+.proto-bar-ticket:hover{background:var(--primary);color:#fff;}
+
+/* ── Demo control banner ─────────────────────────── */
+.demo-banner{
+  background:#32415B;color:#fff;padding:10px 20px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:200;
+}
+.demo-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--teal);white-space:nowrap;}
+.demo-title{font-size:12px;font-weight:600;flex:1;min-width:0;}
+.demo-state-lbl{font-size:10px;font-weight:600;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.demo-states{display:flex;gap:5px;flex-wrap:wrap;}
+.dbtn{
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:20px;
+  color:#fff;font-family:'Nunito',sans-serif;font-size:11px;font-weight:600;padding:4px 11px;
+  cursor:pointer;transition:background .15s;white-space:nowrap;
+}
+.dbtn:hover{background:rgba(255,255,255,.2);}
+.dbtn.active{background:var(--teal);border-color:var(--teal);color:#32415B;}
+.dbtn-br{margin-left:auto;}
+
+/* ── BR chip system ──────────────────────────────── */
+.br-chip{
+  display:none;position:absolute;top:-9px;right:-5px;
+  background:#F97316;color:#fff;
+  font-size:9px;font-weight:700;letter-spacing:.3px;
+  padding:2px 6px;border-radius:10px;z-index:50;
+  white-space:nowrap;pointer-events:none;
+}
+body.show-br .br-chip{display:block;}
+.br-a{position:relative;}
+
+/* ── Settings tab bar (match real UI) ───────────── */
+.tab-bar{
+  background:#fff;border-bottom:1px solid var(--border);
+  padding:0 24px;display:flex;gap:4px;overflow-x:auto;
+  scrollbar-width:none;
+}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-chip{
+  display:inline-flex;align-items:center;
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:500;
+  color:var(--text-muted);white-space:nowrap;
+  padding:10px 14px;border-bottom:2px solid transparent;
+  cursor:pointer;transition:color .15s,border-color .15s;text-decoration:none;
+}
+.tab-chip:hover{color:var(--primary);}
+.tab-chip.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:700;}
+
+/* ── Page shell ──────────────────────────────────── */
+.page-shell{max-width:1100px;margin:0 auto;padding:24px 24px 60px;}
+
+/* ── Section header ──────────────────────────────── */
+.section-header{margin-bottom:20px;}
+.section-header h2{font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.section-header p{font-size:12px;color:var(--text-muted);}
+
+.scope-note{
+  display:flex;align-items:flex-start;gap:8px;
+  background:var(--info-bg);border:1px solid var(--info-border);color:var(--info-text);
+  border-radius:8px;padding:10px 14px;margin-bottom:20px;font-size:12px;line-height:1.6;
+}
+.scope-note i{font-size:15px;flex-shrink:0;margin-top:1px;}
+
+/* ── Integration cards row layout (match real UI) ── */
+.integ-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:0;
+  background:var(--card-bg);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;margin-bottom:20px;
+}
+.integ-panel{
+  padding:24px 24px 0 24px;display:flex;flex-direction:column;
+  min-height:400px;border-right:1px solid var(--border);position:relative;
+}
+.integ-panel:last-child{border-right:none;}
+.integ-logo-area{margin-bottom:18px;}
+
+/* Acorn logo */
+.acorn-logo{display:flex;align-items:center;gap:6px;}
+.acorn-icon{width:32px;height:32px;}
+.acorn-wordmark{font-size:16px;font-weight:800;color:#1a4a3a;letter-spacing:-.3px;}
+.acorn-sub{font-size:10px;color:#1a4a3a;letter-spacing:.5px;text-transform:uppercase;}
+
+/* Zapier logo */
+.zapier-wordmark{font-size:22px;font-weight:800;color:#FF4A00;letter-spacing:-.5px;}
+
+/* CompanyCam logo */
+.cc-logo{display:flex;align-items:center;gap:10px;}
+.cc-icon{width:34px;height:34px;border-radius:8px;background:#1565C0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;}
+.cc-wordmark{font-size:14px;font-weight:800;color:var(--text);letter-spacing:.3px;text-transform:uppercase;}
+
+/* Content area */
+.integ-content{flex:1;display:flex;flex-direction:column;gap:12px;}
+.integ-infobox{
+  background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:12px;
+  font-size:12px;color:#166534;line-height:1.6;
+}
+.integ-infobox strong{font-weight:700;}
+.integ-field-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.integ-input-row{display:flex;gap:6px;align-items:center;}
+.integ-input{
+  flex:1;height:36px;border:1px solid var(--border);border-radius:7px;
+  font-family:'Nunito',sans-serif;font-size:13px;color:var(--text-muted);
+  padding:0 12px;background:#FAFAFA;font-family:monospace;letter-spacing:1px;
+}
+.btn-sm-outline{
+  height:36px;padding:0 12px;border-radius:7px;border:1.5px solid var(--border);background:#fff;
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;color:var(--text-muted);
+  cursor:pointer;transition:border-color .15s,color .15s;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.btn-sm-outline:hover{border-color:var(--primary);color:var(--primary);}
+.btn-sm-primary-outline{
+  height:36px;padding:0 12px;border-radius:7px;border:1.5px solid var(--primary);background:var(--primary);
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;color:#fff;
+  cursor:pointer;transition:background .15s;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.btn-sm-primary-outline:hover{background:var(--primary-hover);}
+
+/* cc field rows */
+.cc-field-row{display:flex;flex-direction:column;gap:3px;margin-bottom:8px;}
+.cc-field-label{font-size:11px;font-weight:700;color:var(--text);}
+.cc-field-value{font-size:13px;color:var(--text-muted);}
+
+/* Panel footer */
+.integ-panel-footer{
+  border-top:1px solid var(--border);padding:12px 0;margin-top:auto;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+}
+.integ-footer-link{
+  font-size:12px;font-weight:600;color:var(--primary);text-decoration:none;cursor:pointer;
+  display:inline-flex;align-items:center;gap:3px;transition:color .15s;
+}
+.integ-footer-link:hover{color:var(--primary-hover);}
+.integ-footer-link-muted{color:var(--text-muted);}
+.integ-footer-link-muted:hover{color:var(--primary);}
+
+/* ── NEW: Send Marketing Agency Info trigger (BR-1) ── */
+.send-agency-wrap{
+  margin-top:4px;padding-top:12px;border-top:1px dashed var(--border);
+}
+.btn-send-agency{
+  display:inline-flex;align-items:center;gap:6px;width:100%;justify-content:center;
+  height:38px;border-radius:8px;border:1.5px solid var(--primary);background:#fff;
+  font-family:'Nunito',sans-serif;font-size:12.5px;font-weight:700;color:var(--primary);
+  cursor:pointer;transition:background .15s,color .15s;
+}
+.btn-send-agency:hover{background:var(--primary);color:#fff;}
+.btn-send-agency:disabled{
+  border-color:var(--border);color:var(--text-muted);background:#FAFAFA;cursor:not-allowed;
+}
+.send-agency-help{font-size:11px;color:var(--text-muted);margin-top:6px;line-height:1.5;text-align:center;}
+.send-agency-help.is-warn{color:var(--warn-text);}
+.send-agency-tooltip{
+  position:relative;
+}
+.send-agency-tooltip[data-tip]:hover::after{
+  content:attr(data-tip);
+  position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:#32415B;color:#fff;font-size:11px;font-weight:600;padding:6px 10px;border-radius:6px;
+  white-space:nowrap;z-index:60;box-shadow:0 4px 10px rgba(0,0,0,.18);
+}
+
+/* ── Helper text ──────────────────────────────────── */
+.helper-box{
+  background:#f0fafa;border-left:4px solid var(--teal);border-radius:4px;
+  padding:10px 14px;font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:6px;
+}
+.helper-box strong{color:var(--text);font-weight:600;}
+
+/* ── Compose modal ────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(50,65,91,.55);
+  align-items:center;justify-content:center;z-index:500;padding:20px;
+}
+.modal-overlay.open{display:flex;}
+.modal-box{
+  background:#fff;border-radius:12px;width:100%;max-width:620px;max-height:90vh;
+  display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);
+  overflow:hidden;
+}
+.modal-header{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding:20px 22px 16px;border-bottom:1px solid var(--border);
+}
+.modal-title{font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+.modal-title i{color:var(--primary);font-size:17px;}
+.modal-subtitle{font-size:12px;color:var(--text-muted);margin-top:4px;line-height:1.5;max-width:480px;}
+.modal-close{
+  background:none;border:none;font-size:20px;line-height:1;color:var(--text-muted);
+  cursor:pointer;padding:2px 4px;flex-shrink:0;
+}
+.modal-close:hover{color:var(--text);}
+.modal-body{padding:18px 22px;overflow-y:auto;flex:1;}
+.modal-warning{
+  display:flex;align-items:flex-start;gap:8px;
+  background:var(--warn-bg);border:1px solid var(--warn-border);color:var(--warn-text);
+  border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12px;line-height:1.6;
+}
+.modal-warning i{font-size:15px;flex-shrink:0;margin-top:1px;}
+.modal-field{margin-bottom:14px;display:flex;flex-direction:column;gap:6px;}
+.modal-field label{font-size:12px;font-weight:600;color:var(--text);}
+.compose-input,.compose-textarea{
+  border:1px solid var(--border);border-radius:8px;padding:10px 12px;
+  font-family:'Nunito',sans-serif;font-size:13px;color:var(--text);
+  transition:border-color .15s,box-shadow .15s;width:100%;
+}
+.compose-input:focus,.compose-textarea:focus{
+  outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.18);
+}
+.compose-textarea{min-height:340px;line-height:1.6;resize:vertical;}
+.modal-footer{
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  padding:14px 22px;border-top:1px solid var(--border);
+}
+.copied-indicator{
+  font-size:12px;font-weight:700;color:var(--success-text);opacity:0;transition:opacity .2s;
+  display:flex;align-items:center;gap:4px;margin-right:auto;
+}
+.copied-indicator.show{opacity:1;}
+.btn-outline-modal{
+  height:38px;padding:0 16px;border-radius:8px;border:1.5px solid var(--border);background:#fff;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;color:var(--text-muted);cursor:pointer;
+}
+.btn-outline-modal:hover{border-color:var(--primary);color:var(--primary);}
+.btn-copy-all{
+  height:38px;padding:0 18px;border-radius:8px;border:none;background:var(--primary);color:#fff;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;transition:background .15s;
+}
+.btn-copy-all:hover{background:var(--primary-hover);}
+
+/* ── Responsive ───────────────────────────────────── */
+@media(max-width:900px){
+  .integ-row{grid-template-columns:1fr;}
+  .integ-panel{border-right:none;border-bottom:1px solid var(--border);min-height:0;}
+  .integ-panel:last-child{border-bottom:none;}
+}
+@media(max-width:580px){
+  .demo-banner{gap:8px;}
+  .page-shell{padding:16px 14px 50px;}
+  .modal-header,.modal-body,.modal-footer{padding-left:16px;padding-right:16px;}
+  .modal-footer{flex-wrap:wrap;}
+  .copied-indicator{margin-right:0;width:100%;order:3;}
+}
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Send Marketing Agency Info · Zapier Card</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bbky76u" target="_blank">86bbky76u</a>
+</div>
+
+<!-- Demo control banner -->
+<div class="demo-banner">
+  <span class="demo-label">Prototype</span>
+  <span class="demo-title">Zapier Card: Send Marketing Agency Info</span>
+  <span class="demo-state-lbl">Scenario:</span>
+  <div class="demo-states">
+    <button class="dbtn active" onclick="setScenario('filled')">Profile Complete</button>
+    <button class="dbtn" onclick="setScenario('missing')">Missing Profile Info</button>
+    <button class="dbtn" onclick="setScenario('no-key')">No API Key Yet</button>
+  </div>
+  <button class="dbtn dbtn-br" id="brBtn" onclick="toggleBR()">BRs Off</button>
+</div>
+
+<!-- Settings tab bar -->
+<div class="tab-bar">
+  <a class="tab-chip">Company Information</a>
+  <a class="tab-chip">Brand</a>
+  <a class="tab-chip">Email Settings</a>
+  <a class="tab-chip">App Settings</a>
+  <a class="tab-chip">Calendar</a>
+  <a class="tab-chip">Templates</a>
+  <a class="tab-chip">Notifications</a>
+  <a class="tab-chip">Payments</a>
+  <a class="tab-chip active">Integrations</a>
+  <a class="tab-chip">Customer Portal</a>
+  <a class="tab-chip">Add-Ons</a>
+</div>
+
+<!-- Page shell -->
+<div class="page-shell">
+
+  <div class="section-header">
+    <h2>Application Integrations</h2>
+    <p>Connect DripJobs to the third-party services you already use.</p>
+  </div>
+
+  <div class="scope-note">
+    <i class="ti ti-info-circle"></i>
+    <div>This prototype is scoped to the ticket's requested change: the <strong>Send Marketing Agency Info</strong> component on the Zapier card. Acorn Finance and CompanyCam are shown unchanged, for surrounding context only.</div>
+  </div>
+
+  <!-- 3-panel integration row (top row from the real Integrations grid) -->
+  <div class="integ-row">
+
+    <!-- Acorn Finance (unchanged, for context) -->
+    <div class="integ-panel">
+      <div class="integ-logo-area">
+        <div class="acorn-logo">
+          <svg class="acorn-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="16" fill="#e8f5e9"/>
+            <ellipse cx="16" cy="18" rx="8" ry="9" fill="#2e7d32"/>
+            <rect x="14" y="7" width="4" height="6" rx="2" fill="#5d4037"/>
+            <path d="M12 10 Q16 5 20 10" stroke="#5d4037" stroke-width="1.5" fill="none"/>
+          </svg>
+          <div>
+            <div class="acorn-wordmark">Acorn</div>
+            <div class="acorn-sub">Finance</div>
+          </div>
+        </div>
+      </div>
+      <div class="integ-content">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Add Financing widget option to proposals</div>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:8px;">
+          <span style="position:relative;display:inline-block;width:40px;height:22px;">
+            <input type="checkbox" checked style="opacity:0;width:0;height:0;position:absolute;">
+            <span style="position:absolute;inset:0;background:var(--primary);border-radius:11px;"></span>
+            <span style="position:absolute;top:3px;right:4px;width:16px;height:16px;background:#fff;border-radius:50%;"></span>
+          </span>
+        </label>
+        <div class="integ-infobox">
+          <strong>How does the Acorn integration work?</strong><br/>
+          DripJobs now integrates with <strong>Acorn Finance</strong>, allowing you to offer financing options to your customers <strong>at no cost to you.</strong> A financing widget with estimated payments will appear on your proposals, giving customers the option to apply for financing directly.
+        </div>
+      </div>
+      <div class="integ-panel-footer">
+        <a class="integ-footer-link integ-footer-link-muted">View Brochure</a>
+        <a class="integ-footer-link integ-footer-link-muted">Help Article</a>
+        <a class="integ-footer-link integ-footer-link-muted">How Financing Works</a>
+      </div>
+    </div>
+
+    <!-- Zapier — FOCUS of this ticket -->
+    <div class="integ-panel br-a" id="zapierPanel">
+      <span class="br-chip" style="top:-1px;right:-1px;">BR 1</span>
+      <div class="integ-logo-area">
+        <div class="zapier-wordmark">zapier</div>
+      </div>
+      <div class="integ-content">
+        <div>
+          <div class="integ-field-label">API Key</div>
+          <div class="integ-input-row">
+            <input class="integ-input" id="apiKeyInput" type="password" value="12345678901234567890123456789012" readonly />
+            <button class="btn-sm-outline">Copy</button>
+            <button class="btn-sm-primary-outline"><i class="ti ti-refresh" style="font-size:12px;"></i> Regenerate</button>
+          </div>
+        </div>
+
+        <!-- NEW component (BR-1): sits below API Key, above footer links -->
+        <div class="send-agency-wrap br-a" id="sendAgencyWrap">
+          <span class="br-chip" style="top:2px;right:2px;">BR 2–9</span>
+          <div class="send-agency-tooltip" id="sendAgencyTooltipWrap">
+            <button class="btn-send-agency" id="sendAgencyBtn" onclick="openModal()">
+              <i class="ti ti-send"></i> Send Marketing Agency Info
+            </button>
+          </div>
+          <div class="send-agency-help" id="sendAgencyHelp">Get a ready-made message for your marketing agency, with your Zapier key already filled in.</div>
+        </div>
+      </div>
+      <div class="integ-panel-footer">
+        <a class="integ-footer-link integ-footer-link-muted">Schedule a Demo</a>
+        <a class="integ-footer-link">Help Articles &rsaquo;</a>
+      </div>
+    </div>
+
+    <!-- CompanyCam (unchanged, for context) -->
+    <div class="integ-panel">
+      <div class="integ-logo-area">
+        <div class="cc-logo">
+          <div class="cc-icon"><i class="ti ti-camera"></i></div>
+          <div class="cc-wordmark">CompanyCam</div>
+        </div>
+      </div>
+      <div class="integ-content">
+        <div class="cc-field-row">
+          <span class="cc-field-label">Email</span>
+          <span class="cc-field-value">agency@example.com</span>
+        </div>
+        <div class="cc-field-row">
+          <span class="cc-field-label">API Key</span>
+          <span class="cc-field-value">kSZiQCHydW********************</span>
+        </div>
+        <div class="cc-field-row">
+          <span class="cc-field-label">Show on Command Center</span>
+          <span class="cc-field-value">True</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:4px;">
+          If you need help you can follow our CompanyCam Setup Instructions below.
+        </div>
+      </div>
+      <div class="integ-panel-footer">
+        <span></span>
+        <a class="integ-footer-link">CompanyCam Setup &rsaquo;</a>
+      </div>
+    </div>
+
+  </div><!-- /integ-row -->
+
+  <!-- Annotation helper box -->
+  <div class="helper-box" id="helperBox" style="display:none;"></div>
+
+</div><!-- /page-shell -->
+
+<!-- Compose modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title"><i class="ti ti-send"></i> Send Marketing Agency Info</div>
+        <div class="modal-subtitle">Copy this message and send it to your marketing agency so they connect their lead forms to DripJobs correctly. This is copy only, DripJobs does not send anything on your behalf.</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-warning" id="profileWarning" style="display:none;">
+        <i class="ti ti-alert-triangle"></i>
+        <div>Some of your account info is incomplete, so placeholders were used below. Complete your profile in <strong>Company Information</strong>, or edit the text directly before copying.</div>
+      </div>
+      <div class="modal-field">
+        <label for="composeSubject">Subject</label>
+        <input class="compose-input" id="composeSubject" type="text" />
+      </div>
+      <div class="modal-field">
+        <label for="composeBody">Message</label>
+        <textarea class="compose-textarea" id="composeBody" spellcheck="false"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span class="copied-indicator" id="copiedIndicator"><i class="ti ti-check"></i> Copied!</span>
+      <button class="btn-outline-modal" onclick="closeModal()">Close</button>
+      <button class="btn-copy-all" onclick="copyTemplate()"><i class="ti ti-copy"></i> Copy Subject &amp; Message</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastArea" style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+
+<script>
+const SCENARIOS = {
+  filled: {
+    userName: 'Alex Rivera',
+    companyName: 'Peak Painting Co.',
+    phone: '(555) 204-7788',
+    apiKey: '12345678901234567890123456789012',
+    hasKey: true,
+    note: 'Happy path (BR-3): user name, company name, phone, and Zapier API key all pulled from existing account data. Only {agency-contact-name} is left as an editable placeholder (BR-4).'
+  },
+  missing: {
+    userName: '',
+    companyName: '',
+    phone: '',
+    apiKey: '12345678901234567890123456789012',
+    hasKey: true,
+    note: 'Edge case: Company Name, user name, or phone are blank in settings. The compose view falls back to bracketed placeholders and shows a visible prompt to complete the profile before copying, matching the pattern used on the Send to Developer email (see Edge Cases table).'
+  },
+  'no-key': {
+    userName: 'Alex Rivera',
+    companyName: 'Peak Painting Co.',
+    phone: '(555) 204-7788',
+    apiKey: '',
+    hasKey: false,
+    note: 'Gap flagged in the ticket: no decision was made on whether to hide, disable, or prompt when no Zapier API key exists yet. This prototype assumes disable + tooltip prompting the user to generate a key first — flag for confirmation before dev.'
+  }
+};
+
+let currentScenario = 'filled';
+let brOn = false;
+
+function tokenOr(value, placeholder) {
+  return value && value.trim() ? value : placeholder;
+}
+
+function buildTemplate(s) {
+  const userName = tokenOr(s.userName, '[Your Name]');
+  const companyName = tokenOr(s.companyName, '[Your Company Name]');
+  const phone = tokenOr(s.phone, '[Your Phone Number]');
+  const apiKey = s.hasKey ? s.apiKey : '[Generate a Zapier API key first]';
+
+  const subject = 'Sending my leads into DripJobs, setup info inside';
+
+  const body = `Hi [Agency Contact Name],
+
+This is ${userName} with ${companyName}!
+
+I just launched DripJobs as my CRM and I want to make sure you properly send leads to my DripJobs account. Any lead that comes through my ads or forms needs to land in DripJobs so it starts receiving automated follow up right away. The information is as follows:
+
+My DripJobs Zapier API key:
+${apiKey}
+(This is what you'll use to connect DripJobs inside Zapier. I pulled it from Company Settings > Integrations in my account.)
+
+You can adjust the lead source in the Zap to reflect your agency name for accurate reporting and it will update my DripJobs account automatically.
+
+This name will show up on the deal card in my pipeline, so I'll be able to see exactly which campaign each lead came from.
+
+Setup instructions:
+DripJobs put together a step by step walkthrough for agencies here: Zapier Setup Guide for Agencies — https://intercom.help/dripjobs/en/articles/8954871-sending-leads-into-dripjobs-automatically-with-zapier-for-agencies-with-dripjobs-clients
+
+The short version: create a Zap with your lead source as the trigger, choose DripJobs as the action, select Create Lead, connect using the API key above, map the form fields, then publish. Once it's live, send a test lead through so we can confirm it lands in my pipeline.
+
+One more thing. DripJobs has a partnerships team that works directly with agencies like yours. If you want to talk through how the integration works, or what else DripJobs can do for your other contractor clients, you can book a time with them here: Book a Partnership Meeting — https://calendly.com/dripjobs/dripjobs-partnership-meeting
+
+Let me know once the Zap is published and I'll keep an eye out for the test lead.
+
+Thanks,
+${userName}
+${companyName}
+${phone}`;
+
+  return { subject, body };
+}
+
+function setScenario(key) {
+  currentScenario = key;
+  const s = SCENARIOS[key];
+  const btn = document.getElementById('sendAgencyBtn');
+  const help = document.getElementById('sendAgencyHelp');
+  const tooltipWrap = document.getElementById('sendAgencyTooltipWrap');
+
+  if (s.hasKey) {
+    btn.disabled = false;
+    help.classList.remove('is-warn');
+    help.textContent = 'Get a ready-made message for your marketing agency, with your Zapier key already filled in.';
+    tooltipWrap.removeAttribute('data-tip');
+  } else {
+    btn.disabled = true;
+    help.classList.add('is-warn');
+    help.textContent = 'Generate a Zapier API key above first — the agency message needs it to connect leads.';
+    tooltipWrap.setAttribute('data-tip', 'Generate an API key first');
+  }
+
+  document.querySelectorAll('.dbtn:not(.dbtn-br)').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === {
+      filled: 'Profile Complete',
+      missing: 'Missing Profile Info',
+      'no-key': 'No API Key Yet'
+    }[key]);
+  });
+
+  const hb = document.getElementById('helperBox');
+  hb.style.display = brOn ? 'block' : 'none';
+  hb.innerHTML = brOn ? `<strong>Scenario annotation:</strong> ${s.note}` : '';
+}
+
+function openModal() {
+  if (document.getElementById('sendAgencyBtn').disabled) return;
+  const s = SCENARIOS[currentScenario];
+  const { subject, body } = buildTemplate(s);
+  document.getElementById('composeSubject').value = subject;
+  document.getElementById('composeBody').value = body;
+  document.getElementById('profileWarning').style.display = (!s.userName || !s.companyName || !s.phone) ? 'flex' : 'none';
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('copiedIndicator').classList.remove('show');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function copyTemplate() {
+  const subject = document.getElementById('composeSubject').value;
+  const body = document.getElementById('composeBody').value;
+  const combined = `Subject: ${subject}\n\n${body}`;
+
+  const done = () => {
+    const ind = document.getElementById('copiedIndicator');
+    ind.classList.add('show');
+    setTimeout(() => ind.classList.remove('show'), 2500);
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(combined).then(done).catch(done);
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = combined;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    done();
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+function toggleBR() {
+  brOn = !brOn;
+  document.body.classList.toggle('show-br', brOn);
+  const btn = document.getElementById('brBtn');
+  btn.textContent = brOn ? 'BRs On' : 'BRs Off';
+  btn.classList.toggle('active', brOn);
+  const hb = document.getElementById('helperBox');
+  hb.style.display = brOn ? 'block' : 'none';
+  hb.innerHTML = brOn ? `<strong>Scenario annotation:</strong> ${SCENARIOS[currentScenario].note}` : '';
+}
+
+setScenario('filled');
+</script>
+</body>
+</html>
