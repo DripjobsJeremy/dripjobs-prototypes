@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-25] Know Your Numbers webinar recap, combine period slides
+
+- Decision: Merged the "Changing Your Period" and "What Each Quick-Select Really Means" slides in `know-your-numbers-webinar/index.html` into one slide (deck went 14 → 13 slides), with the quick-select table now living directly under the period banner instead of on its own slide. Clicking a quick-range chip (Today/Week/Last Wk/Month/Last Mo/YTD/All) now highlights the matching row in the "What it includes" table below, and the default "Month" chip highlights its row on load. Opening the Change Period modal and applying a custom range clears the highlight, since a custom range doesn't map to any single quick-select row. Also dropped a redundant quote callout that just repeated the period-hint text verbatim.
+- Why: Jeremy asked to combine the two slides and tie the quick-range chips to the definition table so the connection between "click this button" and "here's exactly what it means" is immediate rather than requiring a slide advance.
+- Open question: None.
+
 ## [2026-08-25] Know Your Numbers webinar recap, enlarge + DripSense states follow-up
 
 - Decision: Widened `know-your-numbers-webinar/index.html`'s stage (980px → 1260px max-width) and bumped font/spacing scale across every slide component (titles, cards, KPI tiles, tables, callouts) to cut white space and make elements easier to read while presenting. Rebuilt the "Introducing DripSense" slide from one static canned result into a 4-tab demo (This Week / This Year / Custom Range / Today) driven by a small state machine, using the exact copy and figures from Jeremy's screenshots of Ali's production build: the stale-results amber banner + "no projection" layout for This Week, a fresh "no projection" state for This Year, the original projection/confidence-ring state for Custom Range, and the plain "There's nothing to report for this period" empty state plus its "Every card opens its full report" tip for Today. Added a header collapse toggle and a "Reset demo" button that restores all four tabs to their pristine starting states for repeat live demos.
