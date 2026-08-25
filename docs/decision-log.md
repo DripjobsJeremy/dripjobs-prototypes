@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-25] Know Your Numbers webinar recap, real dripjobs logo watermark
+
+- Decision: Replaced the CSS-built watermark (purple square + "dripjobs" text) with the actual gear-icon dripjobs logo cropped from source PDF page 5, background made transparent (`know-your-numbers-webinar/images/dripjobs-logo.png`). Same single global positioning as before, just swapped the CSS shape for the real logo image.
+- Why: Jeremy asked for the real logo from the deck (the one with the gear), not an approximation.
+- Open question: None.
+
 ## [2026-08-25] Know Your Numbers webinar recap, global dripjobs watermark
 
 - Decision: Added one consistent "dripjobs" wordmark watermark to the top-right of the deck stage in `know-your-numbers-webinar/index.html`, positioned outside the per-slide `.slide` sections so it stays fixed in place across all 16 slides regardless of which one is active, rather than duplicating markup per slide. Removed the 4 existing per-slide dark-theme logo marks (`.cover-logo` on the cover slide, `.dark-slide-logo` on both "Why Don't My Numbers Match?" slides and "We're Here to Help") since they sat at nearly the same position and would have doubled up with the new global mark.
