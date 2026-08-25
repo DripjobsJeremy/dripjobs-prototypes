@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-25] Know Your Numbers webinar recap, New vs. Returning Customer definitions
+
+- Decision: Added a "What counts as New vs. Returning?" two-card definition block to the Conversions & Volume slide (slide 7), directly below the Appointments metric card, using Jeremy's exact wording for New Customer (Contact creation date falls inside the selected period) and Returning Customer (Contact creation date falls before the selected period).
+- Why: The Appointments card already says "1 New + 3 Returning" with no explanation of what those terms mean; Jeremy wanted that clarified for attendees.
+- Open question: None.
+
 ## [2026-08-25] Know Your Numbers webinar recap, real dripjobs logo watermark
 
 - Decision: Replaced the CSS-built watermark (purple square + "dripjobs" text) with the actual gear-icon dripjobs logo cropped from source PDF page 5, background made transparent (`know-your-numbers-webinar/images/dripjobs-logo.png`). Same single global positioning as before, just swapped the CSS shape for the real logo image.
