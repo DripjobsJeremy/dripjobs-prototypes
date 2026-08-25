@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-25] Know Your Numbers webinar recap, global dripjobs watermark
+
+- Decision: Added one consistent "dripjobs" wordmark watermark to the top-right of the deck stage in `know-your-numbers-webinar/index.html`, positioned outside the per-slide `.slide` sections so it stays fixed in place across all 16 slides regardless of which one is active, rather than duplicating markup per slide. Removed the 4 existing per-slide dark-theme logo marks (`.cover-logo` on the cover slide, `.dark-slide-logo` on both "Why Don't My Numbers Match?" slides and "We're Here to Help") since they sat at nearly the same position and would have doubled up with the new global mark.
+- Why: Jeremy asked for the watermark on every page; the 4 dark interstitial slides already had one baked into their card, but the other 12 light slides didn't. A single global element was simpler and more consistent than adding markup to every slide individually, and avoids the mark's position shifting between light and dark slides.
+- Open question: None.
+
 ## [2026-08-25] Know Your Numbers webinar recap, real Help Desk screenshot
 
 - Decision: Replaced the hand-built CSS chat-widget mockup on the "We're Here to Help" closing slide with the actual image from source PDF page 24, cropped from a 300dpi render to the open Live Help Desk modal plus its surrounding purple circle backdrop (`know-your-numbers-webinar/images/help-desk-modal.png`). Removed the now-unused `.help-mock*` CSS.
