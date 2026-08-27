@@ -900,8 +900,11 @@ const BUSINESSES = [
     industry: 'Real Estate / Facilities',
     emails: [{ v: 'board@cedarcreekhoa.com', label: 'Board', primary: true }],
     phones: [{ v: '(555) 902-7744', label: 'Mobile', primary: true }],
-    address: { street: '15 Cedar Creek Loop', city: 'Frisco', state: 'TX', zip: '75034' },
-    billingSame: true, archived: false,
+    // No on-file Address yet (demos the Job/Appointment Address blank-fallback branch) — Billing Address is on file separately.
+    address: { street: '', city: '', state: '', zip: '' },
+    billingSame: false,
+    billingAddress: { street: '15 Cedar Creek Loop', city: 'Frisco', state: 'TX', zip: '75034' },
+    archived: false,
     contactIds: ['c9']
   },
   {
@@ -925,9 +928,10 @@ const CONTACTS = [
   { id: 'c7', name: 'Dr. Angela Ferris', role: 'Practice Administrator', phone: '(555) 118-2201', email: 'aferris@northgatemedplaza.org', status: 'Customer', businessId: 'northgate', primaryFor: 'northgate' },
   { id: 'c8', name: 'Ben Okafor', role: 'Facilities Coordinator', phone: '(555) 118-2209', email: 'bokafor@northgatemedplaza.org', status: 'Customer', businessId: 'northgate' },
   { id: 'c9', name: 'Linda Marsh', role: 'HOA Board President', phone: '(555) 902-7745', email: 'lmarsh@cedarcreekhoa.com', status: 'Customer', businessId: 'cedarcreek', primaryFor: 'cedarcreek' },
-  { id: 'c10', name: 'James Whitfield', role: null, phone: '(555) 774-2210', email: 'jameswhitfield@gmail.com', status: 'Lead', businessId: null },
-  { id: 'c11', name: 'Sara Delgado', role: null, phone: '(555) 774-3390', email: 'saradelgado22@gmail.com', status: 'Customer', businessId: null },
-  { id: 'c12', name: 'Mike Feldman', role: null, phone: '(555) 774-4410', email: 'mfeldman.home@gmail.com', status: 'Lead', businessId: null }
+  { id: 'c10', name: 'James Whitfield', role: null, phone: '(555) 774-2210', email: 'jameswhitfield@gmail.com', status: 'Lead', businessId: null, address: { street: '482 Willow Creek Dr', city: 'Plano', state: 'TX', zip: '75025' } },
+  // No saved address on file (demos the Personal Project blank-fallback branch)
+  { id: 'c11', name: 'Sara Delgado', role: null, phone: '(555) 774-3390', email: 'saradelgado22@gmail.com', status: 'Customer', businessId: null, address: null },
+  { id: 'c12', name: 'Mike Feldman', role: null, phone: '(555) 774-4410', email: 'mfeldman.home@gmail.com', status: 'Lead', businessId: null, address: { street: '9 Larkspur Ct', city: 'Frisco', state: 'TX', zip: '75035' } }
 ];
 
 function getBiz(id) { return BUSINESSES.find(b => b.id === id); }
@@ -1232,7 +1236,7 @@ function activityListHtml(rows, emptyMsg) {
     '<div class="activity-row"><div class="activity-icon">' + r.icon + '</div><div style="flex:1;"><div class="activity-title">' + r.title + '</div><div class="activity-sub">' + r.sub + '</div></div>' + (r.time ? '<div class="activity-time">' + r.time + '</div>' : '') + '</div>'
   ).join('') + '</div>';
 }
-function fmtAddr(a) { if (!a) return '—'; return a.street + ', ' + a.city + ', ' + a.state + ' ' + a.zip; }
+function fmtAddr(a) { if (!a || !a.street) return '—'; return a.street + ', ' + a.city + ', ' + a.state + ' ' + a.zip; }
 
 /* ─── Archive / Delete ─── */
 function archiveBusiness(id) {
@@ -1529,7 +1533,9 @@ function renderEpBody() {
   '</div>';
 
   if (epState.type === 'individual') {
-    html += '<div class="empty-state"><div class="empty-state-desc">Individual Customer path is unchanged — out of scope for this prototype.</div></div>';
+    html += (epState.entry === 'proposal' || epState.entry === 'appt')
+      ? epIndividualBlockHtml()
+      : '<div class="empty-state"><div class="empty-state-desc">Individual Customer path is unchanged — out of scope for this prototype.</div></div>';
   } else if (epState.type === 'business') {
     html += '<div class="selector-sub-row">' +
       '<button class="pill-toggle ' + (epState.mode === 'existing' ? 'selected' : '') + '" onclick="epSelectMode(\'existing\')">Existing</button>' +
@@ -1555,6 +1561,7 @@ function epExistingBlockHtml() {
     '</div>';
   }
   const biz = getBiz(epState.businessId);
+  const showJobAddress = epState.entry === 'proposal' || epState.entry === 'appt';
   return '<div style="max-width:420px; margin:0 auto;">' +
     '<div class="settings-field" style="margin-bottom:4px;">' +
       '<label class="settings-field-label">Business</label>' +
@@ -1564,6 +1571,65 @@ function epExistingBlockHtml() {
       '</div>' +
     '</div>' +
     epContactFieldHtml() +
+    (showJobAddress ? epJobAddressHtml('business', biz) : '') +
+  '</div>';
+}
+
+/* ─── Individual Customer + Contact hand-off (Proposal / Appointment tabs only, Personal Project) ─── */
+function epIndividualBlockHtml() {
+  if (!epState.contactId) {
+    return '<div style="max-width:420px; margin:0 auto;">' +
+      '<div class="settings-field"><label class="settings-field-label">Search Contacts</label><input class="settings-field-input" id="epIndividualSearchInput" placeholder="Start typing a contact name..." oninput="renderEpIndividualResults(this.value)"></div>' +
+      '<div id="epIndividualResults"></div>' +
+    '</div>';
+  }
+  const c = getContact(epState.contactId);
+  return '<div style="max-width:420px; margin:0 auto;">' +
+    '<div class="settings-field" style="margin-bottom:4px;">' +
+      '<label class="settings-field-label">Contact</label>' +
+      '<div style="height:40px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; border:1px solid var(--st-color-border); border-radius:8px; background:var(--gray-50);">' +
+        '<span>' + c.name + '</span>' +
+        '<button type="button" class="btn-link" onclick="epClearIndividualContact()">Change</button>' +
+      '</div>' +
+    '</div>' +
+    epJobAddressHtml('personal', c) +
+  '</div>';
+}
+function renderEpIndividualResults(q) {
+  q = (q || '').toLowerCase();
+  const el = document.getElementById('epIndividualResults');
+  if (!el) return;
+  const results = CONTACTS.filter(c => !q || c.name.toLowerCase().includes(q)).slice(0, 5);
+  el.innerHTML = results.map(c =>
+    '<div class="typeahead-result" onclick="epSelectIndividualContact(\'' + c.id + '\')"><span>' + c.name + '<br><span style="color:var(--gray-400); font-size:11.5px;">' + (c.role || c.email) + '</span></span><span class="btn-link">Select</span></div>'
+  ).join('') || '<div class="empty-state"><div class="empty-state-desc">No contacts match.</div></div>';
+}
+function epSelectIndividualContact(cid) { epState.contactId = cid; renderEpBody(); }
+function epClearIndividualContact() { epState.contactId = null; renderEpBody(); }
+
+/* ─── Job/Appointment Address Sourcing (shared by Business Project + Personal Project branches) ───
+   Business Project: pre-fills from the Business's on-file Address, never its Billing Address.
+   Personal Project: pre-fills from the Contact's own saved address.
+   Either branch starts blank and fully editable when its source has no address on file. */
+function epJobAddressHtml(sourceType, entity) {
+  const addr = entity.address;
+  const hasAddr = !!(addr && addr.street);
+  const s = addr || {};
+  const nameLabel = sourceType === 'business' ? bizDisplayLabel(entity) : entity.name;
+  const sourceNote = hasAddr
+    ? 'Pre-filled from ' + nameLabel + '’s ' + (sourceType === 'business' ? 'on-file Address' : 'saved address') + ' — edit freely for this job.'
+    : nameLabel + ' has no ' + (sourceType === 'business' ? 'on-file Address yet' : 'saved address on file') + ' — starting blank, fully editable.';
+  return '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
+    '<div class="settings-section-title">Job/Appointment Address <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: Job/Appointment Address Sourcing">🔗 BR: Job/Appointment Address Sourcing</span></div>' +
+    '<div class="settings-section-subtitle">' + (sourceType === 'business' ? 'Business Project — sourced from the Business, never the Contact’s personal address.' : 'Personal Project — sourced from the Contact’s own saved address.') + '</div>' +
+    '<div class="settings-help" style="margin-bottom:12px;">' + sourceNote + '</div>' +
+    '<div class="settings-field" style="margin-bottom:12px;"><label class="settings-field-label">Street</label><input class="settings-field-input" id="epJobAddrStreet" value="' + (s.street || '') + '"></div>' +
+    '<div style="display:flex; gap:10px;">' +
+      '<div class="settings-field" style="flex:2;"><label class="settings-field-label">City</label><input class="settings-field-input" id="epJobAddrCity" value="' + (s.city || '') + '"></div>' +
+      '<div class="settings-field" style="flex:1; max-width:74px;"><label class="settings-field-label">State</label><input class="settings-field-input" id="epJobAddrState" maxlength="2" value="' + (s.state || '') + '"></div>' +
+      '<div class="settings-field" style="flex:1; max-width:100px;"><label class="settings-field-label">ZIP</label><input class="settings-field-input" id="epJobAddrZip" value="' + (s.zip || '') + '"></div>' +
+    '</div>' +
+    (sourceType === 'business' ? '<div class="settings-alert settings-alert--info" style="margin-top:14px; margin-bottom:0;"><div class="settings-alert-icon">ℹ️</div><div>The Business’s <strong>Billing Address</strong> is never offered here — it’s used for invoicing only, never for a Job or Appointment.</div></div>' : '') +
   '</div>';
 }
 function renderEpBusinessResults(q) {
