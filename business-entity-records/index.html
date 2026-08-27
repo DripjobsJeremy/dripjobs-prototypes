@@ -344,6 +344,26 @@
     padding: 3px 10px; border-radius: 999px; cursor: default; white-space: nowrap;
   }
 
+  /* ─── Demo banner (amber/black — scripted stakeholder-walkthrough aids, never product UI) ─── */
+  #be-app .demo-banner { background: var(--gray-900); color: #fff; border-radius: var(--radius); padding: 16px 18px; margin-top: 18px; }
+  #be-app .demo-banner-label {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 800;
+    color: var(--gray-900); background: #FBBF24; padding: 3px 9px; border-radius: 999px;
+    letter-spacing: 0.4px; text-transform: uppercase;
+  }
+  #be-app .demo-banner-title { font-size: 13.5px; font-weight: 800; margin: 10px 0 4px; }
+  #be-app .demo-banner-desc { font-size: 12px; color: var(--gray-400); margin-bottom: 14px; line-height: 1.5; }
+  #be-app .demo-sim-btn {
+    background: transparent; border: 1px solid rgba(255,255,255,0.35); color: #fff;
+    font-size: 12px; font-weight: 700; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  #be-app .demo-sim-btn:hover { background: rgba(255,255,255,0.12); }
+  #be-app .demo-surface-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+  @media (min-width: 760px) { #be-app .demo-surface-grid { grid-template-columns: repeat(3, 1fr); } }
+  #be-app .demo-surface-card { background: #fff; color: var(--gray-800); border-radius: 8px; padding: 12px; }
+  #be-app .demo-surface-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-400); margin-bottom: 8px; }
+
   /* ─── Profile header ─── */
   #be-app .profile-header { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 20px; margin-bottom: 18px; }
   #be-app .profile-header-top { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
@@ -951,6 +971,7 @@ function primaryContactFor(biz) { const id = biz.contactIds.find(cid => { const 
    ═══════════════════════════════════════════════ */
 let currentBizId = null;
 let currentContactId = null;
+let demoSyncActive = false; // Phase 5 Primary Contact live-sync demo toggle, reset per business profile visit
 
 function showView(name) {
   document.querySelectorAll('#be-app .view').forEach(v => v.classList.remove('active'));
@@ -1037,6 +1058,7 @@ const TABS = [
 
 function openBusinessProfile(id, tab) {
   currentBizId = id;
+  demoSyncActive = false;
   const biz = getBiz(id);
   renderProfileHeader(biz);
   renderProfileTabs();
@@ -1144,7 +1166,78 @@ function infoTabHtml(biz) {
       '<div class="settings-section-title">Associated Contacts <button class="btn btn-outline btn-sm" onclick="openAssociateModal()">+ Associate Contact</button></div>' +
       '<div class="settings-section-subtitle">A Contact can belong to at most one Business Entity. The Primary contact is the default used when initiating communication from this entity.</div>' +
       contactRows +
+    '</div>' +
+    demoLiveSyncHtml(biz);
+}
+
+/* ═══════════════════════════════════════════════
+   DEMO: Primary Contact Live-Sync (stakeholder-walkthrough aid, not product UI)
+   Scripted before/after — does not mutate CONTACTS/BUSINESSES, only these mocked surfaces.
+   ═══════════════════════════════════════════════ */
+function demoLiveSyncHtml(biz) {
+  const contact = primaryContactFor(biz);
+  const brChip = '<span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: Contact Info, Appointments, and Confirmation, item 1">🔗 BR: Primary Contact Live-Sync</span>';
+  if (!contact) {
+    return '<div class="demo-banner">' +
+      '<span class="demo-banner-label">🧪 Demo</span>' +
+      '<div class="demo-banner-title">Primary Contact Live-Sync ' + brChip + '</div>' +
+      '<div class="demo-banner-desc">Simulates live-sync behavior for a stakeholder walkthrough — not a proposed UI addition. This Business has no Primary Contact yet; associate one and mark it Primary to try the demo.</div>' +
     '</div>';
+  }
+  const before = { email: contact.email, phone: contact.phone };
+  const after = { email: demoAfterEmail(contact.email), phone: demoAfterPhone(contact.phone) };
+  const live = demoSyncActive ? after : before;
+  return '<div class="demo-banner">' +
+    '<span class="demo-banner-label">🧪 Demo</span>' +
+    '<div class="demo-banner-title">Primary Contact Live-Sync ' + brChip + '</div>' +
+    '<div class="demo-banner-desc">Simulates live-sync behavior for a stakeholder walkthrough — not a proposed UI addition. ' + contact.name + ' is the Primary Contact for ' + bizDisplayLabel(biz) + '; a Primary email/phone edit should reflect everywhere it’s shown.</div>' +
+    '<div style="font-size:12.5px; margin-bottom:12px;">Primary Contact on file: <strong>' + live.email + '</strong> · <strong>' + live.phone + '</strong>' + (demoSyncActive ? ' <span style="color:#FBBF24; font-weight:800;">(simulated edit)</span>' : '') + '</div>' +
+    '<button type="button" class="demo-sim-btn" onclick="toggleDemoLiveSync()">' + (demoSyncActive ? '↺ Revert simulation' : '🧪 Simulate: edit Primary email &amp; phone') + '</button>' +
+    '<div class="demo-surface-grid">' +
+      demoSurfaceCardHtml('Proposal Builder', demoProposalBuilderHtml(contact, live)) +
+      demoSurfaceCardHtml('Customer Portal', demoPortalContactCardHtml(contact, live)) +
+      demoSurfaceCardHtml('PDF Preview', demoPdfPreviewHtml(live)) +
+    '</div>' +
+    '<div class="demo-banner-desc" style="margin:14px 0 0;">A PDF already downloaded before this change stays exactly as it was generated — it’s a file outside the system with no live connection back to this record. Only a freshly generated PDF (like the preview above) reflects the edit.</div>' +
+  '</div>';
+}
+function demoSurfaceCardHtml(label, innerHtml) {
+  return '<div class="demo-surface-card"><div class="demo-surface-label">' + label + '</div>' + innerHtml + '</div>';
+}
+function demoProposalBuilderHtml(contact, live) {
+  return '<div style="font-size:12px; font-weight:800; color:var(--gray-900);">Proposal #4821</div>' +
+    '<div style="font-size:11px; color:var(--gray-500); margin:2px 0 8px;">Prepared for</div>' +
+    '<div style="font-size:12.5px; font-weight:700; color:var(--gray-800);">' + contact.name + '</div>' +
+    '<div style="font-size:11.5px; color:var(--gray-600);">' + live.email + '</div>' +
+    '<div style="font-size:11.5px; color:var(--gray-600);">' + live.phone + '</div>';
+}
+function demoPortalContactCardHtml(contact, live) {
+  const initials = contact.name.split(' ').map(w => w[0]).join('').slice(0, 2);
+  return '<div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">' +
+      '<div style="width:26px; height:26px; border-radius:50%; background:var(--teal); color:#fff; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:800; flex-shrink:0;">' + initials + '</div>' +
+      '<div style="font-size:12.5px; font-weight:700; color:var(--gray-800);">' + contact.name + '</div>' +
+    '</div>' +
+    '<div style="font-size:11.5px; color:var(--gray-600);">✉️ ' + live.email + '</div>' +
+    '<div style="font-size:11.5px; color:var(--gray-600);">📞 ' + live.phone + '</div>';
+}
+function demoPdfPreviewHtml(live) {
+  return '<div style="border:1px solid var(--gray-200); border-radius:6px; padding:10px; background:var(--gray-50);">' +
+    '<div style="font-size:9.5px; font-weight:800; color:var(--gray-400); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px;">Proposal.pdf — generated just now</div>' +
+    '<div style="height:5px; width:70%; background:var(--gray-200); border-radius:2px; margin-bottom:6px;"></div>' +
+    '<div style="font-size:10.5px; color:var(--gray-600);">' + live.email + '</div>' +
+    '<div style="font-size:10.5px; color:var(--gray-600);">' + live.phone + '</div>' +
+  '</div>';
+}
+function demoAfterEmail(email) {
+  const at = email.indexOf('@');
+  return at === -1 ? email : email.slice(0, at) + '.updated' + email.slice(at);
+}
+function demoAfterPhone(phone) {
+  return phone.slice(0, -2) + '99';
+}
+function toggleDemoLiveSync() {
+  demoSyncActive = !demoSyncActive;
+  renderTabContent('information');
 }
 
 const SNAPSHOT_TABS_LABEL = { deals: 'Deals', proposals: 'Proposals', appointments: 'Appointments', invoices: 'Invoices', payments: 'Payments' };
