@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-27] Business Entity Records V1, app-shell rebuild to match real DripJobs chrome
+
+- Decision: Jeremy flagged that the prototype's app shell didn't resemble the actual DripJobs dashboard (screenshot of the real Sales Pipeline page). Rebuilt the sidebar and topbar to match: real nav grouping (Sales / Jobs / Daily Operations / Documents / Financials / Marketing, each with the actual item names — Contacts, Sales List, Sales Pipeline, Change Orders, Job Schedule, Jobs List, Jobs Pipeline, Work Orders, Appointments, Chat, Email, Tasks, Invoices, Proposals, Job Costing, Production Rates, Metrics, Activity, Blast, Drips), a "The Nest" workspace row under the logo, a solid-purple active-item pill (was a light-purple + left-border style), a pinned dark "Settings" row at the sidebar's bottom, and a new persistent global top bar (search "Search leads, contacts, tags...", alert icon, notification bell with a red dot, avatar + "Jeremy Harrison" + chevron) that didn't exist before at all. Businesses stayed under Sales per BR7, inserted next to Contacts; every other nav item is decorative (toasts "not part of this prototype," same convention as before). Regression-tested that all 6 phases still work unchanged after the shell rebuild.
+- Why: The shell is what makes a prototype read as "this product" rather than a generic app; matching the real nav/topbar chrome was flagged as broken enough to block a stakeholder read of the rest of the work.
+- Open question: None.
+
 ## [2026-08-27] Business Entity Records V1, Phase 6: Fast-follow tab treatment
 
 - Decision: Added a neutral-gray "Fast-follow candidate" note (new `.settings-alert--neutral` variant, same shell as the existing 4 alert variants) to the Business Profile's Appointments, Invoices, and Payments tabs only — Deals and Proposals are untouched, verified byte-for-byte identical to before. The note reads "Ships as fast-follow if data aggregation requires new backend query logic — pending feasibility confirmation," sits above the pre-existing amber "Open Item #1" alert (left as-is, per scope — this phase is labeling only, not new aggregation UI), and carries a BR-9 chip. Kept it visually distinct from the amber Assumption/BR chips already in heavy use on this page, since a fast-follow sequencing note reads differently to a stakeholder than an open design question.
