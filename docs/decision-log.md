@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-27] Business Entity Records V1, Phase 6: Fast-follow tab treatment
+
+- Decision: Added a neutral-gray "Fast-follow candidate" note (new `.settings-alert--neutral` variant, same shell as the existing 4 alert variants) to the Business Profile's Appointments, Invoices, and Payments tabs only — Deals and Proposals are untouched, verified byte-for-byte identical to before. The note reads "Ships as fast-follow if data aggregation requires new backend query logic — pending feasibility confirmation," sits above the pre-existing amber "Open Item #1" alert (left as-is, per scope — this phase is labeling only, not new aggregation UI), and carries a BR-9 chip. Kept it visually distinct from the amber Assumption/BR chips already in heavy use on this page, since a fast-follow sequencing note reads differently to a stakeholder than an open design question.
+- Why: An empty Appointments/Invoices/Payments tab reads as "not built" without this label; the ticket calls out that these three are genuinely pending Jason's feasibility call while Deals/Proposals are V1-confirmed, and that distinction needs to survive a stakeholder demo.
+- Open question: None for this phase.
+
 ## [2026-08-27] Business Entity Records V1, Phase 5: Primary Contact live-sync demo
 
 - Decision: Added a scripted before/after demo to the Business Profile's Information tab (below Associated Contacts), reusing the repo-wide amber/black `.demo-banner` + "Simulate:" button convention already established in other prototypes (e.g. `jobs-list-column-mgmt/index.html`) rather than inventing a new demo-affordance style. Shows the Business's Primary Contact's current email/phone, a "Simulate: edit Primary email & phone" toggle button, and three mocked downstream surfaces (Proposal Builder header, Customer Portal contact card, PDF Preview) that all update together when clicked, plus a note that a PDF already downloaded before the change stays static since it's a file outside the system. The toggle is local-only (a module-level `demoSyncActive` flag, reset per business profile visit) and never mutates the real CONTACTS/BUSINESSES data — verified the Contacts list still shows the original email after simulating, so this demo can't leak state into the rest of the prototype. Businesses with no Primary Contact (e.g. Westline) show a graceful "associate a contact first" message instead of the simulate button. Added the BR chip citing ticket item 1.
