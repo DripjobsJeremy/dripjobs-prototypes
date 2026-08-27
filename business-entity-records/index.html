@@ -1511,9 +1511,20 @@ const EP_CONFIG = {
   proposal: { title: 'New Proposal', step: 'Step 1 of 5', context: 'Same Business / Individual selector. The final summary step confirms "Create a new business record" before the entity is created on save.' },
   invoice: { title: 'Create Invoice', step: 'Step 1 of 3', context: '"Who is this invoice for?" — Individual Contact or Business.' }
 };
-let epState = { entry: 'lead', type: null, mode: null, businessId: null, contactId: null };
+// Mocked Company Settings → Calendar → Event Types source. New Appointment only shows entries
+// where Calendar = "Appointments" — the Jobs-calendar entry below demonstrates that filter and is
+// intentionally never rendered in the Event Type dropdown.
+const EVENT_TYPES = [
+  { key: 'estimate', label: 'Estimate Consultation', calendar: 'Appointments', defaultDuration: 45 },
+  { key: 'followup', label: 'Follow-Up Walkthrough', calendar: 'Appointments', defaultDuration: 30 },
+  { key: 'colorconsult', label: 'Color Consultation', calendar: 'Appointments', defaultDuration: 60 },
+  { key: 'punchlist', label: 'Punch List Review', calendar: 'Appointments', defaultDuration: 30 },
+  { key: 'paintcrew', label: 'Paint Crew — Day 1', calendar: 'Jobs', defaultDuration: 480 }
+];
+const EP_STATE_DEFAULTS = { businessId: null, contactId: null, eventType: null, duration: '', locationType: 'onsite', platform: 'Zoom' };
+let epState = Object.assign({ entry: 'lead', type: null, mode: null }, EP_STATE_DEFAULTS);
 function setEntryPoint(key) {
-  epState = { entry: key, type: null, mode: null, businessId: null, contactId: null };
+  epState = Object.assign({ entry: key, type: null, mode: null }, EP_STATE_DEFAULTS);
   document.querySelectorAll('.entry-points-nav .pill-toggle').forEach(b => b.classList.toggle('selected', b.dataset.ep === key));
   document.getElementById('epFrameTitle').textContent = EP_CONFIG[key].title;
   document.getElementById('epStepChip').textContent = EP_CONFIG[key].step;
@@ -1521,8 +1532,8 @@ function setEntryPoint(key) {
 }
 // Shared by all four entry-point tabs (New Lead / New Appointment / New Proposal / Create Invoice) —
 // switching type or Business mode always clears any in-progress Business + Contact selection.
-function epSelectType(type) { epState.type = type; epState.mode = null; epState.businessId = null; epState.contactId = null; renderEpBody(); }
-function epSelectMode(mode) { epState.mode = mode; epState.businessId = null; epState.contactId = null; renderEpBody(); }
+function epSelectType(type) { epState.type = type; epState.mode = null; Object.assign(epState, EP_STATE_DEFAULTS); renderEpBody(); }
+function epSelectMode(mode) { epState.mode = mode; Object.assign(epState, EP_STATE_DEFAULTS); renderEpBody(); }
 function renderEpBody() {
   const cfg = EP_CONFIG[epState.entry];
   let html = '<div style="text-align:center; margin-bottom:12px;"><span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: Shared Business + Contact Selection">🔗 BR: Creation Flow – Shared Business + Contact Selection</span></div>';
@@ -1571,7 +1582,7 @@ function epExistingBlockHtml() {
       '</div>' +
     '</div>' +
     epContactFieldHtml() +
-    (showJobAddress ? epJobAddressHtml('business', biz) : '') +
+    (showJobAddress ? epAddressOrApptExtrasHtml('business', biz) : '') +
   '</div>';
 }
 
@@ -1592,7 +1603,7 @@ function epIndividualBlockHtml() {
         '<button type="button" class="btn-link" onclick="epClearIndividualContact()">Change</button>' +
       '</div>' +
     '</div>' +
-    epJobAddressHtml('personal', c) +
+    epAddressOrApptExtrasHtml('personal', c) +
   '</div>';
 }
 function renderEpIndividualResults(q) {
@@ -1606,6 +1617,64 @@ function renderEpIndividualResults(q) {
 }
 function epSelectIndividualContact(cid) { epState.contactId = cid; renderEpBody(); }
 function epClearIndividualContact() { epState.contactId = null; renderEpBody(); }
+
+/* ─── New Appointment specifics: Event Type, Default Duration, On-Site/Virtual location (shared
+   by the Business Project and Personal Project branches — appt-only, not shown on New Proposal). ─── */
+function epAddressOrApptExtrasHtml(sourceType, entity) {
+  return epState.entry === 'appt' ? epApptExtrasHtml(sourceType, entity) : epJobAddressHtml(sourceType, entity);
+}
+function epApptExtrasHtml(sourceType, entity) {
+  let html = '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
+      '<div class="settings-section-title">Appointment Details <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: Contact Info, Appointments, and Confirmation">🔗 BR: New Appointment Specifics</span></div>' +
+      epEventTypeSelectHtml() +
+      epDurationFieldHtml() +
+      epLocationToggleHtml() +
+    '</div>';
+  html += epState.locationType === 'virtual'
+    ? '<div style="max-width:420px; margin:0 auto 4px;">' + epPlatformSelectHtml() + '</div>'
+    : epJobAddressHtml(sourceType, entity);
+  return html;
+}
+function epEventTypeSelectHtml() {
+  const options = EVENT_TYPES.filter(e => e.calendar === 'Appointments'); // Jobs-calendar entries never appear here
+  return '<div class="settings-field" style="margin-bottom:14px;">' +
+      '<label class="settings-field-label is-required">Event Type</label>' +
+      '<select id="epEventTypeSelect" onchange="epSelectEventType(this.value)">' +
+        '<option value="">Select an event type…</option>' +
+        options.map(e => '<option value="' + e.key + '"' + (epState.eventType === e.key ? ' selected' : '') + '>' + e.label + '</option>').join('') +
+      '</select>' +
+    '</div>' +
+    '<div class="settings-help" style="margin:-8px 0 14px;">Sourced from Company Settings → Calendar → Event Types, filtered to Calendar = Appointments.</div>';
+}
+function epSelectEventType(key) {
+  epState.eventType = key || null;
+  const et = EVENT_TYPES.find(e => e.key === key);
+  epState.duration = et ? et.defaultDuration : ''; // auto-fills, stays editable below
+  renderEpBody();
+}
+function epDurationFieldHtml() {
+  return '<div class="settings-field" style="margin-bottom:14px;">' +
+    '<label class="settings-field-label">Default Duration (minutes)</label>' +
+    '<input class="settings-field-input" id="epDurationInput" type="number" min="0" step="5" value="' + (epState.duration != null ? epState.duration : '') + '" oninput="epState.duration = this.value">' +
+  '</div>';
+}
+function epLocationToggleHtml() {
+  return '<div class="selector-sub-row" style="margin:0 0 4px;">' +
+    '<button type="button" class="pill-toggle ' + (epState.locationType === 'onsite' ? 'selected' : '') + '" onclick="epSelectLocationType(\'onsite\')">On-Site</button>' +
+    '<button type="button" class="pill-toggle ' + (epState.locationType === 'virtual' ? 'selected' : '') + '" onclick="epSelectLocationType(\'virtual\')">Virtual Meeting</button>' +
+  '</div>';
+}
+function epSelectLocationType(type) { epState.locationType = type; renderEpBody(); }
+function epPlatformSelectHtml() {
+  const platforms = ['Zoom', 'Google Meet', 'FaceTime'];
+  return '<div class="settings-field" style="margin-top:14px;">' +
+    '<label class="settings-field-label is-required">Meeting Platform</label>' +
+    '<select id="epPlatformSelect" onchange="epState.platform = this.value">' +
+      platforms.map(p => '<option value="' + p + '"' + (epState.platform === p ? ' selected' : '') + '>' + p + '</option>').join('') +
+    '</select>' +
+    '<div class="settings-help">No address is collected for a Virtual Meeting.</div>' +
+  '</div>';
+}
 
 /* ─── Job/Appointment Address Sourcing (shared by Business Project + Personal Project branches) ───
    Business Project: pre-fills from the Business's on-file Address, never its Billing Address.
