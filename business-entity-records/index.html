@@ -332,14 +332,8 @@
   #be-app .switch input:checked + .switch-track::before { transform: translateX(18px); }
   #be-app .settings-toggle-label { font-size: 13px; font-weight: 700; color: var(--st-color-text); }
 
-  /* Multi-value rows (email / phone) */
-  #be-app .multi-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  /* Primary-designation badge (Associated Contacts list, Contact's Business card) */
   #be-app .multi-row-primary-badge { font-size: 10px; font-weight: 800; background: #E8E6FA; color: #5C53DC; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
-  #be-app .multi-row-type { font-size: 12px; color: var(--st-color-text-muted); min-width: 62px; }
-  #be-app .multi-row-remove { background: none; border: none; color: var(--gray-400); cursor: pointer; font-size: 15px; padding: 4px; }
-  #be-app .multi-row-remove:hover { color: var(--red); }
-  #be-app .add-row-link { font-size: 12.5px; font-weight: 700; color: var(--st-color-primary); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
-  #be-app .add-row-link:hover { color: var(--st-color-primary-active); }
 
   /* ─── Tabs (design-system.md pastel chip pattern, purple active border) ─── */
   #be-app .settings-tabs nav {
@@ -849,18 +843,14 @@
             <option>Other</option>
           </select>
         </div>
-      </div>
-
-      <div style="margin-top:18px; padding-top:16px; border-top:1px solid var(--st-color-border);">
-        <div class="settings-section-title" style="margin-bottom:10px;">Email</div>
-        <div id="emailRows"></div>
-        <div class="add-row-link" onclick="addEmailRow()">+ Add another email</div>
-      </div>
-
-      <div style="margin-top:18px; padding-top:16px; border-top:1px solid var(--st-color-border);">
-        <div class="settings-section-title" style="margin-bottom:10px;">Phone</div>
-        <div id="phoneRows"></div>
-        <div class="add-row-link" onclick="addPhoneRow()">+ Add another phone</div>
+        <div class="settings-field settings-field--half">
+          <label class="settings-field-label">Email</label>
+          <input class="settings-field-input" id="f_email" placeholder="billing@company.com" />
+        </div>
+        <div class="settings-field settings-field--half">
+          <label class="settings-field-label">Phone</label>
+          <input class="settings-field-input formatted-phone-no" id="f_phone" placeholder="(555) 123-4567" />
+        </div>
       </div>
 
       <div style="margin-top:18px; padding-top:16px; border-top:1px solid var(--st-color-border);">
@@ -937,24 +927,15 @@
   </div>
 </div>
 
-<!-- ═══ Modal: Associate contact ═══ -->
+<!-- ═══ Modal: Associate contact (shared: Business→Contact picker and Contact→Business picker) ═══ -->
 <div class="modal-overlay" id="modalAssociate">
   <div class="modal-card modal-narrow">
     <div class="modal-header">
-      <h3>Associate Contact</h3>
+      <h3 id="associateModalTitle">Associate Contact</h3>
       <button class="modal-close" onclick="closeModal('modalAssociate')">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="settings-field" style="margin-bottom:4px;">
-        <label class="settings-field-label">Search Contacts</label>
-        <input class="settings-field-input" id="associateSearch" placeholder="Search unassociated contacts..." oninput="renderAssociateResults(this.value)" />
-      </div>
-      <div class="settings-help" style="margin-bottom:10px;">Only unassociated contacts are shown — a contact can belong to one Business at a time.</div>
-      <div id="associateResults"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modalAssociate')">Cancel</button>
-    </div>
+    <div class="modal-body" id="associateModalBody"></div>
+    <div class="modal-footer" id="associateModalFooter"></div>
   </div>
 </div>
 
@@ -971,8 +952,8 @@ const BUSINESSES = [
   {
     id: 'acme', legal: 'Acme Commercial Painting Group LLC', dba: 'Acme Painting', displayDba: true,
     industry: 'Commercial Painting Contractor',
-    emails: [{ v: 'billing@acmepaintinggroup.com', label: 'Billing', primary: true }, { v: 'info@acmepaintinggroup.com', label: 'Office', primary: false }],
-    phones: [{ v: '(555) 201-4400', label: 'Office', primary: true }, { v: '(555) 201-4401', label: 'Mobile', primary: false }],
+    email: 'billing@acmepaintinggroup.com',
+    phone: '(555) 201-4400',
     address: { street: '4820 Meridian Business Pkwy', city: 'Dallas', state: 'TX', zip: '75201' },
     billingSame: true, archived: false,
     contactIds: ['c1', 'c2', 'c3']
@@ -980,8 +961,8 @@ const BUSINESSES = [
   {
     id: 'summit', legal: 'Summit Ridge Property Holdings Inc.', dba: 'Summit Ridge', displayDba: true,
     industry: 'Property Management',
-    emails: [{ v: 'ap@summitridgeholdings.com', label: 'AP', primary: true }],
-    phones: [{ v: '(555) 340-1190', label: 'Office', primary: true }],
+    email: 'ap@summitridgeholdings.com',
+    phone: '(555) 340-1190',
     address: { street: '210 Commerce Center Dr', city: 'Austin', state: 'TX', zip: '78701' },
     billingSame: false,
     billingAddress: { street: 'PO Box 8842', city: 'Austin', state: 'TX', zip: '78708' },
@@ -991,8 +972,8 @@ const BUSINESSES = [
   {
     id: 'brightview', legal: 'Brightview Retail Facilities LLC', dba: '', displayDba: false,
     industry: 'Retail / Hospitality',
-    emails: [{ v: 'facilities@brightviewretail.com', label: 'Office', primary: true }],
-    phones: [{ v: '(555) 622-8800', label: 'Office', primary: true }, { v: '(555) 622-8801', label: 'After Hours', primary: false }],
+    email: 'facilities@brightviewretail.com',
+    phone: '(555) 622-8800',
     address: { street: '77 Galleria Way, Suite 300', city: 'Plano', state: 'TX', zip: '75024' },
     billingSame: true, archived: false,
     contactIds: ['c6']
@@ -1000,8 +981,8 @@ const BUSINESSES = [
   {
     id: 'northgate', legal: 'Northgate Medical Plaza Association', dba: 'Northgate Medical Plaza', displayDba: true,
     industry: 'Healthcare Facility',
-    emails: [{ v: 'ops@northgatemedplaza.org', label: 'Office', primary: true }],
-    phones: [{ v: '(555) 118-2200', label: 'Office', primary: true }],
+    email: 'ops@northgatemedplaza.org',
+    phone: '(555) 118-2200',
     address: { street: '900 Northgate Blvd', city: 'Fort Worth', state: 'TX', zip: '76102' },
     billingSame: true, archived: false,
     contactIds: ['c7', 'c8']
@@ -1009,8 +990,8 @@ const BUSINESSES = [
   {
     id: 'cedarcreek', legal: 'Cedar Creek Homeowners Association', dba: 'Cedar Creek HOA', displayDba: true,
     industry: 'Real Estate / Facilities',
-    emails: [{ v: 'board@cedarcreekhoa.com', label: 'Board', primary: true }],
-    phones: [{ v: '(555) 902-7744', label: 'Mobile', primary: true }],
+    email: 'board@cedarcreekhoa.com',
+    phone: '(555) 902-7744',
     // No on-file Address yet (demos the Job/Appointment Address blank-fallback branch) — Billing Address is on file separately.
     address: { street: '', city: '', state: '', zip: '' },
     billingSame: false,
@@ -1021,8 +1002,8 @@ const BUSINESSES = [
   {
     id: 'westline', legal: 'Westline General Contracting Co.', dba: 'Westline GC', displayDba: true,
     industry: 'General Contractor',
-    emails: [{ v: 'accounts@westlinegc.com', label: 'Accounts', primary: true }],
-    phones: [{ v: '(555) 405-6690', label: 'Office', primary: true }],
+    email: 'accounts@westlinegc.com',
+    phone: '(555) 405-6690',
     address: { street: '3300 Industrial Loop', city: 'Dallas', state: 'TX', zip: '75212' },
     billingSame: true, archived: false,
     contactIds: []
@@ -1053,8 +1034,8 @@ function bizAbbrev(biz) {
   return (words.slice(0, 2).map(w => w[0]).join('') || 'B').toUpperCase();
 }
 function bizDisplayLabel(biz) { return (biz.dba && biz.dba.trim()) ? biz.dba : biz.legal; }
-function primaryEmail(biz) { const e = biz.emails.find(x => x.primary) || biz.emails[0]; return e ? e.v : '—'; }
-function primaryPhone(biz) { const p = biz.phones.find(x => x.primary) || biz.phones[0]; return p ? p.v : '—'; }
+function primaryEmail(biz) { return biz.email || '—'; }
+function primaryPhone(biz) { return biz.phone || '—'; }
 function primaryContactFor(biz) { const id = biz.contactIds.find(cid => { const c = getContact(cid); return c && c.primaryFor === biz.id; }); return id ? getContact(id) : (biz.contactIds[0] ? getContact(biz.contactIds[0]) : null); }
 
 /* ═══════════════════════════════════════════════
@@ -1216,17 +1197,18 @@ function renderTabContent(key) {
 }
 
 function infoTabHtml(biz) {
-  const emailRows = biz.emails.map(e => '<div class="multi-row"><span class="multi-row-type">' + e.label + '</span><span>' + e.v + '</span>' + (e.primary ? '<span class="multi-row-primary-badge">PRIMARY</span>' : '') + '</div>').join('');
-  const phoneRows = biz.phones.map(p => '<div class="multi-row"><span class="multi-row-type">' + p.label + '</span><span>' + p.v + '</span>' + (p.primary ? '<span class="multi-row-primary-badge">PRIMARY</span>' : '') + '</div>').join('');
   const billing = biz.billingSame ? biz.address : biz.billingAddress;
+  const canReassignPrimary = biz.contactIds.length > 1;
   const contactRows = biz.contactIds.map(cid => {
     const c = getContact(cid);
+    const isPrimary = c.primaryFor === biz.id;
     return '<div class="activity-row">' +
       '<div class="activity-icon">👤</div>' +
       '<div style="flex:1;">' +
-        '<div class="activity-title" style="cursor:pointer;" onclick="openContactProfile(\'' + c.id + '\')">' + c.name + (c.primaryFor === biz.id ? ' <span class="multi-row-primary-badge">PRIMARY</span>' : '') + '</div>' +
+        '<div class="activity-title" style="cursor:pointer;" onclick="openContactProfile(\'' + c.id + '\')">' + c.name + (isPrimary ? ' <span class="multi-row-primary-badge">⭐ PRIMARY</span>' : '') + '</div>' +
         '<div class="activity-sub">' + (c.role || 'Contact') + ' · ' + c.phone + '</div>' +
       '</div>' +
+      (!isPrimary && canReassignPrimary ? '<button class="btn-link" onclick="makeContactPrimary(\'' + c.id + '\')">Make Primary</button>' : '') +
       '<button class="btn-link muted" onclick="removeAssociation(\'' + c.id + '\')">Remove</button>' +
     '</div>';
   }).join('') || '<div class="empty-state"><div class="empty-state-desc">No contacts associated yet.</div></div>';
@@ -1239,13 +1221,10 @@ function infoTabHtml(biz) {
         '<div class="settings-field settings-field--half"><label class="settings-field-label">DBA</label><input class="settings-field-input" value="' + (biz.dba || '—') + '" disabled></div>' +
         '<div class="settings-field settings-field--half"><label class="settings-field-label">Industry</label><input class="settings-field-input" value="' + biz.industry + '" disabled></div>' +
         '<div class="settings-field settings-field--half"><label class="settings-field-label">Display DBA on Documents</label><input class="settings-field-input" value="' + (biz.displayDba ? 'Enabled' : 'Disabled') + '" disabled></div>' +
+        '<div class="settings-field settings-field--half"><label class="settings-field-label">Email</label><input class="settings-field-input" value="' + (biz.email || '—') + '" disabled></div>' +
+        '<div class="settings-field settings-field--half"><label class="settings-field-label">Phone</label><input class="settings-field-input" value="' + (biz.phone || '—') + '" disabled></div>' +
       '</div>' +
-    '</div>' +
-    '<div class="settings-section">' +
-      '<div class="settings-section-title">Email</div>' + emailRows +
-    '</div>' +
-    '<div class="settings-section">' +
-      '<div class="settings-section-title">Phone</div>' + phoneRows +
+      '<div class="settings-help">A Business Entity has exactly one Email, Phone, Address, and Billing Address on file — edit via Edit Business.</div>' +
     '</div>' +
     '<div class="settings-section">' +
       '<div class="settings-grid">' +
@@ -1255,7 +1234,7 @@ function infoTabHtml(biz) {
     '</div>' +
     '<div class="settings-section">' +
       '<div class="settings-section-title">Associated Contacts <button class="btn btn-outline btn-sm" onclick="openAssociateModal()">+ Associate Contact</button></div>' +
-      '<div class="settings-section-subtitle">A Contact can belong to at most one Business Entity. The Primary contact is the default used when initiating communication from this entity.</div>' +
+      '<div class="settings-section-subtitle">A Contact can belong to at most one Business Entity. The first contact associated with a Business becomes its ⭐ Primary Contact by default — the default used when initiating communication from this entity. Once there\'s more than one associated contact, any of them can be made Primary instead.</div>' +
       contactRows +
     '</div>' +
     demoLiveSyncHtml(biz);
@@ -1465,23 +1444,51 @@ function confirmDelete(id) {
   renderBusinessesTable();
 }
 
-/* ─── Associate contact ─── */
-function openAssociateModal() { document.getElementById('associateSearch').value = ''; renderAssociateResults(''); openModal('modalAssociate'); }
-function renderAssociateResults(q) {
-  q = (q || '').toLowerCase();
-  const unassociated = CONTACTS.filter(c => !c.businessId && c.name.toLowerCase().includes(q));
-  document.getElementById('associateResults').innerHTML = unassociated.map(c =>
-    '<div class="typeahead-result" onclick="associateContact(\'' + c.id + '\')"><span>' + c.name + '<br><span style="color:var(--gray-400); font-size:11.5px;">' + c.email + '</span></span><span class="btn-link">Associate</span></div>'
-  ).join('') || '<div class="empty-state"><div class="empty-state-desc">No unassociated contacts match.</div></div>';
+/* ─── Associate contact (dropdown selection — the contact list could get large) ─── */
+function openAssociateModal() {
+  document.getElementById('associateModalTitle').textContent = 'Associate Contact';
+  const unassociated = CONTACTS.filter(c => !c.businessId);
+  document.getElementById('associateModalBody').innerHTML =
+    '<div class="settings-field" style="margin-bottom:4px;">' +
+      '<label class="settings-field-label">Contact</label>' +
+      '<select class="select2" id="associateContactSelect">' +
+        '<option value="">Select a contact…</option>' +
+        unassociated.map(c => '<option value="' + c.id + '">' + c.name + (c.email ? ' — ' + c.email : '') + '</option>').join('') +
+      '</select>' +
+    '</div>' +
+    '<div class="settings-help">Only unassociated contacts are shown — a contact can belong to one Business at a time.' +
+      (unassociated.length === 0 ? ' There are no unassociated contacts right now.' : '') +
+    '</div>';
+  document.getElementById('associateModalFooter').innerHTML =
+    '<button class="btn btn-outline" onclick="closeModal(\'modalAssociate\')">Cancel</button>' +
+    '<button class="btn btn-primary" onclick="confirmAssociateContact()">Associate</button>';
+  openModal('modalAssociate');
+}
+function confirmAssociateContact() {
+  const cid = document.getElementById('associateContactSelect').value;
+  if (!cid) { toast('Select a contact first.'); return; }
+  associateContact(cid);
 }
 function associateContact(cid) {
   const c = getContact(cid);
   const biz = getBiz(currentBizId);
+  const becomesPrimary = biz.contactIds.length === 0; // first contact associated defaults to Primary
   c.businessId = biz.id;
   biz.contactIds.push(cid);
+  if (becomesPrimary) c.primaryFor = biz.id;
   closeModal('modalAssociate');
-  toast(c.name + ' associated with ' + bizDisplayLabel(biz) + '.');
-  renderTabContent('information'); document.getElementById('panel-information').dataset.rendered = ''; renderTabContent('information');
+  toast(c.name + ' associated with ' + bizDisplayLabel(biz) + (becomesPrimary ? ' as the Primary Contact.' : '.'));
+  renderProfileHeader(biz);
+  document.getElementById('panel-information').dataset.rendered = ''; renderTabContent('information');
+}
+function makeContactPrimary(cid) {
+  const biz = getBiz(currentBizId);
+  biz.contactIds.forEach(id => { const c = getContact(id); if (c.primaryFor === biz.id) c.primaryFor = null; });
+  const c = getContact(cid);
+  c.primaryFor = biz.id;
+  toast(c.name + ' is now the Primary Contact for ' + bizDisplayLabel(biz) + '.');
+  renderProfileHeader(biz);
+  document.getElementById('panel-information').dataset.rendered = ''; renderTabContent('information');
 }
 function removeAssociation(cid) {
   const c = getContact(cid);
@@ -1497,23 +1504,12 @@ function removeAssociation(cid) {
    NEW BUSINESS MODAL
    ═══════════════════════════════════════════════ */
 let editingBizId = null;
-function emailRowHtml(v, label, primary) {
-  return '<div class="multi-row"><input class="settings-field-input" style="flex:1; min-width:160px;" value="' + (v || '') + '" placeholder="name@company.com"><select class="multi-row-type" style="height:36px;"><option ' + (label === 'Office' ? 'selected' : '') + '>Office</option><option ' + (label === 'Billing' ? 'selected' : '') + '>Billing</option><option ' + (label === 'Other' ? 'selected' : '') + '>Other</option></select>' + (primary ? '<span class="multi-row-primary-badge">PRIMARY</span>' : '<button type="button" class="btn-link muted" style="font-size:11px;" onclick="this.closest(\'.multi-row\').remove()">make primary</button>') + '<button class="multi-row-remove" onclick="this.closest(\'.multi-row\').remove()">✕</button></div>';
-}
-function phoneRowHtml(v, label, primary) {
-  return '<div class="multi-row"><input class="settings-field-input" style="flex:1; min-width:160px;" value="' + (v || '') + '" placeholder="(555) 123-4567"><select class="multi-row-type" style="height:36px;"><option ' + (label === 'Office' ? 'selected' : '') + '>Office</option><option ' + (label === 'Mobile' ? 'selected' : '') + '>Mobile</option><option ' + (label === 'Fax' ? 'selected' : '') + '>Fax</option></select>' + (primary ? '<span class="multi-row-primary-badge">PRIMARY</span>' : '<button type="button" class="btn-link muted" style="font-size:11px;" onclick="this.closest(\'.multi-row\').remove()">make primary</button>') + '<button class="multi-row-remove" onclick="this.closest(\'.multi-row\').remove()">✕</button></div>';
-}
-function addEmailRow() { document.getElementById('emailRows').insertAdjacentHTML('beforeend', emailRowHtml('', 'Office', false)); }
-function addPhoneRow() { document.getElementById('phoneRows').insertAdjacentHTML('beforeend', phoneRowHtml('', 'Office', false)); }
-
 function resetBusinessForm() {
-  ['f_legalName','f_dba','f_street','f_city','f_state','f_zip','f_bStreet','f_bCity','f_bState','f_bZip'].forEach(id => document.getElementById(id).value = '');
+  ['f_legalName','f_dba','f_email','f_phone','f_street','f_city','f_state','f_zip','f_bStreet','f_bCity','f_bState','f_bZip'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f_displayDba').checked = true;
   document.getElementById('f_industry').value = 'Commercial Painting Contractor';
   document.getElementById('f_billingSame').checked = true;
   toggleBillingFields();
-  document.getElementById('emailRows').innerHTML = emailRowHtml('', 'Office', true);
-  document.getElementById('phoneRows').innerHTML = phoneRowHtml('', 'Office', true);
 }
 function toggleBillingFields() {
   const same = document.getElementById('f_billingSame').checked;
@@ -1533,6 +1529,8 @@ function openEditBusinessModal(id) {
   document.getElementById('f_dba').value = b.dba || '';
   document.getElementById('f_displayDba').checked = b.displayDba;
   document.getElementById('f_industry').value = b.industry;
+  document.getElementById('f_email').value = b.email || '';
+  document.getElementById('f_phone').value = b.phone || '';
   document.getElementById('f_street').value = b.address.street;
   document.getElementById('f_city').value = b.address.city;
   document.getElementById('f_state').value = b.address.state;
@@ -1544,16 +1542,7 @@ function openEditBusinessModal(id) {
   document.getElementById('f_bState').value = ba.state;
   document.getElementById('f_bZip').value = ba.zip;
   toggleBillingFields();
-  document.getElementById('emailRows').innerHTML = b.emails.map(e => emailRowHtml(e.v, e.label, e.primary)).join('');
-  document.getElementById('phoneRows').innerHTML = b.phones.map(p => phoneRowHtml(p.v, p.label, p.primary)).join('');
   openModal('modalNewBusiness');
-}
-function collectMultiRows(containerId) {
-  return [...document.querySelectorAll('#' + containerId + ' .multi-row')].map((row, i) => ({
-    v: row.querySelector('input').value.trim(),
-    label: row.querySelector('select').value,
-    primary: i === 0
-  })).filter(r => r.v);
 }
 function saveNewBusiness() {
   const legal = document.getElementById('f_legalName').value.trim();
@@ -1563,8 +1552,8 @@ function saveNewBusiness() {
     dba: document.getElementById('f_dba').value.trim(),
     displayDba: document.getElementById('f_displayDba').checked,
     industry: document.getElementById('f_industry').value,
-    emails: collectMultiRows('emailRows'),
-    phones: collectMultiRows('phoneRows'),
+    email: document.getElementById('f_email').value.trim(),
+    phone: document.getElementById('f_phone').value.trim(),
     address: { street: document.getElementById('f_street').value, city: document.getElementById('f_city').value, state: document.getElementById('f_state').value, zip: document.getElementById('f_zip').value },
     billingSame: document.getElementById('f_billingSame').checked,
     billingAddress: { street: document.getElementById('f_bStreet').value, city: document.getElementById('f_bCity').value, state: document.getElementById('f_bState').value, zip: document.getElementById('f_bZip').value }
@@ -1666,32 +1655,38 @@ function removeAssociationFromContact(cid) {
 }
 function openChangeBusinessModal(cid) {
   currentContactId = cid;
-  document.getElementById('associateSearch').value = '';
+  document.getElementById('associateModalTitle').textContent = 'Associate with Business';
+  document.getElementById('associateModalBody').innerHTML =
+    '<div class="settings-field" style="margin-bottom:4px;">' +
+      '<label class="settings-field-label">Search Businesses</label>' +
+      '<input class="settings-field-input" id="businessPickSearch" placeholder="Search businesses..." oninput="renderBusinessPickResults(this.value)">' +
+    '</div>' +
+    '<div class="settings-help" style="margin-bottom:10px;">A Contact can belong to one Business Entity at a time. Selecting a new one replaces any existing association.</div>' +
+    '<div id="businessPickResults"></div>';
+  document.getElementById('associateModalFooter').innerHTML =
+    '<button class="btn btn-outline" onclick="closeModal(\'modalAssociate\')">Cancel</button>';
   renderBusinessPickResults('');
-  document.getElementById('modalAssociate').querySelector('h3').textContent = 'Associate with Business';
-  document.getElementById('modalAssociate').querySelector('.settings-help').textContent = 'A Contact can belong to one Business Entity at a time. Selecting a new one replaces any existing association.';
-  document.getElementById('associateSearch').oninput = function () { renderBusinessPickResults(this.value); };
   openModal('modalAssociate');
 }
 function renderBusinessPickResults(q) {
   q = (q || '').toLowerCase();
   const results = BUSINESSES.filter(b => bizDisplayLabel(b).toLowerCase().includes(q) || b.legal.toLowerCase().includes(q));
-  document.getElementById('associateResults').innerHTML = results.map(b =>
+  document.getElementById('businessPickResults').innerHTML = results.map(b =>
     '<div class="typeahead-result" onclick="pickBusinessForContact(\'' + b.id + '\')"><span>' + bizDisplayLabel(b) + '<br><span style="color:var(--gray-400); font-size:11.5px;">' + b.legal + '</span></span><span class="btn-link">Select</span></div>'
   ).join('') || '<div class="empty-state"><div class="empty-state-desc">No businesses match.</div></div>';
 }
 function pickBusinessForContact(bid) {
   const c = getContact(currentContactId);
   if (c.businessId) { const old = getBiz(c.businessId); old.contactIds = old.contactIds.filter(id => id !== c.id); }
+  c.primaryFor = null; // leaving any prior Primary designation behind with the old Business
+  const biz = getBiz(bid);
+  const becomesPrimary = biz.contactIds.length === 0; // first contact associated defaults to Primary
   c.businessId = bid;
-  getBiz(bid).contactIds.push(c.id);
+  biz.contactIds.push(c.id);
+  if (becomesPrimary) c.primaryFor = bid;
   closeModal('modalAssociate');
   renderContactBusinessCard(c);
-  toast(c.name + ' associated with ' + bizDisplayLabel(getBiz(bid)) + '.');
-  // reset associate modal back to default (business-profile) mode
-  document.getElementById('modalAssociate').querySelector('h3').textContent = 'Associate Contact';
-  document.getElementById('modalAssociate').querySelector('.settings-help').textContent = 'Only unassociated contacts are shown — a contact can belong to one Business at a time.';
-  document.getElementById('associateSearch').oninput = function () { renderAssociateResults(this.value); };
+  toast(c.name + ' associated with ' + bizDisplayLabel(biz) + (becomesPrimary ? ' as the Primary Contact.' : '.'));
 }
 
 /* ═══════════════════════════════════════════════
