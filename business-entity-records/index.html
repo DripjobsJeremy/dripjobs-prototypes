@@ -337,6 +337,13 @@
     padding: 2px 8px; border-radius: 999px; cursor: default; white-space: nowrap;
   }
 
+  /* ─── BR traceability chip (solid amber — distinct from the light assumption-flag) ─── */
+  #be-app .br-annotation-chip {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 800;
+    color: #fff; background: var(--amber); border: 1px solid #B45309;
+    padding: 3px 10px; border-radius: 999px; cursor: default; white-space: nowrap;
+  }
+
   /* ─── Profile header ─── */
   #be-app .profile-header { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 20px; margin-bottom: 18px; }
   #be-app .profile-header-top { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
@@ -404,6 +411,15 @@
     border-radius: 8px; margin-top: 8px; cursor: pointer; font-size: 13px;
   }
   #be-app .typeahead-result:hover { border-color: var(--purple); background: var(--purple-light); }
+
+  #be-app .ep-contact-dropdown {
+    display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 20;
+    background: #fff; border: 1px solid var(--gray-200); border-radius: 8px; box-shadow: var(--shadow-md);
+    max-height: 220px; overflow-y: auto; padding: 6px;
+  }
+  #be-app .ep-contact-dropdown.open { display: block; }
+  #be-app .ep-contact-dropdown .typeahead-result { margin-top: 0; }
+  #be-app .ep-contact-dropdown .typeahead-result + .typeahead-result { margin-top: 6px; }
 
   #be-app .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0;
@@ -1491,19 +1507,22 @@ const EP_CONFIG = {
   proposal: { title: 'New Proposal', step: 'Step 1 of 5', context: 'Same Business / Individual selector. The final summary step confirms "Create a new business record" before the entity is created on save.' },
   invoice: { title: 'Create Invoice', step: 'Step 1 of 3', context: '"Who is this invoice for?" — Individual Contact or Business.' }
 };
-let epState = { entry: 'lead', type: null, mode: null };
+let epState = { entry: 'lead', type: null, mode: null, businessId: null, contactId: null };
 function setEntryPoint(key) {
-  epState = { entry: key, type: null, mode: null };
+  epState = { entry: key, type: null, mode: null, businessId: null, contactId: null };
   document.querySelectorAll('.entry-points-nav .pill-toggle').forEach(b => b.classList.toggle('selected', b.dataset.ep === key));
   document.getElementById('epFrameTitle').textContent = EP_CONFIG[key].title;
   document.getElementById('epStepChip').textContent = EP_CONFIG[key].step;
   renderEpBody();
 }
-function epSelectType(type) { epState.type = type; epState.mode = null; renderEpBody(); }
-function epSelectMode(mode) { epState.mode = mode; renderEpBody(); }
+// Shared by all four entry-point tabs (New Lead / New Appointment / New Proposal / Create Invoice) —
+// switching type or Business mode always clears any in-progress Business + Contact selection.
+function epSelectType(type) { epState.type = type; epState.mode = null; epState.businessId = null; epState.contactId = null; renderEpBody(); }
+function epSelectMode(mode) { epState.mode = mode; epState.businessId = null; epState.contactId = null; renderEpBody(); }
 function renderEpBody() {
   const cfg = EP_CONFIG[epState.entry];
-  let html = '<p style="text-align:center; color:var(--gray-500); font-size:12.5px; max-width:460px; margin:0 auto 22px;">' + cfg.context + '</p>';
+  let html = '<div style="text-align:center; margin-bottom:12px;"><span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: Shared Business + Contact Selection">🔗 BR: Creation Flow – Shared Business + Contact Selection</span></div>';
+  html += '<p style="text-align:center; color:var(--gray-500); font-size:12.5px; max-width:460px; margin:0 auto 22px;">' + cfg.context + '</p>';
   html += '<div class="selector-2x2">' +
     '<div class="selector-card ' + (epState.type === 'individual' ? 'selected' : '') + '" onclick="epSelectType(\'individual\')"><div class="selector-icon">👤</div><div class="selector-label">Individual Customer</div></div>' +
     '<div class="selector-card ' + (epState.type === 'business' ? 'selected' : '') + '" onclick="epSelectType(\'business\')"><div class="selector-icon">🏢</div><div class="selector-label">Business</div></div>' +
@@ -1517,45 +1536,136 @@ function renderEpBody() {
       '<button class="pill-toggle ' + (epState.mode === 'new' ? 'selected' : '') + '" onclick="epSelectMode(\'new\')">New</button>' +
     '</div>';
     if (epState.mode === 'existing') {
-      html += '<div style="max-width:420px; margin:0 auto;">' +
-        '<div class="settings-field"><label class="settings-field-label">Search Businesses</label><input class="settings-field-input" placeholder="Start typing a business name..." oninput="renderEpExistingResults(this.value)"></div>' +
-        '<div id="epExistingResults"></div>' +
-        '<div class="settings-help" style="margin-top:8px;">Selecting an existing entity creates no duplicate record — it links directly.</div>' +
-      '</div>';
+      html += epExistingBlockHtml();
     } else if (epState.mode === 'new') {
       html += epNewFormHtml(epState.entry);
     }
   }
   document.getElementById('epFrameBody').innerHTML = html;
-  if (epState.type === 'business' && epState.mode === 'existing') renderEpExistingResults('');
+  if (epState.type === 'business' && epState.mode === 'existing' && !epState.businessId) renderEpBusinessResults('');
 }
-function renderEpExistingResults(q) {
+
+/* ─── Existing-Business + Contact hand-off (shared across all four tabs) ─── */
+function epExistingBlockHtml() {
+  if (!epState.businessId) {
+    return '<div style="max-width:420px; margin:0 auto;">' +
+      '<div class="settings-field"><label class="settings-field-label">Search Businesses</label><input class="settings-field-input" id="epBizSearchInput" placeholder="Start typing a business name..." oninput="renderEpBusinessResults(this.value)"></div>' +
+      '<div id="epExistingResults"></div>' +
+      '<div class="settings-help" style="margin-top:8px;">Selecting an existing entity creates no duplicate record — it links directly.</div>' +
+    '</div>';
+  }
+  const biz = getBiz(epState.businessId);
+  return '<div style="max-width:420px; margin:0 auto;">' +
+    '<div class="settings-field" style="margin-bottom:4px;">' +
+      '<label class="settings-field-label">Business</label>' +
+      '<div style="height:40px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; border:1px solid var(--st-color-border); border-radius:8px; background:var(--gray-50);">' +
+        '<span class="biz-pill" style="cursor:default; background:transparent; padding:0;"><span class="biz-pill-icon">' + bizAbbrev(biz) + '</span>' + bizDisplayLabel(biz) + '</span>' +
+        '<button type="button" class="btn-link" onclick="epClearBusiness()">Change</button>' +
+      '</div>' +
+    '</div>' +
+    epContactFieldHtml() +
+  '</div>';
+}
+function renderEpBusinessResults(q) {
   q = (q || '').toLowerCase();
   const el = document.getElementById('epExistingResults');
   if (!el) return;
   const results = BUSINESSES.filter(b => !q || bizDisplayLabel(b).toLowerCase().includes(q));
   el.innerHTML = results.slice(0, 5).map(b =>
-    '<div class="typeahead-result" onclick="toast(\'Linked to existing business: ' + bizDisplayLabel(b).replace(/'/g, "\\'") + '. No duplicate created.\')"><span>' + bizDisplayLabel(b) + '<br><span style="color:var(--gray-400); font-size:11.5px;">' + b.legal + '</span></span><span class="btn-link">Select</span></div>'
+    '<div class="typeahead-result" onclick="epSelectBusiness(\'' + b.id + '\')"><span>' + bizDisplayLabel(b) + '<br><span style="color:var(--gray-400); font-size:11.5px;">' + b.legal + '</span></span><span class="btn-link">Select</span></div>'
+  ).join('') || '<div class="empty-state"><div class="empty-state-desc">No businesses match.</div></div>';
+}
+function epSelectBusiness(bid) {
+  epState.businessId = bid;
+  const pc = primaryContactFor(getBiz(bid));
+  epState.contactId = pc ? pc.id : null; // auto-populate with the Business's Primary Contact
+  renderEpBody();
+}
+function epClearBusiness() {
+  epState.businessId = null;
+  epState.contactId = null;
+  renderEpBody();
+}
+function epContactFieldHtml() {
+  const biz = getBiz(epState.businessId);
+  const selected = epState.contactId ? getContact(epState.contactId) : null;
+  const bizLabel = bizDisplayLabel(biz).replace(/"/g, '&quot;');
+  return '<div class="settings-field" style="margin-top:14px; position:relative;">' +
+      '<label class="settings-field-label">Contact</label>' +
+      '<input class="settings-field-input" id="epContactInput" autocomplete="off" value="' + (selected ? selected.name.replace(/"/g, '&quot;') : '') + '" placeholder="Search ' + bizLabel + '\'s contacts..." oninput="epFilterContactDropdown(this.value)" onfocus="epOpenContactDropdown()" onblur="epScheduleCloseContactDropdown()">' +
+      '<div class="ep-contact-dropdown" id="epContactDropdown"></div>' +
+    '</div>' +
+    '<div class="settings-help" style="margin-top:6px;">Auto-populated with the ⭐ Primary Contact, editable. Only contacts associated with ' + bizLabel + ' are shown.</div>';
+}
+function epContactOptionsHtml(filterText) {
+  const biz = getBiz(epState.businessId);
+  if (!biz) return '';
+  const ft = (filterText || '').toLowerCase();
+  const contacts = biz.contactIds.map(getContact).filter(c => !ft || c.name.toLowerCase().includes(ft));
+  if (!contacts.length) return '<div class="empty-state" style="padding:14px;"><div class="empty-state-desc">No contacts match.</div></div>';
+  return contacts.map(c =>
+    '<div class="typeahead-result" onmousedown="epSelectContact(\'' + c.id + '\')"><span>' + (c.primaryFor === biz.id ? '⭐ ' : '') + c.name + '<br><span style="color:var(--gray-400); font-size:11.5px;">' + (c.role || 'Contact') + '</span></span></div>'
   ).join('');
 }
+function epOpenContactDropdown() {
+  const dd = document.getElementById('epContactDropdown');
+  if (!dd) return;
+  dd.innerHTML = epContactOptionsHtml('');
+  dd.classList.add('open');
+}
+function epFilterContactDropdown(v) {
+  const dd = document.getElementById('epContactDropdown');
+  if (!dd) return;
+  dd.innerHTML = epContactOptionsHtml(v);
+  dd.classList.add('open');
+}
+let epContactBlurTimer;
+function epScheduleCloseContactDropdown() {
+  clearTimeout(epContactBlurTimer);
+  epContactBlurTimer = setTimeout(() => {
+    const dd = document.getElementById('epContactDropdown');
+    if (dd) dd.classList.remove('open');
+  }, 150);
+}
+function epSelectContact(cid) {
+  clearTimeout(epContactBlurTimer);
+  epState.contactId = cid;
+  const input = document.getElementById('epContactInput');
+  const dd = document.getElementById('epContactDropdown');
+  if (input) input.value = getContact(cid).name;
+  if (dd) dd.classList.remove('open');
+}
+
 function epNewFormHtml(entry) {
-  if (entry === 'lead' || entry === 'appt') {
+  // When Business = New, Contact defaults to "New (create alongside)" — shared across tabs that don't
+  // otherwise collect a contact explicitly (New Appointment already requires its own Primary Contact field).
+  const contactDefaultRow = '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label">Contact</label><input class="settings-field-input" value="New (create alongside)" disabled></div>';
+  if (entry === 'lead') {
     return '<div style="max-width:420px; margin:0 auto;">' +
       '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Business Name</label><input class="settings-field-input" placeholder="e.g. Acme Painting"></div>' +
-      (entry === 'appt' ? '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Primary Contact</label><input class="settings-field-input" placeholder="Search or add a contact..."></div>' :
-        '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label">Address</label><input class="settings-field-input" placeholder="Street, City, State, ZIP"></div>') +
+      contactDefaultRow +
+      '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label">Address</label><input class="settings-field-input" placeholder="Street, City, State, ZIP"></div>' +
+      '<button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="toast(\'Business Entity record created on save.\')">Continue</button>' +
+    '</div>';
+  }
+  if (entry === 'appt') {
+    return '<div style="max-width:420px; margin:0 auto;">' +
+      '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Business Name</label><input class="settings-field-input" placeholder="e.g. Acme Painting"></div>' +
+      '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Primary Contact</label><input class="settings-field-input" placeholder="Search or add a contact..."></div>' +
       '<button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="toast(\'Business Entity record created on save.\')">Continue</button>' +
     '</div>';
   }
   if (entry === 'proposal') {
     return '<div style="max-width:420px; margin:0 auto;">' +
       '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Business Name</label><input class="settings-field-input" placeholder="e.g. Acme Painting"></div>' +
+      contactDefaultRow +
       '<div class="settings-alert settings-alert--success" style="margin-bottom:0;"><div class="settings-alert-icon">✅</div><div><div class="settings-alert-title">Final Summary Step</div><div>"Create a new business record" — the entity is created when the proposal is saved.</div></div></div>' +
     '</div>';
   }
   if (entry === 'invoice') {
     return '<div style="max-width:420px; margin:0 auto;">' +
       '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Business Name</label><input class="settings-field-input" placeholder="e.g. Acme Painting"></div>' +
+      contactDefaultRow +
       '<button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="toast(\'Business Entity record created on invoice save.\')">Continue</button>' +
     '</div>';
   }

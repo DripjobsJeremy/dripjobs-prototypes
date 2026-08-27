@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-27] Business Entity Records V1, Phase 1: Creation Flow Business+Contact selector
+
+- Decision: Made the Business/Individual selector in `business-entity-records/index.html`'s Creation Entry Points section fully interactive for the Existing-Business path, shared across all four tabs (New Lead, New Appointment, New Proposal, Create Invoice) via one function set (`epState` + `renderEpBody` + `epSelectBusiness`/`epContactFieldHtml`/etc.), per BR "Creation Flow: Shared Business + Contact Selection" (ticket 86bbhhhqd). Selecting an existing Business auto-populates Contact with that Business's ⭐ Primary Contact (editable), the Contact dropdown filters to only that Business's associated contacts, and switching Business mode (Existing/New/None) clears the Contact selection. Business = New shows a disabled "Contact: New (create alongside)" field on the Lead/Proposal/Invoice tabs (Appointment keeps its own required Primary Contact field, unchanged). Added a solid-amber "BR" traceability chip distinct from the existing light-amber "Assumption" flag, since this marks a confirmed implemented BR rather than an open PRD question.
+- Why: Phase 1 of the six-phase prototype extension plan — this is the core interaction the rest of the epic (address sourcing, appointment specifics, proposal confirmation, live-sync) hinges on, and the ticket calls out that the shared selector should not be four separate copies.
+- Open question: None for this phase. New Business modal, Delete modal, and Associate Contact modal were explicitly out of scope and untouched.
+
 ## [2026-08-25] Know Your Numbers webinar recap, New vs. Returning Customer definitions
 
 - Decision: Added a "What counts as New vs. Returning?" two-card definition block to the Conversions & Volume slide (slide 7), directly below the Appointments metric card, using Jeremy's exact wording for New Customer (Contact creation date falls inside the selected period) and Returning Customer (Contact creation date falls before the selected period).
