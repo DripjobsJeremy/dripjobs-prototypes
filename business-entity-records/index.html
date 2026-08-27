@@ -1621,7 +1621,8 @@ function epClearIndividualContact() { epState.contactId = null; renderEpBody(); 
 /* ─── New Appointment specifics: Event Type, Default Duration, On-Site/Virtual location (shared
    by the Business Project and Personal Project branches — appt-only, not shown on New Proposal). ─── */
 function epAddressOrApptExtrasHtml(sourceType, entity) {
-  return epState.entry === 'appt' ? epApptExtrasHtml(sourceType, entity) : epJobAddressHtml(sourceType, entity);
+  const stepHtml = epState.entry === 'appt' ? epApptExtrasHtml(sourceType, entity) : epJobAddressHtml(sourceType, entity);
+  return stepHtml + epReadyToCreateHtml(sourceType, entity);
 }
 function epApptExtrasHtml(sourceType, entity) {
   let html = '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
@@ -1701,6 +1702,60 @@ function epJobAddressHtml(sourceType, entity) {
     (sourceType === 'business' ? '<div class="settings-alert settings-alert--info" style="margin-top:14px; margin-bottom:0;"><div class="settings-alert-icon">ℹ️</div><div>The Business’s <strong>Billing Address</strong> is never offered here — it’s used for invoicing only, never for a Job or Appointment.</div></div>' : '') +
   '</div>';
 }
+
+/* ─── "Ready to Create" confirmation step — shared, identical component, by New Appointment and
+   New Proposal (ported from Appointment to Proposal per BR item 4). Enable Reminders toggle,
+   Email/SMS/Both notify-method pills, and a summary box are the same markup/interaction in both
+   flows; only the summary rows differ (appointment fields vs. proposal fields). ─── */
+function epReadyToCreateHtml(sourceType, entity) {
+  const contact = epState.contactId ? getContact(epState.contactId) : null;
+  const rows = [];
+  if (sourceType === 'business') {
+    rows.push({ label: 'Business', value: bizDisplayLabel(entity) });
+    rows.push({ label: 'Contact', value: contact ? contact.name : '—' });
+  } else {
+    rows.push({ label: 'Contact', value: entity.name });
+  }
+  if (epState.entry === 'appt') {
+    const et = EVENT_TYPES.find(e => e.key === epState.eventType);
+    rows.push({ label: 'Event Type', value: et ? et.label : '—' });
+    rows.push({ label: 'Duration', value: (epState.duration || epState.duration === 0) ? (epState.duration + ' min') : '—' });
+    rows.push({ label: 'Location', value: epState.locationType === 'virtual' ? ('Virtual — ' + epState.platform) : 'On-Site' });
+  } else if (epState.entry === 'proposal') {
+    const addr = entity.address;
+    rows.push({ label: 'Job Address', value: (addr && addr.street) ? (addr.street + ', ' + addr.city + ', ' + addr.state + ' ' + addr.zip) : 'No address on file yet' });
+    rows.push({ label: 'Line Item', value: 'Exterior Repaint — West Wing' });
+    rows.push({ label: 'Proposal Total', value: '$18,400.00' });
+  }
+  const rowsHtml = rows.map(r =>
+    '<div style="display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--gray-100); font-size:12.5px;">' +
+      '<span style="color:var(--gray-500); font-weight:700;">' + r.label + '</span>' +
+      '<span style="color:var(--gray-800); font-weight:700; text-align:right;">' + r.value + '</span>' +
+    '</div>'
+  ).join('');
+  return '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
+    '<div class="settings-section-title">Ready to Create <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: Contact Info, Appointments, and Confirmation, item 4">🔗 BR: Ready to Create Confirmation</span></div>' +
+    '<div class="settings-section-subtitle">Same confirmation component as New Appointment — final review before this record is created.</div>' +
+    rowsHtml +
+    '<div class="settings-toggle-row" style="margin-top:16px;">' +
+      '<label class="switch"><input type="checkbox" checked><span class="switch-track"></span></label>' +
+      '<span class="settings-toggle-label">Enable Reminders</span>' +
+    '</div>' +
+    '<div class="selector-sub-row" style="margin:14px 0 4px; max-width:none; justify-content:flex-start;">' +
+      '<button type="button" class="pill-toggle selected" onclick="epSelectNotifyMethod(this)">Email</button>' +
+      '<button type="button" class="pill-toggle" onclick="epSelectNotifyMethod(this)">SMS</button>' +
+      '<button type="button" class="pill-toggle" onclick="epSelectNotifyMethod(this)">Both</button>' +
+    '</div>' +
+    '<div class="settings-alert settings-alert--success" style="margin-top:16px; margin-bottom:0;">' +
+      '<div class="settings-alert-icon">✅</div>' +
+      '<div><div class="settings-alert-title">Ready to create</div><div>Review the summary above, then save to create this record.</div></div>' +
+    '</div>' +
+  '</div>';
+}
+function epSelectNotifyMethod(btn) {
+  btn.parentElement.querySelectorAll('.pill-toggle').forEach(b => b.classList.toggle('selected', b === btn));
+}
+
 function renderEpBusinessResults(q) {
   q = (q || '').toLowerCase();
   const el = document.getElementById('epExistingResults');
