@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-28] Business Entity Records V1: "Entry Points" link upgraded to a real button
+
+- Decision: Replaced the "Creation Entry Points →" underlined text link in the Businesses page's "New in V1" banner with a solid `btn btn-primary` button labeled "Entry Points →", reusing the same trailing-action position (right-aligned, vertically centered in the alert). Removed the now-unused `.settings-alert-action` link styling.
+- Why: Jeremy asked for a more visible way to reach Creation Entry Points than a text link.
+- Open question: none.
+
 ## [2026-08-28] Business Entity Records V1: "Business > New" can associate an existing Contact, not just create one
 
 - Decision: Added an Existing/New Contact toggle to the "Business > New" step across all four Creation Entry Points. Existing pulls from the same unassociated-contacts pool as the Business Profile's Associate Contact modal (a contact can only belong to one Business at a time); selecting one associates it to the new Business and makes it Primary on Save, same rule as creating a brand-new contact. New keeps the typed Name/Phone/Email fields from the previous pass.
