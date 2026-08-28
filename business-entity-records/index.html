@@ -1980,13 +1980,20 @@ function getEventColor(key) { return EVENT_COLORS.find(c => c.key === key) || nu
 // New Proposal specifics — Proposal Template list, Lead Source list, and Salesperson/Project Manager
 // roster are this prototype's own reasonable placeholders (not sourced from a screenshot), flagged
 // in the decision log. Proposal Template options ARE from the reference screenshot.
+// "total" is only ever populated for a template with one fixed, known price. Blank and every
+// template built from Packages/optional items has no total until those are built out — none of
+// that pricing/package-building UI exists in this prototype, so every template here starts at
+// null (Proposal Total shows "—") pending real per-template pricing data.
 const EP_PROPOSAL_TEMPLATES = [
-  { key: 'blank', label: 'Blank' },
-  { key: 'cmc-ext-standard', label: 'CMC Exterior — Standard (Default)' },
-  { key: 'cmc-int-brand-ambassador', label: 'CMC Interior — BRAND-AMBASSADOR' },
-  { key: 'cmc-int-standard', label: 'CMC Interior — Standard' },
-  { key: 'ext-paint-pressure-wash', label: 'EXT Paint + Pressure Wash' }
+  { key: 'blank', label: 'Blank', total: null },
+  { key: 'cmc-ext-standard', label: 'CMC Exterior — Standard (Default)', total: null },
+  { key: 'cmc-int-brand-ambassador', label: 'CMC Interior — BRAND-AMBASSADOR', total: null },
+  { key: 'cmc-int-standard', label: 'CMC Interior — Standard', total: null },
+  { key: 'ext-paint-pressure-wash', label: 'EXT Paint + Pressure Wash', total: null }
 ];
+function fmtProposalTotal(tmpl) {
+  return (tmpl && tmpl.total != null) ? ('$' + tmpl.total.toLocaleString('en-US', { minimumFractionDigits: 2 })) : '—';
+}
 const EP_LEAD_SOURCES = [
   { key: 'google', label: 'Google Search' },
   { key: 'referral', label: 'Referral' },
@@ -2483,8 +2490,7 @@ function epReadyToCreateHtml(sourceType, entity) {
     rows.push({ label: 'Salesperson', value: epState.salesperson || '—' });
     rows.push({ label: 'Project Manager', value: epState.projectManager || '—' });
     rows.push({ label: 'Drips', value: epState.disableDrips ? 'Disabled' : 'Enabled' });
-    rows.push({ label: 'Line Item', value: 'Exterior Repaint — West Wing' });
-    rows.push({ label: 'Proposal Total', value: '$18,400.00' });
+    rows.push({ label: 'Proposal Total', value: fmtProposalTotal(tmpl) });
   }
   const rowsHtml = rows.map(r =>
     '<div style="display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--gray-100); font-size:12.5px;">' +
@@ -2642,8 +2648,9 @@ function pushEpRecordOntoBusiness(biz, contact) {
     const tmpl = EP_PROPOSAL_TEMPLATES.find(t => t.key === epState.proposalTemplate);
     const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
     const dealTitle = epState.dealName || ('New Deal — ' + bizDisplayLabel(biz));
-    biz.deals.push({ title: dealTitle, sub: 'Stage: Proposal Sent' + (src ? ' · Lead Source: ' + src.label : ''), meta: '$18,400.00', via });
-    biz.proposals.push({ title: 'Proposal — ' + dealTitle, sub: 'Sent · Template: ' + (tmpl ? tmpl.label : 'Blank'), meta: '$18,400.00', via });
+    const total = fmtProposalTotal(tmpl);
+    biz.deals.push({ title: dealTitle, sub: 'Stage: Proposal Sent' + (src ? ' · Lead Source: ' + src.label : ''), meta: total, via });
+    biz.proposals.push({ title: 'Proposal — ' + dealTitle, sub: 'Sent · Template: ' + (tmpl ? tmpl.label : 'Blank'), meta: total, via });
   } else if (epState.entry === 'invoice') {
     const num = 'INV-' + (nextInvoiceNo++);
     const due = new Date(PROTO_TODAY);
