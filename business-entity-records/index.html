@@ -586,6 +586,8 @@
 
   #be-app .activity-row { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--gray-100); }
   #be-app .activity-row:last-child { border-bottom: none; }
+  #be-app .activity-row.clickable { cursor: pointer; margin: 0 -10px; padding: 12px 10px; border-radius: 8px; }
+  #be-app .activity-row.clickable:hover { background: var(--purple-light); }
   #be-app .activity-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--gray-100); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
   #be-app .activity-title { font-size: 13px; font-weight: 700; color: var(--gray-800); }
   #be-app .activity-sub { font-size: 12px; color: var(--gray-500); margin-top: 1px; }
@@ -1627,8 +1629,10 @@ const SNAPSHOT_TABS_LABEL = { deals: 'Deals', proposals: 'Proposals', appointmen
 const FASTFOLLOW_CANDIDATE_TABS = ['appointments', 'invoices', 'payments']; // Deals + Proposals are V1-confirmed, left out of this list on purpose
 function dataTabHtml(key, biz) {
   const rows = biz[key] || [];
-  const rowsHtml = rows.map(r =>
-    '<div class="activity-row">' +
+  // Only records started "for a Business" (a Business Project) ever land in biz[key] — a Personal
+  // Project record belonging only to an associated Contact is never pushed here. See pushEpRecordOntoBusiness.
+  const rowsHtml = rows.map((r, i) =>
+    '<div class="activity-row clickable" onclick="openRecordDetail(\'' + biz.id + '\', \'' + key + '\', ' + i + ')">' +
       '<div class="activity-icon">' + ({ deals: '📈', proposals: '📋', appointments: '📅', invoices: '🧾', payments: '💰' }[key]) + '</div>' +
       '<div style="flex:1;">' +
         '<div class="activity-title">' + (r.color ? '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:' + r.color + '; margin-right:6px;"></span>' : '') + r.title + '</div>' +
@@ -1636,7 +1640,7 @@ function dataTabHtml(key, biz) {
       '</div>' +
       '<div style="font-weight:800; color:var(--gray-800);">' + r.meta + '</div>' +
     '</div>'
-  ).join('') || '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-title">Nothing yet</div><div class="empty-state-desc">' + SNAPSHOT_TABS_LABEL[key] + ' from associated contacts will appear here.</div></div>';
+  ).join('') || '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-title">Nothing yet</div><div class="empty-state-desc">' + SNAPSHOT_TABS_LABEL[key] + ' created for this Business will appear here.</div></div>';
 
   const fastFollowNote = FASTFOLLOW_CANDIDATE_TABS.includes(key) ?
     '<div class="settings-alert settings-alert--neutral" style="margin-bottom:10px;">' +
@@ -1648,8 +1652,15 @@ function dataTabHtml(key, biz) {
   return fastFollowNote + '<div class="settings-alert settings-alert--warn">' +
       '<div class="settings-alert-icon">⚠️</div>' +
       '<div><div class="settings-alert-title">Open Item #1 — pending Jason</div>' +
-      '<div>This tab aggregates ' + SNAPSHOT_TABS_LABEL[key].toLowerCase() + ' across every contact associated with this business. Whether that requires new backend query logic (vs. reusing existing contact-level calls) is unconfirmed — this tab may ship with real data in V1 or land as "coming soon" in a fast-follow. Rows shown display each record\'s point-in-time contact snapshot, not the contact\'s current Primary info.</div></div>' +
+      '<div>This tab shows ' + SNAPSHOT_TABS_LABEL[key].toLowerCase() + ' created directly for this Business (a Business Project) — not personal records belonging only to an associated Contact. Whether surfacing these requires new backend query logic is unconfirmed — this tab may ship with real data in V1 or land as "coming soon" in a fast-follow. Rows shown display each record\'s point-in-time contact snapshot, not the contact\'s current Primary info. Click a row to open that record, same as opening it from a Contact today.</div></div>' +
     '</div>' + rowsHtml;
+}
+function openRecordDetail(bizId, key, idx) {
+  const biz = getBiz(bizId);
+  const r = (biz && biz[key] || [])[idx];
+  if (!r) return;
+  const singular = SNAPSHOT_TABS_LABEL[key].slice(0, -1);
+  toast('Opens ' + singular + ' "' + r.title + '" — same destination as opening it from a Contact today (not modeled in this prototype).');
 }
 
 function callHistoryHtml(biz) {
