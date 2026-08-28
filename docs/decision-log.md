@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-28] Weekly refresh: Product Roadmap re-scoped to Active Triage only, Weekly Product Update drafted from ClickUp
+
+- Decision: Narrowed the DripJobs Product Roadmap's data source from Active Triage + Airport Parking + Development V1 (Active Development) down to Active Triage only, per Jeremy's direction. The 8 dev-pipeline lanes (Ready for Dev through Branch Ready) are gone since that data no longer lives in scope; the board is now 6 lanes (New, Needs PM Analysis, Needs Design, In Review, Triage, Sent to Dev) plus the On Hold/Parked exception lane, still filtered to 🎯/🎯 focus tags (33 tickets). Rebuilt the Weekly Product Update (Aug 24-28, 2026) from the 13 ClickUp tickets marked "Pushed to Production" in DripJobs Development V1 for that week (release-2026-08-26 and release-2026-08-27 tags), drafting What Changed/Why It Matters/Action Needed copy from each ticket's ClickUp description. Added a new "Contacts" and "Admin Tools" section to the Weekly Product Update template since this week's shipped work didn't fit the existing category set.
+- Why: Direct request from Jeremy to tighten the roadmap's scope to just the list he's actively triaging, and to source the weekly update from ClickUp's Pushed to Production tickets rather than hand-authoring it from scratch.
+- Open question: The Weekly Product Update copy was drafted from ticket descriptions, not reviewed by Jeremy before publishing; worth a quick pass to confirm the What Changed/Why It Matters framing reads right before this goes out externally.
+
 ## [2026-08-28] Business Entity Records V1: data tabs scoped to Business Projects, rows clickable
 
 - Decision: Confirmed and documented (no data-model change needed) that a Business Profile's Deals/Proposals/Appointments/Invoices/Payments tabs only ever show records started "for a Business" — `pushEpRecordOntoBusiness()` is the only writer to those arrays, and it's only reachable from the Business Project save path, never the Personal Project one, so a Contact's personal record was never leaking in. Updated the tab's Open Item #1 copy and empty-state text to say this explicitly (previously worded as "aggregates across every contact," which read as including personal records too). Made every row in those five tabs clickable (`openRecordDetail`), matching the request that clicking a record here should behave like opening it from a Contact today.
