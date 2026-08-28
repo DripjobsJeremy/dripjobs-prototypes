@@ -488,6 +488,7 @@
     z-index: 1000; transition: all 0.2s; display: flex; align-items: center; gap: 8px; pointer-events: none;
   }
   #be-app .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #be-app .toast.toast-success { background: var(--green); }
 
   #be-app .empty-state { text-align: center; padding: 40px 20px; color: var(--gray-400); }
   #be-app .empty-state-icon { font-size: 28px; margin-bottom: 8px; }
@@ -1035,8 +1036,15 @@ function bizAbbrev(biz) {
   return (words.slice(0, 2).map(w => w[0]).join('') || 'B').toUpperCase();
 }
 function bizDisplayLabel(biz) { return (biz.dba && biz.dba.trim()) ? biz.dba : biz.legal; }
+function fmtPhone(v) {
+  if (!v) return v;
+  let digits = v.replace(/\D/g, '');
+  if (digits.length === 11 && digits[0] === '1') digits = digits.slice(1);
+  if (digits.length !== 10) return v; // not a clean 10-digit US number — leave as-is rather than mangle it
+  return '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6);
+}
 function primaryEmail(biz) { return biz.email || '—'; }
-function primaryPhone(biz) { return biz.phone || '—'; }
+function primaryPhone(biz) { return biz.phone ? fmtPhone(biz.phone) : '—'; }
 function primaryContactFor(biz) { const id = biz.contactIds.find(cid => { const c = getContact(cid); return c && c.primaryFor === biz.id; }); return id ? getContact(id) : (biz.contactIds[0] ? getContact(biz.contactIds[0]) : null); }
 
 /* ═══════════════════════════════════════════════
@@ -1061,8 +1069,10 @@ function showView(name) {
 
   if (name === 'businesses') {
     topLeft.innerHTML = '<span class="page-title">Businesses</span>';
+    filterBusinesses(); // re-render with current data — associations/edits made elsewhere must not go stale on return
   } else if (name === 'contacts') {
     topLeft.innerHTML = '<span class="page-title">Contacts</span>';
+    filterContacts(); // same — the Business column/filter must reflect the latest associations
   } else if (name === 'entrypoints') {
     topLeft.innerHTML = '<span class="breadcrumb-link" onclick="showView(\'businesses\')">Businesses</span><span class="breadcrumb-sep">/</span><span class="page-title" style="font-size:15px;">Creation Entry Points</span>';
   } else if (name === 'business-profile') {
@@ -1200,7 +1210,9 @@ function renderTabContent(key) {
 function infoTabHtml(biz) {
   const billing = biz.billingSame ? biz.address : biz.billingAddress;
   const canReassignPrimary = biz.contactIds.length > 1;
-  const contactRows = biz.contactIds.map(cid => {
+  // Primary Contact always sorts to the top — reordering on demand when the designation changes.
+  const orderedContactIds = [...biz.contactIds].sort((a, b) => (getContact(b).primaryFor === biz.id) - (getContact(a).primaryFor === biz.id));
+  const contactRows = orderedContactIds.map(cid => {
     const c = getContact(cid);
     const isPrimary = c.primaryFor === biz.id;
     return '<div class="activity-row">' +
@@ -1223,7 +1235,7 @@ function infoTabHtml(biz) {
         '<div class="settings-field settings-field--half"><label class="settings-field-label">Industry</label><input class="settings-field-input" value="' + biz.industry + '" disabled></div>' +
         '<div class="settings-field settings-field--half"><label class="settings-field-label">Display DBA on Documents</label><input class="settings-field-input" value="' + (biz.displayDba ? 'Enabled' : 'Disabled') + '" disabled></div>' +
         '<div class="settings-field settings-field--half"><label class="settings-field-label">Email</label><input class="settings-field-input" value="' + (biz.email || '—') + '" disabled></div>' +
-        '<div class="settings-field settings-field--half"><label class="settings-field-label">Phone</label><input class="settings-field-input" value="' + (biz.phone || '—') + '" disabled></div>' +
+        '<div class="settings-field settings-field--half"><label class="settings-field-label">Phone</label><input class="settings-field-input" value="' + (biz.phone ? fmtPhone(biz.phone) : '—') + '" disabled></div>' +
       '</div>' +
       '<div class="settings-help">A Business Entity has exactly one Email, Phone, Address, and Billing Address on file — edit via Edit Business.</div>' +
     '</div>' +
@@ -1524,7 +1536,7 @@ function makeContactPrimary(cid) {
   biz.contactIds.forEach(id => { const c = getContact(id); if (c.primaryFor === biz.id) c.primaryFor = null; });
   const c = getContact(cid);
   c.primaryFor = biz.id;
-  toast(c.name + ' is now the Primary Contact for ' + bizDisplayLabel(biz) + '.');
+  toast('✓ ' + c.name + ' is now the Primary Contact for ' + bizDisplayLabel(biz) + '.', 'success');
   renderProfileHeader(biz);
   document.getElementById('panel-information').dataset.rendered = ''; renderTabContent('information');
 }
@@ -2097,9 +2109,10 @@ function toggleGuide(open) {
   document.getElementById('guidePanel').classList.toggle('open', open);
 }
 let toastTimer;
-function toast(msg) {
+function toast(msg, variant) {
   let t = document.getElementById('protoToast');
-  if (!t) { t = document.createElement('div'); t.id = 'protoToast'; t.className = 'toast'; document.body.appendChild(t); }
+  if (!t) { t = document.createElement('div'); t.id = 'protoToast'; document.getElementById('be-app').appendChild(t); }
+  t.className = 'toast' + (variant ? ' toast-' + variant : '');
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastTimer);
@@ -2127,6 +2140,13 @@ renderBusinessesTable();
 renderContactsTable();
 setEntryPoint('lead');
 document.querySelector('.sidebar-item[data-nav="businesses"]').classList.add('active');
+document.querySelectorAll('.formatted-phone-no').forEach(el => el.addEventListener('input', () => {
+  const digits = el.value.replace(/\D/g, '').slice(0, 10);
+  el.value = digits.length > 6 ? '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6)
+    : digits.length > 3 ? '(' + digits.slice(0, 3) + ') ' + digits.slice(3)
+    : digits.length > 0 ? '(' + digits
+    : '';
+}));
 </script>
 
 </body>
