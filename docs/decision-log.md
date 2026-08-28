@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-28] Business Entity Records V1: data tabs scoped to Business Projects, rows clickable
+
+- Decision: Confirmed and documented (no data-model change needed) that a Business Profile's Deals/Proposals/Appointments/Invoices/Payments tabs only ever show records started "for a Business" — `pushEpRecordOntoBusiness()` is the only writer to those arrays, and it's only reachable from the Business Project save path, never the Personal Project one, so a Contact's personal record was never leaking in. Updated the tab's Open Item #1 copy and empty-state text to say this explicitly (previously worded as "aggregates across every contact," which read as including personal records too). Made every row in those five tabs clickable (`openRecordDetail`), matching the request that clicking a record here should behave like opening it from a Contact today.
+- Why: Jeremy asked to confirm the Business-only scoping and add click-through on these rows.
+- Open question: There's no real Deal/Proposal/Appointment/Invoice/Payment detail page anywhere in this prototype (the Contact profile doesn't have these tabs either, so there was nothing to mirror directly), so a click currently shows a toast naming the record rather than navigating anywhere real. Flagging in case an actual destination (even a simple read-only detail modal) is wanted for a future pass.
+
 ## [2026-08-28] Business Entity Records V1: Contacts list rebuilt to match production
 
 - Decision: Rebuilt the Contacts list from its old 5-column, no-sort/no-pagination shape to match the real production Contact List, per Jeremy's screenshot. New column set: Customer, Business (additive, BR12), Email, Phone, Type, Source, Address, Salesperson, Balance, Created Date. Added a "Contact List (N contacts)" heading with decorative Bulk Actions/Import/Export/+Add Contact buttons, sortable column headers with hover-reveal arrows and pagination (mirroring the Businesses list's exact mechanics), and Type/Source/Salesperson filter dropdowns populated dynamically from whatever values exist on the seed data. Show Archived is built as a toggle switch (not the checkbox shown in the current production screenshot), since the ticket's own UX note calls for it to become a toggle once "Show Business" ships alongside it — this rebuild is the base those two toggles sit on. Added `type`/`source`/`salesperson`/`balance`/`createdAt` to all 12 seed contacts as placeholder demo values so the new columns have something to show, sort, and filter by.
