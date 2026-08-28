@@ -555,6 +555,17 @@
   #be-app .ep-time-option:hover { background: var(--purple-light); }
   #be-app .ep-time-option.selected { background: var(--purple); color: #fff; }
 
+  /* ─── New Appointment Communication block — each concern gets its own row with room to breathe,
+     wrapping to a single column on narrow viewports instead of squeezing everything onto one line. ─── */
+  #be-app .ep-comm-toggles { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; row-gap: 12px; }
+  #be-app .ep-comm-toggle { display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 700; color: var(--gray-600); white-space: nowrap; }
+  #be-app .ep-comm-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; row-gap: 14px; }
+  #be-app .ep-comm-row > .settings-field { flex: 1; min-width: 200px; margin-bottom: 0; }
+  @media (max-width: 520px) {
+    #be-app .ep-comm-row { flex-direction: column; align-items: stretch; }
+    #be-app .ep-comm-toggle { flex: 1 1 auto; }
+  }
+
   #be-app .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0;
     background: var(--gray-900); color: #fff; padding: 11px 20px; border-radius: 10px; font-size: 13px; font-weight: 700;
@@ -2047,14 +2058,14 @@ function renderEpBody() {
 /* ─── Existing-Business + Contact hand-off (shared across all four tabs) ─── */
 function epExistingBlockHtml() {
   if (!epState.businessId) {
-    return '<div style="max-width:420px; margin:0 auto;">' +
+    return '<div style="max-width:640px; margin:0 auto;">' +
       '<div class="settings-field"><label class="settings-field-label">Search Businesses</label><input class="settings-field-input" id="epBizSearchInput" placeholder="Start typing a business name..." oninput="renderEpBusinessResults(this.value)"></div>' +
       '<div id="epExistingResults"></div>' +
       '<div class="settings-help" style="margin-top:8px;">Selecting an existing entity creates no duplicate record — it links directly.</div>' +
     '</div>';
   }
   const biz = getBiz(epState.businessId);
-  return '<div style="max-width:420px; margin:0 auto;">' +
+  return '<div style="max-width:640px; margin:0 auto;">' +
     '<div class="settings-field" style="margin-bottom:4px;">' +
       '<label class="settings-field-label">Business</label>' +
       '<div style="height:40px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; border:1px solid var(--st-color-border); border-radius:8px; background:var(--gray-50);">' +
@@ -2070,13 +2081,13 @@ function epExistingBlockHtml() {
 /* ─── Individual Customer + Contact hand-off (Proposal / Appointment tabs only, Personal Project) ─── */
 function epIndividualBlockHtml() {
   if (!epState.contactId) {
-    return '<div style="max-width:420px; margin:0 auto;">' +
+    return '<div style="max-width:640px; margin:0 auto;">' +
       '<div class="settings-field"><label class="settings-field-label">Search Contacts</label><input class="settings-field-input" id="epIndividualSearchInput" placeholder="Start typing a contact name..." oninput="renderEpIndividualResults(this.value)"></div>' +
       '<div id="epIndividualResults"></div>' +
     '</div>';
   }
   const c = getContact(epState.contactId);
-  return '<div style="max-width:420px; margin:0 auto;">' +
+  return '<div style="max-width:640px; margin:0 auto;">' +
     '<div class="settings-field" style="margin-bottom:4px;">' +
       '<label class="settings-field-label">Contact</label>' +
       '<div style="height:40px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; border:1px solid var(--st-color-border); border-radius:8px; background:var(--gray-50);">' +
@@ -2168,7 +2179,10 @@ function epApptExtrasHtml(sourceType, entity) {
       epScheduleFieldsHtml() +
     '</div>';
   html += epState.locationType === 'virtual'
-    ? '<div style="max-width:420px; margin:0 auto 4px;">' + epPlatformSelectHtml() + '</div>'
+    ? '<div class="settings-section" style="margin-top:18px; margin-bottom:0; text-align:left;">' +
+        '<div class="settings-section-title">Virtual Meeting Details</div>' +
+        epPlatformSelectHtml() +
+      '</div>'
     : epJobAddressHtml(sourceType, entity);
   return html;
 }
@@ -2515,32 +2529,28 @@ function epCommunicationHtml() {
     ' for {appointment-time} on {appointment-date} at {appointment-location} with {salesperson-name}. Please let us know if you have any questions or need to make changes! Thank you! - {company-name}';
   const dealStage = et ? (et.label + ' Scheduled') : 'Scheduled';
   return '<div class="settings-section" style="margin-top:18px; margin-bottom:0; text-align:left;">' +
-      '<div class="settings-section-title">' +
-        '<span>✉️ Communication</span>' +
-        '<div style="display:flex; align-items:center; gap:16px; font-size:12px; font-weight:700; color:var(--gray-600);">' +
-          '<span style="display:flex; align-items:center; gap:8px;">Send Email <label class="switch"><input type="checkbox" ' + (epState.sendEmail ? 'checked' : '') + ' onchange="epState.sendEmail = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
-          '<span style="display:flex; align-items:center; gap:8px;">Send SMS <label class="switch"><input type="checkbox" ' + (epState.sendSms ? 'checked' : '') + ' onchange="epState.sendSms = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
-        '</div>' +
+      '<div class="settings-section-title" style="margin-bottom:16px;"><span>✉️ Communication</span></div>' +
+      '<div class="ep-comm-toggles" style="margin-bottom:20px;">' +
+        '<span class="ep-comm-toggle">Send Email <label class="switch"><input type="checkbox" ' + (epState.sendEmail ? 'checked' : '') + ' onchange="epState.sendEmail = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
+        '<span class="ep-comm-toggle">Send SMS <label class="switch"><input type="checkbox" ' + (epState.sendSms ? 'checked' : '') + ' onchange="epState.sendSms = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
       '</div>' +
-      '<div style="display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-top:12px;">' +
-        '<div class="settings-field" style="flex:1; margin-bottom:0;">' +
+      '<div class="ep-comm-row">' +
+        '<div class="settings-field">' +
           '<label class="settings-field-label">Drip Sequence <span title="The sequence of automated messages sent around this appointment." style="cursor:help;">ⓘ</span></label>' +
           '<select class="select2" onchange="epState.dripSequence = this.value; renderEpBody();">' +
             EP_DRIP_SEQUENCES.map(d => '<option value="' + d.key + '"' + (epState.dripSequence === d.key ? ' selected' : '') + '>' + d.label + '</option>').join('') +
           '</select>' +
         '</div>' +
-        '<div style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:var(--gray-600); padding-bottom:10px; white-space:nowrap;">' +
-          'Disable Drips <label class="switch"><input type="checkbox" ' + (epState.disableDrips ? 'checked' : '') + ' onchange="epState.disableDrips = this.checked; renderEpBody();"><span class="switch-track"></span></label>' +
-        '</div>' +
+        '<span class="ep-comm-toggle">Disable Drips <label class="switch"><input type="checkbox" ' + (epState.disableDrips ? 'checked' : '') + ' onchange="epState.disableDrips = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
       '</div>' +
-      '<div style="text-align:center; font-size:12px; color:var(--gray-500); margin-top:10px;">Next Drip: <strong style="color:var(--gray-800);">' + (seq ? seq.nextDrip : '—') + '</strong></div>' +
+      '<div style="text-align:center; font-size:12px; color:var(--gray-500); margin-top:16px;">Next Drip: <strong style="color:var(--gray-800);">' + (seq ? seq.nextDrip : '—') + '</strong></div>' +
       (epState.sendSms
-        ? '<div class="settings-field" style="margin-top:16px; margin-bottom:0;">' +
+        ? '<div class="settings-field" style="margin-top:20px; margin-bottom:0;">' +
             '<label class="settings-field-label">SMS Message</label>' +
             '<textarea class="settings-field-input" rows="4" readonly style="height:auto; padding:10px 14px; font-family:inherit; resize:vertical;">' + smsTemplate + '</textarea>' +
           '</div>'
         : '') +
-      '<div class="settings-alert settings-alert--success" style="margin-top:16px; margin-bottom:0;">' +
+      '<div class="settings-alert settings-alert--success" style="margin-top:20px; margin-bottom:0;">' +
         '<div><strong>Email Template:</strong> To edit your email template please visit your Company Settings and click on the Templates tab.</div>' +
       '</div>' +
     '</div>' +
@@ -2724,7 +2734,7 @@ function epSelectContact(cid) {
 function epNewFormHtml() {
   const mode = epState.newBizContactMode || 'new';
   const unassociated = CONTACTS.filter(c => !c.businessId);
-  return '<div style="max-width:420px; margin:0 auto;">' +
+  return '<div style="max-width:640px; margin:0 auto;">' +
     '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Business Name</label><input class="settings-field-input" id="epNewBizName" placeholder="e.g. Acme Painting"></div>' +
     '<div class="settings-field" style="margin-bottom:18px;"><label class="settings-field-label">Address</label><input class="settings-field-input" id="epNewBizAddress" placeholder="Street, City, State, ZIP"></div>' +
     '<div class="settings-group-label" style="margin-top:0;">Contact</div>' +
@@ -2788,7 +2798,7 @@ function epChangeNewBusiness() {
 function epNewConfirmedBlockHtml() {
   const pseudoBiz = { id: null, legal: epState.pendingNewBiz.legal, dba: '', address: epState.pendingNewBiz.address };
   const contactName = epState.pendingExistingContactId ? getContact(epState.pendingExistingContactId).name : epState.pendingNewContact.name;
-  return '<div style="max-width:420px; margin:0 auto;">' +
+  return '<div style="max-width:640px; margin:0 auto;">' +
     '<div class="settings-field" style="margin-bottom:4px;">' +
       '<label class="settings-field-label">Business (new)</label>' +
       '<div style="height:40px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; border:1px solid var(--st-color-border); border-radius:8px; background:var(--gray-50);">' +

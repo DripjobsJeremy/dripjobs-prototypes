@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-28] Business Entity Records V1: de-clutter Creation Entry Points layout for mobile
+
+- Decision: Widened the Creation Entry Points step container from 420px to 640px (Business/Contact selection, Appointment Details, Proposal Details, Ready to Create, and the Communication block all sit inside this one wrapper), since nothing required that narrow a column and it was the direct cause of the Communication section feeling cramped. Rebuilt the Communication block itself so each concern gets its own full-width row (title alone, then Send Email/Send SMS, then Drip Sequence + Disable Drips, then the Next Drip caption) instead of cramming the title and two toggles onto one line. Added a `@media (max-width: 520px)` rule so those rows stack to a single column on narrow viewports instead of squeezing. Also gave the Virtual Meeting Platform/URL fields their own `.settings-section` card ("Virtual Meeting Details") to match the On-Site Job Address card's treatment — they'd been floating unstyled below the Appointment Details card before.
+- Why: Jeremy flagged the Communication section as cluttered and asked for mobile-optimized layout, noting the container had no real reason to stay so constrained.
+- Open question: none.
+
 ## [2026-08-28] Business Entity Records V1: Meeting URL field for Virtual appointments
 
 - Decision: Added a "Meeting URL" field under Meeting Platform, shown only when Location = Virtual Meeting. It appears as its own row in the Ready to Create summary (a clickable link once entered, an em dash while blank), and disappears entirely when Location is On-Site.
