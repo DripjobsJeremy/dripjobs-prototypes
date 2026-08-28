@@ -1999,7 +1999,7 @@ const EP_DRIP_SEQUENCES = [
 ];
 const EP_STATE_DEFAULTS = {
   businessId: null, contactId: null, eventType: null, duration: '', eventColor: null, scheduledDate: null, startTime: '', endTime: '',
-  locationType: 'onsite', platform: 'Zoom',
+  locationType: 'onsite', platform: 'Zoom', meetingUrl: '',
   proposalTemplate: 'cmc-ext-standard', leadSource: '', dealName: '', disableDrips: false, salesperson: 'Jordan P.', projectManager: '',
   newBizConfirmed: false, pendingNewBiz: null, pendingNewContact: null, newBizContactMode: 'new', pendingExistingContactId: null,
   sendEmail: true, sendSms: false, dripSequence: 'appointment-information'
@@ -2402,6 +2402,10 @@ function epPlatformSelectHtml() {
       platforms.map(p => '<option value="' + p + '"' + (epState.platform === p ? ' selected' : '') + '>' + p + '</option>').join('') +
     '</select>' +
     '<div class="settings-help">No address is collected for a Virtual Meeting.</div>' +
+  '</div>' +
+  '<div class="settings-field" style="margin-top:14px;">' +
+    '<label class="settings-field-label">Meeting URL</label>' +
+    '<input class="settings-field-input" id="epMeetingUrlInput" placeholder="Paste the meeting link…" value="' + (epState.meetingUrl || '').replace(/"/g, '&quot;') + '" oninput="epState.meetingUrl = this.value">' +
   '</div>';
 }
 
@@ -2451,6 +2455,9 @@ function epReadyToCreateHtml(sourceType, entity) {
     rows.push({ label: 'Event Color', value: col ? ('<span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:10px; height:10px; border-radius:50%; background:' + col.hex + '; display:inline-block;"></span>' + col.label + '</span>') : '—' });
     rows.push({ label: 'Scheduled', value: epState.scheduledDate ? (fmtDateSlash(epState.scheduledDate) + (epState.startTime ? (', ' + fmtTimeLabel(epState.startTime) + (epState.endTime ? '–' + fmtTimeLabel(epState.endTime) : '')) : '')) : '—' });
     rows.push({ label: 'Location', value: epState.locationType === 'virtual' ? ('Virtual — ' + epState.platform) : 'On-Site' });
+    if (epState.locationType === 'virtual') {
+      rows.push({ label: 'Meeting URL', value: epState.meetingUrl ? ('<a href="' + epState.meetingUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" style="color:var(--purple);">' + epState.meetingUrl + '</a>') : '—' });
+    }
   } else if (epState.entry === 'proposal') {
     const addr = entity.address;
     const tmpl = EP_PROPOSAL_TEMPLATES.find(t => t.key === epState.proposalTemplate);
