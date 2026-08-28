@@ -1033,7 +1033,29 @@ const BUSINESSES = [
     address: { street: '4820 Meridian Business Pkwy', city: 'Dallas', state: 'TX', zip: '75201' },
     billingSame: true, archived: false,
     contactIds: ['c1', 'c2', 'c3'],
-    createdAt: '2026-02-18'
+    createdAt: '2026-02-18',
+    // Only Acme is seeded with existing Deals/Proposals/Appointments/Invoices/Payments history — every
+    // other business starts empty and is populated live by saving through the Creation Entry Points demo.
+    deals: [
+      { title: 'Exterior Repaint — West Wing', sub: 'Stage: Proposal Sent', meta: '$18,400', via: 'Karen Whitfield' },
+      { title: 'Parking Structure Coating', sub: 'Stage: Negotiation', meta: '$42,000', via: 'Tom Reyes' }
+    ],
+    proposals: [
+      { title: 'Proposal #4821 — Exterior Repaint', sub: 'Sent · Awaiting signature', meta: '$18,400', via: 'Karen Whitfield' },
+      { title: 'Proposal #4790 — Lobby Refresh', sub: 'Accepted', meta: '$6,250', via: 'Tom Reyes' }
+    ],
+    appointments: [
+      { title: 'On-site walkthrough', sub: 'Aug 4, 2026 · 10:00 AM', meta: 'Scheduled', via: 'Karen Whitfield' },
+      { title: 'Color consultation', sub: 'Jul 22, 2026 · 2:00 PM', meta: 'Completed', via: 'Tom Reyes' }
+    ],
+    invoices: [
+      { title: 'Invoice #INV-2291', sub: 'Due Aug 15, 2026', meta: '$6,250.00', via: 'Karen Whitfield' },
+      { title: 'Invoice #INV-2204', sub: 'Paid Jul 2, 2026', meta: '$3,120.00', via: 'Tom Reyes' }
+    ],
+    payments: [
+      { title: 'Payment received — INV-2204', sub: 'Jul 2, 2026 · Card ending 4471', meta: '$3,120.00', via: 'Karen Whitfield' },
+      { title: 'Deposit — Proposal #4790', sub: 'Jun 18, 2026 · ACH', meta: '$1,500.00', via: 'Tom Reyes' }
+    ]
   },
   {
     id: 'summit', legal: 'Summit Ridge Property Holdings Inc.', dba: 'Summit Ridge', displayDba: true,
@@ -1045,7 +1067,8 @@ const BUSINESSES = [
     billingAddress: { street: 'PO Box 8842', city: 'Austin', state: 'TX', zip: '78708' },
     archived: false,
     contactIds: ['c4', 'c5'],
-    createdAt: '2026-03-25'
+    createdAt: '2026-03-25',
+    deals: [], proposals: [], appointments: [], invoices: [], payments: []
   },
   {
     id: 'brightview', legal: 'Brightview Retail Facilities LLC', dba: '', displayDba: false,
@@ -1055,7 +1078,8 @@ const BUSINESSES = [
     address: { street: '77 Galleria Way, Suite 300', city: 'Plano', state: 'TX', zip: '75024' },
     billingSame: true, archived: false,
     contactIds: ['c6'],
-    createdAt: '2026-04-30'
+    createdAt: '2026-04-30',
+    deals: [], proposals: [], appointments: [], invoices: [], payments: []
   },
   {
     id: 'northgate', legal: 'Northgate Medical Plaza Association', dba: 'Northgate Medical Plaza', displayDba: true,
@@ -1065,7 +1089,8 @@ const BUSINESSES = [
     address: { street: '900 Northgate Blvd', city: 'Fort Worth', state: 'TX', zip: '76102' },
     billingSame: true, archived: false,
     contactIds: ['c7', 'c8'],
-    createdAt: '2026-05-22'
+    createdAt: '2026-05-22',
+    deals: [], proposals: [], appointments: [], invoices: [], payments: []
   },
   {
     id: 'cedarcreek', legal: 'Cedar Creek Homeowners Association', dba: 'Cedar Creek HOA', displayDba: true,
@@ -1078,7 +1103,8 @@ const BUSINESSES = [
     billingAddress: { street: '15 Cedar Creek Loop', city: 'Frisco', state: 'TX', zip: '75034' },
     archived: false,
     contactIds: ['c9'],
-    createdAt: '2026-06-19'
+    createdAt: '2026-06-19',
+    deals: [], proposals: [], appointments: [], invoices: [], payments: []
   },
   {
     id: 'westline', legal: 'Westline General Contracting Co.', dba: 'Westline GC', displayDba: true,
@@ -1089,7 +1115,8 @@ const BUSINESSES = [
     billingSame: true, archived: false,
     contactIds: [],
     hasActiveRecords: false, // Brand-new entity, nothing created against it yet — demos the "editing Information has no downstream impact" case
-    createdAt: '2026-08-25'
+    createdAt: '2026-08-25',
+    deals: [], proposals: [], appointments: [], invoices: [], payments: []
   },
   {
     id: 'sunridge', legal: 'Sunridge Painting & Coatings LLC', dba: 'Sunridge Painting', displayDba: true,
@@ -1101,7 +1128,8 @@ const BUSINESSES = [
     archived: true, // Closed account — demos the Businesses list "Show Archived" toggle
     contactIds: [],
     hasActiveRecords: false,
-    createdAt: '2026-01-10'
+    createdAt: '2026-01-10',
+    deals: [], proposals: [], appointments: [], invoices: [], payments: []
   }
 ];
 
@@ -1550,43 +1578,19 @@ function toggleDemoLiveSync(which) {
 }
 
 const SNAPSHOT_TABS_LABEL = { deals: 'Deals', proposals: 'Proposals', appointments: 'Appointments', invoices: 'Invoices', payments: 'Payments' };
-const DATA_TAB_SAMPLES = {
-  deals: [
-    { title: 'Exterior Repaint — West Wing', sub: 'Stage: Proposal Sent', meta: '$18,400' },
-    { title: 'Parking Structure Coating', sub: 'Stage: Negotiation', meta: '$42,000' }
-  ],
-  proposals: [
-    { title: 'Proposal #4821 — Exterior Repaint', sub: 'Sent · Awaiting signature', meta: '$18,400' },
-    { title: 'Proposal #4790 — Lobby Refresh', sub: 'Accepted', meta: '$6,250' }
-  ],
-  appointments: [
-    { title: 'On-site walkthrough', sub: 'Aug 4, 2026 · 10:00 AM', meta: 'Scheduled' },
-    { title: 'Color consultation', sub: 'Jul 22, 2026 · 2:00 PM', meta: 'Completed' }
-  ],
-  invoices: [
-    { title: 'Invoice #INV-2291', sub: 'Due Aug 15, 2026', meta: '$6,250.00' },
-    { title: 'Invoice #INV-2204', sub: 'Paid Jul 2, 2026', meta: '$3,120.00' }
-  ],
-  payments: [
-    { title: 'Payment received — INV-2204', sub: 'Jul 2, 2026 · Card ending 4471', meta: '$3,120.00' },
-    { title: 'Deposit — Proposal #4790', sub: 'Jun 18, 2026 · ACH', meta: '$1,500.00' }
-  ]
-};
 const FASTFOLLOW_CANDIDATE_TABS = ['appointments', 'invoices', 'payments']; // Deals + Proposals are V1-confirmed, left out of this list on purpose
 function dataTabHtml(key, biz) {
-  const rows = DATA_TAB_SAMPLES[key] || [];
-  const contactNames = biz.contactIds.map(id => getContact(id).name);
-  const rowsHtml = rows.map((r, i) => {
-    const attrib = contactNames.length ? contactNames[i % contactNames.length] : '—';
-    return '<div class="activity-row">' +
+  const rows = biz[key] || [];
+  const rowsHtml = rows.map(r =>
+    '<div class="activity-row">' +
       '<div class="activity-icon">' + ({ deals: '📈', proposals: '📋', appointments: '📅', invoices: '🧾', payments: '💰' }[key]) + '</div>' +
       '<div style="flex:1;">' +
-        '<div class="activity-title">' + r.title + '</div>' +
-        '<div class="activity-sub">' + r.sub + ' · via ' + attrib + ' <span class="assumption-flag" style="margin-left:4px;" title="Snapshot value captured at record creation, does not update if the contact\'s Primary info later changes — per dependency ticket QA notes, confirmed 7/29.">SNAPSHOT</span></div>' +
+        '<div class="activity-title">' + (r.color ? '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:' + r.color + '; margin-right:6px;"></span>' : '') + r.title + '</div>' +
+        '<div class="activity-sub">' + r.sub + ' · via ' + (r.via || '—') + ' <span class="assumption-flag" style="margin-left:4px;" title="Snapshot value captured at record creation, does not update if the contact\'s Primary info later changes — per dependency ticket QA notes, confirmed 7/29.">SNAPSHOT</span></div>' +
       '</div>' +
       '<div style="font-weight:800; color:var(--gray-800);">' + r.meta + '</div>' +
-    '</div>';
-  }).join('') || '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-title">Nothing yet</div><div class="empty-state-desc">' + SNAPSHOT_TABS_LABEL[key] + ' from associated contacts will appear here.</div></div>';
+    '</div>'
+  ).join('') || '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-title">Nothing yet</div><div class="empty-state-desc">' + SNAPSHOT_TABS_LABEL[key] + ' from associated contacts will appear here.</div></div>';
 
   const fastFollowNote = FASTFOLLOW_CANDIDATE_TABS.includes(key) ?
     '<div class="settings-alert settings-alert--neutral" style="margin-bottom:10px;">' +
@@ -1967,7 +1971,35 @@ const EVENT_COLORS = [
   { key: 'gray', label: 'Gray', hex: '#9CA3AF' }
 ];
 function getEventColor(key) { return EVENT_COLORS.find(c => c.key === key) || null; }
-const EP_STATE_DEFAULTS = { businessId: null, contactId: null, eventType: null, duration: '', eventColor: null, scheduledDate: null, startTime: '', endTime: '', locationType: 'onsite', platform: 'Zoom' };
+// New Proposal specifics — Proposal Template list, Lead Source list, and Salesperson/Project Manager
+// roster are this prototype's own reasonable placeholders (not sourced from a screenshot), flagged
+// in the decision log. Proposal Template options ARE from the reference screenshot.
+const EP_PROPOSAL_TEMPLATES = [
+  { key: 'blank', label: 'Blank' },
+  { key: 'cmc-ext-standard', label: 'CMC Exterior — Standard (Default)' },
+  { key: 'cmc-int-brand-ambassador', label: 'CMC Interior — BRAND-AMBASSADOR' },
+  { key: 'cmc-int-standard', label: 'CMC Interior — Standard' },
+  { key: 'ext-paint-pressure-wash', label: 'EXT Paint + Pressure Wash' }
+];
+const EP_LEAD_SOURCES = [
+  { key: 'google', label: 'Google Search' },
+  { key: 'referral', label: 'Referral' },
+  { key: 'repeat', label: 'Repeat Customer' },
+  { key: 'website', label: 'Website' },
+  { key: 'social', label: 'Facebook / Instagram' },
+  { key: 'yard-sign', label: 'Yard Sign' },
+  { key: 'event', label: 'Home Show / Event' },
+  { key: 'other', label: 'Other' }
+];
+const EP_TEAM_MEMBERS = ['Jordan P.', 'Maria Sutton', 'Chris Boyd', 'Elena Vasquez'];
+const EP_RECORD_LABEL = { lead: 'Deal', appt: 'Appointment', proposal: 'Proposal', invoice: 'Invoice' };
+let nextInvoiceNo = 3005;
+const EP_STATE_DEFAULTS = {
+  businessId: null, contactId: null, eventType: null, duration: '', eventColor: null, scheduledDate: null, startTime: '', endTime: '',
+  locationType: 'onsite', platform: 'Zoom',
+  proposalTemplate: 'cmc-ext-standard', leadSource: '', dealName: '', disableDrips: false, salesperson: 'Jordan P.', projectManager: '',
+  newBizConfirmed: false, pendingNewBiz: null, pendingNewContact: null
+};
 let epState = Object.assign({ entry: 'lead', type: null, mode: null }, EP_STATE_DEFAULTS);
 function setEntryPoint(key) {
   epState = Object.assign({ entry: key, type: null, mode: null }, EP_STATE_DEFAULTS);
@@ -2001,7 +2033,7 @@ function renderEpBody() {
     if (epState.mode === 'existing') {
       html += epExistingBlockHtml();
     } else if (epState.mode === 'new') {
-      html += epNewFormHtml(epState.entry);
+      html += epState.newBizConfirmed ? epNewConfirmedBlockHtml() : epNewFormHtml();
     }
   }
   document.getElementById('epFrameBody').innerHTML = html;
@@ -2018,7 +2050,6 @@ function epExistingBlockHtml() {
     '</div>';
   }
   const biz = getBiz(epState.businessId);
-  const showJobAddress = epState.entry === 'proposal' || epState.entry === 'appt';
   return '<div style="max-width:420px; margin:0 auto;">' +
     '<div class="settings-field" style="margin-bottom:4px;">' +
       '<label class="settings-field-label">Business</label>' +
@@ -2028,7 +2059,7 @@ function epExistingBlockHtml() {
       '</div>' +
     '</div>' +
     epContactFieldHtml() +
-    (showJobAddress ? epAddressOrApptExtrasHtml('business', biz) : '') +
+    epAddressOrApptExtrasHtml('business', biz) +
   '</div>';
 }
 
@@ -2067,8 +2098,60 @@ function epClearIndividualContact() { epState.contactId = null; renderEpBody(); 
 /* ─── New Appointment specifics: Event Type, Default Duration, On-Site/Virtual location (shared
    by the Business Project and Personal Project branches — appt-only, not shown on New Proposal). ─── */
 function epAddressOrApptExtrasHtml(sourceType, entity) {
-  const stepHtml = epState.entry === 'appt' ? epApptExtrasHtml(sourceType, entity) : epJobAddressHtml(sourceType, entity);
+  // "lead" and "invoice" collect no extra fields beyond Business/Contact — Ready to Create follows directly.
+  let stepHtml = '';
+  if (epState.entry === 'appt') stepHtml = epApptExtrasHtml(sourceType, entity);
+  else if (epState.entry === 'proposal') stepHtml = epProposalDetailsHtml() + epJobAddressHtml(sourceType, entity);
   return stepHtml + epReadyToCreateHtml(sourceType, entity);
+}
+
+/* ─── New Proposal specifics: Template, Lead Source (required) + Deal Name, Assignment
+   (Salesperson + Project Manager), Disable Drips — a Proposal implicitly creates its Deal. ─── */
+function epProposalDetailsHtml() {
+  return '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
+      '<div class="settings-section-title">Proposal Details <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: New Proposal Specifics">🔗 BR: New Proposal Specifics</span></div>' +
+      '<div class="settings-group-label">Template</div>' +
+      '<div class="settings-field" style="margin-bottom:14px;">' +
+        '<label class="settings-field-label">Proposal Template</label>' +
+        '<select class="select2" id="epProposalTemplateSelect" onchange="epState.proposalTemplate = this.value; renderEpBody();">' +
+          EP_PROPOSAL_TEMPLATES.map(t => '<option value="' + t.key + '"' + (epState.proposalTemplate === t.key ? ' selected' : '') + '>' + t.label + '</option>').join('') +
+        '</select>' +
+      '</div>' +
+      '<div style="display:flex; gap:10px;">' +
+        '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
+          '<label class="settings-field-label is-required">Lead Source</label>' +
+          '<select id="epLeadSourceSelect" onchange="epState.leadSource = this.value; renderEpBody();">' +
+            '<option value="">Select a lead source…</option>' +
+            EP_LEAD_SOURCES.map(s => '<option value="' + s.key + '"' + (epState.leadSource === s.key ? ' selected' : '') + '>' + s.label + '</option>').join('') +
+          '</select>' +
+        '</div>' +
+        '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
+          '<label class="settings-field-label">Deal Name</label>' +
+          '<input class="settings-field-input" placeholder="Give this job a unique name…" value="' + (epState.dealName || '').replace(/"/g, '&quot;') + '" oninput="epState.dealName = this.value">' +
+        '</div>' +
+      '</div>' +
+      '<div class="settings-group-label">Assignment</div>' +
+      '<div style="display:flex; gap:10px;">' +
+        '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
+          '<label class="settings-field-label">Salesperson</label>' +
+          '<select class="select2" onchange="epState.salesperson = this.value; renderEpBody();">' +
+            EP_TEAM_MEMBERS.map(n => '<option value="' + n + '"' + (epState.salesperson === n ? ' selected' : '') + '>' + n + '</option>').join('') +
+          '</select>' +
+        '</div>' +
+        '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
+          '<label class="settings-field-label">Project Manager</label>' +
+          '<select class="select2" onchange="epState.projectManager = this.value; renderEpBody();">' +
+            '<option value="">Select a project manager…</option>' +
+            EP_TEAM_MEMBERS.map(n => '<option value="' + n + '"' + (epState.projectManager === n ? ' selected' : '') + '>' + n + '</option>').join('') +
+          '</select>' +
+        '</div>' +
+      '</div>' +
+      '<div class="settings-group-label">Drips</div>' +
+      '<div class="settings-toggle-row" style="margin-bottom:2px;">' +
+        '<label class="switch"><input type="checkbox" ' + (epState.disableDrips ? 'checked' : '') + ' onchange="epState.disableDrips = this.checked; renderEpBody();"><span class="switch-track"></span></label>' +
+        '<span class="settings-toggle-label">Disable</span>' +
+      '</div>' +
+    '</div>';
 }
 function epApptExtrasHtml(sourceType, entity) {
   let html = '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
@@ -2366,7 +2449,15 @@ function epReadyToCreateHtml(sourceType, entity) {
     rows.push({ label: 'Location', value: epState.locationType === 'virtual' ? ('Virtual — ' + epState.platform) : 'On-Site' });
   } else if (epState.entry === 'proposal') {
     const addr = entity.address;
+    const tmpl = EP_PROPOSAL_TEMPLATES.find(t => t.key === epState.proposalTemplate);
+    const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
     rows.push({ label: 'Job Address', value: (addr && addr.street) ? (addr.street + ', ' + addr.city + ', ' + addr.state + ' ' + addr.zip) : 'No address on file yet' });
+    rows.push({ label: 'Proposal Template', value: tmpl ? tmpl.label : '—' });
+    rows.push({ label: 'Lead Source', value: src ? src.label : '—' });
+    rows.push({ label: 'Deal Name', value: epState.dealName || '—' });
+    rows.push({ label: 'Salesperson', value: epState.salesperson || '—' });
+    rows.push({ label: 'Project Manager', value: epState.projectManager || '—' });
+    rows.push({ label: 'Drips', value: epState.disableDrips ? 'Disabled' : 'Enabled' });
     rows.push({ label: 'Line Item', value: 'Exterior Repaint — West Wing' });
     rows.push({ label: 'Proposal Total', value: '$18,400.00' });
   }
@@ -2389,14 +2480,95 @@ function epReadyToCreateHtml(sourceType, entity) {
       '<button type="button" class="pill-toggle" onclick="epSelectNotifyMethod(this)">SMS</button>' +
       '<button type="button" class="pill-toggle" onclick="epSelectNotifyMethod(this)">Both</button>' +
     '</div>' +
-    '<div class="settings-alert settings-alert--success" style="margin-top:16px; margin-bottom:0;">' +
+    '<div class="settings-alert settings-alert--success" style="margin-top:16px; margin-bottom:14px;">' +
       '<div class="settings-alert-icon">✅</div>' +
       '<div><div class="settings-alert-title">Ready to create</div><div>Review the summary above, then save to create this record.</div></div>' +
     '</div>' +
+    '<button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="epSaveRecord(\'' + sourceType + '\')">Save &amp; Create ' + EP_RECORD_LABEL[epState.entry] + '</button>' +
   '</div>';
 }
 function epSelectNotifyMethod(btn) {
   btn.parentElement.querySelectorAll('.pill-toggle').forEach(b => b.classList.toggle('selected', b === btn));
+}
+
+/* ─── Save — the missing terminal step: actually creates the Business/Contact (if new) plus the
+   Deal/Appointment/Proposal/Invoice record, attaches it to that Business, and navigates to the
+   Business Profile so it's immediately visible where BR item 4 asked ("view these records associated"). ─── */
+function epSaveRecord(sourceType) {
+  if (epState.entry === 'proposal' && !epState.leadSource) {
+    toast('Lead Source is required before saving.');
+    const el = document.getElementById('epLeadSourceSelect');
+    if (el) el.focus();
+    return;
+  }
+  if (sourceType === 'personal') {
+    // Individual Customer path — no Business Entity to attach a record to in this prototype's scope.
+    toast('✓ Personal Project saved for this demo.', 'success');
+    setEntryPoint(epState.entry);
+    return;
+  }
+  let biz, contact;
+  if (epState.mode === 'new') {
+    if (!epState.pendingNewBiz || !epState.pendingNewContact) { toast('Complete the New Business form first.'); return; }
+    const bizId = 'biz' + (nextBizId++);
+    const cid = 'c' + (nextContactId++);
+    biz = {
+      id: bizId, legal: epState.pendingNewBiz.legal, dba: '', displayDba: false,
+      industry: 'Commercial Painting Contractor', email: '', phone: '',
+      address: epState.pendingNewBiz.address || { street: '', city: '', state: '', zip: '' },
+      billingSame: true, archived: false, contactIds: [cid],
+      createdAt: PROTO_TODAY.toISOString().slice(0, 10),
+      deals: [], proposals: [], appointments: [], invoices: [], payments: []
+    };
+    BUSINESSES.push(biz);
+    contact = {
+      id: cid, name: epState.pendingNewContact.name, role: null,
+      phone: epState.pendingNewContact.phone || '', email: epState.pendingNewContact.email || '',
+      status: 'Lead', businessId: bizId, primaryFor: bizId // first Contact associated always defaults to Primary
+    };
+    CONTACTS.push(contact);
+  } else {
+    biz = getBiz(epState.businessId);
+    contact = epState.contactId ? getContact(epState.contactId) : null;
+  }
+  if (!biz) { toast('Select a Business first.'); return; }
+  pushEpRecordOntoBusiness(biz, contact);
+  renderBusinessesTable();
+  populateIndustryFilter();
+  populateBusinessFilter();
+  toast('✓ ' + EP_RECORD_LABEL[epState.entry] + ' created for ' + bizDisplayLabel(biz) + '.', 'success');
+  const targetTab = { lead: 'deals', appt: 'appointments', proposal: 'proposals', invoice: 'invoices' }[epState.entry];
+  const savedEntry = epState.entry;
+  openBusinessProfile(biz.id, targetTab);
+  setEntryPoint(savedEntry); // reset the demo flow behind the scenes, ready for the next run
+}
+function pushEpRecordOntoBusiness(biz, contact) {
+  const via = contact ? contact.name : '—';
+  if (epState.entry === 'lead') {
+    biz.deals.push({ title: 'New Deal — ' + bizDisplayLabel(biz), sub: 'Stage: Lead', meta: '—', via });
+  } else if (epState.entry === 'appt') {
+    const et = EVENT_TYPES.find(e => e.key === epState.eventType);
+    const col = getEventColor(epState.eventColor);
+    const when = epState.scheduledDate
+      ? fmtDateSlash(epState.scheduledDate) + (epState.startTime ? ', ' + fmtTimeLabel(epState.startTime) + (epState.endTime ? '–' + fmtTimeLabel(epState.endTime) : '') : '')
+      : 'Not yet scheduled';
+    biz.appointments.push({
+      title: et ? et.label : 'Appointment', sub: when,
+      meta: epState.locationType === 'virtual' ? ('Virtual — ' + epState.platform) : 'On-Site',
+      via, color: col ? col.hex : null
+    });
+  } else if (epState.entry === 'proposal') {
+    const tmpl = EP_PROPOSAL_TEMPLATES.find(t => t.key === epState.proposalTemplate);
+    const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
+    const dealTitle = epState.dealName || ('New Deal — ' + bizDisplayLabel(biz));
+    biz.deals.push({ title: dealTitle, sub: 'Stage: Proposal Sent' + (src ? ' · Lead Source: ' + src.label : ''), meta: '$18,400.00', via });
+    biz.proposals.push({ title: 'Proposal — ' + dealTitle, sub: 'Sent · Template: ' + (tmpl ? tmpl.label : 'Blank'), meta: '$18,400.00', via });
+  } else if (epState.entry === 'invoice') {
+    const num = 'INV-' + (nextInvoiceNo++);
+    const due = new Date(PROTO_TODAY);
+    due.setDate(due.getDate() + 30);
+    biz.invoices.push({ title: 'Invoice #' + num, sub: 'Due ' + fmtDateAbs(due.toISOString().slice(0, 10)), meta: '$4,250.00', via });
+  }
 }
 
 function renderEpBusinessResults(q) {
@@ -2472,40 +2644,64 @@ function epSelectContact(cid) {
   if (dd) dd.classList.remove('open');
 }
 
-function epNewFormHtml(entry) {
-  // When Business = New, Contact defaults to "New (create alongside)" — shared across tabs that don't
-  // otherwise collect a contact explicitly (New Appointment already requires its own Primary Contact field).
-  const contactDefaultRow = '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label">Contact</label><input class="settings-field-input" value="New (create alongside)" disabled></div>';
-  if (entry === 'lead') {
-    return '<div style="max-width:420px; margin:0 auto;">' +
-      '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Business Name</label><input class="settings-field-input" placeholder="e.g. Acme Painting"></div>' +
-      contactDefaultRow +
-      '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label">Address</label><input class="settings-field-input" placeholder="Street, City, State, ZIP"></div>' +
-      '<button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="toast(\'Business Entity record created on save.\')">Continue</button>' +
-    '</div>';
-  }
-  if (entry === 'appt') {
-    return '<div style="max-width:420px; margin:0 auto;">' +
-      '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Business Name</label><input class="settings-field-input" placeholder="e.g. Acme Painting"></div>' +
-      '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Primary Contact</label><input class="settings-field-input" placeholder="Search or add a contact..."></div>' +
-      '<button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="toast(\'Business Entity record created on save.\')">Continue</button>' +
-    '</div>';
-  }
-  if (entry === 'proposal') {
-    return '<div style="max-width:420px; margin:0 auto;">' +
-      '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Business Name</label><input class="settings-field-input" placeholder="e.g. Acme Painting"></div>' +
-      contactDefaultRow +
-      '<div class="settings-alert settings-alert--success" style="margin-bottom:0;"><div class="settings-alert-icon">✅</div><div><div class="settings-alert-title">Final Summary Step</div><div>"Create a new business record" — the entity is created when the proposal is saved.</div></div></div>' +
-    '</div>';
-  }
-  if (entry === 'invoice') {
-    return '<div style="max-width:420px; margin:0 auto;">' +
-      '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Business Name</label><input class="settings-field-input" placeholder="e.g. Acme Painting"></div>' +
-      contactDefaultRow +
-      '<button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="toast(\'Business Entity record created on invoice save.\')">Continue</button>' +
-    '</div>';
-  }
-  return '';
+/* ─── "Business > New" — captures the new Business + its first Contact (always the Primary, per
+   the associate-contact rule), same shape across all four entry points. Nothing is created yet —
+   per the existing "the entity is created when the proposal is saved" note, creation is deferred
+   to the final Save on the Ready to Create step, once Continue below confirms these fields. ─── */
+function epNewFormHtml() {
+  return '<div style="max-width:420px; margin:0 auto;">' +
+    '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Business Name</label><input class="settings-field-input" id="epNewBizName" placeholder="e.g. Acme Painting"></div>' +
+    '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label">Address</label><input class="settings-field-input" id="epNewBizAddress" placeholder="Street, City, State, ZIP"></div>' +
+    '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Contact Name</label><input class="settings-field-input" id="epNewContactName" placeholder="Full name"></div>' +
+    '<div style="display:flex; gap:10px;">' +
+      '<div class="settings-field" style="flex:1; margin-bottom:14px;"><label class="settings-field-label">Contact Phone</label><input class="settings-field-input formatted-phone-no" id="epNewContactPhone" placeholder="(555) 555-5555"></div>' +
+      '<div class="settings-field" style="flex:1; margin-bottom:14px;"><label class="settings-field-label">Contact Email</label><input class="settings-field-input" id="epNewContactEmail" type="email" placeholder="name@company.com"></div>' +
+    '</div>' +
+    '<button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="epConfirmNewBusiness()">Continue</button>' +
+  '</div>';
+}
+function epConfirmNewBusiness() {
+  const legal = document.getElementById('epNewBizName').value.trim();
+  if (!legal) { toast('Business Name is required.'); document.getElementById('epNewBizName').focus(); return; }
+  const contactName = document.getElementById('epNewContactName').value.trim();
+  if (!contactName) { toast('Contact Name is required.'); document.getElementById('epNewContactName').focus(); return; }
+  epState.pendingNewBiz = { legal, address: { street: document.getElementById('epNewBizAddress').value.trim(), city: '', state: '', zip: '' } };
+  epState.pendingNewContact = {
+    name: contactName,
+    phone: document.getElementById('epNewContactPhone').value.trim(),
+    email: document.getElementById('epNewContactEmail').value.trim()
+  };
+  epState.newBizConfirmed = true;
+  renderEpBody();
+}
+function epChangeNewBusiness() {
+  epState.newBizConfirmed = false;
+  epState.pendingNewBiz = null;
+  epState.pendingNewContact = null;
+  renderEpBody();
+}
+function epNewConfirmedBlockHtml() {
+  const pseudoBiz = { id: null, legal: epState.pendingNewBiz.legal, dba: '', address: epState.pendingNewBiz.address };
+  return '<div style="max-width:420px; margin:0 auto;">' +
+    '<div class="settings-field" style="margin-bottom:4px;">' +
+      '<label class="settings-field-label">Business (new)</label>' +
+      '<div style="height:40px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; border:1px solid var(--st-color-border); border-radius:8px; background:var(--gray-50);">' +
+        '<span>' + pseudoBiz.legal + '</span>' +
+        '<button type="button" class="btn-link" onclick="epChangeNewBusiness()">Change</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="settings-field" style="margin-top:14px; margin-bottom:4px;">' +
+      '<label class="settings-field-label">Contact (new)</label>' +
+      '<div style="height:40px; display:flex; align-items:center; padding:0 14px; border:1px solid var(--st-color-border); border-radius:8px; background:var(--gray-50);">' +
+        '<span>' + epState.pendingNewContact.name + ' <span style="color:var(--gray-400); font-weight:600;">· Primary Contact</span></span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="settings-alert settings-alert--success" style="margin-top:14px; margin-bottom:0;">' +
+      '<div class="settings-alert-icon">✅</div>' +
+      '<div>"' + pseudoBiz.legal + '" and its Primary Contact are created when this ' + EP_RECORD_LABEL[epState.entry] + ' is saved below.</div>' +
+    '</div>' +
+    epAddressOrApptExtrasHtml('business', pseudoBiz) +
+  '</div>';
 }
 
 /* ═══════════════════════════════════════════════
