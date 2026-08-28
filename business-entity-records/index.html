@@ -513,6 +513,53 @@
   #be-app .ep-contact-dropdown .typeahead-result { margin-top: 0; }
   #be-app .ep-contact-dropdown .typeahead-result + .typeahead-result { margin-top: 6px; }
 
+  #be-app .settings-group-label { font-size: 10.5px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; color: var(--gray-400); margin: 14px 0 8px; }
+  #be-app .settings-group-label:first-child { margin-top: 0; }
+
+  #be-app .ep-swatch-trigger {
+    width: 100%; height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 0 12px; border: 1px solid var(--st-color-border); border-radius: 8px; background: var(--st-color-card-bg);
+    cursor: pointer; font-size: 13px; font-weight: 600; color: var(--st-color-text); text-align: left;
+  }
+  #be-app .ep-swatch-trigger:focus { outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+  #be-app .ep-swatch-trigger-label { display: flex; align-items: center; gap: 8px; }
+  #be-app .ep-swatch-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  #be-app .ep-swatch-trigger .chevron { color: var(--gray-400); transition: transform 0.15s; flex-shrink: 0; }
+  #be-app .ep-swatch-trigger.open .chevron { transform: rotate(180deg); }
+
+  #be-app .ep-popover {
+    display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 30;
+    background: #fff; border: 1px solid var(--gray-200); border-radius: 8px; box-shadow: var(--shadow-md);
+    padding: 6px; max-height: 260px; overflow-y: auto;
+  }
+  #be-app .ep-popover.open { display: block; }
+  #be-app .ep-swatch-option { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--gray-700); }
+  #be-app .ep-swatch-option:hover { background: var(--purple-light); }
+  #be-app .ep-swatch-option.selected { background: var(--gray-50); }
+  #be-app .ep-swatch-option .ep-swatch-dot { width: 14px; height: 14px; }
+
+  #be-app .ep-cal-popover { width: 280px; padding: 10px; }
+  #be-app .ep-cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  #be-app .ep-cal-nav-btn { width: 26px; height: 26px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--gray-500); }
+  #be-app .ep-cal-nav-btn:hover { background: var(--gray-100); color: var(--gray-800); }
+  #be-app .ep-cal-month-label { font-size: 12.5px; font-weight: 800; color: var(--gray-800); }
+  #be-app .ep-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  #be-app .ep-cal-dow { text-align: center; font-size: 10.5px; font-weight: 700; color: var(--gray-400); padding: 4px 0; }
+  #be-app .ep-cal-day { text-align: center; font-size: 12.5px; padding: 6px 0; border-radius: 6px; cursor: pointer; color: var(--gray-700); }
+  #be-app .ep-cal-day:hover { background: var(--purple-light); }
+  #be-app .ep-cal-day.blank { cursor: default; }
+  #be-app .ep-cal-day.blank:hover { background: transparent; }
+  #be-app .ep-cal-day.today { font-weight: 800; color: var(--purple); box-shadow: inset 0 0 0 1.5px var(--purple); }
+  #be-app .ep-cal-day.selected { background: var(--purple); color: #fff; font-weight: 800; }
+  #be-app .ep-cal-footer { display: flex; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--gray-100); }
+  #be-app .ep-cal-footer a { font-size: 11.5px; font-weight: 700; color: var(--purple); cursor: pointer; }
+  #be-app .ep-cal-footer a:hover { text-decoration: underline; }
+
+  #be-app .ep-time-popover { padding: 4px; }
+  #be-app .ep-time-option { padding: 7px 12px; font-size: 12.5px; font-weight: 600; color: var(--gray-700); border-radius: 6px; cursor: pointer; }
+  #be-app .ep-time-option:hover { background: var(--purple-light); }
+  #be-app .ep-time-option.selected { background: var(--purple); color: #fff; }
+
   #be-app .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0;
     background: var(--gray-900); color: #fff; padding: 11px 20px; border-radius: 10px; font-size: 13px; font-weight: 700;
@@ -1892,19 +1939,35 @@ const EP_CONFIG = {
 };
 // Mocked Company Settings → Calendar → Event Types source. New Appointment only shows entries
 // where Calendar = "Appointments" — the Jobs-calendar entry below demonstrates that filter and is
-// intentionally never rendered in the Event Type dropdown.
+// intentionally never rendered in the Event Type dropdown. "color" is each type's default Event
+// Color, as configured in Company Settings → Calendar → Event Types.
 const EVENT_TYPES = [
-  { key: 'onsite-estimate', label: 'On-Site Estimate', calendar: 'Appointments', defaultDuration: 45 },
-  { key: 'second-estimate', label: '2nd Time Estimate', calendar: 'Appointments', defaultDuration: 30 },
-  { key: 'site-visit', label: 'Site Visit', calendar: 'Appointments', defaultDuration: 30 },
-  { key: 'project-walkthrough', label: 'Project Walkthrough', calendar: 'Appointments', defaultDuration: 60 },
-  { key: 'punch-out', label: 'Punch-Out', calendar: 'Appointments', defaultDuration: 30 },
-  { key: 'scope-clarification', label: 'Scope Clarification', calendar: 'Appointments', defaultDuration: 20 },
-  { key: 'payment-collection', label: 'Payment Collection', calendar: 'Appointments', defaultDuration: 15 },
-  { key: 'personal-appointment', label: 'Personal Appointment', calendar: 'Appointments', defaultDuration: 30 },
-  { key: 'paintcrew', label: 'Paint Crew — Day 1', calendar: 'Jobs', defaultDuration: 480 }
+  { key: 'onsite-estimate', label: 'On-Site Estimate', calendar: 'Appointments', defaultDuration: 45, color: 'purple' },
+  { key: 'second-estimate', label: '2nd Time Estimate', calendar: 'Appointments', defaultDuration: 30, color: 'gold' },
+  { key: 'site-visit', label: 'Site Visit', calendar: 'Appointments', defaultDuration: 30, color: 'mint' },
+  { key: 'project-walkthrough', label: 'Project Walkthrough', calendar: 'Appointments', defaultDuration: 60, color: 'darkblue' },
+  { key: 'punch-out', label: 'Punch-Out', calendar: 'Appointments', defaultDuration: 30, color: 'orange' },
+  { key: 'scope-clarification', label: 'Scope Clarification', calendar: 'Appointments', defaultDuration: 20, color: 'lightblue' },
+  { key: 'payment-collection', label: 'Payment Collection', calendar: 'Appointments', defaultDuration: 15, color: 'green' },
+  { key: 'personal-appointment', label: 'Personal Appointment', calendar: 'Appointments', defaultDuration: 30, color: 'gray' },
+  { key: 'warranty-work', label: 'Warranty Work', calendar: 'Jobs', defaultDuration: 60, color: 'purple' }
 ];
-const EP_STATE_DEFAULTS = { businessId: null, contactId: null, eventType: null, duration: '', locationType: 'onsite', platform: 'Zoom' };
+// Real Event Color palette from Company Settings → Calendar → Event Types.
+const EVENT_COLORS = [
+  { key: 'purple', label: 'Purple', hex: '#8B85EA' },
+  { key: 'red', label: 'Red', hex: '#EF4444' },
+  { key: 'salmon', label: 'Salmon', hex: '#FA8072' },
+  { key: 'orange', label: 'Orange', hex: '#F97316' },
+  { key: 'yellow', label: 'Yellow', hex: '#FACC15' },
+  { key: 'mint', label: 'Mint', hex: '#34D399' },
+  { key: 'green', label: 'Green', hex: '#22C55E' },
+  { key: 'darkblue', label: 'Dark Blue', hex: '#1E3A8A' },
+  { key: 'lightblue', label: 'Light Blue', hex: '#60A5FA' },
+  { key: 'gold', label: 'Gold', hex: '#D4AF37' },
+  { key: 'gray', label: 'Gray', hex: '#9CA3AF' }
+];
+function getEventColor(key) { return EVENT_COLORS.find(c => c.key === key) || null; }
+const EP_STATE_DEFAULTS = { businessId: null, contactId: null, eventType: null, duration: '', eventColor: null, scheduledDate: null, startTime: '', endTime: '', locationType: 'onsite', platform: 'Zoom' };
 let epState = Object.assign({ entry: 'lead', type: null, mode: null }, EP_STATE_DEFAULTS);
 function setEntryPoint(key) {
   epState = Object.assign({ entry: key, type: null, mode: null }, EP_STATE_DEFAULTS);
@@ -2010,9 +2073,12 @@ function epAddressOrApptExtrasHtml(sourceType, entity) {
 function epApptExtrasHtml(sourceType, entity) {
   let html = '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
       '<div class="settings-section-title">Appointment Details <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: Contact Info, Appointments, and Confirmation">🔗 BR: New Appointment Specifics</span></div>' +
+      '<div class="settings-group-label">Event Details</div>' +
       epEventTypeSelectHtml() +
-      epDurationFieldHtml() +
+      epEventColorFieldHtml() +
       epLocationToggleHtml() +
+      '<div class="settings-group-label">Schedule</div>' +
+      epScheduleFieldsHtml() +
     '</div>';
   html += epState.locationType === 'virtual'
     ? '<div style="max-width:420px; margin:0 auto 4px;">' + epPlatformSelectHtml() + '</div>'
@@ -2033,14 +2099,206 @@ function epEventTypeSelectHtml() {
 function epSelectEventType(key) {
   epState.eventType = key || null;
   const et = EVENT_TYPES.find(e => e.key === key);
-  epState.duration = et ? et.defaultDuration : ''; // auto-fills, stays editable below
+  epState.duration = et ? et.defaultDuration : ''; // drives End Time auto-fill below, no longer its own field
+  epState.eventColor = et ? et.color : null; // auto-fills from Company Settings → Calendar → Event Types, stays editable below
+  if (epState.startTime && epState.duration !== '') {
+    epState.endTime = epMinutesToTime(epTimeToMinutes(epState.startTime) + Number(epState.duration));
+  }
   renderEpBody();
 }
-function epDurationFieldHtml() {
-  return '<div class="settings-field" style="margin-bottom:14px;">' +
-    '<label class="settings-field-label">Default Duration (minutes)</label>' +
-    '<input class="settings-field-input" id="epDurationInput" type="number" min="0" step="5" value="' + (epState.duration != null ? epState.duration : '') + '" oninput="epState.duration = this.value">' +
-  '</div>';
+
+/* ─── Event Color: swatch + label dropdown, defaults from the selected Event Type's Company
+   Settings → Calendar → Event Types color, stays editable. ─── */
+function epEventColorFieldHtml() {
+  const c = getEventColor(epState.eventColor);
+  return '<div class="settings-field" style="margin-bottom:14px; position:relative;">' +
+      '<label class="settings-field-label">Event Color</label>' +
+      '<button type="button" class="ep-swatch-trigger" id="epColorTrigger" onclick="epToggleColorPopover()" onblur="epScheduleClosePopover(\'epColorPopover\', \'epColorTrigger\')">' +
+        '<span class="ep-swatch-trigger-label">' +
+          (c ? '<span class="ep-swatch-dot" style="background:' + c.hex + ';"></span><span>' + c.label + '</span>' : '<span style="color:var(--st-color-text-muted);">Select a color…</span>') +
+        '</span>' +
+        '<svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</button>' +
+      '<div class="ep-popover" id="epColorPopover">' + epColorOptionsHtml() + '</div>' +
+    '</div>' +
+    '<div class="settings-help" style="margin:-8px 0 14px;">Defaults to this Event Type\'s color from Company Settings → Calendar → Event Types, editable per appointment.</div>';
+}
+function epColorOptionsHtml() {
+  return EVENT_COLORS.map(c =>
+    '<div class="ep-swatch-option' + (epState.eventColor === c.key ? ' selected' : '') + '" onmousedown="epSelectEventColor(\'' + c.key + '\')">' +
+      '<span class="ep-swatch-dot" style="background:' + c.hex + ';"></span><span>' + c.label + '</span>' +
+    '</div>'
+  ).join('');
+}
+function epToggleColorPopover() {
+  const el = document.getElementById('epColorPopover');
+  const trigger = document.getElementById('epColorTrigger');
+  if (!el) return;
+  const willOpen = !el.classList.contains('open');
+  el.classList.toggle('open', willOpen);
+  if (trigger) trigger.classList.toggle('open', willOpen);
+}
+function epSelectEventColor(key) {
+  epState.eventColor = key;
+  renderEpBody();
+}
+let epPopoverBlurTimers = {};
+function epScheduleClosePopover(popoverId, triggerId) {
+  clearTimeout(epPopoverBlurTimers[popoverId]);
+  epPopoverBlurTimers[popoverId] = setTimeout(() => {
+    const el = document.getElementById(popoverId);
+    if (el) el.classList.remove('open');
+    if (triggerId) {
+      const trigger = document.getElementById(triggerId);
+      if (trigger) trigger.classList.remove('open');
+    }
+  }, 150);
+}
+
+/* ─── Scheduler: Scheduled Date (calendar picker) + Start Time / End Time (5-minute-increment,
+   text-filterable time pickers) — ported from the real Scheduler modal, replacing the old
+   "Default Duration (minutes)" numeric input. ─── */
+function epScheduleFieldsHtml() {
+  return '<div class="settings-field" style="margin-bottom:14px; position:relative;">' +
+      '<label class="settings-field-label">Scheduled Date</label>' +
+      '<input class="settings-field-input" id="epDateInput" readonly autocomplete="off" placeholder="Select a date…" value="' + (epState.scheduledDate ? fmtDateSlash(epState.scheduledDate) : '') + '" onfocus="epOpenDatePicker()" onblur="epScheduleClosePopover(\'epDatePicker\')">' +
+      '<div class="ep-popover ep-cal-popover" id="epDatePicker"></div>' +
+    '</div>' +
+    '<div style="display:flex; gap:10px;">' +
+      '<div class="settings-field" style="flex:1; margin-bottom:0; position:relative;">' +
+        '<label class="settings-field-label">Start Time</label>' +
+        '<input class="settings-field-input" id="epStartTimeInput" autocomplete="off" placeholder="Select a time…" value="' + (epState.startTime ? fmtTimeLabel(epState.startTime) : '') + '" oninput="epFilterTimePopover(\'start\', this.value)" onfocus="epOpenTimePopover(\'start\')" onblur="epScheduleClosePopover(\'epStartTimePicker\')">' +
+        '<div class="ep-popover ep-time-popover" id="epStartTimePicker"></div>' +
+      '</div>' +
+      '<div class="settings-field" style="flex:1; margin-bottom:0; position:relative;">' +
+        '<label class="settings-field-label">End Time</label>' +
+        '<input class="settings-field-input" id="epEndTimeInput" autocomplete="off" placeholder="Select a time…" value="' + (epState.endTime ? fmtTimeLabel(epState.endTime) : '') + '" oninput="epFilterTimePopover(\'end\', this.value)" onfocus="epOpenTimePopover(\'end\')" onblur="epScheduleClosePopover(\'epEndTimePicker\')">' +
+        '<div class="ep-popover ep-time-popover" id="epEndTimePicker"></div>' +
+      '</div>' +
+    '</div>';
+}
+function fmtDateSlash(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+}
+function epTimeToMinutes(hhmm) {
+  const parts = hhmm.split(':');
+  return Number(parts[0]) * 60 + Number(parts[1]);
+}
+function epMinutesToTime(mins) {
+  mins = Math.max(0, Math.min(1435, mins));
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+}
+function fmtTimeLabel(hhmm) {
+  const mins = epTimeToMinutes(hhmm);
+  let h = Math.floor(mins / 60), m = mins % 60;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12; if (h === 0) h = 12;
+  return h + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+}
+
+/* ─── Scheduled Date calendar picker ─── */
+let epCalCursor = null;
+function epOpenDatePicker() {
+  const base = epState.scheduledDate ? new Date(epState.scheduledDate + 'T00:00:00') : PROTO_TODAY;
+  epCalCursor = { year: base.getFullYear(), month: base.getMonth() };
+  const el = document.getElementById('epDatePicker');
+  if (!el) return;
+  el.innerHTML = epCalHtml();
+  el.classList.add('open');
+}
+function epCalHtml() {
+  const { year, month } = epCalCursor;
+  const monthLabel = new Date(year, month, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayIso = PROTO_TODAY.toISOString().slice(0, 10);
+  let cells = '';
+  for (let i = 0; i < firstDow; i++) cells += '<div class="ep-cal-day blank"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const cls = ['ep-cal-day'];
+    if (iso === todayIso) cls.push('today');
+    if (iso === epState.scheduledDate) cls.push('selected');
+    cells += '<div class="' + cls.join(' ') + '" onmousedown="epSelectDate(\'' + iso + '\')">' + d + '</div>';
+  }
+  return '<div class="ep-cal-nav">' +
+      '<button type="button" class="ep-cal-nav-btn" onmousedown="epCalNav(-1)">‹</button>' +
+      '<span class="ep-cal-month-label">' + monthLabel + '</span>' +
+      '<button type="button" class="ep-cal-nav-btn" onmousedown="epCalNav(1)">›</button>' +
+    '</div>' +
+    '<div class="ep-cal-grid">' + ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => '<div class="ep-cal-dow">' + d + '</div>').join('') + cells + '</div>' +
+    '<div class="ep-cal-footer"><a onmousedown="epCalToday()">Today</a><a onmousedown="epCalClear()">Clear</a><a onmousedown="epCalClose()">Close</a></div>';
+}
+function epCalNav(delta) {
+  epCalCursor.month += delta;
+  if (epCalCursor.month < 0) { epCalCursor.month = 11; epCalCursor.year--; }
+  if (epCalCursor.month > 11) { epCalCursor.month = 0; epCalCursor.year++; }
+  const el = document.getElementById('epDatePicker');
+  if (el) el.innerHTML = epCalHtml();
+}
+function epSelectDate(iso) {
+  epState.scheduledDate = iso;
+  renderEpBody();
+}
+function epCalToday() {
+  epSelectDate(PROTO_TODAY.toISOString().slice(0, 10));
+}
+function epCalClear() {
+  epState.scheduledDate = null;
+  renderEpBody();
+}
+function epCalClose() {
+  const el = document.getElementById('epDatePicker');
+  const trigger = document.getElementById('epDateInput');
+  if (el) el.classList.remove('open');
+  if (trigger) trigger.blur();
+}
+
+/* ─── Start Time / End Time pickers — shared logic, 5-minute increments, text-filterable ─── */
+let epAllTimeOptionsCache = null;
+function epAllTimeOptions() {
+  if (epAllTimeOptionsCache) return epAllTimeOptionsCache;
+  const opts = [];
+  for (let mins = 0; mins < 1440; mins += 5) {
+    const value = epMinutesToTime(mins);
+    opts.push({ value, label: fmtTimeLabel(value) });
+  }
+  epAllTimeOptionsCache = opts;
+  return opts;
+}
+function epTimeOptionsHtml(which, filterText) {
+  const ft = (filterText || '').toLowerCase().trim();
+  const current = which === 'start' ? epState.startTime : epState.endTime;
+  const opts = epAllTimeOptions().filter(o => !ft || o.label.toLowerCase().includes(ft));
+  if (!opts.length) return '<div class="empty-state" style="padding:14px;"><div class="empty-state-desc">No matching times.</div></div>';
+  return opts.map(o =>
+    '<div class="ep-time-option' + (o.value === current ? ' selected' : '') + '" onmousedown="epSelectTime(\'' + which + '\', \'' + o.value + '\')">' + o.label + '</div>'
+  ).join('');
+}
+function epOpenTimePopover(which) {
+  const el = document.getElementById(which === 'start' ? 'epStartTimePicker' : 'epEndTimePicker');
+  if (!el) return;
+  el.innerHTML = epTimeOptionsHtml(which, '');
+  el.classList.add('open');
+}
+function epFilterTimePopover(which, v) {
+  const el = document.getElementById(which === 'start' ? 'epStartTimePicker' : 'epEndTimePicker');
+  if (!el) return;
+  el.innerHTML = epTimeOptionsHtml(which, v);
+  el.classList.add('open');
+}
+function epSelectTime(which, value) {
+  if (which === 'start') {
+    epState.startTime = value;
+    if (epState.duration !== '' && epState.duration != null) {
+      epState.endTime = epMinutesToTime(epTimeToMinutes(value) + Number(epState.duration)); // auto-fills, stays editable
+    }
+  } else {
+    epState.endTime = value;
+  }
+  renderEpBody();
 }
 function epLocationToggleHtml() {
   return '<div class="selector-sub-row" style="margin:0 0 4px;">' +
@@ -2101,8 +2359,10 @@ function epReadyToCreateHtml(sourceType, entity) {
   }
   if (epState.entry === 'appt') {
     const et = EVENT_TYPES.find(e => e.key === epState.eventType);
+    const col = getEventColor(epState.eventColor);
     rows.push({ label: 'Event Type', value: et ? et.label : '—' });
-    rows.push({ label: 'Duration', value: (epState.duration || epState.duration === 0) ? (epState.duration + ' min') : '—' });
+    rows.push({ label: 'Event Color', value: col ? ('<span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:10px; height:10px; border-radius:50%; background:' + col.hex + '; display:inline-block;"></span>' + col.label + '</span>') : '—' });
+    rows.push({ label: 'Scheduled', value: epState.scheduledDate ? (fmtDateSlash(epState.scheduledDate) + (epState.startTime ? (', ' + fmtTimeLabel(epState.startTime) + (epState.endTime ? '–' + fmtTimeLabel(epState.endTime) : '')) : '')) : '—' });
     rows.push({ label: 'Location', value: epState.locationType === 'virtual' ? ('Virtual — ' + epState.platform) : 'On-Site' });
   } else if (epState.entry === 'proposal') {
     const addr = entity.address;
