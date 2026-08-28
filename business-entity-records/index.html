@@ -258,12 +258,35 @@
     text-align: left; font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
     color: var(--gray-400); padding: 11px 16px; border-bottom: 1px solid var(--gray-200); white-space: nowrap; background: var(--gray-50);
   }
+  #be-app table.data-table thead th.sortable { cursor: pointer; user-select: none; }
+  #be-app table.data-table thead th.sortable:hover { color: var(--gray-600); }
+  #be-app .sort-arrow { display: inline-block; font-size: 9px; margin-left: 2px; color: var(--gray-300); }
+  #be-app .sort-arrow.active { color: var(--purple); }
   #be-app table.data-table tbody td { padding: 12px 16px; border-bottom: 1px solid var(--gray-100); color: var(--gray-700); vertical-align: middle; }
   #be-app table.data-table tbody tr:last-child td { border-bottom: none; }
   #be-app table.data-table tbody tr.clickable { cursor: pointer; }
   #be-app table.data-table tbody tr.clickable:hover { background: var(--gray-50); }
+  #be-app table.data-table tbody tr.archived-row { opacity: 0.6; }
   #be-app .cell-name { font-weight: 700; color: var(--gray-900); }
   #be-app .cell-muted { color: var(--gray-400); }
+  #be-app .cell-created-abs { color: var(--gray-700); }
+  #be-app .cell-created-rel { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
+
+  /* ─── Table pagination bar (shared table-mechanics pattern) ─── */
+  #be-app .table-pagination-bar {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    padding: 12px 16px; border-top: 1px solid var(--gray-200); font-size: 12.5px; color: var(--gray-500);
+  }
+  #be-app .pagination-entries-select select {
+    height: 30px; border: 1.5px solid var(--gray-300); border-radius: 6px; padding: 0 6px; font-size: 12.5px; margin: 0 4px; background: #fff;
+  }
+  #be-app .pagination-controls { display: flex; align-items: center; gap: 4px; }
+  #be-app .pagination-nav-btn, #be-app .pagination-page-btn {
+    height: 30px; min-width: 30px; padding: 0 10px; border: 1.5px solid var(--gray-300); background: #fff; border-radius: 6px;
+    font-size: 12.5px; font-weight: 700; color: var(--gray-600); cursor: pointer;
+  }
+  #be-app .pagination-page-btn.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+  #be-app .pagination-nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
   #be-app .biz-pill {
     display: inline-flex; align-items: center; gap: 6px;
@@ -282,6 +305,7 @@
   #be-app .status-lead { background: #E6F3FA; color: #1D6FA5; }
   #be-app .status-customer { background: var(--green-light); color: #0F7A56; }
   #be-app .status-active { background: var(--green-light); color: #0F7A56; }
+  #be-app .status-archived { background: var(--gray-100); color: var(--gray-500); }
 
   /* ─── Section cards & form grid (design-system.md, soft-indigo tokens) ─── */
   #be-app {
@@ -633,6 +657,10 @@
           <select class="filter-select" id="industryFilter" onchange="filterBusinesses()">
             <option value="">All Industries</option>
           </select>
+          <div class="settings-toggle-row" style="margin-left:2px;">
+            <label class="switch"><input type="checkbox" id="bizShowArchivedToggle" onchange="toggleBizShowArchived(this.checked)"><span class="switch-track"></span></label>
+            <span class="settings-toggle-label" style="font-size:12.5px; white-space:nowrap;">Show Archived</span>
+          </div>
           <div class="toolbar-spacer"></div>
           <button class="btn btn-primary" onclick="openNewBusinessModal()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
@@ -643,19 +671,11 @@
         <div class="table-card">
           <div class="table-scroll">
             <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Business</th>
-                  <th>Legal Name</th>
-                  <th>Industry</th>
-                  <th>Primary Contact</th>
-                  <th>Contacts</th>
-                  <th>Phone</th>
-                </tr>
-              </thead>
+              <thead id="businessesThead"></thead>
               <tbody id="businessesTbody"></tbody>
             </table>
           </div>
+          <div class="table-pagination-bar" id="bizPaginationBar"></div>
         </div>
       </div>
 
@@ -957,7 +977,8 @@ const BUSINESSES = [
     phone: '(555) 201-4400',
     address: { street: '4820 Meridian Business Pkwy', city: 'Dallas', state: 'TX', zip: '75201' },
     billingSame: true, archived: false,
-    contactIds: ['c1', 'c2', 'c3']
+    contactIds: ['c1', 'c2', 'c3'],
+    createdAt: '2026-02-18'
   },
   {
     id: 'summit', legal: 'Summit Ridge Property Holdings Inc.', dba: 'Summit Ridge', displayDba: true,
@@ -968,7 +989,8 @@ const BUSINESSES = [
     billingSame: false,
     billingAddress: { street: 'PO Box 8842', city: 'Austin', state: 'TX', zip: '78708' },
     archived: false,
-    contactIds: ['c4', 'c5']
+    contactIds: ['c4', 'c5'],
+    createdAt: '2026-03-25'
   },
   {
     id: 'brightview', legal: 'Brightview Retail Facilities LLC', dba: '', displayDba: false,
@@ -977,7 +999,8 @@ const BUSINESSES = [
     phone: '(555) 622-8800',
     address: { street: '77 Galleria Way, Suite 300', city: 'Plano', state: 'TX', zip: '75024' },
     billingSame: true, archived: false,
-    contactIds: ['c6']
+    contactIds: ['c6'],
+    createdAt: '2026-04-30'
   },
   {
     id: 'northgate', legal: 'Northgate Medical Plaza Association', dba: 'Northgate Medical Plaza', displayDba: true,
@@ -986,7 +1009,8 @@ const BUSINESSES = [
     phone: '(555) 118-2200',
     address: { street: '900 Northgate Blvd', city: 'Fort Worth', state: 'TX', zip: '76102' },
     billingSame: true, archived: false,
-    contactIds: ['c7', 'c8']
+    contactIds: ['c7', 'c8'],
+    createdAt: '2026-05-22'
   },
   {
     id: 'cedarcreek', legal: 'Cedar Creek Homeowners Association', dba: 'Cedar Creek HOA', displayDba: true,
@@ -998,7 +1022,8 @@ const BUSINESSES = [
     billingSame: false,
     billingAddress: { street: '15 Cedar Creek Loop', city: 'Frisco', state: 'TX', zip: '75034' },
     archived: false,
-    contactIds: ['c9']
+    contactIds: ['c9'],
+    createdAt: '2026-06-19'
   },
   {
     id: 'westline', legal: 'Westline General Contracting Co.', dba: 'Westline GC', displayDba: true,
@@ -1008,7 +1033,20 @@ const BUSINESSES = [
     address: { street: '3300 Industrial Loop', city: 'Dallas', state: 'TX', zip: '75212' },
     billingSame: true, archived: false,
     contactIds: [],
-    hasActiveRecords: false // Brand-new entity, nothing created against it yet — demos the "editing Information has no downstream impact" case
+    hasActiveRecords: false, // Brand-new entity, nothing created against it yet — demos the "editing Information has no downstream impact" case
+    createdAt: '2026-08-25'
+  },
+  {
+    id: 'sunridge', legal: 'Sunridge Painting & Coatings LLC', dba: 'Sunridge Painting', displayDba: true,
+    industry: 'Commercial Painting Contractor',
+    email: 'office@sunridgepainting.com',
+    phone: '(555) 774-9020',
+    address: { street: '1180 Sunridge Pkwy', city: 'Arlington', state: 'TX', zip: '76010' },
+    billingSame: true,
+    archived: true, // Closed account — demos the Businesses list "Show Archived" toggle
+    contactIds: [],
+    hasActiveRecords: false,
+    createdAt: '2026-01-10'
   }
 ];
 
@@ -1046,6 +1084,19 @@ function fmtPhone(v) {
 function primaryEmail(biz) { return biz.email || '—'; }
 function primaryPhone(biz) { return biz.phone ? fmtPhone(biz.phone) : '—'; }
 function primaryContactFor(biz) { const id = biz.contactIds.find(cid => { const c = getContact(cid); return c && c.primaryFor === biz.id; }); return id ? getContact(id) : (biz.contactIds[0] ? getContact(biz.contactIds[0]) : null); }
+// Fixed reference date for this prototype's fictional "today" — relative labels are computed from
+// this, not the viewer's real clock, so they stay sensible no matter when the page is opened.
+const PROTO_TODAY = new Date('2026-08-28T00:00:00');
+function fmtDateAbs(iso) {
+  return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function fmtDateRelative(iso) {
+  const days = Math.round((PROTO_TODAY - new Date(iso + 'T00:00:00')) / 86400000);
+  if (days <= 0) return 'Today';
+  if (days === 1) return '1d ago';
+  if (days < 30) return days + 'd ago';
+  return Math.round(days / 30) + 'mo ago';
+}
 
 /* ═══════════════════════════════════════════════
    ROUTER
@@ -1087,32 +1138,121 @@ function showView(name) {
 }
 
 /* ═══════════════════════════════════════════════
-   BUSINESSES LIST
+   BUSINESSES LIST — sorting, pagination, and Show Archived match the table mechanics already
+   established elsewhere in the app (Sales List / At Risk Accounts): sortable column headers,
+   a per-page size selector, a "Showing X to Y of Z" status line, and Previous/page/Next controls.
    ═══════════════════════════════════════════════ */
+const BIZ_COLUMNS = [
+  { key: 'business', label: 'Business' },
+  { key: 'dba', label: 'DBA' },
+  { key: 'industry', label: 'Industry' },
+  { key: 'address', label: 'Business Address' },
+  { key: 'contacts', label: 'Contacts' },
+  { key: 'primaryContact', label: 'Primary Contact' },
+  { key: 'primaryPhone', label: 'Primary Phone' },
+  { key: 'primaryEmail', label: 'Primary Email' },
+  { key: 'created', label: 'Created Date' }
+];
+let bizSort = { key: 'business', dir: 'asc' };
+let bizPage = 1;
+let bizPageSize = 25;
+let bizShowArchived = false;
+
+function bizSortValue(b, key) {
+  const pc = primaryContactFor(b);
+  switch (key) {
+    case 'business': return bizDisplayLabel(b).toLowerCase();
+    case 'dba': return (b.dba || '').toLowerCase();
+    case 'industry': return b.industry.toLowerCase();
+    case 'address': return fmtAddr(b.address).toLowerCase();
+    case 'contacts': return b.contactIds.length;
+    case 'primaryContact': return pc ? pc.name.toLowerCase() : '';
+    case 'primaryPhone': return pc ? pc.phone : '';
+    case 'primaryEmail': return pc ? pc.email.toLowerCase() : '';
+    case 'created': return b.createdAt;
+    default: return '';
+  }
+}
+function sortBusinesses(key) {
+  if (bizSort.key === key) bizSort.dir = bizSort.dir === 'asc' ? 'desc' : 'asc';
+  else bizSort = { key: key, dir: 'asc' };
+  renderBusinessesTable();
+}
+function toggleBizShowArchived(checked) { bizShowArchived = checked; bizPage = 1; renderBusinessesTable(); }
+function goToBizPage(p) { bizPage = p; renderBusinessesTable(); }
+function setBizPageSize(n) { bizPageSize = parseInt(n, 10); bizPage = 1; renderBusinessesTable(); }
+
+function renderBizTableHead() {
+  document.getElementById('businessesThead').innerHTML = '<tr>' + BIZ_COLUMNS.map(col => {
+    const active = bizSort.key === col.key;
+    const arrow = active ? (bizSort.dir === 'asc' ? '▲' : '▼') : '▲▼';
+    return '<th class="sortable" onclick="sortBusinesses(\'' + col.key + '\')">' + col.label + ' <span class="sort-arrow' + (active ? ' active' : '') + '">' + arrow + '</span></th>';
+  }).join('') + '</tr>';
+}
+function renderBizPaginationBar(total, totalPages) {
+  const start = total === 0 ? 0 : (bizPage - 1) * bizPageSize + 1;
+  const end = Math.min(bizPage * bizPageSize, total);
+  let pageBtns = '';
+  for (let p = 1; p <= totalPages; p++) {
+    pageBtns += '<button type="button" class="pagination-page-btn' + (p === bizPage ? ' active' : '') + '" onclick="goToBizPage(' + p + ')">' + p + '</button>';
+  }
+  document.getElementById('bizPaginationBar').innerHTML =
+    '<div class="pagination-entries-select">Show' +
+      '<select onchange="setBizPageSize(this.value)">' +
+        [10, 25, 50, 100].map(n => '<option value="' + n + '"' + (n === bizPageSize ? ' selected' : '') + '>' + n + '</option>').join('') +
+      '</select>entries</div>' +
+    '<div class="pagination-status">Showing ' + start + ' to ' + end + ' of ' + total + ' entries</div>' +
+    '<div class="pagination-controls">' +
+      '<button type="button" class="pagination-nav-btn" ' + (bizPage <= 1 ? 'disabled' : '') + ' onclick="goToBizPage(' + (bizPage - 1) + ')">Previous</button>' +
+      pageBtns +
+      '<button type="button" class="pagination-nav-btn" ' + (bizPage >= totalPages ? 'disabled' : '') + ' onclick="goToBizPage(' + (bizPage + 1) + ')">Next</button>' +
+    '</div>';
+}
 function renderBusinessesTable(filterText, industry) {
-  const tbody = document.getElementById('businessesTbody');
-  const ft = (filterText || '').toLowerCase();
-  const ind = industry || '';
-  tbody.innerHTML = BUSINESSES.filter(b => {
+  const searchEl = document.querySelector('#view-businesses .search-input');
+  const industryEl = document.getElementById('industryFilter');
+  const ft = (filterText != null ? filterText : (searchEl ? searchEl.value : '')).toLowerCase();
+  const ind = industry != null ? industry : (industryEl ? industryEl.value : '');
+
+  let rows = BUSINESSES.filter(b => {
+    if (!bizShowArchived && b.archived) return false;
     if (ind && b.industry !== ind) return false;
-    if (!ft) return true;
-    return (b.legal + ' ' + b.dba).toLowerCase().includes(ft);
-  }).map(b => {
+    if (ft && !(b.legal + ' ' + b.dba).toLowerCase().includes(ft)) return false;
+    return true;
+  });
+  rows.sort((a, b) => {
+    const av = bizSortValue(a, bizSort.key), bv = bizSortValue(b, bizSort.key);
+    const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+    return bizSort.dir === 'asc' ? cmp : -cmp;
+  });
+
+  renderBizTableHead();
+
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / bizPageSize));
+  if (bizPage > totalPages) bizPage = totalPages;
+  const pageRows = rows.slice((bizPage - 1) * bizPageSize, (bizPage - 1) * bizPageSize + bizPageSize);
+
+  document.getElementById('businessesTbody').innerHTML = pageRows.map(b => {
     const pc = primaryContactFor(b);
-    return '<tr class="clickable" onclick="openBusinessProfile(\'' + b.id + '\')">' +
-      '<td><span class="biz-pill" style="cursor:default; background:transparent; padding:0;"><span class="biz-pill-icon">' + bizAbbrev(b) + '</span><span class="cell-name">' + bizDisplayLabel(b) + '</span></span></td>' +
-      '<td>' + b.legal + '</td>' +
+    return '<tr class="clickable' + (b.archived ? ' archived-row' : '') + '" onclick="openBusinessProfile(\'' + b.id + '\')">' +
+      '<td><span class="biz-pill" style="cursor:default; background:transparent; padding:0;"><span class="biz-pill-icon">' + bizAbbrev(b) + '</span><span class="cell-name">' + bizDisplayLabel(b) + '</span></span>' + (b.archived ? ' <span class="status-pill status-archived">Archived</span>' : '') + '</td>' +
+      '<td>' + (b.dba ? b.dba : '<span class="cell-muted">-</span>') + '</td>' +
       '<td>' + b.industry + '</td>' +
-      '<td>' + (pc ? pc.name : '<span class="cell-muted">—</span>') + '</td>' +
+      '<td>' + fmtAddr(b.address) + '</td>' +
       '<td>' + b.contactIds.length + '</td>' +
-      '<td>' + primaryPhone(b) + '</td>' +
+      '<td>' + (pc ? pc.name : '<span class="cell-muted">—</span>') + '</td>' +
+      '<td>' + (pc ? fmtPhone(pc.phone) : '<span class="cell-muted">—</span>') + '</td>' +
+      '<td>' + (pc ? pc.email : '<span class="cell-muted">—</span>') + '</td>' +
+      '<td><div class="cell-created-abs">' + fmtDateAbs(b.createdAt) + '</div><div class="cell-created-rel">' + fmtDateRelative(b.createdAt) + '</div></td>' +
     '</tr>';
-  }).join('') || '<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">🏢</div><div class="empty-state-title">No businesses match</div><div class="empty-state-desc">Try a different search or filter.</div></div></td></tr>';
+  }).join('') || '<tr><td colspan="9"><div class="empty-state"><div class="empty-state-icon">🏢</div><div class="empty-state-title">No businesses match</div><div class="empty-state-desc">Try a different search or filter.</div></div></td></tr>';
+
+  renderBizPaginationBar(total, totalPages);
 }
 function filterBusinesses() {
-  const text = document.querySelector('#view-businesses .search-input').value;
-  const industry = document.getElementById('industryFilter').value;
-  renderBusinessesTable(text, industry);
+  bizPage = 1;
+  renderBusinessesTable();
 }
 function populateIndustryFilter() {
   const sel = document.getElementById('industryFilter');
