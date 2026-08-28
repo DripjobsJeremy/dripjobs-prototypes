@@ -253,6 +253,12 @@
   #be-app select.filter-select:focus { outline: none; border-color: var(--purple); }
   #be-app .toolbar-spacer { flex: 1; }
 
+  /* ─── Contact List page header (matches production: heading + count, actions row) ─── */
+  #be-app .list-header-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  #be-app .list-heading { font-size: 20px; font-weight: 800; color: var(--gray-900); margin: 0; }
+  #be-app .list-heading-count { font-size: 14px; font-weight: 700; color: var(--gray-400); }
+  #be-app .list-header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
   /* ─── Data table ─── */
   #be-app .table-card { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; }
   #be-app .table-scroll { overflow-x: auto; }
@@ -751,13 +757,34 @@
 
       <!-- ══════════ VIEW: Contacts list ══════════ -->
       <div class="view" id="view-contacts">
-        <div class="toolbar-row">
-          <div class="search-input-wrap">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-            <input class="search-input" placeholder="Search contacts..." oninput="filterContacts(this.value)" />
+        <div class="list-header-row">
+          <h1 class="list-heading">Contact List <span class="list-heading-count" id="contactListCount"></span></h1>
+          <div class="list-header-actions">
+            <div class="dropdown-btn-wrap">
+              <button class="btn btn-outline btn-sm" onclick="toast('Not part of this prototype — out of scope for Business Entity Records V1.')">Bulk Actions ▾</button>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="toast('Not part of this prototype — out of scope for Business Entity Records V1.')">Import</button>
+            <button class="btn btn-outline btn-sm" onclick="toast('Not part of this prototype — out of scope for Business Entity Records V1.')">Export</button>
+            <button class="btn btn-primary btn-sm" onclick="toast('Not part of this prototype — out of scope for Business Entity Records V1.')">+ Add Contact</button>
           </div>
+        </div>
+
+        <div class="toolbar-row">
+          <div class="search-input-wrap" style="flex:1; min-width:180px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input class="search-input" placeholder="Search..." oninput="filterContacts(this.value)" />
+          </div>
+          <select class="filter-select" id="contactTypeFilter" onchange="filterContacts()">
+            <option value="">Type</option>
+          </select>
+          <select class="filter-select" id="contactSourceFilter" onchange="filterContacts()">
+            <option value="">Source</option>
+          </select>
+          <select class="filter-select" id="contactSalespersonFilter" onchange="filterContacts()">
+            <option value="">Salesperson</option>
+          </select>
           <select class="filter-select" id="contactStatusFilter" onchange="filterContacts()">
-            <option value="">All Statuses</option>
+            <option value="">Status</option>
             <option value="Lead">Lead</option>
             <option value="Customer">Customer</option>
           </select>
@@ -765,6 +792,10 @@
             <option value="">All Businesses</option>
           </select>
           <div class="settings-toggle-row" style="margin-left:2px;">
+            <label class="switch"><input type="checkbox" id="contactShowArchivedToggle" onchange="toggleContactShowArchived(this.checked)"><span class="switch-track"></span></label>
+            <span class="settings-toggle-label" style="font-size:12.5px; white-space:nowrap;">Show Archived</span>
+          </div>
+          <div class="settings-toggle-row">
             <label class="switch"><input type="checkbox" id="contactShowBusinessToggle" onchange="toggleContactShowBusiness(this.checked)"><span class="switch-track"></span></label>
             <span class="settings-toggle-label" style="font-size:12.5px; white-space:nowrap;">Show Business</span>
           </div>
@@ -773,18 +804,11 @@
         <div class="table-card">
           <div class="table-scroll">
             <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th class="biz-col" style="display:none;">Business</th>
-                  <th>Phone</th>
-                  <th>Email</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
+              <thead id="contactsThead"></thead>
               <tbody id="contactsTbody"></tbody>
             </table>
           </div>
+          <div class="table-pagination-bar" id="contactPaginationBar"></div>
         </div>
       </div>
 
@@ -1151,20 +1175,24 @@ const BUSINESSES = [
   }
 ];
 
+// type/source/salesperson/balance/createdAt are this prototype's own placeholder demo values added
+// to match the real Contact List column set (BR: Contacts tab rebuilt to match production) — not
+// sourced from real account data. Business-affiliated contacts leave Type blank, matching how
+// several real rows in the reference screenshot also show a blank Type.
 const CONTACTS = [
-  { id: 'c1', name: 'Karen Whitfield', role: 'Property Manager', phone: '(555) 201-4410', email: 'karen.whitfield@acmepaintinggroup.com', status: 'Customer', businessId: 'acme', primaryFor: 'acme' },
-  { id: 'c2', name: 'Tom Reyes', role: 'Facilities Coordinator', phone: '(555) 201-4422', email: 'tom.reyes@acmepaintinggroup.com', status: 'Customer', businessId: 'acme' },
-  { id: 'c3', name: 'Dana Cho', role: 'AP Contact', phone: '(555) 201-4433', email: 'dana.cho@acmepaintinggroup.com', status: 'Customer', businessId: 'acme' },
-  { id: 'c4', name: 'Marcus Ibsen', role: 'Owner', phone: '(555) 340-1191', email: 'marcus@summitridgeholdings.com', status: 'Customer', businessId: 'summit', primaryFor: 'summit' },
-  { id: 'c5', name: 'Priya Nadeem', role: 'Facilities Coordinator', phone: '(555) 340-1198', email: 'priya@summitridgeholdings.com', status: 'Lead', businessId: 'summit' },
-  { id: 'c6', name: 'Chris Halloway', role: 'Store Operations Lead', phone: '(555) 622-8810', email: 'chris.h@brightviewretail.com', status: 'Customer', businessId: 'brightview', primaryFor: 'brightview' },
-  { id: 'c7', name: 'Dr. Angela Ferris', role: 'Practice Administrator', phone: '(555) 118-2201', email: 'aferris@northgatemedplaza.org', status: 'Customer', businessId: 'northgate', primaryFor: 'northgate' },
-  { id: 'c8', name: 'Ben Okafor', role: 'Facilities Coordinator', phone: '(555) 118-2209', email: 'bokafor@northgatemedplaza.org', status: 'Customer', businessId: 'northgate' },
-  { id: 'c9', name: 'Linda Marsh', role: 'HOA Board President', phone: '(555) 902-7745', email: 'lmarsh@cedarcreekhoa.com', status: 'Customer', businessId: 'cedarcreek', primaryFor: 'cedarcreek' },
-  { id: 'c10', name: 'James Whitfield', role: null, phone: '(555) 774-2210', email: 'jameswhitfield@gmail.com', status: 'Lead', businessId: null, address: { street: '482 Willow Creek Dr', city: 'Plano', state: 'TX', zip: '75025' } },
+  { id: 'c1', name: 'Karen Whitfield', role: 'Property Manager', phone: '(555) 201-4410', email: 'karen.whitfield@acmepaintinggroup.com', status: 'Customer', businessId: 'acme', primaryFor: 'acme', type: '', source: 'Referral', salesperson: 'Jordan P.', balance: 0, createdAt: '2026-02-18' },
+  { id: 'c2', name: 'Tom Reyes', role: 'Facilities Coordinator', phone: '(555) 201-4422', email: 'tom.reyes@acmepaintinggroup.com', status: 'Customer', businessId: 'acme', type: '', source: 'Referral', salesperson: 'Jordan P.', balance: 1250, createdAt: '2026-02-20' },
+  { id: 'c3', name: 'Dana Cho', role: 'AP Contact', phone: '(555) 201-4433', email: 'dana.cho@acmepaintinggroup.com', status: 'Customer', businessId: 'acme', type: '', source: 'Referral', salesperson: '', balance: 0, createdAt: '2026-02-22' },
+  { id: 'c4', name: 'Marcus Ibsen', role: 'Owner', phone: '(555) 340-1191', email: 'marcus@summitridgeholdings.com', status: 'Customer', businessId: 'summit', primaryFor: 'summit', type: '', source: 'Google', salesperson: 'Maria Sutton', balance: 0, createdAt: '2026-03-25' },
+  { id: 'c5', name: 'Priya Nadeem', role: 'Facilities Coordinator', phone: '(555) 340-1198', email: 'priya@summitridgeholdings.com', status: 'Lead', businessId: 'summit', type: '', source: 'Google', salesperson: 'Maria Sutton', balance: 340, createdAt: '2026-03-28' },
+  { id: 'c6', name: 'Chris Halloway', role: 'Store Operations Lead', phone: '(555) 622-8810', email: 'chris.h@brightviewretail.com', status: 'Customer', businessId: 'brightview', primaryFor: 'brightview', type: '', source: 'Website', salesperson: 'Chris Boyd', balance: 0, createdAt: '2026-04-30' },
+  { id: 'c7', name: 'Dr. Angela Ferris', role: 'Practice Administrator', phone: '(555) 118-2201', email: 'aferris@northgatemedplaza.org', status: 'Customer', businessId: 'northgate', primaryFor: 'northgate', type: '', source: 'Website', salesperson: 'Elena Vasquez', balance: 0, createdAt: '2026-05-22' },
+  { id: 'c8', name: 'Ben Okafor', role: 'Facilities Coordinator', phone: '(555) 118-2209', email: 'bokafor@northgatemedplaza.org', status: 'Customer', businessId: 'northgate', type: '', source: 'Website', salesperson: '', balance: 0, createdAt: '2026-05-24' },
+  { id: 'c9', name: 'Linda Marsh', role: 'HOA Board President', phone: '(555) 902-7745', email: 'lmarsh@cedarcreekhoa.com', status: 'Customer', businessId: 'cedarcreek', primaryFor: 'cedarcreek', type: '', source: 'Referral', salesperson: 'Jordan P.', balance: 0, createdAt: '2026-06-19' },
+  { id: 'c10', name: 'James Whitfield', role: null, phone: '(555) 774-2210', email: 'jameswhitfield@gmail.com', status: 'Lead', businessId: null, address: { street: '482 Willow Creek Dr', city: 'Plano', state: 'TX', zip: '75025' }, type: 'Homeowner', source: 'Google', salesperson: 'Maria Sutton', balance: 4120, createdAt: '2026-07-02' },
   // No saved address on file (demos the Personal Project blank-fallback branch)
-  { id: 'c11', name: 'Sara Delgado', role: null, phone: '(555) 774-3390', email: 'saradelgado22@gmail.com', status: 'Customer', businessId: null, address: null },
-  { id: 'c12', name: 'Mike Feldman', role: null, phone: '(555) 774-4410', email: 'mfeldman.home@gmail.com', status: 'Lead', businessId: null, address: { street: '9 Larkspur Ct', city: 'Frisco', state: 'TX', zip: '75035' } }
+  { id: 'c11', name: 'Sara Delgado', role: null, phone: '(555) 774-3390', email: 'saradelgado22@gmail.com', status: 'Customer', businessId: null, address: null, type: 'Homeowner', source: 'Instagram', salesperson: 'Chris Boyd', balance: 0, createdAt: '2026-07-15' },
+  { id: 'c12', name: 'Mike Feldman', role: null, phone: '(555) 774-4410', email: 'mfeldman.home@gmail.com', status: 'Lead', businessId: null, address: { street: '9 Larkspur Ct', city: 'Frisco', state: 'TX', zip: '75035' }, type: 'Homeowner', source: 'Door Knocking', salesperson: '', balance: 899, createdAt: '2026-07-20' }
 ];
 
 function getBiz(id) { return BUSINESSES.find(b => b.id === id); }
@@ -1904,28 +1932,48 @@ function saveNewBusiness() {
 }
 
 /* ═══════════════════════════════════════════════
-   CONTACTS LIST + PROFILE
+   CONTACTS LIST + PROFILE — column set, filter bar, sorting, and pagination rebuilt to match the
+   real production Contact List (screenshot), with "Show Business" + its column/filter layered on
+   top per BR12. Sorting/pagination mechanics mirror the Businesses list.
    ═══════════════════════════════════════════════ */
+function fmtCurrency(n) { return '$' + (n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+const CONTACT_COLUMNS = [
+  { key: 'customer', label: 'Customer' },
+  { key: 'business', label: 'Business' },
+  { key: 'email', label: 'Email' },
+  { key: 'phone', label: 'Phone' },
+  { key: 'type', label: 'Type' },
+  { key: 'source', label: 'Source' },
+  { key: 'address', label: 'Address' },
+  { key: 'salesperson', label: 'Salesperson' },
+  { key: 'balance', label: 'Balance' },
+  { key: 'created', label: 'Created Date' }
+];
 let contactShowBusiness = false;
-function renderContactsTable(filterText, status, businessId) {
-  const tbody = document.getElementById('contactsTbody');
-  const ft = (filterText || '').toLowerCase();
-  tbody.innerHTML = CONTACTS.filter(c => {
-    if (status && c.status !== status) return false;
-    if (contactShowBusiness && !c.businessId) return false; // BR12: ON filters to only Business-associated Contacts
-    if (businessId && c.businessId !== businessId) return false;
-    if (ft && !c.name.toLowerCase().includes(ft)) return false;
-    return true;
-  }).map(c => {
-    const biz = c.businessId ? getBiz(c.businessId) : null;
-    return '<tr>' +
-      '<td class="clickable" onclick="openContactProfile(\'' + c.id + '\')"><span class="cell-name">' + c.name + '</span></td>' +
-      '<td class="biz-col" style="display:' + (contactShowBusiness ? '' : 'none') + ';">' + (biz ? '<span class="biz-pill" onclick="openBusinessProfile(\'' + biz.id + '\')">' + bizDisplayLabel(biz) + '</span>' : '<span class="no-biz">Unassociated</span>') + '</td>' +
-      '<td>' + c.phone + '</td>' +
-      '<td>' + c.email + '</td>' +
-      '<td>' + (c.archived ? '<span class="status-pill status-archived">Archived</span>' : '<span class="status-pill status-' + c.status.toLowerCase() + '">' + c.status + '</span>') + '</td>' +
-    '</tr>';
-  }).join('') || '<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">👤</div><div class="empty-state-title">No contacts match</div></div></td></tr>';
+let contactShowArchived = false;
+let contactSort = { key: 'customer', dir: 'asc' };
+let contactPage = 1;
+let contactPageSize = 15;
+
+function contactSortValue(c, key) {
+  switch (key) {
+    case 'customer': return c.name.toLowerCase();
+    case 'business': return c.businessId ? bizDisplayLabel(getBiz(c.businessId)).toLowerCase() : '';
+    case 'email': return (c.email || '').toLowerCase();
+    case 'phone': return c.phone || '';
+    case 'type': return (c.type || '').toLowerCase();
+    case 'source': return (c.source || '').toLowerCase();
+    case 'address': return fmtAddr(c.address).toLowerCase();
+    case 'salesperson': return (c.salesperson || '').toLowerCase();
+    case 'balance': return c.balance || 0;
+    case 'created': return c.createdAt || '';
+    default: return '';
+  }
+}
+function sortContacts(key) {
+  if (contactSort.key === key) contactSort.dir = contactSort.dir === 'asc' ? 'desc' : 'asc';
+  else contactSort = { key: key, dir: 'asc' };
+  renderContactsTable();
 }
 function toggleContactShowBusiness(checked) {
   contactShowBusiness = checked;
@@ -1933,15 +1981,109 @@ function toggleContactShowBusiness(checked) {
   if (!checked) document.getElementById('contactBusinessFilter').value = '';
   filterContacts();
 }
+function toggleContactShowArchived(checked) { contactShowArchived = checked; contactPage = 1; renderContactsTable(); }
+function goToContactPage(p) { contactPage = p; renderContactsTable(); }
+function setContactPageSize(n) { contactPageSize = parseInt(n, 10); contactPage = 1; renderContactsTable(); }
+
+function renderContactTableHead() {
+  document.getElementById('contactsThead').innerHTML = '<tr>' + CONTACT_COLUMNS.map(col => {
+    const active = contactSort.key === col.key;
+    const arrow = active ? (contactSort.dir === 'asc' ? '▲' : '▼') : '▲▼';
+    const bizClass = col.key === 'business' ? ' biz-col' : '';
+    const bizStyle = col.key === 'business' ? ' style="display:' + (contactShowBusiness ? '' : 'none') + ';"' : '';
+    return '<th class="sortable' + bizClass + '"' + bizStyle + ' onclick="sortContacts(\'' + col.key + '\')">' + col.label + ' <span class="sort-arrow' + (active ? ' active' : '') + '">' + arrow + '</span></th>';
+  }).join('') + '</tr>';
+}
+function renderContactPaginationBar(total, totalPages) {
+  const start = total === 0 ? 0 : (contactPage - 1) * contactPageSize + 1;
+  const end = Math.min(contactPage * contactPageSize, total);
+  let pageBtns = '';
+  for (let p = 1; p <= totalPages; p++) {
+    pageBtns += '<button type="button" class="pagination-page-btn' + (p === contactPage ? ' active' : '') + '" onclick="goToContactPage(' + p + ')">' + p + '</button>';
+  }
+  document.getElementById('contactPaginationBar').innerHTML =
+    '<div class="pagination-entries-select">Show' +
+      '<select onchange="setContactPageSize(this.value)">' +
+        [10, 15, 25, 50, 100].map(n => '<option value="' + n + '"' + (n === contactPageSize ? ' selected' : '') + '>' + n + '</option>').join('') +
+      '</select>entries</div>' +
+    '<div class="pagination-status">Showing ' + start + ' to ' + end + ' of ' + total + ' entries</div>' +
+    '<div class="pagination-controls">' +
+      '<button type="button" class="pagination-nav-btn" ' + (contactPage <= 1 ? 'disabled' : '') + ' onclick="goToContactPage(' + (contactPage - 1) + ')">Previous</button>' +
+      pageBtns +
+      '<button type="button" class="pagination-nav-btn" ' + (contactPage >= totalPages ? 'disabled' : '') + ' onclick="goToContactPage(' + (contactPage + 1) + ')">Next</button>' +
+    '</div>';
+}
+function renderContactsTable(filterText, status, businessId) {
+  const searchEl = document.querySelector('#view-contacts .search-input');
+  const ft = (filterText != null ? filterText : (searchEl ? searchEl.value : '')).toLowerCase();
+  const type = document.getElementById('contactTypeFilter').value;
+  const source = document.getElementById('contactSourceFilter').value;
+  const salesperson = document.getElementById('contactSalespersonFilter').value;
+  const stat = status != null ? status : document.getElementById('contactStatusFilter').value;
+  const biz = businessId != null ? businessId : (contactShowBusiness ? document.getElementById('contactBusinessFilter').value : '');
+
+  let rows = CONTACTS.filter(c => {
+    if (contactShowArchived ? !c.archived : c.archived) return false; // exclusive, matches the Businesses list's Show Archived
+    if (stat && c.status !== stat) return false;
+    if (type && (c.type || '') !== type) return false;
+    if (source && (c.source || '') !== source) return false;
+    if (salesperson && (c.salesperson || '') !== salesperson) return false;
+    if (contactShowBusiness && !c.businessId) return false; // BR12: ON filters to only Business-associated Contacts
+    if (biz && c.businessId !== biz) return false;
+    if (ft && !c.name.toLowerCase().includes(ft)) return false;
+    return true;
+  });
+  rows.sort((a, b) => {
+    const av = contactSortValue(a, contactSort.key), bv = contactSortValue(b, contactSort.key);
+    const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+    return contactSort.dir === 'asc' ? cmp : -cmp;
+  });
+
+  renderContactTableHead();
+
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / contactPageSize));
+  if (contactPage > totalPages) contactPage = totalPages;
+  const pageRows = rows.slice((contactPage - 1) * contactPageSize, (contactPage - 1) * contactPageSize + contactPageSize);
+  const colCount = CONTACT_COLUMNS.length;
+
+  document.getElementById('contactsTbody').innerHTML = pageRows.map(c => {
+    const biz = c.businessId ? getBiz(c.businessId) : null;
+    return '<tr>' +
+      '<td class="clickable" onclick="openContactProfile(\'' + c.id + '\')"><span class="cell-name">' + c.name + '</span>' + (c.archived ? ' <span class="status-pill status-archived">Archived</span>' : '') + '</td>' +
+      '<td class="biz-col" style="display:' + (contactShowBusiness ? '' : 'none') + ';">' + (biz ? '<span class="biz-pill" onclick="openBusinessProfile(\'' + biz.id + '\')">' + bizDisplayLabel(biz) + '</span>' : '<span class="no-biz">Unassociated</span>') + '</td>' +
+      '<td>' + c.email + '</td>' +
+      '<td>' + c.phone + '</td>' +
+      '<td>' + (c.type || '<span class="cell-muted">—</span>') + '</td>' +
+      '<td>' + (c.source || '<span class="cell-muted">—</span>') + '</td>' +
+      '<td>' + fmtAddr(c.address) + '</td>' +
+      '<td>' + (c.salesperson || '<span class="cell-muted">—</span>') + '</td>' +
+      '<td>' + fmtCurrency(c.balance) + '</td>' +
+      '<td><div class="cell-created-abs">' + fmtDateAbs(c.createdAt) + '</div><div class="cell-created-rel">' + fmtDateRelative(c.createdAt) + '</div></td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan="' + colCount + '"><div class="empty-state"><div class="empty-state-icon">👤</div><div class="empty-state-title">No contacts match</div><div class="empty-state-desc">Try a different search or filter.</div></div></td></tr>';
+
+  renderContactPaginationBar(total, totalPages);
+  const countEl = document.getElementById('contactListCount');
+  if (countEl) countEl.textContent = '(' + total + ' contact' + (total === 1 ? '' : 's') + ')';
+}
 function filterContacts() {
-  const text = document.querySelector('#view-contacts .search-input').value;
-  const status = document.getElementById('contactStatusFilter').value;
-  const biz = contactShowBusiness ? document.getElementById('contactBusinessFilter').value : '';
-  renderContactsTable(text, status, biz);
+  contactPage = 1;
+  renderContactsTable();
 }
 function populateBusinessFilter() {
   const sel = document.getElementById('contactBusinessFilter');
   sel.innerHTML = '<option value="">All Businesses</option>' + BUSINESSES.map(b => '<option value="' + b.id + '">' + bizDisplayLabel(b) + '</option>').join('');
+}
+function populateContactFilters() {
+  const typeSel = document.getElementById('contactTypeFilter');
+  const sourceSel = document.getElementById('contactSourceFilter');
+  const spSel = document.getElementById('contactSalespersonFilter');
+  const types = new Set(), sources = new Set(), sps = new Set();
+  CONTACTS.forEach(c => { if (c.type) types.add(c.type); if (c.source) sources.add(c.source); if (c.salesperson) sps.add(c.salesperson); });
+  typeSel.innerHTML = '<option value="">Type</option>' + [...types].sort().map(t => '<option value="' + t + '">' + t + '</option>').join('');
+  sourceSel.innerHTML = '<option value="">Source</option>' + [...sources].sort().map(s => '<option value="' + s + '">' + s + '</option>').join('');
+  spSel.innerHTML = '<option value="">Salesperson</option>' + [...sps].sort().map(s => '<option value="' + s + '">' + s + '</option>').join('');
 }
 
 function openContactProfile(id) {
@@ -3053,6 +3195,7 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
    ═══════════════════════════════════════════════ */
 populateIndustryFilter();
 populateBusinessFilter();
+populateContactFilters();
 renderBusinessesTable();
 renderContactsTable();
 setEntryPoint('lead');
