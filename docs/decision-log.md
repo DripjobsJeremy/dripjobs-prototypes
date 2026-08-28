@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-28] Business Entity Records V1: real Communication block for New Appointment
+
+- Decision: Replaced the invented "Enable Reminders" toggle + Email/SMS/Both pills on New Appointment's Ready to Create step with the real Communication block from the "New On-Site Estimate" modal screenshot: separate Send Email / Send SMS toggles, a Drip Sequence dropdown with an info tooltip, a Disable Drips toggle (reusing the same state as New Proposal's), a "Next Drip: X" preview caption, a conditional SMS Message textarea (shown only when Send SMS is on, previewing the company template with merge fields and the selected Event Type's name substituted in), a static "Email Template" note, and a blue alert stating a Deal will be created in a stage named after the Event Type (e.g. "On-Site Estimate Scheduled"). Implemented that stated behavior for real: saving a New Appointment now creates both the Appointment and a Deal in that stage. New Proposal and other entry points keep the original simple Reminders/notify-method block, since only New Appointment's Communication section was shown in the screenshot.
+- Why: Jeremy provided screenshots of the real Communication section (SMS off and SMS on) and asked for New Appointment to include it.
+- Open question: Drip Sequence's other list options ("Estimate Follow-Up", "None") and their "Next Drip" preview text are my own placeholders — only "Appointment Information" / "Immediate Confirmation" is confirmed from the screenshot. The "<Event Type> Scheduled" Deal-stage naming is generalized from the one confirmed example (On-Site Estimate → "Estimate Scheduled") and isn't confirmed for other Event Types.
+
 ## [2026-08-28] Business Entity Records V1: "Entry Points" link upgraded to a real button
 
 - Decision: Replaced the "Creation Entry Points →" underlined text link in the Businesses page's "New in V1" banner with a solid `btn btn-primary` button labeled "Entry Points →", reusing the same trailing-action position (right-aligned, vertically centered in the alert). Removed the now-unused `.settings-alert-action` link styling.

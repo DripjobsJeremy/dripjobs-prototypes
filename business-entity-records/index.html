@@ -1989,11 +1989,20 @@ const EP_LEAD_SOURCES = [
 const EP_TEAM_MEMBERS = ['Jordan P.', 'Maria Sutton', 'Chris Boyd', 'Elena Vasquez'];
 const EP_RECORD_LABEL = { lead: 'Deal', appt: 'Appointment', proposal: 'Proposal', invoice: 'Invoice' };
 let nextInvoiceNo = 3005;
+// New Appointment's Communication block — Drip Sequence options and each one's "Next Drip" preview
+// are this prototype's own placeholders (not sourced from a screenshot, only the selected default
+// "Appointment Information" / "Immediate Confirmation" pairing is confirmed).
+const EP_DRIP_SEQUENCES = [
+  { key: 'appointment-information', label: 'Appointment Information', nextDrip: 'Immediate Confirmation' },
+  { key: 'estimate-follow-up', label: 'Estimate Follow-Up', nextDrip: '1 Day Before Reminder' },
+  { key: 'none', label: 'None', nextDrip: '—' }
+];
 const EP_STATE_DEFAULTS = {
   businessId: null, contactId: null, eventType: null, duration: '', eventColor: null, scheduledDate: null, startTime: '', endTime: '',
   locationType: 'onsite', platform: 'Zoom',
   proposalTemplate: 'cmc-ext-standard', leadSource: '', dealName: '', disableDrips: false, salesperson: 'Jordan P.', projectManager: '',
-  newBizConfirmed: false, pendingNewBiz: null, pendingNewContact: null, newBizContactMode: 'new', pendingExistingContactId: null
+  newBizConfirmed: false, pendingNewBiz: null, pendingNewContact: null, newBizContactMode: 'new', pendingExistingContactId: null,
+  sendEmail: true, sendSms: false, dripSequence: 'appointment-information'
 };
 let epState = Object.assign({ entry: 'lead', type: null, mode: null }, EP_STATE_DEFAULTS);
 function setEntryPoint(key) {
@@ -2462,19 +2471,22 @@ function epReadyToCreateHtml(sourceType, entity) {
       '<span style="color:var(--gray-800); font-weight:700; text-align:right;">' + r.value + '</span>' +
     '</div>'
   ).join('');
+  const communicationHtml = epState.entry === 'appt'
+    ? epCommunicationHtml()
+    : '<div class="settings-toggle-row" style="margin-top:16px;">' +
+        '<label class="switch"><input type="checkbox" checked><span class="switch-track"></span></label>' +
+        '<span class="settings-toggle-label">Enable Reminders</span>' +
+      '</div>' +
+      '<div class="selector-sub-row" style="margin:14px 0 4px; max-width:none; justify-content:flex-start;">' +
+        '<button type="button" class="pill-toggle selected" onclick="epSelectNotifyMethod(this)">Email</button>' +
+        '<button type="button" class="pill-toggle" onclick="epSelectNotifyMethod(this)">SMS</button>' +
+        '<button type="button" class="pill-toggle" onclick="epSelectNotifyMethod(this)">Both</button>' +
+      '</div>';
   return '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
     '<div class="settings-section-title">Ready to Create <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: Contact Info, Appointments, and Confirmation, item 4">🔗 BR: Ready to Create Confirmation</span></div>' +
     '<div class="settings-section-subtitle">Same confirmation component as New Appointment — final review before this record is created.</div>' +
     rowsHtml +
-    '<div class="settings-toggle-row" style="margin-top:16px;">' +
-      '<label class="switch"><input type="checkbox" checked><span class="switch-track"></span></label>' +
-      '<span class="settings-toggle-label">Enable Reminders</span>' +
-    '</div>' +
-    '<div class="selector-sub-row" style="margin:14px 0 4px; max-width:none; justify-content:flex-start;">' +
-      '<button type="button" class="pill-toggle selected" onclick="epSelectNotifyMethod(this)">Email</button>' +
-      '<button type="button" class="pill-toggle" onclick="epSelectNotifyMethod(this)">SMS</button>' +
-      '<button type="button" class="pill-toggle" onclick="epSelectNotifyMethod(this)">Both</button>' +
-    '</div>' +
+    communicationHtml +
     '<div class="settings-alert settings-alert--success" style="margin-top:16px; margin-bottom:14px;">' +
       '<div class="settings-alert-icon">✅</div>' +
       '<div><div class="settings-alert-title">Ready to create</div><div>Review the summary above, then save to create this record.</div></div>' +
@@ -2484,6 +2496,51 @@ function epReadyToCreateHtml(sourceType, entity) {
 }
 function epSelectNotifyMethod(btn) {
   btn.parentElement.querySelectorAll('.pill-toggle').forEach(b => b.classList.toggle('selected', b === btn));
+}
+
+/* ─── New Appointment's Communication block — Send Email/SMS toggles, Drip Sequence + Disable
+   Drips, a conditional SMS Message preview, and the note that saving also creates a Deal. Ported
+   from the real "New On-Site Estimate" modal's Communication section. ─── */
+function epCommunicationHtml() {
+  const et = EVENT_TYPES.find(e => e.key === epState.eventType);
+  const seq = EP_DRIP_SEQUENCES.find(d => d.key === epState.dripSequence);
+  const smsTemplate = '(Company Settings Template)\nHi, {first-name}! We\'ve scheduled your ' + (et ? et.label : 'appointment') +
+    ' for {appointment-time} on {appointment-date} at {appointment-location} with {salesperson-name}. Please let us know if you have any questions or need to make changes! Thank you! - {company-name}';
+  const dealStage = et ? (et.label + ' Scheduled') : 'Scheduled';
+  return '<div class="settings-section" style="margin-top:18px; margin-bottom:0; text-align:left;">' +
+      '<div class="settings-section-title">' +
+        '<span>✉️ Communication</span>' +
+        '<div style="display:flex; align-items:center; gap:16px; font-size:12px; font-weight:700; color:var(--gray-600);">' +
+          '<span style="display:flex; align-items:center; gap:8px;">Send Email <label class="switch"><input type="checkbox" ' + (epState.sendEmail ? 'checked' : '') + ' onchange="epState.sendEmail = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
+          '<span style="display:flex; align-items:center; gap:8px;">Send SMS <label class="switch"><input type="checkbox" ' + (epState.sendSms ? 'checked' : '') + ' onchange="epState.sendSms = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-top:12px;">' +
+        '<div class="settings-field" style="flex:1; margin-bottom:0;">' +
+          '<label class="settings-field-label">Drip Sequence <span title="The sequence of automated messages sent around this appointment." style="cursor:help;">ⓘ</span></label>' +
+          '<select class="select2" onchange="epState.dripSequence = this.value; renderEpBody();">' +
+            EP_DRIP_SEQUENCES.map(d => '<option value="' + d.key + '"' + (epState.dripSequence === d.key ? ' selected' : '') + '>' + d.label + '</option>').join('') +
+          '</select>' +
+        '</div>' +
+        '<div style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:var(--gray-600); padding-bottom:10px; white-space:nowrap;">' +
+          'Disable Drips <label class="switch"><input type="checkbox" ' + (epState.disableDrips ? 'checked' : '') + ' onchange="epState.disableDrips = this.checked; renderEpBody();"><span class="switch-track"></span></label>' +
+        '</div>' +
+      '</div>' +
+      '<div style="text-align:center; font-size:12px; color:var(--gray-500); margin-top:10px;">Next Drip: <strong style="color:var(--gray-800);">' + (seq ? seq.nextDrip : '—') + '</strong></div>' +
+      (epState.sendSms
+        ? '<div class="settings-field" style="margin-top:16px; margin-bottom:0;">' +
+            '<label class="settings-field-label">SMS Message</label>' +
+            '<textarea class="settings-field-input" rows="4" readonly style="height:auto; padding:10px 14px; font-family:inherit; resize:vertical;">' + smsTemplate + '</textarea>' +
+          '</div>'
+        : '') +
+      '<div class="settings-alert settings-alert--success" style="margin-top:16px; margin-bottom:0;">' +
+        '<div><strong>Email Template:</strong> To edit your email template please visit your Company Settings and click on the Templates tab.</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="settings-alert settings-alert--info" style="margin-top:14px; margin-bottom:0;">' +
+      '<div class="settings-alert-icon">ℹ️</div>' +
+      '<div>By submitting this appointment, a Deal will be created in <strong>' + dealStage + '</strong>.</div>' +
+    '</div>';
 }
 
 /* ─── Save — the missing terminal step: actually creates the Business/Contact (if new) plus the
@@ -2561,6 +2618,9 @@ function pushEpRecordOntoBusiness(biz, contact) {
       meta: epState.locationType === 'virtual' ? ('Virtual — ' + epState.platform) : 'On-Site',
       via, color: col ? col.hex : null
     });
+    // Per the Communication block's own note: submitting an Appointment also creates a Deal.
+    const dealStage = et ? (et.label + ' Scheduled') : 'Scheduled';
+    biz.deals.push({ title: (et ? et.label : 'Appointment') + ' — ' + bizDisplayLabel(biz), sub: 'Stage: ' + dealStage, meta: '—', via });
   } else if (epState.entry === 'proposal') {
     const tmpl = EP_PROPOSAL_TEMPLATES.find(t => t.key === epState.proposalTemplate);
     const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
