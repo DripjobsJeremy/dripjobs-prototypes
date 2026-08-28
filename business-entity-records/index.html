@@ -1998,7 +1998,7 @@ const EP_STATE_DEFAULTS = {
   businessId: null, contactId: null, eventType: null, duration: '', eventColor: null, scheduledDate: null, startTime: '', endTime: '',
   locationType: 'onsite', platform: 'Zoom',
   proposalTemplate: 'cmc-ext-standard', leadSource: '', dealName: '', disableDrips: false, salesperson: 'Jordan P.', projectManager: '',
-  newBizConfirmed: false, pendingNewBiz: null, pendingNewContact: null
+  newBizConfirmed: false, pendingNewBiz: null, pendingNewContact: null, newBizContactMode: 'new', pendingExistingContactId: null
 };
 let epState = Object.assign({ entry: 'lead', type: null, mode: null }, EP_STATE_DEFAULTS);
 function setEntryPoint(key) {
@@ -2509,24 +2509,33 @@ function epSaveRecord(sourceType) {
   }
   let biz, contact;
   if (epState.mode === 'new') {
-    if (!epState.pendingNewBiz || !epState.pendingNewContact) { toast('Complete the New Business form first.'); return; }
+    if (!epState.pendingNewBiz || (!epState.pendingNewContact && !epState.pendingExistingContactId)) { toast('Complete the New Business form first.'); return; }
     const bizId = 'biz' + (nextBizId++);
-    const cid = 'c' + (nextContactId++);
     biz = {
       id: bizId, legal: epState.pendingNewBiz.legal, dba: '', displayDba: false,
       industry: 'Commercial Painting Contractor', email: '', phone: '',
       address: epState.pendingNewBiz.address || { street: '', city: '', state: '', zip: '' },
-      billingSame: true, archived: false, contactIds: [cid],
+      billingSame: true, archived: false, contactIds: [],
       createdAt: PROTO_TODAY.toISOString().slice(0, 10),
       deals: [], proposals: [], appointments: [], invoices: [], payments: []
     };
     BUSINESSES.push(biz);
-    contact = {
-      id: cid, name: epState.pendingNewContact.name, role: null,
-      phone: epState.pendingNewContact.phone || '', email: epState.pendingNewContact.email || '',
-      status: 'Lead', businessId: bizId, primaryFor: bizId // first Contact associated always defaults to Primary
-    };
-    CONTACTS.push(contact);
+    if (epState.pendingExistingContactId) {
+      // Associating an already-existing (previously unassociated) contact — same rule as the
+      // Business Profile's Associate Contact modal: the first contact associated defaults to Primary.
+      contact = getContact(epState.pendingExistingContactId);
+      contact.businessId = bizId;
+      contact.primaryFor = bizId;
+    } else {
+      const cid = 'c' + (nextContactId++);
+      contact = {
+        id: cid, name: epState.pendingNewContact.name, role: null,
+        phone: epState.pendingNewContact.phone || '', email: epState.pendingNewContact.email || '',
+        status: 'Lead', businessId: bizId, primaryFor: bizId
+      };
+      CONTACTS.push(contact);
+    }
+    biz.contactIds.push(contact.id);
   } else {
     biz = getBiz(epState.businessId);
     contact = epState.contactId ? getContact(epState.contactId) : null;
@@ -2645,32 +2654,65 @@ function epSelectContact(cid) {
 }
 
 /* ─── "Business > New" — captures the new Business + its first Contact (always the Primary, per
-   the associate-contact rule), same shape across all four entry points. Nothing is created yet —
-   per the existing "the entity is created when the proposal is saved" note, creation is deferred
-   to the final Save on the Ready to Create step, once Continue below confirms these fields. ─── */
+   the associate-contact rule), same shape across all four entry points. The Contact can either be
+   an existing unassociated contact (same pool as the Business Profile's Associate Contact modal) or
+   a brand-new one typed here. Nothing is created yet — per the existing "the entity is created when
+   the proposal is saved" note, creation is deferred to the final Save on the Ready to Create step,
+   once Continue below confirms these fields. ─── */
 function epNewFormHtml() {
+  const mode = epState.newBizContactMode || 'new';
+  const unassociated = CONTACTS.filter(c => !c.businessId);
   return '<div style="max-width:420px; margin:0 auto;">' +
     '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Business Name</label><input class="settings-field-input" id="epNewBizName" placeholder="e.g. Acme Painting"></div>' +
-    '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label">Address</label><input class="settings-field-input" id="epNewBizAddress" placeholder="Street, City, State, ZIP"></div>' +
-    '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Contact Name</label><input class="settings-field-input" id="epNewContactName" placeholder="Full name"></div>' +
-    '<div style="display:flex; gap:10px;">' +
-      '<div class="settings-field" style="flex:1; margin-bottom:14px;"><label class="settings-field-label">Contact Phone</label><input class="settings-field-input formatted-phone-no" id="epNewContactPhone" placeholder="(555) 555-5555"></div>' +
-      '<div class="settings-field" style="flex:1; margin-bottom:14px;"><label class="settings-field-label">Contact Email</label><input class="settings-field-input" id="epNewContactEmail" type="email" placeholder="name@company.com"></div>' +
+    '<div class="settings-field" style="margin-bottom:18px;"><label class="settings-field-label">Address</label><input class="settings-field-input" id="epNewBizAddress" placeholder="Street, City, State, ZIP"></div>' +
+    '<div class="settings-group-label" style="margin-top:0;">Contact</div>' +
+    '<div class="selector-sub-row" style="margin:0 0 14px; max-width:none; justify-content:flex-start;">' +
+      '<button type="button" class="pill-toggle ' + (mode === 'existing' ? 'selected' : '') + '" onclick="epSelectNewBizContactMode(\'existing\')">Existing Contact</button>' +
+      '<button type="button" class="pill-toggle ' + (mode === 'new' ? 'selected' : '') + '" onclick="epSelectNewBizContactMode(\'new\')">New Contact</button>' +
     '</div>' +
+    (mode === 'existing'
+      ? '<div class="settings-field" style="margin-bottom:4px;">' +
+          '<label class="settings-field-label is-required">Contact</label>' +
+          '<select class="select2" id="epNewBizExistingContact">' +
+            '<option value="">Select a contact…</option>' +
+            unassociated.map(c => '<option value="' + c.id + '"' + (epState.pendingExistingContactId === c.id ? ' selected' : '') + '>' + c.name + (c.email ? ' — ' + c.email : '') + '</option>').join('') +
+          '</select>' +
+        '</div>' +
+        '<div class="settings-help" style="margin-bottom:14px;">Only unassociated contacts are shown — a contact can belong to one Business at a time.' +
+          (unassociated.length === 0 ? ' There are no unassociated contacts right now — switch to New Contact.' : '') +
+        '</div>'
+      : '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Contact Name</label><input class="settings-field-input" id="epNewContactName" placeholder="Full name"></div>' +
+        '<div style="display:flex; gap:10px;">' +
+          '<div class="settings-field" style="flex:1; margin-bottom:14px;"><label class="settings-field-label">Contact Phone</label><input class="settings-field-input formatted-phone-no" id="epNewContactPhone" placeholder="(555) 555-5555"></div>' +
+          '<div class="settings-field" style="flex:1; margin-bottom:14px;"><label class="settings-field-label">Contact Email</label><input class="settings-field-input" id="epNewContactEmail" type="email" placeholder="name@company.com"></div>' +
+        '</div>'
+    ) +
     '<button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="epConfirmNewBusiness()">Continue</button>' +
   '</div>';
+}
+function epSelectNewBizContactMode(mode) {
+  epState.newBizContactMode = mode;
+  renderEpBody();
 }
 function epConfirmNewBusiness() {
   const legal = document.getElementById('epNewBizName').value.trim();
   if (!legal) { toast('Business Name is required.'); document.getElementById('epNewBizName').focus(); return; }
-  const contactName = document.getElementById('epNewContactName').value.trim();
-  if (!contactName) { toast('Contact Name is required.'); document.getElementById('epNewContactName').focus(); return; }
   epState.pendingNewBiz = { legal, address: { street: document.getElementById('epNewBizAddress').value.trim(), city: '', state: '', zip: '' } };
-  epState.pendingNewContact = {
-    name: contactName,
-    phone: document.getElementById('epNewContactPhone').value.trim(),
-    email: document.getElementById('epNewContactEmail').value.trim()
-  };
+  if ((epState.newBizContactMode || 'new') === 'existing') {
+    const cid = document.getElementById('epNewBizExistingContact').value;
+    if (!cid) { toast('Select an existing contact, or switch to New Contact.'); return; }
+    epState.pendingExistingContactId = cid;
+    epState.pendingNewContact = null;
+  } else {
+    const contactName = document.getElementById('epNewContactName').value.trim();
+    if (!contactName) { toast('Contact Name is required.'); document.getElementById('epNewContactName').focus(); return; }
+    epState.pendingNewContact = {
+      name: contactName,
+      phone: document.getElementById('epNewContactPhone').value.trim(),
+      email: document.getElementById('epNewContactEmail').value.trim()
+    };
+    epState.pendingExistingContactId = null;
+  }
   epState.newBizConfirmed = true;
   renderEpBody();
 }
@@ -2678,10 +2720,12 @@ function epChangeNewBusiness() {
   epState.newBizConfirmed = false;
   epState.pendingNewBiz = null;
   epState.pendingNewContact = null;
+  epState.pendingExistingContactId = null;
   renderEpBody();
 }
 function epNewConfirmedBlockHtml() {
   const pseudoBiz = { id: null, legal: epState.pendingNewBiz.legal, dba: '', address: epState.pendingNewBiz.address };
+  const contactName = epState.pendingExistingContactId ? getContact(epState.pendingExistingContactId).name : epState.pendingNewContact.name;
   return '<div style="max-width:420px; margin:0 auto;">' +
     '<div class="settings-field" style="margin-bottom:4px;">' +
       '<label class="settings-field-label">Business (new)</label>' +
@@ -2691,14 +2735,14 @@ function epNewConfirmedBlockHtml() {
       '</div>' +
     '</div>' +
     '<div class="settings-field" style="margin-top:14px; margin-bottom:4px;">' +
-      '<label class="settings-field-label">Contact (new)</label>' +
+      '<label class="settings-field-label">Contact' + (epState.pendingExistingContactId ? '' : ' (new)') + '</label>' +
       '<div style="height:40px; display:flex; align-items:center; padding:0 14px; border:1px solid var(--st-color-border); border-radius:8px; background:var(--gray-50);">' +
-        '<span>' + epState.pendingNewContact.name + ' <span style="color:var(--gray-400); font-weight:600;">· Primary Contact</span></span>' +
+        '<span>' + contactName + ' <span style="color:var(--gray-400); font-weight:600;">· Primary Contact</span></span>' +
       '</div>' +
     '</div>' +
     '<div class="settings-alert settings-alert--success" style="margin-top:14px; margin-bottom:0;">' +
       '<div class="settings-alert-icon">✅</div>' +
-      '<div>"' + pseudoBiz.legal + '" and its Primary Contact are created when this ' + EP_RECORD_LABEL[epState.entry] + ' is saved below.</div>' +
+      '<div>"' + pseudoBiz.legal + '" is created, and ' + contactName + ' becomes its Primary Contact, when this ' + EP_RECORD_LABEL[epState.entry] + ' is saved below.</div>' +
     '</div>' +
     epAddressOrApptExtrasHtml('business', pseudoBiz) +
   '</div>';
