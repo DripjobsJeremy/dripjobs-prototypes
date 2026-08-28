@@ -1006,7 +1006,8 @@ const BUSINESSES = [
     phone: '(555) 405-6690',
     address: { street: '3300 Industrial Loop', city: 'Dallas', state: 'TX', zip: '75212' },
     billingSame: true, archived: false,
-    contactIds: []
+    contactIds: [],
+    hasActiveRecords: false // Brand-new entity, nothing created against it yet — demos the "editing Information has no downstream impact" case
   }
 ];
 
@@ -1043,7 +1044,7 @@ function primaryContactFor(biz) { const id = biz.contactIds.find(cid => { const 
    ═══════════════════════════════════════════════ */
 let currentBizId = null;
 let currentContactId = null;
-let demoSyncActive = false; // Phase 5 Primary Contact live-sync demo toggle, reset per business profile visit
+let demoSyncState = { contact: false, business: false }; // Phase 5 live-sync demo toggles (Primary Contact edit + Business Info edit), reset per business profile visit
 
 function showView(name) {
   document.querySelectorAll('#be-app .view').forEach(v => v.classList.remove('active'));
@@ -1130,7 +1131,7 @@ const TABS = [
 
 function openBusinessProfile(id, tab) {
   currentBizId = id;
-  demoSyncActive = false;
+  demoSyncState = { contact: false, business: false };
   const biz = getBiz(id);
   renderProfileHeader(biz);
   renderProfileTabs();
@@ -1241,61 +1242,98 @@ function infoTabHtml(biz) {
 }
 
 /* ═══════════════════════════════════════════════
-   DEMO: Primary Contact Live-Sync (stakeholder-walkthrough aid, not product UI)
-   Scripted before/after — does not mutate CONTACTS/BUSINESSES, only these mocked surfaces.
+   DEMO: Live-Sync Behavior (stakeholder-walkthrough aid, not product UI)
+   Two independent edit sources, same rule: a Contact's Primary email/phone changing, and a
+   Business's own Information changing (when it has active downstream records) both reflect
+   live everywhere the system renders from the record — Proposal Builder, Customer Portal, and
+   PDFs generated/re-downloaded after the change. A PDF already downloaded beforehand stays
+   static, since it's a file outside the system. Scripted before/after — does not mutate
+   CONTACTS/BUSINESSES, only these mocked surfaces.
    ═══════════════════════════════════════════════ */
 function demoLiveSyncHtml(biz) {
   const contact = primaryContactFor(biz);
-  const brChip = '<span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: Contact Info, Appointments, and Confirmation, item 1">🔗 BR: Primary Contact Live-Sync</span>';
-  if (!contact) {
+  const hasActiveRecords = biz.hasActiveRecords !== false;
+  const brChip = '<span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: Contact Info, Appointments, and Confirmation, item 1 — the same rule also governs a Business Information edit once the Business has active downstream records">🔗 BR: Primary Contact Live-Sync</span>';
+
+  if (!contact && !hasActiveRecords) {
     return '<div class="demo-banner">' +
       '<span class="demo-banner-label">🧪 Demo</span>' +
-      '<div class="demo-banner-title">Primary Contact Live-Sync ' + brChip + '</div>' +
-      '<div class="demo-banner-desc">Simulates live-sync behavior for a stakeholder walkthrough — not a proposed UI addition. This Business has no Primary Contact yet; associate one and mark it Primary to try the demo.</div>' +
+      '<div class="demo-banner-title">Live-Sync Behavior ' + brChip + '</div>' +
+      '<div class="demo-banner-desc">Simulates live-sync behavior for a stakeholder walkthrough — not a proposed UI addition. ' + bizDisplayLabel(biz) + ' has no Primary Contact and no active Deals, Proposals, Appointments, Invoices, or Payments yet — there\'s nothing downstream to demo a sync against. Editing its Information right now would simply update the record.</div>' +
     '</div>';
   }
-  const before = { email: contact.email, phone: contact.phone };
-  const after = { email: demoAfterEmail(contact.email), phone: demoAfterPhone(contact.phone) };
-  const live = demoSyncActive ? after : before;
-  return '<div class="demo-banner">' +
+
+  const contactLive = contact ? (demoSyncState.contact ? { email: demoAfterEmail(contact.email), phone: demoAfterPhone(contact.phone) } : { email: contact.email, phone: contact.phone }) : null;
+  const bizLive = demoSyncState.business ? { email: demoAfterEmail(biz.email), phone: demoAfterPhone(biz.phone) } : { email: biz.email, phone: biz.phone };
+
+  let html = '<div class="demo-banner">' +
     '<span class="demo-banner-label">🧪 Demo</span>' +
-    '<div class="demo-banner-title">Primary Contact Live-Sync ' + brChip + '</div>' +
-    '<div class="demo-banner-desc">Simulates live-sync behavior for a stakeholder walkthrough — not a proposed UI addition. ' + contact.name + ' is the Primary Contact for ' + bizDisplayLabel(biz) + '; a Primary email/phone edit should reflect everywhere it’s shown.</div>' +
-    '<div style="font-size:12.5px; margin-bottom:12px;">Primary Contact on file: <strong>' + live.email + '</strong> · <strong>' + live.phone + '</strong>' + (demoSyncActive ? ' <span style="color:#FBBF24; font-weight:800;">(simulated edit)</span>' : '') + '</div>' +
-    '<button type="button" class="demo-sim-btn" onclick="toggleDemoLiveSync()">' + (demoSyncActive ? '↺ Revert simulation' : '🧪 Simulate: edit Primary email &amp; phone') + '</button>' +
-    '<div class="demo-surface-grid">' +
-      demoSurfaceCardHtml('Proposal Builder', demoProposalBuilderHtml(contact, live)) +
-      demoSurfaceCardHtml('Customer Portal', demoPortalContactCardHtml(contact, live)) +
-      demoSurfaceCardHtml('PDF Preview', demoPdfPreviewHtml(live)) +
+    '<div class="demo-banner-title">Live-Sync Behavior ' + brChip + '</div>' +
+    '<div class="demo-banner-desc">Simulates live-sync behavior for a stakeholder walkthrough — not a proposed UI addition. The same rule governs both sources below: a change reflects live everywhere the system renders from the record, whether the edit happens in-flow during New Lead, Proposal, or Appointment creation, or independently afterward.</div>';
+
+  if (contact) {
+    html += '<div style="font-size:12.5px; margin-bottom:8px;">Primary Contact on file: <strong>' + contactLive.email + '</strong> · <strong>' + contactLive.phone + '</strong>' + (demoSyncState.contact ? ' <span style="color:#FBBF24; font-weight:800;">(simulated edit)</span>' : '') + '<br>' +
+      '<button type="button" class="demo-sim-btn" style="margin-top:6px;" onclick="toggleDemoLiveSync(\'contact\')">' + (demoSyncState.contact ? '↺ Revert Contact simulation' : '🧪 Simulate: edit Primary email &amp; phone') + '</button></div>';
+  } else {
+    html += '<div class="demo-banner-desc" style="margin-bottom:8px;">' + bizDisplayLabel(biz) + ' has no Primary Contact yet — associate one and mark it Primary to try that side of the demo.</div>';
+  }
+
+  if (hasActiveRecords) {
+    html += '<div style="font-size:12.5px; margin-bottom:4px;">Business Info on file: <strong>' + bizLive.email + '</strong> · <strong>' + bizLive.phone + '</strong>' + (demoSyncState.business ? ' <span style="color:#FBBF24; font-weight:800;">(simulated edit)</span>' : '') + '<br>' +
+      '<button type="button" class="demo-sim-btn" style="margin-top:6px;" onclick="toggleDemoLiveSync(\'business\')">' + (demoSyncState.business ? '↺ Revert Business Info simulation' : '🧪 Simulate: edit Business email &amp; phone') + '</button></div>';
+  } else {
+    html += '<div class="settings-alert settings-alert--neutral" style="margin:2px 0 0;">' +
+      '<div class="settings-alert-icon">🕓</div>' +
+      '<div><div class="settings-alert-title">No active records yet</div>' +
+      '<div>' + bizDisplayLabel(biz) + ' has no active Deals, Proposals, Appointments, Invoices, or Payments — editing its Information right now simply updates the record. There\'s nothing downstream to keep in sync.</div></div>' +
+    '</div>';
+  }
+
+  html += '<div class="demo-surface-grid" style="margin-top:16px;">' +
+      demoSurfaceCardHtml('Proposal Builder', demoProposalBuilderHtml(biz, contact, bizLive, contactLive)) +
+      demoSurfaceCardHtml('Customer Portal', demoPortalContactCardHtml(biz, contact, bizLive, contactLive)) +
+      demoSurfaceCardHtml('PDF Preview', demoPdfPreviewHtml(biz, contact, bizLive, contactLive)) +
     '</div>' +
-    '<div class="demo-banner-desc" style="margin:14px 0 0;">A PDF already downloaded before this change stays exactly as it was generated — it’s a file outside the system with no live connection back to this record. Only a freshly generated PDF (like the preview above) reflects the edit.</div>' +
+    '<div class="demo-banner-desc" style="margin:14px 0 0;">A PDF already downloaded before either change stays exactly as it was generated — it’s a file outside the system with no live connection back to this record. Only a freshly generated PDF (like the preview above) reflects the edit.</div>' +
   '</div>';
+  return html;
 }
 function demoSurfaceCardHtml(label, innerHtml) {
   return '<div class="demo-surface-card"><div class="demo-surface-label">' + label + '</div>' + innerHtml + '</div>';
 }
-function demoProposalBuilderHtml(contact, live) {
+function demoBizLineHtml(biz, bizLive) {
+  return '<div style="font-size:10.5px; color:var(--gray-500); margin-bottom:8px; padding-bottom:8px; border-bottom:1px dashed var(--gray-200);">🏢 ' + bizDisplayLabel(biz) + ' · ' + bizLive.email + ' · ' + bizLive.phone + '</div>';
+}
+function demoContactBlockHtml(contact, contactLive) {
+  return contact
+    ? '<div style="font-size:12.5px; font-weight:700; color:var(--gray-800);">' + contact.name + '</div>' +
+      '<div style="font-size:11.5px; color:var(--gray-600);">' + contactLive.email + '</div>' +
+      '<div style="font-size:11.5px; color:var(--gray-600);">' + contactLive.phone + '</div>'
+    : '<div style="font-size:11.5px; color:var(--gray-400); font-style:italic;">No Primary Contact yet</div>';
+}
+function demoProposalBuilderHtml(biz, contact, bizLive, contactLive) {
   return '<div style="font-size:12px; font-weight:800; color:var(--gray-900);">Proposal #4821</div>' +
-    '<div style="font-size:11px; color:var(--gray-500); margin:2px 0 8px;">Prepared for</div>' +
-    '<div style="font-size:12.5px; font-weight:700; color:var(--gray-800);">' + contact.name + '</div>' +
-    '<div style="font-size:11.5px; color:var(--gray-600);">' + live.email + '</div>' +
-    '<div style="font-size:11.5px; color:var(--gray-600);">' + live.phone + '</div>';
+    demoBizLineHtml(biz, bizLive) +
+    '<div style="font-size:11px; color:var(--gray-500); margin-bottom:2px;">Prepared for</div>' +
+    demoContactBlockHtml(contact, contactLive);
 }
-function demoPortalContactCardHtml(contact, live) {
-  const initials = contact.name.split(' ').map(w => w[0]).join('').slice(0, 2);
-  return '<div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">' +
-      '<div style="width:26px; height:26px; border-radius:50%; background:var(--teal); color:#fff; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:800; flex-shrink:0;">' + initials + '</div>' +
-      '<div style="font-size:12.5px; font-weight:700; color:var(--gray-800);">' + contact.name + '</div>' +
-    '</div>' +
-    '<div style="font-size:11.5px; color:var(--gray-600);">✉️ ' + live.email + '</div>' +
-    '<div style="font-size:11.5px; color:var(--gray-600);">📞 ' + live.phone + '</div>';
+function demoPortalContactCardHtml(biz, contact, bizLive, contactLive) {
+  const initials = contact ? contact.name.split(' ').map(w => w[0]).join('').slice(0, 2) : null;
+  return demoBizLineHtml(biz, bizLive) +
+    (contact ?
+      '<div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">' +
+        '<div style="width:26px; height:26px; border-radius:50%; background:var(--teal); color:#fff; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:800; flex-shrink:0;">' + initials + '</div>' +
+        '<div style="font-size:12.5px; font-weight:700; color:var(--gray-800);">' + contact.name + '</div>' +
+      '</div>' +
+      '<div style="font-size:11.5px; color:var(--gray-600);">✉️ ' + contactLive.email + '</div>' +
+      '<div style="font-size:11.5px; color:var(--gray-600);">📞 ' + contactLive.phone + '</div>'
+      : '<div style="font-size:11.5px; color:var(--gray-400); font-style:italic;">No Primary Contact yet</div>');
 }
-function demoPdfPreviewHtml(live) {
+function demoPdfPreviewHtml(biz, contact, bizLive, contactLive) {
   return '<div style="border:1px solid var(--gray-200); border-radius:6px; padding:10px; background:var(--gray-50);">' +
     '<div style="font-size:9.5px; font-weight:800; color:var(--gray-400); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px;">Proposal.pdf — generated just now</div>' +
-    '<div style="height:5px; width:70%; background:var(--gray-200); border-radius:2px; margin-bottom:6px;"></div>' +
-    '<div style="font-size:10.5px; color:var(--gray-600);">' + live.email + '</div>' +
-    '<div style="font-size:10.5px; color:var(--gray-600);">' + live.phone + '</div>' +
+    demoBizLineHtml(biz, bizLive) +
+    demoContactBlockHtml(contact, contactLive) +
   '</div>';
 }
 function demoAfterEmail(email) {
@@ -1305,8 +1343,8 @@ function demoAfterEmail(email) {
 function demoAfterPhone(phone) {
   return phone.slice(0, -2) + '99';
 }
-function toggleDemoLiveSync() {
-  demoSyncActive = !demoSyncActive;
+function toggleDemoLiveSync(which) {
+  demoSyncState[which] = !demoSyncState[which];
   renderTabContent('information');
 }
 
