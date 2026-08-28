@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-28] Business Entity Records V1: Proposal Total only shows a number when a template actually has one
+
+- Decision: New Proposal's Ready to Create no longer always shows "$18,400.00" — Proposal Total is now driven by a `total` field on each `EP_PROPOSAL_TEMPLATES` entry (`fmtProposalTotal()`), and shows an em dash whenever that's null. Also removed the "Line Item: Exterior Repaint — West Wing" row entirely, since it was hardcoded and unrelated to whichever template is selected. Set `total: null` on all 5 templates (Blank included), since none of them are confirmed to be a simple fixed-price template rather than Packages/optional items, and this prototype has no package-pricing UI to derive a real number from. The Deal and Proposal records created on Save now use this same computed value for their dollar-amount field, so what gets saved matches what was shown in the summary.
+- Why: Jeremy clarified that Proposal Total should only display a number when the selected template actually has one — Blank and package/optional-item-based templates shouldn't show a total at all.
+- Open question: If any of the 4 named templates (CMC Exterior — Standard, CMC Interior — BRAND-AMBASSADOR, CMC Interior — Standard, EXT Paint + Pressure Wash) is actually a simple fixed-price template rather than package-based, tell me which one(s) and the real number, and it can be set directly on that template's `total` field.
+
 ## [2026-08-28] Business Entity Records V1: de-clutter Creation Entry Points layout for mobile
 
 - Decision: Widened the Creation Entry Points step container from 420px to 640px (Business/Contact selection, Appointment Details, Proposal Details, Ready to Create, and the Communication block all sit inside this one wrapper), since nothing required that narrow a column and it was the direct cause of the Communication section feeling cramped. Rebuilt the Communication block itself so each concern gets its own full-width row (title alone, then Send Email/Send SMS, then Drip Sequence + Disable Drips, then the Next Drip caption) instead of cramming the title and two toggles onto one line. Added a `@media (max-width: 520px)` rule so those rows stack to a single column on narrow viewports instead of squeezing. Also gave the Virtual Meeting Platform/URL fields their own `.settings-section` card ("Virtual Meeting Details") to match the On-Site Job Address card's treatment — they'd been floating unstyled below the Appointment Details card before.
