@@ -506,6 +506,7 @@
     border-radius: 8px; margin-top: 8px; cursor: pointer; font-size: 13px;
   }
   #be-app .typeahead-result:hover { border-color: var(--purple); background: var(--purple-light); }
+  #be-app #epExistingResults { max-height: 260px; overflow-y: auto; }
 
   #be-app .ep-contact-dropdown {
     display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 20;
@@ -2149,8 +2150,11 @@ function renderEpBusinessResults(q) {
   q = (q || '').toLowerCase();
   const el = document.getElementById('epExistingResults');
   if (!el) return;
-  const results = BUSINESSES.filter(b => !q || bizDisplayLabel(b).toLowerCase().includes(q));
-  el.innerHTML = results.slice(0, 5).map(b =>
+  // No result cap: a newly created Business must be selectable here immediately, without
+  // needing to search for it by name to page it into view. Archived Businesses are excluded,
+  // same as the main Businesses list's default (non-"Show Archived") view.
+  const results = BUSINESSES.filter(b => !b.archived && (!q || bizDisplayLabel(b).toLowerCase().includes(q)));
+  el.innerHTML = results.map(b =>
     '<div class="typeahead-result" onclick="epSelectBusiness(\'' + b.id + '\')"><span>' + bizDisplayLabel(b) + '<br><span style="color:var(--gray-400); font-size:11.5px;">' + b.legal + '</span></span><span class="btn-link">Select</span></div>'
   ).join('') || '<div class="empty-state"><div class="empty-state-desc">No businesses match.</div></div>';
 }

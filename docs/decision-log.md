@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-28] Business Entity Records V1: new Business not appearing in Creation Entry Points "Existing" picker
+
+- Decision: `renderEpBusinessResults()` (the Business search inside the New Lead/Appointment/Proposal/Invoice "Existing" picker) capped results at 5 with no recency ordering, so a Business created earlier in the session landed past the cutoff and never showed up unless the user searched for it by exact name — which they had no reason to know they needed to do. Removed the cap (added a scrollable max-height instead, matching the existing Contact dropdown's pattern) so every non-archived Business is listed and selectable by default. Also found and fixed a related gap while in there: this picker didn't exclude archived Businesses at all, so an archived Business was selectable for a brand-new Lead/Appointment/Proposal/Invoice — now filtered out, consistent with the main Businesses list's default view.
+- Why: A newly created record that silently doesn't appear where you'd immediately go looking for it reads as data loss, same class of issue as the earlier stale-list-view bugs.
+- Open question: None.
+
 ## [2026-08-28] Business Entity Records V1: Creation Entry Points link discoverability
 
 - Decision: The "Creation Entry Points" link in the Businesses list's "New in V1" banner was functional but easy to miss — small, inline, mid-sentence text with no underline, just a color change. Jeremy had to hunt for it despite the guide panel pointing at it directly. Added the design system's documented "trailing action link" alert pattern (`.settings-alert-action`: bold, underlined, right-aligned, separated from the body text) and moved the link there with an arrow ("Creation Entry Points →"), removing it from the sentence.
