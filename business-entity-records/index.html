@@ -260,13 +260,14 @@
   }
   #be-app table.data-table thead th.sortable { cursor: pointer; user-select: none; }
   #be-app table.data-table thead th.sortable:hover { color: var(--gray-600); }
-  #be-app .sort-arrow { display: inline-block; font-size: 9px; margin-left: 2px; color: var(--gray-300); }
-  #be-app .sort-arrow.active { color: var(--purple); }
+  #be-app .sort-arrow { display: inline-block; font-size: 9px; margin-left: 2px; color: var(--gray-300); opacity: 0; transition: opacity 0.1s ease; }
+  #be-app table.data-table thead th.sortable:hover .sort-arrow { opacity: 1; }
+  #be-app .sort-arrow.active { color: var(--purple); opacity: 1; }
   #be-app table.data-table tbody td { padding: 12px 16px; border-bottom: 1px solid var(--gray-100); color: var(--gray-700); vertical-align: middle; }
   #be-app table.data-table tbody tr:last-child td { border-bottom: none; }
+  #be-app table.data-table tbody tr:nth-child(even) { background: var(--gray-50); }
   #be-app table.data-table tbody tr.clickable { cursor: pointer; }
-  #be-app table.data-table tbody tr.clickable:hover { background: var(--gray-50); }
-  #be-app table.data-table tbody tr.archived-row { opacity: 0.6; }
+  #be-app table.data-table tbody tr.clickable:hover { background: var(--purple-light); }
   #be-app .cell-name { font-weight: 700; color: var(--gray-900); }
   #be-app .cell-muted { color: var(--gray-400); }
   #be-app .cell-created-abs { color: var(--gray-700); }
@@ -1215,7 +1216,7 @@ function renderBusinessesTable(filterText, industry) {
   const ind = industry != null ? industry : (industryEl ? industryEl.value : '');
 
   let rows = BUSINESSES.filter(b => {
-    if (!bizShowArchived && b.archived) return false;
+    if (bizShowArchived ? !b.archived : b.archived) return false; // Show Archived is an exclusive filter, not additive
     if (ind && b.industry !== ind) return false;
     if (ft && !(b.legal + ' ' + b.dba).toLowerCase().includes(ft)) return false;
     return true;
@@ -1235,8 +1236,8 @@ function renderBusinessesTable(filterText, industry) {
 
   document.getElementById('businessesTbody').innerHTML = pageRows.map(b => {
     const pc = primaryContactFor(b);
-    return '<tr class="clickable' + (b.archived ? ' archived-row' : '') + '" onclick="openBusinessProfile(\'' + b.id + '\')">' +
-      '<td><span class="biz-pill" style="cursor:default; background:transparent; padding:0;"><span class="biz-pill-icon">' + bizAbbrev(b) + '</span><span class="cell-name">' + bizDisplayLabel(b) + '</span></span>' + (b.archived ? ' <span class="status-pill status-archived">Archived</span>' : '') + '</td>' +
+    return '<tr class="clickable" onclick="openBusinessProfile(\'' + b.id + '\')">' +
+      '<td><span class="cell-name">' + bizDisplayLabel(b) + '</span>' + (b.archived ? ' <span class="status-pill status-archived">Archived</span>' : '') + '</td>' +
       '<td>' + (b.dba ? b.dba : '<span class="cell-muted">-</span>') + '</td>' +
       '<td>' + b.industry + '</td>' +
       '<td>' + fmtAddr(b.address) + '</td>' +
