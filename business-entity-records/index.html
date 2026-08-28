@@ -497,7 +497,6 @@
     border-radius: 8px; margin-top: 8px; cursor: pointer; font-size: 13px;
   }
   #be-app .typeahead-result:hover { border-color: var(--purple); background: var(--purple-light); }
-  #be-app #epExistingResults { max-height: 260px; overflow-y: auto; }
 
   #be-app .ep-contact-dropdown {
     display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 20;
@@ -762,9 +761,13 @@
             <option value="Lead">Lead</option>
             <option value="Customer">Customer</option>
           </select>
-          <select class="filter-select" id="contactBusinessFilter" onchange="filterContacts()">
+          <select class="filter-select biz-col" id="contactBusinessFilter" onchange="filterContacts()" style="display:none;">
             <option value="">All Businesses</option>
           </select>
+          <div class="settings-toggle-row" style="margin-left:2px;">
+            <label class="switch"><input type="checkbox" id="contactShowBusinessToggle" onchange="toggleContactShowBusiness(this.checked)"><span class="switch-track"></span></label>
+            <span class="settings-toggle-label" style="font-size:12.5px; white-space:nowrap;">Show Business</span>
+          </div>
         </div>
 
         <div class="table-card">
@@ -773,7 +776,7 @@
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Business</th>
+                  <th class="biz-col" style="display:none;">Business</th>
                   <th>Phone</th>
                   <th>Email</th>
                   <th>Status</th>
@@ -883,7 +886,7 @@
       <div class="guide-step-num">💡</div>
       <div>
         <div class="guide-step-title">Amber flags = open PRD questions</div>
-        <div class="guide-step-desc">A few interactions (Delete, Call Business) carry an amber "Assumption" flag where the PRD leaves the exact rule to Jason. Hover for the open item it maps to.</div>
+        <div class="guide-step-desc">A few interactions still carry an amber "Assumption" flag where the PRD leaves the exact rule open. Hover for the open item it maps to. (Delete and Call Business are now resolved per BR6/BR10 and no longer flagged.)</div>
       </div>
     </div>
   </div>
@@ -980,6 +983,15 @@
             <input class="settings-field-input" id="f_bZip" disabled />
           </div>
         </div>
+      </div>
+
+      <div id="newBizContactSection" style="margin-top:18px; padding-top:16px; border-top:1px solid var(--st-color-border);">
+        <div class="settings-section-title" style="margin-bottom:10px;">Primary Contact</div>
+        <div class="selector-sub-row" style="margin:0 0 14px; max-width:none; justify-content:flex-start;">
+          <button type="button" class="pill-toggle" id="newBizContactModeExisting" onclick="setNewBizContactMode('existing')">Existing Contact</button>
+          <button type="button" class="pill-toggle selected" id="newBizContactModeNew" onclick="setNewBizContactMode('new')">New Contact</button>
+        </div>
+        <div id="newBizContactFields"></div>
       </div>
 
       <div class="settings-alert settings-alert--warn" style="margin-top:18px; margin-bottom:0;">
@@ -1386,7 +1398,7 @@ function renderProfileHeader(biz) {
           (pc ? '<span class="profile-meta-item">⭐ Primary: <strong>' + pc.name + '</strong></span>' : '') +
         '</div>' +
         '<div class="profile-actions">' +
-          '<button class="btn btn-outline btn-sm" onclick="toast(\'Simulated call to ' + primaryPhone(biz) + '\')">📞 Call Business <span class="assumption-flag" title="Open Item #3: does Business Phone drive this, or the Primary Contact\'s number? Pending Jason.">?</span></button>' +
+          '<button class="btn btn-outline btn-sm" onclick="toast(\'Simulated call to ' + (biz.phone ? fmtPhone(biz.phone) : 'the Business&#39;s phone') + '\')">📞 Call Business</button>' +
           '<button class="btn btn-outline btn-sm" onclick="openEditBusinessModal(\'' + biz.id + '\')">✏️ Edit Business</button>' +
           '<button class="btn btn-outline btn-sm" onclick="archiveBusiness(\'' + biz.id + '\')">🗄️ Archive</button>' +
           '<button class="btn btn-danger btn-sm" onclick="openDeleteModal(\'' + biz.id + '\')">🗑️ Delete</button>' +
@@ -1666,14 +1678,16 @@ function archiveBusiness(id) {
 }
 function openDeleteModal(id) {
   const biz = getBiz(id);
-  const hasOpenWork = biz.contactIds.length > 0;
+  // BR6: delete is blocked when the Business has open Deals or Invoices (Jobs isn't a modeled entity in this
+  // prototype, so it's not checked here — flagged in the decision log).
+  const hasOpenWork = biz.deals.length > 0 || biz.invoices.length > 0;
   const body = document.getElementById('deleteModalBody');
   const footer = document.getElementById('deleteModalFooter');
   if (hasOpenWork) {
     body.innerHTML = '<div class="settings-alert settings-alert--danger" style="margin-bottom:0;">' +
       '<div class="settings-alert-icon">🚫</div>' +
-      '<div><div class="settings-alert-title">Delete blocked <span class="assumption-flag" title="Open Item #2: unconfirmed with Jason. Modeled here as blocking, matching the Contact-level precedent.">ASSUMPTION</span></div>' +
-      '<div>"' + bizDisplayLabel(biz) + '" has open Deals, Jobs, or Invoices associated through its contacts. Per an unconfirmed PRD assumption (Open Item #2), delete is blocked while those remain open. Archive instead to preserve the record and its history, or resolve the open items first.</div></div>' +
+      '<div><div class="settings-alert-title">Delete blocked</div>' +
+      '<div>"' + bizDisplayLabel(biz) + '" has open Deals or Invoices. Per BR6, delete is blocked while those remain open. Archive instead to preserve the record and its history.</div></div>' +
     '</div>';
     footer.innerHTML = '<button class="btn btn-outline" onclick="closeModal(\'modalDelete\')">Close</button><button class="btn btn-primary" onclick="closeModal(\'modalDelete\'); archiveBusiness(\'' + id + '\')">Archive Instead</button>';
   } else {
@@ -1753,25 +1767,66 @@ function removeAssociation(cid) {
    NEW BUSINESS MODAL
    ═══════════════════════════════════════════════ */
 let editingBizId = null;
+let newBizContactMode = 'new';
 function resetBusinessForm() {
   ['f_legalName','f_dba','f_email','f_phone','f_street','f_city','f_state','f_zip','f_bStreet','f_bCity','f_bState','f_bZip'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f_displayDba').checked = true;
   document.getElementById('f_industry').value = 'Commercial Painting Contractor';
   document.getElementById('f_billingSame').checked = true;
   toggleBillingFields();
+  newBizContactMode = 'new';
+  document.getElementById('newBizContactModeExisting').classList.remove('selected');
+  document.getElementById('newBizContactModeNew').classList.add('selected');
+  renderNewBizContactFields();
 }
 function toggleBillingFields() {
   const same = document.getElementById('f_billingSame').checked;
   document.querySelectorAll('.billing-address-field .settings-field-input').forEach(el => el.disabled = same);
 }
+/* ─── Primary Contact picker on the standalone New Business modal (BR: Creation Flow item 12) —
+   same Existing/New pattern as "Business > New" in the Creation Entry Points, reusing the same
+   unassociated-contacts pool. Create-only; hidden when editing an existing Business. ─── */
+function setNewBizContactMode(mode) {
+  newBizContactMode = mode;
+  document.getElementById('newBizContactModeExisting').classList.toggle('selected', mode === 'existing');
+  document.getElementById('newBizContactModeNew').classList.toggle('selected', mode === 'new');
+  renderNewBizContactFields();
+}
+function renderNewBizContactFields() {
+  const el = document.getElementById('newBizContactFields');
+  if (!el) return;
+  if (newBizContactMode === 'existing') {
+    const unassociated = CONTACTS.filter(c => !c.businessId && !c.archived);
+    el.innerHTML =
+      '<div class="settings-field" style="margin-bottom:4px;">' +
+        '<label class="settings-field-label is-required">Contact</label>' +
+        '<select class="select2" id="f_existingContact">' +
+          '<option value="">Select a contact…</option>' +
+          unassociated.map(c => '<option value="' + c.id + '">' + c.name + (c.email ? ' — ' + c.email : '') + '</option>').join('') +
+        '</select>' +
+      '</div>' +
+      '<div class="settings-help">Only unassociated contacts are shown — a contact can belong to one Business at a time.' +
+        (unassociated.length === 0 ? ' There are no unassociated contacts right now — switch to New Contact.' : '') +
+      '</div>';
+  } else {
+    el.innerHTML =
+      '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Contact Name</label><input class="settings-field-input" id="f_newContactName" placeholder="Full name"></div>' +
+      '<div style="display:flex; gap:10px;">' +
+        '<div class="settings-field" style="flex:1; margin-bottom:0;"><label class="settings-field-label">Contact Phone</label><input class="settings-field-input formatted-phone-no" id="f_newContactPhone" placeholder="(555) 555-5555"></div>' +
+        '<div class="settings-field" style="flex:1; margin-bottom:0;"><label class="settings-field-label">Contact Email</label><input class="settings-field-input" id="f_newContactEmail" type="email" placeholder="name@company.com"></div>' +
+      '</div>';
+  }
+}
 function openNewBusinessModal() {
   editingBizId = null;
   document.getElementById('bizModalTitle').textContent = 'New Business';
+  document.getElementById('newBizContactSection').style.display = '';
   resetBusinessForm();
   openModal('modalNewBusiness');
 }
 function openEditBusinessModal(id) {
   editingBizId = id;
+  document.getElementById('newBizContactSection').style.display = 'none';
   const b = getBiz(id);
   document.getElementById('bizModalTitle').textContent = 'Edit Business';
   document.getElementById('f_legalName').value = b.legal;
@@ -1815,13 +1870,35 @@ function saveNewBusiness() {
     document.getElementById('panel-information').dataset.rendered = '';
     renderTabContent('information');
   } else {
+    let contact;
+    if (newBizContactMode === 'existing') {
+      const cid = document.getElementById('f_existingContact').value;
+      if (!cid) { toast('Select an existing contact, or switch to New Contact.'); return; }
+      contact = getContact(cid);
+    } else {
+      const contactName = document.getElementById('f_newContactName').value.trim();
+      if (!contactName) { toast('Contact Name is required.'); document.getElementById('f_newContactName').focus(); return; }
+      contact = {
+        id: 'c' + (nextContactId++), name: contactName, role: null,
+        phone: document.getElementById('f_newContactPhone').value.trim(),
+        email: document.getElementById('f_newContactEmail').value.trim(),
+        status: 'Lead', businessId: null, primaryFor: null
+      };
+      CONTACTS.push(contact);
+    }
     const id = 'biz' + (nextBizId++);
     const createdAt = PROTO_TODAY.toISOString().slice(0, 10);
-    BUSINESSES.push(Object.assign({ id, contactIds: [], archived: false, createdAt }, data));
+    BUSINESSES.push(Object.assign({
+      id, contactIds: [contact.id], archived: false, createdAt,
+      deals: [], proposals: [], appointments: [], invoices: [], payments: []
+    }, data));
+    contact.businessId = id;
+    contact.primaryFor = id; // first Contact associated always defaults to Primary (BR5)
     closeModal('modalNewBusiness');
     toast('Business created.');
     renderBusinessesTable();
     populateIndustryFilter();
+    populateBusinessFilter();
     openBusinessProfile(id);
   }
 }
@@ -1829,11 +1906,13 @@ function saveNewBusiness() {
 /* ═══════════════════════════════════════════════
    CONTACTS LIST + PROFILE
    ═══════════════════════════════════════════════ */
+let contactShowBusiness = false;
 function renderContactsTable(filterText, status, businessId) {
   const tbody = document.getElementById('contactsTbody');
   const ft = (filterText || '').toLowerCase();
   tbody.innerHTML = CONTACTS.filter(c => {
     if (status && c.status !== status) return false;
+    if (contactShowBusiness && !c.businessId) return false; // BR12: ON filters to only Business-associated Contacts
     if (businessId && c.businessId !== businessId) return false;
     if (ft && !c.name.toLowerCase().includes(ft)) return false;
     return true;
@@ -1841,17 +1920,23 @@ function renderContactsTable(filterText, status, businessId) {
     const biz = c.businessId ? getBiz(c.businessId) : null;
     return '<tr>' +
       '<td class="clickable" onclick="openContactProfile(\'' + c.id + '\')"><span class="cell-name">' + c.name + '</span></td>' +
-      '<td>' + (biz ? '<span class="biz-pill" onclick="openBusinessProfile(\'' + biz.id + '\')">' + bizDisplayLabel(biz) + '</span>' : '<span class="no-biz">Unassociated</span>') + '</td>' +
+      '<td class="biz-col" style="display:' + (contactShowBusiness ? '' : 'none') + ';">' + (biz ? '<span class="biz-pill" onclick="openBusinessProfile(\'' + biz.id + '\')">' + bizDisplayLabel(biz) + '</span>' : '<span class="no-biz">Unassociated</span>') + '</td>' +
       '<td>' + c.phone + '</td>' +
       '<td>' + c.email + '</td>' +
-      '<td><span class="status-pill status-' + c.status.toLowerCase() + '">' + c.status + '</span></td>' +
+      '<td>' + (c.archived ? '<span class="status-pill status-archived">Archived</span>' : '<span class="status-pill status-' + c.status.toLowerCase() + '">' + c.status + '</span>') + '</td>' +
     '</tr>';
   }).join('') || '<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">👤</div><div class="empty-state-title">No contacts match</div></div></td></tr>';
+}
+function toggleContactShowBusiness(checked) {
+  contactShowBusiness = checked;
+  document.querySelectorAll('#view-contacts .biz-col').forEach(el => el.style.display = checked ? '' : 'none');
+  if (!checked) document.getElementById('contactBusinessFilter').value = '';
+  filterContacts();
 }
 function filterContacts() {
   const text = document.querySelector('#view-contacts .search-input').value;
   const status = document.getElementById('contactStatusFilter').value;
-  const biz = document.getElementById('contactBusinessFilter').value;
+  const biz = contactShowBusiness ? document.getElementById('contactBusinessFilter').value : '';
   renderContactsTable(text, status, biz);
 }
 function populateBusinessFilter() {
@@ -1871,7 +1956,10 @@ function renderContactProfile(c) {
       '<div class="profile-heading">' +
         '<div class="profile-legal-name">' + c.name + '</div>' +
         '<div class="profile-dba-sub">' + (c.role || 'Contact') + '</div>' +
-        '<div class="profile-meta-row"><span class="profile-meta-item">📞 ' + c.phone + '</span><span class="profile-meta-item">✉️ ' + c.email + '</span><span class="profile-meta-item"><span class="status-pill status-' + c.status.toLowerCase() + '">' + c.status + '</span></span></div>' +
+        '<div class="profile-meta-row"><span class="profile-meta-item">📞 ' + c.phone + '</span><span class="profile-meta-item">✉️ ' + c.email + '</span><span class="profile-meta-item">' + (c.archived ? '<span class="status-pill status-archived">Archived</span>' : '<span class="status-pill status-' + c.status.toLowerCase() + '">' + c.status + '</span>') + '</span></div>' +
+        '<div class="profile-actions">' +
+          (c.archived ? '' : '<button class="btn btn-outline btn-sm" onclick="openArchiveContactModal(\'' + c.id + '\')">🗄️ Archive Contact</button>') +
+        '</div>' +
       '</div>' +
     '</div>';
   renderContactBusinessCard(c);
@@ -1882,7 +1970,7 @@ function renderContactBusinessCard(c) {
     const b = getBiz(c.businessId);
     card.innerHTML = '<div class="settings-section-title">Business</div>' +
       '<div class="activity-row" style="padding-top:0;">' +
-        '<div style="flex:1;"><div class="activity-title" style="cursor:pointer;" onclick="openBusinessProfile(\'' + b.id + '\')">' + bizDisplayLabel(b) + (c.primaryFor === b.id ? ' <span class="multi-row-primary-badge">PRIMARY CONTACT</span>' : '') + '</div><div class="activity-sub">' + b.legal + '</div></div>' +
+        '<div style="flex:1;"><div class="activity-title" style="cursor:pointer;" onclick="openBusinessProfile(\'' + b.id + '\')">' + bizDisplayLabel(b) + (c.primaryFor === b.id ? ' <span class="multi-row-primary-badge">PRIMARY CONTACT</span>' : '') + (b.archived ? ' <span class="status-pill status-archived">Archived</span>' : '') + '</div><div class="activity-sub">' + b.legal + '</div></div>' +
         '<button class="btn btn-outline btn-sm" onclick="openChangeBusinessModal(\'' + c.id + '\')">Change</button>' +
         '<button class="btn btn-outline btn-sm" onclick="removeAssociationFromContact(\'' + c.id + '\')">Remove</button>' +
       '</div>';
@@ -1901,6 +1989,126 @@ function removeAssociationFromContact(cid) {
   c.businessId = null; c.primaryFor = null;
   renderContactBusinessCard(c);
   toast('Removed from ' + bizDisplayLabel(biz) + '.');
+}
+
+/* ─── Contact Archive Interaction with Business Entity ───
+   Primary Contact: archive is blocked until a new Primary is selected (existing associated contact,
+   existing unassociated contact, or a brand-new contact) — reuses the shared modalAssociate shell.
+   Non-primary associated Contact: an informational, non-blocking alert before archiving.
+   Unassociated Contact: archives directly. ─── */
+function openArchiveContactModal(cid) {
+  const c = getContact(cid);
+  if (c.archived) return;
+  if (c.primaryFor) { openPrimaryReassignModal(cid); return; }
+  if (c.businessId) { openNonPrimaryArchiveConfirm(cid); return; }
+  document.getElementById('associateModalTitle').textContent = 'Archive Contact';
+  document.getElementById('associateModalBody').innerHTML = '<div>Archive <strong>' + c.name + '</strong>? They will no longer appear as an active contact.</div>';
+  document.getElementById('associateModalFooter').innerHTML =
+    '<button class="btn btn-outline" onclick="closeModal(\'modalAssociate\')">Cancel</button>' +
+    '<button class="btn btn-primary" onclick="closeModal(\'modalAssociate\'); doArchiveContact(\'' + cid + '\')">Archive Contact</button>';
+  openModal('modalAssociate');
+}
+function openNonPrimaryArchiveConfirm(cid) {
+  const c = getContact(cid);
+  const biz = getBiz(c.businessId);
+  document.getElementById('associateModalTitle').textContent = 'Archive Contact';
+  document.getElementById('associateModalBody').innerHTML =
+    '<div class="settings-alert settings-alert--info" style="margin-bottom:0;">' +
+      '<div class="settings-alert-icon">ℹ️</div>' +
+      '<div>' + c.name + ' is associated with ' + bizDisplayLabel(biz) + ' and will be removed from its Associated Contacts list once archived.</div>' +
+    '</div>';
+  document.getElementById('associateModalFooter').innerHTML =
+    '<button class="btn btn-outline" onclick="closeModal(\'modalAssociate\')">Cancel</button>' +
+    '<button class="btn btn-primary" onclick="closeModal(\'modalAssociate\'); doArchiveContact(\'' + cid + '\')">Archive Contact</button>';
+  openModal('modalAssociate');
+}
+function openPrimaryReassignModal(cid) {
+  const c = getContact(cid);
+  const biz = getBiz(c.primaryFor);
+  const otherAssociated = biz.contactIds.filter(id => id !== cid).map(getContact).filter(x => !x.archived);
+  const unassociated = CONTACTS.filter(x => !x.businessId && x.id !== cid);
+  document.getElementById('associateModalTitle').textContent = 'Select a New Primary Contact';
+  document.getElementById('associateModalBody').innerHTML =
+    '<div class="settings-alert settings-alert--warn" style="margin-bottom:16px;">' +
+      '<div class="settings-alert-icon">⚠️</div>' +
+      '<div>' + c.name + ' is the Primary Contact for ' + bizDisplayLabel(biz) + '. Select a new Primary Contact before archiving.</div>' +
+    '</div>' +
+    (otherAssociated.length ? (
+      '<div class="settings-field" style="margin-bottom:8px;">' +
+        '<label class="settings-field-label">Existing Associated Contact</label>' +
+        '<select class="select2" id="archiveReassignExisting">' +
+          '<option value="">Select a contact…</option>' +
+          otherAssociated.map(x => '<option value="' + x.id + '">' + x.name + '</option>').join('') +
+        '</select>' +
+      '</div>' +
+      '<button class="btn btn-primary" style="width:100%;" onclick="confirmPrimaryReassignFromExisting(\'' + cid + '\')">Set as Primary &amp; Archive</button>' +
+      '<div class="settings-help" style="text-align:center; margin:16px 0;">— or —</div>'
+    ) : '') +
+    '<div class="settings-field" style="margin-bottom:8px;">' +
+      '<label class="settings-field-label">Existing Unassociated Contact</label>' +
+      '<select class="select2" id="archiveReassignUnassociated">' +
+        '<option value="">Select a contact…</option>' +
+        unassociated.map(x => '<option value="' + x.id + '">' + x.name + (x.email ? ' — ' + x.email : '') + '</option>').join('') +
+      '</select>' +
+    '</div>' +
+    '<button class="btn btn-primary" style="width:100%;" onclick="confirmPrimaryReassignFromUnassociated(\'' + cid + '\')">Associate, Set as Primary &amp; Archive</button>' +
+    '<div class="settings-help" style="text-align:center; margin:16px 0;">— or —</div>' +
+    '<div class="settings-field" style="margin-bottom:14px;">' +
+      '<label class="settings-field-label">New Contact Name</label>' +
+      '<input class="settings-field-input" id="archiveReassignNewName" placeholder="Full name">' +
+    '</div>' +
+    '<button class="btn btn-primary" style="width:100%;" onclick="confirmPrimaryReassignFromNew(\'' + cid + '\')">Create, Set as Primary &amp; Archive</button>';
+  document.getElementById('associateModalFooter').innerHTML =
+    '<button class="btn btn-outline" onclick="closeModal(\'modalAssociate\')">Cancel</button>';
+  openModal('modalAssociate');
+}
+function confirmPrimaryReassignFromExisting(cid) {
+  const sel = document.getElementById('archiveReassignExisting').value;
+  if (!sel) { toast('Select a contact.'); return; }
+  finishPrimaryReassignAndArchive(cid, getContact(sel));
+}
+function confirmPrimaryReassignFromUnassociated(cid) {
+  const sel = document.getElementById('archiveReassignUnassociated').value;
+  if (!sel) { toast('Select a contact.'); return; }
+  const c = getContact(cid);
+  const biz = getBiz(c.primaryFor);
+  const newPrimary = getContact(sel);
+  newPrimary.businessId = biz.id;
+  biz.contactIds.push(newPrimary.id);
+  finishPrimaryReassignAndArchive(cid, newPrimary);
+}
+function confirmPrimaryReassignFromNew(cid) {
+  const name = document.getElementById('archiveReassignNewName').value.trim();
+  if (!name) { toast('Contact Name is required.'); return; }
+  const c = getContact(cid);
+  const biz = getBiz(c.primaryFor);
+  const newId = 'c' + (nextContactId++);
+  const newPrimary = { id: newId, name, role: null, phone: '', email: '', status: 'Lead', businessId: biz.id, primaryFor: null };
+  CONTACTS.push(newPrimary);
+  biz.contactIds.push(newId);
+  finishPrimaryReassignAndArchive(cid, newPrimary);
+}
+function finishPrimaryReassignAndArchive(cid, newPrimary) {
+  const c = getContact(cid);
+  const biz = getBiz(c.primaryFor);
+  biz.contactIds.forEach(id => { const x = getContact(id); if (x.primaryFor === biz.id) x.primaryFor = null; });
+  newPrimary.primaryFor = biz.id;
+  closeModal('modalAssociate');
+  toast('✓ ' + newPrimary.name + ' is now the Primary Contact for ' + bizDisplayLabel(biz) + '.', 'success');
+  doArchiveContact(cid);
+}
+function doArchiveContact(cid) {
+  const c = getContact(cid);
+  c.archived = true;
+  if (c.businessId) {
+    const biz = getBiz(c.businessId);
+    biz.contactIds = biz.contactIds.filter(id => id !== cid);
+    c.primaryFor = null;
+    c.businessId = null;
+  }
+  toast(c.name + ' archived.');
+  if (currentContactId === cid) renderContactProfile(c);
+  filterContacts();
 }
 function openChangeBusinessModal(cid) {
   currentContactId = cid;
@@ -2059,29 +2267,24 @@ function renderEpBody() {
     }
   }
   document.getElementById('epFrameBody').innerHTML = html;
-  if (epState.type === 'business' && epState.mode === 'existing' && !epState.businessId) renderEpBusinessResults('');
 }
 
-/* ─── Existing-Business + Contact hand-off (shared across all four tabs) ─── */
+/* ─── Existing-Business + Contact hand-off (shared across all four tabs) — a plain dropdown select
+   rather than a search-and-results list, to save vertical space; archived Businesses are excluded,
+   matching the main Businesses list's default view. ─── */
 function epExistingBlockHtml() {
-  if (!epState.businessId) {
-    return '<div style="max-width:640px; margin:0 auto;">' +
-      '<div class="settings-field"><label class="settings-field-label">Search Businesses</label><input class="settings-field-input" id="epBizSearchInput" placeholder="Start typing a business name..." oninput="renderEpBusinessResults(this.value)"></div>' +
-      '<div id="epExistingResults"></div>' +
-      '<div class="settings-help" style="margin-top:8px;">Selecting an existing entity creates no duplicate record — it links directly.</div>' +
-    '</div>';
-  }
-  const biz = getBiz(epState.businessId);
+  const options = BUSINESSES.filter(b => !b.archived);
+  const biz = epState.businessId ? getBiz(epState.businessId) : null;
   return '<div style="max-width:640px; margin:0 auto;">' +
-    '<div class="settings-field" style="margin-bottom:4px;">' +
+    '<div class="settings-field">' +
       '<label class="settings-field-label">Business</label>' +
-      '<div style="height:40px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; border:1px solid var(--st-color-border); border-radius:8px; background:var(--gray-50);">' +
-        '<span class="biz-pill" style="cursor:default; background:transparent; padding:0;">' + bizDisplayLabel(biz) + '</span>' +
-        '<button type="button" class="btn-link" onclick="epClearBusiness()">Change</button>' +
-      '</div>' +
+      '<select class="select2" onchange="epSelectBusiness(this.value)">' +
+        '<option value="">Select a business…</option>' +
+        options.map(b => '<option value="' + b.id + '"' + (b.id === epState.businessId ? ' selected' : '') + '>' + bizDisplayLabel(b) + '</option>').join('') +
+      '</select>' +
     '</div>' +
-    epContactFieldHtml() +
-    epAddressOrApptExtrasHtml('business', biz) +
+    '<div class="settings-help" style="margin-top:8px;">Selecting an existing entity creates no duplicate record — it links directly.</div>' +
+    (biz ? epContactFieldHtml() + epAddressOrApptExtrasHtml('business', biz) : '') +
   '</div>';
 }
 
@@ -2167,11 +2370,6 @@ function epProposalDetailsHtml() {
             EP_TEAM_MEMBERS.map(n => '<option value="' + n + '"' + (epState.projectManager === n ? ' selected' : '') + '>' + n + '</option>').join('') +
           '</select>' +
         '</div>' +
-      '</div>' +
-      '<div class="settings-group-label">Drips</div>' +
-      '<div class="settings-toggle-row" style="margin-bottom:2px;">' +
-        '<label class="switch"><input type="checkbox" ' + (epState.disableDrips ? 'checked' : '') + ' onchange="epState.disableDrips = this.checked; renderEpBody();"><span class="switch-track"></span></label>' +
-        '<span class="settings-toggle-label">Disable</span>' +
       '</div>' +
     '</div>';
 }
@@ -2498,7 +2696,7 @@ function epReadyToCreateHtml(sourceType, entity) {
       '<span style="color:var(--gray-800); font-weight:700; text-align:right;">' + r.value + '</span>' +
     '</div>'
   ).join('');
-  const communicationHtml = epState.entry === 'appt'
+  const communicationHtml = (epState.entry === 'appt' || epState.entry === 'proposal')
     ? epCommunicationHtml()
     : '<div class="settings-toggle-row" style="margin-top:16px;">' +
         '<label class="switch"><input type="checkbox" checked><span class="switch-track"></span></label>' +
@@ -2525,14 +2723,19 @@ function epSelectNotifyMethod(btn) {
   btn.parentElement.querySelectorAll('.pill-toggle').forEach(b => b.classList.toggle('selected', b === btn));
 }
 
-/* ─── New Appointment's Communication block — Send Email/SMS toggles, Drip Sequence + Disable
-   Drips, a conditional SMS Message preview, and the note that saving also creates a Deal. Ported
-   from the real "New On-Site Estimate" modal's Communication section. ─── */
+/* ─── Ready to Create's Communication block — Send Email/SMS toggles, Drip Sequence + Disable
+   Drips, a conditional SMS Message preview. Ported from the real "New On-Site Estimate" modal's
+   Communication section for New Appointment, and adopted in New Proposal per ticket item 4 for
+   consistency across the creation modals — only the SMS preview text and the trailing note differ
+   per entry type. ─── */
 function epCommunicationHtml() {
-  const et = EVENT_TYPES.find(e => e.key === epState.eventType);
+  const isAppt = epState.entry === 'appt';
+  const et = isAppt ? EVENT_TYPES.find(e => e.key === epState.eventType) : null;
   const seq = EP_DRIP_SEQUENCES.find(d => d.key === epState.dripSequence);
-  const smsTemplate = '(Company Settings Template)\nHi, {first-name}! We\'ve scheduled your ' + (et ? et.label : 'appointment') +
-    ' for {appointment-time} on {appointment-date} at {appointment-location} with {salesperson-name}. Please let us know if you have any questions or need to make changes! Thank you! - {company-name}';
+  const smsTemplate = isAppt
+    ? '(Company Settings Template)\nHi, {first-name}! We\'ve scheduled your ' + (et ? et.label : 'appointment') +
+      ' for {appointment-time} on {appointment-date} at {appointment-location} with {salesperson-name}. Please let us know if you have any questions or need to make changes! Thank you! - {company-name}'
+    : '(Company Settings Template)\nHi, {first-name}! Your proposal from {company-name} is ready to view: {view-proposal-link}. Let us know if you have any questions! - {salesperson-name}';
   const dealStage = et ? (et.label + ' Scheduled') : 'Scheduled';
   return '<div class="settings-section" style="margin-top:18px; margin-bottom:0; text-align:left;">' +
       '<div class="settings-section-title" style="margin-bottom:16px;"><span>✉️ Communication</span></div>' +
@@ -2542,7 +2745,7 @@ function epCommunicationHtml() {
       '</div>' +
       '<div class="ep-comm-row">' +
         '<div class="settings-field">' +
-          '<label class="settings-field-label">Drip Sequence <span title="The sequence of automated messages sent around this appointment." style="cursor:help;">ⓘ</span></label>' +
+          '<label class="settings-field-label">Drip Sequence <span title="The sequence of automated messages sent around this ' + (isAppt ? 'appointment' : 'proposal') + '." style="cursor:help;">ⓘ</span></label>' +
           '<select class="select2" onchange="epState.dripSequence = this.value; renderEpBody();">' +
             EP_DRIP_SEQUENCES.map(d => '<option value="' + d.key + '"' + (epState.dripSequence === d.key ? ' selected' : '') + '>' + d.label + '</option>').join('') +
           '</select>' +
@@ -2560,10 +2763,12 @@ function epCommunicationHtml() {
         '<div><strong>Email Template:</strong> To edit your email template please visit your Company Settings and click on the Templates tab.</div>' +
       '</div>' +
     '</div>' +
-    '<div class="settings-alert settings-alert--info" style="margin-top:14px; margin-bottom:0;">' +
-      '<div class="settings-alert-icon">ℹ️</div>' +
-      '<div>By submitting this appointment, a Deal will be created in <strong>' + dealStage + '</strong>.</div>' +
-    '</div>';
+    (isAppt
+      ? '<div class="settings-alert settings-alert--info" style="margin-top:14px; margin-bottom:0;">' +
+          '<div class="settings-alert-icon">ℹ️</div>' +
+          '<div>By submitting this appointment, a Deal will be created in <strong>' + dealStage + '</strong>.</div>' +
+        '</div>'
+      : '');
 }
 
 /* ─── Save — the missing terminal step: actually creates the Business/Contact (if new) plus the
@@ -2659,27 +2864,11 @@ function pushEpRecordOntoBusiness(biz, contact) {
   }
 }
 
-function renderEpBusinessResults(q) {
-  q = (q || '').toLowerCase();
-  const el = document.getElementById('epExistingResults');
-  if (!el) return;
-  // No result cap: a newly created Business must be selectable here immediately, without
-  // needing to search for it by name to page it into view. Archived Businesses are excluded,
-  // same as the main Businesses list's default (non-"Show Archived") view.
-  const results = BUSINESSES.filter(b => !b.archived && (!q || bizDisplayLabel(b).toLowerCase().includes(q)));
-  el.innerHTML = results.map(b =>
-    '<div class="typeahead-result" onclick="epSelectBusiness(\'' + b.id + '\')"><span>' + bizDisplayLabel(b) + '<br><span style="color:var(--gray-400); font-size:11.5px;">' + b.legal + '</span></span><span class="btn-link">Select</span></div>'
-  ).join('') || '<div class="empty-state"><div class="empty-state-desc">No businesses match.</div></div>';
-}
 function epSelectBusiness(bid) {
+  if (!bid) { epState.businessId = null; epState.contactId = null; renderEpBody(); return; }
   epState.businessId = bid;
   const pc = primaryContactFor(getBiz(bid));
   epState.contactId = pc ? pc.id : null; // auto-populate with the Business's Primary Contact
-  renderEpBody();
-}
-function epClearBusiness() {
-  epState.businessId = null;
-  epState.contactId = null;
   renderEpBody();
 }
 function epContactFieldHtml() {
