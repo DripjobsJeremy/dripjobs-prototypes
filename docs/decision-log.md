@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-28] Business Entity Records V1: Creation Entry Points link discoverability
+
+- Decision: The "Creation Entry Points" link in the Businesses list's "New in V1" banner was functional but easy to miss — small, inline, mid-sentence text with no underline, just a color change. Jeremy had to hunt for it despite the guide panel pointing at it directly. Added the design system's documented "trailing action link" alert pattern (`.settings-alert-action`: bold, underlined, right-aligned, separated from the body text) and moved the link there with an arrow ("Creation Entry Points →"), removing it from the sentence.
+- Why: A functional-but-invisible affordance is effectively broken for a stakeholder demo; this was a discoverability bug, not a logic bug.
+- Open question: None.
+
 ## [2026-08-28] Business Entity Records V1: correct purple token + real nav icons
 
 - Decision: The app shell (`#be-app`) had been using the marketing brand purple `#7C3AED` throughout (buttons, active nav state, avatars, tabs, pill-toggles) — wrong for this surface. Per CLAUDE.md and the design system doc, in-app chrome should use the softer in-product token `#8B85EA` (with `#736BE3` hover, `#5C53DC` dark/active), same as every other real DripJobs settings-style page. Swapped the three `--purple*` CSS custom properties (plus a hardcoded focus-ring rgba that referenced the old hex directly) so every button, active state, and accent cascades correctly from one token change. Also replaced every sidebar emoji icon with inline stroke-SVG line icons matching the real product's nav (Contacts, Sales List, Sales Pipeline, Jobs group, Daily Operations, Documents, Financials, Marketing, Settings), plus a new custom building icon for Businesses (not a real product icon yet, drawn in the same visual language: 24x24 viewBox, 2px stroke, rounded caps).
