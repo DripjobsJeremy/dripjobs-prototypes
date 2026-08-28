@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-28] Business Entity Records V1: fix "Invalid Date NaNmo ago" for new businesses
+
+- Decision: `saveNewBusiness()`'s create path never set `createdAt` on the new record, so the Businesses list's Created Date column rendered "Invalid Date" / "NaNmo ago" for anything created in-session. Now stamps `createdAt` from the same fixed `PROTO_TODAY` reference (Aug 28, 2026) the rest of the list's relative-date labels already use, so a freshly created business correctly shows "Aug 28, 2026 · Today."
+- Why: Straightforward regression from adding the Created Date column without updating the one place that creates a Business record without going through seed data.
+- Open question: None.
+
 ## [2026-08-28] Business Entity Records V1: Businesses list polish (Ali's At Risk Accounts patterns)
 
 - Decision: Four small fixes to the rebuilt Businesses list, matching Ali's At Risk Accounts table conventions. Sort arrows are now hidden by default and fade in on column-header hover (`opacity` transition), with the active sort column's arrow staying visible in purple regardless of hover. Added zebra striping (`nth-child(even)` rows use the existing `--gray-50` token) and switched row hover to `--purple-light` so it stays visually distinct from the new stripe. Removed the circular initials icon from the Business column (kept it everywhere else it's used — Contacts list, Business Profile header, Creation Entry Points). Also fixed "Show Archived" to be an exclusive filter (only archived records show when it's on) rather than additive (archived + active together) — dropped the now-pointless `archived-row` opacity dimming since a filtered, archived-only list doesn't need to visually distinguish itself from anything else on screen; kept the "Archived" status badge for label clarity.
