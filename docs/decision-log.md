@@ -9,6 +9,18 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-28] Business Entity Records V1: de-clutter Creation Entry Points layout for mobile
+
+- Decision: Widened the Creation Entry Points step container from 420px to 640px (Business/Contact selection, Appointment Details, Proposal Details, Ready to Create, and the Communication block all sit inside this one wrapper), since nothing required that narrow a column and it was the direct cause of the Communication section feeling cramped. Rebuilt the Communication block itself so each concern gets its own full-width row (title alone, then Send Email/Send SMS, then Drip Sequence + Disable Drips, then the Next Drip caption) instead of cramming the title and two toggles onto one line. Added a `@media (max-width: 520px)` rule so those rows stack to a single column on narrow viewports instead of squeezing. Also gave the Virtual Meeting Platform/URL fields their own `.settings-section` card ("Virtual Meeting Details") to match the On-Site Job Address card's treatment — they'd been floating unstyled below the Appointment Details card before.
+- Why: Jeremy flagged the Communication section as cluttered and asked for mobile-optimized layout, noting the container had no real reason to stay so constrained.
+- Open question: none.
+
+## [2026-08-28] Business Entity Records V1: Meeting URL field for Virtual appointments
+
+- Decision: Added a "Meeting URL" field under Meeting Platform, shown only when Location = Virtual Meeting. It appears as its own row in the Ready to Create summary (a clickable link once entered, an em dash while blank), and disappears entirely when Location is On-Site.
+- Why: Jeremy asked for a way to capture the meeting link per appointment, plus raised the real question of how that link would actually reach the customer given Email/SMS content comes from a fixed Company Settings template that has no per-appointment field for it. Answered in chat rather than guessing at new business logic to build: the lowest-effort, lowest-risk path is adding a `{meeting-link}` merge token to the existing template system (Email/SMS templates already substitute per-appointment tokens like `{appointment-time}` and `{appointment-location}`, so this is one more token of the same kind, not new plumbing) — not implemented here since it lives in Company Settings > Templates, out of this prototype's scope.
+- Open question: Whether to also implement the merge-token change, or a portal-page fallback for existing pre-URL templates, is Jeremy's call — not built pending that decision.
+
 ## [2026-08-28] Business Entity Records V1: real Communication block for New Appointment
 
 - Decision: Replaced the invented "Enable Reminders" toggle + Email/SMS/Both pills on New Appointment's Ready to Create step with the real Communication block from the "New On-Site Estimate" modal screenshot: separate Send Email / Send SMS toggles, a Drip Sequence dropdown with an info tooltip, a Disable Drips toggle (reusing the same state as New Proposal's), a "Next Drip: X" preview caption, a conditional SMS Message textarea (shown only when Send SMS is on, previewing the company template with merge fields and the selected Event Type's name substituted in), a static "Email Template" note, and a blue alert stating a Deal will be created in a stage named after the Event Type (e.g. "On-Site Estimate Scheduled"). Implemented that stated behavior for real: saving a New Appointment now creates both the Appointment and a Deal in that stage. New Proposal and other entry points keep the original simple Reminders/notify-method block, since only New Appointment's Communication section was shown in the screenshot.
