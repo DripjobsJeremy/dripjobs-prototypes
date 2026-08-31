@@ -2363,7 +2363,7 @@ const EP_CONFIG = {
 // intentionally never rendered in the Event Type dropdown. "color" is each type's default Event
 // Color, as configured in Company Settings → Calendar → Event Types.
 const EVENT_TYPES = [
-  { key: 'onsite-estimate', label: 'On-Site Estimate', calendar: 'Appointments', defaultDuration: 45, color: 'purple' },
+  { key: 'onsite-estimate', label: 'On-Site Estimate', calendar: 'Appointments', defaultDuration: 60, color: 'purple' },
   { key: 'second-estimate', label: '2nd Time Estimate', calendar: 'Appointments', defaultDuration: 30, color: 'gold' },
   { key: 'site-visit', label: 'Site Visit', calendar: 'Appointments', defaultDuration: 30, color: 'mint' },
   { key: 'project-walkthrough', label: 'Project Walkthrough', calendar: 'Appointments', defaultDuration: 60, color: 'darkblue' },
@@ -2765,22 +2765,33 @@ function epCalClose() {
   if (trigger) trigger.blur();
 }
 
-/* ─── Start Time / End Time pickers — shared logic, 5-minute increments, text-filterable ─── */
-let epAllTimeOptionsCache = null;
-function epAllTimeOptions() {
-  if (epAllTimeOptionsCache) return epAllTimeOptionsCache;
+/* ─── Start Time / End Time pickers — shared logic, 5-minute increments, text-filterable.
+   Lists are ordered starting from an anchor time rather than always from 12:00 AM, matching
+   existing scheduling-modal convention: Start Time anchors at 7:00 AM (business-hours default);
+   End Time anchors at Start Time + the selected Event Type's Default Duration, so the correct
+   default is always the first option in the list once a Start Time and Event Type are set. ─── */
+function epAllTimeOptions(anchorMinutes) {
+  const anchor = ((anchorMinutes % 1440) + 1440) % 1440;
   const opts = [];
-  for (let mins = 0; mins < 1440; mins += 5) {
-    const value = epMinutesToTime(mins);
+  for (let i = 0; i < 288; i++) {
+    const value = epMinutesToTime((anchor + i * 5) % 1440);
     opts.push({ value, label: fmtTimeLabel(value) });
   }
-  epAllTimeOptionsCache = opts;
   return opts;
+}
+function epTimeAnchorMinutes(which) {
+  const DEFAULT_ANCHOR = 7 * 60; // 7:00 AM
+  if (which === 'start') return DEFAULT_ANCHOR;
+  if (epState.startTime && epState.duration !== '' && epState.duration != null) {
+    return epTimeToMinutes(epState.startTime) + Number(epState.duration);
+  }
+  if (epState.startTime) return epTimeToMinutes(epState.startTime); // duration not known yet — anchor at Start Time itself
+  return DEFAULT_ANCHOR;
 }
 function epTimeOptionsHtml(which, filterText) {
   const ft = (filterText || '').toLowerCase().trim();
   const current = which === 'start' ? epState.startTime : epState.endTime;
-  const opts = epAllTimeOptions().filter(o => !ft || o.label.toLowerCase().includes(ft));
+  const opts = epAllTimeOptions(epTimeAnchorMinutes(which)).filter(o => !ft || o.label.toLowerCase().includes(ft));
   if (!opts.length) return '<div class="empty-state" style="padding:14px;"><div class="empty-state-desc">No matching times.</div></div>';
   return opts.map(o =>
     '<div class="ep-time-option' + (o.value === current ? ' selected' : '') + '" onmousedown="epSelectTime(\'' + which + '\', \'' + o.value + '\')">' + o.label + '</div>'
@@ -3162,7 +3173,10 @@ function epNewFormHtml() {
         '<div class="settings-help" style="margin-bottom:14px;">Only unassociated contacts are shown — a contact can belong to one Business at a time.' +
           (unassociated.length === 0 ? ' There are no unassociated contacts right now — switch to New Contact.' : '') +
         '</div>'
-      : '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Contact Name</label><input class="settings-field-input" id="epNewContactName" placeholder="Full name"></div>' +
+      : '<div style="display:flex; gap:10px;">' +
+          '<div class="settings-field" style="flex:1; margin-bottom:14px;"><label class="settings-field-label is-required">First Name</label><input class="settings-field-input" id="epNewContactFirstName" placeholder="First name"></div>' +
+          '<div class="settings-field" style="flex:1; margin-bottom:14px;"><label class="settings-field-label">Last Name</label><input class="settings-field-input" id="epNewContactLastName" placeholder="Last name"></div>' +
+        '</div>' +
         '<div style="display:flex; gap:10px;">' +
           '<div class="settings-field" style="flex:1; margin-bottom:14px;"><label class="settings-field-label">Contact Phone</label><input class="settings-field-input formatted-phone-no" id="epNewContactPhone" placeholder="(555) 555-5555"></div>' +
           '<div class="settings-field" style="flex:1; margin-bottom:14px;"><label class="settings-field-label">Contact Email</label><input class="settings-field-input" id="epNewContactEmail" type="email" placeholder="name@company.com"></div>' +
@@ -3190,10 +3204,11 @@ function epConfirmNewBusiness() {
     epState.pendingExistingContactId = cid;
     epState.pendingNewContact = null;
   } else {
-    const contactName = document.getElementById('epNewContactName').value.trim();
-    if (!contactName) { toast('Contact Name is required.'); document.getElementById('epNewContactName').focus(); return; }
+    const firstName = document.getElementById('epNewContactFirstName').value.trim();
+    const lastName = document.getElementById('epNewContactLastName').value.trim();
+    if (!firstName) { toast('First Name is required.'); document.getElementById('epNewContactFirstName').focus(); return; }
     epState.pendingNewContact = {
-      name: contactName,
+      name: (firstName + ' ' + lastName).trim(),
       phone: document.getElementById('epNewContactPhone').value.trim(),
       email: document.getElementById('epNewContactEmail').value.trim()
     };
