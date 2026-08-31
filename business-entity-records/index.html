@@ -1094,12 +1094,13 @@ const BUSINESSES = [
     ],
     invoices: [
       { title: 'Invoice #INV-2291', sub: 'Due Aug 15, 2026', meta: '$6,250.00', via: 'Karen Whitfield' },
-      { title: 'Invoice #INV-2204', sub: 'Paid Jul 2, 2026', meta: '$3,120.00', via: 'Tom Reyes' }
+      { title: 'Invoice #INV-2204', sub: 'Paid Jul 2, 2026', meta: '$3,120.00', via: 'Tom Reyes', closed: true }
     ],
     payments: [
       { title: 'Payment received — INV-2204', sub: 'Jul 2, 2026 · Card ending 4471', meta: '$3,120.00', via: 'Karen Whitfield' },
       { title: 'Deposit — Proposal #4790', sub: 'Jun 18, 2026 · ACH', meta: '$1,500.00', via: 'Tom Reyes' }
-    ]
+    ],
+    jobs: []
   },
   {
     id: 'summit', legal: 'Summit Ridge Property Holdings Inc.', dba: 'Summit Ridge', displayDba: true,
@@ -1112,7 +1113,15 @@ const BUSINESSES = [
     archived: false,
     contactIds: ['c4', 'c5'],
     createdAt: '2026-03-25',
-    deals: [], proposals: [], appointments: [], invoices: [], payments: []
+    // Demonstrates BR6/BR20's specific edge case: no open Deals or Invoices — the Deal below closed
+    // won — but the Job it converted into is still active, and that alone blocks Delete.
+    deals: [
+      { title: 'HOA Common Area Repaint', sub: 'Stage: Closed Won', meta: '$28,500', via: 'Marcus Ibsen', closed: true }
+    ],
+    proposals: [], appointments: [], invoices: [], payments: [],
+    jobs: [
+      { title: 'Job — HOA Common Area Repaint', sub: 'In Progress · Crew scheduled Aug 20, 2026', meta: '$28,500', via: 'Marcus Ibsen', active: true, fromDeal: 'HOA Common Area Repaint' }
+    ]
   },
   {
     id: 'brightview', legal: 'Brightview Retail Facilities LLC', dba: '', displayDba: false,
@@ -1123,7 +1132,7 @@ const BUSINESSES = [
     billingSame: true, archived: false,
     contactIds: ['c6'],
     createdAt: '2026-04-30',
-    deals: [], proposals: [], appointments: [], invoices: [], payments: []
+    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
   },
   {
     id: 'northgate', legal: 'Northgate Medical Plaza Association', dba: 'Northgate Medical Plaza', displayDba: true,
@@ -1134,7 +1143,7 @@ const BUSINESSES = [
     billingSame: true, archived: false,
     contactIds: ['c7', 'c8'],
     createdAt: '2026-05-22',
-    deals: [], proposals: [], appointments: [], invoices: [], payments: []
+    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
   },
   {
     id: 'cedarcreek', legal: 'Cedar Creek Homeowners Association', dba: 'Cedar Creek HOA', displayDba: true,
@@ -1148,7 +1157,7 @@ const BUSINESSES = [
     archived: false,
     contactIds: ['c9'],
     createdAt: '2026-06-19',
-    deals: [], proposals: [], appointments: [], invoices: [], payments: []
+    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
   },
   {
     id: 'westline', legal: 'Westline General Contracting Co.', dba: 'Westline GC', displayDba: true,
@@ -1160,7 +1169,7 @@ const BUSINESSES = [
     contactIds: [],
     hasActiveRecords: false, // Brand-new entity, nothing created against it yet — demos the "editing Information has no downstream impact" case
     createdAt: '2026-08-25',
-    deals: [], proposals: [], appointments: [], invoices: [], payments: []
+    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
   },
   {
     id: 'sunridge', legal: 'Sunridge Painting & Coatings LLC', dba: 'Sunridge Painting', displayDba: true,
@@ -1173,7 +1182,7 @@ const BUSINESSES = [
     contactIds: [],
     hasActiveRecords: false,
     createdAt: '2026-01-10',
-    deals: [], proposals: [], appointments: [], invoices: [], payments: []
+    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
   }
 ];
 
@@ -1717,16 +1726,28 @@ function archiveBusiness(id) {
 }
 function openDeleteModal(id) {
   const biz = getBiz(id);
-  // BR6: delete is blocked when the Business has open Deals or Invoices (Jobs isn't a modeled entity in this
-  // prototype, so it's not checked here — flagged in the decision log).
-  const hasOpenWork = biz.deals.length > 0 || biz.invoices.length > 0;
+  // BR6/BR20: delete is blocked when the Business has open (active, non-closed) Deals or Invoices,
+  // or an active Job created as a Business Project for it — a Job stays active even after the Deal
+  // it converted from has closed, and that Job alone is enough to block Delete. Personal, non-Business
+  // records never factor in, consistent with how these arrays are populated (see pushEpRecordOntoBusiness).
+  const openDeals = biz.deals.filter(d => !d.closed);
+  const openInvoices = biz.invoices.filter(i => !i.closed);
+  const activeJobs = (biz.jobs || []).filter(j => j.active);
+  const hasOpenWork = openDeals.length > 0 || openInvoices.length > 0 || activeJobs.length > 0;
   const body = document.getElementById('deleteModalBody');
   const footer = document.getElementById('deleteModalFooter');
   if (hasOpenWork) {
+    const reasons = [];
+    if (openDeals.length) reasons.push(openDeals.length + ' open Deal' + (openDeals.length > 1 ? 's' : ''));
+    if (openInvoices.length) reasons.push(openInvoices.length + ' open Invoice' + (openInvoices.length > 1 ? 's' : ''));
+    if (activeJobs.length) reasons.push(activeJobs.length + ' active Job' + (activeJobs.length > 1 ? 's' : ''));
+    const jobFromClosedDealNote = (activeJobs.length && openDeals.length === 0)
+      ? ' The active Job remains even though its originating Deal has already closed, that alone is enough to block Delete.'
+      : '';
     body.innerHTML = '<div class="settings-alert settings-alert--danger" style="margin-bottom:0;">' +
       '<div class="settings-alert-icon">🚫</div>' +
       '<div><div class="settings-alert-title">Delete blocked</div>' +
-      '<div>"' + bizDisplayLabel(biz) + '" has open Deals or Invoices. Per BR6, delete is blocked while those remain open. Archive instead to preserve the record and its history.</div></div>' +
+      '<div>"' + bizDisplayLabel(biz) + '" has ' + reasons.join(', ') + '. Per BR6/BR20, delete is blocked while those remain open or active.' + jobFromClosedDealNote + ' Archive instead to preserve the record and its history.</div></div>' +
     '</div>';
     footer.innerHTML = '<button class="btn btn-outline" onclick="closeModal(\'modalDelete\')">Close</button><button class="btn btn-primary" onclick="closeModal(\'modalDelete\'); archiveBusiness(\'' + id + '\')">Archive Instead</button>';
   } else {
@@ -1929,7 +1950,7 @@ function saveNewBusiness() {
     const createdAt = PROTO_TODAY.toISOString().slice(0, 10);
     BUSINESSES.push(Object.assign({
       id, contactIds: [contact.id], archived: false, createdAt,
-      deals: [], proposals: [], appointments: [], invoices: [], payments: []
+      deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
     }, data));
     contact.businessId = id;
     contact.primaryFor = id; // first Contact associated always defaults to Primary (BR5)
@@ -2950,7 +2971,7 @@ function epSaveRecord(sourceType) {
       address: epState.pendingNewBiz.address || { street: '', city: '', state: '', zip: '' },
       billingSame: true, archived: false, contactIds: [],
       createdAt: PROTO_TODAY.toISOString().slice(0, 10),
-      deals: [], proposals: [], appointments: [], invoices: [], payments: []
+      deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
     };
     BUSINESSES.push(biz);
     if (epState.pendingExistingContactId) {
