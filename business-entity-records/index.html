@@ -2428,7 +2428,6 @@ const EP_DRIP_SEQUENCES = [
 ];
 const EP_STATE_DEFAULTS = {
   businessId: null, contactId: null, eventType: null, duration: '', eventColor: null, scheduledDate: null, startTime: '', endTime: '',
-  locationType: 'onsite', platform: 'Zoom', meetingUrl: '',
   proposalTemplate: 'cmc-ext-standard', leadSource: '', dealName: '', disableDrips: false, salesperson: 'Jordan P.', projectManager: '',
   newBizConfirmed: false, pendingNewBiz: null, pendingNewContact: null, newBizContactMode: 'new', pendingExistingContactId: null,
   sendEmail: true, sendSms: false, dripSequence: 'appointment-information'
@@ -2523,8 +2522,10 @@ function renderEpIndividualResults(q) {
 function epSelectIndividualContact(cid) { epState.contactId = cid; renderEpBody(); }
 function epClearIndividualContact() { epState.contactId = null; renderEpBody(); }
 
-/* ─── New Appointment specifics: Event Type, Default Duration, On-Site/Virtual location (shared
-   by the Business Project and Personal Project branches — appt-only, not shown on New Proposal). ─── */
+/* ─── New Appointment specifics: Event Type, Default Duration, On-Site location (shared by the
+   Business Project and Personal Project branches — appt-only, not shown on New Proposal). Virtual
+   Meeting scheduling was pulled from this ticket's scope, it's cross-cutting appointment-scheduling
+   functionality, not specific to Business Entity — tracked as a separate follow-up instead. ─── */
 function epAddressOrApptExtrasHtml(sourceType, entity) {
   // "lead" and "invoice" collect no extra fields beyond Business/Contact — Ready to Create follows directly.
   let stepHtml = '';
@@ -2582,16 +2583,10 @@ function epApptExtrasHtml(sourceType, entity) {
       '<div class="settings-group-label">Event Details</div>' +
       epEventTypeSelectHtml() +
       epEventColorFieldHtml() +
-      epLocationToggleHtml() +
       '<div class="settings-group-label">Schedule</div>' +
       epScheduleFieldsHtml() +
     '</div>';
-  html += epState.locationType === 'virtual'
-    ? '<div class="settings-section" style="margin-top:18px; margin-bottom:0; text-align:left;">' +
-        '<div class="settings-section-title">Virtual Meeting Details</div>' +
-        epPlatformSelectHtml() +
-      '</div>'
-    : epJobAddressHtml(sourceType, entity);
+  html += epJobAddressHtml(sourceType, entity);
   return html;
 }
 function epEventTypeSelectHtml() {
@@ -2820,27 +2815,6 @@ function epSelectTime(which, value) {
   }
   renderEpBody();
 }
-function epLocationToggleHtml() {
-  return '<div class="selector-sub-row" style="margin:0 0 4px;">' +
-    '<button type="button" class="pill-toggle ' + (epState.locationType === 'onsite' ? 'selected' : '') + '" onclick="epSelectLocationType(\'onsite\')">On-Site</button>' +
-    '<button type="button" class="pill-toggle ' + (epState.locationType === 'virtual' ? 'selected' : '') + '" onclick="epSelectLocationType(\'virtual\')">Virtual Meeting</button>' +
-  '</div>';
-}
-function epSelectLocationType(type) { epState.locationType = type; renderEpBody(); }
-function epPlatformSelectHtml() {
-  const platforms = ['Zoom', 'Google Meet', 'FaceTime'];
-  return '<div class="settings-field" style="margin-top:14px;">' +
-    '<label class="settings-field-label is-required">Meeting Platform</label>' +
-    '<select id="epPlatformSelect" onchange="epState.platform = this.value">' +
-      platforms.map(p => '<option value="' + p + '"' + (epState.platform === p ? ' selected' : '') + '>' + p + '</option>').join('') +
-    '</select>' +
-    '<div class="settings-help">No address is collected for a Virtual Meeting.</div>' +
-  '</div>' +
-  '<div class="settings-field" style="margin-top:14px;">' +
-    '<label class="settings-field-label">Meeting URL</label>' +
-    '<input class="settings-field-input" id="epMeetingUrlInput" placeholder="Paste the meeting link…" value="' + (epState.meetingUrl || '').replace(/"/g, '&quot;') + '" oninput="epState.meetingUrl = this.value">' +
-  '</div>';
-}
 
 /* ─── Job/Appointment Address Sourcing (shared by Business Project + Personal Project branches) ───
    Business Project: pre-fills from the Business's on-file Address, never its Billing Address.
@@ -2887,10 +2861,6 @@ function epReadyToCreateHtml(sourceType, entity) {
     rows.push({ label: 'Event Type', value: et ? et.label : '—' });
     rows.push({ label: 'Event Color', value: col ? ('<span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:10px; height:10px; border-radius:50%; background:' + col.hex + '; display:inline-block;"></span>' + col.label + '</span>') : '—' });
     rows.push({ label: 'Scheduled', value: epState.scheduledDate ? (fmtDateSlash(epState.scheduledDate) + (epState.startTime ? (', ' + fmtTimeLabel(epState.startTime) + (epState.endTime ? '–' + fmtTimeLabel(epState.endTime) : '')) : '')) : '—' });
-    rows.push({ label: 'Location', value: epState.locationType === 'virtual' ? ('Virtual — ' + epState.platform) : 'On-Site' });
-    if (epState.locationType === 'virtual') {
-      rows.push({ label: 'Meeting URL', value: epState.meetingUrl ? ('<a href="' + epState.meetingUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" style="color:var(--purple);">' + epState.meetingUrl + '</a>') : '—' });
-    }
   } else if (epState.entry === 'proposal') {
     const addr = entity.address;
     const tmpl = EP_PROPOSAL_TEMPLATES.find(t => t.key === epState.proposalTemplate);
@@ -3061,7 +3031,7 @@ function pushEpRecordOntoBusiness(biz, contact) {
       : 'Not yet scheduled';
     biz.appointments.push({
       title: et ? et.label : 'Appointment', sub: when,
-      meta: epState.locationType === 'virtual' ? ('Virtual — ' + epState.platform) : 'On-Site',
+      meta: 'On-Site',
       via, color: col ? col.hex : null
     });
     // Per the Communication block's own note: submitting an Appointment also creates a Deal.
