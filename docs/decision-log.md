@@ -9,6 +9,11 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-08-31] Release Notes | August 2026: 3 in-flight tickets added to Upcoming/Coming Soon by request
+- Decision: Added ticket 86bbkb1vp (Support Linking Multiple Google Calendars, status "test in progress") to Upcoming Releases as "In QA". Added 86b8gdanh (Add Thumbtack direct integration, status "need more context") to Coming Soon as "In progress" (reusing the exact teaser copy already used on the July page for consistency) and 86b32d4gr (Invoice Reminders, status "needs pm analysis") to Coming Soon as "Planned", a new stage label since this ticket is earlier stage than anything previously featured in that section.
+- Why: Jeremy requested these three specific tickets be added directly by ClickUp link. Wrote customer-facing teasers from each ticket's business rules/summary rather than exposing internal status jargon or the Thumbtack ticket's external-partner blocker narrative.
+- Open question: None.
+
 ## [2026-08-31] Release Notes | August 2026: added to hub, sourced from ClickUp
 - Decision: Built `release-notes-august-2026/` (index.html + Release_Notes_August_2026.md), matching June/July's structure, voice, and the Collapse/Expand All and back-to-top additions made to the July page. Content compiled from ClickUp's 7 August release tags (08-03 through 08-27, ~46 candidate tickets). Excluded single-tenant tickets (company name + account ID in the title) and internal-only Super Admin tooling, including re-excluding the Activation Dashboard "V1 Expansion" ticket that was cut from July for the same reason. Three items teased as "Upcoming"/"Coming Soon" in June or July (Jobs/Sales List column management, QuickBooks reliability improvements, multi-document Customer Portal settings) actually shipped this month and are written up as full entries rather than teasers.
 - Why: Same ClickUp-sourcing approach validated last month; consistency with the prior exclusion call on Activation Dashboard tooling avoids re-litigating a decision Jeremy already made.

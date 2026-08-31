@@ -212,17 +212,26 @@
 
 ---
 
-## 🚀 Upcoming Releases (1 in progress)
+## 🚀 Upcoming Releases (2 in progress)
 
 ### Automatic Google Calendar Sync for DripJobs Events (PR in review)
 Once you connect Google Calendar, every future DripJobs event, including appointments, scheduled jobs, and estimates, will sync automatically to the calendar you choose, and any new events you create afterward will keep syncing without any extra steps. Disconnecting will stop new events from syncing while leaving what's already on your Google Calendar untouched.
 
+### Link More Than One Google Calendar (In QA)
+You'll soon be able to link more than one Google Calendar to DripJobs instead of just one. Every linked calendar's events show up in DripJobs for reference, and you'll choose exactly which linked calendar DripJobs writes new appointments and jobs to, with the option to change that at any time.
+
 ---
 
-## ✨ Other Exciting Updates Coming Soon (1 planned)
+## ✨ Other Exciting Updates Coming Soon (3 planned)
 
 ### Auto-Filled Marketing Agency Email Template for Zapier (In QA)
 A new tool on the Zapier integration card will let you generate a ready-to-send email for your marketing agency, pre-filled with your API key, company name, and contact details, walking them through exactly how to connect their lead forms into your DripJobs pipeline. You'll be able to edit the message before copying it into your own email client.
+
+### Direct Thumbtack Integration (In progress)
+A direct Thumbtack integration is in the works. Once live, new Thumbtack leads will flow straight into DripJobs as contacts and deals, tagged with Thumbtack as the lead source, and dropped automatically into your Sales Pipeline and drip sequences, no manual entry required.
+
+### Invoice Reminders (Planned)
+Automatic, configurable reminders for outstanding invoices are on the way, sent by email or text before the due date, on the due date, or after, on a schedule you control. The Invoices page is also getting summary stats, more filters, a reminder status for every invoice, and bulk actions like Send Reminder, Mark as Paid, and Export.
 
 ---
 
