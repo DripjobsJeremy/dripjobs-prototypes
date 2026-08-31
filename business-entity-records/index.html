@@ -3139,8 +3139,13 @@ function epNewFormHtml() {
   const unassociated = CONTACTS.filter(c => !c.businessId && !c.archived);
   return '<div style="max-width:640px; margin:0 auto;">' +
     '<div class="settings-field" style="margin-bottom:14px;"><label class="settings-field-label is-required">Business Name</label><input class="settings-field-input" id="epNewBizName" placeholder="e.g. Acme Painting"></div>' +
-    '<div class="settings-field" style="margin-bottom:4px;"><label class="settings-field-label">Address</label><input class="settings-field-input" id="epNewBizAddress" placeholder="Street, City, State, ZIP"></div>' +
-    '<div class="settings-help" style="margin-bottom:14px;">Captured as a single freeform field here for quick creation <span class="assumption-flag" title="The standalone New Business modal (Businesses tab) collects Street/City/State/ZIP as 4 structured fields. This quick-create path intentionally trades that structure for speed during a Lead/Appointment/Proposal/Invoice creation flow. Full Street/City/State/ZIP fields can always be added later from the Business Profile\'s Edit Business action.">ASSUMPTION</span></div>' +
+    '<div class="settings-section-title" style="margin-bottom:10px;">Address</div>' +
+    '<div class="settings-grid" style="margin-bottom:18px;">' +
+      '<div class="settings-field settings-field--full"><label class="settings-field-label">Street</label><input class="settings-field-input" id="epNewBizStreet"></div>' +
+      '<div class="settings-field"><label class="settings-field-label">City</label><input class="settings-field-input" id="epNewBizCity"></div>' +
+      '<div class="settings-field settings-field--compact"><label class="settings-field-label">State</label><input class="settings-field-input" id="epNewBizState" maxlength="2"></div>' +
+      '<div class="settings-field settings-field--compact"><label class="settings-field-label">ZIP</label><input class="settings-field-input" id="epNewBizZip"></div>' +
+    '</div>' +
     '<div class="settings-group-label" style="margin-top:0;">Contact</div>' +
     '<div class="selector-sub-row" style="margin:0 0 14px; max-width:none; justify-content:flex-start;">' +
       '<button type="button" class="pill-toggle ' + (mode === 'existing' ? 'selected' : '') + '" onclick="epSelectNewBizContactMode(\'existing\')">Existing Contact</button>' +
@@ -3173,7 +3178,12 @@ function epSelectNewBizContactMode(mode) {
 function epConfirmNewBusiness() {
   const legal = document.getElementById('epNewBizName').value.trim();
   if (!legal) { toast('Business Name is required.'); document.getElementById('epNewBizName').focus(); return; }
-  epState.pendingNewBiz = { legal, address: { street: document.getElementById('epNewBizAddress').value.trim(), city: '', state: '', zip: '' } };
+  epState.pendingNewBiz = { legal, address: {
+    street: document.getElementById('epNewBizStreet').value.trim(),
+    city: document.getElementById('epNewBizCity').value.trim(),
+    state: document.getElementById('epNewBizState').value.trim(),
+    zip: document.getElementById('epNewBizZip').value.trim()
+  } };
   if ((epState.newBizContactMode || 'new') === 'existing') {
     const cid = document.getElementById('epNewBizExistingContact').value;
     if (!cid) { toast('Select an existing contact, or switch to New Contact.'); return; }
