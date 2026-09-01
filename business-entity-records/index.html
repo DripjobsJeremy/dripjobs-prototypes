@@ -1758,23 +1758,33 @@ function dataTabHtml(key, biz) {
     '</div>'
   ).join('') || '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-title">Nothing yet</div><div class="empty-state-desc">' + SNAPSHOT_TABS_LABEL[key] + ' created for this Business will appear here.</div></div>';
 
-  const fastFollowNote = FASTFOLLOW_CANDIDATE_TABS.includes(key) ?
+  const isFastFollow = FASTFOLLOW_CANDIDATE_TABS.includes(key);
+  const fastFollowNote = isFastFollow ?
     '<div class="settings-alert settings-alert--neutral" style="margin-bottom:10px;">' +
       '<div class="settings-alert-icon">🕓</div>' +
       '<div><div class="settings-alert-title">Fast-follow candidate <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Business Rule 9: Data tabs aggregation, fast-follow note">🔗 BR-9: Data Tabs Aggregation</span></div>' +
-      '<div>Ships as fast-follow if data aggregation requires new backend query logic — pending feasibility confirmation.</div></div>' +
+      '<div>' + (key === 'payments'
+        ? 'Not an independent feasibility question — rides along with the Invoices tab\'s fast-follow status. No dedicated creation entry point, no aggregation logic of its own, and no separate detail view.'
+        : 'Ships as fast-follow if data aggregation requires new backend query logic — pending feasibility confirmation.') + '</div></div>' +
     '</div>' : '';
+  const feasibilitySentence = isFastFollow
+    ? ' Whether surfacing these requires new backend query logic is unconfirmed — this tab may ship with real data in V1 or land as "coming soon" in a fast-follow.'
+    : ' This tab is V1-confirmed and ships with this feature.';
 
   return fastFollowNote + '<div class="settings-alert settings-alert--warn">' +
       '<div class="settings-alert-icon">⚠️</div>' +
       '<div><div class="settings-alert-title">Open Item #1 — pending Jason</div>' +
-      '<div>This tab shows ' + SNAPSHOT_TABS_LABEL[key].toLowerCase() + ' created directly for this Business (a Business Project) — not personal records belonging only to an associated Contact. Whether surfacing these requires new backend query logic is unconfirmed — this tab may ship with real data in V1 or land as "coming soon" in a fast-follow. Rows shown display each record\'s point-in-time contact snapshot, not the contact\'s current Primary info. Click a row to open that record, same as opening it from a Contact today.</div></div>' +
+      '<div>This tab shows ' + SNAPSHOT_TABS_LABEL[key].toLowerCase() + ' created directly for this Business (a Business Project) — not personal records belonging only to an associated Contact.' + feasibilitySentence + ' Rows shown display each record\'s point-in-time contact snapshot, not the contact\'s current Primary info. Click a row to open that record, same as opening it from a Contact today' + (key === 'payments' ? ', a Payment opens its associated Invoice rather than a Payment detail view of its own (BR39)' : '') + '.</div></div>' +
     '</div>' + rowsHtml;
 }
 function openRecordDetail(bizId, key, idx) {
   const biz = getBiz(bizId);
   const r = (biz && biz[key] || [])[idx];
   if (!r) return;
+  if (key === 'payments') {
+    toast('Opens the associated Invoice for payment "' + r.title + '" — Payments have no detail view of their own, per BR39 (not modeled in this prototype).');
+    return;
+  }
   const singular = SNAPSHOT_TABS_LABEL[key].slice(0, -1);
   toast('Opens ' + singular + ' "' + r.title + '" — same destination as opening it from a Contact today (not modeled in this prototype).');
 }
@@ -2535,6 +2545,10 @@ const EP_LEAD_SOURCES = [
   { key: 'other', label: 'Other' }
 ];
 const EP_TEAM_MEMBERS = ['Jordan P.', 'Maria Sutton', 'Chris Boyd', 'Elena Vasquez'];
+// Placeholder Sales Pipeline stage list for New Lead's Stage dropdown (BR46) — not sourced from a
+// real account's configured Pipeline stages, only the two named in the ticket (Cold Leads, Warm
+// Leads) are confirmed; the rest are common-convention placeholders pending the real stage list.
+const EP_DEAL_STAGES = ['Cold Leads', 'Warm Leads', 'Hot Leads', 'Contacted', 'Qualified'];
 const EP_RECORD_LABEL = { lead: 'Deal', appt: 'Appointment', proposal: 'Proposal', invoice: 'Invoice' };
 let nextInvoiceNo = 3005;
 // New Appointment's Communication block — Drip Sequence options and each one's "Next Drip" preview
@@ -2548,7 +2562,7 @@ const EP_DRIP_SEQUENCES = [
 const EP_STATE_DEFAULTS = {
   businessId: null, contactId: null, eventType: null, duration: '', eventColor: null, scheduledDate: null, startTime: '', endTime: '',
   jobAddressId: '',
-  proposalTemplate: 'cmc-ext-standard', leadSource: '', dealName: '', disableDrips: false, salesperson: 'Jordan P.', projectManager: '',
+  proposalTemplate: 'cmc-ext-standard', leadSource: '', dealName: '', dealStageSelect: '', disableDrips: false, salesperson: 'Jordan P.', projectManager: '',
   newBizConfirmed: false, pendingNewBiz: null, pendingNewContact: null, newBizContactMode: 'new', pendingExistingContactId: null,
   sendEmail: true, sendSms: false, dripSequence: 'appointment-information'
 };
@@ -2692,7 +2706,14 @@ function epLeadSourceAssignmentHtml(includeDealName) {
 }
 function epLeadDetailsHtml() {
   return '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
-      '<div class="settings-section-title">Lead Details <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: New Lead Specifics">🔗 BR: New Lead Specifics</span></div>' +
+      '<div class="settings-section-title">Lead Details <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Business Rule 46: New Lead Stage dropdown">🔗 BR46: New Lead Specifics</span></div>' +
+      '<div class="settings-field" style="margin-bottom:14px;">' +
+        '<label class="settings-field-label">Stage</label>' +
+        '<select class="select2" id="epDealStageSelect" onchange="epState.dealStageSelect = this.value; renderEpBody();">' +
+          '<option value="">Select a deal stage…</option>' +
+          EP_DEAL_STAGES.map(s => '<option value="' + s + '"' + (epState.dealStageSelect === s ? ' selected' : '') + '>' + s + '</option>').join('') +
+        '</select>' +
+      '</div>' +
       epLeadSourceAssignmentHtml(true) +
     '</div>';
 }
@@ -3077,6 +3098,7 @@ function epReadyToCreateHtml(sourceType, entity) {
   }
   if (epState.entry === 'lead') {
     const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
+    rows.push({ label: 'Stage', value: epState.dealStageSelect || '—' });
     rows.push({ label: 'Lead Source', value: src ? src.label : '—' });
     rows.push({ label: 'Deal Name', value: epState.dealName || '—' });
     rows.push({ label: 'Salesperson', value: epState.salesperson || '—' });
@@ -3161,7 +3183,7 @@ function epCommunicationHtml() {
     ? '(Company Settings Template)\nHi, {first-name}! We\'ve scheduled your ' + (et ? et.label : 'appointment') +
       ' for {appointment-time} on {appointment-date} at {appointment-location} with {salesperson-name}. Please let us know if you have any questions or need to make changes! Thank you! - {company-name}'
     : '(Company Settings Template)\nHi, {first-name}! Your proposal from {company-name} is ready to view: {view-proposal-link}. Let us know if you have any questions! - {salesperson-name}';
-  const dealStage = et ? (et.label + ' Scheduled') : 'Scheduled';
+  const createsDeal = isAppt && epState.eventType === 'onsite-estimate';
   return '<div class="settings-section" style="margin-top:18px; margin-bottom:0; text-align:left;">' +
       '<div class="settings-section-title" style="margin-bottom:16px;"><span>✉️ Communication</span></div>' +
       '<div class="ep-comm-toggles" style="margin-bottom:20px;">' +
@@ -3189,10 +3211,15 @@ function epCommunicationHtml() {
       '</div>' +
     '</div>' +
     (isAppt
-      ? '<div class="settings-alert settings-alert--info" style="margin-top:14px; margin-bottom:0;">' +
-          '<div class="settings-alert-icon">ℹ️</div>' +
-          '<div>By submitting this appointment, a Deal will be created in <strong>' + dealStage + '</strong>.</div>' +
-        '</div>'
+      ? (createsDeal
+          ? '<div class="settings-alert settings-alert--info" style="margin-top:14px; margin-bottom:0;">' +
+              '<div class="settings-alert-icon">ℹ️</div>' +
+              '<div>By submitting this appointment, a Deal will be created in <strong>Estimate Scheduled</strong>. Per BR31, only On-Site Estimate creates a Deal.</div>' +
+            '</div>'
+          : '<div class="settings-alert settings-alert--neutral" style="margin-top:14px; margin-bottom:0;">' +
+              '<div class="settings-alert-icon">🕓</div>' +
+              '<div>No Deal is created for this Event Type, per BR31, only On-Site Estimate creates one. This appointment is added to the Appointments calendar only.</div>' +
+            '</div>')
       : '');
 }
 
@@ -3259,9 +3286,10 @@ function epSaveRecord(sourceType) {
 function pushEpRecordOntoBusiness(biz, contact) {
   const via = contact ? contact.name : '—';
   if (epState.entry === 'lead') {
-    const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
+    // Lead Source is attribution tracking only (feeds Metrics) — it never appears in the Deal's own
+    // display text; Stage is the one user-selected field that does (BR42, BR46).
     const dealTitle = epState.dealName || ('New Deal — ' + bizDisplayLabel(biz));
-    biz.deals.push({ title: dealTitle, sub: 'Stage: Lead' + (src ? ' · Lead Source: ' + src.label : ''), meta: '—', via });
+    biz.deals.push({ title: dealTitle, sub: 'Stage: ' + (epState.dealStageSelect || 'Cold Leads'), meta: '—', via });
   } else if (epState.entry === 'appt') {
     const et = EVENT_TYPES.find(e => e.key === epState.eventType);
     const col = getEventColor(epState.eventColor);
@@ -3273,17 +3301,18 @@ function pushEpRecordOntoBusiness(biz, contact) {
       meta: 'On-Site',
       via, color: col ? col.hex : null
     });
-    // Per the Communication block's own note: submitting an Appointment also creates a Deal.
-    const apptSrc = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
-    const apptDealTitle = epState.dealName || ((et ? et.label : 'Appointment') + ' — ' + bizDisplayLabel(biz));
-    const dealStage = et ? (et.label + ' Scheduled') : 'Scheduled';
-    biz.deals.push({ title: apptDealTitle, sub: 'Stage: ' + dealStage + (apptSrc ? ' · Lead Source: ' + apptSrc.label : ''), meta: '—', via });
+    // Per BR31: a Deal is created ONLY for On-Site Estimate, always landing in the fixed "Estimate
+    // Scheduled" stage — every other Event Type adds only the Appointments calendar entry above.
+    if (epState.eventType === 'onsite-estimate') {
+      const apptDealTitle = epState.dealName || ((et ? et.label : 'Appointment') + ' — ' + bizDisplayLabel(biz));
+      biz.deals.push({ title: apptDealTitle, sub: 'Stage: Estimate Scheduled', meta: '—', via });
+    }
   } else if (epState.entry === 'proposal') {
     const tmpl = EP_PROPOSAL_TEMPLATES.find(t => t.key === epState.proposalTemplate);
-    const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
     const dealTitle = epState.dealName || ('New Deal — ' + bizDisplayLabel(biz));
     const total = fmtProposalTotal(tmpl);
-    biz.deals.push({ title: dealTitle, sub: 'Stage: Proposal Sent' + (src ? ' · Lead Source: ' + src.label : ''), meta: total, via });
+    // Per BR32: a Proposal's Deal always lands in the fixed "In Draft" stage.
+    biz.deals.push({ title: dealTitle, sub: 'Stage: In Draft', meta: total, via });
     biz.proposals.push({ title: 'Proposal — ' + dealTitle, sub: 'Sent · Template: ' + (tmpl ? tmpl.label : 'Blank'), meta: total, via });
   } else if (epState.entry === 'invoice') {
     const num = 'INV-' + (nextInvoiceNo++);
