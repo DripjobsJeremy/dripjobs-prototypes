@@ -620,6 +620,39 @@
     #be-app .mobile-nav-toggle { display: inline-flex; }
     #be-app .selector-2x2 { grid-template-columns: 1fr; max-width: 300px; }
   }
+
+  /* ─── Sales / Jobs Pipeline — Kanban board of Business-associated Deals/Jobs, card layout matches
+     the "Business Deal Cards" design reference (Business chip + Primary Contact footer pattern). ─── */
+  #be-app .pipeline-board-wrap { overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+  #be-app .pipeline-board { display: flex; gap: 14px; align-items: flex-start; min-height: 200px; }
+  #be-app .pipeline-col { flex: 0 0 300px; width: 300px; display: flex; flex-direction: column; gap: 10px; }
+  #be-app .pipeline-col-header { display: flex; align-items: center; justify-content: space-between; border-radius: var(--radius); padding: 12px 14px; }
+  #be-app .pipeline-col-title { font-size: 14px; font-weight: 700; }
+  #be-app .pipeline-col-count { background: #fff; border-radius: 6px; padding: 2px 9px; font-size: 12px; font-weight: 700; }
+  #be-app .pipeline-col-body { display: flex; flex-direction: column; gap: 10px; min-height: 40px; }
+  #be-app .pipeline-col-empty { text-align: center; color: var(--gray-400); font-size: 12px; padding: 18px 8px; border: 1.5px dashed var(--gray-200); border-radius: var(--radius-sm); }
+
+  #be-app .pipeline-card { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius); box-shadow: 0 1px 2px rgba(17,24,39,0.04), 0 1px 3px rgba(17,24,39,0.06); padding: 14px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: box-shadow 0.15s ease, border-color 0.15s ease; }
+  #be-app .pipeline-card:hover { border-color: var(--purple); box-shadow: 0 2px 8px rgba(139,133,234,0.18); }
+  #be-app .pipeline-card-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  #be-app .pipeline-card-title { font-size: 14px; font-weight: 700; color: var(--gray-800); min-width: 0; }
+  #be-app .pipeline-card-title span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+  #be-app .pipeline-biz-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--purple-light); border-radius: 6px; padding: 3px 8px; align-self: flex-start; color: var(--purple-dark); }
+  #be-app .pipeline-biz-chip span { font-size: 12.5px; font-weight: 600; }
+  #be-app .pipeline-card-sub { font-size: 12.5px; color: var(--gray-500); }
+  #be-app .pipeline-card-divider { height: 1px; background: var(--gray-100); }
+  #be-app .pipeline-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; gap: 8px; }
+  #be-app .pipeline-card-avatar { width: 22px; height: 22px; border-radius: 50%; background: #4C1D95; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  #be-app .pipeline-card-contact { font-size: 12.5px; font-weight: 600; color: var(--gray-700); }
+  #be-app .pipeline-card-updated { font-size: 11.5px; color: var(--gray-400); white-space: nowrap; }
+  #be-app .pipeline-card.just-created { animation: pipelineHighlight 2.4s ease; }
+  @keyframes pipelineHighlight {
+    0%, 15% { box-shadow: 0 0 0 3px var(--purple), 0 2px 8px rgba(139,133,234,0.3); border-color: var(--purple); }
+    100% { box-shadow: 0 1px 2px rgba(17,24,39,0.04), 0 1px 3px rgba(17,24,39,0.06); border-color: var(--gray-200); }
+  }
+  @media (max-width: 860px) {
+    #be-app .pipeline-col { flex: 0 0 82vw; width: 82vw; }
+  }
 </style>
 </head>
 <body>
@@ -660,14 +693,14 @@
         <div class="sidebar-item" data-nav="contacts"><span class="sidebar-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Contacts</div>
         <div class="sidebar-item" data-nav="businesses"><span class="sidebar-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 21v-4h6v4M9 7h.01M9 11h.01M9 15h.01M15 7h.01M15 11h.01M15 15h.01"/></svg></span> Businesses <span class="sidebar-new-badge">NEW</span></div>
         <div class="sidebar-item" data-nav="none"><span class="sidebar-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span> Sales List</div>
-        <div class="sidebar-item" data-nav="none"><span class="sidebar-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Sales Pipeline</div>
+        <div class="sidebar-item" data-nav="sales-pipeline"><span class="sidebar-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Sales Pipeline</div>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-label">Jobs</div>
         <div class="sidebar-item" data-nav="none"><span class="sidebar-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span> Change Orders</div>
         <div class="sidebar-item" data-nav="none"><span class="sidebar-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Job Schedule</div>
         <div class="sidebar-item" data-nav="none"><span class="sidebar-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> Jobs List</div>
-        <div class="sidebar-item" data-nav="none"><span class="sidebar-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Jobs Pipeline</div>
+        <div class="sidebar-item" data-nav="jobs-pipeline"><span class="sidebar-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Jobs Pipeline</div>
         <div class="sidebar-item" data-nav="none"><span class="sidebar-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span> Work Orders</div>
       </div>
       <div class="sidebar-section">
@@ -876,6 +909,34 @@
             <span class="step-chip" id="epStepChip">Step 2 of 4</span>
           </div>
           <div class="entry-frame-body" id="epFrameBody"></div>
+        </div>
+      </div>
+
+      <!-- ══════════ VIEW: Sales Pipeline ══════════ -->
+      <div class="view" id="view-sales-pipeline">
+        <div class="settings-alert settings-alert--info">
+          <div class="settings-alert-icon">ℹ️</div>
+          <div>
+            <div class="settings-alert-title">Active Deals across every Business <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — new: Sales/Jobs Pipeline surfaces Business Deals">🔗 New: Sales Pipeline</span></div>
+            <div>Shows open Deals created for a Business (a Business Project) — Personal Project records aren't modeled with a Deal in this prototype, so they don't appear here. Columns and colors are this prototype's own placeholder Sales Pipeline stages, not a confirmed production stage list. Saving a New Lead, an On-Site Estimate Appointment, or a New Proposal lands you back here, scrolled to that Deal's card.</div>
+          </div>
+        </div>
+        <div class="pipeline-board-wrap">
+          <div class="pipeline-board" id="salesPipelineBoard"></div>
+        </div>
+      </div>
+
+      <!-- ══════════ VIEW: Jobs Pipeline ══════════ -->
+      <div class="view" id="view-jobs-pipeline">
+        <div class="settings-alert settings-alert--info">
+          <div class="settings-alert-icon">ℹ️</div>
+          <div>
+            <div class="settings-alert-title">Active Jobs across every Business <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — new: Sales/Jobs Pipeline surfaces Business Deals">🔗 New: Jobs Pipeline</span></div>
+            <div>Shows active Jobs created for a Business. This prototype has no Deal-to-Job conversion flow, so this view is read-only — none of the four creation entry points navigate here.</div>
+          </div>
+        </div>
+        <div class="pipeline-board-wrap">
+          <div class="pipeline-board" id="jobsPipelineBoard"></div>
         </div>
       </div>
 
@@ -1106,8 +1167,8 @@ const BUSINESSES = [
     // Only Acme is seeded with existing Deals/Proposals/Appointments/Invoices/Payments history — every
     // other business starts empty and is populated live by saving through the Creation Entry Points demo.
     deals: [
-      { title: 'Exterior Repaint — West Wing', sub: 'Stage: Proposal Sent', meta: '$18,400', via: 'Karen Whitfield' },
-      { title: 'Parking Structure Coating', sub: 'Stage: Negotiation', meta: '$42,000', via: 'Tom Reyes' }
+      { title: 'Exterior Repaint — West Wing', sub: 'Stage: Proposal Sent', stage: 'Proposal Sent', meta: '$18,400', via: 'Karen Whitfield', updatedAt: '2026-08-24' },
+      { title: 'Parking Structure Coating', sub: 'Stage: Negotiation', stage: 'Negotiation', meta: '$42,000', via: 'Tom Reyes', updatedAt: '2026-08-15' }
     ],
     proposals: [
       { title: 'Proposal #4821 — Exterior Repaint', sub: 'Sent · Awaiting signature', meta: '$18,400', via: 'Karen Whitfield' },
@@ -1145,11 +1206,11 @@ const BUSINESSES = [
     // Demonstrates BR6/BR20's specific edge case: no open Deals or Invoices — the Deal below closed
     // won — but the Job it converted into is still active, and that alone blocks Delete.
     deals: [
-      { title: 'HOA Common Area Repaint', sub: 'Stage: Closed Won', meta: '$28,500', via: 'Marcus Ibsen', closed: true }
+      { title: 'HOA Common Area Repaint', sub: 'Stage: Closed Won', stage: 'Closed Won', meta: '$28,500', via: 'Marcus Ibsen', closed: true, updatedAt: '2026-08-01' }
     ],
     proposals: [], appointments: [], invoices: [], payments: [],
     jobs: [
-      { title: 'Job — HOA Common Area Repaint', sub: 'In Progress · Crew scheduled Aug 20, 2026', meta: '$28,500', via: 'Marcus Ibsen', active: true, fromDeal: 'HOA Common Area Repaint' }
+      { title: 'Job — HOA Common Area Repaint', sub: 'In Progress · Crew scheduled Aug 20, 2026', stage: 'In Progress', meta: '$28,500', via: 'Marcus Ibsen', active: true, fromDeal: 'HOA Common Area Repaint', updatedAt: '2026-08-11' }
     ],
     jobAddresses: []
   },
@@ -1273,8 +1334,8 @@ let demoSyncState = { contact: false, business: false }; // Phase 5 live-sync de
 function showView(name) {
   document.querySelectorAll('#be-app .view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('#be-app .sidebar-item').forEach(i => i.classList.remove('active'));
-  const titles = { businesses: 'Businesses', 'business-profile': '', contacts: 'Contacts', 'contact-profile': '', entrypoints: 'Creation Entry Points' };
-  const navMap = { businesses: 'businesses', contacts: 'contacts' };
+  const titles = { businesses: 'Businesses', 'business-profile': '', contacts: 'Contacts', 'contact-profile': '', entrypoints: 'Creation Entry Points', 'sales-pipeline': 'Sales Pipeline', 'jobs-pipeline': 'Jobs Pipeline' };
+  const navMap = { businesses: 'businesses', contacts: 'contacts', 'sales-pipeline': 'sales-pipeline', 'jobs-pipeline': 'jobs-pipeline' };
 
   document.getElementById('view-' + name).classList.add('active');
   if (navMap[name]) document.querySelector('.sidebar-item[data-nav="' + navMap[name] + '"]').classList.add('active');
@@ -1297,6 +1358,12 @@ function showView(name) {
   } else if (name === 'contact-profile') {
     const c = getContact(currentContactId);
     topLeft.innerHTML = '<span class="breadcrumb-link" onclick="showView(\'contacts\')">Contacts</span><span class="breadcrumb-sep">/</span><span class="page-title" style="font-size:15px;">' + c.name + '</span>';
+  } else if (name === 'sales-pipeline') {
+    topLeft.innerHTML = '<span class="page-title">Sales Pipeline</span>';
+    renderSalesPipeline();
+  } else if (name === 'jobs-pipeline') {
+    topLeft.innerHTML = '<span class="page-title">Jobs Pipeline</span>';
+    renderJobsPipeline();
   }
   window.scrollTo(0, 0);
   document.querySelector('.content-scroll').scrollTop = 0;
@@ -3283,22 +3350,33 @@ function epSaveRecord(sourceType) {
     contact = epState.contactId ? getContact(epState.contactId) : null;
   }
   if (!biz) { toast('Select a Business first.'); return; }
-  pushEpRecordOntoBusiness(biz, contact);
+  const newDealIdx = pushEpRecordOntoBusiness(biz, contact);
   renderBusinessesTable();
   populateIndustryFilter();
   toast('✓ ' + EP_RECORD_LABEL[epState.entry] + ' created for ' + bizDisplayLabel(biz) + '.', 'success');
-  const targetTab = { lead: 'deals', appt: 'appointments', proposal: 'proposals', invoice: 'invoices' }[epState.entry];
   const savedEntry = epState.entry;
-  openBusinessProfile(biz.id, targetTab);
+  // A Deal was created (New Lead always, an On-Site Estimate Appointment, or New Proposal) — land back
+  // on the Sales Pipeline scrolled to that Deal's card instead of the Business Profile data tab.
+  if (newDealIdx !== null) {
+    openSalesPipeline(biz.id, newDealIdx);
+  } else {
+    const targetTab = { lead: 'deals', appt: 'appointments', proposal: 'proposals', invoice: 'invoices' }[epState.entry];
+    openBusinessProfile(biz.id, targetTab);
+  }
   setEntryPoint(savedEntry); // reset the demo flow behind the scenes, ready for the next run
 }
+// Returns the index of the Deal just pushed onto biz.deals (for Sales Pipeline navigation), or null
+// when this entry didn't create one (a non-On-Site-Estimate Appointment, or an Invoice).
 function pushEpRecordOntoBusiness(biz, contact) {
   const via = contact ? contact.name : '—';
+  const nowIso = PROTO_TODAY.toISOString().slice(0, 10);
   if (epState.entry === 'lead') {
     // Lead Source is attribution tracking only (feeds Metrics) — it never appears in the Deal's own
     // display text; Stage is the one user-selected field that does (BR42, BR46).
     const dealTitle = epState.dealName || ('New Deal — ' + bizDisplayLabel(biz));
-    biz.deals.push({ title: dealTitle, sub: 'Stage: ' + (epState.dealStageSelect || 'Cold Leads'), meta: '—', via });
+    const stage = epState.dealStageSelect || 'Cold Leads';
+    biz.deals.push({ title: dealTitle, sub: 'Stage: ' + stage, stage, meta: '—', via, updatedAt: nowIso });
+    return biz.deals.length - 1;
   } else if (epState.entry === 'appt') {
     const et = EVENT_TYPES.find(e => e.key === epState.eventType);
     const col = getEventColor(epState.eventColor);
@@ -3314,21 +3392,166 @@ function pushEpRecordOntoBusiness(biz, contact) {
     // Scheduled" stage — every other Event Type adds only the Appointments calendar entry above.
     if (epState.eventType === 'onsite-estimate') {
       const apptDealTitle = epState.dealName || ((et ? et.label : 'Appointment') + ' — ' + bizDisplayLabel(biz));
-      biz.deals.push({ title: apptDealTitle, sub: 'Stage: Estimate Scheduled', meta: '—', via });
+      biz.deals.push({ title: apptDealTitle, sub: 'Stage: Estimate Scheduled', stage: 'Estimate Scheduled', meta: '—', via, updatedAt: nowIso, scheduledDate: epState.scheduledDate || null });
+      return biz.deals.length - 1;
     }
+    return null;
   } else if (epState.entry === 'proposal') {
     const tmpl = EP_PROPOSAL_TEMPLATES.find(t => t.key === epState.proposalTemplate);
     const dealTitle = epState.dealName || ('New Deal — ' + bizDisplayLabel(biz));
     const total = fmtProposalTotal(tmpl);
     // Per BR32: a Proposal's Deal always lands in the fixed "In Draft" stage.
-    biz.deals.push({ title: dealTitle, sub: 'Stage: In Draft', meta: total, via });
+    biz.deals.push({ title: dealTitle, sub: 'Stage: In Draft', stage: 'In Draft', meta: total, via, updatedAt: nowIso });
     biz.proposals.push({ title: 'Proposal — ' + dealTitle, sub: 'Sent · Template: ' + (tmpl ? tmpl.label : 'Blank'), meta: total, via });
+    return biz.deals.length - 1;
   } else if (epState.entry === 'invoice') {
     const num = 'INV-' + (nextInvoiceNo++);
     const due = new Date(PROTO_TODAY);
     due.setDate(due.getDate() + 30);
     biz.invoices.push({ title: 'Invoice #' + num, sub: 'Due ' + fmtDateAbs(due.toISOString().slice(0, 10)), meta: '$4,250.00', via });
+    return null;
   }
+  return null;
+}
+
+/* ═══════════════════════════════════════════════
+   SALES / JOBS PIPELINE — read-only Kanban view of Deals/Jobs created for a Business (a Business
+   Project) — Personal Project records have no Deal in this prototype's data model, see
+   pushEpRecordOntoBusiness above. "Active" excludes closed Deals and inactive Jobs. The column set
+   and colors below are this prototype's own placeholder pipeline stages, not a confirmed production
+   stage list — same caveat as New Lead's Stage dropdown (BR46).
+   ═══════════════════════════════════════════════ */
+const SALES_STAGES = [
+  { key: 'Cold Leads', bg: 'var(--purple-light)', text: 'var(--purple-dark)' },
+  { key: 'Warm Leads', bg: '#FEF9C3', text: '#854D0E' },
+  { key: 'Hot Leads', bg: 'var(--red-light)', text: '#991B1B' },
+  { key: 'Contacted', bg: '#DBEAFE', text: '#1E40AF' },
+  { key: 'Qualified', bg: '#EDE9FE', text: '#5B21B6' },
+  { key: 'Estimate Scheduled', bg: '#FEF3C7', text: '#78350F' },
+  { key: 'In Draft', bg: '#FDE7D3', text: '#7C2D12' },
+  { key: 'Proposal Sent', bg: '#CCFBF1', text: '#0F766E' },
+  { key: 'Negotiation', bg: '#FCE7F3', text: '#9D174D' }
+];
+const JOBS_STAGES = [
+  { key: 'Project Accepted', bg: 'var(--green-light)', text: '#065F46' },
+  { key: 'In Progress', bg: '#DBEAFE', text: '#1E3A8A' }
+];
+
+function activeDealsByStage() {
+  const map = {};
+  SALES_STAGES.forEach(s => map[s.key] = []);
+  BUSINESSES.filter(b => !b.archived).forEach(biz => {
+    (biz.deals || []).forEach((deal, idx) => {
+      if (deal.closed) return;
+      const stage = deal.stage || SALES_STAGES[0].key;
+      (map[stage] || (map[stage] = [])).push({ biz, deal, idx });
+    });
+  });
+  return map;
+}
+function activeJobsByStage() {
+  const map = {};
+  JOBS_STAGES.forEach(s => map[s.key] = []);
+  BUSINESSES.filter(b => !b.archived).forEach(biz => {
+    (biz.jobs || []).forEach((job, idx) => {
+      if (!job.active) return;
+      const stage = job.stage || JOBS_STAGES[0].key;
+      (map[stage] || (map[stage] = [])).push({ biz, job, idx });
+    });
+  });
+  return map;
+}
+function initialsOf(name) {
+  if (!name || name === '—') return '—';
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0][0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+}
+function pipelineBizIconSvg() {
+  return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 21v-4h6v4M9 7h.01M9 11h.01M9 15h.01M15 7h.01M15 11h.01M15 15h.01"/></svg>';
+}
+function pipelineCardFooterHtml(via, updatedAt) {
+  return '<div class="pipeline-card-divider"></div>' +
+    '<div class="pipeline-card-footer">' +
+      '<div style="display:flex; align-items:center; gap:6px; min-width:0;">' +
+        '<div class="pipeline-card-avatar">' + initialsOf(via) + '</div>' +
+        '<span class="pipeline-card-contact" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + via + '</span>' +
+      '</div>' +
+      '<span class="pipeline-card-updated">Updated ' + (updatedAt ? fmtDateRelative(updatedAt) : '—') + '</span>' +
+    '</div>';
+}
+function dealCardExtraHtml(biz, deal) {
+  if (deal.stage === 'Estimate Scheduled' && deal.scheduledDate) {
+    return '<div style="display:flex; align-items:center; justify-content:space-between;">' +
+      '<span style="font-size:13px; font-weight:700; color:var(--red);">' + fmtDateSlash(deal.scheduledDate) + '</span>' +
+      '<button type="button" class="btn btn-outline btn-sm" onclick="event.stopPropagation(); showView(\'entrypoints\'); setEntryPoint(\'proposal\');">New Proposal</button>' +
+    '</div>';
+  }
+  if (deal.stage === 'In Draft') {
+    return '<div style="display:flex; align-items:center; justify-content:space-between;">' +
+      '<span class="btn-link" onclick="event.stopPropagation(); openBusinessProfile(\'' + biz.id + '\', \'proposals\')" style="font-size:13px;">View Proposal</span>' +
+      '<div style="text-align:right;"><div style="font-size:14px; font-weight:700; color:var(--gray-800);">' + deal.meta + '</div><div style="font-size:11px; color:var(--gray-400);">Pending</div></div>' +
+    '</div>';
+  }
+  if (deal.stage === 'Cold Leads' || deal.stage === 'Warm Leads' || deal.stage === 'Hot Leads') {
+    return '<div style="display:flex; align-items:center; justify-content:space-between;">' +
+      '<span class="btn-link" onclick="event.stopPropagation(); showView(\'entrypoints\'); setEntryPoint(\'appt\');" style="font-size:13px;">Schedule</span>' +
+      '<button type="button" class="btn btn-outline btn-sm" onclick="event.stopPropagation(); toast(\'Notes are not modeled in this prototype.\')">Add Note</button>' +
+    '</div>';
+  }
+  if (deal.meta && deal.meta !== '—') {
+    return '<div style="font-size:12.5px; color:var(--gray-500); font-weight:700;">' + deal.meta + '</div>';
+  }
+  return '';
+}
+function dealCardHtml(biz, deal, idx) {
+  return '<div class="pipeline-card" id="pipeline-deal-' + biz.id + '-' + idx + '" onclick="openRecordDetail(\'' + biz.id + '\', \'deals\', ' + idx + ')">' +
+    '<div class="pipeline-card-title-row"><div class="pipeline-card-title"><span>' + deal.title + '</span></div></div>' +
+    '<div class="pipeline-biz-chip" onclick="event.stopPropagation(); openBusinessProfile(\'' + biz.id + '\', \'deals\')" style="cursor:pointer;">' + pipelineBizIconSvg() + '<span>' + bizDisplayLabel(biz) + '</span></div>' +
+    dealCardExtraHtml(biz, deal) +
+    pipelineCardFooterHtml(deal.via, deal.updatedAt) +
+  '</div>';
+}
+function jobCardHtml(biz, job, idx) {
+  return '<div class="pipeline-card" onclick="openBusinessProfile(\'' + biz.id + '\', \'information\')">' +
+    '<div class="pipeline-card-title-row"><div class="pipeline-card-title"><span>' + job.title + '</span></div></div>' +
+    '<div class="pipeline-biz-chip" onclick="event.stopPropagation(); openBusinessProfile(\'' + biz.id + '\', \'information\')" style="cursor:pointer;">' + pipelineBizIconSvg() + '<span>' + bizDisplayLabel(biz) + '</span></div>' +
+    '<div class="pipeline-card-sub">' + job.sub + '</div>' +
+    (job.meta ? '<div style="font-size:14px; font-weight:700; color:var(--gray-800);">' + job.meta + '</div>' : '') +
+    pipelineCardFooterHtml(job.via, job.updatedAt) +
+  '</div>';
+}
+function pipelineColumnHtml(stageConf, cardsHtmlArr) {
+  const body = cardsHtmlArr.length ? cardsHtmlArr.join('') : '<div class="pipeline-col-empty">Nothing here yet.</div>';
+  return '<div class="pipeline-col">' +
+    '<div class="pipeline-col-header" style="background:' + stageConf.bg + '; color:' + stageConf.text + ';">' +
+      '<div class="pipeline-col-title">' + stageConf.key + '</div>' +
+      '<div class="pipeline-col-count">' + cardsHtmlArr.length + '</div>' +
+    '</div>' +
+    '<div class="pipeline-col-body">' + body + '</div>' +
+  '</div>';
+}
+function renderSalesPipeline() {
+  const byStage = activeDealsByStage();
+  document.getElementById('salesPipelineBoard').innerHTML =
+    SALES_STAGES.map(s => pipelineColumnHtml(s, (byStage[s.key] || []).map(it => dealCardHtml(it.biz, it.deal, it.idx)))).join('');
+}
+function renderJobsPipeline() {
+  const byStage = activeJobsByStage();
+  document.getElementById('jobsPipelineBoard').innerHTML =
+    JOBS_STAGES.map(s => pipelineColumnHtml(s, (byStage[s.key] || []).map(it => jobCardHtml(it.biz, it.job, it.idx)))).join('');
+}
+// Navigates to the Sales Pipeline and, when a specific Deal is given (post-save from New Lead, an
+// On-Site Estimate Appointment, or New Proposal), scrolls to and briefly highlights its card.
+function openSalesPipeline(bizId, dealIdx) {
+  showView('sales-pipeline');
+  if (bizId == null || dealIdx == null) return;
+  requestAnimationFrame(() => {
+    const el = document.getElementById('pipeline-deal-' + bizId + '-' + dealIdx);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    el.classList.add('just-created');
+    setTimeout(() => el.classList.remove('just-created'), 2500);
+  });
 }
 
 function epSelectBusiness(bid) {
@@ -3528,6 +3751,8 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
     const nav = item.dataset.nav;
     if (nav === 'businesses') showView('businesses');
     else if (nav === 'contacts') showView('contacts');
+    else if (nav === 'sales-pipeline') showView('sales-pipeline');
+    else if (nav === 'jobs-pipeline') showView('jobs-pipeline');
     else toast('Not part of this prototype — out of scope for Business Entity Records V1.');
     toggleMobileSidebar(false);
   });
