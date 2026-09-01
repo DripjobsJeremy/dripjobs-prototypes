@@ -2671,7 +2671,7 @@ function epAddressOrApptExtrasHtml(sourceType, entity) {
 
 /* ─── Lead Source (required) + Deal Name, Assignment (Salesperson + Project Manager) — shared
    across New Lead, New Appointment, New Proposal (deal name), and New Invoice (no deal name). ─── */
-function epLeadSourceAssignmentHtml(includeDealName) {
+function epLeadSourceDealNameRowHtml(includeDealName) {
   return '<div style="display:flex; gap:10px;">' +
       '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
         '<label class="settings-field-label is-required">Lead Source</label>' +
@@ -2686,8 +2686,10 @@ function epLeadSourceAssignmentHtml(includeDealName) {
           '<input class="settings-field-input" placeholder="Give this job a unique name…" value="' + (epState.dealName || '').replace(/"/g, '&quot;') + '" oninput="epState.dealName = this.value">' +
         '</div>'
         : '') +
-    '</div>' +
-    '<div class="settings-group-label">Assignment</div>' +
+    '</div>';
+}
+function epAssignmentRowHtml() {
+  return '<div class="settings-group-label">Assignment</div>' +
     '<div style="display:flex; gap:10px;">' +
       '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
         '<label class="settings-field-label">Salesperson</label>' +
@@ -2704,17 +2706,24 @@ function epLeadSourceAssignmentHtml(includeDealName) {
       '</div>' +
     '</div>';
 }
+function epLeadSourceAssignmentHtml(includeDealName) {
+  return epLeadSourceDealNameRowHtml(includeDealName) + epAssignmentRowHtml();
+}
+function epDealStageFieldHtml() {
+  return '<div class="settings-field" style="margin-bottom:14px;">' +
+      '<label class="settings-field-label">Stage</label>' +
+      '<select class="select2" id="epDealStageSelect" onchange="epState.dealStageSelect = this.value; renderEpBody();">' +
+        '<option value="">Select a deal stage…</option>' +
+        EP_DEAL_STAGES.map(s => '<option value="' + s + '"' + (epState.dealStageSelect === s ? ' selected' : '') + '>' + s + '</option>').join('') +
+      '</select>' +
+    '</div>';
+}
 function epLeadDetailsHtml() {
   return '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
       '<div class="settings-section-title">Lead Details <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Business Rule 46: New Lead Stage dropdown">🔗 BR46: New Lead Specifics</span></div>' +
-      '<div class="settings-field" style="margin-bottom:14px;">' +
-        '<label class="settings-field-label">Stage</label>' +
-        '<select class="select2" id="epDealStageSelect" onchange="epState.dealStageSelect = this.value; renderEpBody();">' +
-          '<option value="">Select a deal stage…</option>' +
-          EP_DEAL_STAGES.map(s => '<option value="' + s + '"' + (epState.dealStageSelect === s ? ' selected' : '') + '>' + s + '</option>').join('') +
-        '</select>' +
-      '</div>' +
-      epLeadSourceAssignmentHtml(true) +
+      epLeadSourceDealNameRowHtml(true) +
+      epDealStageFieldHtml() +
+      epAssignmentRowHtml() +
     '</div>';
 }
 function epInvoiceDetailsHtml() {
@@ -3098,9 +3107,9 @@ function epReadyToCreateHtml(sourceType, entity) {
   }
   if (epState.entry === 'lead') {
     const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
-    rows.push({ label: 'Stage', value: epState.dealStageSelect || '—' });
     rows.push({ label: 'Lead Source', value: src ? src.label : '—' });
     rows.push({ label: 'Deal Name', value: epState.dealName || '—' });
+    rows.push({ label: 'Stage', value: epState.dealStageSelect || '—' });
     rows.push({ label: 'Salesperson', value: epState.salesperson || '—' });
     rows.push({ label: 'Project Manager', value: epState.projectManager || '—' });
   } else if (epState.entry === 'appt') {
