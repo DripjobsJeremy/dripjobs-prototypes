@@ -817,9 +817,6 @@
             <option value="Lead">Lead</option>
             <option value="Customer">Customer</option>
           </select>
-          <select class="filter-select biz-col" id="contactBusinessFilter" onchange="filterContacts()" style="display:none;">
-            <option value="">All Businesses</option>
-          </select>
           <div class="settings-toggle-row" style="margin-left:2px;">
             <label class="switch"><input type="checkbox" id="contactShowArchivedToggle" onchange="toggleContactShowArchived(this.checked)"><span class="switch-track"></span></label>
             <span class="settings-toggle-label" style="font-size:12.5px; white-space:nowrap;">Show Archived</span>
@@ -904,7 +901,7 @@
       <div class="guide-step-num">2</div>
       <div>
         <div class="guide-step-title">Explore the profile tabs</div>
-        <div class="guide-step-desc">Information holds the entity's own fields. Deals, Proposals, Appointments, Invoices, and Payments aggregate records across every associated contact — try Call History, Tasks, Notes, Attachments, Email, and Text too.</div>
+        <div class="guide-step-desc">Information holds the entity's own fields. Deals, Proposals, Appointments, Invoices, and Payments aggregate records across every associated contact — try Tasks, Notes, Attachments, Email, and Text too.</div>
       </div>
     </div>
     <div class="guide-step">
@@ -918,7 +915,7 @@
       <div class="guide-step-num">4</div>
       <div>
         <div class="guide-step-title">Check the Contacts list</div>
-        <div class="guide-step-desc">Click <code>Contacts</code> in the left nav. Note the new Business column and Business filter dropdown — click a business pill to jump straight to its profile.</div>
+        <div class="guide-step-desc">Click <code>Contacts</code> in the left nav. Note the new Business column — click a business pill to jump straight to its profile, or sort by the column to group Business-associated contacts together.</div>
       </div>
     </div>
     <div class="guide-step">
@@ -1094,6 +1091,7 @@
    ═══════════════════════════════════════════════ */
 let nextBizId = 100;
 let nextContactId = 100;
+let nextJobAddressId = 100;
 
 const BUSINESSES = [
   {
@@ -1127,7 +1125,11 @@ const BUSINESSES = [
       { title: 'Payment received — INV-2204', sub: 'Jul 2, 2026 · Card ending 4471', meta: '$3,120.00', via: 'Karen Whitfield' },
       { title: 'Deposit — Proposal #4790', sub: 'Jun 18, 2026 · ACH', meta: '$1,500.00', via: 'Tom Reyes' }
     ],
-    jobs: []
+    jobs: [],
+    jobAddresses: [
+      { id: 'ja1', label: 'West Wing', street: '4820 Meridian Business Pkwy, Bldg B', city: 'Dallas', state: 'TX', zip: '75201' },
+      { id: 'ja2', label: 'Parking Structure', street: '4900 Meridian Business Pkwy', city: 'Dallas', state: 'TX', zip: '75201' }
+    ]
   },
   {
     id: 'summit', legal: 'Summit Ridge Property Holdings Inc.', dba: 'Summit Ridge', displayDba: true,
@@ -1148,7 +1150,8 @@ const BUSINESSES = [
     proposals: [], appointments: [], invoices: [], payments: [],
     jobs: [
       { title: 'Job — HOA Common Area Repaint', sub: 'In Progress · Crew scheduled Aug 20, 2026', meta: '$28,500', via: 'Marcus Ibsen', active: true, fromDeal: 'HOA Common Area Repaint' }
-    ]
+    ],
+    jobAddresses: []
   },
   {
     id: 'brightview', legal: 'Brightview Retail Facilities LLC', dba: '', displayDba: false,
@@ -1159,7 +1162,7 @@ const BUSINESSES = [
     billingSame: true, archived: false,
     contactIds: ['c6'],
     createdAt: '2026-04-30',
-    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
+    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: [], jobAddresses: []
   },
   {
     id: 'northgate', legal: 'Northgate Medical Plaza Association', dba: 'Northgate Medical Plaza', displayDba: true,
@@ -1170,7 +1173,7 @@ const BUSINESSES = [
     billingSame: true, archived: false,
     contactIds: ['c7', 'c8'],
     createdAt: '2026-05-22',
-    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
+    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: [], jobAddresses: []
   },
   {
     id: 'cedarcreek', legal: 'Cedar Creek Homeowners Association', dba: 'Cedar Creek HOA', displayDba: true,
@@ -1184,7 +1187,7 @@ const BUSINESSES = [
     archived: false,
     contactIds: ['c9'],
     createdAt: '2026-06-19',
-    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
+    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: [], jobAddresses: []
   },
   {
     id: 'westline', legal: 'Westline General Contracting Co.', dba: 'Westline GC', displayDba: true,
@@ -1196,7 +1199,7 @@ const BUSINESSES = [
     contactIds: [],
     hasActiveRecords: false, // Brand-new entity, nothing created against it yet — demos the "editing Information has no downstream impact" case
     createdAt: '2026-08-25',
-    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
+    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: [], jobAddresses: []
   },
   {
     id: 'sunridge', legal: 'Sunridge Painting & Coatings LLC', dba: 'Sunridge Painting', displayDba: true,
@@ -1209,7 +1212,7 @@ const BUSINESSES = [
     contactIds: [],
     hasActiveRecords: false,
     createdAt: '2026-01-10',
-    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
+    deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: [], jobAddresses: []
   }
 ];
 
@@ -1428,7 +1431,6 @@ function populateIndustryFilter() {
    ═══════════════════════════════════════════════ */
 const TABS = [
   { key: 'information', label: 'Information' },
-  { key: 'callhistory', label: 'Call History' },
   { key: 'deals', label: 'Deals' },
   { key: 'proposals', label: 'Proposals' },
   { key: 'appointments', label: 'Appointments' },
@@ -1500,7 +1502,6 @@ function renderTabContent(key) {
   const dataTabs = ['deals', 'proposals', 'appointments', 'invoices', 'payments'];
   if (dataTabs.includes(key)) { panel.innerHTML = dataTabHtml(key, biz); return; }
 
-  if (key === 'callhistory') { panel.innerHTML = callHistoryHtml(biz); return; }
   if (key === 'tasks') { panel.innerHTML = tasksHtml(biz); return; }
   if (key === 'notes') { panel.innerHTML = notesHtml(biz); return; }
   if (key === 'attachments') { panel.innerHTML = attachmentsHtml(biz); return; }
@@ -1547,11 +1548,90 @@ function infoTabHtml(biz) {
       '</div>' +
     '</div>' +
     '<div class="settings-section">' +
+      '<div class="settings-section-title">Job Addresses <button class="btn btn-outline btn-sm" onclick="openAddJobAddressModal(\'' + biz.id + '\')">+ Add Job Address</button></div>' +
+      '<div class="settings-section-subtitle">Sourced independently from ' + bizDisplayLabel(biz) + '’s own Address (BR2) — this is what populates the Job/Appointment Address dropdown when creating Deals, Proposals, Appointments, and Invoices for this Business.</div>' +
+      jobAddressRowsHtml(biz) +
+    '</div>' +
+    '<div class="settings-section">' +
       '<div class="settings-section-title">Associated Contacts <button class="btn btn-outline btn-sm" onclick="openAssociateModal()">+ Associate Contact</button></div>' +
       '<div class="settings-section-subtitle">A Contact can belong to at most one Business Entity. The first contact associated with a Business becomes its ⭐ Primary Contact by default — the default used when initiating communication from this entity. Once there\'s more than one associated contact, any of them can be made Primary instead.</div>' +
       contactRows +
     '</div>' +
     demoLiveSyncHtml(biz);
+}
+function jobAddressRowsHtml(biz) {
+  const addrs = biz.jobAddresses || [];
+  if (!addrs.length) return '<div class="empty-state"><div class="empty-state-desc">No Job Addresses on file yet.</div></div>';
+  return addrs.map(a =>
+    '<div class="activity-row">' +
+      '<div class="activity-icon">📍</div>' +
+      '<div style="flex:1;">' +
+        '<div class="activity-title">' + (a.label || fmtJobAddr(a)) + '</div>' +
+        (a.label ? '<div class="activity-sub">' + fmtJobAddr(a) + '</div>' : '') +
+      '</div>' +
+      '<button class="btn-link" onclick="openEditJobAddressModal(\'' + biz.id + '\', \'' + a.id + '\')">Edit</button>' +
+      '<button class="btn-link muted" onclick="removeJobAddress(\'' + biz.id + '\', \'' + a.id + '\')">Remove</button>' +
+    '</div>'
+  ).join('');
+}
+function jobAddressFormHtml(a) {
+  a = a || {};
+  return '<div class="settings-field" style="margin-bottom:12px;"><label class="settings-field-label">Label (optional)</label><input class="settings-field-input" id="jaLabel" value="' + (a.label || '') + '" placeholder="e.g. Main Site"></div>' +
+    '<div class="settings-field" style="margin-bottom:12px;"><label class="settings-field-label is-required">Street</label><input class="settings-field-input" id="jaStreet" value="' + (a.street || '') + '"></div>' +
+    '<div style="display:flex; gap:10px;">' +
+      '<div class="settings-field" style="flex:2;"><label class="settings-field-label">City</label><input class="settings-field-input" id="jaCity" value="' + (a.city || '') + '"></div>' +
+      '<div class="settings-field" style="flex:1; max-width:74px;"><label class="settings-field-label">State</label><input class="settings-field-input" id="jaState" maxlength="2" value="' + (a.state || '') + '"></div>' +
+      '<div class="settings-field" style="flex:1; max-width:100px;"><label class="settings-field-label">ZIP</label><input class="settings-field-input" id="jaZip" value="' + (a.zip || '') + '"></div>' +
+    '</div>';
+}
+function openAddJobAddressModal(bizId) {
+  document.getElementById('associateModalTitle').textContent = 'Add Job Address';
+  document.getElementById('associateModalBody').innerHTML = jobAddressFormHtml(null);
+  document.getElementById('associateModalFooter').innerHTML =
+    '<button class="btn btn-outline" onclick="closeModal(\'modalAssociate\')">Cancel</button>' +
+    '<button class="btn btn-primary" onclick="confirmSaveJobAddress(\'' + bizId + '\', null)">Save</button>';
+  openModal('modalAssociate');
+}
+function openEditJobAddressModal(bizId, addrId) {
+  const biz = getBiz(bizId);
+  const a = (biz.jobAddresses || []).find(x => x.id === addrId);
+  document.getElementById('associateModalTitle').textContent = 'Edit Job Address';
+  document.getElementById('associateModalBody').innerHTML = jobAddressFormHtml(a);
+  document.getElementById('associateModalFooter').innerHTML =
+    '<button class="btn btn-outline" onclick="closeModal(\'modalAssociate\')">Cancel</button>' +
+    '<button class="btn btn-primary" onclick="confirmSaveJobAddress(\'' + bizId + '\', \'' + addrId + '\')">Save</button>';
+  openModal('modalAssociate');
+}
+function confirmSaveJobAddress(bizId, addrId) {
+  const street = document.getElementById('jaStreet').value.trim();
+  if (!street) { toast('Street is required.'); document.getElementById('jaStreet').focus(); return; }
+  const biz = getBiz(bizId);
+  biz.jobAddresses = biz.jobAddresses || [];
+  const data = {
+    label: document.getElementById('jaLabel').value.trim(),
+    street,
+    city: document.getElementById('jaCity').value.trim(),
+    state: document.getElementById('jaState').value.trim(),
+    zip: document.getElementById('jaZip').value.trim()
+  };
+  if (addrId) {
+    Object.assign(biz.jobAddresses.find(x => x.id === addrId), data);
+    toast('Job Address updated.');
+  } else {
+    data.id = 'ja' + (nextJobAddressId++);
+    biz.jobAddresses.push(data);
+    toast('Job Address added.');
+  }
+  closeModal('modalAssociate');
+  document.getElementById('panel-information').dataset.rendered = '';
+  renderTabContent('information');
+}
+function removeJobAddress(bizId, addrId) {
+  const biz = getBiz(bizId);
+  biz.jobAddresses = (biz.jobAddresses || []).filter(a => a.id !== addrId);
+  toast('Job Address removed.');
+  document.getElementById('panel-information').dataset.rendered = '';
+  renderTabContent('information');
 }
 
 /* ═══════════════════════════════════════════════
@@ -1699,13 +1779,6 @@ function openRecordDetail(bizId, key, idx) {
   toast('Opens ' + singular + ' "' + r.title + '" — same destination as opening it from a Contact today (not modeled in this prototype).');
 }
 
-function callHistoryHtml(biz) {
-  const rows = [
-    { icon: '📞', title: 'Outbound call — ' + (getContact(biz.contactIds[0] || '') ? getContact(biz.contactIds[0]).name : 'Primary Contact'), sub: '4m 12s · Discussed proposal timeline', time: 'Jul 24' },
-    { icon: '📞', title: 'Inbound call', sub: '1m 05s · Missed, voicemail left', time: 'Jul 18' }
-  ];
-  return activityListHtml(rows, biz.contactIds.length ? null : 'No call history yet.');
-}
 function tasksHtml(biz) {
   const rows = [
     { icon: '✅', title: 'Follow up on signed proposal', sub: 'Due Aug 2, 2026 · Assigned to Jordan P.', time: 'Open' },
@@ -1795,29 +1868,74 @@ function confirmDelete(id) {
 }
 
 /* ─── Associate contact (dropdown selection — the contact list could get large) ─── */
+let associateContactMode = 'existing';
 function openAssociateModal() {
+  associateContactMode = 'existing';
   document.getElementById('associateModalTitle').textContent = 'Associate Contact';
-  const unassociated = CONTACTS.filter(c => !c.businessId && !c.archived);
   document.getElementById('associateModalBody').innerHTML =
-    '<div class="settings-field" style="margin-bottom:4px;">' +
-      '<label class="settings-field-label">Contact</label>' +
-      '<select class="select2" id="associateContactSelect">' +
-        '<option value="">Select a contact…</option>' +
-        unassociated.map(c => '<option value="' + c.id + '">' + c.name + (c.email ? ' — ' + c.email : '') + '</option>').join('') +
-      '</select>' +
+    '<div class="selector-sub-row" style="margin:0 0 14px; max-width:none; justify-content:flex-start;">' +
+      '<button type="button" class="pill-toggle selected" id="associateModeExisting" onclick="setAssociateContactMode(\'existing\')">Existing Contact</button>' +
+      '<button type="button" class="pill-toggle" id="associateModeNew" onclick="setAssociateContactMode(\'new\')">+ Add New</button>' +
     '</div>' +
-    '<div class="settings-help">Only unassociated contacts are shown — a contact can belong to one Business at a time.' +
-      (unassociated.length === 0 ? ' There are no unassociated contacts right now.' : '') +
-    '</div>';
+    '<div id="associateContactFields"></div>';
   document.getElementById('associateModalFooter').innerHTML =
     '<button class="btn btn-outline" onclick="closeModal(\'modalAssociate\')">Cancel</button>' +
     '<button class="btn btn-primary" onclick="confirmAssociateContact()">Associate</button>';
+  renderAssociateContactFields();
   openModal('modalAssociate');
 }
+function setAssociateContactMode(mode) {
+  associateContactMode = mode;
+  document.getElementById('associateModeExisting').classList.toggle('selected', mode === 'existing');
+  document.getElementById('associateModeNew').classList.toggle('selected', mode === 'new');
+  renderAssociateContactFields();
+}
+function renderAssociateContactFields() {
+  const el = document.getElementById('associateContactFields');
+  if (!el) return;
+  if (associateContactMode === 'existing') {
+    const unassociated = CONTACTS.filter(c => !c.businessId && !c.archived);
+    el.innerHTML =
+      '<div class="settings-field" style="margin-bottom:4px;">' +
+        '<label class="settings-field-label">Contact</label>' +
+        '<select class="select2" id="associateContactSelect">' +
+          '<option value="">Select a contact…</option>' +
+          unassociated.map(c => '<option value="' + c.id + '">' + c.name + (c.email ? ' — ' + c.email : '') + '</option>').join('') +
+        '</select>' +
+      '</div>' +
+      '<div class="settings-help">Only unassociated contacts are shown — a contact can belong to one Business at a time.' +
+        (unassociated.length === 0 ? ' There are no unassociated contacts right now — switch to + Add New.' : '') +
+      '</div>';
+  } else {
+    el.innerHTML =
+      '<div style="display:flex; gap:10px;">' +
+        '<div class="settings-field" style="flex:1; margin-bottom:14px;"><label class="settings-field-label is-required">First Name</label><input class="settings-field-input" id="associateNewFirstName" placeholder="First name"></div>' +
+        '<div class="settings-field" style="flex:1; margin-bottom:14px;"><label class="settings-field-label">Last Name</label><input class="settings-field-input" id="associateNewLastName" placeholder="Last name"></div>' +
+      '</div>' +
+      '<div style="display:flex; gap:10px;">' +
+        '<div class="settings-field" style="flex:1; margin-bottom:0;"><label class="settings-field-label">Contact Phone</label><input class="settings-field-input formatted-phone-no" id="associateNewPhone" placeholder="(555) 555-5555"></div>' +
+        '<div class="settings-field" style="flex:1; margin-bottom:0;"><label class="settings-field-label">Contact Email</label><input class="settings-field-input" id="associateNewEmail" type="email" placeholder="name@company.com"></div>' +
+      '</div>';
+  }
+}
 function confirmAssociateContact() {
-  const cid = document.getElementById('associateContactSelect').value;
-  if (!cid) { toast('Select a contact first.'); return; }
-  associateContact(cid);
+  if (associateContactMode === 'existing') {
+    const cid = document.getElementById('associateContactSelect').value;
+    if (!cid) { toast('Select a contact first.'); return; }
+    associateContact(cid);
+  } else {
+    const firstName = document.getElementById('associateNewFirstName').value.trim();
+    const lastName = document.getElementById('associateNewLastName').value.trim();
+    if (!firstName) { toast('First Name is required.'); document.getElementById('associateNewFirstName').focus(); return; }
+    const contact = {
+      id: 'c' + (nextContactId++), name: (firstName + ' ' + lastName).trim(), role: null,
+      phone: document.getElementById('associateNewPhone').value.trim(),
+      email: document.getElementById('associateNewEmail').value.trim(),
+      status: 'Lead', businessId: null, primaryFor: null
+    };
+    CONTACTS.push(contact);
+    associateContact(contact.id);
+  }
 }
 function associateContact(cid) {
   const c = getContact(cid);
@@ -1977,7 +2095,7 @@ function saveNewBusiness() {
     const createdAt = PROTO_TODAY.toISOString().slice(0, 10);
     BUSINESSES.push(Object.assign({
       id, contactIds: [contact.id], archived: false, createdAt,
-      deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
+      deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: [], jobAddresses: []
     }, data));
     contact.businessId = id;
     contact.primaryFor = id; // first Contact associated always defaults to Primary (BR5)
@@ -1985,7 +2103,6 @@ function saveNewBusiness() {
     toast('Business created.');
     renderBusinessesTable();
     populateIndustryFilter();
-    populateBusinessFilter();
     openBusinessProfile(id);
   }
 }
@@ -2037,7 +2154,6 @@ function sortContacts(key) {
 function toggleContactShowBusiness(checked) {
   contactShowBusiness = checked;
   document.querySelectorAll('#view-contacts .biz-col').forEach(el => el.style.display = checked ? '' : 'none');
-  if (!checked) document.getElementById('contactBusinessFilter').value = '';
   filterContacts();
 }
 function toggleContactShowArchived(checked) { contactShowArchived = checked; contactPage = 1; renderContactsTable(); }
@@ -2072,14 +2188,13 @@ function renderContactPaginationBar(total, totalPages) {
       '<button type="button" class="pagination-nav-btn" ' + (contactPage >= totalPages ? 'disabled' : '') + ' onclick="goToContactPage(' + (contactPage + 1) + ')">Next</button>' +
     '</div>';
 }
-function renderContactsTable(filterText, status, businessId) {
+function renderContactsTable(filterText, status) {
   const searchEl = document.querySelector('#view-contacts .search-input');
   const ft = (filterText != null ? filterText : (searchEl ? searchEl.value : '')).toLowerCase();
   const type = document.getElementById('contactTypeFilter').value;
   const source = document.getElementById('contactSourceFilter').value;
   const salesperson = document.getElementById('contactSalespersonFilter').value;
   const stat = status != null ? status : document.getElementById('contactStatusFilter').value;
-  const biz = businessId != null ? businessId : (contactShowBusiness ? document.getElementById('contactBusinessFilter').value : '');
 
   let rows = CONTACTS.filter(c => {
     if (contactShowArchived ? !c.archived : c.archived) return false; // exclusive, matches the Businesses list's Show Archived
@@ -2087,8 +2202,7 @@ function renderContactsTable(filterText, status, businessId) {
     if (type && (c.type || '') !== type) return false;
     if (source && (c.source || '') !== source) return false;
     if (salesperson && (c.salesperson || '') !== salesperson) return false;
-    if (contactShowBusiness && !c.businessId) return false; // BR12: ON filters to only Business-associated Contacts
-    if (biz && c.businessId !== biz) return false;
+    if (contactShowBusiness && !c.businessId) return false; // BR12: ON filters to only Business-associated Contacts, sort by the Business column to narrow further
     if (ft && !c.name.toLowerCase().includes(ft)) return false;
     return true;
   });
@@ -2130,10 +2244,6 @@ function filterContacts() {
   contactPage = 1;
   renderContactsTable();
 }
-function populateBusinessFilter() {
-  const sel = document.getElementById('contactBusinessFilter');
-  sel.innerHTML = '<option value="">All Businesses</option>' + BUSINESSES.map(b => '<option value="' + b.id + '">' + bizDisplayLabel(b) + '</option>').join('');
-}
 function populateContactFilters() {
   const typeSel = document.getElementById('contactTypeFilter');
   const sourceSel = document.getElementById('contactSourceFilter');
@@ -2169,11 +2279,12 @@ function renderContactBusinessCard(c) {
   const card = document.getElementById('contactBusinessCard');
   if (c.businessId) {
     const b = getBiz(c.businessId);
+    const isPrimary = c.primaryFor === b.id;
     card.innerHTML = '<div class="settings-section-title">Business</div>' +
       '<div class="activity-row contact-biz-row" style="padding-top:0;">' +
-        '<div class="contact-biz-info"><div class="activity-title" style="cursor:pointer;" onclick="openBusinessProfile(\'' + b.id + '\')">' + bizDisplayLabel(b) + (c.primaryFor === b.id ? ' <span class="multi-row-primary-badge">PRIMARY CONTACT</span>' : '') + (b.archived ? ' <span class="status-pill status-archived">Archived</span>' : '') + '</div><div class="activity-sub">' + b.legal + '</div></div>' +
+        '<div class="contact-biz-info"><div class="activity-title" style="cursor:pointer;" onclick="openBusinessProfile(\'' + b.id + '\')">' + bizDisplayLabel(b) + (isPrimary ? ' <span class="multi-row-primary-badge">PRIMARY CONTACT</span>' : '') + (b.archived ? ' <span class="status-pill status-archived">Archived</span>' : '') + '</div><div class="activity-sub">' + b.legal + '</div></div>' +
         '<div class="contact-biz-actions">' +
-          '<button class="btn btn-outline btn-sm" onclick="openChangeBusinessModal(\'' + c.id + '\')">Change</button>' +
+          (!isPrimary ? '<button class="btn btn-outline btn-sm" onclick="makeContactPrimaryFromContactProfile(\'' + c.id + '\')">Make Primary</button>' : '') +
           '<button class="btn btn-outline btn-sm" onclick="removeAssociationFromContact(\'' + c.id + '\')">Remove</button>' +
         '</div>' +
       '</div>';
@@ -2184,6 +2295,14 @@ function renderContactBusinessCard(c) {
         '<div style="margin-top:10px;"><button class="btn btn-primary btn-sm" onclick="openChangeBusinessModal(\'' + c.id + '\')">+ Associate with Business</button></div>' +
       '</div>';
   }
+}
+function makeContactPrimaryFromContactProfile(cid) {
+  const c = getContact(cid);
+  const biz = getBiz(c.businessId);
+  biz.contactIds.forEach(id => { const other = getContact(id); if (other.primaryFor === biz.id) other.primaryFor = null; });
+  c.primaryFor = biz.id;
+  toast('✓ ' + c.name + ' is now the Primary Contact for ' + bizDisplayLabel(biz) + '.', 'success');
+  renderContactBusinessCard(c);
 }
 function removeAssociationFromContact(cid) {
   const c = getContact(cid);
@@ -2428,6 +2547,7 @@ const EP_DRIP_SEQUENCES = [
 ];
 const EP_STATE_DEFAULTS = {
   businessId: null, contactId: null, eventType: null, duration: '', eventColor: null, scheduledDate: null, startTime: '', endTime: '',
+  jobAddressId: '',
   proposalTemplate: 'cmc-ext-standard', leadSource: '', dealName: '', disableDrips: false, salesperson: 'Jordan P.', projectManager: '',
   newBizConfirmed: false, pendingNewBiz: null, pendingNewContact: null, newBizContactMode: 'new', pendingExistingContactId: null,
   sendEmail: true, sendSms: false, dripSequence: 'appointment-information'
@@ -2527,15 +2647,63 @@ function epClearIndividualContact() { epState.contactId = null; renderEpBody(); 
    Meeting scheduling was pulled from this ticket's scope, it's cross-cutting appointment-scheduling
    functionality, not specific to Business Entity — tracked as a separate follow-up instead. ─── */
 function epAddressOrApptExtrasHtml(sourceType, entity) {
-  // "lead" and "invoice" collect no extra fields beyond Business/Contact — Ready to Create follows directly.
   let stepHtml = '';
-  if (epState.entry === 'appt') stepHtml = epApptExtrasHtml(sourceType, entity);
+  if (epState.entry === 'lead') stepHtml = epLeadDetailsHtml();
+  else if (epState.entry === 'appt') stepHtml = epApptExtrasHtml(sourceType, entity);
   else if (epState.entry === 'proposal') stepHtml = epProposalDetailsHtml() + epJobAddressHtml(sourceType, entity);
+  else if (epState.entry === 'invoice') stepHtml = epInvoiceDetailsHtml() + epJobAddressHtml(sourceType, entity);
   return stepHtml + epReadyToCreateHtml(sourceType, entity);
 }
 
-/* ─── New Proposal specifics: Template, Lead Source (required) + Deal Name, Assignment
-   (Salesperson + Project Manager), Disable Drips — a Proposal implicitly creates its Deal. ─── */
+/* ─── Lead Source (required) + Deal Name, Assignment (Salesperson + Project Manager) — shared
+   across New Lead, New Appointment, New Proposal (deal name), and New Invoice (no deal name). ─── */
+function epLeadSourceAssignmentHtml(includeDealName) {
+  return '<div style="display:flex; gap:10px;">' +
+      '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
+        '<label class="settings-field-label is-required">Lead Source</label>' +
+        '<select id="epLeadSourceSelect" onchange="epState.leadSource = this.value; renderEpBody();">' +
+          '<option value="">Select a lead source…</option>' +
+          EP_LEAD_SOURCES.map(s => '<option value="' + s.key + '"' + (epState.leadSource === s.key ? ' selected' : '') + '>' + s.label + '</option>').join('') +
+        '</select>' +
+      '</div>' +
+      (includeDealName ?
+        '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
+          '<label class="settings-field-label">Deal Name</label>' +
+          '<input class="settings-field-input" placeholder="Give this job a unique name…" value="' + (epState.dealName || '').replace(/"/g, '&quot;') + '" oninput="epState.dealName = this.value">' +
+        '</div>'
+        : '') +
+    '</div>' +
+    '<div class="settings-group-label">Assignment</div>' +
+    '<div style="display:flex; gap:10px;">' +
+      '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
+        '<label class="settings-field-label">Salesperson</label>' +
+        '<select class="select2" onchange="epState.salesperson = this.value; renderEpBody();">' +
+          EP_TEAM_MEMBERS.map(n => '<option value="' + n + '"' + (epState.salesperson === n ? ' selected' : '') + '>' + n + '</option>').join('') +
+        '</select>' +
+      '</div>' +
+      '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
+        '<label class="settings-field-label">Project Manager</label>' +
+        '<select class="select2" onchange="epState.projectManager = this.value; renderEpBody();">' +
+          '<option value="">Select a project manager…</option>' +
+          EP_TEAM_MEMBERS.map(n => '<option value="' + n + '"' + (epState.projectManager === n ? ' selected' : '') + '>' + n + '</option>').join('') +
+        '</select>' +
+      '</div>' +
+    '</div>';
+}
+function epLeadDetailsHtml() {
+  return '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
+      '<div class="settings-section-title">Lead Details <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: New Lead Specifics">🔗 BR: New Lead Specifics</span></div>' +
+      epLeadSourceAssignmentHtml(true) +
+    '</div>';
+}
+function epInvoiceDetailsHtml() {
+  return '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
+      '<div class="settings-section-title">Invoice Details <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: New Invoice Specifics">🔗 BR: New Invoice Specifics</span></div>' +
+      epLeadSourceAssignmentHtml(false) +
+    '</div>';
+}
+/* ─── New Proposal specifics: Template, then the shared Lead Source/Deal Name/Assignment block —
+   a Proposal implicitly creates its Deal. ─── */
 function epProposalDetailsHtml() {
   return '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
       '<div class="settings-section-title">Proposal Details <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: New Proposal Specifics">🔗 BR: New Proposal Specifics</span></div>' +
@@ -2546,35 +2714,7 @@ function epProposalDetailsHtml() {
           EP_PROPOSAL_TEMPLATES.map(t => '<option value="' + t.key + '"' + (epState.proposalTemplate === t.key ? ' selected' : '') + '>' + t.label + '</option>').join('') +
         '</select>' +
       '</div>' +
-      '<div style="display:flex; gap:10px;">' +
-        '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
-          '<label class="settings-field-label is-required">Lead Source</label>' +
-          '<select id="epLeadSourceSelect" onchange="epState.leadSource = this.value; renderEpBody();">' +
-            '<option value="">Select a lead source…</option>' +
-            EP_LEAD_SOURCES.map(s => '<option value="' + s.key + '"' + (epState.leadSource === s.key ? ' selected' : '') + '>' + s.label + '</option>').join('') +
-          '</select>' +
-        '</div>' +
-        '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
-          '<label class="settings-field-label">Deal Name</label>' +
-          '<input class="settings-field-input" placeholder="Give this job a unique name…" value="' + (epState.dealName || '').replace(/"/g, '&quot;') + '" oninput="epState.dealName = this.value">' +
-        '</div>' +
-      '</div>' +
-      '<div class="settings-group-label">Assignment</div>' +
-      '<div style="display:flex; gap:10px;">' +
-        '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
-          '<label class="settings-field-label">Salesperson</label>' +
-          '<select class="select2" onchange="epState.salesperson = this.value; renderEpBody();">' +
-            EP_TEAM_MEMBERS.map(n => '<option value="' + n + '"' + (epState.salesperson === n ? ' selected' : '') + '>' + n + '</option>').join('') +
-          '</select>' +
-        '</div>' +
-        '<div class="settings-field" style="flex:1; margin-bottom:14px;">' +
-          '<label class="settings-field-label">Project Manager</label>' +
-          '<select class="select2" onchange="epState.projectManager = this.value; renderEpBody();">' +
-            '<option value="">Select a project manager…</option>' +
-            EP_TEAM_MEMBERS.map(n => '<option value="' + n + '"' + (epState.projectManager === n ? ' selected' : '') + '>' + n + '</option>').join('') +
-          '</select>' +
-        '</div>' +
-      '</div>' +
+      epLeadSourceAssignmentHtml(true) +
     '</div>';
 }
 function epApptExtrasHtml(sourceType, entity) {
@@ -2585,6 +2725,10 @@ function epApptExtrasHtml(sourceType, entity) {
       epEventColorFieldHtml() +
       '<div class="settings-group-label">Schedule</div>' +
       epScheduleFieldsHtml() +
+    '</div>';
+  html += '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
+      '<div class="settings-section-title">Deal Details <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: New Appointment Specifics">🔗 BR: New Appointment Specifics</span></div>' +
+      epLeadSourceAssignmentHtml(true) +
     '</div>';
   html += epJobAddressHtml(sourceType, entity);
   return html;
@@ -2821,16 +2965,16 @@ function epSelectTime(which, value) {
    Personal Project: pre-fills from the Contact's own saved address.
    Either branch starts blank and fully editable when its source has no address on file. */
 function epJobAddressHtml(sourceType, entity) {
+  if (sourceType === 'business') return epBusinessJobAddressHtml(entity);
   const addr = entity.address;
   const hasAddr = !!(addr && addr.street);
   const s = addr || {};
-  const nameLabel = sourceType === 'business' ? bizDisplayLabel(entity) : entity.name;
   const sourceNote = hasAddr
-    ? 'Pre-filled from ' + nameLabel + '’s ' + (sourceType === 'business' ? 'on-file Address' : 'saved address') + ' — edit freely for this job.'
-    : nameLabel + ' has no ' + (sourceType === 'business' ? 'on-file Address yet' : 'saved address on file') + ' — starting blank, fully editable.';
+    ? 'Pre-filled from ' + entity.name + '’s saved address — edit freely for this job.'
+    : entity.name + ' has no saved address on file — starting blank, fully editable.';
   return '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
     '<div class="settings-section-title">Job/Appointment Address <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: Job/Appointment Address Sourcing">🔗 BR: Job/Appointment Address Sourcing</span></div>' +
-    '<div class="settings-section-subtitle">' + (sourceType === 'business' ? 'Business Project — sourced from the Business, never the Contact’s personal address.' : 'Personal Project — sourced from the Contact’s own saved address.') + '</div>' +
+    '<div class="settings-section-subtitle">Personal Project — sourced from the Contact’s own saved address.</div>' +
     '<div class="settings-help" style="margin-bottom:12px;">' + sourceNote + '</div>' +
     '<div class="settings-field" style="margin-bottom:12px;"><label class="settings-field-label">Street</label><input class="settings-field-input" id="epJobAddrStreet" value="' + (s.street || '') + '"></div>' +
     '<div style="display:flex; gap:10px;">' +
@@ -2838,8 +2982,84 @@ function epJobAddressHtml(sourceType, entity) {
       '<div class="settings-field" style="flex:1; max-width:74px;"><label class="settings-field-label">State</label><input class="settings-field-input" id="epJobAddrState" maxlength="2" value="' + (s.state || '') + '"></div>' +
       '<div class="settings-field" style="flex:1; max-width:100px;"><label class="settings-field-label">ZIP</label><input class="settings-field-input" id="epJobAddrZip" value="' + (s.zip || '') + '"></div>' +
     '</div>' +
-    (sourceType === 'business' ? '<div class="settings-alert settings-alert--info" style="margin-top:14px; margin-bottom:0;"><div class="settings-alert-icon">ℹ️</div><div>The Business’s <strong>Billing Address</strong> is never offered here — it’s used for invoicing only, never for a Job or Appointment.</div></div>' : '') +
   '</div>';
+}
+/* ─── Business Project Job Address — sourced from the Business's own Job Addresses list (never the
+   Associated Contact's personal address), which is what populates this dropdown for every Business
+   Project creation flow (Deals, Proposals, Appointments, Invoices, Payments). Selecting "+ Add New
+   Job Address" reveals an inline form that saves straight onto the Business's Job Addresses. ─── */
+function epCurrentJobAddressesTarget() {
+  if (epState.businessId) return getBiz(epState.businessId);
+  if (epState.pendingNewBiz) return epState.pendingNewBiz;
+  return null;
+}
+function fmtJobAddr(a) {
+  return [a.street, a.city, (a.state && a.zip ? a.state + ' ' + a.zip : (a.state || a.zip))].filter(Boolean).join(', ');
+}
+function jobAddressLabel(a) {
+  const addrPart = fmtJobAddr(a);
+  return a.label ? (a.label + ' — ' + addrPart) : addrPart;
+}
+function epBusinessJobAddressHtml(entity) {
+  const addrs = entity.jobAddresses || [];
+  const showAddForm = addrs.length === 0 || epState.jobAddressId === '__new__';
+  const selectHtml = addrs.length
+    ? '<div class="settings-field" style="margin-bottom:12px;">' +
+        '<label class="settings-field-label">Job Address</label>' +
+        '<select class="select2" id="epJobAddressSelect" onchange="epSelectJobAddress(this.value)">' +
+          '<option value="">Select a Job Address…</option>' +
+          addrs.map(a => '<option value="' + a.id + '"' + (epState.jobAddressId === a.id ? ' selected' : '') + '>' + jobAddressLabel(a) + '</option>').join('') +
+          '<option value="__new__"' + (epState.jobAddressId === '__new__' ? ' selected' : '') + '>+ Add New Job Address…</option>' +
+        '</select>' +
+      '</div>'
+    : '';
+  const addFormHtml = showAddForm ?
+    '<div class="settings-help" style="margin-bottom:12px;">' + (addrs.length ? 'New Job Address for ' : 'No Job Addresses on file for ') + bizDisplayLabel(entity) + (addrs.length ? '.' : ' yet.') + '</div>' +
+    '<div class="settings-field" style="margin-bottom:12px;"><label class="settings-field-label">Label (optional)</label><input class="settings-field-input" id="epNewJobAddrLabel" placeholder="e.g. Main Site"></div>' +
+    '<div class="settings-field" style="margin-bottom:12px;"><label class="settings-field-label is-required">Street</label><input class="settings-field-input" id="epNewJobAddrStreet"></div>' +
+    '<div style="display:flex; gap:10px;">' +
+      '<div class="settings-field" style="flex:2;"><label class="settings-field-label">City</label><input class="settings-field-input" id="epNewJobAddrCity"></div>' +
+      '<div class="settings-field" style="flex:1; max-width:74px;"><label class="settings-field-label">State</label><input class="settings-field-input" id="epNewJobAddrState" maxlength="2"></div>' +
+      '<div class="settings-field" style="flex:1; max-width:100px;"><label class="settings-field-label">ZIP</label><input class="settings-field-input" id="epNewJobAddrZip"></div>' +
+    '</div>' +
+    '<button type="button" class="btn btn-outline btn-sm" style="margin-top:4px;" onclick="epSaveNewJobAddress()">Save Job Address</button>'
+    : '';
+  return '<div class="settings-section" style="margin-top:18px; text-align:left;">' +
+    '<div class="settings-section-title">Job/Appointment Address <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Creation Flow: Job/Appointment Address Sourcing">🔗 BR: Job/Appointment Address Sourcing</span></div>' +
+    '<div class="settings-section-subtitle">Business Project — sourced from ' + bizDisplayLabel(entity) + '’s Job Addresses, never the Associated Contact’s personal address.</div>' +
+    selectHtml + addFormHtml +
+    '<div class="settings-alert settings-alert--info" style="margin-top:14px; margin-bottom:0;"><div class="settings-alert-icon">ℹ️</div><div>The Business’s <strong>Billing Address</strong> is never offered here — it’s used for invoicing only, never for a Job, Appointment, Deal, or Invoice.</div></div>' +
+  '</div>';
+}
+function epSelectJobAddress(val) {
+  epState.jobAddressId = val;
+  renderEpBody();
+}
+function epSaveNewJobAddress() {
+  const street = document.getElementById('epNewJobAddrStreet').value.trim();
+  if (!street) { toast('Street is required.'); document.getElementById('epNewJobAddrStreet').focus(); return; }
+  const target = epCurrentJobAddressesTarget();
+  if (!target) return;
+  target.jobAddresses = target.jobAddresses || [];
+  const addr = {
+    id: 'ja' + (nextJobAddressId++),
+    label: document.getElementById('epNewJobAddrLabel').value.trim(),
+    street,
+    city: document.getElementById('epNewJobAddrCity').value.trim(),
+    state: document.getElementById('epNewJobAddrState').value.trim(),
+    zip: document.getElementById('epNewJobAddrZip').value.trim()
+  };
+  target.jobAddresses.push(addr);
+  epState.jobAddressId = addr.id;
+  renderEpBody();
+}
+function epSelectedJobAddressSummary(sourceType, entity) {
+  if (sourceType !== 'business') {
+    const addr = entity.address;
+    return (addr && addr.street) ? fmtJobAddr(addr) : 'No address on file yet';
+  }
+  const a = (entity.jobAddresses || []).find(x => x.id === epState.jobAddressId);
+  return a ? jobAddressLabel(a) : 'No Job Address selected yet';
 }
 
 /* ─── "Ready to Create" confirmation step — shared, identical component, by New Appointment and
@@ -2855,17 +3075,28 @@ function epReadyToCreateHtml(sourceType, entity) {
   } else {
     rows.push({ label: 'Contact', value: entity.name });
   }
-  if (epState.entry === 'appt') {
+  if (epState.entry === 'lead') {
+    const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
+    rows.push({ label: 'Lead Source', value: src ? src.label : '—' });
+    rows.push({ label: 'Deal Name', value: epState.dealName || '—' });
+    rows.push({ label: 'Salesperson', value: epState.salesperson || '—' });
+    rows.push({ label: 'Project Manager', value: epState.projectManager || '—' });
+  } else if (epState.entry === 'appt') {
     const et = EVENT_TYPES.find(e => e.key === epState.eventType);
     const col = getEventColor(epState.eventColor);
     rows.push({ label: 'Event Type', value: et ? et.label : '—' });
     rows.push({ label: 'Event Color', value: col ? ('<span style="display:inline-flex; align-items:center; gap:6px;"><span style="width:10px; height:10px; border-radius:50%; background:' + col.hex + '; display:inline-block;"></span>' + col.label + '</span>') : '—' });
     rows.push({ label: 'Scheduled', value: epState.scheduledDate ? (fmtDateSlash(epState.scheduledDate) + (epState.startTime ? (', ' + fmtTimeLabel(epState.startTime) + (epState.endTime ? '–' + fmtTimeLabel(epState.endTime) : '')) : '')) : '—' });
+    rows.push({ label: 'Job Address', value: epSelectedJobAddressSummary(sourceType, entity) });
+    const apptSrc = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
+    rows.push({ label: 'Lead Source', value: apptSrc ? apptSrc.label : '—' });
+    rows.push({ label: 'Deal Name', value: epState.dealName || '—' });
+    rows.push({ label: 'Salesperson', value: epState.salesperson || '—' });
+    rows.push({ label: 'Project Manager', value: epState.projectManager || '—' });
   } else if (epState.entry === 'proposal') {
-    const addr = entity.address;
     const tmpl = EP_PROPOSAL_TEMPLATES.find(t => t.key === epState.proposalTemplate);
     const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
-    rows.push({ label: 'Job Address', value: (addr && addr.street) ? (addr.street + ', ' + addr.city + ', ' + addr.state + ' ' + addr.zip) : 'No address on file yet' });
+    rows.push({ label: 'Job Address', value: epSelectedJobAddressSummary(sourceType, entity) });
     rows.push({ label: 'Proposal Template', value: tmpl ? tmpl.label : '—' });
     rows.push({ label: 'Lead Source', value: src ? src.label : '—' });
     rows.push({ label: 'Deal Name', value: epState.dealName || '—' });
@@ -2877,6 +3108,12 @@ function epReadyToCreateHtml(sourceType, entity) {
       ? ' <span class="assumption-flag" style="margin-left:4px;" title="No Proposal Template in this prototype has confirmed fixed pricing data yet, so Proposal Total always shows an em dash right now. Per AC #13, a template with a real fixed price should show a $ figure here instead once that pricing data is confirmed — see ticket Open Items.">ASSUMPTION</span>'
       : '';
     rows.push({ label: 'Proposal Total', value: totalVal + totalFlag });
+  } else if (epState.entry === 'invoice') {
+    const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
+    rows.push({ label: 'Job Address', value: epSelectedJobAddressSummary(sourceType, entity) });
+    rows.push({ label: 'Lead Source', value: src ? src.label : '—' });
+    rows.push({ label: 'Salesperson', value: epState.salesperson || '—' });
+    rows.push({ label: 'Project Manager', value: epState.projectManager || '—' });
   }
   const rowsHtml = rows.map(r =>
     '<div style="display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--gray-100); font-size:12.5px;">' +
@@ -2985,7 +3222,8 @@ function epSaveRecord(sourceType) {
       address: epState.pendingNewBiz.address || { street: '', city: '', state: '', zip: '' },
       billingSame: true, archived: false, contactIds: [],
       createdAt: PROTO_TODAY.toISOString().slice(0, 10),
-      deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: []
+      deals: [], proposals: [], appointments: [], invoices: [], payments: [], jobs: [],
+      jobAddresses: epState.pendingNewBiz.jobAddresses || []
     };
     BUSINESSES.push(biz);
     if (epState.pendingExistingContactId) {
@@ -3012,7 +3250,6 @@ function epSaveRecord(sourceType) {
   pushEpRecordOntoBusiness(biz, contact);
   renderBusinessesTable();
   populateIndustryFilter();
-  populateBusinessFilter();
   toast('✓ ' + EP_RECORD_LABEL[epState.entry] + ' created for ' + bizDisplayLabel(biz) + '.', 'success');
   const targetTab = { lead: 'deals', appt: 'appointments', proposal: 'proposals', invoice: 'invoices' }[epState.entry];
   const savedEntry = epState.entry;
@@ -3022,7 +3259,9 @@ function epSaveRecord(sourceType) {
 function pushEpRecordOntoBusiness(biz, contact) {
   const via = contact ? contact.name : '—';
   if (epState.entry === 'lead') {
-    biz.deals.push({ title: 'New Deal — ' + bizDisplayLabel(biz), sub: 'Stage: Lead', meta: '—', via });
+    const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
+    const dealTitle = epState.dealName || ('New Deal — ' + bizDisplayLabel(biz));
+    biz.deals.push({ title: dealTitle, sub: 'Stage: Lead' + (src ? ' · Lead Source: ' + src.label : ''), meta: '—', via });
   } else if (epState.entry === 'appt') {
     const et = EVENT_TYPES.find(e => e.key === epState.eventType);
     const col = getEventColor(epState.eventColor);
@@ -3035,8 +3274,10 @@ function pushEpRecordOntoBusiness(biz, contact) {
       via, color: col ? col.hex : null
     });
     // Per the Communication block's own note: submitting an Appointment also creates a Deal.
+    const apptSrc = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
+    const apptDealTitle = epState.dealName || ((et ? et.label : 'Appointment') + ' — ' + bizDisplayLabel(biz));
     const dealStage = et ? (et.label + ' Scheduled') : 'Scheduled';
-    biz.deals.push({ title: (et ? et.label : 'Appointment') + ' — ' + bizDisplayLabel(biz), sub: 'Stage: ' + dealStage, meta: '—', via });
+    biz.deals.push({ title: apptDealTitle, sub: 'Stage: ' + dealStage + (apptSrc ? ' · Lead Source: ' + apptSrc.label : ''), meta: '—', via });
   } else if (epState.entry === 'proposal') {
     const tmpl = EP_PROPOSAL_TEMPLATES.find(t => t.key === epState.proposalTemplate);
     const src = EP_LEAD_SOURCES.find(s => s.key === epState.leadSource);
@@ -3053,6 +3294,7 @@ function pushEpRecordOntoBusiness(biz, contact) {
 }
 
 function epSelectBusiness(bid) {
+  epState.jobAddressId = '';
   if (!bid) { epState.businessId = null; epState.contactId = null; renderEpBody(); return; }
   epState.businessId = bid;
   const pc = primaryContactFor(getBiz(bid));
@@ -3167,7 +3409,7 @@ function epConfirmNewBusiness() {
     city: document.getElementById('epNewBizCity').value.trim(),
     state: document.getElementById('epNewBizState').value.trim(),
     zip: document.getElementById('epNewBizZip').value.trim()
-  } };
+  }, jobAddresses: [] };
   if ((epState.newBizContactMode || 'new') === 'existing') {
     const cid = document.getElementById('epNewBizExistingContact').value;
     if (!cid) { toast('Select an existing contact, or switch to New Contact.'); return; }
@@ -3192,10 +3434,11 @@ function epChangeNewBusiness() {
   epState.pendingNewBiz = null;
   epState.pendingNewContact = null;
   epState.pendingExistingContactId = null;
+  epState.jobAddressId = '';
   renderEpBody();
 }
 function epNewConfirmedBlockHtml() {
-  const pseudoBiz = { id: null, legal: epState.pendingNewBiz.legal, dba: '', address: epState.pendingNewBiz.address };
+  const pseudoBiz = { id: null, legal: epState.pendingNewBiz.legal, dba: '', address: epState.pendingNewBiz.address, jobAddresses: epState.pendingNewBiz.jobAddresses };
   const contactName = epState.pendingExistingContactId ? getContact(epState.pendingExistingContactId).name : epState.pendingNewContact.name;
   return '<div style="max-width:640px; margin:0 auto;">' +
     '<div class="settings-field" style="margin-bottom:4px;">' +
@@ -3263,7 +3506,6 @@ function toggleMobileSidebar(force) {
    INIT
    ═══════════════════════════════════════════════ */
 populateIndustryFilter();
-populateBusinessFilter();
 populateContactFilters();
 renderBusinessesTable();
 renderContactsTable();
