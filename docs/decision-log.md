@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-01] Business Entity Records V1: reordered New Lead's Stage field
+
+- Decision: New Lead's Stage dropdown (BR46) now renders after the Lead Source/Deal Name row instead of before it, matching the field order requested: Lead Source + Deal Name, then Stage, then Assignment. Split the shared `epLeadSourceAssignmentHtml()` into `epLeadSourceDealNameRowHtml()` + `epAssignmentRowHtml()` so Lead's layout could interleave Stage between them without duplicating markup for Appointment/Proposal/Invoice, which are unaffected. Reordered the matching Ready to Create summary rows to stay consistent with the form's field order.
+- Why: Direct request.
+- Open question: None.
+
 ## [2026-09-01] Business Entity Records V1: closed ticket gaps (BR31/32/42/46, Payments BR9/BR39)
 
 - Decision: Pulled the ticket's latest gap-closing updates into the prototype. (1) BR46: New Lead now has a Stage dropdown (placeholder list, only "Cold Leads"/"Warm Leads" are ticket-confirmed) feeding the created Deal's stage text, since Lead is the one entry point where the destination stage is genuinely user-selected. (2) BR42 clarified Lead Source is attribution-only and must not drive Deal display, removed the "· Lead Source: ..." suffix that a prior round had appended to the Deal's sub-text for Lead, Appointment, and Proposal, Lead Source still shows as its own Ready to Create row, just no longer baked into the saved Deal record. (3) BR31: an Appointment now creates a Deal only when Event Type is On-Site Estimate, always in a fixed "Estimate Scheduled" stage, every other Event Type creates the Appointment only, no Deal at all. The Communication block's info alert is now conditional to match: a "Deal will be created" note for On-Site Estimate, a neutral "No Deal is created for this Event Type" note otherwise. (4) BR32: a Proposal's Deal now always lands in a fixed "In Draft" stage (previously "Proposal Sent", which wasn't the confirmed name). (5) BR9/BR39: the Payments tab's fast-follow note now explains it rides along with Invoices' status rather than posing its own feasibility question, and clicking a Payment row now says it opens the associated Invoice rather than a Payment detail view of its own. (6) Also tightened the "Open Item #1" copy shared by all five data tabs, Deals and Proposals (V1-confirmed) no longer say aggregation feasibility is "unconfirmed", only the three fast-follow candidates do.
