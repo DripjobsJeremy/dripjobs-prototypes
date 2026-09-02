@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-02] Hub: added a password gate to every page
+
+- Decision: Added a shared `gate.js` (loaded by `index.html` and every prototype page) that blocks the page behind a single team password until the correct one is entered, remembered per-device via `localStorage` so it isn't re-prompted on every visit. Applied to all 61 existing pages plus `_template/index.html` so new prototypes inherit it automatically.
+- Why: Jeremy received a solicitation email from a developer outside DripJobs who had clearly found the hub, likely via a shared link or search indexing. This is a client-side deterrent only (the password hash and check are visible in page source to anyone who looks), not real access control — Cloudflare Access with a custom domain was flagged as the stronger option if real gating is needed later.
+- Open question: Password is `DJprod2026!` (Jeremy's choice). To rotate it, edit `HASH_HEX` in `gate.js` per the comment at the top of that file.
+
 ## [2026-09-01] Business Entity Records V1: BR49 — Crew/Proposal ID/Invoice ID placeholder columns
 
 - Decision: Jobs List and Work Orders List now show Crew, Proposal ID, Invoice ID, and Invoice Status as real columns (previously omitted entirely per the earlier round's trim). Each cell renders a shared `br49PlaceholderCellHtml()` treatment: an em dash plus an amber "PLACEHOLDER" assumption-flag badge with a tooltip naming BR49 and explaining the column has no real linkage in this prototype yet. Columns are marked `sortable: false` (a column of identical placeholder text can't usefully sort) and have no click handler of their own.
