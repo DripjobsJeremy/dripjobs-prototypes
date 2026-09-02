@@ -9,6 +9,11 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-02] Hub: removed At Risk Account Finder (shipped)
+
+- Decision: Removed "At Risk Account Finder" from `#protoGrid`, per Jeremy confirming it's been pushed to production.
+- Why: Direct request.
+- Open question: None.
 ## [2026-09-02] Hub: removed two shipped cards, reopened Holiday Calendar Display for a post-release update
 
 - Decision: Removed "Metrics — DripSense" and "Job Address + Column Management (Jobs List)" from `#protoGrid`, both fully pushed to production. Reset "Holiday Calendar Display (US/Canada)" to Active Triage status, renamed it "Holiday Calendar Display (post release update)", and repointed its ClickUp link from the original shipped ticket (86bbc0rvr) to a new follow-up ticket (86bbrazc3). Left its 🎯 tag badge as-is since no change to that was requested.
