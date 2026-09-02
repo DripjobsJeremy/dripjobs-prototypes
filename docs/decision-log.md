@@ -9,6 +9,11 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-02] Hub: dropped the word "Bullseye" from the tag UI, emoji only
+
+- Decision: Reverted the visible "Bullseye" text on the filter button and on every card's tag badge (previously "🎯 Bullseye") to just the 🎯 emoji. Title/tooltip text updated the same way ("Tagged 🎯 in ClickUp" / "...tagged 🎯"). Underlying `data-bullseye` attribute, CSS class names, and decision-log history are unchanged, this was a label-only correction.
+- Why: Jeremy flagged that including the word was his own earlier mistake; the emoji alone is the intended label.
+
 ## [2026-09-02] Hub: synced #protoGrid statuses to ClickUp, added Bullseye tag/filter
 
 - Decision: Pulled the current status and tags for all 26 ClickUp tickets linked from the Prototypes tab (`#protoGrid`; Resources and Release Notes left alone, per existing scope). Updated each card's status badge to match: 12 unchanged, 5 moved to "Pushed to Production," 2 moved to a new "No Fix Needed" badge (`status-nofix`, gray), 2 moved to a new "In Progress" badge (`status-inprogress`, blue, reused for the "PR Created" ClickUp status too), 1 (Link Multiple Google Calendars) moved to "In QA Testing," and 2 multi-ticket cards' Mixed Status tooltips were recomputed (Job Address + Column Mgmt is now fully shipped and no longer mixed; At Risk Account Finder became mixed since its two linked tickets diverged to Pushed to Production vs. Kickback). Added `data-status="nofix"` / `"inprogress"` filter-dropdown options so the new buckets are filterable. Also added a Bullseye button to the filter bar and a small orange "🎯 Bullseye" badge on any card whose linked ClickUp ticket carries the tag, toggled via `data-bullseye="true"` + a JS filter combined with search/status/sort.
