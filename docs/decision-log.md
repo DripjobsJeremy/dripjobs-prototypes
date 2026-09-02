@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-02] Holiday Calendar: Independent Per-Calendar Controls (ticket 86bbrazc3)
+
+- Decision: Built `holiday-calendar-independent-controls/` as a new prototype and hub card for the follow-up ticket, rather than editing the original shipped `holiday-calendar-display/` prototype in place, since that one still stands as the as-built record for the now-superseded 86bbc0rvr. Reused its calendar rendering engine and holiday rule set unchanged (BR-6 carries that forward as-is), but split the single shared `holidayRegion` value into two independent per-calendar state values so changing one never touches the other (BR-4). Added a small Before/After card illustrating BR-1 (the control's row struck through and removed from a compact User Profile mock, since no full User Profile page exists in this repo to edit) and an info alert demonstrating BR-8's migration behavior: both selects load pre-seeded to the same demo legacy value (United States & Canada) and only diverge once the user changes one of them.
+- Why: Direct request from Jeremy's pasted ClickUp decision log, which had already confirmed the independent-values direction, the migration behavior, and that this supersedes BR-2/BR-8 of the original ticket, so no open questions remained to ask about scope.
+- Open question: None.
+
 ## [2026-09-01] Business Entity Records V1: BR49 — Crew/Proposal ID/Invoice ID placeholder columns
 
 - Decision: Jobs List and Work Orders List now show Crew, Proposal ID, Invoice ID, and Invoice Status as real columns (previously omitted entirely per the earlier round's trim). Each cell renders a shared `br49PlaceholderCellHtml()` treatment: an em dash plus an amber "PLACEHOLDER" assumption-flag badge with a tooltip naming BR49 and explaining the column has no real linkage in this prototype yet. Columns are marked `sortable: false` (a column of identical placeholder text can't usefully sort) and have no click handler of their own.
