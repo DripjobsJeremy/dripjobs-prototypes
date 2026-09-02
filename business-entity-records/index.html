@@ -1012,7 +1012,7 @@
           <div class="settings-alert-icon">ℹ️</div>
           <div>
             <div class="settings-alert-title">Job Address ahead of Business <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Lists Review recommendation">🔗 Lists Review</span></div>
-            <div>A Job is inherently site-specific, so Job Address is surfaced ahead of the Business column here (BR44) — the Business column still appears alongside it, per the same BR9 scoping as every other list. Column set is trimmed to fields this prototype actually models — no Crew, Proposal ID, or Invoice ID linkage exists here (see decision log).</div>
+            <div>A Job is inherently site-specific, so Job Address is surfaced ahead of the Business column here (BR44) — the Business column still appears alongside it, per the same BR9 scoping as every other list. Crew, Proposal ID, Invoice ID, and Invoice Status appear as placeholder columns (amber "PLACEHOLDER" flag, not clickable) — per BR49, these ship with real data and click-through during development; they're shown now so a developer isn't left guessing whether the column was cut or is coming.</div>
           </div>
         </div>
         <div class="list-header-row">
@@ -1127,7 +1127,7 @@
           <div class="settings-alert-icon">ℹ️</div>
           <div>
             <div class="settings-alert-title">Job Address ahead of Business <span class="br-annotation-chip" title="ClickUp 86bbhhhqd — Lists Review recommendation">🔗 Lists Review</span></div>
-            <div>Same Job Address-first + Business column treatment as Jobs List (BR44/BR9) — Work Orders share the same underlying Jobs data, styled for the crew-facing view with View/Share actions.</div>
+            <div>Same Job Address-first + Business column treatment as Jobs List (BR44/BR9) — Work Orders share the same underlying Jobs data, styled for the crew-facing view with View/Share actions. Crew, Proposal ID, Invoice ID, and Invoice Status appear as placeholder columns (amber "PLACEHOLDER" flag, not clickable) — per BR49, these ship with real data and click-through during development.</div>
           </div>
         </div>
         <div class="list-header-row">
@@ -3855,6 +3855,14 @@ function dealStatusFromStage(r) {
   return 'Open';
 }
 function parseAmount(meta) { return meta ? parseFloat(String(meta).replace(/[^0-9.-]/g, '')) || 0 : 0; }
+// BR49: Crew, Proposal ID, Invoice ID, and Invoice Status have no real linkage modeled in this
+// prototype yet (a Job isn't tied to a specific Crew or a specific Proposal/Invoice record here).
+// Ticket confirms these production columns are added with real data during development rather than
+// staying omitted, so the column exists now with a clearly-flagged placeholder cell — never a live
+// value, never clickable — so a developer isn't left guessing whether the column was cut or is coming.
+function br49PlaceholderCellHtml(fieldLabel) {
+  return '<span class="cell-muted">—</span> <span class="assumption-flag" title="BR49 — placeholder column, not part of this prototype. ' + fieldLabel + ' has no real linkage modeled here yet; confirmed to ship with real data and click-through during development.">PLACEHOLDER</span>';
+}
 
 function allDealRows() {
   const bizRows = BUSINESSES.filter(b => !b.archived).flatMap(biz =>
@@ -4046,6 +4054,10 @@ registerListTable('jobs', {
     { key: 'business', label: 'Business' },
     { key: 'salesperson', label: 'Salesperson' },
     { key: 'pm', label: 'Project Manager' },
+    { key: 'crew', label: 'Crew', sortable: false },
+    { key: 'proposalId', label: 'Proposal ID', sortable: false },
+    { key: 'invoiceId', label: 'Invoice ID', sortable: false },
+    { key: 'invoiceStatus', label: 'Invoice Status', sortable: false },
     { key: 'dealStage', label: 'Deal Stage' },
     { key: 'amount', label: 'Amount' }
   ],
@@ -4070,6 +4082,10 @@ registerListTable('jobs', {
       '<td>' + rowBusinessCellHtml(r) + '</td>' +
       '<td>' + (r.salesperson || '<span class="cell-muted">—</span>') + '</td>' +
       '<td>' + (r.projectManager || '<span class="cell-muted">No project manager</span>') + '</td>' +
+      '<td>' + br49PlaceholderCellHtml('Crew') + '</td>' +
+      '<td>' + br49PlaceholderCellHtml('Proposal ID') + '</td>' +
+      '<td>' + br49PlaceholderCellHtml('Invoice ID') + '</td>' +
+      '<td>' + br49PlaceholderCellHtml('Invoice Status') + '</td>' +
       '<td>' + (r.dealStage || '<span class="cell-muted">—</span>') + '</td>' +
       '<td>' + (r.meta || '<span class="cell-muted">—</span>') + '</td>' +
     '</tr>',
@@ -4208,6 +4224,10 @@ registerListTable('workorders', {
     { key: 'address', label: 'Job Address' },
     { key: 'customer', label: 'Customer' },
     { key: 'business', label: 'Business' },
+    { key: 'crew', label: 'Crew', sortable: false },
+    { key: 'proposalId', label: 'Proposal ID', sortable: false },
+    { key: 'invoiceId', label: 'Invoice ID', sortable: false },
+    { key: 'invoiceStatus', label: 'Invoice Status', sortable: false },
     { key: 'dealStage', label: 'Deal Stage' },
     { key: 'amount', label: 'Amount' },
     { key: 'date', label: 'Date' },
@@ -4231,6 +4251,10 @@ registerListTable('workorders', {
       '<td>' + rowAddress(r) + '</td>' +
       '<td>' + rowCustomerName(r) + '</td>' +
       '<td>' + rowBusinessCellHtml(r) + '</td>' +
+      '<td>' + br49PlaceholderCellHtml('Crew') + '</td>' +
+      '<td>' + br49PlaceholderCellHtml('Proposal ID') + '</td>' +
+      '<td>' + br49PlaceholderCellHtml('Invoice ID') + '</td>' +
+      '<td>' + br49PlaceholderCellHtml('Invoice Status') + '</td>' +
       '<td>' + (r.dealStage || '<span class="cell-muted">—</span>') + '</td>' +
       '<td>' + (r.meta || '<span class="cell-muted">—</span>') + '</td>' +
       '<td>' + (r.updatedAt ? fmtDateSlash(r.updatedAt) : '<span class="cell-muted">—</span>') + '</td>' +
