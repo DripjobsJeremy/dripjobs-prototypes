@@ -9,6 +9,11 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-02] Hub: removed two shipped cards, reopened Holiday Calendar Display for a post-release update
+
+- Decision: Removed "Metrics — DripSense" and "Job Address + Column Management (Jobs List)" from `#protoGrid`, both fully pushed to production. Reset "Holiday Calendar Display (US/Canada)" to Active Triage status, renamed it "Holiday Calendar Display (post release update)", and repointed its ClickUp link from the original shipped ticket (86bbc0rvr) to a new follow-up ticket (86bbrazc3). Left its 🎯 tag badge as-is since no change to that was requested.
+- Why: Direct request; the two removed prototypes had already reached production and no longer needed a hub entry, while Holiday Calendar Display has a new post-release ticket that needs to go back through triage.
+- Open question: Whether the new ticket (86bbrazc3) still carries the 🎯 tag hasn't been re-checked against ClickUp since the request only specified status/title/link changes.
 ## [2026-09-02] Hub: dropped the word "Bullseye" from the tag UI, emoji only
 
 - Decision: Reverted the visible "Bullseye" text on the filter button and on every card's tag badge (previously "🎯 Bullseye") to just the 🎯 emoji. Title/tooltip text updated the same way ("Tagged 🎯 in ClickUp" / "...tagged 🎯"). Underlying `data-bullseye` attribute, CSS class names, and decision-log history are unchanged, this was a label-only correction.
