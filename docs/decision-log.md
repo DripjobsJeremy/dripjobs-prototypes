@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-02] Hub: synced #protoGrid statuses to ClickUp, added Bullseye tag/filter
+
+- Decision: Pulled the current status and tags for all 26 ClickUp tickets linked from the Prototypes tab (`#protoGrid`; Resources and Release Notes left alone, per existing scope). Updated each card's status badge to match: 12 unchanged, 5 moved to "Pushed to Production," 2 moved to a new "No Fix Needed" badge (`status-nofix`, gray), 2 moved to a new "In Progress" badge (`status-inprogress`, blue, reused for the "PR Created" ClickUp status too), 1 (Link Multiple Google Calendars) moved to "In QA Testing," and 2 multi-ticket cards' Mixed Status tooltips were recomputed (Job Address + Column Mgmt is now fully shipped and no longer mixed; At Risk Account Finder became mixed since its two linked tickets diverged to Pushed to Production vs. Kickback). Added `data-status="nofix"` / `"inprogress"` filter-dropdown options so the new buckets are filterable. Also added a Bullseye button to the filter bar and a small orange "🎯 Bullseye" badge on any card whose linked ClickUp ticket carries the tag, toggled via `data-bullseye="true"` + a JS filter combined with search/status/sort.
+- Why: Direct request to keep the hub's status badges current against ClickUp and surface a "Bullseye" priority signal with a dedicated filter.
+- Assumption: No ClickUp ticket in this batch has a tag literally named "bullseye." The closest real signal is a 🎯 (target emoji) tag, applied as either `🎯` or `🎯 focus` across 15 of the 26 tickets. Confirmed with Jeremy to treat that emoji tag as the Bullseye signal; if the intent was a narrower/differently-named tag, the 15 tagged cards here will need re-checking once a real "bullseye" tag exists in ClickUp.
+
 ## [2026-09-02] Hub: added a password gate to every page
 
 - Decision: Added a shared `gate.js` (loaded by `index.html` and every prototype page) that blocks the page behind a single team password until the correct one is entered, remembered per-device via `localStorage` so it isn't re-prompted on every visit. Applied to all 61 existing pages plus `_template/index.html` so new prototypes inherit it automatically.

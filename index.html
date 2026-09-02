@@ -196,6 +196,29 @@
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
   }
+  .filter-bullseye-btn {
+    flex: 0 0 auto;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: var(--color-card);
+    color: var(--color-text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .filter-bullseye-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .filter-bullseye-btn.active {
+    background: #FFF1E0;
+    border-color: #9A3412;
+    color: #9A3412;
+  }
   /* ── Stats row ── */
   .stats-row {
     display: grid;
@@ -286,16 +309,40 @@
   }
 
   /* Status colors */
-  .status-active    { background: #E6FAF0; color: #166534; }
-  .status-triage    { background: #EFF6FF; color: #1E40AF; }
-  .status-analysis  { background: #FFFBEB; color: #92400E; }
-  .status-new       { background: #E8E6FA; color: #5C53DC; }
-  .status-postponed { background: #FAE6E6; color: #991B1B; }
-  .status-design    { background: #FAE6F0; color: #9D174D; }
-  .status-readydev  { background: #EEF2FF; color: #4338CA; }
-  .status-testing   { background: #ECFEFF; color: #0E7490; }
-  .status-shipped   { background: #E6FAF0; color: #166534; }
-  .status-mixed     { background: #F3F4F6; color: #4B5563; }
+  .status-active     { background: #E6FAF0; color: #166534; }
+  .status-triage     { background: #EFF6FF; color: #1E40AF; }
+  .status-analysis   { background: #FFFBEB; color: #92400E; }
+  .status-new        { background: #E8E6FA; color: #5C53DC; }
+  .status-postponed  { background: #FAE6E6; color: #991B1B; }
+  .status-design     { background: #FAE6F0; color: #9D174D; }
+  .status-readydev   { background: #EEF2FF; color: #4338CA; }
+  .status-testing    { background: #ECFEFF; color: #0E7490; }
+  .status-shipped    { background: #E6FAF0; color: #166534; }
+  .status-mixed      { background: #F3F4F6; color: #4B5563; }
+  .status-nofix      { background: #F3F4F6; color: #6B7280; }
+  .status-inprogress { background: #E0F2FE; color: #075985; }
+
+  .proto-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .proto-bullseye-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: #FFF1E0;
+    color: #9A3412;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
 
   .proto-name {
     font-size: 14px;
@@ -641,11 +688,16 @@
       <option value="new">New</option>
       <option value="postponed">Postponed</option>
       <option value="design">Needs Design</option>
+      <option value="inprogress">In Progress</option>
       <option value="readydev">Ready for Dev</option>
       <option value="testing">In QA Testing</option>
       <option value="shipped">Pushed to Production</option>
+      <option value="nofix">No Fix Needed</option>
       <option value="mixed">Mixed Status</option>
     </select>
+    <button class="filter-bullseye-btn" id="bullseyeFilterBtn" type="button" title="Show only prototypes whose ClickUp ticket is tagged Bullseye">
+      🎯 Bullseye
+    </button>
   </div>
 
   <!-- Prototype grid -->
@@ -675,10 +727,13 @@
 
 
     <!-- 6. Tasks UI Refresh -->
-    <div class="proto-card" data-status="design" data-name="tasks ui refresh overhaul" data-added="2026-07-08">
+    <div class="proto-card" data-status="design" data-bullseye="true" data-name="tasks ui refresh overhaul" data-added="2026-07-08">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#FAE6E6;">✅</div>
-        <span class="proto-status-badge status-design">Needs Design</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-design">Needs Design</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">Tasks UI Refresh</div>
       <div class="proto-desc">Full UX/UI overhaul of the Tasks page.</div>
@@ -695,10 +750,13 @@
     </div>
 
     <!-- 7. Prod Rates Import -->
-    <div class="proto-card" data-status="analysis" data-name="production rates import wizard csv excel" data-added="2026-07-08">
+    <div class="proto-card" data-status="analysis" data-bullseye="true" data-name="production rates import wizard csv excel" data-added="2026-07-08">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#E6FAFA;">📥</div>
-        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">Prod Rates Import Wizard</div>
       <div class="proto-desc">Step-by-step import wizard for bringing production rates in from CSV/Excel.</div>
@@ -715,10 +773,10 @@
     </div>
 
     <!-- 8. Default Proposal Templates -->
-    <div class="proto-card" data-status="analysis" data-name="default proposal templates new accounts" data-added="2026-07-08">
+    <div class="proto-card" data-status="nofix" data-name="default proposal templates new accounts" data-added="2026-07-08">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#F0FAE6;">📄</div>
-        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+        <span class="proto-status-badge status-nofix">No Fix Needed</span>
       </div>
       <div class="proto-name">Default Proposal Templates</div>
       <div class="proto-desc">Default proposal template system for new DripJobs accounts at signup.</div>
@@ -796,10 +854,13 @@
 
     <!-- Inline Tax Rate -->
     <!-- Package Templates -->
-    <div class="proto-card" data-status="analysis" data-name="package templates save reuse proposals" data-added="2026-07-08">
+    <div class="proto-card" data-status="analysis" data-bullseye="true" data-name="package templates save reuse proposals" data-added="2026-07-08">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#E8E6FA;">📦</div>
-        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">Package Templates — Save &amp; Reuse</div>
       <div class="proto-desc">Library of reusable Package Templates with 2-step Select from Library flow, full editor, Add Item / Add Multi. Items / Add Area modals, and Proposal Builder insertion.</div>
@@ -831,10 +892,13 @@
       </div>
     </div>
 
-    <div class="proto-card" data-status="analysis" data-name="prod rates item product type multi-product substrates area wizard proposal builder" data-added="2026-07-08">
+    <div class="proto-card" data-status="analysis" data-bullseye="true" data-name="prod rates item product type multi-product substrates area wizard proposal builder" data-added="2026-07-08">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#FAF7E6;">⚗️</div>
-        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">Prod Rates: Item Product Type &amp; Multi-Product Substrates</div>
       <div class="proto-desc">Adds Item-type product support (hides Sheen, shows Qty + Price Per Item) and multi-product substrate assignment. Covers PR &rsaquo; Products, PR &rsaquo; Substrates, Area Wizard (6-step), Substrates Step inline editor with all 4 substrate panels (Walls, Trim, Ceilings, Doors), and Proposal Builder with area-grouped package display.</div>
@@ -867,10 +931,13 @@
         </div>
       </div>
     </div>
-    <div class="proto-card" data-status="analysis" data-name="invoice reminders invoices page reminders page outstanding due date sms email" data-added="2026-07-08">
+    <div class="proto-card" data-status="analysis" data-bullseye="true" data-name="invoice reminders invoices page reminders page outstanding due date sms email" data-added="2026-07-08">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#E6FAF0;">&#128181;</div>
-        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">Invoice Reminders</div>
       <div class="proto-desc">Extends the Reminders page with a new "For Invoices" section (Email + SMS, Before / On Due Date / After timing, Add Reminder, default templates). Extends the Invoices page with summary stat cards, filtering, sortable columns, Reminder status chip (Active / Paused / None), and bulk actions (Send Reminder, Mark as Paid, Export, Void).</div>
@@ -886,10 +953,13 @@
       </div>
     </div>
 
-    <div class="proto-card" data-status="mixed" data-name="job address column show hide column management reorder saved views jobs list export" data-added="2026-07-08">
+    <div class="proto-card" data-status="shipped" data-bullseye="true" data-name="job address column show hide column management reorder saved views jobs list export" data-added="2026-07-08">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#E8E6FA;">&#128203;</div>
-        <span class="proto-status-badge status-mixed" title="Linked tickets are at different stages: Job Address column (Needs PM Analysis), Jobs List column mgmt (Pushed to Production), Sales List column mgmt (Pushed to Production)">Mixed Status</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-shipped">Pushed to Production</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">Job Address + Column Management (Jobs List)</div>
       <div class="proto-desc">Adds a permanent Job Address column (street, city, state, zip) sourced from the Accepted proposal, exporting as four separate CSV columns. Pairs with full column management: show/hide, drag-and-drop reordering, a freeze boundary column that pins leading columns during horizontal scroll, built-in preset views (Default, Sales, Production, Accounting, Minimal), and personal custom saved views — including a blocked/warned duplicate-name save and hidden-until-enabled behavior for future new columns — all persisted per user account like existing Filter Presets. Scope mirrored in the Sales List companion ticket.</div>
@@ -914,10 +984,13 @@
         </div>
       </div>
     </div>
-    <div class="proto-card" data-status="design" data-name="csv import products services bulk upload categories" data-added="2026-07-22">
+    <div class="proto-card" data-status="design" data-bullseye="true" data-name="csv import products services bulk upload categories" data-added="2026-07-22">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#FAF0E6;">📦</div>
-        <span class="proto-status-badge status-design">Needs Design</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-design">Needs Design</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">CSV Import for Products &amp; Services</div>
       <div class="proto-desc">V1 clickable prototype: bulk import Products and Services from a CSV, with a pre-import summary, skip/overwrite handling for name matches, per-row error rejection, and a downloadable error list.</div>
@@ -932,10 +1005,10 @@
         </div>
       </div>
     </div>
-    <div class="proto-card" data-status="design" data-name="jobs schedule calendar crew leveling order settings day 3 day month view" data-added="2026-07-24">
+    <div class="proto-card" data-status="nofix" data-name="jobs schedule calendar crew leveling order settings day 3 day month view" data-added="2026-07-24">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#E6F3FA;">👥</div>
-        <span class="proto-status-badge status-design">Needs Design</span>
+        <span class="proto-status-badge status-nofix">No Fix Needed</span>
       </div>
       <div class="proto-name">Jobs Schedule Calendar — Crew Leveling</div>
       <div class="proto-desc">Levels jobs on the Day, 3 Day, and Month calendar views so each crew consistently appears in the same relative position, matching crew order in Crew Settings, instead of stacking by start time. Includes a live before/after toggle to compare current vs. proposed sort, and a reorderable Crew Settings reference panel that updates the calendar instantly.</div>
@@ -951,10 +1024,13 @@
       </div>
     </div>
 
-    <div class="proto-card" data-status="testing" data-name="metrics ai predictability dripsense natural language insights closing ratio revenue trend" data-added="2026-07-28">
+    <div class="proto-card" data-status="shipped" data-bullseye="true" data-name="metrics ai predictability dripsense natural language insights closing ratio revenue trend" data-added="2026-07-28">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#E8E6FA;">🧠</div>
-        <span class="proto-status-badge status-testing">In QA Testing</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-shipped">Pushed to Production</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">Metrics — DripSense</div>
       <div class="proto-desc">AI-generated Natural Language Insights panel on the Metrics Dashboard, translating closing ratio, conversion rate, average job value, proposal volume, and revenue trends into a plain-English weekly digest. V1 Phase 2, targeted Q3/Q4 2026, blocked on the Metrics Dashboard accumulating a sufficient data baseline. Includes demo states for never-run, no-data, run-failed, and loading.</div>
@@ -969,10 +1045,13 @@
         </div>
       </div>
     </div>
-    <div class="proto-card" data-status="analysis" data-name="proposal expiration date enforcement reopen flow drips customer portal" data-added="2026-07-28">
+    <div class="proto-card" data-status="analysis" data-bullseye="true" data-name="proposal expiration date enforcement reopen flow drips customer portal" data-added="2026-07-28">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#FAE6E6;">⏳</div>
-        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">Proposal Expiration Enforcement &amp; Re-Open Flow</div>
       <div class="proto-desc">Expired proposals block customer signing in the Customer Portal, disable Edit/Send in the Proposal Builder, and surface a Re-Open flow that mirrors the existing rejected-proposal pattern. Covers Activity Log entries, PDF export behavior, and the Accepted-overrides-expiry edge case.</div>
@@ -1002,10 +1081,13 @@
         </div>
       </div>
     </div>
-    <div class="proto-card" data-status="design" data-name="business entity records company profile tabbed contacts businesses nav v1" data-added="2026-07-29">
+    <div class="proto-card" data-status="inprogress" data-bullseye="true" data-name="business entity records company profile tabbed contacts businesses nav v1" data-added="2026-07-29">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#E8E6FA;">🏢</div>
-        <span class="proto-status-badge status-design">Needs Design</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-inprogress">In Progress</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">Business Entity Records — V1</div>
       <div class="proto-desc">Clickable prototype for the new standalone Business Entity record type: a "Businesses" nav item, tabbed company profile (Information, Deals, Proposals, Appointments, Invoices, Payments, Call History, Tasks, Notes, Attachments, Email, Text), Contact list Business column/filter, contact-to-business association, and the shared Business/Individual selector across all four creation entry points. PRD v1.4, Ready for Alignment Call — open items pending Jason are flagged inline.</div>
@@ -1035,10 +1117,13 @@
         </div>
       </div>
     </div>
-    <div class="proto-card" data-status="analysis" data-name="stripe instant payouts connected accounts payments earnings balance" data-added="2026-07-31">
+    <div class="proto-card" data-status="analysis" data-bullseye="true" data-name="stripe instant payouts connected accounts payments earnings balance" data-added="2026-07-31">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#E8E6FA;">⚡</div>
-        <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-analysis">Needs PM Analysis</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">Stripe Instant Payouts</div>
       <div class="proto-desc">Lets connected accounts request immediate access to earned funds from a paid invoice instead of waiting for the standard payout schedule, gated on Stripe eligibility (eligible debit card/bank account on file). Shows available instant balance, a disclosed 1% fee before confirming, amount validation against the $0.50-$9,999 range and available balance, success/failure handling, and a payout history list. Includes daily-limit messaging (approaching/reached) and a lightweight admin summary of Instant Payout volume and fee revenue across connected accounts.</div>
@@ -1068,10 +1153,13 @@
         </div>
       </div>
     </div>
-    <div class="proto-card" data-status="design" data-name="br-13 card indicator drips paused kept disabled deal card visual design command center api carryover contact opt out" data-added="2026-08-13">
+    <div class="proto-card" data-status="design" data-bullseye="true" data-name="br-13 card indicator drips paused kept disabled deal card visual design command center api carryover contact opt out" data-added="2026-08-13">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#F0FAFA;">🔔</div>
-        <span class="proto-status-badge status-design">Needs Design</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-design">Needs Design</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">BR-13: Deal Card Drips Indicator</div>
       <div class="proto-desc">Visual design for the one open item in the Drip Preference Visibility ticket: the Deal card indicator that shows when an API-initiated stage move carried a disabled Drips state forward (BR-12/13), including the Contact-level opt-out variant (BR-14). Reproduces both real card layouts (job and proposal) and adds a teal "Drips kept disabled" callout row with a BR-13 traceability chip and a toggle to demo the card with and without the indicator.</div>
@@ -1086,10 +1174,13 @@
         </div>
       </div>
     </div>
-    <div class="proto-card" data-status="readydev" data-name="at risk account finder health score health tier signup date filter primary contact onboarding rep churn" data-added="2026-08-14">
+    <div class="proto-card" data-status="mixed" data-bullseye="true" data-name="at risk account finder health score health tier signup date filter primary contact onboarding rep churn" data-added="2026-08-14">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#FEE2E2;">&#127919;</div>
-        <span class="proto-status-badge status-readydev">Ready for Dev</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-mixed" title="Linked tickets are at different stages: At Risk Account Finder (Pushed to Production), HealthScore v2.1 draft — parent (Kickback)">Mixed Status</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">At Risk Account Finder</div>
       <div class="proto-desc">Standalone, reduced-scope split from the HealthScore v2.1 draft, per Tanner's feedback that the tool's real job is narrower: let an onboarding rep filter accounts by Health tier (multi select: At Risk, Needs Attention, On Track) and signup date (Last 30/60/90 days, cumulative, or a custom range including end-date-only "before X" searches), then see each matching account's Primary Contact (Name, Email, Phone) right in the list so they can reach out without logging into or impersonating the account. Grid reduction, the Account Details drawer, branch icons, copy-to-clipboard, and everything else from the v2.1 draft stay out of scope here and remain on the HealthScore prototype.</div>
@@ -1110,10 +1201,13 @@
         </div>
       </div>
     </div>
-<div class="proto-card" data-status="design" data-name="holiday calendar display us canada appointments job schedule per user preference statutory holidays non-editable blocks" data-added="2026-08-18">
+<div class="proto-card" data-status="shipped" data-bullseye="true" data-name="holiday calendar display us canada appointments job schedule per user preference statutory holidays non-editable blocks" data-added="2026-08-18">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#FFF3E0;">🗓️</div>
-        <span class="proto-status-badge status-design">Needs Design</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-shipped">Pushed to Production</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">Holiday Calendar Display (US/Canada)</div>
       <div class="proto-desc">Clickable prototype for a per-user "Holiday Calendar" preference (None / United States / Canada / United States &amp; Canada) that overlays non-editable, visually distinct holiday blocks on both the Appointments and Job Schedule calendars, sharing one preference. Includes a working fixed-date and relative-weekday holiday engine to demonstrate indefinite date resolution (e.g. Thanksgiving recomputes correctly across years) and country-tagged blocks for same-named holidays that fall on different dates (e.g. US vs. CA Thanksgiving).</div>
@@ -1128,10 +1222,10 @@
         </div>
       </div>
     </div>
-<div class="proto-card" data-status="design" data-name="link multiple google calendars write to calendar reference sync unlink reassign" data-added="2026-08-24">
+<div class="proto-card" data-status="testing" data-name="link multiple google calendars write to calendar reference sync unlink reassign" data-added="2026-08-24">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#E8E6FA;">📅</div>
-        <span class="proto-status-badge status-design">Needs Design</span>
+        <span class="proto-status-badge status-testing">In QA Testing</span>
       </div>
       <div class="proto-name">Link Multiple Google Calendars</div>
       <div class="proto-desc">Clickable prototype for the calendar connection screen supporting more than one linked Google Calendar per account, shown in the real entry-flow context: Appointments (Sign in with Google) &rarr; choose calendars to link &rarr; Success &rarr; back to Appointments with a live connected summary and a Manage link. Linked calendars are visible in DripJobs for reference only; the user designates exactly one as the write-to calendar that new DripJobs events are copied to, and can change that designation anytime without moving previously synced events. Demonstrates the unlink edge case: unlinking the current write-to calendar while others remain linked requires picking a new write-to first, unlinking it when no other calendars remain linked is a full disconnect. Scoped to desktop/web only per the ticket (mobile linking is a separate track).</div>
@@ -1146,10 +1240,13 @@
         </div>
       </div>
     </div>
-<div class="proto-card" data-status="design" data-name="send marketing agency info zapier card company settings integrations email template api key copy" data-added="2026-08-25">
+<div class="proto-card" data-status="inprogress" data-bullseye="true" data-name="send marketing agency info zapier card company settings integrations email template api key copy" data-added="2026-08-25">
       <div class="proto-card-top">
         <div class="proto-icon" style="background:#FFF3E0;">📨</div>
-        <span class="proto-status-badge status-design">Needs Design</span>
+        <div class="proto-badges">
+          <span class="proto-status-badge status-inprogress">PR Created</span>
+          <span class="proto-bullseye-badge" title="Tagged Bullseye in ClickUp">🎯 Bullseye</span>
+        </div>
       </div>
       <div class="proto-name">Send Marketing Agency Info</div>
       <div class="proto-desc">Clickable prototype for a new "Send Marketing Agency Info" component on the Zapier card in Company Settings &gt; Integrations. Clicking it opens a copy-only compose view pre-filled with a template that auto-fills the user's name, company name, and Zapier API key, leaving the agency contact name as an editable placeholder. A single Copy button copies the full subject and message with a "Copied!" confirmation; there is no send, reply-to, or BCC functionality. Includes scenario toggles for the two open edge cases flagged in the ticket: incomplete profile info (falls back to bracketed placeholders) and no Zapier API key yet (button disabled with a prompt) — both flagged as assumptions needing confirmation before dev.</div>
@@ -2003,6 +2100,8 @@
   const statusFilter = document.getElementById('statusFilter');
   const searchInput = document.getElementById('searchInput');
   const emptyState = document.getElementById('emptyState');
+  const bullseyeFilterBtn = document.getElementById('bullseyeFilterBtn');
+  let bullseyeOnly = false;
 
   function applyFilters() {
     const q = searchInput.value.toLowerCase().trim();
@@ -2011,7 +2110,8 @@
     cards.forEach(card => {
       const nameMatch = card.dataset.name.includes(q);
       const statusMatch = activeFilter === 'all' || card.dataset.status === activeFilter;
-      if (nameMatch && statusMatch) {
+      const bullseyeMatch = !bullseyeOnly || card.dataset.bullseye === 'true';
+      if (nameMatch && statusMatch && bullseyeMatch) {
         card.classList.remove('hidden');
         visible++;
       } else {
@@ -2023,6 +2123,11 @@
 
   statusFilter.addEventListener('change', applyFilters);
   searchInput.addEventListener('input', applyFilters);
+  bullseyeFilterBtn.addEventListener('click', () => {
+    bullseyeOnly = !bullseyeOnly;
+    bullseyeFilterBtn.classList.toggle('active', bullseyeOnly);
+    applyFilters();
+  });
 
   // ── Sort by date added ──
   const protoGrid = document.getElementById('protoGrid');
