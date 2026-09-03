@@ -9,6 +9,11 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-03] Multiple Concurrent Payment Requests (86bbke1pr): removed the business-app left nav
+
+- Decision: Removed the "dripjobs" app sidebar (Contacts/Sales List/Jobs List/etc.) from the business-side views (Invoice Detail, Invoices List, Jobs List). The scenario switcher already drives navigation for this prototype, and the sidebar would need to look different for the Customer Portal anyway (which keeps its own distinct portal sidebar, unchanged).
+- Why: Direct request — the app sidebar was dead chrome once the scenario buttons took over as the way to move through this prototype, and keeping it risked implying the Customer Portal shares that same nav when it doesn't.
+
 ## [2026-09-03] Multiple Concurrent Payment Requests (86bbke1pr): Overpaid Balance shows as a Credit
 
 - Decision: Fixed the Overpaid scenario so Balance reads as a positive amount + teal "Credit" badge (e.g. "$800.00 CREDIT") instead of freezing at $0.00, in both the business Invoice Detail view (header stat + totals box) and the Customer Portal (balance stat + invoice status badge, now "Credit Balance" / "Credit on Account" instead of a plain paid-in-full state). Payments log now records the Payment Processing settlement as its own line item (method: Stripe) distinct from the earlier offline payment, so the numbers trace correctly.
