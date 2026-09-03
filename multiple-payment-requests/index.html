@@ -91,7 +91,32 @@ a { text-decoration: none; }
 .info-value.link { color: #7C3AED; }
 .info-value.balance { color: #111827; }
 .info-value.balance.zero { color: #16a34a; }
-.info-value.balance.overpaid { color: #dc2626; }
+.credit-badge { display: inline-block; background: #E6FAFA; color: #0D9488; border: 1px solid #99E6E0; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 6px; text-transform: uppercase; letter-spacing: 0.03em; vertical-align: middle; }
+.pill-credit { background: #E6FAFA; color: #0D9488; }
+.credit-badge-sm { display: inline-block; background: #E6FAFA; color: #0D9488; border: 1px solid #99E6E0; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 8px; margin-left: 4px; text-transform: uppercase; letter-spacing: 0.02em; vertical-align: middle; }
+
+/* ── Invoices List / Jobs List (shared table pattern) ── */
+.list-view { display: none; }
+.list-view.show { display: block; }
+.stat-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
+.stat-tile { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 16px; }
+.stat-tile .label { font-size: 10.5px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.03em; }
+.stat-tile .value { font-size: 22px; font-weight: 700; color: #111827; margin-top: 4px; }
+.stat-tile .note { font-size: 10.5px; color: #9ca3af; margin-top: 5px; font-style: italic; line-height: 1.4; }
+.filter-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.filter-bar input, .filter-bar select { height: 36px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0 12px; font-size: 12.5px; background: #f9fafb; color: #6b7280; }
+.filter-bar input { flex: 1; min-width: 180px; }
+.table-scroll { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; white-space: nowrap; }
+.data-table th { text-align: left; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.03em; padding: 9px 10px; border-bottom: 1px solid #e5e7eb; background: #f9fafb; }
+.data-table td { padding: 10px; border-bottom: 1px solid #f3f4f6; color: #374151; }
+.data-table tr.highlight-row td { background: #F5F3FF; }
+.data-table .link { color: #7C3AED; font-weight: 600; }
+.status-pill-sm { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 700; }
+.status-pill-sm.paid { background: #d1fae5; color: #065f46; }
+.status-pill-sm.open, .status-pill-sm.partial { background: #fef3c7; color: #92400e; }
+.status-pill-sm.credit { background: #E6FAFA; color: #0D9488; }
+.status-pill-sm.accepted { background: #d1fae5; color: #065f46; }
 
 .section-title { font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 10px; display:flex; align-items:center; justify-content:space-between; }
 
@@ -303,6 +328,8 @@ a { text-decoration: none; }
         <div class="view-toggle">
           <button type="button" class="active" id="viewBtnBusiness" onclick="setView('business')">Business View</button>
           <button type="button" id="viewBtnPortal" onclick="setView('portal')">Customer Portal</button>
+          <button type="button" id="viewBtnInvoices" onclick="setView('invoices')">Invoices List</button>
+          <button type="button" id="viewBtnJobs" onclick="setView('jobs')">Jobs List</button>
         </div>
       </div>
     </div>
@@ -453,6 +480,68 @@ a { text-decoration: none; }
     </div>
   </div>
 
+  <!-- ══════════ INVOICES LIST VIEW ══════════ -->
+  <div class="list-view" id="invoicesListView">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-size:18px;font-weight:700;color:#111827;">Invoices <span class="pill" style="background:#E8E6FA;color:#5C53DC;">348</span></div>
+        <div class="top-actions">
+          <button class="btn btn-purple btn-round-sm"><i class="fas fa-plus mr-1"></i> New Invoice</button>
+          <button class="btn btn-outline-purple btn-round-sm">Actions <i class="fas fa-caret-down ml-1"></i></button>
+        </div>
+      </div>
+      <div class="stat-tiles">
+        <div class="stat-tile"><div class="label">Total Invoices</div><div class="value">348</div></div>
+        <div class="stat-tile"><div class="label">Unpaid</div><div class="value" style="color:#f59e0b;">259</div></div>
+        <div class="stat-tile"><div class="label">Total Amount</div><div class="value">$177,022.57</div></div>
+        <div class="stat-tile">
+          <div class="label">Outstanding Balance</div>
+          <div class="value" id="invoicesOutstandingVal" style="color:#16a34a;">$0.00</div>
+          <div class="note" id="invoicesOutstandingNote" style="display:none;">Includes 1 invoice with a Credit balance &mdash; see Credits Pending Resolution (planned follow-up)</div>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <input type="text" placeholder="Search invoices..." disabled>
+        <select disabled><option>All Statuses</option></select>
+        <select disabled><option>Type</option></select>
+        <button class="btn btn-purple btn-round-sm">Search</button>
+        <button class="btn btn-outline-purple btn-round-sm">Clear</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead><tr><th>Status</th><th>Customer</th><th>Proposal</th><th>Invoice</th><th style="text-align:right;">Amount</th><th style="text-align:right;">Paid</th><th style="text-align:right;">Balance</th><th>Date</th><th></th></tr></thead>
+          <tbody id="invoicesListBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ JOBS LIST VIEW ══════════ -->
+  <div class="list-view" id="jobsListView">
+    <div class="card">
+      <div style="font-size:18px;font-weight:700;color:#111827;margin-bottom:2px;">Jobs List</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:14px;">Total Deals: <strong>154</strong> &nbsp;&middot;&nbsp; Total Value: <strong>$799,883.79</strong></div>
+      <div class="filter-bar">
+        <select disabled><option>All Salespeople</option></select>
+        <select disabled><option>All Project Managers</option></select>
+        <select disabled><option>All Deal Stages</option></select>
+        <select disabled><option>Anytime</option></select>
+        <button class="btn btn-purple btn-round-sm">Go</button>
+        <button class="btn btn-outline-purple btn-round-sm">Reset</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead><tr>
+            <th>Status</th><th>Label</th><th>Job</th><th>Job Address</th><th>Customer Name</th><th>Email</th><th>Phone Number</th>
+            <th>Salesperson</th><th>Project Manager</th><th>Crew</th><th>Proposal ID</th><th>Invoice ID</th><th>Invoice Status</th>
+            <th style="text-align:right;">Amount</th><th style="text-align:right;">Paid</th><th style="text-align:right;">Balance</th><th>Deal Stage</th>
+          </tr></thead>
+          <tbody id="jobsListBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </div>
 <!-- /main-content -->
 
@@ -506,7 +595,7 @@ const INVOICE_TAX = 209.30;
 let currentScenario = 'multi';
 let currentView = 'business';
 
-let invoiceTotal, paymentsReceived, requests, overageActive, overpaidActive, overpaidAmount;
+let invoiceTotal, paymentsReceived, requests, overageActive, overpaidActive, overpaidAmount, extraPayments;
 
 const SCENARIO_DESCS = {
   multi: '<strong>Rule 4 / Rule 1:</strong> Two Payment Requests are already active on this invoice (Sent + Payment Processing). Try "Create Payment Request" — amounts above the Available-to-Request balance are blocked before they can be sent.',
@@ -528,6 +617,7 @@ function resetState(scenario) {
   overageActive = false;
   overpaidActive = false;
   overpaidAmount = 0;
+  extraPayments = [];
   clearNotifications();
 }
 
@@ -540,7 +630,7 @@ function committedTotal() {
     .reduce((s, r) => s + r.amount, 0);
 }
 function balance() {
-  return Math.max(invoiceTotal - paymentsReceived, invoiceTotal - paymentsReceived); // allow negative for overpaid display separately
+  return Math.round((invoiceTotal - paymentsReceived) * 100) / 100; // can go negative when overpaid — that's a credit, not clamped to $0
 }
 function availableToRequest() {
   return Math.round((balance() - committedTotal()) * 100) / 100;
@@ -549,6 +639,13 @@ function fmt(n) {
   const neg = n < 0;
   const v = Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   return (neg ? '-$' : '$') + v;
+}
+/* Balance cell markup: negative balance renders as a positive amount + "Credit" badge,
+   matching how Stripe/QBO/Bill.com surface an overpayment rather than pinning it at $0. */
+function balanceDisplay(bal) {
+  if (bal < -0.001) return `${fmt(Math.abs(bal))} <span class="credit-badge">Credit</span>`;
+  if (Math.abs(bal) < 0.001) return `<span style="color:#16a34a;">${fmt(0)}</span>`;
+  return fmt(bal);
 }
 
 /* ─────────────────────────────────────────────
@@ -560,8 +657,8 @@ function render() {
   const avail = availableToRequest();
 
   // header + totals
-  document.getElementById('headerBalance').textContent = fmt(bal);
-  document.getElementById('totalsBalance').textContent = fmt(bal);
+  document.getElementById('headerBalance').innerHTML = balanceDisplay(bal);
+  document.getElementById('totalsBalance').innerHTML = balanceDisplay(bal);
   document.getElementById('totalsInvoiceRow').querySelector('span:last-child').textContent = fmt(invoiceTotal);
   document.getElementById('availableAmount').textContent = fmt(avail);
   document.getElementById('modalAvailable').textContent = fmt(avail);
@@ -571,8 +668,8 @@ function render() {
 
   // invoice pill
   const pillEl = document.getElementById('invoicePill');
-  if (overpaidActive) { pillEl.textContent = 'Overpaid'; pillEl.className = 'pill pill-overpaid'; }
-  else if (bal <= 0) { pillEl.textContent = 'Paid in Full'; pillEl.className = 'pill pill-open'; }
+  if (overpaidActive) { pillEl.textContent = 'Credit Balance'; pillEl.className = 'pill pill-credit'; }
+  else if (bal <= 0.001) { pillEl.textContent = 'Paid in Full'; pillEl.className = 'pill pill-open'; }
   else { pillEl.textContent = 'Partially Paid'; pillEl.className = 'pill pill-partial'; }
 
   // create button disabled state
@@ -628,19 +725,21 @@ function render() {
   // payments log
   const paymentsList = document.getElementById('paymentsList');
   let rows = `<div class="payments-row"><div class="link">Deposit #600377 (Deposit)</div><div>check</div><div>9/3/2026</div><div>1234567</div><div style="text-align:right;">$270.93</div></div>`;
-  if (paymentsReceived > 270.93 + 0.001) {
-    rows += `<div class="payments-row"><div class="link">Payment #600400 (Offline)</div><div>other</div><div>9/3/2026</div><div>N/A</div><div style="text-align:right;">${fmt(paymentsReceived - 270.93)}</div></div>`;
-  }
+  extraPayments.forEach(p => {
+    rows += `<div class="payments-row"><div class="link">Payment ${p.id} (${p.label})</div><div>${p.method}</div><div>9/3/2026</div><div>N/A</div><div style="text-align:right;">${fmt(p.amount)}</div></div>`;
+  });
   paymentsList.innerHTML = rows;
 
   renderPortal(bal);
+  renderInvoicesList(bal);
+  renderJobsList(bal);
 }
 
 function renderPortal(bal) {
-  document.getElementById('portalBalanceVal').textContent = bal < 0 ? fmt(0) : fmt(bal);
+  document.getElementById('portalBalanceVal').innerHTML = balanceDisplay(bal);
   const statusBadge = document.getElementById('portalStatusBadge');
-  if (overpaidActive) statusBadge.textContent = 'PAID IN FULL';
-  else if (bal <= 0) statusBadge.textContent = 'PAID IN FULL';
+  if (overpaidActive) statusBadge.textContent = 'CREDIT ON ACCOUNT';
+  else if (bal <= 0.001) statusBadge.textContent = 'PAID IN FULL';
   else statusBadge.textContent = 'PARTIALLY PAID';
 
   const container = document.getElementById('portalBanners');
@@ -673,6 +772,110 @@ function renderPortal(bal) {
   container.innerHTML = html;
 }
 
+/* Filler rows are static illustrative data matching the real Invoices List / Jobs List
+   screenshots — only the #512256 row is wired to this prototype's scenario state. */
+const INVOICES_LIST_FILLER = [
+  { status: 'paid', customer: 'Bob Barker', proposal: '1109275', invoice: '#176578', amount: 5000.00, paid: 5000.00, balance: 0, date: '10/17/2024' },
+  { status: 'paid', customer: 'Mike McGill', proposal: '691551', invoice: '#112501', amount: 5118.96, paid: 5118.96, balance: 0, date: '4/12/2024' },
+  { status: 'paid', customer: 'Sally Smith II', proposal: 'Proposal #1515123', invoice: '#236891', amount: 6300.00, paid: 6300.00, balance: 0, date: '4/4/2025' },
+  { status: 'paid', customer: 'Tony Soprano', proposal: 'Job #2084585', invoice: '#323373', amount: 7514.91, paid: 7514.91, balance: 0, date: '9/22/2025' }
+];
+
+function renderInvoicesList(bal) {
+  const isCredit = bal < -0.001;
+  const body = document.getElementById('invoicesListBody');
+  let html = INVOICES_LIST_FILLER.map(r => `<tr>
+    <td><span class="status-pill-sm paid">PAID</span></td>
+    <td>${r.customer}</td>
+    <td>${r.proposal}</td>
+    <td><span class="link">${r.invoice}</span></td>
+    <td style="text-align:right;">${fmt(r.amount)}</td>
+    <td style="text-align:right;">${fmt(r.paid)}</td>
+    <td style="text-align:right;">${fmt(r.balance)}</td>
+    <td>${r.date}</td>
+    <td><button class="btn btn-outline-purple btn-round-sm" style="padding:4px 10px;font-size:11px;">View</button></td>
+  </tr>`).join('');
+
+  let statusClass, statusText;
+  if (isCredit) { statusClass = 'credit'; statusText = 'CREDIT'; }
+  else if (bal <= 0.001) { statusClass = 'paid'; statusText = 'PAID'; }
+  else { statusClass = 'partial'; statusText = 'PARTIAL'; }
+  const balanceCell = isCredit ? `${fmt(Math.abs(bal))} <span class="credit-badge-sm">Credit</span>` : fmt(bal);
+  html += `<tr class="highlight-row">
+    <td><span class="status-pill-sm ${statusClass}">${statusText}</span></td>
+    <td>Dripjobs Harrison</td>
+    <td>Proposal #3064242</td>
+    <td><span class="link">#512256</span></td>
+    <td style="text-align:right;">$2,709.30</td>
+    <td style="text-align:right;">${fmt(paymentsReceived)}</td>
+    <td style="text-align:right;">${balanceCell}</td>
+    <td>9/3/2026</td>
+    <td><button class="btn btn-outline-purple btn-round-sm" style="padding:4px 10px;font-size:11px;">View</button></td>
+  </tr>`;
+  body.innerHTML = html;
+
+  // Per Jeremy (2026-09-03): don't silently net a credit into this roll-up — call it out with a note instead.
+  // The proper surfacing (a dedicated "Credits Pending Resolution" view) is a confirmed follow-up enhancement, not built here.
+  document.getElementById('invoicesOutstandingVal').textContent = fmt(0);
+  document.getElementById('invoicesOutstandingNote').style.display = isCredit ? 'block' : 'none';
+}
+
+const JOBS_LIST_FILLER = [
+  { status: 'Accepted', job: 'Multiple Props', address: '5 Main St, Forest Park, GA, 30297', customer: 'Adam Smith', email: 'AdamSmith@djtest.com', phone: '(456) 555-7907', proposalId: '1359276', invoiceId: '#212928', invoiceStatus: 'paid', amount: 5500.00, paid: 5500.00, balance: 0, dealStage: 'Project Accepted' },
+  { status: 'Accepted', job: 'ACORN', address: '400 Job Address, Inverness, FL, 34332', customer: 'Aaron Blankfields', email: 'jeremy@dripjobs.com', phone: '(352) 555-1234', proposalId: '1509761', invoiceId: '#250346', invoiceStatus: 'open', amount: 6131.45, paid: 0, balance: 6131.45, dealStage: 'Project Accepted' }
+];
+
+function renderJobsList(bal) {
+  const isCredit = bal < -0.001;
+  const body = document.getElementById('jobsListBody');
+  let html = JOBS_LIST_FILLER.map(r => `<tr>
+    <td><span class="status-pill-sm accepted">${r.status}</span></td>
+    <td>+ add label</td>
+    <td><span class="link">${r.job}</span></td>
+    <td>${r.address}</td>
+    <td>${r.customer}</td>
+    <td>${r.email}</td>
+    <td>${r.phone}</td>
+    <td>Jeremy Harrison</td>
+    <td>No project manager</td>
+    <td>No crew</td>
+    <td>${r.proposalId}</td>
+    <td><span class="link">${r.invoiceId}</span></td>
+    <td><span class="status-pill-sm ${r.invoiceStatus}">${r.invoiceStatus === 'paid' ? 'Paid' : 'Open'}</span></td>
+    <td style="text-align:right;">${fmt(r.amount)}</td>
+    <td style="text-align:right;">${fmt(r.paid)}</td>
+    <td style="text-align:right;">${fmt(r.balance)}</td>
+    <td>${r.dealStage}</td>
+  </tr>`).join('');
+
+  let statusClass, statusText;
+  if (isCredit) { statusClass = 'credit'; statusText = 'Credit'; }
+  else if (bal <= 0.001) { statusClass = 'paid'; statusText = 'Paid'; }
+  else { statusClass = 'partial'; statusText = 'Partially paid'; }
+  const invoiceStatusPill = `<span class="status-pill-sm ${statusClass}">${statusText}</span>`;
+  const balanceCell = isCredit ? `${fmt(Math.abs(bal))} <span class="credit-badge-sm">Credit</span>` : fmt(bal);
+  html += `<tr class="highlight-row">
+    <td><span class="status-pill-sm accepted">Accepted</span></td>
+    <td>+ add label</td>
+    <td><span class="link">Interior Painting - Nashville Ave</span></td>
+    <td>221 N Nashville Ave, Hernando, FL, 34442</td>
+    <td>Dripjobs Harrison</td>
+    <td>jeremy+1@dripjobs.com</td>
+    <td>(727) 250-8869</td>
+    <td>Jeremy Harrison</td>
+    <td>No project manager</td>
+    <td>No crew</td>
+    <td>3064242</td>
+    <td><span class="link">#512256</span></td>
+    <td>${invoiceStatusPill}</td>
+    <td style="text-align:right;">$2,709.30</td>
+    <td style="text-align:right;">${fmt(paymentsReceived)}</td>
+    <td style="text-align:right;">${balanceCell}</td>
+    <td>Project Accepted</td>
+  </tr>`;
+  body.innerHTML = html;
+}
+
 /* ─────────────────────────────────────────────
    Scenario / View switching
 ───────────────────────────────────────────── */
@@ -701,8 +904,12 @@ function setView(v) {
   currentView = v;
   document.getElementById('businessView').style.display = v === 'business' ? 'block' : 'none';
   document.getElementById('portalView').classList.toggle('show', v === 'portal');
+  document.getElementById('invoicesListView').classList.toggle('show', v === 'invoices');
+  document.getElementById('jobsListView').classList.toggle('show', v === 'jobs');
   document.getElementById('viewBtnBusiness').classList.toggle('active', v === 'business');
   document.getElementById('viewBtnPortal').classList.toggle('active', v === 'portal');
+  document.getElementById('viewBtnInvoices').classList.toggle('active', v === 'invoices');
+  document.getElementById('viewBtnJobs').classList.toggle('active', v === 'jobs');
 }
 
 /* ─────────────────────────────────────────────
@@ -712,6 +919,7 @@ function simulateFullOfflinePayment() {
   const bal = balance();
   if (bal <= 0) { showToast('info', 'Already at $0', 'This invoice balance is already $0.'); return; }
   paymentsReceived += bal;
+  extraPayments.push({ id: '#600400', label: 'Offline', method: 'other', amount: bal });
 
   // Cancel Sent/Viewed/Outstanding requests, notify customer. Payment Processing survives (Rule 9).
   let cancelledAny = false;
@@ -733,18 +941,19 @@ function simulateFullOfflinePayment() {
 function simulateProcessingSettles() {
   const processing = requests.find(r => r.status === 'Payment Processing');
   if (!processing) { showToast('info', 'Nothing to settle', 'There is no Payment Request currently in Payment Processing.'); return; }
-  const bal = balance();
   processing.status = 'Paid';
   processing.note = 'Settled successfully.';
+  paymentsReceived += processing.amount;
+  extraPayments.push({ id: '#600401', label: 'PR-1043 Settlement', method: 'Stripe', amount: processing.amount });
 
-  if (bal <= 0) {
+  const balAfter = balance();
+  if (balAfter < -0.001) {
     overpaidActive = true;
-    overpaidAmount = processing.amount;
+    overpaidAmount = Math.abs(balAfter);
     pushNotification('fa-exclamation-circle', '#991B1B', 'Invoice #512256 is Overpaid',
-      `A Payment Processing request settled after the balance already reached $0. Overpaid by ${fmt(processing.amount)} &mdash; resolve manually via refund or credit.`);
-    showToast('warn', 'Invoice Overpaid', `Payment settled while balance was $0. Business notified &mdash; overpaid by ${fmt(processing.amount)}.`);
+      `A Payment Processing request settled after the balance already reached $0. Overpaid by ${fmt(overpaidAmount)} &mdash; the Balance now shows a Credit until this is resolved manually via refund or credit.`);
+    showToast('warn', 'Invoice Overpaid', `Payment settled while balance was $0. Business notified &mdash; overpaid by ${fmt(overpaidAmount)}.`);
   } else {
-    paymentsReceived += processing.amount;
     showToast('success', 'Payment Settled', `${fmt(processing.amount)} applied to the invoice balance.`);
   }
   render();
