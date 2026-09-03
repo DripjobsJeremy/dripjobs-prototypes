@@ -91,7 +91,8 @@ a { text-decoration: none; }
 .info-value.link { color: #7C3AED; }
 .info-value.balance { color: #111827; }
 .info-value.balance.zero { color: #16a34a; }
-.info-value.balance.overpaid { color: #dc2626; }
+.credit-badge { display: inline-block; background: #E6FAFA; color: #0D9488; border: 1px solid #99E6E0; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 6px; text-transform: uppercase; letter-spacing: 0.03em; vertical-align: middle; }
+.pill-credit { background: #E6FAFA; color: #0D9488; }
 
 .section-title { font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 10px; display:flex; align-items:center; justify-content:space-between; }
 
@@ -506,7 +507,7 @@ const INVOICE_TAX = 209.30;
 let currentScenario = 'multi';
 let currentView = 'business';
 
-let invoiceTotal, paymentsReceived, requests, overageActive, overpaidActive, overpaidAmount;
+let invoiceTotal, paymentsReceived, requests, overageActive, overpaidActive, overpaidAmount, extraPayments;
 
 const SCENARIO_DESCS = {
   multi: '<strong>Rule 4 / Rule 1:</strong> Two Payment Requests are already active on this invoice (Sent + Payment Processing). Try "Create Payment Request" — amounts above the Available-to-Request balance are blocked before they can be sent.',
@@ -528,6 +529,7 @@ function resetState(scenario) {
   overageActive = false;
   overpaidActive = false;
   overpaidAmount = 0;
+  extraPayments = [];
   clearNotifications();
 }
 
@@ -540,7 +542,7 @@ function committedTotal() {
     .reduce((s, r) => s + r.amount, 0);
 }
 function balance() {
-  return Math.max(invoiceTotal - paymentsReceived, invoiceTotal - paymentsReceived); // allow negative for overpaid display separately
+  return Math.round((invoiceTotal - paymentsReceived) * 100) / 100; // can go negative when overpaid — that's a credit, not clamped to $0
 }
 function availableToRequest() {
   return Math.round((balance() - committedTotal()) * 100) / 100;
@@ -549,6 +551,13 @@ function fmt(n) {
   const neg = n < 0;
   const v = Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   return (neg ? '-$' : '$') + v;
+}
+/* Balance cell markup: negative balance renders as a positive amount + "Credit" badge,
+   matching how Stripe/QBO/Bill.com surface an overpayment rather than pinning it at $0. */
+function balanceDisplay(bal) {
+  if (bal < -0.001) return `${fmt(Math.abs(bal))} <span class="credit-badge">Credit</span>`;
+  if (Math.abs(bal) < 0.001) return `<span style="color:#16a34a;">${fmt(0)}</span>`;
+  return fmt(bal);
 }
 
 /* ─────────────────────────────────────────────
@@ -560,8 +569,8 @@ function render() {
   const avail = availableToRequest();
 
   // header + totals
-  document.getElementById('headerBalance').textContent = fmt(bal);
-  document.getElementById('totalsBalance').textContent = fmt(bal);
+  document.getElementById('headerBalance').innerHTML = balanceDisplay(bal);
+  document.getElementById('totalsBalance').innerHTML = balanceDisplay(bal);
   document.getElementById('totalsInvoiceRow').querySelector('span:last-child').textContent = fmt(invoiceTotal);
   document.getElementById('availableAmount').textContent = fmt(avail);
   document.getElementById('modalAvailable').textContent = fmt(avail);
@@ -571,8 +580,8 @@ function render() {
 
   // invoice pill
   const pillEl = document.getElementById('invoicePill');
-  if (overpaidActive) { pillEl.textContent = 'Overpaid'; pillEl.className = 'pill pill-overpaid'; }
-  else if (bal <= 0) { pillEl.textContent = 'Paid in Full'; pillEl.className = 'pill pill-open'; }
+  if (overpaidActive) { pillEl.textContent = 'Credit Balance'; pillEl.className = 'pill pill-credit'; }
+  else if (bal <= 0.001) { pillEl.textContent = 'Paid in Full'; pillEl.className = 'pill pill-open'; }
   else { pillEl.textContent = 'Partially Paid'; pillEl.className = 'pill pill-partial'; }
 
   // create button disabled state
@@ -628,19 +637,19 @@ function render() {
   // payments log
   const paymentsList = document.getElementById('paymentsList');
   let rows = `<div class="payments-row"><div class="link">Deposit #600377 (Deposit)</div><div>check</div><div>9/3/2026</div><div>1234567</div><div style="text-align:right;">$270.93</div></div>`;
-  if (paymentsReceived > 270.93 + 0.001) {
-    rows += `<div class="payments-row"><div class="link">Payment #600400 (Offline)</div><div>other</div><div>9/3/2026</div><div>N/A</div><div style="text-align:right;">${fmt(paymentsReceived - 270.93)}</div></div>`;
-  }
+  extraPayments.forEach(p => {
+    rows += `<div class="payments-row"><div class="link">Payment ${p.id} (${p.label})</div><div>${p.method}</div><div>9/3/2026</div><div>N/A</div><div style="text-align:right;">${fmt(p.amount)}</div></div>`;
+  });
   paymentsList.innerHTML = rows;
 
   renderPortal(bal);
 }
 
 function renderPortal(bal) {
-  document.getElementById('portalBalanceVal').textContent = bal < 0 ? fmt(0) : fmt(bal);
+  document.getElementById('portalBalanceVal').innerHTML = balanceDisplay(bal);
   const statusBadge = document.getElementById('portalStatusBadge');
-  if (overpaidActive) statusBadge.textContent = 'PAID IN FULL';
-  else if (bal <= 0) statusBadge.textContent = 'PAID IN FULL';
+  if (overpaidActive) statusBadge.textContent = 'CREDIT ON ACCOUNT';
+  else if (bal <= 0.001) statusBadge.textContent = 'PAID IN FULL';
   else statusBadge.textContent = 'PARTIALLY PAID';
 
   const container = document.getElementById('portalBanners');
@@ -712,6 +721,7 @@ function simulateFullOfflinePayment() {
   const bal = balance();
   if (bal <= 0) { showToast('info', 'Already at $0', 'This invoice balance is already $0.'); return; }
   paymentsReceived += bal;
+  extraPayments.push({ id: '#600400', label: 'Offline', method: 'other', amount: bal });
 
   // Cancel Sent/Viewed/Outstanding requests, notify customer. Payment Processing survives (Rule 9).
   let cancelledAny = false;
@@ -733,18 +743,19 @@ function simulateFullOfflinePayment() {
 function simulateProcessingSettles() {
   const processing = requests.find(r => r.status === 'Payment Processing');
   if (!processing) { showToast('info', 'Nothing to settle', 'There is no Payment Request currently in Payment Processing.'); return; }
-  const bal = balance();
   processing.status = 'Paid';
   processing.note = 'Settled successfully.';
+  paymentsReceived += processing.amount;
+  extraPayments.push({ id: '#600401', label: 'PR-1043 Settlement', method: 'Stripe', amount: processing.amount });
 
-  if (bal <= 0) {
+  const balAfter = balance();
+  if (balAfter < -0.001) {
     overpaidActive = true;
-    overpaidAmount = processing.amount;
+    overpaidAmount = Math.abs(balAfter);
     pushNotification('fa-exclamation-circle', '#991B1B', 'Invoice #512256 is Overpaid',
-      `A Payment Processing request settled after the balance already reached $0. Overpaid by ${fmt(processing.amount)} &mdash; resolve manually via refund or credit.`);
-    showToast('warn', 'Invoice Overpaid', `Payment settled while balance was $0. Business notified &mdash; overpaid by ${fmt(processing.amount)}.`);
+      `A Payment Processing request settled after the balance already reached $0. Overpaid by ${fmt(overpaidAmount)} &mdash; the Balance now shows a Credit until this is resolved manually via refund or credit.`);
+    showToast('warn', 'Invoice Overpaid', `Payment settled while balance was $0. Business notified &mdash; overpaid by ${fmt(overpaidAmount)}.`);
   } else {
-    paymentsReceived += processing.amount;
     showToast('success', 'Payment Settled', `${fmt(processing.amount)} applied to the invoice balance.`);
   }
   render();
