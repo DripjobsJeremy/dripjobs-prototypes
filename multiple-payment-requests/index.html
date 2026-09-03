@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DripJobs — Multiple Concurrent Payment Requests Prototype</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+* { box-sizing: border-box; }
+body { background: #f0f0f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; color: #32415B; }
+a { text-decoration: none; }
+
+/* ── App shell (sits below the proto-bar) ── */
+.app-body { display: flex; align-items: flex-start; }
+
+/* ── Sidebar ── */
+.sidebar { width: 220px; min-height: calc(100vh - 49px); background: white; border-right: 1px solid #e5e7eb; padding: 0; flex-shrink: 0; }
+.main-content { flex: 1; min-width: 0; padding: 0 24px 40px; }
+.sidebar-logo { padding: 16px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 10px; }
+.sidebar-logo span { font-weight: 700; font-size: 18px; color: #7C3AED; }
+.sidebar-section-label { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; padding: 12px 16px 4px; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 13px; color: #374151; cursor: pointer; text-decoration: none; }
+.sidebar-item:hover { background: #f3f0ff; color: #7C3AED; }
+.sidebar-item.active { background: #f3f0ff; color: #7C3AED; font-weight: 600; }
+.sidebar-item i { width: 16px; text-align: center; font-size: 13px; }
+
+/* ── Top bar ── */
+.topbar { height: 56px; background: white; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0 4px; margin: 0 -24px 20px; }
+.topbar-search { flex: 1; max-width: 360px; margin-left: 8px; }
+.topbar-search input { width: 100%; height: 34px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0 12px; font-size: 13px; background: #f9fafb; }
+.topbar-right { display: flex; align-items: center; gap: 14px; margin-right: 12px; position: relative; }
+.notif-bell-wrap { position: relative; }
+.notif-bell { width: 34px; height: 34px; border-radius: 8px; border: 1px solid #e5e7eb; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6b7280; font-size: 14px; position: relative; }
+.notif-bell:hover { background: #f3f0ff; color: #7C3AED; border-color: #7C3AED; }
+.notif-dot { position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; border-radius: 50%; background: #dc2626; border: 2px solid white; display: none; }
+.notif-dot.show { display: block; }
+.notif-dropdown { position: absolute; top: 42px; right: 0; width: 340px; background: white; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.14); z-index: 500; display: none; overflow: hidden; }
+.notif-dropdown.show { display: block; }
+.notif-dropdown-header { padding: 12px 16px; font-size: 13px; font-weight: 700; border-bottom: 1px solid #f3f4f6; }
+.notif-empty { padding: 22px 16px; font-size: 12px; color: #9ca3af; text-align: center; }
+.notif-item { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; display: flex; gap: 10px; }
+.notif-item:last-child { border-bottom: none; }
+.notif-item i { margin-top: 2px; flex-shrink: 0; }
+.notif-item-title { font-size: 12.5px; font-weight: 600; color: #111827; }
+.notif-item-body { font-size: 12px; color: #6b7280; margin-top: 2px; line-height: 1.5; }
+.user-chip { width: 30px; height: 30px; border-radius: 50%; background: #7C3AED; color: white; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+/* ── Scenario nav ── */
+.scenario-nav { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 14px 18px; margin-bottom: 20px; }
+.scenario-nav-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.scenario-nav .label { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.04em; margin-right: 4px; flex-shrink: 0; }
+.scenario-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #e5e7eb; background: white; font-size: 12px; font-weight: 500; color: #374151; cursor: pointer; }
+.scenario-btn:hover { border-color: #7C3AED; color: #7C3AED; }
+.scenario-btn.active { background: #7C3AED; border-color: #7C3AED; color: white; }
+.scenario-desc { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f3f4f6; font-size: 12px; color: #6b7280; display: flex; align-items: flex-start; gap: 6px; }
+.scenario-desc strong { color: #374151; }
+.view-toggle-wrap { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.view-toggle { display: flex; border: 1px solid #e5e7eb; border-radius: 20px; overflow: hidden; }
+.view-toggle button { border: none; background: white; padding: 6px 14px; font-size: 12px; font-weight: 600; color: #6b7280; cursor: pointer; }
+.view-toggle button.active { background: #7C3AED; color: white; }
+
+/* ── Invoice header card ── */
+.invoice-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+.invoice-title-left { display: flex; align-items: center; gap: 10px; }
+.invoice-title-left h2 { font-size: 20px; font-weight: 700; margin: 0; color: #111827; }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+.pill-open { background: #d1fae5; color: #065f46; }
+.pill-partial { background: #fef3c7; color: #92400e; }
+.pill-overpaid { background: #fee2e2; color: #991b1b; }
+.icon-btn { width: 32px; height: 32px; border-radius: 6px; border: 1px solid #e5e7eb; background: white; color: #6b7280; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.top-actions { display: flex; gap: 8px; }
+.btn-purple { background: #7C3AED; color: white; border: none; }
+.btn-purple:hover { background: #6d28d9; color: white; }
+.btn-outline-purple { background: white; color: #7C3AED; border: 1px solid #ddd6fe; }
+.btn-outline-purple:hover { background: #f5f3ff; }
+.btn-round-sm { border-radius: 8px; font-size: 13px; font-weight: 600; padding: 8px 16px; }
+.more-actions-wrap { position: relative; }
+.more-dropdown { position: absolute; right: 0; top: 100%; margin-top: 6px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); min-width: 190px; z-index: 400; padding: 4px 0; display: none; }
+.more-dropdown.show { display: block; }
+.more-dropdown-item { padding: 9px 14px; font-size: 13px; color: #374151; cursor: pointer; display: flex; align-items: center; gap: 9px; }
+.more-dropdown-item:hover { background: #f9fafb; }
+.more-dropdown-item i { width: 14px; color: #6b7280; }
+
+.card { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 18px; margin-bottom: 18px; }
+.info-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 12px; }
+@media (max-width: 900px) { .info-grid { grid-template-columns: 1fr 1fr; } }
+.info-label { font-size: 10.5px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.04em; }
+.info-value { font-size: 14px; font-weight: 600; color: #111827; margin-top: 2px; }
+.info-value.link { color: #7C3AED; }
+.info-value.balance { color: #111827; }
+.info-value.balance.zero { color: #16a34a; }
+.info-value.balance.overpaid { color: #dc2626; }
+
+.section-title { font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 10px; display:flex; align-items:center; justify-content:space-between; }
+
+/* ── Alert banners (design-system tokens) ── */
+.alert-box { border-radius: 8px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; line-height: 1.6; margin-bottom: 14px; }
+.alert-box .alert-title { font-weight: 700; margin-bottom: 2px; display:block; }
+.alert-box .alert-action-row { margin-top: 8px; display:flex; gap:8px; }
+.alert-warn { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+.alert-danger { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+.alert-info { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+.alert-success { background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534; }
+.alert-box .btn-sm-outline { border: 1px solid currentColor; background: transparent; color: inherit; font-size: 11.5px; font-weight: 600; padding: 5px 10px; border-radius: 6px; }
+
+/* ── Payment Requests list ── */
+.pr-row { border: 1px solid #f3f4f6; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1.6fr; align-items: center; gap: 10px; transition: opacity .3s ease; }
+.pr-row.fading { opacity: 0.25; }
+@media (max-width: 900px) { .pr-row { grid-template-columns: 1fr 1fr; } }
+.pr-label { font-size: 10.5px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.03em; }
+.pr-value { font-size: 13.5px; font-weight: 600; color: #111827; margin-top: 2px; }
+.status-chip { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 10.5px; font-weight: 700; color: white; letter-spacing: 0.02em; }
+.status-Draft { background: #9CA3AF; }
+.status-Sent { background: #3B82F6; }
+.status-Viewed { background: #6366F1; }
+.status-Outstanding { background: #F59E0B; }
+.status-Payment-Processing { background: #7C3AED; }
+.status-Paid { background: #10B981; }
+.status-Cancelled { background: #6B7280; }
+.pr-actions { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+.pr-actions button { font-size: 11.5px; padding: 6px 10px; border-radius: 6px; font-weight: 600; }
+.pr-note { font-size: 11px; color: #9ca3af; margin-top: 4px; font-style: italic; }
+.available-balance-strip { display: flex; align-items: center; justify-content: space-between; background: #f9fafb; border: 1px dashed #e5e7eb; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; font-size: 12.5px; }
+.available-balance-strip strong { color: #111827; font-size: 15px; }
+.available-balance-strip.blocked strong { color: #dc2626; }
+
+/* ── Tabs ── */
+.tabs-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.tab-chip { padding: 8px 16px; border-radius: 16px; font-size: 12.5px; font-weight: 600; border: 1px solid transparent; background: #EFEFF3; color: #6b7280; cursor: default; }
+.tab-chip.active { background: white; box-shadow: inset 0 0 0 2px #7C3AED; color: #111827; }
+
+/* ── Items table ── */
+.items-table-row { display: grid; grid-template-columns: 2fr 0.6fr 1fr 0.8fr 1fr; padding: 12px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+.items-table-row.head { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.03em; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+.items-table-row .item-name { color: #7C3AED; font-weight: 600; }
+.totals-box { margin-left: auto; width: 260px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 14px; margin-top: 12px; }
+.totals-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+.totals-row.total { font-weight: 700; border-top: 1px solid #e5e7eb; margin-top: 4px; padding-top: 8px; }
+.totals-row.balance { font-weight: 700; border-top: 1px solid #e5e7eb; margin-top: 4px; padding-top: 8px; }
+
+.payments-row { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr; padding: 12px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+.payments-row.head { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.03em; }
+.payments-row .link { color: #7C3AED; font-weight: 600; }
+
+/* ── Modal ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal-box { background: white; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); max-width: 420px; width: 100%; margin: 16px; overflow: hidden; }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
+.modal-header h5 { margin: 0; font-size: 15px; font-weight: 700; color: #111827; }
+.modal-close { background: none; border: none; font-size: 18px; color: #9ca3af; cursor: pointer; padding: 2px; line-height: 1; }
+.modal-body { padding: 20px; text-align: center; }
+.remaining-balance-label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 14px; }
+.quick-pills { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+.quick-pill { border: 1px solid #ddd6fe; color: #7C3AED; background: white; border-radius: 20px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.quick-pill:hover, .quick-pill.active { background: #7C3AED; color: white; }
+.modal-fields { display: flex; gap: 12px; text-align: left; }
+.modal-fields .field { flex: 1; }
+.modal-fields label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.03em; }
+.modal-fields .input-group-custom { display: flex; align-items: center; border: 1px solid #e5e7eb; border-radius: 8px; margin-top: 4px; overflow: hidden; }
+.modal-fields .input-group-custom span { padding: 0 10px; color: #6b7280; font-size: 13px; background: #f9fafb; height: 38px; display: flex; align-items: center; }
+.modal-fields .input-group-custom input { border: none; padding: 0 10px; height: 38px; width: 100%; font-size: 14px; }
+.modal-fields .input-group-custom input:focus { outline: none; }
+.modal-error { color: #dc2626; font-size: 12px; font-weight: 600; margin-top: 10px; text-align: left; }
+.modal-footer { padding: 14px 20px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 10px; background: #f9fafb; }
+.btn-cancel { padding: 9px 20px; border: 1px solid #d1d5db; border-radius: 6px; background: white; color: #374151; font-size: 13px; font-weight: 600; cursor: pointer; }
+.btn-cancel:hover { background: #f9fafb; }
+.btn-save { padding: 9px 20px; border: none; border-radius: 6px; background: #7C3AED; color: white; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-save:hover { background: #6d28d9; }
+.btn-save:disabled { background: #c4b5fd; cursor: not-allowed; }
+
+/* ── Toast ── */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 4000; display: flex; flex-direction: column; gap: 10px; }
+.toast { background: white; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px; max-width: 360px; transform: translateX(400px); transition: transform 0.3s ease; }
+.toast.show { transform: translateX(0); }
+.toast-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+.toast-icon.success { background: #d1fae5; color: #065f46; }
+.toast-icon.info { background: #dbeafe; color: #1e40af; }
+.toast-icon.warn { background: #fef3c7; color: #92400e; }
+.toast-title { font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 2px; }
+.toast-msg { font-size: 12px; color: #6b7280; line-height: 1.4; }
+
+/* ── Customer portal view ── */
+.portal-wrap { display: none; background: #f3f4f6; margin: 0 -24px; padding: 0; }
+.portal-wrap.show { display: flex; min-height: 640px; }
+.portal-sidebar { width: 190px; background: white; border-right: 1px solid #e5e7eb; padding: 18px 0; flex-shrink: 0; }
+.portal-sidebar img, .portal-logo { text-align: center; margin-bottom: 12px; }
+.portal-logo-text { text-align: center; font-weight: 700; color: #7C3AED; font-size: 16px; font-style: italic; margin-bottom: 16px; }
+.portal-nav-item { padding: 8px 18px; font-size: 12.5px; color: #374151; display: flex; align-items: center; gap: 8px; cursor: default; }
+.portal-nav-item.active { background: #1f2a3d; color: white; }
+.portal-nav-item i { width: 14px; font-size: 11px; }
+.portal-main { flex: 1; padding: 20px 28px; }
+.portal-topbar { text-align: center; font-size: 13px; font-weight: 700; color: #1f2a3d; padding: 10px 0; border-bottom: 1px solid #e5e7eb; margin: -20px -28px 20px; position: relative; }
+.portal-topbar .phone { position: absolute; right: 20px; top: 10px; font-weight: 400; color: #6b7280; font-size: 12px; }
+
+.pr-banner { border-radius: 8px 8px 0 0; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 0; }
+.pr-banner + .pr-banner { border-top: 1px solid rgba(255,255,255,0.25); }
+.pr-banner.requested { background: linear-gradient(135deg,#f59e0b,#ea8f10); color: white; }
+.pr-banner.processing { background: #eef2ff; color: #3730a3; border-bottom: 1px solid #e0e7ff; }
+.pr-banner.cancelled-paidfull { background: #f3f4f6; color: #4b5563; }
+.pr-banner-left { display: flex; align-items: center; gap: 10px; }
+.pr-banner-icon { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.pr-banner.cancelled-paidfull .pr-banner-icon, .pr-banner.processing .pr-banner-icon { background: rgba(0,0,0,0.06); }
+.pr-banner-title { font-size: 13px; font-weight: 700; }
+.pr-banner-sub { font-size: 11.5px; opacity: 0.95; }
+.pr-banner-cta { background: white; color: #b45309; border: none; border-radius: 6px; padding: 8px 14px; font-size: 12px; font-weight: 700; }
+.pr-banner.processing .pr-banner-cta-label { font-size: 11px; font-weight: 700; color: #3730a3; background: white; border-radius: 6px; padding: 6px 10px; }
+
+.portal-invoice-card { background: linear-gradient(135deg,#6d28d9,#7C3AED); color: white; border-radius: 0; padding: 16px 20px; }
+.portal-invoice-card.top-rounded { border-radius: 8px 8px 0 0; }
+.portal-invoice-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.portal-invoice-top h4 { margin: 0 0 2px; font-size: 15px; font-weight: 700; }
+.portal-invoice-top .meta { font-size: 11.5px; opacity: 0.9; line-height: 1.6; }
+.portal-invoice-badge { background: rgba(255,255,255,0.2); font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-bottom: 6px; display: inline-block; }
+.portal-sub-strip { background: white; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; padding: 12px 20px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.portal-sub-strip .lbl { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.03em; }
+.portal-sub-strip .val { font-size: 13px; font-weight: 700; color: #111827; margin-top: 2px; }
+.portal-items-title { font-size: 13px; font-weight: 700; color: #111827; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+.portal-item { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #111827; }
+.portal-payments-title { font-size: 13px; font-weight: 700; margin: 16px 0 8px; }
+.portal-payment-row { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; font-size: 12.5px; color: #374151; display:flex; justify-content:space-between; }
+
+.reset-link { margin-top: 4px; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; color: #7C3AED; cursor: pointer; background: none; border: none; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ── Proto bar ── */
+.proto-bar { background: white; border-bottom: 1px solid #e5e7eb; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.proto-bar-left { display: flex; align-items: center; gap: 10px; }
+.proto-bar .back-link { font-size: 12px; font-weight: 500; color: #80879A; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+.proto-bar .back-link:hover { color: #7C3AED; }
+.proto-bar .divider { color: #DAD8E3; font-size: 16px; }
+.proto-bar-title { font-size: 14px; font-weight: 600; color: #32415B; }
+.proto-bar-ticket { font-size: 11px; font-weight: 600; color: #5C53DC; text-decoration: none; padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA; border-radius: 999px; letter-spacing: 0.2px; }
+.proto-bar-ticket:hover { background: #7C3AED; color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Multiple Concurrent Payment Requests</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bbke1pr" target="_blank">86bbke1pr</a>
+</div>
+
+<div class="app-body">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div style="width:28px;height:28px;background:#7C3AED;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+      <i class="fas fa-tint" style="color:white;font-size:14px;"></i>
+    </div>
+    <span>dripjobs</span>
+  </div>
+  <div style="padding:10px 16px 6px;"><span style="font-size:11px;color:#9ca3af;font-weight:600;">The Nest</span></div>
+  <div class="sidebar-section-label">SALES</div>
+  <a class="sidebar-item"><i class="fas fa-user-friends"></i> Contacts</a>
+  <a class="sidebar-item"><i class="fas fa-list"></i> Sales List</a>
+  <a class="sidebar-item"><i class="fas fa-columns"></i> Sales Pipeline</a>
+  <div class="sidebar-section-label">JOBS</div>
+  <a class="sidebar-item"><i class="fas fa-exchange-alt"></i> Change Orders</a>
+  <a class="sidebar-item"><i class="fas fa-calendar-alt"></i> Job Schedule</a>
+  <a class="sidebar-item"><i class="fas fa-list-ul"></i> Jobs List</a>
+  <div class="sidebar-section-label">DOCUMENTS</div>
+  <a class="sidebar-item active"><i class="fas fa-file-invoice-dollar"></i> Invoices</a>
+  <a class="sidebar-item"><i class="fas fa-file-alt"></i> Proposals</a>
+  <div class="sidebar-section-label">FINANCIALS</div>
+  <a class="sidebar-item"><i class="fas fa-calculator"></i> Job Costing</a>
+  <a class="sidebar-item"><i class="fas fa-chart-line"></i> Production Rates</a>
+  <a class="sidebar-item"><i class="fas fa-chart-bar"></i> Metrics</a>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <div class="topbar">
+    <div class="topbar-search"><input type="text" placeholder="Search leads, contacts, tags..." disabled></div>
+    <div class="topbar-right">
+      <div class="notif-bell-wrap">
+        <button class="notif-bell" onclick="toggleNotif()"><i class="fas fa-bell"></i><span class="notif-dot" id="notifDot"></span></button>
+        <div class="notif-dropdown" id="notifDropdown">
+          <div class="notif-dropdown-header">Notifications</div>
+          <div id="notifBody"><div class="notif-empty">No new notifications</div></div>
+        </div>
+      </div>
+      <div class="user-chip">JH</div>
+    </div>
+  </div>
+
+  <!-- Scenario Switcher -->
+  <div class="scenario-nav">
+    <div class="scenario-nav-top">
+      <span class="label">Scenario:</span>
+      <button type="button" class="scenario-btn active" onclick="setScenario('multi')">1 — Multiple Active Requests</button>
+      <button type="button" class="scenario-btn" onclick="setScenario('autocancel')">2 — Balance Hits $0</button>
+      <button type="button" class="scenario-btn" onclick="setScenario('overage')">3 — Invoice Total Reduced</button>
+      <div class="view-toggle-wrap">
+        <div class="view-toggle">
+          <button type="button" class="active" id="viewBtnBusiness" onclick="setView('business')">Business View</button>
+          <button type="button" id="viewBtnPortal" onclick="setView('portal')">Customer Portal</button>
+        </div>
+      </div>
+    </div>
+    <div class="scenario-desc" id="scenarioDescText"></div>
+  </div>
+
+  <!-- ══════════ BUSINESS VIEW ══════════ -->
+  <div id="businessView">
+
+    <div class="invoice-title-row">
+      <div class="invoice-title-left">
+        <h2>Invoice #512256</h2>
+        <span class="pill" id="invoicePill">Partially Paid</span>
+        <button class="icon-btn"><i class="fas fa-download"></i></button>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-purple btn-round-sm"><i class="fas fa-paper-plane mr-1"></i> Send Invoice</button>
+        <button class="btn btn-outline-purple btn-round-sm">Receive Payment</button>
+        <div class="more-actions-wrap">
+          <button class="btn btn-outline-purple btn-round-sm" onclick="toggleMoreActions()">More Actions <i class="fas fa-caret-down ml-1"></i></button>
+          <div class="more-dropdown" id="moreDropdown">
+            <div class="more-dropdown-item" onclick="closeMoreActions();openRequestModal();"><i class="fas fa-paper-plane"></i> Request Payment</div>
+            <div class="more-dropdown-item"><i class="fas fa-briefcase"></i> View Deal</div>
+            <div class="more-dropdown-item"><i class="fas fa-clock"></i> Apply Late Fee</div>
+            <div class="more-dropdown-item"><i class="fas fa-percent"></i> Apply Discount</div>
+            <div class="more-dropdown-item"><i class="fas fa-chart-bar"></i> View Job Costing</div>
+            <div class="more-dropdown-item"><i class="fas fa-download"></i> Download PDF</div>
+            <div class="more-dropdown-item" onclick="closeMoreActions();setView('portal');"><i class="fas fa-user"></i> Customer View</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="info-grid">
+        <div>
+          <div class="info-label">Client</div>
+          <div class="info-value link">Dripjobs Harrison</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:4px;line-height:1.6;">
+            <i class="fas fa-map-marker-alt" style="width:14px;"></i> 221 N Nashville Ave, Hernando, FL, 34442<br>
+            <i class="fas fa-envelope" style="width:14px;"></i> jeremy+1@dripjobs.com<br>
+            <i class="fas fa-phone" style="width:14px;"></i> (727) 250-8869
+          </div>
+        </div>
+        <div>
+          <div class="info-label">Invoice #</div><div class="info-value link">512256</div>
+          <div class="info-label" style="margin-top:10px;">Date Invoiced</div><div class="info-value link">9/3/2026</div>
+        </div>
+        <div>
+          <div class="info-label">Amount</div><div class="info-value">$2,709.30</div>
+          <div class="info-label" style="margin-top:10px;">Due On</div><div class="info-value link">(Add Due Date)</div>
+        </div>
+        <div>
+          <div class="info-label">Balance</div><div class="info-value balance" id="headerBalance">$2,438.37</div>
+          <div class="info-label" style="margin-top:10px;">Salesperson</div><div class="info-value link">Jeremy Harrison</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overage / Overpaid banners -->
+    <div id="bannerSlot"></div>
+
+    <!-- Payment Requests -->
+    <div class="card">
+      <div class="section-title">
+        Payment Requests
+        <button class="btn btn-purple btn-round-sm" id="createRequestBtn" onclick="openRequestModal()"><i class="fas fa-plus mr-1"></i> Create Payment Request</button>
+      </div>
+      <div class="available-balance-strip" id="availableStrip">
+        Available to Request: <strong id="availableAmount">$638.37</strong>
+      </div>
+      <div id="prList"></div>
+    </div>
+
+    <div class="tabs-row">
+      <div class="tab-chip active">Invoice</div>
+      <div class="tab-chip">Settings</div>
+      <div class="tab-chip">Attachments</div>
+      <div class="tab-chip">Notes</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Invoice Items <button class="btn btn-outline-purple btn-round-sm"><i class="fas fa-plus mr-1"></i> Add Item</button></div>
+      <div class="items-table-row head"><div>Item</div><div>Qty</div><div>Price</div><div>Tax</div><div style="text-align:right;">Total</div></div>
+      <div class="items-table-row"><div class="item-name">Interior Painting - Trim</div><div>1.00</div><div>$500.00</div><div>$45.50</div><div style="text-align:right;">$545.50</div></div>
+      <div class="items-table-row"><div class="item-name">Interior Painting - Walls</div><div>1.00</div><div>$1,000.00</div><div>$91.00</div><div style="text-align:right;">$1,091.00</div></div>
+      <div class="items-table-row"><div class="item-name">Interior Painting - Ceiling</div><div>1.00</div><div>$800.00 / Ea</div><div>$72.80</div><div style="text-align:right;">$872.80</div></div>
+      <div class="items-table-row"><div class="item-name">5-Year Warranty on Interior Painting</div><div>1.00</div><div>$200.00 / Ea</div><div>$0.00</div><div style="text-align:right;">$200.00</div></div>
+      <div class="totals-box">
+        <div class="totals-row"><span>Subtotal</span><span>$2,500.00</span></div>
+        <div class="totals-row"><span>Sales Tax</span><span style="color:#7C3AED;">$209.30</span></div>
+        <div class="totals-row total" id="totalsInvoiceRow"><span>Total</span><span>$2,709.30</span></div>
+        <div class="totals-row balance"><span>Balance</span><span id="totalsBalance">$2,438.37</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Payments <button class="btn btn-outline-purple btn-round-sm">Receive Payment</button></div>
+      <div class="payments-row head"><div>Payment</div><div>Method</div><div>Received</div><div>Reference</div><div style="text-align:right;">Amount</div></div>
+      <div id="paymentsList"></div>
+    </div>
+
+  </div>
+
+  <!-- ══════════ CUSTOMER PORTAL VIEW ══════════ -->
+  <div class="portal-wrap" id="portalView">
+    <div class="portal-sidebar">
+      <div class="portal-logo-text">Sparrow's Nest</div>
+      <div class="portal-nav-item active"><i class="fas fa-file-invoice"></i> My Invoices</div>
+      <div class="portal-nav-item"><i class="fas fa-file-alt"></i> My Proposals</div>
+      <div class="portal-nav-item"><i class="fas fa-calendar-plus"></i> Request Appointment</div>
+      <div class="portal-nav-item"><i class="fas fa-envelope"></i> Email Settings</div>
+      <div class="portal-nav-item"><i class="fas fa-globe"></i> Visit Website</div>
+      <div class="portal-nav-item"><i class="fas fa-star"></i> Reviews</div>
+    </div>
+    <div class="portal-main">
+      <div class="portal-topbar">Sparrow's Nest Painting <span class="phone">(555) 555-5555</span></div>
+
+      <div id="portalBanners"></div>
+
+      <div class="portal-invoice-card" id="portalInvoiceCard">
+        <div class="portal-invoice-top">
+          <div>
+            <h4>Sparrow's Nest Painting</h4>
+            <div class="meta">License# L987616<br>1234 Reynolds Rd, Lakeland, GA 33801<br>(555) 555-5555<br>Tax Reg #: 123456789</div>
+          </div>
+          <div style="text-align:right;">
+            <span class="portal-invoice-badge" id="portalStatusBadge">PARTIALLY PAID</span><br>
+            <span style="font-size:17px;font-weight:700;">Invoice #512256</span>
+          </div>
+        </div>
+      </div>
+      <div class="portal-sub-strip">
+        <div><div class="lbl">Bill To</div><div class="val">Dripjobs Harrison</div></div>
+        <div><div class="lbl">Job Address</div><div class="val">221 N Nashville Ave</div></div>
+        <div><div class="lbl">Balance</div><div class="val" id="portalBalanceVal">$2,438.37</div></div>
+        <div><div class="lbl">Due Date</div><div class="val">&mdash;</div></div>
+      </div>
+
+      <div class="portal-items-title"><i class="fas fa-list" style="color:#7C3AED;"></i> Items</div>
+      <div class="portal-item"><span>Interior Painting - Trim</span><span>$545.50</span></div>
+      <div class="portal-item"><span>Interior Painting - Walls</span><span>$1,091.00</span></div>
+      <div class="portal-item"><span>Interior Painting - Ceiling</span><span>$872.80</span></div>
+      <div class="portal-item"><span>5-Year Warranty on Interior Painting</span><span>$200.00</span></div>
+
+      <div class="portal-payments-title">Payments</div>
+      <div class="portal-payment-row"><span>9/3/2026 &middot; Deposit #600377 (Deposit)</span><span style="font-weight:700;">$270.93</span></div>
+    </div>
+  </div>
+
+</div>
+<!-- /main-content -->
+
+</div>
+<!-- /app-body -->
+
+<!-- REQUEST PAYMENT MODAL -->
+<div class="modal-overlay" id="requestModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h5>Request Payment for Invoice #512256</h5>
+      <button class="modal-close" onclick="closeModal('requestModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="remaining-balance-label">Available to Request &mdash; <span id="modalAvailable">$638.37</span></div>
+      <div class="quick-pills">
+        <button class="quick-pill" onclick="quickPct(25)">25%</button>
+        <button class="quick-pill" onclick="quickPct(50)">50%</button>
+        <button class="quick-pill" onclick="quickPct(75)">75%</button>
+        <button class="quick-pill" onclick="quickPct(100)">100%</button>
+      </div>
+      <div class="modal-fields">
+        <div class="field">
+          <label>Custom</label>
+          <div class="input-group-custom"><input type="number" id="modalPct" value="" placeholder="0"><span>%</span></div>
+        </div>
+        <div class="field">
+          <label>Amount</label>
+          <div class="input-group-custom"><span>$</span><input type="number" id="modalAmount" value="" placeholder="0" oninput="onAmountInput()"></div>
+        </div>
+      </div>
+      <div class="modal-error" id="modalError" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-save" id="modalSaveBtn" onclick="saveRequest()">Save</button>
+      <button class="btn-cancel" onclick="closeModal('requestModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* ─────────────────────────────────────────────
+   State
+───────────────────────────────────────────── */
+const INVOICE_SUBTOTAL = 2500.00;
+const INVOICE_TAX = 209.30;
+
+let currentScenario = 'multi';
+let currentView = 'business';
+
+let invoiceTotal, paymentsReceived, requests, overageActive, overpaidActive, overpaidAmount;
+
+const SCENARIO_DESCS = {
+  multi: '<strong>Rule 4 / Rule 1:</strong> Two Payment Requests are already active on this invoice (Sent + Payment Processing). Try "Create Payment Request" — amounts above the Available-to-Request balance are blocked before they can be sent.',
+  autocancel: '<strong>Rule 8 / Rule 9 / Rule 16:</strong> Log an offline payment that brings the invoice to $0. The Sent request auto-cancels and the customer is notified — the Payment Processing request is exempt and can still settle afterward (Rule 10 / internal notification).',
+  overage: '<strong>Rule 15:</strong> A change order lowers the invoice total below what is already committed in open Payment Requests. The invoice is flagged with an Outstanding Payment Request Overage — existing requests stay valid, but no new ones can be created, and the business is notified internally.'
+};
+
+function baselineRequests() {
+  return [
+    { id: 'PR-1042', date: '8/20/2026', amount: 1000.00, status: 'Sent', note: '' },
+    { id: 'PR-1043', date: '8/25/2026', amount: 800.00, status: 'Payment Processing', note: '' }
+  ];
+}
+
+function resetState(scenario) {
+  invoiceTotal = 2709.30;
+  paymentsReceived = 270.93;
+  requests = baselineRequests();
+  overageActive = false;
+  overpaidActive = false;
+  overpaidAmount = 0;
+  clearNotifications();
+}
+
+/* ─────────────────────────────────────────────
+   Derived values
+───────────────────────────────────────────── */
+function committedTotal() {
+  return requests
+    .filter(r => ['Sent','Viewed','Outstanding','Payment Processing'].includes(r.status))
+    .reduce((s, r) => s + r.amount, 0);
+}
+function balance() {
+  return Math.max(invoiceTotal - paymentsReceived, invoiceTotal - paymentsReceived); // allow negative for overpaid display separately
+}
+function availableToRequest() {
+  return Math.round((balance() - committedTotal()) * 100) / 100;
+}
+function fmt(n) {
+  const neg = n < 0;
+  const v = Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  return (neg ? '-$' : '$') + v;
+}
+
+/* ─────────────────────────────────────────────
+   Render
+───────────────────────────────────────────── */
+function render() {
+  const bal = balance();
+  const committed = committedTotal();
+  const avail = availableToRequest();
+
+  // header + totals
+  document.getElementById('headerBalance').textContent = fmt(bal);
+  document.getElementById('totalsBalance').textContent = fmt(bal);
+  document.getElementById('totalsInvoiceRow').querySelector('span:last-child').textContent = fmt(invoiceTotal);
+  document.getElementById('availableAmount').textContent = fmt(avail);
+  document.getElementById('modalAvailable').textContent = fmt(avail);
+
+  const stripEl = document.getElementById('availableStrip');
+  stripEl.classList.toggle('blocked', avail <= 0);
+
+  // invoice pill
+  const pillEl = document.getElementById('invoicePill');
+  if (overpaidActive) { pillEl.textContent = 'Overpaid'; pillEl.className = 'pill pill-overpaid'; }
+  else if (bal <= 0) { pillEl.textContent = 'Paid in Full'; pillEl.className = 'pill pill-open'; }
+  else { pillEl.textContent = 'Partially Paid'; pillEl.className = 'pill pill-partial'; }
+
+  // create button disabled state
+  const createBtn = document.getElementById('createRequestBtn');
+  createBtn.disabled = overageActive || avail <= 0;
+  createBtn.style.opacity = createBtn.disabled ? 0.5 : 1;
+  createBtn.style.cursor = createBtn.disabled ? 'not-allowed' : 'pointer';
+
+  // banner slot (overage / overpaid)
+  const bannerSlot = document.getElementById('bannerSlot');
+  let bannerHtml = '';
+  if (overageActive) {
+    bannerHtml += `<div class="alert-box alert-warn">
+      <i class="fas fa-exclamation-triangle" style="margin-top:2px;"></i>
+      <div>
+        <span class="alert-title">Outstanding Payment Request Overage</span>
+        Committed Payment Requests (${fmt(committed)}) exceed this invoice's current balance (${fmt(bal)}). Existing requests remain valid and payable, but no new Payment Requests can be created until this is resolved &mdash; either correct the invoice total or pay/cancel requests down to fit.
+      </div>
+    </div>`;
+  }
+  if (overpaidActive) {
+    bannerHtml += `<div class="alert-box alert-danger">
+      <i class="fas fa-exclamation-circle" style="margin-top:2px;"></i>
+      <div>
+        <span class="alert-title">Invoice Overpaid by ${fmt(overpaidAmount)}</span>
+        A Payment Request in Payment Processing settled after the balance had already reached $0. No refund or credit has been issued automatically &mdash; resolve manually with the customer.
+      </div>
+    </div>`;
+  }
+  bannerSlot.innerHTML = bannerHtml;
+
+  // payment requests list
+  const prList = document.getElementById('prList');
+  if (requests.length === 0) {
+    prList.innerHTML = '<div style="text-align:center;color:#9ca3af;font-size:13px;padding:14px 0;">No payments have been requested</div>';
+  } else {
+    prList.innerHTML = requests.map(r => {
+      const chipClass = 'status-' + r.status.replace(/ /g, '-');
+      let actions = '';
+      if (r.status === 'Draft') actions = `<button class="btn btn-purple">Send Request</button><button class="btn btn-outline-purple">Cancel</button>`;
+      else if (['Sent','Viewed','Outstanding'].includes(r.status)) actions = `<button class="btn btn-outline-purple">Mark as Paid</button><button class="btn" style="border:1px solid #d1d5db;">Cancel</button>`;
+      else if (r.status === 'Payment Processing') actions = `<span style="font-size:11.5px;color:#9ca3af;">Awaiting settlement&hellip;</span>`;
+      else actions = '';
+      return `<div class="pr-row ${r._fading ? 'fading' : ''}">
+        <div><div class="pr-label">Payment Request</div><div class="pr-value">${r.id} &middot; ${r.date}</div>${r.note ? `<div class="pr-note">${r.note}</div>` : ''}</div>
+        <div><div class="pr-label">Amount</div><div class="pr-value">${fmt(r.amount)}</div></div>
+        <div><div class="pr-label">Status</div><div><span class="status-chip ${chipClass}">${r.status}</span></div></div>
+        <div class="pr-actions">${actions}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // payments log
+  const paymentsList = document.getElementById('paymentsList');
+  let rows = `<div class="payments-row"><div class="link">Deposit #600377 (Deposit)</div><div>check</div><div>9/3/2026</div><div>1234567</div><div style="text-align:right;">$270.93</div></div>`;
+  if (paymentsReceived > 270.93 + 0.001) {
+    rows += `<div class="payments-row"><div class="link">Payment #600400 (Offline)</div><div>other</div><div>9/3/2026</div><div>N/A</div><div style="text-align:right;">${fmt(paymentsReceived - 270.93)}</div></div>`;
+  }
+  paymentsList.innerHTML = rows;
+
+  renderPortal(bal);
+}
+
+function renderPortal(bal) {
+  document.getElementById('portalBalanceVal').textContent = bal < 0 ? fmt(0) : fmt(bal);
+  const statusBadge = document.getElementById('portalStatusBadge');
+  if (overpaidActive) statusBadge.textContent = 'PAID IN FULL';
+  else if (bal <= 0) statusBadge.textContent = 'PAID IN FULL';
+  else statusBadge.textContent = 'PARTIALLY PAID';
+
+  const container = document.getElementById('portalBanners');
+  let html = '';
+  requests.forEach(r => {
+    if (['Sent','Viewed','Outstanding'].includes(r.status)) {
+      html += `<div class="pr-banner requested top-rounded">
+        <div class="pr-banner-left">
+          <div class="pr-banner-icon"><i class="fas fa-bell" style="color:white;font-size:13px;"></i></div>
+          <div><div class="pr-banner-title">Payment Requested</div><div class="pr-banner-sub">A payment of ${fmt(r.amount)} is due</div></div>
+        </div>
+        <button class="pr-banner-cta"><i class="fas fa-credit-card mr-1"></i> Pay with Other</button>
+      </div>`;
+    } else if (r.status === 'Payment Processing') {
+      html += `<div class="pr-banner processing">
+        <div class="pr-banner-left">
+          <div class="pr-banner-icon"><i class="fas fa-sync-alt" style="color:#3730a3;font-size:13px;"></i></div>
+          <div><div class="pr-banner-title">Payment Processing</div><div class="pr-banner-sub">Your payment of ${fmt(r.amount)} is being processed</div></div>
+        </div>
+      </div>`;
+    } else if (r.status === 'Cancelled' && r.customerNotified) {
+      html += `<div class="pr-banner cancelled-paidfull">
+        <div class="pr-banner-left">
+          <div class="pr-banner-icon"><i class="fas fa-check" style="color:#4b5563;font-size:13px;"></i></div>
+          <div><div class="pr-banner-title">Invoice Paid in Full</div><div class="pr-banner-sub">This invoice has been paid in full. No further payment is required.</div></div>
+        </div>
+      </div>`;
+    }
+  });
+  container.innerHTML = html;
+}
+
+/* ─────────────────────────────────────────────
+   Scenario / View switching
+───────────────────────────────────────────── */
+function setScenario(s) {
+  currentScenario = s;
+  document.querySelectorAll('.scenario-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['multi','autocancel','overage'][i] === s);
+  });
+  document.getElementById('scenarioDescText').innerHTML = SCENARIO_DESCS[s] + scenarioActionHtml(s);
+  resetState(s);
+  render();
+}
+
+function scenarioActionHtml(s) {
+  if (s === 'autocancel') {
+    return `<button type="button" class="reset-link" style="margin-left:10px;" onclick="simulateFullOfflinePayment()"><i class="fas fa-bolt"></i> Simulate: log offline payment for remaining balance</button>
+      <button type="button" class="reset-link" style="margin-left:10px;" onclick="simulateProcessingSettles()"><i class="fas fa-bolt"></i> Simulate: Payment Processing request settles</button>`;
+  }
+  if (s === 'overage') {
+    return `<button type="button" class="reset-link" style="margin-left:10px;" onclick="simulateInvoiceReduction()"><i class="fas fa-bolt"></i> Simulate: change order reduces invoice total to $1,500.00</button>`;
+  }
+  return '';
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('businessView').style.display = v === 'business' ? 'block' : 'none';
+  document.getElementById('portalView').classList.toggle('show', v === 'portal');
+  document.getElementById('viewBtnBusiness').classList.toggle('active', v === 'business');
+  document.getElementById('viewBtnPortal').classList.toggle('active', v === 'portal');
+}
+
+/* ─────────────────────────────────────────────
+   Scenario 2 actions
+───────────────────────────────────────────── */
+function simulateFullOfflinePayment() {
+  const bal = balance();
+  if (bal <= 0) { showToast('info', 'Already at $0', 'This invoice balance is already $0.'); return; }
+  paymentsReceived += bal;
+
+  // Cancel Sent/Viewed/Outstanding requests, notify customer. Payment Processing survives (Rule 9).
+  let cancelledAny = false;
+  requests.forEach(r => {
+    if (['Sent','Viewed','Outstanding'].includes(r.status)) {
+      r.status = 'Cancelled';
+      r.customerNotified = true;
+      r.note = 'Auto-cancelled: invoice paid in full. Customer notified by email.';
+      cancelledAny = true;
+    }
+  });
+
+  render();
+  showToast('success', 'Balance Reached $0', cancelledAny
+    ? 'Outstanding Payment Request auto-cancelled and the customer was notified. The Payment Processing request was not affected.'
+    : 'Invoice balance is now $0.');
+}
+
+function simulateProcessingSettles() {
+  const processing = requests.find(r => r.status === 'Payment Processing');
+  if (!processing) { showToast('info', 'Nothing to settle', 'There is no Payment Request currently in Payment Processing.'); return; }
+  const bal = balance();
+  processing.status = 'Paid';
+  processing.note = 'Settled successfully.';
+
+  if (bal <= 0) {
+    overpaidActive = true;
+    overpaidAmount = processing.amount;
+    pushNotification('fa-exclamation-circle', '#991B1B', 'Invoice #512256 is Overpaid',
+      `A Payment Processing request settled after the balance already reached $0. Overpaid by ${fmt(processing.amount)} &mdash; resolve manually via refund or credit.`);
+    showToast('warn', 'Invoice Overpaid', `Payment settled while balance was $0. Business notified &mdash; overpaid by ${fmt(processing.amount)}.`);
+  } else {
+    paymentsReceived += processing.amount;
+    showToast('success', 'Payment Settled', `${fmt(processing.amount)} applied to the invoice balance.`);
+  }
+  render();
+}
+
+/* ─────────────────────────────────────────────
+   Scenario 3 action
+───────────────────────────────────────────── */
+function simulateInvoiceReduction() {
+  invoiceTotal = 1500.00;
+  const bal = balance();
+  const committed = committedTotal();
+  if (committed > bal) {
+    overageActive = true;
+    pushNotification('fa-exclamation-triangle', '#92400E', 'Outstanding Payment Request Overage',
+      `Invoice #512256's total was reduced and committed Payment Requests (${fmt(committed)}) now exceed the new balance (${fmt(bal)}). Resolve to allow new requests and notify the customer once corrected.`);
+    showToast('warn', 'Overage Flagged', 'Committed requests now exceed the invoice balance. Business notified.');
+  }
+  render();
+}
+
+/* ─────────────────────────────────────────────
+   Request Payment modal
+───────────────────────────────────────────── */
+function openRequestModal() {
+  if (overageActive) { showToast('warn', 'Blocked', 'Resolve the Outstanding Payment Request Overage before creating a new Payment Request.'); return; }
+  document.getElementById('modalPct').value = '';
+  document.getElementById('modalAmount').value = '';
+  document.getElementById('modalError').style.display = 'none';
+  document.querySelectorAll('.quick-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('modalAvailable').textContent = fmt(availableToRequest());
+  openModal('requestModal');
+}
+
+function quickPct(pct) {
+  document.querySelectorAll('.quick-pill').forEach(p => p.classList.toggle('active', p.textContent === pct + '%'));
+  const avail = availableToRequest();
+  const amt = Math.round(avail * (pct/100) * 100) / 100;
+  document.getElementById('modalPct').value = pct;
+  document.getElementById('modalAmount').value = amt;
+  validateModalAmount();
+}
+
+function onAmountInput() {
+  document.querySelectorAll('.quick-pill').forEach(p => p.classList.remove('active'));
+  validateModalAmount();
+}
+
+function validateModalAmount() {
+  const avail = availableToRequest();
+  const amt = parseFloat(document.getElementById('modalAmount').value) || 0;
+  const errEl = document.getElementById('modalError');
+  const saveBtn = document.getElementById('modalSaveBtn');
+  if (amt <= 0) {
+    errEl.style.display = 'none';
+    saveBtn.disabled = true;
+    return false;
+  }
+  if (amt > avail + 0.001) {
+    errEl.textContent = `Exceeds the invoice's available-to-request balance of ${fmt(avail)}.`;
+    errEl.style.display = 'block';
+    saveBtn.disabled = true;
+    return false;
+  }
+  errEl.style.display = 'none';
+  saveBtn.disabled = false;
+  return true;
+}
+
+function saveRequest() {
+  if (!validateModalAmount()) return;
+  const amt = parseFloat(document.getElementById('modalAmount').value);
+  const num = 1044 + requests.length;
+  requests.push({ id: 'PR-' + num, date: '9/3/2026', amount: amt, status: 'Draft', note: '' });
+  closeModal('requestModal');
+  render();
+  showToast('success', 'Payment Request Created', `A new Draft Payment Request for ${fmt(amt)} was created.`);
+}
+
+/* ─────────────────────────────────────────────
+   Notifications
+───────────────────────────────────────────── */
+let notifications = [];
+function pushNotification(icon, color, title, body) {
+  notifications.push({icon, color, title, body});
+  document.getElementById('notifDot').classList.add('show');
+  renderNotifications();
+}
+function clearNotifications() {
+  notifications = [];
+  document.getElementById('notifDot').classList.remove('show');
+  renderNotifications();
+}
+function renderNotifications() {
+  const body = document.getElementById('notifBody');
+  if (notifications.length === 0) { body.innerHTML = '<div class="notif-empty">No new notifications</div>'; return; }
+  body.innerHTML = notifications.map(n => `<div class="notif-item">
+    <i class="fas ${n.icon}" style="color:${n.color};"></i>
+    <div><div class="notif-item-title">${n.title}</div><div class="notif-item-body">${n.body}</div></div>
+  </div>`).join('');
+}
+function toggleNotif() {
+  document.getElementById('notifDropdown').classList.toggle('show');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.notif-bell-wrap')) document.getElementById('notifDropdown').classList.remove('show');
+  if (!e.target.closest('.more-actions-wrap')) document.getElementById('moreDropdown').classList.remove('show');
+});
+
+/* ─────────────────────────────────────────────
+   Generic modal / toast helpers
+───────────────────────────────────────────── */
+function openModal(id) { document.getElementById(id).classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow = ''; }
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(overlay.id); });
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m.id)); });
+
+function toggleMoreActions() { document.getElementById('moreDropdown').classList.toggle('show'); }
+function closeMoreActions() { document.getElementById('moreDropdown').classList.remove('show'); }
+
+function showToast(type, title, msg) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  const icon = type === 'success' ? 'fa-check' : type === 'warn' ? 'fa-exclamation' : 'fa-info';
+  toast.innerHTML = `<div class="toast-icon ${type}"><i class="fas ${icon}"></i></div><div><div class="toast-title">${title}</div><div class="toast-msg">${msg}</div></div>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 50);
+  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => container.removeChild(toast), 300); }, 4500);
+}
+
+/* ─────────────────────────────────────────────
+   Init
+───────────────────────────────────────────── */
+setScenario('multi');
+setView('business');
+</script>
+</body>
+</html>

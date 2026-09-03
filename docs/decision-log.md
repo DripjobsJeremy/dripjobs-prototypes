@@ -9,6 +9,13 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-03] Multiple Concurrent Payment Requests (86bbke1pr): new clickable prototype
+
+- Decision: Built a clickable prototype extending the real Invoice Detail page's existing "Payment Requests" section and "Request Payment" modal (matched pixel-for-pixel from screenshots of invoice #512256) to support multiple concurrent requests instead of one. Covers three scenarios via a switcher: (1) Available-to-Request balance blocking an over-limit request (Rule 4), (2) a Sent request auto-cancelling with "paid in full" Customer Portal messaging when the balance hits $0 while an exempt Payment Processing request settles into an Overpaid state (Rules 8/9/10/16/18), and (3) an invoice-total reduction flagging an Outstanding Payment Request Overage that blocks new requests (Rule 15). Added the hub card under `#protoGrid` with status "Needs Design."
+- Why: Ticket has 18 business rules touching invoice, Payment Request, and Customer Portal state simultaneously; a static mockup couldn't demonstrate the auto-cancel/exception/overpaid sequence, so an interactive prototype was the right fidelity per `docs/design-workflow.md`.
+- Assumption: Jeremy confirmed (2026-09-03) that the Outstanding Payment Request Overage (Rule 15) should fire an internal notification, not just a visual flag — prototyped as a bell-icon dropdown in the top nav. No screenshot of a real notification center exists yet, so this UI is an assumption and should be checked against whatever notification pattern the app actually ships before dev picks this up.
+- Open question: The ticket's own gap flag (internal notification vs. visual-flag-only for Overage) is now resolved per Jeremy's answer above, but the SMS-cancellation-notification copy (Rule 17), QBO per-payment sync display, and the Overage resolution workflow are still out of scope for this prototype per the ticket's own "Out of Scope / V2" list.
+
 ## [2026-09-02] Hub: removed At Risk Account Finder (shipped)
 
 - Decision: Removed "At Risk Account Finder" from `#protoGrid`, per Jeremy confirming it's been pushed to production.
