@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-04] Business Entity Records V1: dropped New Proposal's "Communication" section title
+
+- Decision: Removed the "✉️ Communication" heading from New Proposal's trimmed Drip Sequence/Disable Drips block (`epProposalCommunicationHtml()`). New Appointment's fuller Communication section (Send Email/SMS, SMS preview, Email Template) keeps its own title, unaffected.
+- Why: Direct request — "Communication" doesn't describe a block that's only ever Drip Sequence + Disable Drips.
+- Open question: None.
+
 ## [2026-09-04] Business Entity Records V1: Communication block trims (New Lead, New Proposal, Create Invoice)
 
 - Decision: Per direct request, three of the four original entry points had their "Ready to Create" Communication section changed: New Lead swaps its inert "Enable Reminders" toggle (nothing consumed it) for a real Disable Drips toggle, matching Proposal/Appointment's pattern, and a Drips row was added to its own summary rows for consistency. New Proposal now uses a new, trimmed `epProposalCommunicationHtml()` keeping only Drip Sequence + Disable Drips + Next Drip preview, the Send Email/Send SMS toggle row, conditional SMS Message preview, and Email Template alert are removed (New Appointment's own Communication block is unchanged). Create Invoice's "Enable Reminders" toggle and Email/SMS/Both pills are replaced with a neutral fast-follow note ("Invoice Reminders aren't built yet, tracked as a follow-up enhancement"), reusing the same neutral-alert pattern already used for Payments tab's fast-follow note. Removed the now-fully-unused `epSelectNotifyMethod` function.
