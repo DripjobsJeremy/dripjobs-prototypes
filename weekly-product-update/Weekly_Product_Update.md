@@ -1,109 +1,67 @@
 # DripJobs Weekly Product Update
 
-**Period:** August 24 – August 28, 2026
-**Release:** Aug 26 & Aug 27 deployments · 13 updates
+**Period:** August 31 – September 4, 2026
+**Release:** Sep 1 & Sep 3 deployments · 7 updates
 
 ---
 
 ## Proposal Builder
 
-### Fixed "View Details" Button Overlapping Line Item Text on Package Selection Cards (*Aug 27*)
-**What changed:** Fixed a layout bug where the "View Details" button on Good/Better/Best package cards in the customer-facing proposal view rendered directly on top of the line item name instead of beside or below it.
-**Why it matters:** Customers reviewing package options can now read every line item name without a button covering the text.
-**Action needed:** None
-
-### Improved Loading Feedback and Send Speed for Mobile Proposal Sends (*Aug 27*)
-**What changed:** Investigated and addressed an elevated, inconsistent delay when sending a proposal from a mobile device, and added a visible loading indicator during the send so the screen no longer goes blank with no feedback.
-**Why it matters:** Sending a proposal from your phone now shows clear progress instead of an unexplained delay that looks stalled.
+### Fixed Job Report Profit and Margin Excluding Material Cost (*Sep 3*)
+**What changed:** Fixed a bug where a proposal's Job Report summary calculated Profit and Margin using labor cost and labor price only, leaving out the material cost and price already shown in the same proposal's Product Report. The Job Report now combines labor and material to calculate Total Price, Total Cost, Profit, and Margin.
+**Why it matters:** The Profit and Margin shown on a proposal's Job Report now reflect the job's true, full cost and revenue picture instead of a labor-only number that could understate your actual margin by 10 points or more.
 **Action needed:** None
 
 ---
 
 ## Job Costing
 
-### Fixed Job Costing Complete Zapier Trigger Not Firing Automatically (*Aug 26*)
-**What changed:** Fixed a bug where the "Job Costing Complete" Zapier trigger only fired when run manually, not when a job costing record was actually completed.
-**Why it matters:** Zaps built on the Job Costing Complete trigger now fire automatically as intended, without needing a manual test run first.
+### Fixed a Subcontractor Cost Entry's Dropdown Not Opening (*Sep 3*)
+**What changed:** Fixed a bug where a specific subcontractor/cost entry's dropdown in a job's Job Costing record wouldn't open, blocking access to that entry's details while other entries on the same job worked normally.
+**Why it matters:** You can open and manage every subcontractor cost entry on a job instead of hitting one that's silently stuck.
 **Action needed:** None
 
 ---
 
-## Jobs List & Sales List
+## Command Center
 
-### Added Job Address Column to the Jobs List (*Aug 27*)
-**What changed:** The Jobs List now has a "Job Address" column showing the job's full service address (street, city, state, zip) from its Accepted proposal. On CSV export, the address breaks out into four separate columns.
-**Why it matters:** You can see a job's service address directly in the Jobs List and pull it into spreadsheets or mail merges without manually splitting it out.
-**Action needed:** None
-
----
-
-## Appointments
-
-### Added Per-User Holiday Calendar Display, US & Canada (*Aug 27*)
-**What changed:** Added a per-user Holiday Calendar preference (None, United States, Canada, or both) that displays non-editable holiday blocks on the Appointments and Job Schedule calendars for the selected region(s). Defaults to None for all users.
-**Why it matters:** You can see recognized holidays right on your calendar so you don't inadvertently schedule work on a day you or your team observes as a holiday.
-**Action needed:** None. Opt in from your calendar settings if you'd like holiday blocks displayed; existing calendar behavior is unchanged until you do.
-
----
-
-## Metrics & Reporting
-
-### Added DripSense (AI Metrics Insights) (*Aug 27*)
-**What changed:** Added an AI-generated insights panel to the Metrics Dashboard that translates your performance data into plain-English observations, comparing your selected time period against the equivalent prior period and calling out a likely driver when one is clear. Insights only generate when you click "Run Insights," so viewing different date ranges never uses AI credits on its own.
-**Why it matters:** You get a plain-English summary of what changed in your numbers and why, without manually interpreting every chart and ratio yourself.
-**Action needed:** None. Click "Run Insights" on the Metrics Dashboard whenever you want an updated summary for your selected period.
-
----
-
-## Customer Portal
-
-### Increased Size and Prominence of the Proposal Hero Image Upload Button (*Aug 27*)
-**What changed:** The Upload button for the Proposal Hero Image in Customer Portal > Portal Visual Identity settings is now larger and more visually prominent.
-**Why it matters:** The upload control for your proposal branding image is easier to find and use when setting up your portal.
+### Fixed Support Panel Overlapping the Chat Compose Box (*Sep 3*)
+**What changed:** Fixed a layout issue in Command Center's Chat where the panel could render on top of the message compose box, blocking the text field on certain devices.
+**Why it matters:** You can reliably click into the compose box and type a reply in Command Center Chat without the panel getting in the way.
 **Action needed:** None
 
 ---
 
 ## Contacts
 
-### Added Support for Multiple Phone Numbers and Emails on Contact Records (*Aug 26*)
-**What changed:** A Contact record can now store multiple phone numbers, email addresses, and physical addresses, with one entry per category marked as Primary. The Primary values are used by default across communications, drips, proposals, and invoices, and existing addresses from a contact's past deals and jobs were backfilled onto the contact record automatically.
-**Why it matters:** You can keep a complete contact profile instead of overwriting a customer's old number or email when they give you a new one, and everything still sends to the right Primary contact info by default.
-**Action needed:** None. Review a contact's Primary phone, email, and address if you'd like to adjust which one is used by default.
+### Streamlined Archive → Delete Contact Workflow (*New · Sep 3*)
+**What changed:** Archiving a contact now keeps you on that contact's record instead of redirecting to the active contact list, and immediately offers a separate prompt asking if you'd also like to delete the contact. If the contact has existing Deals, Proposals, Invoices, Appointments, or Jobs, you're warned before archiving that those records will be archived too, and warned again with stronger language before an immediate delete, since deleting permanently removes those associated records.
+**Why it matters:** You no longer have to search under "Show Archived" just to finish deleting a contact, and the two-step warning keeps a lower-stakes action (archive) from being bundled with an irreversible one (delete).
+**Action needed:** None
 
 ---
 
 ## Communications
 
-### Fixed Drips Still Sending After Being Disabled on a Deal (*Aug 27*)
-**What changed:** Fixed a bug where a drip message could still send up to roughly 40 minutes after Drips were disabled on a Deal, most notably in the Project Completed stage.
-**Why it matters:** Disabling Drips on a deal now reliably stops all further scheduled drip messages for that deal.
-**Action needed:** None
-
-### Fixed Blast Email Performance Tab Not Reflecting Opened Emails (*Aug 27*)
-**What changed:** Fixed a bug where a Blast email campaign's Performance tab showed zero opens even when recipients had opened the email, which the contact-level Activity tab was already recording correctly.
-**Why it matters:** Blast performance metrics now match what's actually happening with your recipients, so you can trust the open counts you're reviewing.
+### Investigated and Fixed Unintended Reschedule Messages Sent Without a Job Being Rescheduled (*Sep 1*)
+**What changed:** Fixed a bug where customers on a handful of accounts received an automated reschedule text even though their job was never actually rescheduled, including cases where communications were disabled for that contact.
+**Why it matters:** A reschedule text now only goes out when a job is genuinely rescheduled, so customers won't get a confusing message about a change that didn't happen.
 **Action needed:** None
 
 ---
 
-## Booking Form
+## Integrations
 
-### Fixed Booking Form Not Restoring Scroll Position After Selecting a Date (*Aug 27*)
-**What changed:** Fixed a bug where selecting a date in the Booking Form's Preferred Date or Alternate Date picker dropped the customer somewhere else on the page instead of returning them to the field they were completing.
-**Why it matters:** Customers filling out a booking form no longer lose their place and have to scroll back down after picking a date.
-**Action needed:** None
+### Google Calendar Now Syncs All Future DripJobs Events (*Sep 3*)
+**What changed:** Connecting Google Calendar now syncs every future-dated DripJobs event (appointments, scheduled jobs, estimates, etc.) to the Google Calendar you select, and keeps syncing new events created afterward. Disconnecting stops further syncing to that calendar.
+**Why it matters:** Your connected Google Calendar now reliably reflects your full DripJobs schedule going forward, not just some events.
+**Action needed:** None. Reconnect Google Calendar if you'd like your existing future events to sync now.
 
 ---
 
 ## Admin Tools
 
-### Simplified Branch Admin Tool for Bulk Company Number Entry (*Aug 26*)
-**What changed:** The Branch Admin tool now has one simplified screen where a Super Admin can paste in multiple company numbers at once and run the existing branch stored procedure against all of them in a single submission, instead of processing one company number at a time.
-**Why it matters:** Bulk branch admin work that used to take one company at a time now runs as a single batch, with a clear per-company success or failure result.
-**Action needed:** None (Super Admin tool only)
-
-### Added HealthScore Dashboard At-Risk Account Finder (*Aug 27*)
-**What changed:** Added a focused view of the HealthScore Dashboard that lets Super Admins filter accounts by Health tier, Plan, OBCSS owner, and signup date to find at-risk accounts, with contact info surfaced directly so a rep can reach out without impersonating the account.
-**Why it matters:** Onboarding and CS reps can find and act on accounts likely to churn straight from a filtered list, instead of digging through accounts one at a time.
-**Action needed:** None (Super Admin tool only)
+### Fixed Duplicate Lead Source Tags Blocking Admin Login (*Sep 3*)
+**What changed:** Fixed a bug on one account where duplicate lead source tags triggered a chain of "Duplicate tag" popups that had to be dismissed one at a time before the CRM finished loading, blocking normal admin login.
+**Why it matters:** Admin login is no longer interrupted by a string of duplicate-tag popups.
+**Action needed:** None. Flag your Customer Success contact if you notice duplicate lead source tags on your own account.
