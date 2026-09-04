@@ -3113,11 +3113,12 @@ function epProposalDetailsHtml() {
     '</div>';
 }
 /* ─── Schedule Job specifics: pick one of this Business's already-Accepted Jobs still waiting to
-   be scheduled, then Event Details (Title, Calendar Color, Crew, Project Manager), Schedule
-   (Start/End Date, Start/End Time), and Reminders. Business Project only, a Job only exists on a
-   Business Project in this prototype's data model. Scheduling a Job updates that Job record in
-   place (Crew, Calendar Color, Start/End) rather than creating a new record, so it skips the shared
-   "Ready to Create" summary's rows and Save button in favor of its own — see epReadyToCreateHtml. ─── */
+   be scheduled, then Event Details (Title, Calendar Color, Crew, Project Manager) and Schedule
+   (Start/End Date, Start/End Time). Reminders is grouped with Communication instead, further down
+   in epReadyToCreateHtml. Business Project only, a Job only exists on a Business Project in this
+   prototype's data model. Scheduling a Job updates that Job record in place (Crew, Calendar Color,
+   Start/End) rather than creating a new record, so it skips the shared "Ready to Create" summary's
+   rows and Save button in favor of its own — see epReadyToCreateHtml. ─── */
 function epUnscheduledJobs(biz) {
   return (biz.jobs || []).map((j, idx) => ({ job: j, idx })).filter(x => x.job.active && !x.job.crew);
 }
@@ -3199,11 +3200,6 @@ function epJobScheduleDetailsHtml(sourceType, entity) {
         '<input class="settings-field-input" id="epEndTimeInput" autocomplete="off" placeholder="Select a time…" value="' + (epState.endTime ? fmtTimeLabel(epState.endTime) : '') + '" oninput="epFilterTimePopover(\'end\', this.value)" onfocus="epOpenTimePopover(\'end\')" onblur="epScheduleClosePopover(\'epEndTimePicker\')">' +
         '<div class="ep-popover ep-time-popover" id="epEndTimePicker"></div>' +
       '</div>' +
-    '</div>' +
-    '<div class="settings-group-label">Reminders</div>' +
-    '<div class="ep-comm-toggles" style="margin-bottom:0;">' +
-      '<span class="ep-comm-toggle">Email <label class="switch"><input type="checkbox" ' + (epState.reminderEmail ? 'checked' : '') + ' onchange="epState.reminderEmail = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
-      '<span class="ep-comm-toggle">SMS <label class="switch"><input type="checkbox" ' + (epState.reminderSms ? 'checked' : '') + ' onchange="epState.reminderSms = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
     '</div>' +
   '</div>';
   return html + epReadyToCreateHtml(sourceType, entity);
@@ -3633,20 +3629,13 @@ function epReadyToCreateHtml(sourceType, entity) {
     // and Email Template alert that New Appointment still has are removed here.
     communicationHtml = epProposalCommunicationHtml();
   } else if (epState.entry === 'schedule') {
-    communicationHtml = '<div class="settings-section" style="margin-top:18px; margin-bottom:0; text-align:left;">' +
-        '<div class="settings-section-title" style="margin-bottom:16px;"><span>✉️ Communication</span></div>' +
-        '<div class="ep-comm-toggles" style="margin-bottom:0;">' +
-          '<span class="ep-comm-toggle">Send Email <label class="switch"><input type="checkbox" ' + (epState.sendEmail ? 'checked' : '') + ' onchange="epState.sendEmail = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
-          '<span class="ep-comm-toggle">Send SMS <label class="switch"><input type="checkbox" ' + (epState.sendSms ? 'checked' : '') + ' onchange="epState.sendSms = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
-        '</div>' +
-      '</div>';
+    // Reminders is grouped directly with Communication here, per direct request — both sit back to
+    // back as their own settings-section, rather than Reminders living up in the Schedule step.
+    communicationHtml = epRemindersBoxHtml() + epCommunicationBoxHtml();
   } else if (epState.entry === 'lead') {
     // Per direct request: New Lead swaps Enable Reminders (not a real toggle here, nothing consumes
     // it) for Disable Drips, matching the toggle New Proposal and New Appointment already have.
-    communicationHtml = '<div class="settings-toggle-row" style="margin-top:16px;">' +
-        '<label class="switch"><input type="checkbox" ' + (epState.disableDrips ? 'checked' : '') + ' onchange="epState.disableDrips = this.checked; renderEpBody();"><span class="switch-track"></span></label>' +
-        '<span class="settings-toggle-label">Disable Drips</span>' +
-      '</div>';
+    communicationHtml = epDripsBoxHtml();
   } else if (epState.entry === 'invoice') {
     // Per direct request: Invoice Reminders don't exist yet, Enable Reminders is removed rather than
     // left as a toggle with nothing behind it — flagged as a follow-up, same neutral-alert pattern
@@ -3676,6 +3665,35 @@ function epReadyToCreateHtml(sourceType, entity) {
    Communication section for New Appointment, and adopted in New Proposal per ticket item 4 for
    consistency across the creation modals — only the SMS preview text and the trailing note differ
    per entry type. ─── */
+/* ─── Shared "titled toggle box" pattern — an uppercase icon+label on the left (reusing the same
+   .settings-group-label styling as "Event Details"/"Schedule"/"Assignment"), one or more toggles on
+   the right, in a bordered section. Per direct request, this is the one UI used everywhere Reminders,
+   Communication, or Drips appear, instead of each entry point rolling its own layout. ─── */
+function epTogglesBoxHtml(icon, title, togglesHtml) {
+  return '<div class="settings-section" style="margin-top:18px; margin-bottom:0; text-align:left; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; row-gap:10px;">' +
+      '<div class="settings-group-label" style="margin:0;">' + icon + ' ' + title + '</div>' +
+      '<div class="ep-comm-toggles" style="margin-bottom:0;">' + togglesHtml + '</div>' +
+    '</div>';
+}
+function epRemindersBoxHtml() {
+  return epTogglesBoxHtml('🔔', 'REMINDERS',
+    '<span class="ep-comm-toggle">Email <label class="switch"><input type="checkbox" ' + (epState.reminderEmail ? 'checked' : '') + ' onchange="epState.reminderEmail = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
+    '<span class="ep-comm-toggle">SMS <label class="switch"><input type="checkbox" ' + (epState.reminderSms ? 'checked' : '') + ' onchange="epState.reminderSms = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>'
+  );
+}
+function epCommunicationBoxHtml() {
+  return epTogglesBoxHtml('✉️', 'COMMUNICATION',
+    '<span class="ep-comm-toggle">Send Email <label class="switch"><input type="checkbox" ' + (epState.sendEmail ? 'checked' : '') + ' onchange="epState.sendEmail = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
+    '<span class="ep-comm-toggle">Send SMS <label class="switch"><input type="checkbox" ' + (epState.sendSms ? 'checked' : '') + ' onchange="epState.sendSms = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>'
+  );
+}
+// Drips toggle box — matches the reference screenshot exactly (droplet icon + "DRIPS" + Disable +
+// info tooltip + toggle, all in one row). Shared by every entry point with a Drips concept.
+function epDripsBoxHtml() {
+  return epTogglesBoxHtml('💧', 'DRIPS',
+    '<span class="ep-comm-toggle">Disable <span title="Disabling Drips stops this record\'s automated follow-up messages." style="cursor:help; color:var(--gray-400);">ⓘ</span> <label class="switch"><input type="checkbox" ' + (epState.disableDrips ? 'checked' : '') + ' onchange="epState.disableDrips = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>'
+  );
+}
 function epCommunicationHtml() {
   const isAppt = epState.entry === 'appt';
   const et = isAppt ? EVENT_TYPES.find(e => e.key === epState.eventType) : null;
@@ -3685,32 +3703,28 @@ function epCommunicationHtml() {
       ' for {appointment-time} on {appointment-date} at {appointment-location} with {salesperson-name}. Please let us know if you have any questions or need to make changes! Thank you! - {company-name}'
     : '(Company Settings Template)\nHi, {first-name}! Your proposal from {company-name} is ready to view: {view-proposal-link}. Let us know if you have any questions! - {salesperson-name}';
   const createsDeal = isAppt && epState.eventType === 'onsite-estimate';
-  return '<div class="settings-section" style="margin-top:18px; margin-bottom:0; text-align:left;">' +
-      '<div class="settings-section-title" style="margin-bottom:16px;"><span>✉️ Communication</span></div>' +
-      '<div class="ep-comm-toggles" style="margin-bottom:20px;">' +
-        '<span class="ep-comm-toggle">Send Email <label class="switch"><input type="checkbox" ' + (epState.sendEmail ? 'checked' : '') + ' onchange="epState.sendEmail = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
-        '<span class="ep-comm-toggle">Send SMS <label class="switch"><input type="checkbox" ' + (epState.sendSms ? 'checked' : '') + ' onchange="epState.sendSms = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
-      '</div>' +
-      '<div class="ep-comm-row">' +
-        '<div class="settings-field">' +
-          '<label class="settings-field-label">Drip Sequence <span title="The sequence of automated messages sent around this ' + (isAppt ? 'appointment' : 'proposal') + '." style="cursor:help;">ⓘ</span></label>' +
-          '<select class="select2" onchange="epState.dripSequence = this.value; renderEpBody();">' +
-            EP_DRIP_SEQUENCES.map(d => '<option value="' + d.key + '"' + (epState.dripSequence === d.key ? ' selected' : '') + '>' + d.label + '</option>').join('') +
-          '</select>' +
-        '</div>' +
-        '<span class="ep-comm-toggle">Disable Drips <label class="switch"><input type="checkbox" ' + (epState.disableDrips ? 'checked' : '') + ' onchange="epState.disableDrips = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
-      '</div>' +
-      '<div style="text-align:center; font-size:12px; color:var(--gray-500); margin-top:16px;">Next Drip: <strong style="color:var(--gray-800);">' + (seq ? seq.nextDrip : '—') + '</strong></div>' +
-      (epState.sendSms
-        ? '<div class="settings-field" style="margin-top:20px; margin-bottom:0;">' +
+  return epCommunicationBoxHtml() +
+    (epState.sendSms
+      ? '<div class="settings-section" style="margin-top:18px; margin-bottom:0; text-align:left;">' +
+          '<div class="settings-field" style="margin-bottom:0;">' +
             '<label class="settings-field-label">SMS Message</label>' +
             '<textarea class="settings-field-input" rows="4" readonly style="height:auto; padding:10px 14px; font-family:inherit; resize:vertical;">' + smsTemplate + '</textarea>' +
-          '</div>'
-        : '') +
-      '<div class="settings-alert settings-alert--success" style="margin-top:20px; margin-bottom:0;">' +
-        '<div><strong>Email Template:</strong> To edit your email template please visit your Company Settings and click on the Templates tab.</div>' +
-      '</div>' +
+          '</div>' +
+        '</div>'
+      : '') +
+    '<div class="settings-alert settings-alert--success" style="margin-top:18px; margin-bottom:0;">' +
+      '<div><strong>Email Template:</strong> To edit your email template please visit your Company Settings and click on the Templates tab.</div>' +
     '</div>' +
+    '<div class="settings-section" style="margin-top:18px; margin-bottom:0; text-align:left;">' +
+      '<div class="settings-field" style="margin-bottom:0;">' +
+        '<label class="settings-field-label">Drip Sequence <span title="The sequence of automated messages sent around this ' + (isAppt ? 'appointment' : 'proposal') + '." style="cursor:help;">ⓘ</span></label>' +
+        '<select class="select2" onchange="epState.dripSequence = this.value; renderEpBody();">' +
+          EP_DRIP_SEQUENCES.map(d => '<option value="' + d.key + '"' + (epState.dripSequence === d.key ? ' selected' : '') + '>' + d.label + '</option>').join('') +
+        '</select>' +
+      '</div>' +
+      '<div style="text-align:center; font-size:12px; color:var(--gray-500); margin-top:16px;">Next Drip: <strong style="color:var(--gray-800);">' + (seq ? seq.nextDrip : '—') + '</strong></div>' +
+    '</div>' +
+    epDripsBoxHtml() +
     (isAppt
       ? (createsDeal
           ? '<div class="settings-alert settings-alert--info" style="margin-top:14px; margin-bottom:0;">' +
@@ -3731,19 +3745,19 @@ function epProposalCommunicationHtml() {
   const seq = EP_DRIP_SEQUENCES.find(d => d.key === epState.dripSequence);
   // No section title here on purpose — per direct request, "Communication" doesn't fit a block
   // that's only ever Drip Sequence + Disable Drips, unlike New Appointment's fuller Communication
-  // section (Send Email/SMS, SMS preview, Email Template) which keeps its own title.
+  // section (Send Email/SMS, SMS preview, Email Template) which keeps its own title. The Disable
+  // Drips toggle itself now lives in the shared epDripsBoxHtml() box, Drip Sequence stays a plain
+  // field here since it's a selection, not a toggle.
   return '<div class="settings-section" style="margin-top:18px; margin-bottom:0; text-align:left;">' +
-      '<div class="ep-comm-row">' +
-        '<div class="settings-field">' +
-          '<label class="settings-field-label">Drip Sequence <span title="The sequence of automated messages sent around this proposal." style="cursor:help;">ⓘ</span></label>' +
-          '<select class="select2" onchange="epState.dripSequence = this.value; renderEpBody();">' +
-            EP_DRIP_SEQUENCES.map(d => '<option value="' + d.key + '"' + (epState.dripSequence === d.key ? ' selected' : '') + '>' + d.label + '</option>').join('') +
-          '</select>' +
-        '</div>' +
-        '<span class="ep-comm-toggle">Disable Drips <label class="switch"><input type="checkbox" ' + (epState.disableDrips ? 'checked' : '') + ' onchange="epState.disableDrips = this.checked; renderEpBody();"><span class="switch-track"></span></label></span>' +
+      '<div class="settings-field" style="margin-bottom:0;">' +
+        '<label class="settings-field-label">Drip Sequence <span title="The sequence of automated messages sent around this proposal." style="cursor:help;">ⓘ</span></label>' +
+        '<select class="select2" onchange="epState.dripSequence = this.value; renderEpBody();">' +
+          EP_DRIP_SEQUENCES.map(d => '<option value="' + d.key + '"' + (epState.dripSequence === d.key ? ' selected' : '') + '>' + d.label + '</option>').join('') +
+        '</select>' +
       '</div>' +
       '<div style="text-align:center; font-size:12px; color:var(--gray-500); margin-top:16px;">Next Drip: <strong style="color:var(--gray-800);">' + (seq ? seq.nextDrip : '—') + '</strong></div>' +
-    '</div>';
+    '</div>' +
+    epDripsBoxHtml();
 }
 
 /* ─── Save — the missing terminal step: actually creates the Business/Contact (if new) plus the
