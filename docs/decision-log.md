@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-04] Business Entity Records V1: standardized Reminders/Communication/Drips toggle UI
+
+- Decision: Per direct request, built one shared "titled toggle box" component (`epTogglesBoxHtml`, reusing the existing uppercase `.settings-group-label` styling with flex space-between so the icon+label sits left and the toggle(s) sit right, matching the Schedule Job reference screenshot exactly) and three callers built on it: `epRemindersBoxHtml()` (🔔 REMINDERS, Email/SMS), `epCommunicationBoxHtml()` (✉️ COMMUNICATION, Send Email/Send SMS), and `epDripsBoxHtml()` (💧 DRIPS, a single Disable toggle + info tooltip, matching the second reference screenshot exactly). Applied everywhere a Reminders/Communication/Drips toggle appears: Schedule Job's Reminders+Communication boxes now call the shared functions instead of hand-rolled HTML; New Appointment's Communication section now uses the boxed Send Email/SMS toggle only, with Drip Sequence/Next Drip pulled into their own plain field group and Disable Drips moved into its own Drips box (SMS Message preview, Email Template alert, and the appt Deal-creation alert are kept, just no longer crammed inside the same bordered box as the toggles); New Proposal's Drip Sequence/Next Drip stays a plain field group, Disable Drips also moved into the shared Drips box; New Lead's inline, unboxed Disable Drips toggle also switched to the shared Drips box. Create Invoice is unaffected (still the neutral "not built yet" note, no real toggle to restyle).
+- Why: Direct request, two reference screenshots supplied (Schedule Job's Reminders/Communication boxes, and a standalone Drips toggle box).
+- Open question: None.
+
 ## [2026-09-04] Business Entity Records V1: dropped New Proposal's "Communication" section title
 
 - Decision: Removed the "✉️ Communication" heading from New Proposal's trimmed Drip Sequence/Disable Drips block (`epProposalCommunicationHtml()`). New Appointment's fuller Communication section (Send Email/SMS, SMS preview, Email Template) keeps its own title, unaffected.
