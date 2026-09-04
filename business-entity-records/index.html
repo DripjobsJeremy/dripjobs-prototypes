@@ -483,6 +483,30 @@
   #be-app .modal-body { padding: 20px 22px; max-height: 65vh; overflow-y: auto; }
   #be-app .modal-footer { padding: 16px 22px; border-top: 1px solid var(--gray-200); display: flex; justify-content: flex-end; gap: 10px; }
 
+  /* ─── Deal Command Center (BR53/54/55) — first two-pane modal layout in this prototype ─── */
+  #be-app .modal-card.modal-dcc { max-width: 960px; }
+  #be-app .modal-dcc .modal-body { padding: 0; max-height: 72vh; display: flex; }
+  #be-app .dcc-left { flex: 0 0 360px; border-right: 1px solid var(--gray-200); padding: 20px; overflow-y: auto; }
+  #be-app .dcc-right { flex: 1; min-width: 0; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
+  #be-app .dcc-contact-name { font-size: 17px; font-weight: 800; color: var(--gray-800); }
+  #be-app .dcc-biz-line { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+  #be-app .dcc-biz-line .btn-link { margin-left: 6px; }
+  #be-app .dcc-sub { font-size: 12px; color: var(--gray-400); margin-top: 6px; }
+  #be-app .dcc-actions { display: flex; gap: 8px; margin: 14px 0; }
+  #be-app .dcc-copy-btn { background: none; border: none; cursor: pointer; color: var(--gray-400); font-size: 13px; padding: 2px 4px; }
+  #be-app .dcc-copy-btn:hover { color: var(--purple); }
+  #be-app .dcc-people-row { display: flex; gap: 24px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--gray-100); }
+  #be-app .dcc-people-label { font-size: 11px; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.02em; }
+  #be-app .dcc-people-value { font-size: 13px; font-weight: 700; color: var(--gray-800); margin-top: 2px; }
+  #be-app .dcc-stage-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--gray-200); margin-bottom: 14px; font-size: 13px; }
+  #be-app .dcc-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--gray-200); margin-bottom: 14px; flex-wrap: wrap; }
+  #be-app .dcc-tab { padding: 8px 12px; font-size: 12.5px; font-weight: 700; color: var(--gray-500); cursor: pointer; border-bottom: 2px solid transparent; }
+  #be-app .dcc-tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+  @media (max-width: 720px) {
+    #be-app .modal-dcc .modal-body { flex-direction: column; max-height: 80vh; }
+    #be-app .dcc-left { flex: none; border-right: none; border-bottom: 1px solid var(--gray-200); }
+  }
+
   /* ─── Entry-point demo ─── */
   #be-app .entry-frame { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; }
   #be-app .entry-frame-header { background: var(--gray-800); color: #fff; padding: 10px 18px; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
@@ -1363,7 +1387,24 @@
   </div>
 </div>
 
-<!-- ═══ Modal: Associate contact (shared: Business→Contact picker and Contact→Business picker) ═══ -->
+<!-- ═══ Modal: Deal Command Center (BR53 Business identifier, BR54 Change action) ═══ -->
+<div class="modal-overlay" id="modalDealCommandCenter">
+  <div class="modal-card modal-dcc">
+    <div class="modal-header">
+      <h3>Deal Command Center</h3>
+      <button class="modal-close" onclick="closeModal('modalDealCommandCenter')">✕</button>
+    </div>
+    <div class="modal-body" id="dccBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalDealCommandCenter')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Modal: Associate contact (shared: Business→Contact picker, Contact→Business picker, and the
+     Deal→Business "Change" picker added for BR54, which reuses this same shell). Placed after the Deal
+     Command Center in DOM order so it paints on top when opened from BR54's Change link while the
+     Command Center is still open behind it (same z-index, later DOM wins). ═══ -->
 <div class="modal-overlay" id="modalAssociate">
   <div class="modal-card modal-narrow">
     <div class="modal-header">
@@ -1372,6 +1413,21 @@
     </div>
     <div class="modal-body" id="associateModalBody"></div>
     <div class="modal-footer" id="associateModalFooter"></div>
+  </div>
+</div>
+
+<!-- ═══ Modal: Legal Name edit confirmation gate (BR55) ═══ -->
+<div class="modal-overlay" id="modalConfirmLegalName">
+  <div class="modal-card modal-narrow">
+    <div class="modal-header">
+      <h3>Rename Legal Name?</h3>
+      <button class="modal-close" onclick="cancelLegalNameChange()">✕</button>
+    </div>
+    <div class="modal-body" id="confirmLegalNameBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="cancelLegalNameChange()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmLegalNameChange()">Rename</button>
+    </div>
   </div>
 </div>
 
@@ -1397,9 +1453,12 @@ const BUSINESSES = [
     createdAt: '2026-02-18',
     // Only Acme is seeded with existing Deals/Proposals/Appointments/Invoices/Payments history — every
     // other business starts empty and is populated live by saving through the Creation Entry Points demo.
+    // dealNo/sentLocked added for BR54: sentLocked mirrors whether a Proposal or Invoice has already
+    // gone out for this Deal (see pushEpRecordOntoBusiness) — West Wing demos the already-sent, locked
+    // path (Proposal #4821 below is Sent), Parking Structure demos the not-yet-sent, unrestricted path.
     deals: [
-      { title: 'Exterior Repaint — West Wing', sub: 'Stage: Proposal Sent', stage: 'Proposal Sent', meta: '$18,400', via: 'Karen Whitfield', contactId: 'c1', updatedAt: '2026-08-24', leadSource: 'Referral', salesperson: 'Jordan P.' },
-      { title: 'Parking Structure Coating', sub: 'Stage: Negotiation', stage: 'Negotiation', meta: '$42,000', via: 'Tom Reyes', contactId: 'c2', updatedAt: '2026-08-15', leadSource: 'Referral', salesperson: 'Jordan P.' }
+      { title: 'Exterior Repaint — West Wing', sub: 'Stage: Proposal Sent', stage: 'Proposal Sent', meta: '$18,400', via: 'Karen Whitfield', contactId: 'c1', updatedAt: '2026-08-24', leadSource: 'Referral', salesperson: 'Jordan P.', dealNo: 5101, sentLocked: true },
+      { title: 'Parking Structure Coating', sub: 'Stage: Negotiation', stage: 'Negotiation', meta: '$42,000', via: 'Tom Reyes', contactId: 'c2', updatedAt: '2026-08-15', leadSource: 'Referral', salesperson: 'Jordan P.', dealNo: 5102, sentLocked: false }
     ],
     proposals: [
       { title: 'Proposal #4821 — Exterior Repaint', sub: 'Sent · Awaiting signature', meta: '$18,400', via: 'Karen Whitfield', contactId: 'c1', status: 'Sent', createdAt: '2026-08-20', jobAddressId: 'ja1', proposalNo: 4821 },
@@ -1439,7 +1498,7 @@ const BUSINESSES = [
     // Demonstrates BR6/BR20's specific edge case: no open Deals or Invoices — the Deal below closed
     // won — but the Job it converted into is still active, and that alone blocks Delete.
     deals: [
-      { title: 'HOA Common Area Repaint', sub: 'Stage: Closed Won', stage: 'Closed Won', meta: '$28,500', via: 'Marcus Ibsen', contactId: 'c4', closed: true, updatedAt: '2026-08-01', leadSource: 'Google', salesperson: 'Maria Sutton' }
+      { title: 'HOA Common Area Repaint', sub: 'Stage: Closed Won', stage: 'Closed Won', meta: '$28,500', via: 'Marcus Ibsen', contactId: 'c4', closed: true, updatedAt: '2026-08-01', leadSource: 'Google', salesperson: 'Maria Sutton', dealNo: 5103 }
     ],
     proposals: [], appointments: [], invoices: [], payments: [],
     jobs: [
@@ -2134,8 +2193,154 @@ function openRecordDetail(bizId, key, idx) {
     toast('Opens the associated Invoice for payment "' + r.title + '" — Payments have no detail view of their own, per BR39 (not modeled in this prototype).');
     return;
   }
+  if (key === 'deals') {
+    openDealCommandCenter(bizId, idx);
+    return;
+  }
   const singular = SNAPSHOT_TABS_LABEL[key].slice(0, -1);
   toast('Opens ' + singular + ' "' + r.title + '" — same destination as opening it from a Contact today (not modeled in this prototype).');
+}
+
+/* ═══════════════════════════════════════════════
+   DEAL COMMAND CENTER (BR53/54/55, ClickUp 86bbhhhqd) — opened from a Sales/Jobs Pipeline card or a
+   Business Profile "Deals" row, always for a Business Project Deal (a Personal Project Deal has no
+   detail view of its own in this prototype, same as every other record type — see openRecordDetail
+   above — so the "no Business line for Personal Project" requirement in BR53 is satisfied by this
+   modal simply never being reachable for one). This is a skeleton sized to host BR53's Business
+   identifier and BR54's Change action, not a full rebuild of the real Deal Command Center — the Stage/
+   Sequence header and tab row on the right are decorative/non-interactive, flagged as out of scope for
+   this ticket.
+   ═══════════════════════════════════════════════ */
+let currentDccBizId = null, currentDccDealIdx = null;
+function bizLegalWithDba(biz) {
+  return biz.legal + (biz.dba && biz.dba.trim() ? ' (' + biz.dba.trim() + ')' : '');
+}
+function copyText(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard.'), () => toast('Copied to clipboard.'));
+  } else {
+    toast('Copied to clipboard.');
+  }
+}
+function openDealCommandCenter(bizId, idx) {
+  currentDccBizId = bizId;
+  currentDccDealIdx = idx;
+  renderDealCommandCenter();
+  openModal('modalDealCommandCenter');
+}
+function renderDealCommandCenter() {
+  const biz = getBiz(currentDccBizId);
+  const deal = biz && biz.deals[currentDccDealIdx];
+  if (!biz || !deal) return;
+  const contact = deal.contactId ? getContact(deal.contactId) : null;
+  document.getElementById('dccBody').innerHTML = dccLeftPaneHtml(biz, deal, contact) + dccRightPaneHtml(deal);
+}
+function dccBusinessLineHtml(biz) {
+  return '<div class="dcc-biz-line">🏢 ' + bizLegalWithDba(biz) +
+    ' <span class="btn-link" onclick="openChangeDealBusiness()">Change</span></div>';
+}
+function dccInfoRowHtml(icon, value, label) {
+  if (!value) return '';
+  return '<div class="activity-row">' +
+    '<div class="activity-icon">' + icon + '</div>' +
+    '<div style="flex:1;"><div class="activity-title">' + value + ' <span class="multi-row-primary-badge">PRIMARY</span></div><div class="activity-sub">' + label + '</div></div>' +
+    '<button type="button" class="dcc-copy-btn" title="Copy" onclick="copyText(\'' + String(value).replace(/'/g, "\\'") + '\')">📋</button>' +
+  '</div>';
+}
+function dccLeftPaneHtml(biz, deal, contact) {
+  const name = contact ? contact.name : (deal.via || '—');
+  const email = contact ? contact.email : null;
+  const phone = contact ? fmtPhone(contact.phone) : null;
+  return '<div class="dcc-left">' +
+    '<div class="dcc-contact-name">' + name + '</div>' +
+    dccBusinessLineHtml(biz) +
+    '<div class="dcc-sub">Deal #' + (deal.dealNo || '—') + '</div>' +
+    '<div class="dcc-actions">' +
+      '<button type="button" class="btn btn-outline btn-sm" onclick="toast(\'New Proposal is not wired from the Deal Command Center in this prototype — use the Creation Entry Points demo instead.\')">New Proposal</button>' +
+      '<button type="button" class="btn btn-outline btn-sm" onclick="toast(\'New Appointment is not wired from the Deal Command Center in this prototype — use the Creation Entry Points demo instead.\')">New Appt</button>' +
+    '</div>' +
+    '<div class="settings-section-title" style="margin-top:6px;">Contact Information</div>' +
+    (deal.leadSource ? '<div class="activity-row"><div class="activity-icon">🔗</div><div style="flex:1;"><div class="activity-title">' + deal.leadSource + '</div><div class="activity-sub">Source</div></div></div>' : '') +
+    dccInfoRowHtml('✉️', email, 'Email') +
+    dccInfoRowHtml('📞', phone, 'Phone') +
+    '<div class="activity-row">' +
+      '<div class="activity-icon">📍</div>' +
+      '<div style="flex:1;"><div class="activity-title">' + fmtAddr(biz.address) + '</div><div class="activity-sub">Address</div></div>' +
+    '</div>' +
+    '<button type="button" class="btn btn-primary" style="width:100%; margin-top:10px;" ' + (email ? 'onclick="toast(\'Sending an email is not modeled in this prototype.\')"' : 'disabled') + '>Send Email</button>' +
+    '<div class="dcc-people-row">' +
+      '<div><div class="dcc-people-label">Salesperson</div><div class="dcc-people-value">' + (deal.salesperson || '—') + '</div></div>' +
+    '</div>' +
+  '</div>';
+}
+function dccRightPaneHtml(deal) {
+  const tabs = ['Chat', 'Jobi AI', 'Proposals', 'Jobs', 'Invoices', 'Payments', 'Notes', 'Attachments', 'Tasks'];
+  return '<div class="dcc-right">' +
+    '<div class="dcc-stage-row">' +
+      '<div><span style="color:var(--gray-400);">Current Stage:</span> <strong>' + (deal.stage || '—') + '</strong> <span class="btn-link" onclick="toast(\'Moving stage from the Command Center is not modeled in this prototype — drag the card on the Pipeline instead.\')">Move</span></div>' +
+      '<div><span style="color:var(--gray-400);">Current Sequence:</span> <strong>' + (deal.stage === 'In Draft' ? 'Proposal Draft' : '—') + '</strong> <span class="btn-link" onclick="toast(\'Drip Sequence detail is not modeled in this prototype.\')">Change</span></div>' +
+    '</div>' +
+    '<div class="dcc-tabs">' + tabs.map((t, i) =>
+      '<div class="dcc-tab' + (i === 0 ? ' active' : '') + '" onclick="toast(\'The ' + t + ' tab is not modeled in this Deal Command Center skeleton — out of scope for BR53/54/55.\')">' + t + '</div>'
+    ).join('') + '</div>' +
+    '<div class="empty-state" style="flex:1;">' +
+      '<div class="empty-state-icon">💬</div>' +
+      '<div class="empty-state-title">Chat is not modeled here</div>' +
+      '<div class="empty-state-desc">This skeleton exists to host the Business identifier (BR53) and Change action (BR54). Full tab content is out of scope for this ticket.</div>' +
+    '</div>' +
+  '</div>';
+}
+function openChangeDealBusiness() {
+  const biz = getBiz(currentDccBizId);
+  const deal = biz.deals[currentDccDealIdx];
+  document.getElementById('associateModalFooter').innerHTML = '<button class="btn btn-outline" onclick="closeModal(\'modalAssociate\')">Cancel</button>';
+  if (deal.sentLocked) {
+    document.getElementById('associateModalTitle').textContent = 'Can’t Change Business';
+    document.getElementById('associateModalBody').innerHTML =
+      '<div class="settings-alert settings-alert--danger" style="margin-bottom:0;">' +
+        '<div class="settings-alert-icon">🚫</div>' +
+        '<div><div class="settings-alert-title">Changing the Business Entity on a sent record is not supported</div>' +
+        '<div>A Proposal or Invoice for this Deal has already been sent under <strong>' + bizDisplayLabel(biz) + '</strong>. Reassigning the Business now would leave that sent record pointing at the wrong entity, so it is blocked here.</div>' +
+        '<div style="margin-top:8px;">To move this work to the correct Business, delete this Proposal/Deal and start a new one under the correct Business instead.</div></div>' +
+      '</div>';
+    document.getElementById('associateModalFooter').innerHTML = '<button class="btn btn-outline" onclick="closeModal(\'modalAssociate\')">Close</button>';
+    openModal('modalAssociate');
+    return;
+  }
+  document.getElementById('associateModalTitle').textContent = 'Change Business';
+  document.getElementById('associateModalBody').innerHTML =
+    '<div class="settings-field" style="margin-bottom:4px;">' +
+      '<label class="settings-field-label">Search Businesses</label>' +
+      '<input class="settings-field-input" id="businessPickSearch" placeholder="Search businesses..." oninput="renderDealBusinessPickResults(this.value)">' +
+    '</div>' +
+    '<div class="settings-help" style="margin-bottom:10px;">Reassigns this Deal to a different Business Entity. Nothing has been sent for this Deal yet, so reassignment is unrestricted.</div>' +
+    '<div id="businessPickResults"></div>';
+  renderDealBusinessPickResults('');
+  openModal('modalAssociate');
+}
+function renderDealBusinessPickResults(q) {
+  q = (q || '').toLowerCase();
+  const results = BUSINESSES.filter(b => !b.archived && b.id !== currentDccBizId && (bizDisplayLabel(b).toLowerCase().includes(q) || b.legal.toLowerCase().includes(q)));
+  document.getElementById('businessPickResults').innerHTML = results.map(b =>
+    '<div class="typeahead-result" onclick="pickBusinessForDeal(\'' + b.id + '\')"><span>' + bizDisplayLabel(b) + '<br><span style="color:var(--gray-400); font-size:11.5px;">' + b.legal + '</span></span><span class="btn-link">Select</span></div>'
+  ).join('') || '<div class="empty-state"><div class="empty-state-desc">No other businesses match.</div></div>';
+}
+function pickBusinessForDeal(newBizId) {
+  const oldBiz = getBiz(currentDccBizId);
+  const [deal] = oldBiz.deals.splice(currentDccDealIdx, 1);
+  const newBiz = getBiz(newBizId);
+  newBiz.deals.push(deal);
+  currentDccBizId = newBizId;
+  currentDccDealIdx = newBiz.deals.length - 1;
+  closeModal('modalAssociate');
+  renderDealCommandCenter();
+  renderSalesPipeline();
+  // Business Profile's Deals tab caches its render — force a refresh if either Business is the one open.
+  if (typeof currentBizId !== 'undefined' && (currentBizId === oldBiz.id || currentBizId === newBiz.id)) {
+    const panel = document.getElementById('panel-deals');
+    if (panel) { panel.dataset.rendered = ''; if (panel.classList.contains('active')) renderTabContent('deals'); }
+  }
+  toast('Deal reassigned to ' + bizDisplayLabel(newBiz) + '.');
 }
 
 function tasksHtml(biz) {
@@ -2427,12 +2632,17 @@ function saveNewBusiness() {
     billingAddress: { street: document.getElementById('f_bStreet').value, city: document.getElementById('f_bCity').value, state: document.getElementById('f_bState').value, zip: document.getElementById('f_bZip').value }
   };
   if (editingBizId) {
-    Object.assign(getBiz(editingBizId), data);
-    closeModal('modalNewBusiness');
-    toast('Business updated.');
-    renderProfileHeader(getBiz(editingBizId));
-    document.getElementById('panel-information').dataset.rendered = '';
-    renderTabContent('information');
+    const biz = getBiz(editingBizId);
+    // BR55: renaming Legal Name specifically (DBA/Email/Phone/Address are unaffected) needs a
+    // confirmation gate, but only once the Business has a previous or active Deal, Proposal, or
+    // Invoice attached — a brand-new Business with nothing on it yet saves straight through.
+    const legalChanged = data.legal !== biz.legal;
+    const hasAttachedRecords = (biz.deals && biz.deals.length) || (biz.proposals && biz.proposals.length) || (biz.invoices && biz.invoices.length);
+    if (legalChanged && hasAttachedRecords) {
+      openLegalNameConfirm(biz, data);
+      return;
+    }
+    applyBusinessEdit(editingBizId, data);
   } else {
     let contact;
     if (newBizContactMode === 'existing') {
@@ -2464,6 +2674,37 @@ function saveNewBusiness() {
     populateIndustryFilter();
     openBusinessProfile(id);
   }
+}
+function applyBusinessEdit(id, data) {
+  Object.assign(getBiz(id), data);
+  closeModal('modalNewBusiness');
+  toast('Business updated.');
+  renderProfileHeader(getBiz(id));
+  document.getElementById('panel-information').dataset.rendered = '';
+  renderTabContent('information');
+}
+// BR55: stash the pending edit while the confirmation modal is up, applied only on confirm.
+let pendingBizRename = null;
+function openLegalNameConfirm(biz, data) {
+  pendingBizRename = { id: biz.id, data };
+  document.getElementById('confirmLegalNameBody').innerHTML =
+    '<div class="settings-alert settings-alert--warn" style="margin-bottom:0;">' +
+      '<div class="settings-alert-icon">⚠️</div>' +
+      '<div><div class="settings-alert-title">This renames the entity on existing records</div>' +
+      '<div>"' + biz.legal + '" has a Deal, Proposal, or Invoice already tied to it. Renaming the Legal Name to "' + data.legal + '" changes the entity name shown on all of those existing records — it does not create a separate Business.</div>' +
+      '<div style="margin-top:8px;">If you actually mean to represent a <strong>different</strong> business, cancel here and use Change on the Deal instead of renaming this one.</div></div>' +
+    '</div>';
+  openModal('modalConfirmLegalName');
+}
+function confirmLegalNameChange() {
+  if (!pendingBizRename) return;
+  applyBusinessEdit(pendingBizRename.id, pendingBizRename.data);
+  pendingBizRename = null;
+  closeModal('modalConfirmLegalName');
+}
+function cancelLegalNameChange() {
+  pendingBizRename = null;
+  closeModal('modalConfirmLegalName');
 }
 
 /* ═══════════════════════════════════════════════
@@ -2906,6 +3147,7 @@ const EP_DEAL_STAGES = ['Cold Leads', 'Warm Leads', 'Hot Leads', 'Contacted', 'Q
 const EP_RECORD_LABEL = { lead: 'Deal', appt: 'Appointment', proposal: 'Proposal', invoice: 'Invoice' };
 let nextInvoiceNo = 3005;
 let nextProposalNo = 3300;
+let nextDealNo = 5104;
 // New Appointment's Communication block — Drip Sequence options and each one's "Next Drip" preview
 // are this prototype's own placeholders (not sourced from a screenshot, only the selected default
 // "Appointment Information" / "Immediate Confirmation" pairing is confirmed).
@@ -3848,7 +4090,7 @@ function pushEpRecordOntoBusiness(biz, contact) {
     // display text; Stage is the one user-selected field that does (BR42, BR46).
     const dealTitle = epState.dealName || ('New Deal — ' + bizDisplayLabel(biz));
     const stage = epState.dealStageSelect || 'Cold Leads';
-    biz.deals.push({ title: dealTitle, sub: 'Stage: ' + stage, stage, meta: '—', via, contactId, updatedAt: nowIso, leadSource: epState.leadSource || '', salesperson: epState.salesperson || '' });
+    biz.deals.push({ title: dealTitle, sub: 'Stage: ' + stage, stage, meta: '—', via, contactId, updatedAt: nowIso, leadSource: epState.leadSource || '', salesperson: epState.salesperson || '', dealNo: nextDealNo++ });
     return biz.deals.length - 1;
   } else if (epState.entry === 'appt') {
     const et = EVENT_TYPES.find(e => e.key === epState.eventType);
@@ -3865,7 +4107,7 @@ function pushEpRecordOntoBusiness(biz, contact) {
     // Scheduled" stage — every other Event Type adds only the Appointments calendar entry above.
     if (epState.eventType === 'onsite-estimate') {
       const apptDealTitle = epState.dealName || ((et ? et.label : 'Appointment') + ' — ' + bizDisplayLabel(biz));
-      biz.deals.push({ title: apptDealTitle, sub: 'Stage: Estimate Scheduled', stage: 'Estimate Scheduled', meta: '—', via, contactId, updatedAt: nowIso, scheduledDate: epState.scheduledDate || null, leadSource: epState.leadSource || '', salesperson: epState.salesperson || '' });
+      biz.deals.push({ title: apptDealTitle, sub: 'Stage: Estimate Scheduled', stage: 'Estimate Scheduled', meta: '—', via, contactId, updatedAt: nowIso, scheduledDate: epState.scheduledDate || null, leadSource: epState.leadSource || '', salesperson: epState.salesperson || '', dealNo: nextDealNo++ });
       return biz.deals.length - 1;
     }
     return null;
@@ -3873,8 +4115,10 @@ function pushEpRecordOntoBusiness(biz, contact) {
     const tmpl = EP_PROPOSAL_TEMPLATES.find(t => t.key === epState.proposalTemplate);
     const dealTitle = epState.dealName || ('New Deal — ' + bizDisplayLabel(biz));
     const total = fmtProposalTotal(tmpl);
-    // Per BR32: a Proposal's Deal always lands in the fixed "In Draft" stage.
-    biz.deals.push({ title: dealTitle, sub: 'Stage: In Draft', stage: 'In Draft', meta: total, via, contactId, updatedAt: nowIso, leadSource: epState.leadSource || '', salesperson: epState.salesperson || '' });
+    // Per BR32: a Proposal's Deal always lands in the fixed "In Draft" stage. sentLocked: true because
+    // the Proposal pushed right below is created with status 'Sent' — per BR54, once a Proposal or
+    // Invoice has gone out for a Deal its Business Entity can no longer be reassigned.
+    biz.deals.push({ title: dealTitle, sub: 'Stage: In Draft', stage: 'In Draft', meta: total, via, contactId, updatedAt: nowIso, leadSource: epState.leadSource || '', salesperson: epState.salesperson || '', dealNo: nextDealNo++, sentLocked: true });
     const proposalNo = nextProposalNo++;
     biz.proposals.push({ title: 'Proposal — ' + dealTitle, sub: 'Sent · Template: ' + (tmpl ? tmpl.label : 'Blank'), meta: total, via, contactId, status: 'Sent', createdAt: nowIso, jobAddressId: epState.jobAddressId || null, proposalNo });
     return biz.deals.length - 1;
