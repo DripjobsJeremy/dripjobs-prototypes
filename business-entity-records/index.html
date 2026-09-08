@@ -1311,6 +1311,10 @@
             <label class="settings-field-label">Street</label>
             <input class="settings-field-input" id="f_street" />
           </div>
+          <div class="settings-field settings-field--full">
+            <label class="settings-field-label">Address Line 2</label>
+            <input class="settings-field-input" id="f_street2" placeholder="Suite, unit, floor, etc. (optional)" />
+          </div>
           <div class="settings-field">
             <label class="settings-field-label">City</label>
             <input class="settings-field-input" id="f_city" />
@@ -1335,6 +1339,10 @@
           <div class="settings-field settings-field--full billing-address-field">
             <label class="settings-field-label">Street</label>
             <input class="settings-field-input" id="f_bStreet" disabled />
+          </div>
+          <div class="settings-field settings-field--full billing-address-field">
+            <label class="settings-field-label">Address Line 2</label>
+            <input class="settings-field-input" id="f_bStreet2" placeholder="Suite, unit, floor, etc. (optional)" disabled />
           </div>
           <div class="settings-field billing-address-field">
             <label class="settings-field-label">City</label>
@@ -1447,7 +1455,9 @@ const BUSINESSES = [
     industry: 'Commercial Painting Contractor',
     email: 'billing@acmepaintinggroup.com',
     phone: '(555) 201-4400',
-    address: { street: '4820 Meridian Business Pkwy', city: 'Dallas', state: 'TX', zip: '75201' },
+    // line2 demonstrates BR56's populated case — Billing Address is Same as Address here, so it
+    // inherits this Line 2 too, same as it inherits every other Address field.
+    address: { street: '4820 Meridian Business Pkwy', line2: 'Suite 210', city: 'Dallas', state: 'TX', zip: '75201' },
     billingSame: true, archived: false,
     contactIds: ['c1', 'c2', 'c3'],
     createdAt: '2026-02-18',
@@ -1480,7 +1490,9 @@ const BUSINESSES = [
       { title: 'Job — Lobby Refresh', sub: 'Project Accepted', dealStage: 'Project Accepted', meta: '$6,250', via: 'Tom Reyes', contactId: 'c2', active: true, fromDeal: 'Proposal #4790 — Lobby Refresh', updatedAt: '2026-07-21', salesperson: 'Jordan P.', projectManager: 'No project manager', crew: null, color: null, scheduledStart: null, scheduledEnd: null, jobNo: 8801 }
     ],
     jobAddresses: [
-      { id: 'ja1', label: 'West Wing', street: '4820 Meridian Business Pkwy, Bldg B', city: 'Dallas', state: 'TX', zip: '75201' },
+      // line2 demonstrates BR57's populated case — was crammed into street before Line 2 existed as
+      // its own field; ja2 below stays without one, demonstrating BR59 (existing records unaffected).
+      { id: 'ja1', label: 'West Wing', street: '4820 Meridian Business Pkwy', line2: 'Bldg B', city: 'Dallas', state: 'TX', zip: '75201' },
       { id: 'ja2', label: 'Parking Structure', street: '4900 Meridian Business Pkwy', city: 'Dallas', state: 'TX', zip: '75201' }
     ]
   },
@@ -1491,7 +1503,9 @@ const BUSINESSES = [
     phone: '(555) 340-1190',
     address: { street: '210 Commerce Center Dr', city: 'Austin', state: 'TX', zip: '78701' },
     billingSame: false,
-    billingAddress: { street: 'PO Box 8842', city: 'Austin', state: 'TX', zip: '78708' },
+    // line2 here demonstrates BR56's populated case on a Billing Address distinct from Business Address
+    // (billingSame is false) — the Business Address above stays without one, demonstrating BR59.
+    billingAddress: { street: 'PO Box 8842', line2: 'Suite 4B', city: 'Austin', state: 'TX', zip: '78708' },
     archived: false,
     contactIds: ['c4', 'c5'],
     createdAt: '2026-03-25',
@@ -1952,7 +1966,7 @@ function infoTabHtml(biz) {
     '</div>' +
     '<div class="settings-section">' +
       '<div class="settings-grid">' +
-        '<div class="settings-field settings-field--half"><label class="settings-field-label">Address</label><input class="settings-field-input" value="' + fmtAddr(biz.address) + '" disabled></div>' +
+        '<div class="settings-field settings-field--half"><label class="settings-field-label">Address <span class="assumption-flag" title="BR58 — Address Line 2, where set, is shown here and everywhere else this Address is displayed in this prototype (Deal Command Center, Lists, Job Address dropdowns, Ready to Create summaries). Proposal/Invoice PDFs and Zapier payloads aren&#39;t modeled surfaces in this prototype, so BR58&#39;s requirement for those specifically is flagged here rather than fabricated — see decision log.">BR-58</span></label><input class="settings-field-input" value="' + fmtAddr(biz.address) + '" disabled></div>' +
         '<div class="settings-field settings-field--half"><label class="settings-field-label">Billing Address</label><input class="settings-field-input" value="' + fmtAddr(billing) + (biz.billingSame ? ' (same as Address)' : '') + '" disabled></div>' +
       '</div>' +
     '</div>' +
@@ -1987,6 +2001,7 @@ function jobAddressFormHtml(a) {
   a = a || {};
   return '<div class="settings-field" style="margin-bottom:12px;"><label class="settings-field-label">Label (optional)</label><input class="settings-field-input" id="jaLabel" value="' + (a.label || '') + '" placeholder="e.g. Main Site"></div>' +
     '<div class="settings-field" style="margin-bottom:12px;"><label class="settings-field-label is-required">Street</label><input class="settings-field-input" id="jaStreet" value="' + (a.street || '') + '"></div>' +
+    '<div class="settings-field" style="margin-bottom:12px;"><label class="settings-field-label">Address Line 2</label><input class="settings-field-input" id="jaStreet2" value="' + (a.line2 || '') + '" placeholder="Suite, unit, floor, etc. (optional)"></div>' +
     '<div style="display:flex; gap:10px;">' +
       '<div class="settings-field" style="flex:2;"><label class="settings-field-label">City</label><input class="settings-field-input" id="jaCity" value="' + (a.city || '') + '"></div>' +
       '<div class="settings-field" style="flex:1; max-width:74px;"><label class="settings-field-label">State</label><input class="settings-field-input" id="jaState" maxlength="2" value="' + (a.state || '') + '"></div>' +
@@ -2019,6 +2034,7 @@ function confirmSaveJobAddress(bizId, addrId) {
   const data = {
     label: document.getElementById('jaLabel').value.trim(),
     street,
+    line2: document.getElementById('jaStreet2').value.trim(),
     city: document.getElementById('jaCity').value.trim(),
     state: document.getElementById('jaState').value.trim(),
     zip: document.getElementById('jaZip').value.trim()
@@ -2412,7 +2428,11 @@ function activityListHtml(rows, emptyMsg) {
     '<div class="activity-row"><div class="activity-icon">' + r.icon + '</div><div style="flex:1;"><div class="activity-title">' + r.title + '</div><div class="activity-sub">' + r.sub + '</div></div>' + (r.time ? '<div class="activity-time">' + r.time + '</div>' : '') + '</div>'
   ).join('') + '</div>';
 }
-function fmtAddr(a) { if (!a || !a.street) return '—'; return a.street + ', ' + a.city + ', ' + a.state + ' ' + a.zip; }
+// BR58: Address Line 2, where set, appears anywhere Business Address, Billing Address, or a Job
+// Address is displayed — this single formatter (plus fmtJobAddr below) is the one place that needs to
+// change, since every display surface in this prototype (Business Profile, Deal Command Center, Lists,
+// Job Address dropdown labels, Ready to Create summaries) already routes through one of the two.
+function fmtAddr(a) { if (!a || !a.street) return '—'; return [a.street, a.line2, a.city].filter(Boolean).join(', ') + ', ' + a.state + ' ' + a.zip; }
 
 /* ─── Archive / Delete ─── */
 function archiveBusiness(id) {
@@ -2570,7 +2590,7 @@ function removeAssociation(cid) {
 let editingBizId = null;
 let newBizContactMode = 'new';
 function resetBusinessForm() {
-  ['f_legalName','f_dba','f_email','f_phone','f_street','f_city','f_state','f_zip','f_bStreet','f_bCity','f_bState','f_bZip'].forEach(id => document.getElementById(id).value = '');
+  ['f_legalName','f_dba','f_email','f_phone','f_street','f_street2','f_city','f_state','f_zip','f_bStreet','f_bStreet2','f_bCity','f_bState','f_bZip'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f_displayDba').checked = true;
   document.getElementById('f_industry').value = 'Commercial Painting Contractor';
   document.getElementById('f_billingSame').checked = true;
@@ -2637,12 +2657,14 @@ function openEditBusinessModal(id) {
   document.getElementById('f_email').value = b.email || '';
   document.getElementById('f_phone').value = b.phone || '';
   document.getElementById('f_street').value = b.address.street;
+  document.getElementById('f_street2').value = b.address.line2 || '';
   document.getElementById('f_city').value = b.address.city;
   document.getElementById('f_state').value = b.address.state;
   document.getElementById('f_zip').value = b.address.zip;
   document.getElementById('f_billingSame').checked = b.billingSame;
   const ba = b.billingSame ? b.address : b.billingAddress;
   document.getElementById('f_bStreet').value = ba.street;
+  document.getElementById('f_bStreet2').value = ba.line2 || '';
   document.getElementById('f_bCity').value = ba.city;
   document.getElementById('f_bState').value = ba.state;
   document.getElementById('f_bZip').value = ba.zip;
@@ -2659,9 +2681,9 @@ function saveNewBusiness() {
     industry: document.getElementById('f_industry').value,
     email: document.getElementById('f_email').value.trim(),
     phone: document.getElementById('f_phone').value.trim(),
-    address: { street: document.getElementById('f_street').value, city: document.getElementById('f_city').value, state: document.getElementById('f_state').value, zip: document.getElementById('f_zip').value },
+    address: { street: document.getElementById('f_street').value, line2: document.getElementById('f_street2').value.trim(), city: document.getElementById('f_city').value, state: document.getElementById('f_state').value, zip: document.getElementById('f_zip').value },
     billingSame: document.getElementById('f_billingSame').checked,
-    billingAddress: { street: document.getElementById('f_bStreet').value, city: document.getElementById('f_bCity').value, state: document.getElementById('f_bState').value, zip: document.getElementById('f_bZip').value }
+    billingAddress: { street: document.getElementById('f_bStreet').value, line2: document.getElementById('f_bStreet2').value.trim(), city: document.getElementById('f_bCity').value, state: document.getElementById('f_bState').value, zip: document.getElementById('f_bZip').value }
   };
   if (editingBizId) {
     const biz = getBiz(editingBizId);
@@ -3755,7 +3777,7 @@ function epCurrentJobAddressesTarget() {
   return null;
 }
 function fmtJobAddr(a) {
-  return [a.street, a.city, (a.state && a.zip ? a.state + ' ' + a.zip : (a.state || a.zip))].filter(Boolean).join(', ');
+  return [a.street, a.line2, a.city, (a.state && a.zip ? a.state + ' ' + a.zip : (a.state || a.zip))].filter(Boolean).join(', ');
 }
 function jobAddressLabel(a) {
   const addrPart = fmtJobAddr(a);
@@ -3778,6 +3800,7 @@ function epBusinessJobAddressHtml(entity) {
     '<div class="settings-help" style="margin-bottom:12px;">' + (addrs.length ? 'New Job Address for ' : 'No Job Addresses on file for ') + bizDisplayLabel(entity) + (addrs.length ? '.' : ' yet.') + '</div>' +
     '<div class="settings-field" style="margin-bottom:12px;"><label class="settings-field-label">Label (optional)</label><input class="settings-field-input" id="epNewJobAddrLabel" placeholder="e.g. Main Site"></div>' +
     '<div class="settings-field" style="margin-bottom:12px;"><label class="settings-field-label is-required">Street</label><input class="settings-field-input" id="epNewJobAddrStreet"></div>' +
+    '<div class="settings-field" style="margin-bottom:12px;"><label class="settings-field-label">Address Line 2</label><input class="settings-field-input" id="epNewJobAddrStreet2" placeholder="Suite, unit, floor, etc. (optional)"></div>' +
     '<div style="display:flex; gap:10px;">' +
       '<div class="settings-field" style="flex:2;"><label class="settings-field-label">City</label><input class="settings-field-input" id="epNewJobAddrCity"></div>' +
       '<div class="settings-field" style="flex:1; max-width:74px;"><label class="settings-field-label">State</label><input class="settings-field-input" id="epNewJobAddrState" maxlength="2"></div>' +
@@ -3806,6 +3829,7 @@ function epSaveNewJobAddress() {
     id: 'ja' + (nextJobAddressId++),
     label: document.getElementById('epNewJobAddrLabel').value.trim(),
     street,
+    line2: document.getElementById('epNewJobAddrStreet2').value.trim(),
     city: document.getElementById('epNewJobAddrCity').value.trim(),
     state: document.getElementById('epNewJobAddrState').value.trim(),
     zip: document.getElementById('epNewJobAddrZip').value.trim()
