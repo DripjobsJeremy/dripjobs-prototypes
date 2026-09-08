@@ -1477,7 +1477,7 @@ const BUSINESSES = [
       { title: 'Deposit — Proposal #4790', sub: 'Jun 18, 2026 · ACH', meta: '$1,500.00', via: 'Tom Reyes' }
     ],
     jobs: [
-      { title: 'Job — Lobby Refresh', sub: 'Project Accepted', dealStage: 'Project Accepted', meta: '$6,250', via: 'Tom Reyes', contactId: 'c2', active: true, fromDeal: 'Proposal #4790 — Lobby Refresh', updatedAt: '2026-07-21', salesperson: 'Jordan P.', projectManager: 'No project manager', crew: null, color: null, scheduledStart: null, scheduledEnd: null }
+      { title: 'Job — Lobby Refresh', sub: 'Project Accepted', dealStage: 'Project Accepted', meta: '$6,250', via: 'Tom Reyes', contactId: 'c2', active: true, fromDeal: 'Proposal #4790 — Lobby Refresh', updatedAt: '2026-07-21', salesperson: 'Jordan P.', projectManager: 'No project manager', crew: null, color: null, scheduledStart: null, scheduledEnd: null, jobNo: 8801 }
     ],
     jobAddresses: [
       { id: 'ja1', label: 'West Wing', street: '4820 Meridian Business Pkwy, Bldg B', city: 'Dallas', state: 'TX', zip: '75201' },
@@ -1502,7 +1502,7 @@ const BUSINESSES = [
     ],
     proposals: [], appointments: [], invoices: [], payments: [],
     jobs: [
-      { title: 'Job — HOA Common Area Repaint', sub: 'In Progress · Crew scheduled Aug 20, 2026', stage: 'In Progress', meta: '$28,500', via: 'Marcus Ibsen', contactId: 'c4', active: true, fromDeal: 'HOA Common Area Repaint', updatedAt: '2026-08-11', salesperson: 'Maria Sutton', projectManager: 'No project manager', dealStage: 'Project Accepted', jobAddressId: 'ja3', crew: 'Johnny & Sarah', color: 'purple', scheduledStart: '2026-08-20T09:00', scheduledEnd: '2026-08-22T17:00' }
+      { title: 'Job — HOA Common Area Repaint', sub: 'In Progress · Crew scheduled Aug 20, 2026', stage: 'In Progress', meta: '$28,500', via: 'Marcus Ibsen', contactId: 'c4', active: true, fromDeal: 'HOA Common Area Repaint', updatedAt: '2026-08-11', salesperson: 'Maria Sutton', projectManager: 'No project manager', dealStage: 'Project Accepted', jobAddressId: 'ja3', crew: 'Johnny & Sarah', color: 'purple', scheduledStart: '2026-08-20T09:00', scheduledEnd: '2026-08-22T17:00', jobNo: 8802 }
     ],
     jobAddresses: [
       { id: 'ja3', label: 'HOA Common Area', street: '210 Commerce Center Dr', city: 'Austin', state: 'TX', zip: '78701' }
@@ -1908,6 +1908,7 @@ function renderTabContent(key) {
   if (key === 'information') { panel.innerHTML = infoTabHtml(biz); return; }
 
   const dataTabs = ['deals', 'proposals', 'appointments', 'invoices', 'payments'];
+  if (key === 'appointments') { panel.innerHTML = appointmentsTabHtml(biz); return; }
   if (dataTabs.includes(key)) { panel.innerHTML = dataTabHtml(key, biz); return; }
 
   if (key === 'tasks') { panel.innerHTML = tasksHtml(biz); return; }
@@ -2151,21 +2152,22 @@ function toggleDemoLiveSync(which) {
 
 const SNAPSHOT_TABS_LABEL = { deals: 'Deals', proposals: 'Proposals', appointments: 'Appointments', invoices: 'Invoices', payments: 'Payments' };
 const FASTFOLLOW_CANDIDATE_TABS = ['appointments', 'invoices', 'payments']; // Deals + Proposals are V1-confirmed, left out of this list on purpose
-function dataTabHtml(key, biz) {
-  const rows = biz[key] || [];
-  // Only records started "for a Business" (a Business Project) ever land in biz[key] — a Personal
-  // Project record belonging only to an associated Contact is never pushed here. See pushEpRecordOntoBusiness.
-  const rowsHtml = rows.map((r, i) =>
-    '<div class="activity-row clickable" onclick="openRecordDetail(\'' + biz.id + '\', \'' + key + '\', ' + i + ')">' +
+// Shared by dataTabHtml (Deals/Proposals/Invoices/Payments, unchanged flat list) and appointmentsTabHtml
+// (BR9's Appointments section, restructured below) — one row's markup, factored out so both can use it.
+function dataRowHtml(biz, key, i, r) {
+  return '<div class="activity-row clickable" onclick="openRecordDetail(\'' + biz.id + '\', \'' + key + '\', ' + i + ')">' +
       '<div class="activity-icon">' + ({ deals: '📈', proposals: '📋', appointments: '📅', invoices: '🧾', payments: '💰' }[key]) + '</div>' +
       '<div style="flex:1;">' +
         '<div class="activity-title">' + (r.color ? '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:' + r.color + '; margin-right:6px;"></span>' : '') + r.title + '</div>' +
         '<div class="activity-sub">' + r.sub + ' · via ' + (r.via || '—') + ' <span class="assumption-flag" style="margin-left:4px;" title="Snapshot value captured at record creation, does not update if the contact\'s Primary info later changes — per dependency ticket QA notes, confirmed 7/29.">SNAPSHOT</span></div>' +
       '</div>' +
       '<div style="font-weight:800; color:var(--gray-800);">' + r.meta + '</div>' +
-    '</div>'
-  ).join('') || '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-title">Nothing yet</div><div class="empty-state-desc">' + SNAPSHOT_TABS_LABEL[key] + ' created for this Business will appear here.</div></div>';
-
+    '</div>';
+}
+function dataTabEmptyStateHtml(key) {
+  return '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-title">Nothing yet</div><div class="empty-state-desc">' + SNAPSHOT_TABS_LABEL[key] + ' created for this Business will appear here.</div></div>';
+}
+function dataTabNoticesHtml(key) {
   const isFastFollow = FASTFOLLOW_CANDIDATE_TABS.includes(key);
   const fastFollowNote = isFastFollow ?
     '<div class="settings-alert settings-alert--neutral" style="margin-bottom:10px;">' +
@@ -2183,7 +2185,37 @@ function dataTabHtml(key, biz) {
       '<div class="settings-alert-icon">⚠️</div>' +
       '<div><div class="settings-alert-title">Open Item #1 — pending Jason</div>' +
       '<div>This tab shows ' + SNAPSHOT_TABS_LABEL[key].toLowerCase() + ' created directly for this Business (a Business Project) — not personal records belonging only to an associated Contact.' + feasibilitySentence + ' Rows shown display each record\'s point-in-time contact snapshot, not the contact\'s current Primary info. Click a row to open that record, same as opening it from a Contact today' + (key === 'payments' ? ', a Payment opens its associated Invoice rather than a Payment detail view of its own (BR39)' : '') + '.</div></div>' +
-    '</div>' + rowsHtml;
+    '</div>';
+}
+function dataTabHtml(key, biz) {
+  const rows = biz[key] || [];
+  // Only records started "for a Business" (a Business Project) ever land in biz[key] — a Personal
+  // Project record belonging only to an associated Contact is never pushed here. See pushEpRecordOntoBusiness.
+  const rowsHtml = rows.map((r, i) => dataRowHtml(biz, key, i, r)).join('') || dataTabEmptyStateHtml(key);
+  return dataTabNoticesHtml(key) + rowsHtml;
+}
+// BR9 structural clarification: the Appointments tab mirrors the Contact record's own Appointments
+// tab — two sections, Appointments (Appointment records) and Upcoming Scheduled Jobs (Jobs scheduled
+// per BR52, aggregated directly rather than via Deals, since most Appointment Event Types never create
+// a Deal at all — see BR31). Fast-follow status is unchanged; this only restructures the tab's content.
+function scheduledJobRowHtml(biz, job) {
+  return '<div class="activity-row">' +
+    '<div class="activity-icon">🛠️</div>' +
+    '<div style="flex:1;">' +
+      '<div class="activity-title">' + job.title + (job.jobNo ? ' <span style="color:var(--gray-400); font-weight:600;">Job #' + job.jobNo + '</span>' : '') + '</div>' +
+      '<div class="activity-sub">' + jobDateRangeLabel(job) + ' · Crew: ' + job.crew + '</div>' +
+    '</div>' +
+    '<button type="button" class="btn btn-outline btn-sm" onclick="openBusinessProfile(\'' + biz.id + '\', \'information\')">View Job</button>' +
+  '</div>';
+}
+function appointmentsTabHtml(biz) {
+  const apptRows = (biz.appointments || []).map((r, i) => dataRowHtml(biz, 'appointments', i, r)).join('') || dataTabEmptyStateHtml('appointments');
+  const scheduledJobs = (biz.jobs || []).filter(j => j.crew);
+  const jobRows = scheduledJobs.map(job => scheduledJobRowHtml(biz, job)).join('') ||
+    '<div class="empty-state"><div class="empty-state-icon">🛠️</div><div class="empty-state-desc">No scheduled Jobs for this Business yet.</div></div>';
+  return dataTabNoticesHtml('appointments') +
+    '<div class="settings-section"><div class="settings-section-title">Appointments</div>' + apptRows + '</div>' +
+    '<div class="settings-section"><div class="settings-section-title">Upcoming Scheduled Jobs</div>' + jobRows + '</div>';
 }
 function openRecordDetail(bizId, key, idx) {
   const biz = getBiz(bizId);
