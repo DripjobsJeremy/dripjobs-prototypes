@@ -9,6 +9,11 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-08] Hub: removed Send Marketing Agency Info (shipped)
+
+- Decision: Removed "Send Marketing Agency Info" from `#protoGrid`, per Jeremy confirming it was pushed to production today.
+- Why: Direct request.
+- Open question: None.
 ## [2026-09-08] Rate Preset Templates (Production Rates Settings + First Time Setup)
 
 - Decision: Rebuilt the Production Rates > Settings tab (5-tab nav, Proposal Defaults/Proposal Settings cards, Project Details/Guides sidebar) from the reference screenshots since no existing prototype in this repo had the real Settings page shell, then added the Rate Preset Template dropdown (None (custom) / Aiden, PaintPro / Southeast / Florida, all mock values) above Hourly Cost Rate. Used simple underline tabs matching the actual product screenshots rather than the design system's pastel pill-chip tab pattern, since the current UI structure to match took priority over the generic doc pattern for this specific page.
