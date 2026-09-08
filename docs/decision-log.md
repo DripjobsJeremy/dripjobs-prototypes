@@ -9,6 +9,14 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-08] Rate Preset Templates (Production Rates Settings + First Time Setup)
+
+- Decision: Rebuilt the Production Rates > Settings tab (5-tab nav, Proposal Defaults/Proposal Settings cards, Project Details/Guides sidebar) from the reference screenshots since no existing prototype in this repo had the real Settings page shell, then added the Rate Preset Template dropdown (None (custom) / Aiden, PaintPro / Southeast / Florida, all mock values) above Hourly Cost Rate. Used simple underline tabs matching the actual product screenshots rather than the design system's pastel pill-chip tab pattern, since the current UI structure to match took priority over the generic doc pattern for this specific page.
+- Decision: The substrate-edit warning (item 3 of the ticket) is demoed as a standalone "Substrate Field Behavior Preview (Demo)" card on the Settings tab with one mock spread-rate input, rather than rebuilding the full Substrates tab, per the ticket's own scope note that Substrates is reference-only context. The other four tabs (Interior/Exterior Area, Substrates, Products) are left as labeled placeholders linking back to Settings.
+- Decision: Added a before/after diff table inside the confirmation modal (current vs. new value for the 3 affected fields) beyond the literal ticket ask, to make the flow easier to validate visually — flagging this as an addition, not a requested feature, in case Jeremy wants it trimmed for dev.
+- Why: Direct request (ClickUp 86bbwt19j) to prototype the preset selector, its confirmation modal, the substrate-edit warning, and the first-time-setup variant, ahead of these UX decisions being finalized for development.
+- Open question: Whether the confirmation modal's before/after diff table should carry into the real build, or if the warn alert + plain field updates are sufficient, is left to Jeremy.
+
 ## [2026-09-08] Business Entity Records V1: Address Line 2 on Business/Billing/Job Addresses (BR56-59)
 
 - Decision: Added an optional `line2` field to Business Address, Billing Address, and each Job Address, positioned between Street and City in every edit form that touches one of these three (Business Edit modal's Address and Billing Address sections; the Business Profile's Job Addresses Add/Edit modal; the Creation Entry Points' inline "+ Add New Job Address" form). BR58's "appears anywhere these addresses are displayed" was satisfied by updating the two central formatters, `fmtAddr()` and `fmtJobAddr()`, rather than touching each call site — every surface in this prototype (Business Profile display, Deal Command Center, all 5 Lists, the Job Address dropdown/selection lists, Ready to Create summaries) already routes through one of the two, so both picked up Line 2 display automatically.
