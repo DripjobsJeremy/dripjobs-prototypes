@@ -337,9 +337,16 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
 #production-rates-prototype .diff-table td.new-val { color:var(--st-color-primary-active); font-weight:700; }
 #production-rates-prototype .diff-arrow { color:var(--st-color-text-muted); margin:0 6px; }
 
-/* ── FIRST-TIME SETUP MODAL specifics ── */
-#production-rates-prototype .fts-icon { width:44px; height:44px; border-radius:10px; background:#EDE9FE; display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
-#production-rates-prototype .fts-icon i { color:var(--st-color-primary); font-size:19px; }
+/* ── COURSE ACCESS CODE GATE ── */
+#production-rates-prototype .course-lock-icon { width:44px; height:44px; border-radius:10px; background:#EDE9FE; display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+#production-rates-prototype .course-lock-icon i { color:var(--st-color-primary); font-size:19px; }
+#production-rates-prototype .course-access-error { display:none; font-size:12px; color:#991B1B; margin-top:6px; }
+#production-rates-prototype .course-access-divider { display:flex; align-items:center; gap:10px; margin:20px 0 16px; }
+#production-rates-prototype .course-access-divider::before,
+#production-rates-prototype .course-access-divider::after { content:''; flex:1; height:1px; background:var(--st-color-border); }
+#production-rates-prototype .course-access-divider span { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--st-color-text-muted); }
+#production-rates-prototype .course-unlock-box { background:#FBFAFF; border:1px solid #D6D2F5; border-radius:10px; padding:14px 16px; }
+#production-rates-prototype .course-unlock-box p { font-size:12.5px; color:var(--st-color-text-muted); margin-bottom:10px; }
 
 /* ── AREA DEFAULTS SUMMARY (Interior/Exterior Area tabs) ── */
 #production-rates-prototype .area-defaults-row { display:flex; flex-wrap:wrap; gap:24px; }
@@ -430,7 +437,7 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
   <div class="proto-bar-left">
     <a class="back-link" href="../index.html">← Hub</a>
     <span class="divider">|</span>
-    <span class="proto-bar-title">Rate Preset Templates (Settings + First Time Setup)</span>
+    <span class="proto-bar-title">Rate Preset Templates (Settings, Interior/Exterior Area, Substrates, Products)</span>
   </div>
   <a class="proto-bar-ticket" href="https://app.clickup.com/t/86bbwt19j" target="_blank">86bbwt19j</a>
 </div>
@@ -483,7 +490,6 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
         <span class="demo-bar-label"><i class="fas fa-flask"></i> Prototype controls</span>
         <span class="demo-state">Applied preset: <strong id="demoStateLabel">None (custom)</strong></span>
         <div class="demo-bar-spacer"></div>
-        <button class="btn btn-sm btn-outline-primary" onclick="openFirstTimeSetup()"><i class="fas fa-magic"></i> Preview: First-Time Setup Modal</button>
         <button class="btn btn-sm btn-outline-primary" onclick="resetDemo()"><i class="fas fa-undo"></i> Reset Demo</button>
       </div>
 
@@ -513,16 +519,16 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
                 <div class="settings-field settings-field--full">
                   <label class="settings-field-label is-new">Rate Preset Template <i class="fas fa-info-circle" title="Applies mock cost, sell, and markup rates from a coaching course or region. You can still fine-tune values after applying."></i></label>
                   <select class="settings-field-input" id="presetSelect" onchange="onPresetChange(this)">
-                    <option value="none">None (custom)</option>
+                    <option value="none" data-preset="none">None (custom)</option>
                     <optgroup label="Coaching Courses">
-                      <option value="aiden">Aiden, PaintPro</option>
+                      <option value="aiden" data-preset="aiden">🔒 Aiden, PaintPro</option>
                     </optgroup>
                     <optgroup label="Regional">
-                      <option value="southeast">Southeast</option>
-                      <option value="florida">Florida</option>
+                      <option value="southeast" data-preset="southeast">Southeast</option>
+                      <option value="florida" data-preset="florida">Florida</option>
                     </optgroup>
                   </select>
-                  <div class="settings-field-help" id="presetHelp">Applying a preset updates Hourly Cost Rate, Hourly Sell Rate, and Product Markup below. You can still edit any value afterward.</div>
+                  <div class="settings-field-help" id="presetHelp">Applying a preset updates Hourly Cost Rate, Hourly Sell Rate, and Product Markup below. You can still edit any value afterward. Coaching-course presets (🔒) require an access code from that course.</div>
                 </div>
 
                 <div class="settings-field settings-field--compact">
@@ -827,44 +833,36 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
   </div>
 </div>
 
-<!-- ══════════════ FIRST-TIME SETUP MODAL ══════════════ -->
-<div class="modal-backdrop" id="firstTimeSetupModal">
+<!-- ══════════════ COURSE ACCESS CODE MODAL ══════════════ -->
+<div class="modal-backdrop" id="courseAccessModal">
   <div class="modal">
     <div class="modal-header">
       <div>
-        <div class="modal-title">Add Production Rates</div>
-        <div class="modal-subtitle">First-time setup</div>
+        <div class="modal-title" id="courseAccessTitle">Unlock Aiden, PaintPro Rates</div>
+        <div class="modal-subtitle">This preset is only available to students who've completed the course.</div>
       </div>
-      <button class="modal-close" onclick="closeFirstTimeSetup()">&times;</button>
+      <button class="modal-close" onclick="closeCourseAccessModal()">&times;</button>
     </div>
     <div class="modal-body">
-      <div class="fts-icon"><i class="fas fa-tachometer-alt"></i></div>
-      <p>Enter your access code to import a shared rate table, or optionally start from a Rate Preset Template below. There's nothing to overwrite yet, so no confirmation is needed here.</p>
+      <div class="course-lock-icon"><i class="fas fa-lock"></i></div>
+      <p>Enter the access code you were given after completing this course to unlock its rates.</p>
 
-      <div class="settings-grid" style="display:flex; flex-direction:column; gap:16px;">
-        <div class="settings-field">
-          <label class="settings-field-label" for="ftsAccessCode">Access Code</label>
-          <input class="settings-field-input" id="ftsAccessCode" type="text" placeholder="e.g. 7F3-9KD">
-        </div>
-        <div class="settings-field">
-          <label class="settings-field-label is-new">Rate Preset Template</label>
-          <select class="settings-field-input" id="ftsPresetSelect">
-            <option value="none">None (custom)</option>
-            <optgroup label="Coaching Courses">
-              <option value="aiden">Aiden, PaintPro</option>
-            </optgroup>
-            <optgroup label="Regional">
-              <option value="southeast">Southeast</option>
-              <option value="florida">Florida</option>
-            </optgroup>
-          </select>
-          <div class="settings-field-help">Optional — jump-start your rates with a coaching course or regional preset. You can change this anytime from Production Rates &gt; Settings.</div>
-        </div>
+      <div class="settings-field">
+        <label class="settings-field-label" for="courseAccessCode">Access Code</label>
+        <input class="settings-field-input" id="courseAccessCode" type="text" placeholder="e.g. PPC2026">
+      </div>
+      <div class="course-access-error" id="courseAccessError">That code doesn't match. Double-check it and try again.</div>
+
+      <div class="course-access-divider"><span>Don't have a code yet?</span></div>
+
+      <div class="course-unlock-box">
+        <p>Once you've completed the requirements of this course, the provider will give you an access code to unlock these rates.</p>
+        <a class="btn btn-outline-primary btn-sm" id="courseAccessLink" href="https://paintprocoaching.com/" target="_blank" rel="noopener">Unlock these rates by taking this course</a>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline-primary" onclick="closeFirstTimeSetup()">Cancel</button>
-      <button class="btn btn-primary" onclick="continueFirstTimeSetup()">Continue</button>
+      <button class="btn btn-outline-primary" onclick="closeCourseAccessModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCourseAccessCode()">Unlock</button>
     </div>
   </div>
 </div>
@@ -1121,12 +1119,18 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
 </div><!-- /#production-rates-prototype -->
 
 <script>
+// Coaching-course presets are gated behind an access code (only students who've paid
+// for and completed that course should see its rates); regional presets are not gated.
+// The access code itself is a prototype placeholder — real codes are TBD, issued by the
+// course provider once a student completes the course requirements.
 var PRESETS = {
   none:      { label: 'None (custom)', cost: null, sell: null, markup: null },
-  aiden:     { label: 'Aiden, PaintPro', cost: '28.00', sell: '65.00', markup: '80' },
+  aiden:     { label: 'Aiden, PaintPro', cost: '28.00', sell: '65.00', markup: '80', requiresAccessCode: true, accessCode: 'PPC2026', courseUrl: 'https://paintprocoaching.com/' },
   southeast: { label: 'Southeast',       cost: '24.00', sell: '55.00', markup: '65' },
   florida:   { label: 'Florida',         cost: '22.00', sell: '52.00', markup: '60' }
 };
+
+var unlockedPresets = {};
 
 // Rule 4 (ticket 86bbwt19j) says applying a preset also updates Interior/Exterior Area
 // substrate-level production rate values, but the finalized preset numbers were still
@@ -1591,10 +1595,18 @@ function onPresetChange(select) {
   var newValue = select.value;
   if (newValue === currentPreset) return;
 
-  // Page already has values filled in (existing account) -> always confirm before changing.
   pendingPreset = newValue;
-  select.value = currentPreset; // revert visually until confirmed
+  select.value = currentPreset; // revert visually until confirmed/unlocked
 
+  var preset = PRESETS[newValue];
+  if (preset.requiresAccessCode && !unlockedPresets[newValue]) {
+    openCourseAccessModal(newValue);
+    return;
+  }
+  showPresetConfirm(newValue);
+}
+
+function showPresetConfirm(newValue) {
   document.getElementById('confirmPresetName').textContent = PRESETS[newValue].label;
 
   var rows = '';
@@ -1606,6 +1618,41 @@ function onPresetChange(select) {
   document.getElementById('diffTableBody').innerHTML = rows;
 
   document.getElementById('confirmModal').classList.add('open');
+}
+
+/* ── COURSE ACCESS CODE GATE ── */
+function openCourseAccessModal(presetKey) {
+  var preset = PRESETS[presetKey];
+  document.getElementById('courseAccessTitle').textContent = 'Unlock ' + preset.label + ' Rates';
+  document.getElementById('courseAccessCode').value = '';
+  document.getElementById('courseAccessError').style.display = 'none';
+  document.getElementById('courseAccessLink').href = preset.courseUrl;
+  document.getElementById('courseAccessModal').classList.add('open');
+}
+function closeCourseAccessModal() {
+  document.getElementById('courseAccessModal').classList.remove('open');
+  document.getElementById('presetSelect').value = currentPreset;
+  pendingPreset = null;
+}
+function submitCourseAccessCode() {
+  var preset = PRESETS[pendingPreset];
+  var entered = document.getElementById('courseAccessCode').value.trim().toUpperCase();
+  if (!preset || entered !== preset.accessCode) {
+    document.getElementById('courseAccessError').style.display = 'block';
+    return;
+  }
+  unlockedPresets[pendingPreset] = true;
+  document.getElementById('courseAccessModal').classList.remove('open');
+  refreshPresetLockLabels();
+  showPresetConfirm(pendingPreset);
+}
+function refreshPresetLockLabels() {
+  document.querySelectorAll('#presetSelect option[data-preset]').forEach(function(opt){
+    var key = opt.dataset.preset;
+    var preset = PRESETS[key];
+    var locked = preset.requiresAccessCode && !unlockedPresets[key];
+    opt.textContent = (locked ? '🔒 ' : '') + preset.label;
+  });
 }
 
 function diffRow(label, current, next) {
@@ -1873,18 +1920,6 @@ function applyPresetToProducts(presetKey) {
   });
 }
 
-function openFirstTimeSetup() {
-  document.getElementById('firstTimeSetupModal').classList.add('open');
-}
-function closeFirstTimeSetup() {
-  document.getElementById('firstTimeSetupModal').classList.remove('open');
-}
-function continueFirstTimeSetup() {
-  var val = document.getElementById('ftsPresetSelect').value;
-  closeFirstTimeSetup();
-  toast('First-time setup continued with preset: ' + PRESETS[val].label + ' (prototype only)');
-}
-
 function resetDemo() {
   currentPreset = 'none';
   pendingPreset = null;
@@ -1893,15 +1928,17 @@ function resetDemo() {
   document.getElementById('hourlySell').value = '60.00';
   document.getElementById('productMarkup').value = '75';
   document.getElementById('demoStateLabel').textContent = 'None (custom)';
-  document.getElementById('ftsPresetSelect').value = 'none';
-  document.getElementById('ftsAccessCode').value = '';
 
   document.getElementById('areaDefaultsModal').classList.remove('open');
   document.getElementById('substrateModal').classList.remove('open');
   document.getElementById('productModal').classList.remove('open');
+  document.getElementById('courseAccessModal').classList.remove('open');
   editingAreaDefaultsFor = null;
   editingSubstrateRef = null;
   editingProductId = null;
+
+  unlockedPresets = {};
+  refreshPresetLockLabels();
 
   AREA_DEFAULTS = JSON.parse(JSON.stringify(BASE_AREA_DEFAULTS));
   SUBSTRATE_CATALOG = JSON.parse(JSON.stringify(BASE_SUBSTRATE_CATALOG));
@@ -1926,6 +1963,7 @@ renderAreaTab('interior');
 renderAreaTab('exterior');
 renderSubstratesPanel();
 renderProductsPanel();
+refreshPresetLockLabels();
 
 var toastTimer = null;
 function toast(msg) {
