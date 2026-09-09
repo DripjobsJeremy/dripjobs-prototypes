@@ -715,11 +715,10 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
               <thead>
                 <tr>
                   <th>Substrate</th>
-                  <th>Product</th>
-                  <th>Coats</th>
-                  <th>Coverage</th>
-                  <th>Work Rate</th>
-                  <th>Prep Hrs</th>
+                  <th>Default Product</th>
+                  <th>Calculation</th>
+                  <th>Rate</th>
+                  <th>Default Prep</th>
                   <th>Active</th>
                   <th></th>
                 </tr>
@@ -730,6 +729,7 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
           <div class="substrate-table-legend">
             <span><span class="default-chip">Default</span> used when a proposal doesn't specify a substrate for this category</span>
             <span><span class="preset-linked-dot"></span> value comes from the applied Rate Preset Template</span>
+            <span><i class="far fa-star" style="color:var(--st-color-primary);"></i> set this substrate as the category default</span>
           </div>
         </section>
       </div>
@@ -919,66 +919,123 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
 
 <!-- ══════════════ EDIT AREA SUBSTRATE MODAL ══════════════ -->
 <div class="modal-backdrop" id="substrateModal">
-  <div class="modal">
+  <div class="modal" style="width:500px;">
     <div class="modal-header">
-      <div>
-        <div class="modal-title">Edit Area Substrate</div>
-        <div class="modal-subtitle" id="substrateModalSubtitle">Interior · Walls</div>
-      </div>
+      <div class="modal-title">Edit Area Substrate</div>
       <button class="modal-close" onclick="closeSubstrateEdit()">&times;</button>
     </div>
     <div class="modal-body">
-      <div class="settings-grid" style="grid-template-columns:1fr; gap:16px;">
+      <div class="settings-grid" style="grid-template-columns:1fr 1fr; gap:16px;">
         <div class="settings-field">
-          <label class="settings-field-label" for="subName">Substrate Name</label>
-          <input class="settings-field-input" id="subName" type="text" readonly>
+          <label class="settings-field-label" for="subName">Substrate Name:</label>
+          <input class="settings-field-input" id="subName" type="text" oninput="onSubstrateFieldEdit()">
+        </div>
+        <div class="settings-field">
+          <label class="settings-field-label" for="subClientLabel">Substrate Client Label:</label>
+          <input class="settings-field-input" id="subClientLabel" type="text" oninput="onSubstrateFieldEdit()">
         </div>
       </div>
+
+      <div class="settings-grid" style="grid-template-columns:1fr; gap:16px; margin-top:16px;">
+        <div class="settings-field">
+          <label class="settings-field-label" for="subDefaultProduct">Default Product:</label>
+          <select class="settings-field-input" id="subDefaultProduct" onchange="onSubstrateFieldEdit()"></select>
+        </div>
+      </div>
+
       <div class="settings-grid" style="grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;">
         <div class="settings-field">
-          <label class="settings-field-label" for="subProduct">Product</label>
-          <input class="settings-field-input" id="subProduct" type="text" oninput="onSubstrateFieldEdit()">
+          <label class="settings-field-label" for="subCategory">Category:</label>
+          <select class="settings-field-input" id="subCategory" onchange="onSubstrateCategoryChange()"></select>
         </div>
         <div class="settings-field">
-          <label class="settings-field-label" for="subCoats">Coats</label>
-          <input class="settings-field-input" id="subCoats" type="text" oninput="onSubstrateFieldEdit()">
+          <label class="settings-field-label" for="subCalcType">Calculation:</label>
+          <select class="settings-field-input" id="subCalcType" onchange="onSubstrateCalcTypeChange()"></select>
         </div>
-        <div class="settings-field" id="subCoverageField">
-          <label class="settings-field-label" for="subCoverage">Coverage (Spread Rate)</label>
-          <div class="settings-field-group">
+      </div>
+
+      <hr style="border:none; border-top:1px solid var(--st-color-border); margin:18px 0 16px;">
+
+      <!-- Calculation: Square Foot / Linear Foot ("measured") -->
+      <div id="subFieldsMeasured">
+        <div class="settings-grid" style="grid-template-columns:1fr; gap:16px;">
+          <div class="settings-field">
+            <label class="settings-field-label" id="subCoverageLabel" for="subCoverage">Per Gal. Coverage (sqft) <i class="fas fa-info-circle" title="Square feet covered by one gallon at one coat."></i></label>
             <input class="settings-field-input" id="subCoverage" type="text" oninput="onSubstrateFieldEdit()">
-            <span class="settings-field-group-suffix">sq ft/gal</span>
           </div>
         </div>
-        <div class="settings-field">
-          <label class="settings-field-label" for="subWorkRate">Production / Work Rate</label>
-          <input class="settings-field-input" id="subWorkRate" type="text" oninput="onSubstrateFieldEdit()">
-        </div>
-        <div class="settings-field">
-          <label class="settings-field-label" for="subMaterialCost">Material Cost</label>
-          <div class="settings-field-group">
-            <span class="settings-field-group-prefix">$</span>
-            <input class="settings-field-input" id="subMaterialCost" type="text" oninput="onSubstrateFieldEdit()">
+        <div class="settings-field-label" id="subSpreadRateLabel" style="position:static; margin-top:12px; margin-bottom:8px;">Coat Spreadrate Per 1 Man-Hour (sqft) <i class="fas fa-info-circle" title="How many units one painter covers per hour, at 1/2/3 coats."></i></div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr 1fr; gap:16px;">
+          <div class="settings-field">
+            <label class="settings-field-label" for="subSpread1">1 Coat</label>
+            <input class="settings-field-input" id="subSpread1" type="text" oninput="onSubstrateFieldEdit()">
           </div>
-        </div>
-        <div class="settings-field">
-          <label class="settings-field-label" for="subPrepHrs">Prep Time</label>
-          <div class="settings-field-group">
-            <input class="settings-field-input" id="subPrepHrs" type="text" oninput="onSubstrateFieldEdit()">
-            <span class="settings-field-group-suffix">hrs</span>
+          <div class="settings-field">
+            <label class="settings-field-label" for="subSpread2">2 Coats</label>
+            <input class="settings-field-input" id="subSpread2" type="text" oninput="onSubstrateFieldEdit()">
+          </div>
+          <div class="settings-field">
+            <label class="settings-field-label" for="subSpread3">3 Coats</label>
+            <input class="settings-field-input" id="subSpread3" type="text" oninput="onSubstrateFieldEdit()">
           </div>
         </div>
       </div>
 
-      <div class="settings-field settings-field--full" style="margin-top:6px;">
-        <div class="settings-toggle-row" style="border-top:none; padding-top:6px;">
-          <label class="toggle-switch"><input type="checkbox" id="subIsDefault"><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
-          <div class="toggle-label">Set as default substrate for this category</div>
+      <!-- Calculation: Price Per Item -->
+      <div id="subFieldsPricePerItem">
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr; gap:16px;">
+          <div class="settings-field">
+            <label class="settings-field-label" for="subUsagePerCoat1">Usage Per Coat (gal) <i class="fas fa-info-circle" title="Gallons of product used per coat, per item."></i></label>
+            <input class="settings-field-input" id="subUsagePerCoat1" type="text" oninput="onSubstrateFieldEdit()">
+          </div>
+          <div class="settings-field">
+            <label class="settings-field-label" for="subHoursPerItem">Hours Per Item <i class="fas fa-info-circle" title="Labor hours to complete one item."></i></label>
+            <input class="settings-field-input" id="subHoursPerItem" type="text" oninput="onSubstrateFieldEdit()">
+          </div>
         </div>
-        <div class="settings-toggle-row">
-          <label class="toggle-switch"><input type="checkbox" id="subActive" checked><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
-          <div class="toggle-label">Active</div>
+        <div class="settings-grid" style="grid-template-columns:1fr; gap:16px; margin-top:16px;">
+          <div class="settings-field">
+            <label class="settings-field-label" for="subPricePerItem">Price Per Item ($) <i class="fas fa-info-circle" title="Flat charge to the customer per item."></i></label>
+            <input class="settings-field-input" id="subPricePerItem" type="text" oninput="onSubstrateFieldEdit()">
+          </div>
         </div>
+      </div>
+
+      <!-- Calculation: Hours Per Item -->
+      <div id="subFieldsHoursPerItem">
+        <div class="settings-grid" style="grid-template-columns:1fr; gap:16px;">
+          <div class="settings-field">
+            <label class="settings-field-label" for="subUsagePerCoat2">Usage Per Coat (gal) <i class="fas fa-info-circle" title="Gallons of product used per coat, per item."></i></label>
+            <input class="settings-field-input" id="subUsagePerCoat2" type="text" oninput="onSubstrateFieldEdit()">
+          </div>
+        </div>
+        <div class="settings-field-label" style="position:static; margin-top:12px; margin-bottom:8px;">Man-Hours Per Coat <i class="fas fa-info-circle" title="Labor hours per item, at 1/2/3 coats."></i></div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr 1fr; gap:16px;">
+          <div class="settings-field">
+            <label class="settings-field-label" for="subManHours1">1 Coat</label>
+            <input class="settings-field-input" id="subManHours1" type="text" oninput="onSubstrateFieldEdit()">
+          </div>
+          <div class="settings-field">
+            <label class="settings-field-label" for="subManHours2">2 Coats</label>
+            <input class="settings-field-input" id="subManHours2" type="text" oninput="onSubstrateFieldEdit()">
+          </div>
+          <div class="settings-field">
+            <label class="settings-field-label" for="subManHours3">3 Coats</label>
+            <input class="settings-field-input" id="subManHours3" type="text" oninput="onSubstrateFieldEdit()">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-grid" style="grid-template-columns:1fr; gap:16px; margin-top:16px;">
+        <div class="settings-field">
+          <label class="settings-field-label" for="subDefaultPrep">Default Prep <i class="fas fa-info-circle" title="Substrate-level prep override. Leave at 0 to fall back to the Area's Default Prep Level."></i></label>
+          <input class="settings-field-input" id="subDefaultPrep" type="text" oninput="onSubstrateFieldEdit()">
+        </div>
+      </div>
+
+      <div class="settings-toggle-row" style="margin-top:8px;">
+        <label class="toggle-switch"><input type="checkbox" id="subUpdateTemplates"><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        <div class="toggle-label">Update Templates <i class="fas fa-info-circle" title="Also apply these changes to existing Proposal Templates that use this substrate."></i></div>
       </div>
 
       <div class="settings-alert settings-alert--warn" id="substrateWarnAlert" style="display:none; margin-top:16px;">
@@ -989,8 +1046,8 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
         </div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline-primary" onclick="closeSubstrateEdit()">Cancel</button>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <button class="btn btn-outline-primary" onclick="closeSubstrateEdit()">Close</button>
       <button class="btn btn-primary" onclick="saveSubstrateEdit()">Save</button>
     </div>
   </div>
@@ -1093,55 +1150,65 @@ var AREA_DEFAULTS = {
 
 var CATEGORY_META = {
   interior: {
-    walls:    { label: 'Walls',    icon: 'fa-grip-lines-vertical' },
-    ceilings: { label: 'Ceilings', icon: 'fa-square-full' },
-    trim:     { label: 'Trim',     icon: 'fa-ruler' },
-    doors:    { label: 'Doors',    icon: 'fa-door-open' },
-    cabinets: { label: 'Cabinets', icon: 'fa-box' }
+    walls:    { label: 'Walls',    icon: 'fa-grip-lines-vertical', calcTypes: ['measured'], measureUnit: 'sqft' },
+    ceilings: { label: 'Ceilings', icon: 'fa-square-full',         calcTypes: ['measured'], measureUnit: 'sqft' },
+    trim:     { label: 'Trim',     icon: 'fa-ruler',               calcTypes: ['measured'], measureUnit: 'linearft' },
+    doors:    { label: 'Doors',    icon: 'fa-door-open',           calcTypes: ['pricePerItem', 'hoursPerItem'] },
+    cabinets: { label: 'Cabinets', icon: 'fa-box',                 calcTypes: ['pricePerItem', 'hoursPerItem'] }
   },
   exterior: {
-    siding: { label: 'Siding', icon: 'fa-home' },
-    trim:   { label: 'Trim',           icon: 'fa-ruler' },
-    doors:  { label: 'Doors',          icon: 'fa-door-open' }
+    siding: { label: 'Siding', icon: 'fa-home',   calcTypes: ['measured'], measureUnit: 'sqft' },
+    trim:   { label: 'Trim',   icon: 'fa-ruler',   calcTypes: ['measured'], measureUnit: 'linearft' },
+    doors:  { label: 'Doors',  icon: 'fa-door-open', calcTypes: ['pricePerItem', 'hoursPerItem'] }
   }
 };
 
-// Placeholder substrate catalog — representative rows for prototyping the drill-down and
-// edit flow, not a finalized rate book (see ticket's "Out of Scope" note on preset values).
+// Calculation type meta: which fields a substrate carries depends on its Calculation
+// dropdown value, matching the real Edit Area Substrate modal (screenshots, Sept 2026).
+var CALC_TYPE_LABEL = {
+  measured:     function(unit, categoryLabel) { return (unit === 'linearft' ? 'Linear Foot' : 'Square Foot') + ' (' + categoryLabel + ')'; },
+  pricePerItem: function() { return 'Price Per Item'; },
+  hoursPerItem: function() { return 'Hours Per Item'; }
+};
+
+// Substrate catalog. Two rows carry REAL production values from screenshots (8FT Light
+// Texture / Walls, and (Spray) 6-Panel Door - 2 Side / Doors) — everything else is a
+// clearly-flagged placeholder restructured into the same real field shape, not a
+// finalized rate book (see ticket's "Out of Scope" note on preset values).
 var SUBSTRATE_CATALOG = {
   interior: {
     walls: [
-      { id:'int-walls-1', name:'8FT Light Texture', isDefault:true,  product:'SW Emerald Interior',  unit:'Sq Ft',     coats:2, coverage:350, workRate:200, prepHrs:0,    materialCost:70, active:true,  presetLinked:false },
-      { id:'int-walls-2', name:'8FT Smooth',         isDefault:false, product:'SW Duration Interior', unit:'Sq Ft',     coats:2, coverage:350, workRate:225, prepHrs:0,    materialCost:55, active:true,  presetLinked:false },
-      { id:'int-walls-3', name:'2-Story Walls',      isDefault:false, product:'SW Emerald Interior',  unit:'Sq Ft',     coats:2, coverage:350, workRate:100, prepHrs:0,    materialCost:70, active:true,  presetLinked:false }
+      { id:'int-walls-1', name:'8FT Light Texture', clientLabel:'8FT Light Texture', category:'walls', calcType:'measured', defaultProduct:'Sherwin-Williams Duration Exterior', perGalCoverage:350, coatSpreadRate:{1:125,2:100,3:85}, defaultPrep:0, isDefault:true,  active:true, presetLinked:false },
+      { id:'int-walls-2', name:'8FT Smooth',         clientLabel:'8FT Smooth',         category:'walls', calcType:'measured', defaultProduct:'Sherwin Williams SuperPaint Interior', perGalCoverage:350, coatSpreadRate:{1:250,2:225,3:190}, defaultPrep:0, isDefault:false, active:true, presetLinked:false },
+      { id:'int-walls-3', name:'2-Story Walls',      clientLabel:'2-Story Walls',      category:'walls', calcType:'measured', defaultProduct:'Sherwin-Williams Emerald Interior',   perGalCoverage:350, coatSpreadRate:{1:140,2:100,3:80},  defaultPrep:0, isDefault:false, active:true, presetLinked:false }
     ],
     ceilings: [
-      { id:'int-ceil-1', name:'Smooth Ceiling',  isDefault:true,  product:'SW ProMar Ceiling', unit:'Sq Ft', coats:2, coverage:350, workRate:175, prepHrs:0, materialCost:45, active:true, presetLinked:false },
-      { id:'int-ceil-2', name:'Popcorn Ceiling', isDefault:false, product:'SW ProMar Ceiling', unit:'Sq Ft', coats:2, coverage:300, workRate:100, prepHrs:0, materialCost:45, active:true, presetLinked:false }
+      { id:'int-ceil-1', name:'Smooth Ceiling',  clientLabel:'Smooth Ceiling',  category:'ceilings', calcType:'measured', defaultProduct:'Sherwin Williams ProMar 400 Interior', perGalCoverage:350, coatSpreadRate:{1:200,2:175,3:150}, defaultPrep:0, isDefault:true,  active:true, presetLinked:false },
+      { id:'int-ceil-2', name:'Popcorn Ceiling', clientLabel:'Popcorn Ceiling', category:'ceilings', calcType:'measured', defaultProduct:'Sherwin Williams ProMar 400 Interior', perGalCoverage:300, coatSpreadRate:{1:120,2:100,3:80},  defaultPrep:0, isDefault:false, active:true, presetLinked:false }
     ],
     trim: [
-      { id:'int-trim-1', name:'3" Baseboard',  isDefault:true,  product:'SW Emerald Urethane', unit:'Linear Ft', coats:2, coverage:null, workRate:45, prepHrs:0.02, materialCost:75, active:true,  presetLinked:false },
-      { id:'int-trim-2', name:'Crown Molding', isDefault:false, product:'SW Emerald Urethane', unit:'Linear Ft', coats:2, coverage:null, workRate:30, prepHrs:0.03, materialCost:75, active:false, presetLinked:false }
+      { id:'int-trim-1', name:'3" Baseboard',  clientLabel:'3" Baseboard',  category:'trim', calcType:'measured', defaultProduct:'Sherwin Williams Pro-Classic Interior', perGalCoverage:300, coatSpreadRate:{1:60,2:45,3:35}, defaultPrep:0.02, isDefault:true,  active:true,  presetLinked:false },
+      { id:'int-trim-2', name:'Crown Molding', clientLabel:'Crown Molding', category:'trim', calcType:'measured', defaultProduct:'Sherwin Williams Pro-Classic Interior', perGalCoverage:300, coatSpreadRate:{1:45,2:30,3:22}, defaultPrep:0.03, isDefault:false, active:false, presetLinked:false }
     ],
     doors: [
-      { id:'int-doors-1', name:'6-Panel Door — 1 Side', isDefault:true,  product:'Emerald Urethane', unit:'Each', coats:2, coverage:null, workRate:1.25, prepHrs:0.10, materialCost:75, active:true, presetLinked:false },
-      { id:'int-doors-2', name:'Flat Door — 2 Sides',   isDefault:false, product:'Emerald Urethane', unit:'Each', coats:2, coverage:null, workRate:1.00, prepHrs:0.10, materialCost:75, active:true, presetLinked:false }
+      { id:'int-doors-1', name:'(Spray) 6-Panel Door - 2 Side', clientLabel:'Doors (Spray) - 2 Sides', category:'doors', calcType:'pricePerItem', defaultProduct:'Sherwin Williams Pro-Classic Interior', usagePerCoatGal:0.50, hoursPerItem:0.50, pricePerItem:75.00, defaultPrep:0, isDefault:true,  active:true, presetLinked:false },
+      { id:'int-doors-2', name:'Flat Door - 2 Sides',           clientLabel:'Flat Door - 2 Sides',     category:'doors', calcType:'pricePerItem', defaultProduct:'Sherwin Williams ProMar 400 Interior',  usagePerCoatGal:0.40, hoursPerItem:0.60, pricePerItem:65.00, defaultPrep:0, isDefault:false, active:true, presetLinked:false }
     ],
     cabinets: [
-      { id:'int-cab-1', name:'Cabinet Door — Flat', isDefault:true,  product:'Emerald Urethane', unit:'Each',      coats:2, coverage:null, workRate:4,  prepHrs:0.05, materialCost:75, active:true, presetLinked:false },
-      { id:'int-cab-2', name:'Cabinet Box',         isDefault:false, product:'Emerald Urethane', unit:'Linear Ft', coats:2, coverage:null, workRate:15, prepHrs:0.03, materialCost:75, active:true, presetLinked:false }
+      { id:'int-cab-1', name:'Cabinet Door - Flat', clientLabel:'Cabinet Door - Flat', category:'cabinets', calcType:'pricePerItem', defaultProduct:'Sherwin Williams Pro-Classic Interior', usagePerCoatGal:0.25, hoursPerItem:0.25, pricePerItem:45.00, defaultPrep:0, isDefault:true,  active:true, presetLinked:false },
+      { id:'int-cab-2', name:'Cabinet Box',         clientLabel:'Cabinet Box',         category:'cabinets', calcType:'hoursPerItem', defaultProduct:'Sherwin Williams Pro-Classic Interior', usagePerCoatGal:0.30, manHoursPerCoat:{1:0.5,2:0.9,3:1.3}, defaultPrep:0, isDefault:false, active:true, presetLinked:false }
     ]
   },
   exterior: {
     siding: [
-      { id:'ext-siding-1', name:'1-Story Siding', isDefault:true,  product:'SW Duration Exterior', unit:'Sq Ft', coats:2, coverage:350, workRate:175, prepHrs:0, materialCost:65, active:true, presetLinked:false },
-      { id:'ext-siding-2', name:'2-Story Siding', isDefault:false, product:'SW Duration Exterior', unit:'Sq Ft', coats:2, coverage:350, workRate:125, prepHrs:0, materialCost:65, active:true, presetLinked:false }
+      { id:'ext-siding-1', name:'1-Story Siding', clientLabel:'1-Story Siding', category:'siding', calcType:'measured', defaultProduct:'Sherwin-Williams Duration Exterior', perGalCoverage:350, coatSpreadRate:{1:220,2:175,3:140}, defaultPrep:0, isDefault:true,  active:true, presetLinked:false },
+      { id:'ext-siding-2', name:'2-Story Siding', clientLabel:'2-Story Siding', category:'siding', calcType:'measured', defaultProduct:'Sherwin-Williams Duration Exterior', perGalCoverage:350, coatSpreadRate:{1:160,2:125,3:100}, defaultPrep:0, isDefault:false, active:true, presetLinked:false }
     ],
     trim: [
-      { id:'ext-trim-1', name:'Window Trim', isDefault:true, product:'SW Emerald Urethane', unit:'Linear Ft', coats:2, coverage:null, workRate:35, prepHrs:0.03, materialCost:75, active:true, presetLinked:false }
+      { id:'ext-trim-1', name:'Window Trim', clientLabel:'Window Trim', category:'trim', calcType:'measured', defaultProduct:'Sherwin-Williams Duration Exterior', perGalCoverage:300, coatSpreadRate:{1:50,2:35,3:26}, defaultPrep:0.03, isDefault:true, active:true, presetLinked:false }
     ],
     doors: [
-      { id:'ext-doors-1', name:'Exterior Door — 1 Side', isDefault:true, product:'Emerald Rain Refresh', unit:'Each', coats:2, coverage:null, workRate:1.25, prepHrs:0.15, materialCost:85, active:true, presetLinked:false }
+      { id:'ext-doors-1', name:'Exterior Door - 1 Side', clientLabel:'Exterior Door - 1 Side', category:'doors', calcType:'pricePerItem', defaultProduct:'Sherwin-Williams Duration Exterior', usagePerCoatGal:0.50, hoursPerItem:0.60, pricePerItem:85.00, defaultPrep:0.15, isDefault:true, active:true, presetLinked:false }
     ]
   }
 };
@@ -1286,6 +1353,19 @@ function saveAreaDefaultsEdit() {
 }
 
 /* ── SUBSTRATES TAB ── */
+function measureUnitAbbrev(unit) { return unit === 'linearft' ? 'lf' : 'sf'; }
+
+function substrateRateSummary(s) {
+  if (s.calcType === 'measured') {
+    var u = measureUnitAbbrev(CATEGORY_META[s._area][s.category].measureUnit);
+    return s.coatSpreadRate[1] + ' / ' + s.coatSpreadRate[2] + ' / ' + s.coatSpreadRate[3] + ' ' + u + '&middot;hr <span style="color:var(--st-color-text-muted);">(1/2/3 coat)</span>';
+  }
+  if (s.calcType === 'pricePerItem') {
+    return '$' + s.pricePerItem.toFixed(2) + '/item &middot; ' + s.hoursPerItem + ' hrs';
+  }
+  return s.manHoursPerCoat[1] + ' / ' + s.manHoursPerCoat[2] + ' / ' + s.manHoursPerCoat[3] + ' hrs <span style="color:var(--st-color-text-muted);">(1/2/3 coat)</span>';
+}
+
 function renderSubstratesPanel() {
   document.querySelectorAll('#production-rates-prototype .pill-row .pill[data-area]').forEach(function(p){
     p.classList.toggle('active', p.dataset.area === substrateArea);
@@ -1305,19 +1385,23 @@ function renderSubstratesPanel() {
 
   var rows = SUBSTRATE_CATALOG[substrateArea][substrateCategory];
   document.getElementById('substrateTableBody').innerHTML = rows.map(function(s){
+    s._area = substrateArea;
+    var calcLabel = CALC_TYPE_LABEL[s.calcType](cats[substrateCategory].measureUnit, cats[substrateCategory].label);
     return '<tr>' +
       '<td><div class="substrate-name-cell">' +
         (s.presetLinked ? '<span class="preset-linked-dot" title="Set by the applied Rate Preset Template"></span>' : '') +
         s.name +
         (s.isDefault ? '<span class="default-chip">Default</span>' : '') +
       '</div></td>' +
-      '<td>' + s.product + '</td>' +
-      '<td>' + s.coats + '</td>' +
-      '<td>' + (s.coverage === null ? '—' : s.coverage + ' sf/gal') + '</td>' +
-      '<td>' + s.workRate + ' ' + s.unit + '/hr</td>' +
-      '<td>' + s.prepHrs + '</td>' +
-      '<td><span class="active-dot ' + (s.active ? 'is-active' : 'is-inactive') + '" title="' + (s.active ? 'Active' : 'Inactive') + '"></span></td>' +
-      '<td><button class="substrate-row-edit" onclick="openSubstrateEdit(\'' + substrateArea + '\',\'' + substrateCategory + '\',\'' + s.id + '\')" title="Edit Area Substrate"><i class="fas fa-pen"></i></button></td>' +
+      '<td>' + s.defaultProduct + '</td>' +
+      '<td>' + calcLabel + '</td>' +
+      '<td>' + substrateRateSummary(s) + '</td>' +
+      '<td>' + s.defaultPrep + '</td>' +
+      '<td><label class="toggle-switch" style="width:32px; min-width:32px; height:18px;" title="' + (s.active ? 'Active' : 'Inactive') + '"><input type="checkbox" ' + (s.active ? 'checked' : '') + ' onchange="toggleSubstrateActive(\'' + substrateArea + '\',\'' + substrateCategory + '\',\'' + s.id + '\')"><div class="toggle-track" style="width:32px; height:18px;"><div class="toggle-thumb" style="width:12px; height:12px;"></div></div></label></td>' +
+      '<td><div class="products-actions">' +
+        (s.isDefault ? '' : '<button class="action-edit" title="Set as Default" onclick="makeSubstrateDefault(\'' + substrateArea + '\',\'' + substrateCategory + '\',\'' + s.id + '\')"><i class="far fa-star"></i></button>') +
+        '<button class="action-edit" title="Edit Area Substrate" onclick="openSubstrateEdit(\'' + substrateArea + '\',\'' + substrateCategory + '\',\'' + s.id + '\')"><i class="fas fa-pen"></i></button>' +
+      '</div></td>' +
     '</tr>';
   }).join('');
 }
@@ -1336,35 +1420,108 @@ function findSubstrate(area, category, id) {
   return SUBSTRATE_CATALOG[area][category].filter(function(s){ return s.id === id; })[0];
 }
 
+function toggleSubstrateActive(area, category, id) {
+  var s = findSubstrate(area, category, id);
+  if (!s) return;
+  s.active = !s.active;
+  renderSubstratesPanel();
+}
+function makeSubstrateDefault(area, category, id) {
+  SUBSTRATE_CATALOG[area][category].forEach(function(s){ s.isDefault = (s.id === id); });
+  renderSubstratesPanel();
+  toast('Default substrate updated (prototype only)');
+}
+
 /* ── EDIT AREA SUBSTRATE MODAL ── */
+function populateSubstrateProductOptions(selectedName) {
+  var select = document.getElementById('subDefaultProduct');
+  select.innerHTML = PRODUCT_CATALOG.map(function(p){
+    return '<option value="' + p.name + '">' + p.name + '</option>';
+  }).join('');
+  if (selectedName && !PRODUCT_CATALOG.some(function(p){ return p.name === selectedName; })) {
+    select.innerHTML += '<option value="' + selectedName + '">' + selectedName + '</option>';
+  }
+  select.value = selectedName;
+}
+
+function populateSubstrateCategoryOptions(area, selectedCategory) {
+  var select = document.getElementById('subCategory');
+  var cats = CATEGORY_META[area];
+  select.innerHTML = Object.keys(cats).map(function(key){
+    return '<option value="' + key + '">' + cats[key].label + '</option>';
+  }).join('');
+  select.value = selectedCategory;
+}
+
+function populateSubstrateCalcTypeOptions(area, category, selectedCalcType) {
+  var select = document.getElementById('subCalcType');
+  var meta = CATEGORY_META[area][category];
+  select.innerHTML = meta.calcTypes.map(function(ct){
+    return '<option value="' + ct + '">' + CALC_TYPE_LABEL[ct](meta.measureUnit, meta.label) + '</option>';
+  }).join('');
+  select.value = meta.calcTypes.indexOf(selectedCalcType) !== -1 ? selectedCalcType : meta.calcTypes[0];
+}
+
+function showSubstrateCalcFields(calcType) {
+  document.getElementById('subFieldsMeasured').style.display = calcType === 'measured' ? '' : 'none';
+  document.getElementById('subFieldsPricePerItem').style.display = calcType === 'pricePerItem' ? '' : 'none';
+  document.getElementById('subFieldsHoursPerItem').style.display = calcType === 'hoursPerItem' ? '' : 'none';
+}
+
 function openSubstrateEdit(area, category, id) {
   var s = findSubstrate(area, category, id);
   if (!s) return;
   editingSubstrateRef = { area: area, category: category, id: id };
 
-  document.getElementById('substrateModalSubtitle').textContent =
-    (area === 'interior' ? 'Interior' : 'Exterior') + ' · ' + CATEGORY_META[area][category].label;
-  document.getElementById('subName').value = s.name + (s.isDefault ? ' (default)' : '');
-  document.getElementById('subProduct').value = s.product;
-  document.getElementById('subCoats').value = s.coats;
-  document.getElementById('subWorkRate').value = s.workRate;
-  document.getElementById('subMaterialCost').value = s.materialCost;
-  document.getElementById('subPrepHrs').value = s.prepHrs;
-  document.getElementById('subIsDefault').checked = s.isDefault;
-  document.getElementById('subActive').checked = s.active;
-  document.querySelector('label[for="subWorkRate"]').innerHTML = 'Production / Work Rate (' + s.unit + '/hr)';
-
-  var covField = document.getElementById('subCoverageField');
-  if (s.coverage === null) {
-    covField.style.display = 'none';
-  } else {
-    covField.style.display = '';
-    document.getElementById('subCoverage').value = s.coverage;
-  }
+  document.getElementById('subName').value = s.name;
+  document.getElementById('subClientLabel').value = s.clientLabel;
+  populateSubstrateProductOptions(s.defaultProduct);
+  populateSubstrateCategoryOptions(area, category);
+  populateSubstrateCalcTypeOptions(area, category, s.calcType);
+  fillSubstrateCalcFields(area, category, s);
+  document.getElementById('subDefaultPrep').value = s.defaultPrep;
+  document.getElementById('subUpdateTemplates').checked = false;
 
   document.getElementById('substrateWarnAlert').style.display = 'none';
   document.getElementById('substrateModal').classList.add('open');
 }
+
+function fillSubstrateCalcFields(area, category, s) {
+  var meta = CATEGORY_META[area][category];
+  showSubstrateCalcFields(s.calcType);
+  if (s.calcType === 'measured') {
+    var unitLabel = measureUnitAbbrev(meta.measureUnit) === 'lf' ? 'linear ft' : 'sqft';
+    document.getElementById('subCoverageLabel').innerHTML = 'Per Gal. Coverage (' + unitLabel + ') <i class="fas fa-info-circle" title="Coverage per gallon at one coat."></i>';
+    document.getElementById('subSpreadRateLabel').innerHTML = 'Coat Spreadrate Per 1 Man-Hour (' + unitLabel + ') <i class="fas fa-info-circle" title="How many units one painter covers per hour, at 1/2/3 coats."></i>';
+    document.getElementById('subCoverage').value = s.perGalCoverage;
+    document.getElementById('subSpread1').value = s.coatSpreadRate[1];
+    document.getElementById('subSpread2').value = s.coatSpreadRate[2];
+    document.getElementById('subSpread3').value = s.coatSpreadRate[3];
+  } else if (s.calcType === 'pricePerItem') {
+    document.getElementById('subUsagePerCoat1').value = s.usagePerCoatGal;
+    document.getElementById('subHoursPerItem').value = s.hoursPerItem;
+    document.getElementById('subPricePerItem').value = s.pricePerItem;
+  } else {
+    document.getElementById('subUsagePerCoat2').value = s.usagePerCoatGal;
+    document.getElementById('subManHours1').value = s.manHoursPerCoat[1];
+    document.getElementById('subManHours2').value = s.manHoursPerCoat[2];
+    document.getElementById('subManHours3').value = s.manHoursPerCoat[3];
+  }
+}
+
+function onSubstrateCategoryChange() {
+  if (!editingSubstrateRef) return;
+  var newCategory = document.getElementById('subCategory').value;
+  var meta = CATEGORY_META[editingSubstrateRef.area][newCategory];
+  populateSubstrateCalcTypeOptions(editingSubstrateRef.area, newCategory, meta.calcTypes[0]);
+  showSubstrateCalcFields(meta.calcTypes[0]);
+  onSubstrateFieldEdit();
+}
+function onSubstrateCalcTypeChange() {
+  showSubstrateCalcFields(document.getElementById('subCalcType').value);
+  onSubstrateFieldEdit();
+}
+
 function closeSubstrateEdit() {
   document.getElementById('substrateModal').classList.remove('open');
   editingSubstrateRef = null;
@@ -1385,30 +1542,49 @@ function saveSubstrateEdit() {
   var s = findSubstrate(ref.area, ref.category, ref.id);
   if (!s) return;
 
-  s.product = document.getElementById('subProduct').value;
-  s.coats = document.getElementById('subCoats').value;
-  s.workRate = document.getElementById('subWorkRate').value;
-  s.materialCost = document.getElementById('subMaterialCost').value;
-  s.prepHrs = document.getElementById('subPrepHrs').value;
-  if (s.coverage !== null) s.coverage = document.getElementById('subCoverage').value;
+  var newCategory = document.getElementById('subCategory').value;
+  var newCalcType = document.getElementById('subCalcType').value;
+
+  s.name = document.getElementById('subName').value;
+  s.clientLabel = document.getElementById('subClientLabel').value;
+  s.defaultProduct = document.getElementById('subDefaultProduct').value;
+  s.category = newCategory;
+  s.calcType = newCalcType;
+  s.defaultPrep = document.getElementById('subDefaultPrep').value;
+
+  if (newCalcType === 'measured') {
+    s.perGalCoverage = document.getElementById('subCoverage').value;
+    s.coatSpreadRate = { 1: document.getElementById('subSpread1').value, 2: document.getElementById('subSpread2').value, 3: document.getElementById('subSpread3').value };
+    delete s.usagePerCoatGal; delete s.hoursPerItem; delete s.pricePerItem; delete s.manHoursPerCoat;
+  } else if (newCalcType === 'pricePerItem') {
+    s.usagePerCoatGal = document.getElementById('subUsagePerCoat1').value;
+    s.hoursPerItem = document.getElementById('subHoursPerItem').value;
+    s.pricePerItem = parseFloat(document.getElementById('subPricePerItem').value) || 0;
+    delete s.perGalCoverage; delete s.coatSpreadRate; delete s.manHoursPerCoat;
+  } else {
+    s.usagePerCoatGal = document.getElementById('subUsagePerCoat2').value;
+    s.manHoursPerCoat = { 1: document.getElementById('subManHours1').value, 2: document.getElementById('subManHours2').value, 3: document.getElementById('subManHours3').value };
+    delete s.perGalCoverage; delete s.coatSpreadRate; delete s.hoursPerItem; delete s.pricePerItem;
+  }
 
   // Rule 12: a manual edit to a preset-linked substrate overrides that field's preset
   // value going forward, but only after the warning above has been shown and acknowledged.
   var wasWarned = document.getElementById('substrateWarnAlert').style.display === 'flex';
   if (wasWarned) s.presetLinked = false;
 
-  var makeDefault = document.getElementById('subIsDefault').checked;
-  if (makeDefault) {
-    SUBSTRATE_CATALOG[ref.area][ref.category].forEach(function(other){ other.isDefault = (other.id === s.id); });
-  } else {
+  var movedCategory = newCategory !== ref.category;
+  if (movedCategory) {
+    SUBSTRATE_CATALOG[ref.area][ref.category] = SUBSTRATE_CATALOG[ref.area][ref.category].filter(function(x){ return x.id !== s.id; });
     s.isDefault = false;
+    SUBSTRATE_CATALOG[ref.area][newCategory].push(s);
+    substrateCategory = newCategory;
   }
-  s.active = document.getElementById('subActive').checked;
 
+  var updateTemplates = document.getElementById('subUpdateTemplates').checked;
   var savedName = s.name;
   closeSubstrateEdit();
   renderSubstratesPanel();
-  toast('Substrate saved: ' + savedName + ' (prototype only)');
+  toast('Substrate saved: ' + savedName + (updateTemplates ? ' (and existing templates updated)' : '') + ' (prototype only)');
 }
 
 function onPresetChange(select) {
@@ -1486,17 +1662,40 @@ function applyPresetToAreasAndSubstrates(presetKey) {
   });
 
   forEachSubstrate(function(s, area, category, baseS){
-    s.workRate = Math.round(baseS.workRate * multiplier * 100) / 100;
-    if (s.coverage !== null) s.coverage = areaAdjust.coverage;
+    if (!baseS) return; // no base row to recompute from (e.g. a substrate added after page load)
+    if (s.calcType === 'measured') {
+      s.coatSpreadRate = {
+        1: Math.round(baseS.coatSpreadRate[1] * multiplier * 100) / 100,
+        2: Math.round(baseS.coatSpreadRate[2] * multiplier * 100) / 100,
+        3: Math.round(baseS.coatSpreadRate[3] * multiplier * 100) / 100
+      };
+      s.perGalCoverage = areaAdjust.coverage;
+    } else if (s.calcType === 'pricePerItem') {
+      s.hoursPerItem = Math.round(baseS.hoursPerItem * multiplier * 100) / 100;
+    } else if (s.calcType === 'hoursPerItem') {
+      s.manHoursPerCoat = {
+        1: Math.round(baseS.manHoursPerCoat[1] * multiplier * 100) / 100,
+        2: Math.round(baseS.manHoursPerCoat[2] * multiplier * 100) / 100,
+        3: Math.round(baseS.manHoursPerCoat[3] * multiplier * 100) / 100
+      };
+    }
     s.presetLinked = true;
   });
 }
 
+// Matches by id (not array index) so a substrate that's been moved between categories
+// via the Edit Area Substrate modal still recomputes against its correct base values.
 function forEachSubstrate(fn) {
+  var baseById = {};
+  ['interior', 'exterior'].forEach(function(area){
+    Object.keys(BASE_SUBSTRATE_CATALOG[area]).forEach(function(category){
+      BASE_SUBSTRATE_CATALOG[area][category].forEach(function(s){ baseById[s.id] = s; });
+    });
+  });
   ['interior', 'exterior'].forEach(function(area){
     Object.keys(SUBSTRATE_CATALOG[area]).forEach(function(category){
-      SUBSTRATE_CATALOG[area][category].forEach(function(s, idx){
-        fn(s, area, category, BASE_SUBSTRATE_CATALOG[area][category][idx]);
+      SUBSTRATE_CATALOG[area][category].forEach(function(s){
+        fn(s, area, category, baseById[s.id]);
       });
     });
   });
