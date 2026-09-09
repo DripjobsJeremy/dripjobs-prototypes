@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-09] Rate Preset Templates: built out Interior/Exterior Area + Substrates tabs
+
+- Decision: Replaced the placeholder "isn't part of this prototype" panels with real UI. Interior Area and Exterior Area tabs now show an editable "Area Default Settings" card (Coats, Coverage, Waste Factor, Prep Level, via an Edit modal) plus category cards (Interior: Walls, Ceilings, Trim, Doors, Cabinets; Exterior: Siding, Trim, Doors) linking into the Substrates tab. Substrates now has a real Interior/Exterior → category → substrate drill-down table (defaults to Interior → Walls, so "8FT Light Texture (default)" is visible first) with an "Edit Area Substrate" modal per row. Removed the old "Substrate Field Behavior Preview" demo section from the Settings tab (it existed only because Substrates wasn't built yet) and moved its preset-conflict warning (Rule 12) into the real Edit Area Substrate modal, gated on the substrate actually being tied to the currently applied preset. Applying a preset now also recomputes Area Defaults (coverage, waste) and every substrate's work rate across both areas per Rule 4, marking affected rows with a "preset-linked" dot that clears once a user edits and saves that substrate (matching the ticket's override edge case).
+- Why: Direct request to make the prototype feel like the real flow instead of only the preset selector demo on Settings; confirmed against ticket 86bbwt19j, whose Rule 4 already requires presets to update Interior/Exterior Area substrate configuration, so this fills in context the ticket needs rather than expanding past it.
+- Assumption: The substrate catalog (names, products, spread rates, work rates, prep hours) and the per-preset adjustment multipliers are prototype-only placeholders — the ticket explicitly flags that Aiden's finalized preset numbers were still pending, and lists the full mapping between a real substrate list and any preset as an open gap. Whether selecting "None (custom)" after a preset was applied should revert substrate/area values back to their pre-preset numbers is unspecified by the ticket; this prototype leaves the last-applied values in place (matching the existing Hourly Cost/Sell/Markup behavior) and only clears the "preset-linked" marker.
+
 ## [2026-09-08] Hub: removed Send Marketing Agency Info (shipped)
 
 - Decision: Removed "Send Marketing Agency Info" from `#protoGrid`, per Jeremy confirming it was pushed to production today.
