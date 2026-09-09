@@ -388,6 +388,34 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
 #production-rates-prototype .substrate-table-legend { display:flex; gap:16px; flex-wrap:wrap; font-size:11.5px; color:var(--st-color-text-muted); margin-top:10px; align-items:center; }
 #production-rates-prototype .substrate-table-legend span { display:flex; align-items:center; gap:5px; }
 
+/* ── PRODUCTS TAB ── */
+#production-rates-prototype .products-toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+#production-rates-prototype .products-search { flex:1; min-width:200px; display:flex; align-items:center; gap:8px; height:38px; padding:0 14px; border:1px solid var(--st-color-border); border-radius:8px; background:#fff; }
+#production-rates-prototype .products-search i { color:var(--st-color-text-muted); font-size:12px; }
+#production-rates-prototype .products-search input { border:none; outline:none; flex:1; font-size:13.5px; font-family:inherit; color:var(--st-color-text); background:transparent; }
+#production-rates-prototype .products-sort { height:38px; padding:0 14px; border:1px solid var(--st-color-border); border-radius:8px; background:#fff; font-size:13px; font-family:inherit; color:var(--st-color-text); cursor:pointer; }
+#production-rates-prototype .products-table-wrap { overflow-x:auto; border:1px solid var(--st-color-border); border-radius:10px; }
+#production-rates-prototype .products-table { width:100%; border-collapse:collapse; min-width:760px; }
+#production-rates-prototype .products-table th { background:#FAFAFC; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--st-color-text-muted); padding:10px 14px; text-align:left; border-bottom:1px solid var(--st-color-border); white-space:nowrap; }
+#production-rates-prototype .products-table td { padding:11px 14px; font-size:13px; border-bottom:1px solid var(--st-color-border); color:var(--st-color-text); white-space:nowrap; }
+#production-rates-prototype .products-table tr:last-child td { border-bottom:none; }
+#production-rates-prototype .products-table tr:hover td { background:#FBFAFF; }
+#production-rates-prototype .product-name-cell { display:flex; align-items:center; gap:7px; white-space:normal; font-weight:600; }
+#production-rates-prototype .preset-added-chip { font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.3px; background:#FFF1E0; color:#9A3412; padding:2px 7px; border-radius:999px; flex-shrink:0; }
+#production-rates-prototype .products-actions { display:flex; gap:12px; justify-content:flex-end; }
+#production-rates-prototype .products-actions button { background:none; border:none; padding:2px; cursor:pointer; font-size:13px; }
+#production-rates-prototype .products-actions .action-edit { color:var(--st-color-primary); }
+#production-rates-prototype .products-actions .action-duplicate { color:var(--st-color-primary); }
+#production-rates-prototype .products-actions .action-delete { color:#DC2626; }
+#production-rates-prototype .products-actions button:hover { opacity:.7; }
+#production-rates-prototype .products-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:12px; font-size:12.5px; color:var(--st-color-text-muted); }
+#production-rates-prototype .products-footer select { height:32px; padding:0 8px; border:1px solid var(--st-color-border); border-radius:6px; font-family:inherit; font-size:12.5px; }
+#production-rates-prototype .products-pager { display:flex; align-items:center; gap:8px; }
+#production-rates-prototype .products-pager button { height:28px; width:28px; border:1px solid var(--st-color-border); border-radius:6px; background:#fff; cursor:pointer; color:var(--st-color-text-muted); }
+#production-rates-prototype .products-pager button:hover:not(:disabled) { border-color:var(--st-color-primary); color:var(--st-color-primary); }
+#production-rates-prototype .products-pager button:disabled { opacity:.4; cursor:not-allowed; }
+#production-rates-prototype .products-pager .page-num { min-width:26px; height:26px; border-radius:6px; background:var(--st-color-primary); color:#fff; font-weight:700; display:inline-flex; align-items:center; justify-content:center; font-size:12px; }
+
 @media (max-width:640px) {
   #production-rates-prototype .sidebar { display:none; }
   #production-rates-prototype .page-wrap { padding:16px; }
@@ -707,7 +735,62 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
       </div>
 
       <div class="pr-panel" data-panel="products">
-        <div class="pr-placeholder"><i class="fas fa-swatchbook"></i>Products isn't part of this prototype.<br><a onclick="switchTab('settings')">Back to Settings →</a></div>
+        <div class="section-header-row">
+          <div class="settings-section-title" style="font-size:15px;">Products <span class="preset-badge is-none" id="productsPresetBadge"><i class="fas fa-magic"></i> None (custom)</span></div>
+          <div style="display:flex; gap:10px;">
+            <select class="products-sort" id="productsSort" onchange="onProductsSortChange()">
+              <option value="name">Sort: Name</option>
+              <option value="price">Sort: Price</option>
+              <option value="modified">Sort: Last Modified</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="openProductEdit(null)"><i class="fas fa-plus"></i> Add Product</button>
+          </div>
+        </div>
+
+        <div class="products-toolbar">
+          <div class="products-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="productsSearch" placeholder="Type here..." oninput="onProductsSearch()">
+          </div>
+        </div>
+
+        <div class="products-table-wrap">
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Sheen</th>
+                <th>Price / Unit</th>
+                <th>Last Modified</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="products-footer">
+          <div>
+            Showing:
+            <select id="productsPerPage" onchange="onProductsPerPageChange()">
+              <option value="10">10</option>
+              <option value="15" selected>15</option>
+              <option value="25">25</option>
+            </select>
+            Items Per Page
+          </div>
+          <div id="productsShowingText"></div>
+          <div class="products-pager">
+            <button id="productsPrevBtn" onclick="changeProductsPage(-1)"><i class="fas fa-chevron-left"></i></button>
+            <span class="page-num" id="productsPageNum">1</span>
+            <button id="productsNextBtn" onclick="changeProductsPage(1)"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <div class="substrate-table-legend">
+          <span><span class="preset-added-chip">Added by Preset</span> introduced by the applied Rate Preset Template, not part of the original catalog</span>
+          <span><span class="preset-linked-dot"></span> price comes from the applied Rate Preset Template</span>
+        </div>
       </div>
 
     </div>
@@ -913,6 +996,71 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
   </div>
 </div>
 
+<!-- ══════════════ ADD/EDIT PRODUCT MODAL ══════════════ -->
+<div class="modal-backdrop" id="productModal">
+  <div class="modal" style="width:460px;">
+    <div class="modal-header">
+      <div class="modal-title" id="productModalTitle">Add Product</div>
+      <button class="modal-close" onclick="closeProductEdit()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-grid" style="grid-template-columns:1fr; gap:16px;">
+        <div class="settings-field">
+          <label class="settings-field-label" for="prodName">Product Name:</label>
+          <input class="settings-field-input" id="prodName" type="text" oninput="onProductFieldEdit()">
+        </div>
+        <div class="settings-field">
+          <label class="settings-field-label" for="prodPrice">Product Price:</label>
+          <div class="settings-field-group">
+            <span class="settings-field-group-prefix">$</span>
+            <input class="settings-field-input" id="prodPrice" type="text" value="19.99" oninput="onProductFieldEdit()">
+          </div>
+        </div>
+        <div class="settings-field">
+          <label class="settings-field-label" for="prodType">Choose Product Type:</label>
+          <select class="settings-field-input" id="prodType" onchange="onProductFieldEdit()">
+            <option value="Gallon">Gallon</option>
+            <option value="Item">Item</option>
+          </select>
+        </div>
+        <div class="settings-field">
+          <label class="settings-field-label" for="prodSheen">Choose Sheen:</label>
+          <select class="settings-field-input" id="prodSheen" onchange="onProductFieldEdit()">
+            <option value="TBD">TBD</option>
+            <option value="Flat">Flat</option>
+            <option value="Matte">Matte</option>
+            <option value="Flat Enamel">Flat Enamel</option>
+            <option value="Eg-Shel">Eg-Shel</option>
+            <option value="Low Lustre">Low Lustre</option>
+            <option value="Satin">Satin</option>
+            <option value="Gloss">Gloss</option>
+            <option value="Semi-Gloss">Semi-Gloss</option>
+            <option value="High Gloss">High Gloss</option>
+            <option value="High Reflective">High Reflective</option>
+            <option value="Pearl">Pearl</option>
+            <option value="Medium Gloss">Medium Gloss</option>
+            <option value="Clear">Clear</option>
+            <option value="Low-Sheen">Low-Sheen</option>
+            <option value="Velvet">Velvet</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-alert settings-alert--warn" id="productWarnAlert" style="display:none; margin-top:16px;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div class="settings-alert-body">
+          <div class="settings-alert-title">Heads up</div>
+          <div id="productWarnText">This product's price is a part of the applied preset and may cause misconfiguration of your proposal calculations.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <button class="btn btn-outline-primary" onclick="closeProductEdit()">Close</button>
+      <button class="btn btn-primary" onclick="saveProductEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
 </div><!-- /#production-rates-prototype -->
 
 <script>
@@ -1001,18 +1149,64 @@ var SUBSTRATE_CATALOG = {
 var BASE_AREA_DEFAULTS = JSON.parse(JSON.stringify(AREA_DEFAULTS));
 var BASE_SUBSTRATE_CATALOG = JSON.parse(JSON.stringify(SUBSTRATE_CATALOG));
 
+// Products catalog — seeded from the real production Products page (screenshot, Nov 26,
+// 2025) rather than invented placeholders, since this is real account data.
+var PRODUCT_CATALOG = [
+  { id:'prod-1',  name:'Sherwin-Williams Duration Exterior', sheen:'Satin',      unit:'Gallon', price:38.99, lastModified:'November 26, 2025 11:35 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-2',  name:'MinWax Wood Finish Exterior Stain',  sheen:'Clear',      unit:'Gallon', price:39.99, lastModified:'November 26, 2025 11:35 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-3',  name:'Behr Premium Plus Ultra Interior',   sheen:'Satin',      unit:'Gallon', price:44.99, lastModified:'November 26, 2025 11:35 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-4',  name:'Sherwin Williams SuperPaint Interior', sheen:'Satin',    unit:'Gallon', price:34.99, lastModified:'November 26, 2025 11:35 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-5',  name:'Benjamin Moore Regal Select Interior', sheen:'Satin',    unit:'Gallon', price:39.99, lastModified:'November 26, 2025 11:35 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-6',  name:'Sherwin-Williams SuperDeck',          sheen:'TBD',       unit:'Gallon', price:34.99, lastModified:'November 26, 2025 11:35 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-7',  name:'Sherwin-Williams Emerald Interior',   sheen:'Satin',     unit:'Gallon', price:54.99, lastModified:'November 26, 2025 11:35 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-8',  name:'Benjamin Moore Aura Exterior',        sheen:'Satin',     unit:'Gallon', price:55.99, lastModified:'November 26, 2025 11:35 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-9',  name:'Sherwin Williams ProMar 400 Interior', sheen:'Flat',     unit:'Gallon', price:22.99, lastModified:'November 26, 2025 11:35 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-10', name:'Sherwin Williams Pro-Classic Interior', sheen:'Semi-Gloss', unit:'Gallon', price:49.99, lastModified:'November 26, 2025 11:35 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-11', name:'Sherwin Williams H&C Acrya-Deck',     sheen:'TBD',       unit:'Gallon', price:34.99, lastModified:'November 26, 2025 11:35 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-12', name:'PPG Paints Timeless Exterior',        sheen:'Satin',     unit:'Gallon', price:39.99, lastModified:'November 26, 2025 11:35 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-13', name:'Paint Brushes',                       sheen:'TBD',       unit:'Item',   price:4.00,  lastModified:'November 26, 2025 11:34 AM', presetLinked:false, presetAdded:false },
+  { id:'prod-14', name:'Tape Roll (3 Pack)',                  sheen:'TBD',       unit:'Item',   price:10.00, lastModified:'November 26, 2025 11:36 AM', presetLinked:false, presetAdded:false }
+];
+
+// New capability added at Jeremy's request (not in ticket 86bbwt19j's original rules):
+// a preset can also adjust existing product prices and introduce products it recommends
+// that aren't in the catalog yet. Added-product names/prices below are illustrative
+// placeholders for the prototype, not confirmed contents of any real preset.
+var PRESET_PRODUCT_ADJUST = {
+  aiden: {
+    priceMultiplier: 1.15,
+    addProducts: [{ name:'Sherwin-Williams Cashmere Interior', sheen:'Low-Sheen', unit:'Gallon', price:46.99 }]
+  },
+  southeast: {
+    priceMultiplier: 0.95,
+    addProducts: [{ name:'Behr Marquee Exterior', sheen:'Satin', unit:'Gallon', price:41.99 }]
+  },
+  florida: {
+    priceMultiplier: 0.90,
+    addProducts: [{ name:'PPG Manor Hall Exterior', sheen:'Satin', unit:'Gallon', price:37.99 }]
+  }
+};
+
+var BASE_PRODUCT_CATALOG = JSON.parse(JSON.stringify(PRODUCT_CATALOG));
+
 var currentPreset = 'none';
 var pendingPreset = null;
 var substrateArea = 'interior';
 var substrateCategory = 'walls';
 var editingSubstrateRef = null;
 var editingAreaDefaultsFor = null;
+var editingProductId = null;
+var productsSearchQuery = '';
+var productsSortBy = 'name';
+var productsPage = 1;
+var productsPerPage = 15;
 
 function switchTab(name) {
   document.querySelectorAll('#production-rates-prototype .pr-tab').forEach(function(t){ t.classList.toggle('active', t.dataset.tab === name); });
   document.querySelectorAll('#production-rates-prototype .pr-panel').forEach(function(p){ p.classList.toggle('active', p.dataset.panel === name); });
   if (name === 'interior' || name === 'exterior') renderAreaTab(name);
   if (name === 'substrates') renderSubstratesPanel();
+  if (name === 'products') renderProductsPanel();
 }
 
 /* ── INTERIOR / EXTERIOR AREA TABS ── */
@@ -1232,6 +1426,7 @@ function onPresetChange(select) {
   rows += diffRow('Hourly Sell Rate', '$' + document.getElementById('hourlySell').value, PRESETS[newValue].sell === null ? '—' : ('$' + PRESETS[newValue].sell));
   rows += diffRow('Product Markup', document.getElementById('productMarkup').value + '%', PRESETS[newValue].markup === null ? '—' : (PRESETS[newValue].markup + '%'));
   rows += diffRow('Interior/Exterior Substrates', 'current values', PRESETS[newValue].cost === null ? '—' : 'preset values (spread rate, coverage)');
+  rows += diffRow('Products', 'current prices', PRESETS[newValue].cost === null ? '—' : 'preset prices + suggested products');
   document.getElementById('diffTableBody').innerHTML = rows;
 
   document.getElementById('confirmModal').classList.add('open');
@@ -1259,10 +1454,12 @@ function confirmPresetChange() {
     document.getElementById('hourlySell').value = preset.sell;
     document.getElementById('productMarkup').value = preset.markup;
     applyPresetToAreasAndSubstrates(currentPreset);
+    applyPresetToProducts(currentPreset);
   } else {
     // "None (custom)" doesn't revert existing values — it just stops treating future
-    // substrate edits as tied to a preset, since there's no longer an applied one.
+    // substrate/product edits as tied to a preset, since there's no longer an applied one.
     forEachSubstrate(function(s){ s.presetLinked = false; });
+    PRODUCT_CATALOG.forEach(function(p){ p.presetLinked = false; });
   }
 
   document.getElementById('confirmModal').classList.remove('open');
@@ -1272,6 +1469,8 @@ function confirmPresetChange() {
   renderAreaTab('exterior');
   var substratesPanel = document.querySelector('#production-rates-prototype .pr-panel[data-panel="substrates"]');
   if (substratesPanel && substratesPanel.classList.contains('active')) renderSubstratesPanel();
+  var productsPanel = document.querySelector('#production-rates-prototype .pr-panel[data-panel="products"]');
+  if (productsPanel && productsPanel.classList.contains('active')) renderProductsPanel();
 
   pendingPreset = null;
   toast('Preset applied: ' + preset.label + ' (prototype only)');
@@ -1303,6 +1502,178 @@ function forEachSubstrate(fn) {
   });
 }
 
+/* ── PRODUCTS TAB ── */
+function todayString() {
+  return new Date().toLocaleString('en-US', { month:'long', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+}
+
+function findProduct(id) {
+  return PRODUCT_CATALOG.filter(function(p){ return p.id === id; })[0];
+}
+
+function getFilteredSortedProducts() {
+  var q = productsSearchQuery.toLowerCase().trim();
+  var list = PRODUCT_CATALOG.filter(function(p){ return !q || p.name.toLowerCase().indexOf(q) !== -1; });
+  list.sort(function(a, b){
+    if (productsSortBy === 'price') return a.price - b.price;
+    if (productsSortBy === 'modified') return new Date(b.lastModified) - new Date(a.lastModified);
+    return a.name.localeCompare(b.name);
+  });
+  return list;
+}
+
+function renderProductsPanel() {
+  var badge = document.getElementById('productsPresetBadge');
+  if (currentPreset === 'none') {
+    badge.className = 'preset-badge is-none';
+    badge.innerHTML = '<i class="fas fa-magic"></i> None (custom)';
+  } else {
+    badge.className = 'preset-badge';
+    badge.innerHTML = '<i class="fas fa-magic"></i> ' + PRESETS[currentPreset].label;
+  }
+
+  var filtered = getFilteredSortedProducts();
+  var totalPages = Math.max(1, Math.ceil(filtered.length / productsPerPage));
+  if (productsPage > totalPages) productsPage = totalPages;
+  var start = (productsPage - 1) * productsPerPage;
+  var pageItems = filtered.slice(start, start + productsPerPage);
+
+  document.getElementById('productsTableBody').innerHTML = pageItems.map(function(p){
+    return '<tr>' +
+      '<td><div class="product-name-cell">' +
+        (p.presetLinked ? '<span class="preset-linked-dot" title="Price set by the applied Rate Preset Template"></span>' : '') +
+        p.name +
+        (p.presetAdded ? '<span class="preset-added-chip">Added by Preset</span>' : '') +
+      '</div></td>' +
+      '<td>' + p.sheen + '</td>' +
+      '<td>$' + p.price.toFixed(2) + ' / ' + p.unit + '</td>' +
+      '<td>' + p.lastModified + '</td>' +
+      '<td><div class="products-actions">' +
+        '<button class="action-edit" title="Edit" onclick="openProductEdit(\'' + p.id + '\')"><i class="fas fa-pen"></i></button>' +
+        '<button class="action-duplicate" title="Duplicate" onclick="duplicateProduct(\'' + p.id + '\')"><i class="fas fa-copy"></i></button>' +
+        '<button class="action-delete" title="Delete" onclick="deleteProduct(\'' + p.id + '\')"><i class="fas fa-trash-alt"></i></button>' +
+      '</div></td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan="5" style="text-align:center; color:var(--st-color-text-muted); padding:24px;">No products match that search.</td></tr>';
+
+  var showingFrom = filtered.length === 0 ? 0 : start + 1;
+  var showingTo = Math.min(start + productsPerPage, filtered.length);
+  document.getElementById('productsShowingText').textContent = 'Showing ' + showingFrom + ' to ' + showingTo + ' of ' + filtered.length + ' entries';
+  document.getElementById('productsPageNum').textContent = productsPage;
+  document.getElementById('productsPrevBtn').disabled = productsPage <= 1;
+  document.getElementById('productsNextBtn').disabled = productsPage >= totalPages;
+}
+
+function onProductsSearch() {
+  productsSearchQuery = document.getElementById('productsSearch').value;
+  productsPage = 1;
+  renderProductsPanel();
+}
+function onProductsSortChange() {
+  productsSortBy = document.getElementById('productsSort').value;
+  productsPage = 1;
+  renderProductsPanel();
+}
+function onProductsPerPageChange() {
+  productsPerPage = parseInt(document.getElementById('productsPerPage').value, 10);
+  productsPage = 1;
+  renderProductsPanel();
+}
+function changeProductsPage(delta) {
+  productsPage += delta;
+  renderProductsPanel();
+}
+
+function openProductEdit(id) {
+  editingProductId = id;
+  var p = id ? findProduct(id) : null;
+  document.getElementById('productModalTitle').textContent = p ? 'Edit Product' : 'Add Product';
+  document.getElementById('prodName').value = p ? p.name : '';
+  document.getElementById('prodPrice').value = p ? p.price.toFixed(2) : '19.99';
+  document.getElementById('prodType').value = p ? p.unit : 'Gallon';
+  document.getElementById('prodSheen').value = p ? p.sheen : 'TBD';
+  document.getElementById('productWarnAlert').style.display = 'none';
+  document.getElementById('productModal').classList.add('open');
+}
+function closeProductEdit() {
+  document.getElementById('productModal').classList.remove('open');
+  editingProductId = null;
+}
+function onProductFieldEdit() {
+  if (!editingProductId) return;
+  var p = findProduct(editingProductId);
+  if (!p) return;
+  if (p.presetLinked && currentPreset !== 'none') {
+    document.getElementById('productWarnText').textContent =
+      "This product's price is a part of the " + PRESETS[currentPreset].label + " preset and may cause misconfiguration of your proposal calculations.";
+    document.getElementById('productWarnAlert').style.display = 'flex';
+  }
+}
+function saveProductEdit() {
+  var name = document.getElementById('prodName').value.trim();
+  if (!name) { toast('Product Name is required'); return; }
+  var price = parseFloat(document.getElementById('prodPrice').value) || 0;
+  var unit = document.getElementById('prodType').value;
+  var sheen = document.getElementById('prodSheen').value;
+
+  if (editingProductId) {
+    var p = findProduct(editingProductId);
+    if (p) {
+      var wasWarned = document.getElementById('productWarnAlert').style.display === 'flex';
+      if (wasWarned) p.presetLinked = false; // manual edit overrides the preset's price, same as substrates (Rule 12)
+      p.name = name; p.price = price; p.unit = unit; p.sheen = sheen;
+      p.lastModified = todayString();
+    }
+  } else {
+    PRODUCT_CATALOG.push({ id:'prod-custom-' + Date.now(), name:name, sheen:sheen, unit:unit, price:price, lastModified: todayString(), presetLinked:false, presetAdded:false });
+  }
+
+  closeProductEdit();
+  renderProductsPanel();
+  toast('Product saved: ' + name + ' (prototype only)');
+}
+function duplicateProduct(id) {
+  var p = findProduct(id);
+  if (!p) return;
+  PRODUCT_CATALOG.push({ id:'prod-custom-' + Date.now(), name:p.name + ' (Copy)', sheen:p.sheen, unit:p.unit, price:p.price, lastModified: todayString(), presetLinked:false, presetAdded:false });
+  renderProductsPanel();
+  toast('Duplicated: ' + p.name + ' (prototype only)');
+}
+function deleteProduct(id) {
+  var p = findProduct(id);
+  if (!p) return;
+  if (!confirm('Delete "' + p.name + '"? This cannot be undone.')) return;
+  PRODUCT_CATALOG = PRODUCT_CATALOG.filter(function(x){ return x.id !== id; });
+  renderProductsPanel();
+  toast('Deleted: ' + p.name + ' (prototype only)');
+}
+
+function applyPresetToProducts(presetKey) {
+  var adjust = PRESET_PRODUCT_ADJUST[presetKey];
+
+  PRODUCT_CATALOG.forEach(function(p){
+    var basep = BASE_PRODUCT_CATALOG.filter(function(b){ return b.id === p.id; })[0];
+    if (basep) {
+      p.price = Math.round(basep.price * adjust.priceMultiplier * 100) / 100;
+      p.presetLinked = true;
+      p.lastModified = todayString();
+    }
+  });
+
+  adjust.addProducts.forEach(function(np){
+    var existing = PRODUCT_CATALOG.filter(function(p){ return p.name === np.name; })[0];
+    if (existing) {
+      existing.presetLinked = true;
+    } else {
+      PRODUCT_CATALOG.push({
+        id: 'prod-preset-' + presetKey + '-' + PRODUCT_CATALOG.length,
+        name: np.name, sheen: np.sheen, unit: np.unit, price: np.price,
+        lastModified: todayString(), presetLinked: true, presetAdded: true
+      });
+    }
+  });
+}
+
 function openFirstTimeSetup() {
   document.getElementById('firstTimeSetupModal').classList.add('open');
 }
@@ -1328,13 +1699,23 @@ function resetDemo() {
 
   document.getElementById('areaDefaultsModal').classList.remove('open');
   document.getElementById('substrateModal').classList.remove('open');
+  document.getElementById('productModal').classList.remove('open');
   editingAreaDefaultsFor = null;
   editingSubstrateRef = null;
+  editingProductId = null;
 
   AREA_DEFAULTS = JSON.parse(JSON.stringify(BASE_AREA_DEFAULTS));
   SUBSTRATE_CATALOG = JSON.parse(JSON.stringify(BASE_SUBSTRATE_CATALOG));
+  PRODUCT_CATALOG = JSON.parse(JSON.stringify(BASE_PRODUCT_CATALOG));
   substrateArea = 'interior';
   substrateCategory = 'walls';
+  productsSearchQuery = '';
+  productsSortBy = 'name';
+  productsPage = 1;
+  productsPerPage = 15;
+  document.getElementById('productsSearch').value = '';
+  document.getElementById('productsSort').value = 'name';
+  document.getElementById('productsPerPage').value = '15';
 
   switchTab('settings');
   renderAreaTab('interior');
@@ -1345,6 +1726,7 @@ function resetDemo() {
 renderAreaTab('interior');
 renderAreaTab('exterior');
 renderSubstratesPanel();
+renderProductsPanel();
 
 var toastTimer = null;
 function toast(msg) {
