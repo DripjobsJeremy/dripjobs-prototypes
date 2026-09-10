@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-10] Deal Stage / Deal-Proposal Status (ticket 86bbyr3w2)
+
+- Decision: Built the Edit Deal Details modal mockup Jeremy supplied for ticket 86bbyr3w2 into a standalone prototype at `deal-stage-status/index.html`, wrapped in the standard proto-bar and added to the hub. Only the "Stage" and "Deal Status" fields change (relabeled to Deal Stage and Deal/Proposal Status, with the Status options filtered by the selected Stage); Contact Information, Drips, Job Address, and Assignment sections are unchanged from the current UI, per the mockup's own scope note.
+- Why: Direct request from a supplied mockup file; kept the mockup's markup, styles, and JS logic intact rather than rebuilding, since it was already built to match the real modal.
+- Assumption: The status-per-stage mapping (which Deal/Proposal Status options are valid for each Deal Stage) is a placeholder flagged in the mockup itself, not specified in the ticket, needs confirmation from Jeremy before this becomes real business logic.
+
 ## [2026-09-10] Hub: removed Prod Rates Import Wizard card (superseded)
 
 - Decision: Removed the standalone "Prod Rates Import Wizard" card from `#protoGrid` (was linking to `prod-rates-import/index.html`, ticket 86b8tq9m9). Its bulk-import functionality now lives inside the Multi-Industry Production Rates prototype's own card, added the same day.

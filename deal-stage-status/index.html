@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deal Stage &amp; Deal/Proposal Status, DripJobs</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --color-primary:        #8B85EA;
+    --color-primary-hover:  #736BE3;
+    --color-primary-active: #5C53DC;
+    --color-primary-rgb:    139, 133, 234;
+    --color-bg:             #F3F1FC;
+    --color-text:           #32415B;
+    --color-text-muted:     #80879A;
+    --color-border:         #DAD8E3;
+    --color-card:           #FFFFFF;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; background: var(--color-bg); color: var(--color-text); min-height: 100vh; }
+
+  /* ── Top bar ── */
+  .proto-bar {
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .back-link {
+    font-size: 12px; font-weight: 500; color: var(--color-text-muted);
+    text-decoration: none; display: flex; align-items: center; gap: 4px;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--color-primary); }
+  .divider { color: var(--color-border); font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; }
+  .proto-bar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .proto-bar-pill {
+    font-size: 11px; font-weight: 600; color: var(--color-primary-active);
+    padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA;
+    border-radius: 999px; letter-spacing: 0.2px; text-decoration: none;
+  }
+  .proto-bar-pill.muted { color: var(--color-text-muted); background: #F3F1FC; border-color: var(--color-border); }
+  .proto-bar-pill:hover { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  .proto-bar-pill.muted:hover { background: #F3F1FC; color: var(--color-text-muted); }
+
+  /* ══════════════════════════════════════════════
+     MOCKUP: Deal Stage / Deal-Proposal Status
+     (scoped under #dj-mock-wrap, in-app soft purple #8B85EA)
+     ══════════════════════════════════════════════ */
+  #dj-mock-wrap {
+    --st-color-primary: #8B85EA;
+    --st-color-primary-hover: #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb: 139, 133, 234;
+    --st-color-text: #32415B;
+    --st-color-text-muted: #80879A;
+    --st-color-border: #DAD8E3;
+    --st-color-card-bg: #FFFFFF;
+
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #EEF0F5;
+    min-height: 100vh;
+    padding: 32px 16px;
+    box-sizing: border-box;
+    color: var(--st-color-text);
+  }
+
+  #dj-mock-wrap * { box-sizing: border-box; }
+
+  #dj-mock-wrap .mock-context {
+    max-width: 700px;
+    margin: 0 auto 18px auto;
+    font-size: 13px;
+    color: var(--st-color-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #dj-mock-wrap .mock-context .tag {
+    background: #F1EFFC;
+    color: var(--st-color-primary-active);
+    font-weight: 600;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    letter-spacing: 0.2px;
+  }
+
+  /* ---- Modal shell ---- */
+  #dj-mock-wrap .deal-modal {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #F4F5F8;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(50,65,91,0.18);
+    overflow: hidden;
+  }
+  #dj-mock-wrap .deal-modal-header {
+    background: #FFFFFF;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--st-color-border);
+  }
+  #dj-mock-wrap .deal-modal-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--st-color-text);
+  }
+  #dj-mock-wrap .deal-modal-header .close-x {
+    color: var(--st-color-text-muted);
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  #dj-mock-wrap .deal-modal-body {
+    padding: 20px;
+    max-height: 74vh;
+    overflow-y: auto;
+  }
+  #dj-mock-wrap .deal-modal-footer {
+    background: #FFFFFF;
+    padding: 14px 22px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid var(--st-color-border);
+  }
+
+  /* ---- Section cards ---- */
+  #dj-mock-wrap .dj-section {
+    background: #FFFFFF;
+    border: 1px solid var(--st-color-border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  #dj-mock-wrap .dj-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px 0;
+    color: var(--st-color-text);
+  }
+  #dj-mock-wrap .dj-section-title i { font-size: 13px; }
+  #dj-mock-wrap .dj-section-title.contact i { color: #2FBF71; }
+  #dj-mock-wrap .dj-section-title.drips i { color: #8B85EA; }
+  #dj-mock-wrap .dj-section-title.address i { color: #E8863C; }
+  #dj-mock-wrap .dj-section-title.assign i { color: #8B85EA; }
+
+  #dj-mock-wrap .dj-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  #dj-mock-wrap .dj-row.single { grid-template-columns: 1fr; }
+  #dj-mock-wrap .dj-row:last-child { margin-bottom: 0; }
+
+  #dj-mock-wrap .dj-field { display: flex; flex-direction: column; position: relative; }
+  #dj-mock-wrap .dj-field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--st-color-text);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #dj-mock-wrap .dj-field input,
+  #dj-mock-wrap .dj-field select {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--st-color-border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--st-color-text);
+    background: #FFFFFF;
+    width: 100%;
+    font-family: inherit;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  #dj-mock-wrap .dj-field input:disabled { color: var(--st-color-text-muted); background: #FAFAFC; }
+  #dj-mock-wrap .dj-field input:focus, #dj-mock-wrap .dj-field select:focus {
+    outline: none;
+    border-color: var(--st-color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), .18);
+  }
+  #dj-mock-wrap .dj-field select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%2380879A'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 32px;
+  }
+  #dj-mock-wrap .dj-helper {
+    font-size: 11.5px;
+    color: var(--st-color-text-muted);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  #dj-mock-wrap .dj-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #dj-mock-wrap .dj-toggle-label { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  #dj-mock-wrap .switch { position: relative; width: 38px; height: 22px; display: inline-block; }
+  #dj-mock-wrap .switch input { opacity: 0; width: 0; height: 0; }
+  #dj-mock-wrap .slider { position: absolute; inset: 0; background: #D9DBE4; border-radius: 999px; transition: .15s; cursor: pointer; }
+  #dj-mock-wrap .slider::before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: .15s; }
+  #dj-mock-wrap .switch input:checked + .slider { background: var(--st-color-primary); }
+  #dj-mock-wrap .switch input:checked + .slider::before { transform: translateX(16px); }
+
+  /* ---- BR annotation chips ---- */
+  #dj-mock-wrap .br-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #FCEBD9;
+    color: #B5651D;
+    font-size: 9.5px;
+    font-weight: 700;
+    cursor: help;
+    position: relative;
+  }
+  #dj-mock-wrap .br-chip .tip {
+    display: none;
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #32415B;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.4;
+    padding: 8px 10px;
+    border-radius: 6px;
+    width: 230px;
+    z-index: 20;
+    box-shadow: 0 6px 18px rgba(0,0,0,.2);
+  }
+  #dj-mock-wrap .br-chip .tip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #32415B;
+  }
+  #dj-mock-wrap .br-chip:hover .tip { display: block; }
+
+  #dj-mock-wrap .changed-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    background: #E6FAF0;
+    color: #166534;
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-left: auto;
+  }
+  #dj-mock-wrap .dj-field-wrap-changed {
+    background: #FBFAFF;
+    border: 1px dashed #C9C4F5;
+    border-radius: 10px;
+    padding: 12px 12px 4px 12px;
+    margin: -12px -12px 2px -12px;
+  }
+
+  #dj-mock-wrap .dj-hr { height: 1px; background: var(--st-color-border); margin: 16px 0; }
+
+  #dj-mock-wrap .btn {
+    height: 38px;
+    padding: 0 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #dj-mock-wrap .btn-primary { background: var(--st-color-primary); color: #fff; }
+  #dj-mock-wrap .btn-primary:hover { background: var(--st-color-primary-hover); }
+  #dj-mock-wrap .btn-outline { background: #fff; color: var(--st-color-primary); border: 1px solid var(--st-color-primary); }
+  #dj-mock-wrap .btn-outline:hover { background: #F1EFFC; }
+
+  /* toast */
+  .dj-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #166534;
+    color: #fff;
+    padding: 11px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    z-index: 50;
+  }
+  .dj-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  #dj-mock-wrap option:disabled { color: #C4C8D2; }
+</style>
+</head>
+<body>
+
+<!-- ── Proto bar ── -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Deal Stage &amp; Deal/Proposal Status</span>
+  </div>
+  <div class="proto-bar-right">
+    <span class="proto-bar-pill muted">New</span>
+    <a class="proto-bar-pill" href="https://app.clickup.com/t/8633445/86bbyr3w2" target="_blank">86bbyr3w2</a>
+  </div>
+</div>
+
+<div id="dj-mock-wrap">
+
+  <div class="mock-context">
+    <span class="tag">Mockup · Ticket 86bbyr3w2</span>
+    <span>Edit Deal Details modal: Deal Stage &amp; Deal/Proposal Status fields only. All other sections unchanged from current UI.</span>
+  </div>
+
+  <div class="deal-modal">
+    <div class="deal-modal-header">
+      <h2>Edit Deal #3199203 Details</h2>
+      <span class="close-x">&times;</span>
+    </div>
+
+    <div class="deal-modal-body">
+
+      <!-- CONTACT INFORMATION (unchanged) -->
+      <div class="dj-section">
+        <h4 class="dj-section-title contact"><i class="fas fa-user"></i> CONTACT INFORMATION</h4>
+
+        <div class="dj-row single">
+          <div class="dj-field">
+            <label>Contact</label>
+            <input type="text" value="Dripjobs Harrison" disabled>
+          </div>
+        </div>
+
+        <div class="dj-row">
+          <div class="dj-field">
+            <label>First Name</label>
+            <input type="text" value="Dripjobs">
+          </div>
+          <div class="dj-field">
+            <label>Last Name</label>
+            <input type="text" value="Harrison">
+          </div>
+        </div>
+
+        <div class="dj-row">
+          <div class="dj-field">
+            <label>E-mail</label>
+            <input type="text" value="jeremy+1@dripjobs.com">
+          </div>
+          <div class="dj-field">
+            <label>Phone</label>
+            <input type="text" value="(727) 250-8869">
+          </div>
+        </div>
+        <div class="dj-helper" style="margin-bottom:14px;">E-mail and phone are edited on the contact record, not per deal.</div>
+
+        <div class="dj-row">
+          <div class="dj-field">
+            <label>Lead Source</label>
+            <input type="text" value="Special Event" disabled>
+          </div>
+          <div class="dj-field">
+            <label>Deal Name</label>
+            <input type="text" value="Onsite Estimate (AUG 11)">
+          </div>
+        </div>
+        <div class="dj-helper" style="margin-bottom:14px;">Lead source is set on the contact record and cannot be changed when starting a new lead.</div>
+
+        <div class="dj-hr"></div>
+
+        <!-- CHANGED FIELDS: Deal Stage + Deal/Proposal Status (stacked vertically, matches current modal layout) -->
+        <div class="dj-row single dj-field-wrap-changed">
+          <div class="dj-field">
+            <label>
+              Deal Stage
+              <span class="br-chip">i<span class="tip">Relabeled from "Stage" per AC. Selecting a stage filters the statuses available below.</span></span>
+              <span class="changed-badge">Updated</span>
+            </label>
+            <select id="dealStage">
+              <option value="cold_leads">Cold Leads</option>
+              <option value="warm_leads">Warm Leads</option>
+              <option value="estimate_requested">Estimate Requested</option>
+              <option value="estimate_scheduled" selected>Estimate Scheduled</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="in_draft">In Draft</option>
+            </select>
+            <div class="dj-helper">Tracks the deal's position in your pipeline. Changing this moves the deal to a different stage.</div>
+          </div>
+        </div>
+
+        <div class="dj-row single dj-field-wrap-changed" style="margin-top:14px;">
+          <div class="dj-field">
+            <label>
+              Deal/Proposal Status
+              <span class="br-chip">i<span class="tip">Relabeled from "Deal Status" per AC. Options are filtered to only those valid for the selected Deal Stage.</span></span>
+              <span class="changed-badge">Updated</span>
+            </label>
+            <select id="dealStatus"></select>
+            <div class="dj-helper">Status of the deal at this stage. Once a proposal is sent, this tracks whether it's pending, accepted, or rejected.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- DRIPS (unchanged) -->
+      <div class="dj-section">
+        <h4 class="dj-section-title drips"><i class="fas fa-tint"></i> DRIPS</h4>
+        <div class="dj-toggle-row">
+          <span class="dj-toggle-label">Disable <i class="fas fa-info-circle" style="color:var(--st-color-text-muted); font-size:11px;"></i></span>
+          <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <!-- JOB ADDRESS (unchanged) -->
+      <div class="dj-section">
+        <h4 class="dj-section-title address"><i class="fas fa-map-marker-alt"></i> JOB ADDRESS</h4>
+        <div class="dj-row single">
+          <div class="dj-field">
+            <label>Addresses On File</label>
+            <select><option>221 N Nashville Ave, Hernando, FL, 34442</option></select>
+            <div class="dj-helper">Pick an address already on this contact's record, or leave + Add New Address selected and type a different one below.</div>
+          </div>
+        </div>
+        <div class="dj-row single" style="margin-top:14px;">
+          <div class="dj-field">
+            <label>Address Line 1</label>
+            <input type="text" value="221 N Nashville Ave">
+          </div>
+        </div>
+        <div class="dj-row" style="grid-template-columns: 1fr 1fr 1fr; margin-top:14px;">
+          <div class="dj-field">
+            <label>City</label>
+            <input type="text" value="Hernando">
+          </div>
+          <div class="dj-field">
+            <label>State</label>
+            <input type="text" value="FL">
+          </div>
+          <div class="dj-field">
+            <label>Zip</label>
+            <input type="text" value="34442">
+          </div>
+        </div>
+      </div>
+
+      <!-- ASSIGNMENT (unchanged) -->
+      <div class="dj-section">
+        <h4 class="dj-section-title assign"><i class="fas fa-users"></i> ASSIGNMENT</h4>
+        <div class="dj-row">
+          <div class="dj-field">
+            <label>Salesperson</label>
+            <select><option>Jeremy Harrison</option></select>
+          </div>
+          <div class="dj-field">
+            <label>Project Manager</label>
+            <select><option>Select a project manager...</option></select>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="deal-modal-footer">
+      <button class="btn btn-primary" id="saveBtn"><i class="fas fa-check"></i> Save</button>
+      <button class="btn btn-outline">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="dj-toast" id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Saved</span></div>
+
+<script>
+  // Full status set per ticket: Open, Pending, Accepted, Rejected, Scheduled, Cancelled
+  // (Completed removed, that's a Jobs Pipeline stage, not a Deal Pipeline status).
+  // Which statuses are valid per stage was not specified in the ticket, this mapping
+  // is a placeholder for Jeremy to confirm, see docs/decision-log.md.
+  var statusesByStage = {
+    cold_leads:         ["Open"],
+    warm_leads:         ["Open","Pending"],
+    estimate_requested: ["Open","Pending","Scheduled"],
+    estimate_scheduled: ["Scheduled","Pending"],
+    cancelled:          ["Cancelled"],
+    in_draft:           ["Open"]
+  };
+
+  var stageSelect = document.getElementById('dealStage');
+  var statusSelect = document.getElementById('dealStatus');
+
+  function populateStatuses(stageKey, preferredValue) {
+    var options = statusesByStage[stageKey] || [];
+    statusSelect.innerHTML = "";
+    options.forEach(function(opt) {
+      var el = document.createElement('option');
+      el.value = opt;
+      el.textContent = opt;
+      statusSelect.appendChild(el);
+    });
+    if (preferredValue && options.indexOf(preferredValue) !== -1) {
+      statusSelect.value = preferredValue;
+    }
+  }
+
+  stageSelect.addEventListener('change', function() {
+    populateStatuses(this.value);
+  });
+
+  // initial state mirrors the provided screenshot: Estimate Scheduled / Scheduled
+  populateStatuses('estimate_scheduled', 'Scheduled');
+
+  var toast = document.getElementById('toast');
+  var toastMsg = document.getElementById('toastMsg');
+  document.getElementById('saveBtn').addEventListener('click', function() {
+    toastMsg.textContent = "Saved, Deal Stage: " + stageSelect.options[stageSelect.selectedIndex].text + ", Status: " + statusSelect.value;
+    toast.classList.add('show');
+    setTimeout(function() { toast.classList.remove('show'); }, 2600);
+  });
+</script>
+</body>
+</html>
