@@ -379,7 +379,7 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
         <span class="demo-bar-label"><i class="fas fa-flask"></i> Prototype controls</span>
         <span id="demoBarState" style="font-size:12px; color:var(--st-color-text-muted);"></span>
         <div class="demo-bar-spacer"></div>
-        <button class="btn btn-sm btn-outline-primary" onclick="openIndustryChangeModal()"><i class="fas fa-exclamation-triangle"></i> Preview: Industry-Change Modal</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="previewIndustryChangeModal()"><i class="fas fa-exclamation-triangle"></i> Preview: Industry-Change Modal</button>
         <button class="btn btn-sm btn-outline-primary" onclick="resetIndustryToEmpty()"><i class="fas fa-inbox"></i> Demo: Clear to Empty States</button>
         <button class="btn btn-sm btn-outline-primary" onclick="restoreSampleData()"><i class="fas fa-database"></i> Demo: Restore Sample Data</button>
         <button class="btn btn-sm btn-outline-primary" onclick="openNotesPanel()"><i class="fas fa-sticky-note"></i> Notes for Jeremy</button>
@@ -396,23 +396,23 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
   <div class="wizard-card" id="wizardCard"></div>
 </div>
 
-<!-- ══════════════ INDUSTRY-CHANGE CONFIRMATION MODAL (reusable component, Phase 2/3) ══════════════ -->
+<!-- ══════════════ INDUSTRY-CHANGE CONFIRMATION MODAL (reusable component -- used for real by "Restore Default", and by the Notes-panel-adjacent Preview button) ══════════════ -->
 <div class="modal-backdrop" id="industryChangeModal">
   <div class="modal">
     <div class="modal-header">
       <div>
         <div class="modal-title">Change Industry?</div>
-        <div class="modal-subtitle">This is a preview of a reusable component — it never fires during first-time setup, only when changing Industry against existing configuration (Phase 2/3).</div>
+        <div class="modal-subtitle" id="icmSubtitle"></div>
       </div>
       <button class="modal-close" onclick="closeIndustryChangeModal()">&times;</button>
     </div>
     <div class="modal-body">
-      <p>You're changing the Industry from <strong id="icmFrom">Residential Painting</strong> to <strong id="icmTo">Roofing</strong>.</p>
+      <p>You're changing your Industry from <strong id="icmFrom">Residential Painting</strong> to <strong id="icmTo">Roofing</strong>.</p>
       <div class="settings-alert settings-alert--warn">
         <i class="fas fa-exclamation-triangle"></i>
         <div class="settings-alert-body">
-          <div class="settings-alert-title">This can affect existing Production Rate configuration</div>
-          <div>Areas, Categories, and Substrates tied to your current Industry may no longer apply once you switch. Nothing is deleted automatically, but you should confirm before continuing.</div>
+          <div class="settings-alert-title">This replaces your current Production Rates configuration</div>
+          <div id="icmWarnBody">Production Rates supports one Industry at a time. Switching replaces your current configuration with the new Industry's rates. This does not affect existing Proposals and Invoices already created.</div>
         </div>
       </div>
     </div>
@@ -491,6 +491,10 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
       <div class="note-item">
         <span class="note-tag assumption">Scope cut (direct request)</span>
         <div class="note-text">Simplified to one Industry per account at a time, matching what the real system supports today, per your direct request. This removed the Primary + Additional Industries multi-select in the wizard (now a single choice) and the Industry Switcher on this Settings page (now nothing to switch between). Storing multiple simultaneous Production Rate configurations per account is deferred to V2. Restarting the wizard and picking a different Industry now wholesale-replaces the account's configuration rather than adding to it.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Follow-up (direct request)</span>
+        <div class="note-text">Added a persistent "Restore Default (Residential Painting)" button in the Industry header, shown whenever the current Industry isn't already Residential Painting -- per your follow-up that there was no way back to the system default once you'd moved to a different Industry. It opens the same reusable Industry-Change confirmation modal (now wired to a real action, not just a preview) and, on confirm, switches the account back to Residential Painting with its default rates. This is the one Industry the real system supports out of the box today, which is why it's the fixed destination rather than a pick from all ten.</div>
       </div>
       <div class="note-item">
         <span class="note-tag assumption">Assumption (Phase 3)</span>
@@ -640,6 +644,9 @@ var TEN_INDUSTRIES = [
 ];
 
 var COMPANY = { industry: 'Residential Painting', address: '1245 Ocean Ave, Tampa, FL 33602' };
+// What Production Rates loads by default today (Painting-only, pre-dating this
+// multi-industry work) -- always reachable again via "Restore Default" below.
+var SYSTEM_DEFAULT_INDUSTRY = 'Residential Painting';
 
 function industryByName(name) { return TEN_INDUSTRIES.find(function(i){ return i.name === name; }); }
 
@@ -896,16 +903,45 @@ function addMockLineItem() {
   rows.appendChild(tr);
 }
 
-/* ── Industry-Change confirmation modal (preview only, never fires from wizard) ── */
-function openIndustryChangeModal() {
-  document.getElementById('icmFrom').textContent = 'Residential Painting';
-  document.getElementById('icmTo').textContent = 'Roofing';
+/* ── Industry-Change confirmation modal (reusable) ──
+   Never fires during first-time setup (the wizard applies a chosen Industry
+   directly, per BR6). Used for real by "Restore Default" below, and as an
+   isolated preview via the prototype-controls bar. */
+var pendingIndustryChangeAction = null;
+function openIndustryChangeModal(fromName, toName, subtitle, warnBody) {
+  document.getElementById('icmFrom').textContent = fromName;
+  document.getElementById('icmTo').textContent = toName;
+  document.getElementById('icmSubtitle').textContent = subtitle || '';
+  document.getElementById('icmWarnBody').textContent = warnBody || ('Production Rates supports one Industry at a time. Switching to ' + toName + ' replaces your ' + fromName + ' configuration in this account. This does not affect existing Proposals and Invoices already created.');
   document.getElementById('industryChangeModal').classList.add('open');
 }
-function closeIndustryChangeModal() { document.getElementById('industryChangeModal').classList.remove('open'); }
+function previewIndustryChangeModal() {
+  pendingIndustryChangeAction = null;
+  openIndustryChangeModal('Residential Painting', 'Roofing', 'This is a preview of a reusable component -- it never fires during first-time setup, only when changing Industry against existing configuration.');
+}
+function closeIndustryChangeModal() {
+  document.getElementById('industryChangeModal').classList.remove('open');
+  pendingIndustryChangeAction = null;
+}
 function confirmIndustryChangeModal() {
+  var action = pendingIndustryChangeAction;
   closeIndustryChangeModal();
-  toast('Industry change confirmed (prototype only — this component is reused in Phase 2/3)');
+  if (action) action();
+  else toast('Industry change confirmed (prototype only — this is the isolated preview)');
+}
+
+function restoreSystemDefaultIndustry() {
+  var from = APP.activeConfigIndustry;
+  var to = SYSTEM_DEFAULT_INDUSTRY;
+  if (from === to) { toast(to + ' is already the current Industry'); return; }
+  pendingIndustryChangeAction = function () {
+    resetIndustryDataToDefaults(to);
+    APP.configuredIndustries = [to];
+    APP.activeConfigIndustry = to;
+    renderMainPage();
+    toast('Restored the system default: ' + to);
+  };
+  openIndustryChangeModal(from, to, null, 'Production Rates supports one Industry at a time. This restores ' + to + ' with its default rates, replacing your current ' + from + ' configuration in this account. This does not affect existing Proposals and Invoices already created.');
 }
 
 function openNotesPanel() { document.getElementById('notesModal').classList.add('open'); }
@@ -1181,6 +1217,12 @@ function renderConfiguredPage() {
   // Simplified per direct request: one Industry per account today, so there's
   // no switcher here -- use "Restart Wizard" to reconfigure for a different
   // Industry. Multiple simultaneous Industries per account is deferred to V2.
+  // SYSTEM_DEFAULT_INDUSTRY is always reachable from here, though, so a user
+  // who moved to a different Industry always has a way back to what
+  // Production Rates loads by default.
+  var restoreDefaultHtml = (name !== SYSTEM_DEFAULT_INDUSTRY)
+    ? '<button type="button" class="btn btn-outline-primary btn-sm" onclick="restoreSystemDefaultIndustry()"><i class="fas fa-undo"></i> Restore Default (' + SYSTEM_DEFAULT_INDUSTRY + ')</button>'
+    : '';
   return '' +
     '<div class="page-title">Production Rates</div>' +
     '<div class="industry-header">' +
@@ -1188,6 +1230,7 @@ function renderConfiguredPage() {
         '<div class="industry-header-icon"><i class="fas ' + (isGutterIndustry() ? 'fa-water' : 'fa-paint-roller') + '"></i></div>' +
         '<div><div class="industry-header-label">Industry</div><div class="industry-header-name">' + name + '</div></div>' +
       '</div>' +
+      restoreDefaultHtml +
     '</div>' +
     '<div class="pr-tabs">' +
       ['settings', 'areas', 'categories', 'substrates', 'products'].map(function (t) {

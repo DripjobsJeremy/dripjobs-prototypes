@@ -38,6 +38,12 @@ Format:
 - Decision: Removed "Send Marketing Agency Info" from `#protoGrid`, per Jeremy confirming it was pushed to production today.
 - Why: Direct request.
 - Open question: None.
+## [2026-09-10] Multi-Industry Production Rates: added "Restore Default" path back to the system default Industry
+
+- Decision: Now that an account only configures one Industry at a time, there needed to be a way back to Residential Painting (what the real system loads by default today) without redoing the whole First-Time Setup wizard. Added a persistent "Restore Default (Residential Painting)" button in the Industry header, shown whenever the current Industry isn't already Residential Painting. It opens the existing reusable Industry-Change confirmation modal (previously wired only to an isolated "Preview" button) and, on confirm, switches the account back to Residential Painting with its default rates, replacing whatever Industry was previously configured. Canceling leaves the current Industry untouched.
+- Why: Direct follow-up -- after cutting multi-industry-per-account down to one Industry at a time, there was no path back to the default once you'd moved to a different Industry, which is a real gap in the simplified flow, not a hypothetical one.
+- No open question: this closes the gap the previous simplification introduced.
+
 ## [2026-09-10] Multi-Industry Production Rates: Scope cut to one Industry per account
 
 - Decision: Simplified the wizard and configuration UI so an account can only configure Production Rates for one Industry at a time, matching what the real system supports today. Removed: the wizard's Primary + Additional Industries multi-select (Step 2 is now a single choice, pre-filled from Step 1's confirmed Industry but changeable), the "Your Industries" side panel on the wizard's outcome screen, and the Industry Switcher on the Settings header. Selecting a different Industry via the wizard now wholesale-replaces `APP.configuredIndustries` rather than adding to it.
