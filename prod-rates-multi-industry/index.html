@@ -457,7 +457,7 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
   <div class="modal">
     <div class="modal-header">
       <div>
-        <div class="modal-title">Apply Rate Preset Template?</div>
+        <div class="modal-title">Apply Preset Template?</div>
         <div class="modal-subtitle">You're switching <strong id="presetConfirmIndustry">Residential Painting</strong> to <strong id="presetConfirmToRegion">Southeast</strong></div>
       </div>
       <button class="modal-close" onclick="cancelPresetSelectChange()">&times;</button>
@@ -531,7 +531,7 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
       </div>
       <div class="note-item">
         <span class="note-tag assumption">Assumption (Phase 3)</span>
-        <div class="note-text">Switching the preset dropdown back to "None (custom)" only stops tracking that Industry as preset-linked (clears the badge and the misconfiguration-warning trigger) &mdash; it does not revert any values back to what they were before the preset was applied. The ticket frames presets as "recommended starting points, not immutable configuration" (BR8), and doesn't define an undo/revert behavior.</div>
+        <div class="note-text">Switching the preset dropdown back to "[Industry] (Default)" only stops tracking that Industry as preset-linked (clears the badge and the misconfiguration-warning trigger) &mdash; it does not revert any values back to what they were before the preset was applied. The ticket frames presets as "recommended starting points, not immutable configuration" (BR8), and doesn't define an undo/revert behavior.</div>
       </div>
       <div class="note-item">
         <span class="note-tag assumption">Assumption (Phase 3)</span>
@@ -914,9 +914,9 @@ function renderLiveTemplateHero(ind) {
     var selected = WIZARD_PRESET_SELECTIONS[ind.name] || 'none';
     presetField = '' +
       '<div class="settings-field settings-field--full" style="max-width:320px; margin-bottom:16px; text-align:left;">' +
-        '<label class="settings-field-label is-new">Rate Preset Template (optional)</label>' +
+        '<label class="settings-field-label is-new">Preset Template (optional)</label>' +
         '<select class="settings-field-input" onchange="setWizardPreset(\'' + ind.name + '\', this.value)">' +
-          '<option value="none"' + (selected === 'none' ? ' selected' : '') + '>None (custom)</option>' +
+          '<option value="none"' + (selected === 'none' ? ' selected' : '') + '>' + ind.name + ' (Default)</option>' +
           regions.map(function (r) { return '<option value="' + r + '"' + (selected === r ? ' selected' : '') + '>' + r + '</option>'; }).join('') +
         '</select>' +
         '<div class="settings-field-help">Jump-start your rates with a regional starting point. No confirmation is needed here since there\'s nothing to overwrite yet &mdash; you can still edit anything afterward.</div>' +
@@ -1189,7 +1189,7 @@ function openPresetConfirmModal(newValue, currentValue) {
   var d = currentData();
   var name = APP.activeConfigIndustry;
   document.getElementById('presetConfirmIndustry').textContent = name;
-  document.getElementById('presetConfirmToRegion').textContent = newValue === 'none' ? 'None (custom)' : newValue;
+  document.getElementById('presetConfirmToRegion').textContent = newValue === 'none' ? (name + ' (Default)') : newValue;
   var def = newValue !== 'none' ? PRESET_DEFS[name].values[newValue] : null;
   var rows = '';
   rows += presetDiffRow('Hourly Cost Rate', '$' + d.settings.costRate, def ? ('$' + def.costRate) : '&mdash;');
@@ -1305,9 +1305,9 @@ function renderSettingsTab() {
     var current = s.appliedPreset || 'none';
     presetSelectHtml = '' +
       '<div class="settings-field settings-field--full">' +
-        '<label class="settings-field-label is-new">Rate Preset Template</label>' +
+        '<label class="settings-field-label is-new">Preset Template</label>' +
         '<select class="settings-field-input" onchange="onPresetSelectChange(this.value)">' +
-          '<option value="none"' + (current === 'none' ? ' selected' : '') + '>None (custom)</option>' +
+          '<option value="none"' + (current === 'none' ? ' selected' : '') + '>' + name + ' (Default)</option>' +
           regions.map(function (r) { return '<option value="' + r + '"' + (current === r ? ' selected' : '') + '>' + r + '</option>'; }).join('') +
         '</select>' +
         '<div class="settings-field-help">Applying a preset updates Hourly Cost Rate, Hourly Sell Rate, Product Markup, and production rate values across every Area, Category, and Substrate for ' + name + ' only. You can still edit anything afterward.' + (s.appliedPreset ? ' <span class="pill pill-live" style="margin-left:4px;">' + s.appliedPreset + ' applied</span>' : '') + '</div>' +
