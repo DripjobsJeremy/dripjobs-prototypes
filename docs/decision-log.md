@@ -38,6 +38,12 @@ Format:
 - Decision: Removed "Send Marketing Agency Info" from `#protoGrid`, per Jeremy confirming it was pushed to production today.
 - Why: Direct request.
 - Open question: None.
+## [2026-09-10] Multi-Industry Production Rates: Scope cut to one Industry per account
+
+- Decision: Simplified the wizard and configuration UI so an account can only configure Production Rates for one Industry at a time, matching what the real system supports today. Removed: the wizard's Primary + Additional Industries multi-select (Step 2 is now a single choice, pre-filled from Step 1's confirmed Industry but changeable), the "Your Industries" side panel on the wizard's outcome screen, and the Industry Switcher on the Settings header. Selecting a different Industry via the wizard now wholesale-replaces `APP.configuredIndustries` rather than adding to it.
+- Why: Direct request -- storing multiple simultaneous Production Rate configurations per account is real architectural work (data model, Proposal Builder implications, etc.) that doesn't need solving to validate this prototype's core flows. Explicitly deferred to V2.
+- No open question: this was an explicit, unambiguous instruction, not a judgment call.
+
 ## [2026-09-10] Multi-Industry Production Rates, Phase 3: Rate Preset Templates
 
 - Decision: The preset selector (Industry + Region only, per BR1) appears both in Settings' Proposal Defaults and in the wizard's live-template hero screen (BR2), with exactly one region modeled per Industry ("Southeast") since the ticket itself leaves the full region taxonomy as an open gap. Selecting a preset in Settings always requires confirmation via a new, separate modal from the Phase 1 Industry-Change modal (BR6/BR7); selecting one in the wizard applies immediately with no confirmation, since there's nothing to overwrite yet (BR6).
