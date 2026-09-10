@@ -9,6 +9,11 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-10] Hub: removed Prod Rates Import Wizard card (superseded)
+
+- Decision: Removed the standalone "Prod Rates Import Wizard" card from `#protoGrid` (was linking to `prod-rates-import/index.html`, ticket 86b8tq9m9). Its bulk-import functionality now lives inside the Multi-Industry Production Rates prototype's own card, added the same day.
+- Why: Direct request, following the Import Data functionality being folded into the multi-industry prototype. The standalone `prod-rates-import/index.html` file itself was left in place (not deleted) since it's still a valid, if now-superseded, reference; only its hub card was removed.
+
 ## [2026-09-10] Multi-Industry Production Rates: combined in the Import Data feature from prod-rates-import
 
 - Decision: Ported the standalone prod-rates-import prototype's Import Data functionality into this build, per direct request to combine the two. Added a per-tab "Import" button (Interior Area, Exterior Area, Categories, Area Substrates, Products) opening a 4-step wizard (Upload, Map Columns, Preview, Done), plus a page-level "Import Data" button in the Industry header opening a 5-step multi-section wizard (Upload, Select Sections, Map Columns, Preview, Done) that imports across all sections in one pass, with per-section collapsible column mapping and a combined preview. Both reuse the design-system modal/table/alert components already in this file, restyled from the source's own one-off styling. Unlike the source prototype (which only showed canned success counts), completing an import here actually adds or updates real rows in the current Industry's data, honoring a Skip vs. Overwrite choice on the one demonstrated duplicate per section, so the rest of the page reflects the import immediately.
