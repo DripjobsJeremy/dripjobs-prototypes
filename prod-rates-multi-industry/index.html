@@ -309,15 +309,31 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
 #mi-prod-rates-prototype .level-empty-state-title { font-size:14px; font-weight:700; margin-bottom:5px; }
 #mi-prod-rates-prototype .level-empty-state-sub { font-size:12.5px; color:var(--st-color-text-muted); margin-bottom:16px; max-width:360px; margin-left:auto; margin-right:auto; line-height:1.5; }
 
-/* Area cards */
-#mi-prod-rates-prototype .area-card-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:14px; }
-#mi-prod-rates-prototype .area-card { border:1px solid var(--st-color-border); border-radius:10px; padding:16px; cursor:pointer; transition:border-color .15s; }
-#mi-prod-rates-prototype .area-card:hover { border-color:var(--st-color-primary); }
-#mi-prod-rates-prototype .area-card-name { font-size:14px; font-weight:700; margin-bottom:6px; }
-#mi-prod-rates-prototype .area-card-meta { font-size:12px; color:var(--st-color-text-muted); }
+/* ══════════════ PHASE 2 REBUILD: layout parity with the real Production
+   Rates UI (Settings | [Area] Area(s) | Substrates | Products) ══════════════ */
 
-/* Substrate detail chip (coat rates summary) */
-#mi-prod-rates-prototype .coat-rate-chip { display:inline-block; background:#F1F1F5; border-radius:5px; padding:1px 6px; font-size:11.5px; margin-right:4px; font-variant-numeric:tabular-nums; }
+/* Boxed data table + attached footer bar, matching the real system's tables */
+#mi-prod-rates-prototype .data-table-wrap { border:1px solid var(--st-color-border); border-bottom:none; border-radius:8px 8px 0 0; }
+#mi-prod-rates-prototype .table-footer-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:10px 14px; border:1px solid var(--st-color-border); border-radius:0 0 8px 8px; background:#FAFAFC; font-size:12px; font-weight:700; color:var(--st-color-text-muted); margin-bottom:18px; }
+
+/* Drag-to-reorder handle (prototype-only, non-functional) */
+#mi-prod-rates-prototype .drag-handle-cell { width:20px; padding-right:0 !important; }
+#mi-prod-rates-prototype .drag-handle { color:#c9cbe0; font-size:12px; cursor:grab; }
+
+/* Interior/Exterior segmented toggle (Substrates tab) */
+#mi-prod-rates-prototype .pill-toggle { display:inline-flex; border:1.5px solid var(--st-color-border); border-radius:999px; padding:3px; gap:2px; }
+#mi-prod-rates-prototype .pill-toggle-btn { border:none; background:transparent; padding:7px 18px; border-radius:999px; font-size:12.5px; font-weight:700; color:var(--st-color-text-muted); cursor:pointer; font-family:inherit; }
+#mi-prod-rates-prototype .pill-toggle-btn.active { background:var(--st-color-primary); color:#fff; }
+
+/* Area Substrates "Details" column (multi-line coat/rate breakdown) */
+#mi-prod-rates-prototype .details-cell { font-size:12px; line-height:1.7; color:var(--st-color-text); }
+
+/* Products tab toolbar (search + sort, layout-only in this prototype) */
+#mi-prod-rates-prototype .table-toolbar-row { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+#mi-prod-rates-prototype .table-search-box { position:relative; flex:1; min-width:180px; max-width:320px; }
+#mi-prod-rates-prototype .table-search-box i { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:12px; color:var(--st-color-text-muted); }
+#mi-prod-rates-prototype .table-search-input { width:100%; height:38px; padding:0 14px 0 34px; border:1px solid var(--st-color-border); border-radius:8px; font-size:13px; font-family:inherit; background:var(--st-color-card-bg); color:var(--st-color-text); }
+#mi-prod-rates-prototype .table-search-input:focus { outline:none; border-color:var(--st-color-primary); box-shadow:0 0 0 3px rgba(var(--st-color-primary-rgb),.18); }
 
 /* Demo-only reset controls inside a tab */
 #mi-prod-rates-prototype .tab-demo-controls { display:flex; gap:8px; margin-bottom:14px; }
@@ -441,8 +457,8 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
       <div class="settings-alert settings-alert--warn">
         <i class="fas fa-exclamation-triangle"></i>
         <div class="settings-alert-body">
-          <div class="settings-alert-title">This overwrites existing configuration</div>
-          <div>Applying a preset updates Hourly Cost Rate, Hourly Sell Rate, and Product Markup above, plus production rate values across every Area, Category, and Substrate configured for this Industry. This does not change any other Industry on this account, and existing Proposals and Invoices already created will not be impacted.</div>
+          <div class="settings-alert-title" id="presetConfirmWarnTitle">This overwrites existing configuration</div>
+          <div id="presetConfirmWarnBody">Applying a preset updates Hourly Cost Rate, Hourly Sell Rate, and Product Markup above, plus production rate values across every Area, Category, and Substrate configured for this Industry. This does not change any other Industry on this account, and existing Proposals and Invoices already created will not be impacted.</div>
         </div>
       </div>
     </div>
@@ -481,8 +497,16 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
         <div class="note-text">Mid-wizard abandon/resume behavior is flagged as unaddressed in the source ticket. Not built here.</div>
       </div>
       <div class="note-item">
-        <span class="note-tag assumption">Assumption (Phase 2)</span>
-        <div class="note-text">"Areas" in the new hierarchy are the fixed top-level types (Interior/Exterior for Painting, Exterior for Gutter Services) per the Epic's own example ("Residential Painting: Interior &rarr; Walls &rarr; 8' Smooth Walls..."). This is a different concept from the old UI's per-room rows (Office, Kitchen, etc. seen in the reference screenshots) &mdash; those aren't mentioned anywhere in the five tickets, so I've treated them as a separate, unaffected Proposal Builder concept rather than guessing they belong in this new hierarchy.</div>
+        <span class="note-tag assumption">Correction (direct request)</span>
+        <div class="note-text">Superseded an earlier note here: I'd originally treated the real system's named per-Area rows (Office, Kitchen, Whole House, etc.) as an unrelated Proposal Builder concept, outside this hierarchy. Your reference screenshots showed they're actually the real "Interior Area" / "Exterior Area" tab tables, so the tab structure is now rebuilt to match exactly: Settings | Interior Area | Exterior Area | Substrates | Products (Gutter Services only gets one Area tab, since it has no Interior classification). Each named Area row (with its own Measurement Type, default dimensions, and Default Categories) is a new data layer on top of the existing Categories/Substrates hierarchy, not a replacement for it. The Substrates tab now combines Categories (with an Interior/Exterior toggle) and Area Substrates (with a Category chip row) into one tab, matching the real UI's layout, in place of the previous separate Areas/Categories/Substrates split.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption (tab rebuild)</span>
+        <div class="note-text">Seeded representative Area rows to match your reference screenshots (Residential Painting Interior: Office, Kitchen, Whole House; Exterior: Whole House, Exterior Body, Soffit and Fascia; Gutter Services Exterior: Whole House only) since the five tickets don't specify real ones. Last Modified dates on every row (Areas, Categories, Area Substrates, Products) are placeholder seed dates for the same reason; editing, duplicating, or adding a row stamps today's date for real, since that part is a real (if simple) business rule.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption (tab rebuild)</span>
+        <div class="note-text">Added a "Sheen" column/field to Products, matching your reference screenshot, scoped to Residential Painting only (Gutter Services products have no Sheen, so that column doesn't render for it). Duplicate (copy) actions on Areas, Categories, Area Substrates, and Products are prototype-only, as is the drag-handle reorder icon and the Products tab's Search / Sort toolbar; all match the real UI's layout per your request, but aren't wired to real reordering, search, or sort logic in this pass.</div>
       </div>
       <div class="note-item">
         <span class="note-tag assumption">Assumption (Phase 2)</span>
@@ -493,8 +517,8 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
         <div class="note-text">Simplified to one Industry per account at a time, matching what the real system supports today, per your direct request. This removed the Primary + Additional Industries multi-select in the wizard (now a single choice) and the Industry Switcher on this Settings page (now nothing to switch between). Storing multiple simultaneous Production Rate configurations per account is deferred to V2. Restarting the wizard and picking a different Industry now wholesale-replaces the account's configuration rather than adding to it.</div>
       </div>
       <div class="note-item">
-        <span class="note-tag assumption">Follow-up (direct request)</span>
-        <div class="note-text">Added a persistent "Restore Default (Residential Painting)" button in the Industry header, shown whenever the current Industry isn't already Residential Painting -- per your follow-up that there was no way back to the system default once you'd moved to a different Industry. It opens the same reusable Industry-Change confirmation modal (now wired to a real action, not just a preview) and, on confirm, switches the account back to Residential Painting with its default rates. This is the one Industry the real system supports out of the box today, which is why it's the fixed destination rather than a pick from all ten.</div>
+        <span class="note-tag assumption">Superseded (direct request)</span>
+        <div class="note-text">The persistent "Restore Default (Residential Painting)" header button from the last checkpoint has been removed. Per your follow-up ("the available templates should always be accessible in the preset Template dropdown... when I clicked restore default, Gutter Services went away entirely"), the Preset Template dropdown on the Settings tab now lists every Industry's templates in one always-visible list (grouped by Industry, including a "[Industry] (Default)" entry for each), and switching Industries from that single dropdown is the one path both to a different Industry and back to Residential Painting's system default. No Industry's configuration is ever fully gone -- it's still selectable from that same dropdown to switch back to it, still with its own default seed to restore to. The separate header button and its dedicated function were removed as redundant once the dropdown covered the same ground.</div>
       </div>
       <div class="note-item">
         <span class="note-tag assumption">Assumption (Phase 3)</span>
@@ -618,11 +642,54 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
             </div>
           </div>
         </div>
+        <div class="settings-field" id="prodFieldSheenWrap">
+          <label class="settings-field-label">Sheen</label>
+          <select class="settings-field-input" id="prodFieldSheen"></select>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline-primary" onclick="closeProductModal()">Close</button>
       <button class="btn btn-primary" onclick="saveProductModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ADD/EDIT AREA MODAL (per-Area named instances -- Office, Kitchen, Whole House, etc.) ══════════════ -->
+<div class="modal-backdrop" id="areaInstanceModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="areaInstanceModalTitle">Add Area</div>
+        <div class="modal-subtitle" id="areaInstanceModalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeAreaInstanceModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="settings-field">
+          <label class="settings-field-label is-required">Area Name</label>
+          <input class="settings-field-input" id="aiFieldName" type="text" placeholder="e.g. Office">
+        </div>
+        <div>
+          <label class="settings-field-label" style="position:static; display:block; margin-bottom:8px;">Measurement Type</label>
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn btn-outline-primary btn-sm ai-measure-pick" data-type="Area" onclick="pickAreaInstanceMeasureType('Area')">Area</button>
+            <button type="button" class="btn btn-outline-primary btn-sm ai-measure-pick" data-type="Wall" onclick="pickAreaInstanceMeasureType('Wall')">Wall</button>
+            <button type="button" class="btn btn-outline-primary btn-sm ai-measure-pick" data-type="Surface" onclick="pickAreaInstanceMeasureType('Surface')">Surface</button>
+          </div>
+        </div>
+        <div id="aiFieldDimsWrap" style="display:flex; gap:14px;"></div>
+        <div>
+          <label class="settings-field-label" style="position:static; display:block; margin-bottom:8px;">Default Area Categories</label>
+          <div id="aiFieldCategories" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+        <div id="aiFieldLastModifiedWrap" style="font-size:11.5px; color:var(--st-color-text-muted);"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-primary" onclick="closeAreaInstanceModal()">Close</button>
+      <button class="btn btn-primary" onclick="saveAreaInstanceModal()">Save</button>
     </div>
   </div>
 </div>
@@ -645,7 +712,8 @@ var TEN_INDUSTRIES = [
 
 var COMPANY = { industry: 'Residential Painting', address: '1245 Ocean Ave, Tampa, FL 33602' };
 // What Production Rates loads by default today (Painting-only, pre-dating this
-// multi-industry work) -- always reachable again via "Restore Default" below.
+// multi-industry work). Reachable any time via the "Residential Painting
+// (Default)" entry in the Preset Template dropdown.
 var SYSTEM_DEFAULT_INDUSTRY = 'Residential Painting';
 
 function industryByName(name) { return TEN_INDUSTRIES.find(function(i){ return i.name === name; }); }
@@ -930,20 +998,6 @@ function confirmIndustryChangeModal() {
   else toast('Industry change confirmed (prototype only — this is the isolated preview)');
 }
 
-function restoreSystemDefaultIndustry() {
-  var from = APP.activeConfigIndustry;
-  var to = SYSTEM_DEFAULT_INDUSTRY;
-  if (from === to) { toast(to + ' is already the current Industry'); return; }
-  pendingIndustryChangeAction = function () {
-    resetIndustryDataToDefaults(to);
-    APP.configuredIndustries = [to];
-    APP.activeConfigIndustry = to;
-    renderMainPage();
-    toast('Restored the system default: ' + to);
-  };
-  openIndustryChangeModal(from, to, null, 'Production Rates supports one Industry at a time. This restores ' + to + ' with its default rates, replacing your current ' + from + ' configuration in this account. This does not affect existing Proposals and Invoices already created.');
-}
-
 function openNotesPanel() { document.getElementById('notesModal').classList.add('open'); }
 function closeNotesPanel() { document.getElementById('notesModal').classList.remove('open'); }
 
@@ -978,6 +1032,12 @@ var PRODUCT_UNITS = {
   'Residential Painting': ['Gallon', 'Each'],
   'Gutter Services': ['Linear Foot', 'Each']
 };
+/* Sheen is a paint-specific attribute (matches the real Products table's
+   Sheen column) -- only Industries with a Sheen list get that field and
+   column at all; Gutter Services products have no Sheen. */
+var SHEEN_OPTIONS = {
+  'Residential Painting': ['Flat', 'Eggshell', 'Satin', 'Semi-Gloss', 'Gloss']
+};
 
 /* Rate Preset Templates: Industry + Region only (BR1). Region taxonomy is an
    explicit open gap per the ticket, so only Southeast is modeled here -- not
@@ -999,43 +1059,51 @@ function buildPaintingData() {
   return {
     settings: { costRate: '32.00', sellRate: '60.00', markup: '75', taxRate: '5.000%', appliedPreset: null },
     products: [
-      { key: 'sw-duration-ext', name: 'Sherwin-Williams Duration Exterior', unit: 'Gallon', price: '38.99' },
-      { key: 'behr-ultra-int', name: 'Behr Premium Plus Ultra Interior', unit: 'Gallon', price: '44.99' },
-      { key: 'sw-emerald-int', name: 'Sherwin-Williams Emerald Interior', unit: 'Gallon', price: '54.99' },
-      { key: 'sw-superpaint-int', name: 'Sherwin Williams SuperPaint Interior', unit: 'Gallon', price: '34.99' }
+      { key: 'sw-duration-ext', name: 'Sherwin-Williams Duration Exterior', unit: 'Gallon', price: '38.99', sheen: 'Satin', lastModified: '08/12/2025' },
+      { key: 'behr-ultra-int', name: 'Behr Premium Plus Ultra Interior', unit: 'Gallon', price: '44.99', sheen: 'Eggshell', lastModified: '08/12/2025' },
+      { key: 'sw-emerald-int', name: 'Sherwin-Williams Emerald Interior', unit: 'Gallon', price: '54.99', sheen: 'Satin', lastModified: '08/10/2025' },
+      { key: 'sw-superpaint-int', name: 'Sherwin Williams SuperPaint Interior', unit: 'Gallon', price: '34.99', sheen: 'Eggshell', lastModified: '08/10/2025' }
     ],
     areas: [
       { key: 'interior', name: 'Interior', categories: [
-        { key: 'walls', name: 'Walls', calcType: 'Square Foot (Walls)', defaultSubstrateKey: '8ft-light-texture', coats: 2, substrates: [
-          { key: '8ft-light-texture', name: '8FT Light Texture', clientLabel: '8FT Light Texture', productKey: 'sw-duration-ext', rate: { c1: '175.00', c2: '150.00', c3: '125.00' } },
-          { key: '9ft-heavy-texture', name: '9FT Heavy Texture', clientLabel: '9FT Heavy Texture', productKey: 'sw-superpaint-int', rate: { c1: '175.00', c2: '150.00', c3: '125.00' } },
-          { key: '2story-light-texture', name: '2-Story Light Texture', clientLabel: '2-Story Light Texture', productKey: 'sw-duration-ext', rate: { c1: '150.00', c2: '125.00', c3: '100.00' } }
+        { key: 'walls', name: 'Walls', calcType: 'Square Foot (Walls)', defaultSubstrateKey: '8ft-light-texture', coats: 2, lastModified: '08/12/2025', substrates: [
+          { key: '8ft-light-texture', name: '8FT Light Texture', clientLabel: '8FT Light Texture', productKey: 'sw-duration-ext', rate: { c1: '175.00', c2: '150.00', c3: '125.00' }, lastModified: '08/12/2025' },
+          { key: '9ft-heavy-texture', name: '9FT Heavy Texture', clientLabel: '9FT Heavy Texture', productKey: 'sw-superpaint-int', rate: { c1: '175.00', c2: '150.00', c3: '125.00' }, lastModified: '08/12/2025' },
+          { key: '2story-light-texture', name: '2-Story Light Texture', clientLabel: '2-Story Light Texture', productKey: 'sw-duration-ext', rate: { c1: '150.00', c2: '125.00', c3: '100.00' }, lastModified: '08/11/2025' }
         ] },
-        { key: 'ceiling', name: 'Ceilings', calcType: 'Square Foot (Ceiling)', defaultSubstrateKey: '2story-heavy-texture', coats: 2, substrates: [
-          { key: '2story-heavy-texture', name: '(Roll) Two-Story Heavy Texture', clientLabel: 'Two-Story Heavy Texture', productKey: 'sw-emerald-int', rate: { c1: '160.00', c2: '135.00', c3: '110.00' } }
+        { key: 'ceiling', name: 'Ceilings', calcType: 'Square Foot (Ceiling)', defaultSubstrateKey: '2story-heavy-texture', coats: 2, lastModified: '08/11/2025', substrates: [
+          { key: '2story-heavy-texture', name: '(Roll) Two-Story Heavy Texture', clientLabel: 'Two-Story Heavy Texture', productKey: 'sw-emerald-int', rate: { c1: '160.00', c2: '135.00', c3: '110.00' }, lastModified: '08/11/2025' }
         ] },
-        { key: 'trim', name: 'Trim', calcType: 'Linear Foot', defaultSubstrateKey: '3in-baseboard', coats: 2, substrates: [
-          { key: '3in-baseboard', name: '(Brush) 3-Inch Baseboard', clientLabel: '3-Inch Baseboard', productKey: 'behr-ultra-int', rate: { c1: '220.00', c2: '190.00', c3: '160.00' } }
+        { key: 'trim', name: 'Trim', calcType: 'Linear Foot', defaultSubstrateKey: '3in-baseboard', coats: 2, lastModified: '08/10/2025', substrates: [
+          { key: '3in-baseboard', name: '(Brush) 3-Inch Baseboard', clientLabel: '3-Inch Baseboard', productKey: 'behr-ultra-int', rate: { c1: '220.00', c2: '190.00', c3: '160.00' }, lastModified: '08/10/2025' }
         ] },
-        { key: 'doors', name: 'Doors', calcType: 'Hours Per Item', defaultSubstrateKey: '6panel-door-2side', coats: 2, substrates: [
-          { key: '6panel-door-2side', name: '(Spray) 6-Panel Door - 2 Sides', clientLabel: '6-Panel Door', productKey: 'sw-emerald-int', rate: { c1: '0.50', c2: '0.75', c3: '1.00' } }
+        { key: 'doors', name: 'Doors', calcType: 'Hours Per Item', defaultSubstrateKey: '6panel-door-2side', coats: 2, lastModified: '08/09/2025', substrates: [
+          { key: '6panel-door-2side', name: '(Spray) 6-Panel Door - 2 Sides', clientLabel: '6-Panel Door', productKey: 'sw-emerald-int', rate: { c1: '0.50', c2: '0.75', c3: '1.00' }, lastModified: '08/09/2025' }
         ] },
-        { key: 'cabinets', name: 'Cabinets', calcType: 'Hours Per Item', defaultSubstrateKey: 'drawers-prime', coats: 2, substrates: [
-          { key: 'drawers-prime', name: 'Drawers - Prime', clientLabel: 'Drawers - Prime', productKey: 'sw-emerald-int', rate: { c1: '0.75', c2: '1.00', c3: '2.25' } },
-          { key: 'doors-finish', name: 'Doors - Finish', clientLabel: 'Doors - Finish', productKey: 'sw-emerald-int', rate: { c1: '0.75', c2: '1.00', c3: '1.25' } }
+        { key: 'cabinets', name: 'Cabinets', calcType: 'Hours Per Item', defaultSubstrateKey: 'drawers-prime', coats: 2, lastModified: '08/09/2025', substrates: [
+          { key: 'drawers-prime', name: 'Drawers - Prime', clientLabel: 'Drawers - Prime', productKey: 'sw-emerald-int', rate: { c1: '0.75', c2: '1.00', c3: '2.25' }, lastModified: '08/09/2025' },
+          { key: 'doors-finish', name: 'Doors - Finish', clientLabel: 'Doors - Finish', productKey: 'sw-emerald-int', rate: { c1: '0.75', c2: '1.00', c3: '1.25' }, lastModified: '08/09/2025' }
         ] }
+      ], instances: [
+        { key: 'int-office', name: 'Office', measurementType: 'Area', length: '12', width: '10', height: '8', categoryKeys: ['walls', 'ceiling', 'trim'], lastModified: '08/12/2025' },
+        { key: 'int-kitchen', name: 'Kitchen', measurementType: 'Area', length: '14', width: '12', height: '9', categoryKeys: ['walls', 'ceiling', 'trim', 'cabinets'], lastModified: '08/12/2025' },
+        { key: 'int-whole-house', name: 'Whole House', measurementType: 'Area', length: '', width: '', height: '', categoryKeys: ['walls', 'ceiling', 'trim', 'doors', 'cabinets'], lastModified: '08/10/2025' }
       ] },
       { key: 'exterior', name: 'Exterior', categories: [
-        { key: 'siding', name: 'Siding', calcType: 'Square Foot (Walls)', defaultSubstrateKey: 'stucco-heavy-texture', coats: 2, substrates: [
-          { key: 'stucco-heavy-texture', name: '(Roll) Stucco Siding Heavy Texture', clientLabel: 'Stucco Siding', productKey: 'sw-duration-ext', rate: { c1: '175.00', c2: '150.00', c3: '125.00' } }
+        { key: 'siding', name: 'Siding', calcType: 'Square Foot (Walls)', defaultSubstrateKey: 'stucco-heavy-texture', coats: 2, lastModified: '08/08/2025', substrates: [
+          { key: 'stucco-heavy-texture', name: '(Roll) Stucco Siding Heavy Texture', clientLabel: 'Stucco Siding', productKey: 'sw-duration-ext', rate: { c1: '175.00', c2: '150.00', c3: '125.00' }, lastModified: '08/08/2025' }
         ] },
-        { key: 'trim-ext', name: 'Trim', calcType: 'Linear Foot', defaultSubstrateKey: 'soffit-fascia', coats: 2, substrates: [
-          { key: 'soffit-fascia', name: '(Spray) Soffit and Fascia', clientLabel: 'Soffit and Fascia', productKey: 'sw-duration-ext', rate: { c1: '200.00', c2: '175.00', c3: '150.00' } },
-          { key: '6in-wood-fascia', name: '(Brush) 6-Inch Wooden Fascia', clientLabel: '6-Inch Wooden Fascia', productKey: 'sw-duration-ext', rate: { c1: '75.00', c2: '65.00', c3: '55.00' } }
+        { key: 'trim-ext', name: 'Trim', calcType: 'Linear Foot', defaultSubstrateKey: 'soffit-fascia', coats: 2, lastModified: '08/08/2025', substrates: [
+          { key: 'soffit-fascia', name: '(Spray) Soffit and Fascia', clientLabel: 'Soffit and Fascia', productKey: 'sw-duration-ext', rate: { c1: '200.00', c2: '175.00', c3: '150.00' }, lastModified: '08/08/2025' },
+          { key: '6in-wood-fascia', name: '(Brush) 6-Inch Wooden Fascia', clientLabel: '6-Inch Wooden Fascia', productKey: 'sw-duration-ext', rate: { c1: '75.00', c2: '65.00', c3: '55.00' }, lastModified: '08/07/2025' }
         ] },
-        { key: 'doors-ext', name: 'Doors', calcType: 'Hours Per Item', defaultSubstrateKey: 'front-door-sidelights', coats: 2, substrates: [
-          { key: 'front-door-sidelights', name: '(Spray) Front Door + Sidelights - 1 Side', clientLabel: 'Front Door + Sidelights', productKey: 'sw-duration-ext', rate: { c1: '0.75', c2: '1.00', c3: '1.50' } }
+        { key: 'doors-ext', name: 'Doors', calcType: 'Hours Per Item', defaultSubstrateKey: 'front-door-sidelights', coats: 2, lastModified: '08/07/2025', substrates: [
+          { key: 'front-door-sidelights', name: '(Spray) Front Door + Sidelights - 1 Side', clientLabel: 'Front Door + Sidelights', productKey: 'sw-duration-ext', rate: { c1: '0.75', c2: '1.00', c3: '1.50' }, lastModified: '08/07/2025' }
         ] }
+      ], instances: [
+        { key: 'ext-whole-house', name: 'Whole House', measurementType: 'Surface', length: '', width: '', height: '', categoryKeys: ['siding', 'trim-ext', 'doors-ext'], lastModified: '08/08/2025' },
+        { key: 'ext-exterior-body', name: 'Exterior Body', measurementType: 'Wall', length: '', width: '', height: '9', categoryKeys: ['siding'], lastModified: '08/08/2025' },
+        { key: 'ext-soffit-fascia', name: 'Soffit and Fascia', measurementType: 'Wall', length: '', width: '', height: '', categoryKeys: ['trim-ext'], lastModified: '08/07/2025' }
       ] }
     ]
   };
@@ -1045,25 +1113,27 @@ function buildGutterData() {
   return {
     settings: { costRate: '28.00', sellRate: '55.00', markup: '60', taxRate: '5.000%', appliedPreset: null },
     products: [
-      { key: 'alum-seamless', name: 'Aluminum Seamless Gutter Stock', unit: 'Linear Foot', price: '1.85' },
-      { key: 'copper-stock', name: 'Copper Gutter Stock', unit: 'Linear Foot', price: '9.25' },
-      { key: 'gutter-guard-std', name: 'Standard Gutter Guard', unit: 'Linear Foot', price: '2.10' }
+      { key: 'alum-seamless', name: 'Aluminum Seamless Gutter Stock', unit: 'Linear Foot', price: '1.85', lastModified: '08/05/2025' },
+      { key: 'copper-stock', name: 'Copper Gutter Stock', unit: 'Linear Foot', price: '9.25', lastModified: '08/05/2025' },
+      { key: 'gutter-guard-std', name: 'Standard Gutter Guard', unit: 'Linear Foot', price: '2.10', lastModified: '08/05/2025' }
     ],
     areas: [
       { key: 'exterior', name: 'Exterior', categories: [
-        { key: 'gutters', name: 'Gutters', calcType: 'Linear Foot', defaultSubstrateKey: '5in-aluminum', substrates: [
-          { key: '5in-aluminum', name: '5" Aluminum Seamless Gutter', clientLabel: '5" Aluminum Gutter', productKey: 'alum-seamless', rate: { lfPerHour: '60.00' } },
-          { key: '6in-aluminum', name: '6" Aluminum Seamless Gutter', clientLabel: '6" Aluminum Gutter', productKey: 'alum-seamless', rate: { lfPerHour: '55.00' } },
-          { key: 'copper', name: 'Copper Gutter', clientLabel: 'Copper Gutter', productKey: 'copper-stock', rate: { lfPerHour: '35.00' } }
+        { key: 'gutters', name: 'Gutters', calcType: 'Linear Foot', defaultSubstrateKey: '5in-aluminum', lastModified: '08/05/2025', substrates: [
+          { key: '5in-aluminum', name: '5" Aluminum Seamless Gutter', clientLabel: '5" Aluminum Gutter', productKey: 'alum-seamless', rate: { lfPerHour: '60.00' }, lastModified: '08/05/2025' },
+          { key: '6in-aluminum', name: '6" Aluminum Seamless Gutter', clientLabel: '6" Aluminum Gutter', productKey: 'alum-seamless', rate: { lfPerHour: '55.00' }, lastModified: '08/05/2025' },
+          { key: 'copper', name: 'Copper Gutter', clientLabel: 'Copper Gutter', productKey: 'copper-stock', rate: { lfPerHour: '35.00' }, lastModified: '08/05/2025' }
         ] },
-        { key: 'downspouts', name: 'Downspouts', calcType: 'Linear Foot', defaultSubstrateKey: '2x3-downspout', substrates: [
-          { key: '2x3-downspout', name: '2x3 Downspout', clientLabel: '2x3 Downspout', productKey: 'alum-seamless', rate: { lfPerHour: '80.00' } },
-          { key: '3x4-downspout', name: '3x4 Downspout', clientLabel: '3x4 Downspout', productKey: 'alum-seamless', rate: { lfPerHour: '70.00' } }
+        { key: 'downspouts', name: 'Downspouts', calcType: 'Linear Foot', defaultSubstrateKey: '2x3-downspout', lastModified: '08/04/2025', substrates: [
+          { key: '2x3-downspout', name: '2x3 Downspout', clientLabel: '2x3 Downspout', productKey: 'alum-seamless', rate: { lfPerHour: '80.00' }, lastModified: '08/04/2025' },
+          { key: '3x4-downspout', name: '3x4 Downspout', clientLabel: '3x4 Downspout', productKey: 'alum-seamless', rate: { lfPerHour: '70.00' }, lastModified: '08/04/2025' }
         ] },
-        { key: 'gutter-protection', name: 'Gutter Protection', calcType: 'Linear Foot', defaultSubstrateKey: 'std-guard', substrates: [
-          { key: 'std-guard', name: 'Standard Gutter Guard', clientLabel: 'Standard Guard', productKey: 'gutter-guard-std', rate: { lfPerHour: '50.00' } }
+        { key: 'gutter-protection', name: 'Gutter Protection', calcType: 'Linear Foot', defaultSubstrateKey: 'std-guard', lastModified: '08/04/2025', substrates: [
+          { key: 'std-guard', name: 'Standard Gutter Guard', clientLabel: 'Standard Guard', productKey: 'gutter-guard-std', rate: { lfPerHour: '50.00' }, lastModified: '08/04/2025' }
         ] },
-        { key: 'removal', name: 'Removal', calcType: 'Hours Per Item', defaultSubstrateKey: '', substrates: [] }
+        { key: 'removal', name: 'Removal', calcType: 'Hours Per Item', defaultSubstrateKey: '', lastModified: '08/04/2025', substrates: [] }
+      ], instances: [
+        { key: 'ext-whole-house', name: 'Whole House', measurementType: 'Surface', length: '', width: '', height: '', categoryKeys: ['gutters', 'downspouts', 'gutter-protection'], lastModified: '08/05/2025' }
       ] }
     ]
   };
@@ -1137,29 +1207,41 @@ function applyPresetValues(region) {
 function defaultSeedFor(name) { return name === 'Gutter Services' ? buildGutterData() : buildPaintingData(); }
 function resetIndustryDataToDefaults(name) {
   APP.data[name] = defaultSeedFor(name);
-  APP.nav[name].areaKey = APP.data[name].areas[0].key;
-  APP.nav[name].categoryKey = null;
+  APP.nav[name] = { tab: 'settings', areaKey: APP.data[name].areas[0].key, categoryKey: null };
 }
 
-var pendingSettingsPreset = null;
+var pendingSettingsPreset = null; // { industry, selector } where selector is 'default' or a region name
 function onPresetSelectChange(value) {
-  var d = currentData();
-  var current = d.settings.appliedPreset || 'none';
-  if (value === current) return;
-  pendingSettingsPreset = value;
-  openPresetConfirmModal(value, current);
+  var currentIndustry = APP.activeConfigIndustry;
+  var currentValue = currentIndustry + '::' + (currentData().settings.appliedPreset || 'default');
+  if (value === currentValue) return;
+  var parts = value.split('::');
+  pendingSettingsPreset = { industry: parts[0], selector: parts[1] };
+  openPresetConfirmModal(pendingSettingsPreset, currentIndustry);
 }
-function openPresetConfirmModal(newValue, currentValue) {
-  var d = currentData();
-  var name = APP.activeConfigIndustry;
-  document.getElementById('presetConfirmIndustry').textContent = name;
-  document.getElementById('presetConfirmToRegion').textContent = newValue === 'none' ? (name + ' (Default)') : newValue;
-  var def = newValue === 'none' ? defaultSeedFor(name).settings : PRESET_DEFS[name].values[newValue];
+function openPresetConfirmModal(target, currentIndustry) {
+  var d = APP.data[currentIndustry];
+  var switchingIndustry = target.industry !== currentIndustry;
+  var toLabel = target.industry + (target.selector === 'default' ? ' (Default)' : (' — ' + target.selector));
+  document.getElementById('presetConfirmIndustry').textContent = currentIndustry;
+  document.getElementById('presetConfirmToRegion').textContent = toLabel;
+
+  var def = target.selector === 'default' ? defaultSeedFor(target.industry).settings : PRESET_DEFS[target.industry].values[target.selector];
   var rows = '';
   rows += presetDiffRow('Hourly Cost Rate', '$' + d.settings.costRate, '$' + def.costRate);
   rows += presetDiffRow('Hourly Sell Rate', '$' + d.settings.sellRate, '$' + def.sellRate);
   rows += presetDiffRow('Product Markup', d.settings.markup + '%', def.markup + '%');
   document.getElementById('presetDiffTableBody').innerHTML = rows;
+
+  var warnTitle = document.getElementById('presetConfirmWarnTitle');
+  var warnBody = document.getElementById('presetConfirmWarnBody');
+  if (switchingIndustry) {
+    warnTitle.textContent = 'This changes your Industry and overwrites your current configuration';
+    warnBody.textContent = 'Production Rates supports one Industry at a time. Switching to ' + toLabel + ' replaces your current ' + currentIndustry + ' configuration in this account -- it stays available to switch back to from this same dropdown, though. Existing Proposals and Invoices already created will not be impacted.';
+  } else {
+    warnTitle.textContent = 'This overwrites existing configuration';
+    warnBody.textContent = 'Applying a preset updates Hourly Cost Rate, Hourly Sell Rate, and Product Markup above, plus production rate values across every Area, Category, and Substrate configured for this Industry. This does not change any other Industry on this account, and existing Proposals and Invoices already created will not be impacted.';
+  }
   document.getElementById('presetConfirmModal').classList.add('open');
 }
 function presetDiffRow(label, current, next) {
@@ -1171,17 +1253,24 @@ function cancelPresetSelectChange() {
   renderMainPage();
 }
 function confirmPresetSelectChange() {
-  if (pendingSettingsPreset === null) return;
-  if (pendingSettingsPreset === 'none') {
-    resetIndustryDataToDefaults(APP.activeConfigIndustry);
-    renderMainPage();
-    toast('Restored ' + APP.activeConfigIndustry + ' to its default Production Rates');
-  } else {
-    applyPresetValues(pendingSettingsPreset);
-    toast('Applied the ' + pendingSettingsPreset + ' preset to ' + APP.activeConfigIndustry);
+  if (!pendingSettingsPreset) return;
+  var target = pendingSettingsPreset;
+  if (target.industry !== APP.activeConfigIndustry) {
+    APP.configuredIndustries = [target.industry];
+    APP.activeConfigIndustry = target.industry;
   }
+  // Presets (and Default) are absolute target states, not relative
+  // adjustments -- always start from that Industry's clean default seed,
+  // then layer a region multiplier on top if one was selected.
+  resetIndustryDataToDefaults(target.industry);
+  if (target.selector !== 'default') {
+    applyPresetValues(target.selector);
+  }
+  var label = target.industry + (target.selector === 'default' ? ' (Default)' : (' — ' + target.selector));
+  toast('Applied ' + label);
   pendingSettingsPreset = null;
   document.getElementById('presetConfirmModal').classList.remove('open');
+  renderMainPage();
 }
 
 function renderMainPage() {
@@ -1211,18 +1300,35 @@ function renderEmptyLanding() {
 
 function tabLabel(t) { return { settings: 'Settings', areas: 'Areas', categories: 'Categories', substrates: 'Substrates', products: 'Products' }[t]; }
 
+// Tabs now mirror the real system exactly: Settings, then one tab per
+// configured Area (e.g. "Interior Area", "Exterior Area" -- Gutter Services
+// only has Exterior, so it only gets one Area tab), then Substrates, then
+// Products. Replaces the earlier Areas/Categories split, which didn't match
+// the real UI (see decision log).
+function configTabList() {
+  var d = currentData();
+  var tabs = ['settings'];
+  d.areas.forEach(function (a) { tabs.push('area:' + a.key); });
+  tabs.push('substrates');
+  tabs.push('products');
+  return tabs;
+}
+function tabLabel(t) {
+  if (t === 'settings') return 'Settings';
+  if (t === 'substrates') return 'Substrates';
+  if (t === 'products') return 'Products';
+  if (t.indexOf('area:') === 0) {
+    var area = currentData().areas.find(function (a) { return a.key === t.slice(5); });
+    return area ? area.name + ' Area' : 'Area';
+  }
+  return t;
+}
+
 function renderConfiguredPage() {
   var name = APP.activeConfigIndustry;
   var nav = currentNav();
-  // Simplified per direct request: one Industry per account today, so there's
-  // no switcher here -- use "Restart Wizard" to reconfigure for a different
-  // Industry. Multiple simultaneous Industries per account is deferred to V2.
-  // SYSTEM_DEFAULT_INDUSTRY is always reachable from here, though, so a user
-  // who moved to a different Industry always has a way back to what
-  // Production Rates loads by default.
-  var restoreDefaultHtml = (name !== SYSTEM_DEFAULT_INDUSTRY)
-    ? '<button type="button" class="btn btn-outline-primary btn-sm" onclick="restoreSystemDefaultIndustry()"><i class="fas fa-undo"></i> Restore Default (' + SYSTEM_DEFAULT_INDUSTRY + ')</button>'
-    : '';
+  var tabs = configTabList();
+  if (tabs.indexOf(nav.tab) === -1) nav.tab = 'settings';
   return '' +
     '<div class="page-title">Production Rates</div>' +
     '<div class="industry-header">' +
@@ -1230,10 +1336,9 @@ function renderConfiguredPage() {
         '<div class="industry-header-icon"><i class="fas ' + (isGutterIndustry() ? 'fa-water' : 'fa-paint-roller') + '"></i></div>' +
         '<div><div class="industry-header-label">Industry</div><div class="industry-header-name">' + name + '</div></div>' +
       '</div>' +
-      restoreDefaultHtml +
     '</div>' +
     '<div class="pr-tabs">' +
-      ['settings', 'areas', 'categories', 'substrates', 'products'].map(function (t) {
+      tabs.map(function (t) {
         return '<div class="pr-tab ' + (nav.tab === t ? 'active' : '') + '" onclick="switchConfigTab(\'' + t + '\')">' + tabLabel(t) + '</div>';
       }).join('') +
     '</div>' +
@@ -1244,30 +1349,36 @@ function switchConfigTab(tab) { currentNav().tab = tab; renderMainPage(); }
 
 function renderConfigTabContent(nav) {
   if (nav.tab === 'settings') return renderSettingsTab();
-  if (nav.tab === 'areas') return renderAreasTab();
-  if (nav.tab === 'categories') return renderCategoriesTab();
   if (nav.tab === 'substrates') return renderSubstratesTab();
   if (nav.tab === 'products') return renderProductsTab();
+  if (nav.tab.indexOf('area:') === 0) return renderAreaInstancesTab(nav.tab.slice(5));
   return '';
 }
 
 function renderSettingsTab() {
   var s = currentData().settings;
   var name = APP.activeConfigIndustry;
-  var regions = (PRESET_DEFS[name] && PRESET_DEFS[name].regions) || [];
-  var presetSelectHtml = '';
-  if (regions.length) {
-    var current = s.appliedPreset || 'none';
-    presetSelectHtml = '' +
-      '<div class="settings-field settings-field--full">' +
-        '<label class="settings-field-label is-new">Preset Template</label>' +
-        '<select class="settings-field-input" onchange="onPresetSelectChange(this.value)">' +
-          '<option value="none"' + (current === 'none' ? ' selected' : '') + '>' + name + ' (Default)</option>' +
-          regions.map(function (r) { return '<option value="' + r + '"' + (current === r ? ' selected' : '') + '>' + r + '</option>'; }).join('') +
-        '</select>' +
-        '<div class="settings-field-help">Applying a preset updates Hourly Cost Rate, Hourly Sell Rate, Product Markup, and production rate values across every Area, Category, and Substrate for ' + name + ' only. You can still edit anything afterward.' + (s.appliedPreset ? ' <span class="pill pill-live" style="margin-left:4px;">' + s.appliedPreset + ' applied</span>' : '') + '</div>' +
-      '</div>';
-  }
+  var currentValue = name + '::' + (s.appliedPreset || 'default');
+  // Every available template stays selectable here regardless of which
+  // Industry is currently configured -- this is the one always-accessible
+  // path both to a different Industry's rates and back to the system
+  // default (Residential Painting), so nothing "goes away" once you've
+  // moved on to a different Industry.
+  var optgroups = Object.keys(PRESET_DEFS).map(function (industryName) {
+    var def = PRESET_DEFS[industryName];
+    var options = '<option value="' + industryName + '::default"' + (currentValue === industryName + '::default' ? ' selected' : '') + '>' + industryName + ' (Default)</option>' +
+      def.regions.map(function (r) {
+        var val = industryName + '::' + r;
+        return '<option value="' + val + '"' + (currentValue === val ? ' selected' : '') + '>' + industryName + ' &mdash; ' + r + '</option>';
+      }).join('');
+    return '<optgroup label="' + industryName + '">' + options + '</optgroup>';
+  }).join('');
+  var presetSelectHtml = '' +
+    '<div class="settings-field settings-field--full">' +
+      '<label class="settings-field-label is-new">Preset Template</label>' +
+      '<select class="settings-field-input" onchange="onPresetSelectChange(this.value)">' + optgroups + '</select>' +
+      '<div class="settings-field-help">Applying a template from a different Industry switches this account to that Industry. Applying one from ' + name + ' updates Hourly Cost Rate, Hourly Sell Rate, Product Markup, and production rate values across every Area, Category, and Substrate here. You can still edit anything afterward.' + (s.appliedPreset ? ' <span class="pill pill-live" style="margin-left:4px;">' + s.appliedPreset + ' applied</span>' : '') + '</div>' +
+    '</div>';
   return '<section class="settings-section">' +
     '<div class="settings-section-title">Proposal Defaults</div>' +
     '<div class="settings-section-subtitle">Scoped to ' + name + ' only &mdash; each Industry keeps its own rate settings.</div>' +
@@ -1282,26 +1393,80 @@ function renderSettingsTab() {
 }
 function updateSetting(key, value) { currentData().settings[key] = value; }
 
-function renderAreasTab() {
+/* ── Shared row-action / footer-bar helpers (edit, duplicate, delete + a
+   "Displaying: N ___" bar under every data table, matching the real UI) ── */
+function rowActionsHtml(editCall, duplicateCall, deleteCall) {
+  return '<div class="row-actions">' +
+    '<button class="row-icon-btn" onclick="' + editCall + '" title="Edit"><i class="fas fa-pen"></i></button>' +
+    '<button class="row-icon-btn" onclick="' + duplicateCall + '" title="Duplicate"><i class="fas fa-copy"></i></button>' +
+    '<button class="row-icon-btn danger" onclick="' + deleteCall + '" title="Delete"><i class="fas fa-trash-alt"></i></button>' +
+  '</div>';
+}
+function tableFooterBar(count, singular, pluralLabel) {
+  return '<div class="table-footer-bar"><span>Displaying: ' + pluralize(count, singular, pluralLabel) + '</span></div>';
+}
+function dragHandleCell() { return '<td class="drag-handle-cell"><i class="fas fa-grip-vertical drag-handle" title="Drag to reorder (prototype only)"></i></td>'; }
+function todayStamp() {
+  var d = new Date();
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  return pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + '/' + d.getFullYear();
+}
+
+/* ── "[Area] Area" tab: named Area instances (Office, Kitchen, Whole House,
+   etc.), matching the real Interior Area / Exterior Area tables exactly. ── */
+function renderAreaInstancesTab(areaKey) {
   var d = currentData();
-  var cards = d.areas.map(function (a) {
-    var subCount = a.categories.reduce(function (sum, c) { return sum + c.substrates.length; }, 0);
-    return '<div class="area-card" onclick="goToCategoriesForArea(\'' + a.key + '\')">' +
-      '<div class="area-card-name">' + a.name + '</div>' +
-      '<div class="area-card-meta">' + pluralize(a.categories.length, 'Category', 'Categories') + ' &middot; ' + pluralize(subCount, 'Substrate') + '</div>' +
-    '</div>';
-  }).join('');
+  var area = d.areas.find(function (a) { return a.key === areaKey; }) || d.areas[0];
+  var instances = area.instances || [];
+  var body;
+  if (!instances.length) {
+    body = renderLevelEmptyState('No ' + area.name + ' Areas yet', 'Add a ' + area.name + ' Area to start capturing dimensions and default Categories for it.', 'Add ' + area.name + ' Area', "openAreaInstanceModal('" + area.key + "')");
+  } else {
+    body = '<div class="data-table-wrap"><table class="data-table"><thead><tr><th></th><th>Area Name</th><th>Default Categories</th><th>Dimensions, ft</th><th>Last Modified</th><th></th></tr></thead><tbody>' +
+      instances.map(function (inst) {
+        return '<tr>' + dragHandleCell() +
+          '<td><span class="row-name" onclick="openAreaInstanceModal(\'' + area.key + '\',\'' + inst.key + '\')">' + inst.name + '</span></td>' +
+          '<td>' + areaInstanceCategoryNames(area, inst) + '</td>' +
+          '<td>' + areaInstanceDimensions(inst) + '</td>' +
+          '<td>' + inst.lastModified + '</td>' +
+          '<td>' + rowActionsHtml("openAreaInstanceModal('" + area.key + "','" + inst.key + "')", "duplicateAreaInstance('" + area.key + "','" + inst.key + "')", "deleteAreaInstance('" + area.key + "','" + inst.key + "')") + '</td>' +
+        '</tr>';
+      }).join('') +
+    '</tbody></table></div>' + tableFooterBar(instances.length, area.name + ' Area', area.name + ' Areas');
+  }
   return '<section class="settings-section">' +
-    '<div class="section-header-row"><div class="settings-section-title">Areas</div><button class="btn btn-outline-primary btn-sm" onclick="toast(\'Custom Areas beyond the Phase 1 architecture aren&#39;t modeled in this build.\')"><i class="fas fa-plus"></i> Add Area</button></div>' +
-    '<div class="area-card-grid">' + cards + '</div>' +
+    '<div class="section-header-row">' +
+      '<div class="settings-section-title">' + area.name + ' Area <i class="fas fa-info-circle" title="Named ' + area.name + ' Areas (e.g. rooms or elevations) used to apply default Categories and dimensions when building a Proposal." style="font-size:11px; color:var(--st-color-text-muted); cursor:help;"></i></div>' +
+      '<button class="btn btn-outline-primary btn-sm" onclick="openAreaInstanceModal(\'' + area.key + '\')"><i class="fas fa-plus"></i> Add ' + area.name + ' Area</button>' +
+    '</div>' + body +
   '</section>';
 }
-function goToCategoriesForArea(areaKey) { currentNav().areaKey = areaKey; currentNav().tab = 'categories'; renderMainPage(); }
+function areaInstanceCategoryNames(area, inst) {
+  var names = (inst.categoryKeys || []).map(function (k) {
+    var c = area.categories.find(function (x) { return x.key === k; });
+    return c ? c.name : null;
+  }).filter(Boolean);
+  return names.length ? names.join(', ') : '&mdash;';
+}
+function areaInstanceDimensions(inst) {
+  if (inst.measurementType === 'Area' && inst.length && inst.width) {
+    return inst.length + ' x ' + inst.width + (inst.height ? ' x ' + inst.height : '');
+  }
+  if (inst.measurementType === 'Wall' && inst.height) {
+    return inst.height + ' ht';
+  }
+  return '&mdash;';
+}
 
-function renderAreaChips() {
+/* ── Substrates tab: Categories (per Area, with an Interior/Exterior
+   toggle when there's more than one Area) plus Area Substrates below it
+   (scoped to a Category via the chip row) -- combined into one tab exactly
+   like the real system, instead of the two separate tabs this prototype
+   had before. ── */
+function renderAreaToggle() {
   var d = currentData(); var nav = currentNav();
-  return '<div class="chip-filter-row"><span class="chip-filter-label">Area</span>' + d.areas.map(function (a) {
-    return '<button type="button" class="chip-filter ' + (a.key === nav.areaKey ? 'active' : '') + '" onclick="setActiveArea(\'' + a.key + '\')">' + a.name + '</button>';
+  return '<div class="pill-toggle" style="margin-bottom:16px;">' + d.areas.map(function (a) {
+    return '<button type="button" class="pill-toggle-btn ' + (a.key === nav.areaKey ? 'active' : '') + '" onclick="setActiveArea(\'' + a.key + '\')">' + a.name + '</button>';
   }).join('') + '</div>';
 }
 function setActiveArea(key) {
@@ -1310,118 +1475,125 @@ function setActiveArea(key) {
   currentNav().categoryKey = a.categories[0] ? a.categories[0].key : null;
   renderMainPage();
 }
-function goToSubstratesForCategory(catKey) { currentNav().categoryKey = catKey; currentNav().tab = 'substrates'; currentData().substrateWarningVisible = false; renderMainPage(); }
-function hasCoats(c) { return c.coats != null; }
+function goToSubstratesForCategory(catKey) { currentNav().categoryKey = catKey; currentData().substrateWarningVisible = false; renderMainPage(); }
 
-function renderCategoriesTab() {
+function renderSubstratesTab() {
   var d = currentData();
   var nav = currentNav();
-  if (!nav.areaKey) nav.areaKey = d.areas[0].key;
-  var area = currentArea();
-  var chipRow = d.areas.length > 1 ? renderAreaChips() : '';
-  var rows;
+  if (!nav.areaKey || !d.areas.some(function (a) { return a.key === nav.areaKey; })) nav.areaKey = d.areas[0].key;
+  var area = d.areas.find(function (a) { return a.key === nav.areaKey; });
+  var toggleRow = d.areas.length > 1 ? renderAreaToggle() : '';
+
+  var catBody;
   if (!area.categories.length) {
-    rows = renderLevelEmptyState('No Categories yet', 'Add a Category to organize the Substrates used for this Area.', 'Add Category', 'openCategoryModal()');
+    catBody = renderLevelEmptyState('No Categories yet', 'Add a Category to organize the Substrates used for ' + area.name + '.', 'Add Category', 'openCategoryModal()');
   } else {
-    var showCoatsCol = area.categories.some(hasCoats);
-    rows = '<div class="data-table-wrap"><table class="data-table"><thead><tr><th>Category</th><th>Calculation Type</th><th>Default Substrate</th>' + (showCoatsCol ? '<th>Default Coats</th>' : '') + '<th></th></tr></thead><tbody>' +
+    catBody = '<div class="data-table-wrap"><table class="data-table"><thead><tr><th></th><th>Categories</th><th>Calculation Type</th><th>Default Substrate</th><th>Last Modified</th><th></th></tr></thead><tbody>' +
       area.categories.map(function (c) {
         var defSub = c.substrates.find(function (s) { return s.key === c.defaultSubstrateKey; });
-        return '<tr>' +
+        return '<tr>' + dragHandleCell() +
           '<td><span class="row-name" onclick="goToSubstratesForCategory(\'' + c.key + '\')">' + c.name + '</span><div class="row-meta">' + pluralize(c.substrates.length, 'Substrate') + '</div></td>' +
           '<td>' + c.calcType + '</td>' +
           '<td>' + (defSub ? defSub.name : '&mdash;') + '</td>' +
-          (showCoatsCol ? ('<td>' + (c.coats != null ? c.coats : '&mdash;') + '</td>') : '') +
-          '<td><div class="row-actions"><button class="row-icon-btn" onclick="openCategoryModal(\'' + c.key + '\')"><i class="fas fa-pen"></i></button><button class="row-icon-btn danger" onclick="deleteCategory(\'' + c.key + '\')"><i class="fas fa-trash-alt"></i></button></div></td>' +
+          '<td>' + c.lastModified + '</td>' +
+          '<td>' + rowActionsHtml("openCategoryModal('" + c.key + "')", "duplicateCategory('" + c.key + "')", "deleteCategory('" + c.key + "')") + '</td>' +
         '</tr>';
       }).join('') +
-    '</tbody></table></div>';
+    '</tbody></table></div>' + tableFooterBar(area.categories.length, 'Category', 'Categories');
   }
-  return '<section class="settings-section">' + chipRow +
-    '<div class="section-header-row"><div class="settings-section-title">Categories <span style="font-weight:500;color:var(--st-color-text-muted);font-size:12px;">&middot; ' + area.name + '</span></div>' +
+
+  var subSectionHtml = '';
+  if (area.categories.length) {
+    if (!nav.categoryKey || !area.categories.some(function (c) { return c.key === nav.categoryKey; })) nav.categoryKey = area.categories[0].key;
+    var cat = area.categories.find(function (c) { return c.key === nav.categoryKey; });
+    var showCoats = cat.coats != null;
+    var chipRow = '<div class="chip-filter-row">' + area.categories.map(function (c) {
+      return '<button type="button" class="chip-filter ' + (c.key === nav.categoryKey ? 'active' : '') + '" onclick="setActiveCategory(\'' + c.key + '\')">' + c.name + '</button>';
+    }).join('') + '</div>';
+
+    var subBody;
+    if (!cat.substrates.length) {
+      subBody = renderLevelEmptyState('No Area Substrates yet', 'Add an Area Substrate to start capturing Production Rate values for ' + cat.name + '.', 'Add Area Substrate', 'openSubstrateModal()');
+    } else {
+      subBody = '<div class="data-table-wrap"><table class="data-table"><thead><tr><th></th><th>Area Substrates</th><th>Client Label</th><th>Default Product</th><th>Details</th><th>Last Modified</th><th></th></tr></thead><tbody>' +
+        cat.substrates.map(function (s) {
+          var prod = d.products.find(function (p) { return p.key === s.productKey; });
+          return '<tr>' + dragHandleCell() +
+            '<td class="row-name">' + s.name + '</td>' +
+            '<td>' + s.clientLabel + '</td>' +
+            '<td>' + (prod ? prod.name : '&mdash;') + '</td>' +
+            '<td class="details-cell">' + renderSubstrateDetails(s.rate, showCoats, cat.calcType) + '</td>' +
+            '<td>' + s.lastModified + '</td>' +
+            '<td>' + rowActionsHtml("openSubstrateModal('" + s.key + "')", "duplicateSubstrate('" + s.key + "')", "deleteSubstrate('" + s.key + "')") + '</td>' +
+          '</tr>';
+        }).join('') +
+      '</tbody></table></div>' + tableFooterBar(cat.substrates.length, 'Area Substrate');
+    }
+
+    var warnBanner = '';
+    if (d.settings.appliedPreset && d.substrateWarningVisible) {
+      warnBanner = '' +
+        '<div class="settings-alert settings-alert--warn" style="margin-bottom:14px;">' +
+          '<i class="fas fa-exclamation-triangle"></i>' +
+          '<div class="settings-alert-body">' +
+            '<div class="settings-alert-title">Heads up</div>' +
+            '<div>This substrate\'s settings are a part of the ' + d.settings.appliedPreset + ' preset and may cause misconfiguration of your proposal calculations.</div>' +
+          '</div>' +
+          '<button class="modal-close" style="margin-top:1px;" onclick="dismissSubstrateWarning()">&times;</button>' +
+        '</div>';
+    }
+    var presetBadge = d.settings.appliedPreset ? ' <span class="pill pill-live">' + d.settings.appliedPreset + ' preset applied</span>' : '';
+
+    subSectionHtml = '<section class="settings-section">' + chipRow + warnBanner +
+      '<div class="section-header-row"><div class="settings-section-title">Area Substrates' + presetBadge + '</div>' +
+        (cat.substrates.length ? '<button class="btn btn-outline-primary btn-sm" onclick="openSubstrateModal()"><i class="fas fa-plus"></i> Add Area Substrate</button>' : '') +
+      '</div>' + subBody +
+    '</section>';
+  }
+
+  return '<section class="settings-section">' + toggleRow +
+    '<div class="section-header-row"><div class="settings-section-title">Categories</div>' +
       (area.categories.length ? '<button class="btn btn-outline-primary btn-sm" onclick="openCategoryModal()"><i class="fas fa-plus"></i> Add Category</button>' : '') +
-    '</div>' + rows +
-  '</section>';
-}
-
-function renderSubstratesTab() {
-  var area = currentArea();
-  var nav = currentNav();
-  if (!area.categories.length) {
-    return '<section class="settings-section">' + renderLevelEmptyState('No Categories configured for ' + area.name + ' yet', 'Add a Category before you can add Substrates.', 'Go to Categories', "switchConfigTab('categories')") + '</section>';
-  }
-  if (!nav.categoryKey || !area.categories.some(function (c) { return c.key === nav.categoryKey; })) nav.categoryKey = area.categories[0].key;
-  var cat = area.categories.find(function (c) { return c.key === nav.categoryKey; });
-  var showCoats = cat.coats != null;
-  var chipRow = '<div class="chip-filter-row"><span class="chip-filter-label">Category</span>' + area.categories.map(function (c) {
-    return '<button type="button" class="chip-filter ' + (c.key === nav.categoryKey ? 'active' : '') + '" onclick="setActiveCategory(\'' + c.key + '\')">' + c.name + '</button>';
-  }).join('') + '</div>';
-
-  var body;
-  if (!cat.substrates.length) {
-    body = renderLevelEmptyState('No Substrates yet', 'Add a Substrate to start capturing Production Rate values for ' + cat.name + '.', 'Add Substrate', 'openSubstrateModal()');
-  } else {
-    body = '<div class="data-table-wrap"><table class="data-table"><thead><tr><th>Substrate</th><th>Client Label</th><th>Default Product</th><th>Production Rate</th><th></th></tr></thead><tbody>' +
-      cat.substrates.map(function (s) {
-        var prod = currentData().products.find(function (p) { return p.key === s.productKey; });
-        return '<tr>' +
-          '<td class="row-name">' + s.name + '</td>' +
-          '<td>' + s.clientLabel + '</td>' +
-          '<td>' + (prod ? prod.name : '&mdash;') + '</td>' +
-          '<td>' + renderRateSummary(s.rate, showCoats) + '</td>' +
-          '<td><div class="row-actions"><button class="row-icon-btn" onclick="openSubstrateModal(\'' + s.key + '\')"><i class="fas fa-pen"></i></button><button class="row-icon-btn danger" onclick="deleteSubstrate(\'' + s.key + '\')"><i class="fas fa-trash-alt"></i></button></div></td>' +
-        '</tr>';
-      }).join('') +
-    '</tbody></table></div>';
-  }
-
-  var d = currentData();
-  var warnBanner = '';
-  if (d.settings.appliedPreset && d.substrateWarningVisible) {
-    warnBanner = '' +
-      '<div class="settings-alert settings-alert--warn" style="margin-bottom:14px;">' +
-        '<i class="fas fa-exclamation-triangle"></i>' +
-        '<div class="settings-alert-body">' +
-          '<div class="settings-alert-title">Heads up</div>' +
-          '<div>This substrate\'s settings are a part of the ' + d.settings.appliedPreset + ' preset and may cause misconfiguration of your proposal calculations.</div>' +
-        '</div>' +
-        '<button class="modal-close" style="margin-top:1px;" onclick="dismissSubstrateWarning()">&times;</button>' +
-      '</div>';
-  }
-  var presetBadge = d.settings.appliedPreset ? ' <span class="pill pill-live">' + d.settings.appliedPreset + ' preset applied</span>' : '';
-
-  return '<section class="settings-section">' + chipRow + warnBanner +
-    '<div class="section-header-row"><div class="settings-section-title">Substrates <span style="font-weight:500;color:var(--st-color-text-muted);font-size:12px;">&middot; ' + cat.name + '</span>' + presetBadge + '</div>' +
-      (cat.substrates.length ? '<button class="btn btn-outline-primary btn-sm" onclick="openSubstrateModal()"><i class="fas fa-plus"></i> Add Substrate</button>' : '') +
-    '</div>' + body +
-  '</section>';
+    '</div>' + catBody +
+  '</section>' + subSectionHtml;
 }
 function dismissSubstrateWarning() { currentData().substrateWarningVisible = false; renderMainPage(); }
 function setActiveCategory(key) { currentNav().categoryKey = key; currentData().substrateWarningVisible = false; renderMainPage(); }
-function renderRateSummary(rate, showCoats) {
+function renderSubstrateDetails(rate, showCoats, calcType) {
   if (showCoats) {
-    return '<span class="coat-rate-chip">1 Coat ' + rate.c1 + '</span><span class="coat-rate-chip">2 Coat ' + rate.c2 + '</span><span class="coat-rate-chip">3 Coat ' + rate.c3 + '</span>';
+    return ['1', '2', '3'].map(function (n) {
+      return '<div>' + n + ' Coat - ' + rate['c' + n] + ' - ' + calcType + ' Per Man Hour</div>';
+    }).join('');
   }
-  return '<span class="coat-rate-chip">' + rate.lfPerHour + ' LF / Man-Hour</span>';
+  return '<div>' + rate.lfPerHour + ' - ' + calcType + ' Per Man Hour</div>';
 }
 
 function renderProductsTab() {
   var d = currentData();
+  var hasSheen = d.products.some(function (p) { return p.sheen; });
   var body;
   if (!d.products.length) {
     body = renderLevelEmptyState('No Products yet', 'Add a Product to reference from your Substrates.', 'Add Product', 'openProductModal()');
   } else {
-    body = '<div class="data-table-wrap"><table class="data-table"><thead><tr><th>Product Name</th><th>Unit</th><th>Price / Unit</th><th></th></tr></thead><tbody>' +
+    body = '<div class="data-table-wrap"><table class="data-table"><thead><tr><th>Product Name</th>' + (hasSheen ? '<th>Sheen</th>' : '') + '<th>Price / Unit</th><th>Last Modified</th><th></th></tr></thead><tbody>' +
       d.products.map(function (p) {
-        return '<tr><td class="row-name">' + p.name + '</td><td>' + p.unit + '</td><td>$' + p.price + '</td>' +
-          '<td><div class="row-actions"><button class="row-icon-btn" onclick="openProductModal(\'' + p.key + '\')"><i class="fas fa-pen"></i></button><button class="row-icon-btn danger" onclick="deleteProduct(\'' + p.key + '\')"><i class="fas fa-trash-alt"></i></button></div></td></tr>';
+        return '<tr>' +
+          '<td class="row-name" onclick="openProductModal(\'' + p.key + '\')">' + p.name + '</td>' +
+          (hasSheen ? ('<td>' + (p.sheen || '&mdash;') + '</td>') : '') +
+          '<td>$' + p.price + ' / ' + p.unit + '</td>' +
+          '<td>' + (p.lastModified || '&mdash;') + '</td>' +
+          '<td>' + rowActionsHtml("openProductModal('" + p.key + "')", "duplicateProduct('" + p.key + "')", "deleteProduct('" + p.key + "')") + '</td>' +
+        '</tr>';
       }).join('') +
-    '</tbody></table></div>';
+    '</tbody></table></div>' +
+    '<div class="table-footer-bar"><span>Showing 10 Items Per Page</span><span>Showing 1 to ' + d.products.length + ' of ' + d.products.length + ' entries</span></div>';
   }
   return '<section class="settings-section">' +
     '<div class="section-header-row"><div class="settings-section-title">Products</div>' +
-      (d.products.length ? '<button class="btn btn-outline-primary btn-sm" onclick="openProductModal()"><i class="fas fa-plus"></i> Add Product</button>' : '') +
-    '</div>' + body +
+      '<button class="btn btn-outline-primary btn-sm" onclick="openProductModal()"><i class="fas fa-plus"></i> Add Product</button>' +
+    '</div>' +
+    (d.products.length ? '<div class="table-toolbar-row"><div class="table-search-box"><i class="fas fa-search"></i><input class="table-search-input" type="text" placeholder="Search Products..."></div><select class="settings-field-input" style="max-width:190px;"><option>Sort: Name (A-Z)</option><option>Sort: Last Modified</option></select></div>' : '') +
+    body +
   '</section>';
 }
 
@@ -1481,11 +1653,11 @@ function saveCategoryModal() {
   var gutter = isGutterIndustry();
   if (categoryModalCtx.editingKey) {
     var cat = area.categories.find(function (c) { return c.key === categoryModalCtx.editingKey; });
-    cat.name = name; cat.calcType = calcType; cat.defaultSubstrateKey = defaultSubstrateKey;
+    cat.name = name; cat.calcType = calcType; cat.defaultSubstrateKey = defaultSubstrateKey; cat.lastModified = todayStamp();
     if (!gutter) cat.coats = categoryModalCtx.coats; else delete cat.coats;
   } else {
     var key = slugify(name);
-    var newCat = { key: key, name: name, calcType: calcType, defaultSubstrateKey: defaultSubstrateKey, substrates: [] };
+    var newCat = { key: key, name: name, calcType: calcType, defaultSubstrateKey: defaultSubstrateKey, lastModified: todayStamp(), substrates: [] };
     if (!gutter) newCat.coats = categoryModalCtx.coats;
     area.categories.push(newCat);
     currentNav().categoryKey = key;
@@ -1499,6 +1671,19 @@ function deleteCategory(key) {
   var area = currentArea();
   area.categories = area.categories.filter(function (c) { return c.key !== key; });
   renderMainPage();
+}
+function duplicateCategory(key) {
+  var area = currentArea();
+  var cat = area.categories.find(function (c) { return c.key === key; });
+  var copy = JSON.parse(JSON.stringify(cat));
+  copy.key = slugify(cat.name + ' Copy');
+  copy.name = cat.name + ' (Copy)';
+  copy.lastModified = todayStamp();
+  copy.substrates.forEach(function (s) { s.key = slugify(s.name + ' Copy'); });
+  copy.defaultSubstrateKey = copy.substrates.length ? copy.substrates[0].key : '';
+  area.categories.push(copy);
+  renderMainPage();
+  toast('Duplicated ' + cat.name);
 }
 
 /* ── Substrate modal ── */
@@ -1548,10 +1733,10 @@ function saveSubstrateModal() {
 
   if (substrateModalCtx.editingKey) {
     var s = cat.substrates.find(function (x) { return x.key === substrateModalCtx.editingKey; });
-    s.name = name; s.clientLabel = clientLabel; s.productKey = productKey; s.rate = rate;
+    s.name = name; s.clientLabel = clientLabel; s.productKey = productKey; s.rate = rate; s.lastModified = todayStamp();
     if (currentData().settings.appliedPreset) currentData().substrateWarningVisible = true;
   } else {
-    cat.substrates.push({ key: slugify(name), name: name, clientLabel: clientLabel, productKey: productKey, rate: rate });
+    cat.substrates.push({ key: slugify(name), name: name, clientLabel: clientLabel, productKey: productKey, rate: rate, lastModified: todayStamp() });
     if (!cat.defaultSubstrateKey) cat.defaultSubstrateKey = cat.substrates[cat.substrates.length - 1].key;
   }
   closeSubstrateModal();
@@ -1563,6 +1748,17 @@ function deleteSubstrate(key) {
   var cat = currentCategory();
   cat.substrates = cat.substrates.filter(function (s) { return s.key !== key; });
   renderMainPage();
+}
+function duplicateSubstrate(key) {
+  var cat = currentCategory();
+  var sub = cat.substrates.find(function (s) { return s.key === key; });
+  var copy = JSON.parse(JSON.stringify(sub));
+  copy.key = slugify(sub.name + ' Copy');
+  copy.name = sub.name + ' (Copy)';
+  copy.lastModified = todayStamp();
+  cat.substrates.push(copy);
+  renderMainPage();
+  toast('Duplicated ' + sub.name);
 }
 
 /* ── Product modal ── */
@@ -1578,6 +1774,17 @@ function openProductModal(key) {
   unitSel.innerHTML = units.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('');
   unitSel.value = p ? p.unit : units[0];
   document.getElementById('prodFieldPrice').value = p ? p.price : '';
+
+  var sheenOptions = SHEEN_OPTIONS[APP.activeConfigIndustry];
+  var sheenWrap = document.getElementById('prodFieldSheenWrap');
+  if (sheenOptions) {
+    sheenWrap.style.display = '';
+    var sheenSel = document.getElementById('prodFieldSheen');
+    sheenSel.innerHTML = sheenOptions.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
+    sheenSel.value = (p && p.sheen) ? p.sheen : sheenOptions[0];
+  } else {
+    sheenWrap.style.display = 'none';
+  }
   document.getElementById('productModal').classList.add('open');
 }
 function closeProductModal() { document.getElementById('productModal').classList.remove('open'); }
@@ -1586,12 +1793,17 @@ function saveProductModal() {
   if (!name) { toast('Product Name is required'); return; }
   var unit = document.getElementById('prodFieldUnit').value;
   var price = document.getElementById('prodFieldPrice').value;
+  var sheenOptions = SHEEN_OPTIONS[APP.activeConfigIndustry];
+  var sheen = sheenOptions ? document.getElementById('prodFieldSheen').value : null;
   var products = currentData().products;
   if (productModalCtx.editingKey) {
     var p = products.find(function (x) { return x.key === productModalCtx.editingKey; });
-    p.name = name; p.unit = unit; p.price = price;
+    p.name = name; p.unit = unit; p.price = price; p.lastModified = todayStamp();
+    if (sheen) p.sheen = sheen; else delete p.sheen;
   } else {
-    products.push({ key: slugify(name), name: name, unit: unit, price: price });
+    var newProduct = { key: slugify(name), name: name, unit: unit, price: price, lastModified: todayStamp() };
+    if (sheen) newProduct.sheen = sheen;
+    products.push(newProduct);
   }
   closeProductModal();
   renderMainPage();
@@ -1603,16 +1815,117 @@ function deleteProduct(key) {
   d.products = d.products.filter(function (p) { return p.key !== key; });
   renderMainPage();
 }
+function duplicateProduct(key) {
+  var d = currentData();
+  var p = d.products.find(function (x) { return x.key === key; });
+  var copy = Object.assign({}, p, { key: slugify(p.name + ' Copy'), name: p.name + ' (Copy)', lastModified: todayStamp() });
+  d.products.push(copy);
+  renderMainPage();
+  toast('Duplicated ' + p.name);
+}
+
+/* ── Area modal (per-Area named instances: Office, Kitchen, Whole House) ── */
+var areaInstanceModalCtx = { areaKey: null, editingKey: null, measureType: 'Area', dims: { length: '', width: '', height: '' } };
+function openAreaInstanceModal(areaKey, instKey) {
+  var area = currentData().areas.find(function (a) { return a.key === areaKey; });
+  areaInstanceModalCtx.areaKey = areaKey;
+  areaInstanceModalCtx.editingKey = instKey || null;
+  var inst = instKey ? area.instances.find(function (i) { return i.key === instKey; }) : null;
+
+  document.getElementById('areaInstanceModalTitle').textContent = instKey ? 'Edit Area' : 'Add Area';
+  document.getElementById('areaInstanceModalSubtitle').textContent = area.name + ' Area · ' + APP.activeConfigIndustry;
+  document.getElementById('aiFieldName').value = inst ? inst.name : '';
+
+  areaInstanceModalCtx.measureType = inst ? inst.measurementType : 'Area';
+  areaInstanceModalCtx.dims = inst ? { length: inst.length, width: inst.width, height: inst.height } : { length: '', width: '', height: '' };
+  renderAreaInstanceMeasureButtons();
+  renderAreaInstanceDimsFields();
+
+  var catKeys = inst ? (inst.categoryKeys || []) : [];
+  var catsHtml = area.categories.map(function (c) {
+    var checked = catKeys.indexOf(c.key) !== -1;
+    return '<label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;"><input type="checkbox" class="ai-cat-check" value="' + c.key + '"' + (checked ? ' checked' : '') + '> ' + c.name + '</label>';
+  }).join('');
+  document.getElementById('aiFieldCategories').innerHTML = catsHtml || '<div style="font-size:12.5px; color:var(--st-color-text-muted);">No Categories exist for ' + area.name + ' yet &mdash; add one from the Substrates tab first.</div>';
+  document.getElementById('aiFieldLastModifiedWrap').textContent = inst ? ('Last Modified: ' + inst.lastModified) : '';
+
+  document.getElementById('areaInstanceModal').classList.add('open');
+}
+function pickAreaInstanceMeasureType(type) {
+  areaInstanceModalCtx.measureType = type;
+  renderAreaInstanceMeasureButtons();
+  renderAreaInstanceDimsFields();
+}
+function renderAreaInstanceMeasureButtons() {
+  document.querySelectorAll('.ai-measure-pick').forEach(function (b) {
+    var on = b.dataset.type === areaInstanceModalCtx.measureType;
+    b.classList.toggle('btn-primary', on);
+    b.classList.toggle('btn-outline-primary', !on);
+  });
+}
+function renderAreaInstanceDimsFields() {
+  var wrap = document.getElementById('aiFieldDimsWrap');
+  var d = areaInstanceModalCtx.dims;
+  if (areaInstanceModalCtx.measureType === 'Area') {
+    wrap.innerHTML =
+      '<div class="settings-field" style="flex:1;"><label class="settings-field-label">Default Length (ft)</label><input class="settings-field-input" id="aiFieldLength" type="text" value="' + d.length + '"></div>' +
+      '<div class="settings-field" style="flex:1;"><label class="settings-field-label">Default Width (ft)</label><input class="settings-field-input" id="aiFieldWidth" type="text" value="' + d.width + '"></div>' +
+      '<div class="settings-field" style="flex:1;"><label class="settings-field-label">Default Height (ft)</label><input class="settings-field-input" id="aiFieldHeight" type="text" value="' + d.height + '"></div>';
+  } else if (areaInstanceModalCtx.measureType === 'Wall') {
+    wrap.innerHTML = '<div class="settings-field" style="flex:1; max-width:200px;"><label class="settings-field-label">Default Height (ft)</label><input class="settings-field-input" id="aiFieldHeight" type="text" value="' + d.height + '"></div>';
+  } else {
+    wrap.innerHTML = '<div style="font-size:12.5px; color:var(--st-color-text-muted);">Surface Areas aggregate multiple walls or areas &mdash; no single dimension is captured.</div>';
+  }
+}
+function closeAreaInstanceModal() { document.getElementById('areaInstanceModal').classList.remove('open'); }
+function saveAreaInstanceModal() {
+  var area = currentData().areas.find(function (a) { return a.key === areaInstanceModalCtx.areaKey; });
+  var name = document.getElementById('aiFieldName').value.trim();
+  if (!name) { toast('Area Name is required'); return; }
+  var measureType = areaInstanceModalCtx.measureType;
+  var lengthEl = document.getElementById('aiFieldLength');
+  var widthEl = document.getElementById('aiFieldWidth');
+  var heightEl = document.getElementById('aiFieldHeight');
+  var length = lengthEl ? lengthEl.value : '';
+  var width = widthEl ? widthEl.value : '';
+  var height = heightEl ? heightEl.value : '';
+  var categoryKeys = Array.prototype.slice.call(document.querySelectorAll('.ai-cat-check:checked')).map(function (el) { return el.value; });
+
+  if (!area.instances) area.instances = [];
+  if (areaInstanceModalCtx.editingKey) {
+    var inst = area.instances.find(function (i) { return i.key === areaInstanceModalCtx.editingKey; });
+    inst.name = name; inst.measurementType = measureType; inst.length = length; inst.width = width; inst.height = height; inst.categoryKeys = categoryKeys; inst.lastModified = todayStamp();
+  } else {
+    area.instances.push({ key: slugify(name), name: name, measurementType: measureType, length: length, width: width, height: height, categoryKeys: categoryKeys, lastModified: todayStamp() });
+  }
+  closeAreaInstanceModal();
+  renderMainPage();
+  toast('Area saved (prototype only)');
+}
+function duplicateAreaInstance(areaKey, instKey) {
+  var area = currentData().areas.find(function (a) { return a.key === areaKey; });
+  var inst = area.instances.find(function (i) { return i.key === instKey; });
+  var copy = Object.assign({}, inst, { key: slugify(inst.name + ' Copy'), name: inst.name + ' (Copy)', lastModified: todayStamp() });
+  area.instances.push(copy);
+  renderMainPage();
+  toast('Duplicated ' + inst.name);
+}
+function deleteAreaInstance(areaKey, instKey) {
+  if (!confirm('Delete this Area?')) return;
+  var area = currentData().areas.find(function (a) { return a.key === areaKey; });
+  area.instances = area.instances.filter(function (i) { return i.key !== instKey; });
+  renderMainPage();
+}
 
 /* ── Empty-state demo controls ── */
 function resetIndustryToEmpty() {
   if (!APP.activeConfigIndustry) { toast('Set up an Industry first (via the wizard) to use this control'); return; }
   var d = currentData();
-  d.areas.forEach(function (a) { a.categories = []; });
+  d.areas.forEach(function (a) { a.categories = []; a.instances = []; });
   d.products = [];
   currentNav().categoryKey = null;
   renderMainPage();
-  toast('Cleared Categories &amp; Products for ' + APP.activeConfigIndustry + ' (demo)');
+  toast('Cleared Categories, Areas &amp; Products for ' + APP.activeConfigIndustry + ' (demo)');
 }
 function restoreSampleData() {
   if (!APP.activeConfigIndustry) { toast('Set up an Industry first (via the wizard) to use this control'); return; }
