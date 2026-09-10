@@ -531,7 +531,7 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
       </div>
       <div class="note-item">
         <span class="note-tag assumption">Assumption (Phase 3)</span>
-        <div class="note-text">Switching the preset dropdown back to "[Industry] (Default)" only stops tracking that Industry as preset-linked (clears the badge and the misconfiguration-warning trigger) &mdash; it does not revert any values back to what they were before the preset was applied. The ticket frames presets as "recommended starting points, not immutable configuration" (BR8), and doesn't define an undo/revert behavior.</div>
+        <div class="note-text">Per your correction: "[Industry] (Default)" is a real restore action, not just a label. Selecting it (and confirming, since it overwrites existing configuration) puts Hourly Cost/Sell/Markup, Products, and every Area's Categories/Substrates back to the rates Production Rates ships with for that Industry today &mdash; the same reset the "Demo: Restore Sample Data" button performs, now reachable through the real preset flow with its own confirmation diff.</div>
       </div>
       <div class="note-item">
         <span class="note-tag assumption">Assumption (Phase 3)</span>
@@ -1171,10 +1171,16 @@ function applyPresetValues(region) {
   });
   renderMainPage();
 }
-function clearAppliedPreset() {
-  currentData().settings.appliedPreset = null;
-  renderMainPage();
-  toast('Preset cleared -- values remain as they were, just no longer tracked as preset-linked');
+/* "[Industry] (Default)" is a real restore action, not just a no-preset
+   label -- it puts Hourly Cost/Sell/Markup, Products, and every Area's
+   Categories/Substrates back to the rates Production Rates ships with for
+   that Industry today. Reused by both the preset dropdown (via confirm)
+   and the "Demo: Restore Sample Data" button (no confirm, prototype-only). */
+function defaultSeedFor(name) { return name === 'Gutter Services' ? buildGutterData() : buildPaintingData(); }
+function resetIndustryDataToDefaults(name) {
+  APP.data[name] = defaultSeedFor(name);
+  APP.nav[name].areaKey = APP.data[name].areas[0].key;
+  APP.nav[name].categoryKey = null;
 }
 
 var pendingSettingsPreset = null;
@@ -1190,11 +1196,11 @@ function openPresetConfirmModal(newValue, currentValue) {
   var name = APP.activeConfigIndustry;
   document.getElementById('presetConfirmIndustry').textContent = name;
   document.getElementById('presetConfirmToRegion').textContent = newValue === 'none' ? (name + ' (Default)') : newValue;
-  var def = newValue !== 'none' ? PRESET_DEFS[name].values[newValue] : null;
+  var def = newValue === 'none' ? defaultSeedFor(name).settings : PRESET_DEFS[name].values[newValue];
   var rows = '';
-  rows += presetDiffRow('Hourly Cost Rate', '$' + d.settings.costRate, def ? ('$' + def.costRate) : '&mdash;');
-  rows += presetDiffRow('Hourly Sell Rate', '$' + d.settings.sellRate, def ? ('$' + def.sellRate) : '&mdash;');
-  rows += presetDiffRow('Product Markup', d.settings.markup + '%', def ? (def.markup + '%') : '&mdash;');
+  rows += presetDiffRow('Hourly Cost Rate', '$' + d.settings.costRate, '$' + def.costRate);
+  rows += presetDiffRow('Hourly Sell Rate', '$' + d.settings.sellRate, '$' + def.sellRate);
+  rows += presetDiffRow('Product Markup', d.settings.markup + '%', def.markup + '%');
   document.getElementById('presetDiffTableBody').innerHTML = rows;
   document.getElementById('presetConfirmModal').classList.add('open');
 }
@@ -1209,7 +1215,9 @@ function cancelPresetSelectChange() {
 function confirmPresetSelectChange() {
   if (pendingSettingsPreset === null) return;
   if (pendingSettingsPreset === 'none') {
-    clearAppliedPreset();
+    resetIndustryDataToDefaults(APP.activeConfigIndustry);
+    renderMainPage();
+    toast('Restored ' + APP.activeConfigIndustry + ' to its default Production Rates');
   } else {
     applyPresetValues(pendingSettingsPreset);
     toast('Applied the ' + pendingSettingsPreset + ' preset to ' + APP.activeConfigIndustry);
@@ -1662,9 +1670,7 @@ function resetIndustryToEmpty() {
 function restoreSampleData() {
   if (!APP.activeConfigIndustry) { toast('Set up an Industry first (via the wizard) to use this control'); return; }
   var name = APP.activeConfigIndustry;
-  APP.data[name] = (name === 'Gutter Services') ? buildGutterData() : buildPaintingData();
-  APP.nav[name].areaKey = APP.data[name].areas[0].key;
-  APP.nav[name].categoryKey = null;
+  resetIndustryDataToDefaults(name);
   renderMainPage();
   toast('Sample data restored for ' + name);
 }
