@@ -267,6 +267,14 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
 #mi-prod-rates-prototype .modal-body p { font-size:13.5px; line-height:1.6; margin-bottom:14px; color:var(--st-color-text); }
 #mi-prod-rates-prototype .modal-footer { display:flex; justify-content:flex-end; gap:10px; padding:14px 20px; border-top:1px solid var(--st-color-border); }
 
+/* ── Preset diff table (Phase 3) ── */
+#mi-prod-rates-prototype .diff-table { width:100%; border-collapse:collapse; margin-bottom:16px; border:1px solid var(--st-color-border); border-radius:8px; overflow:hidden; }
+#mi-prod-rates-prototype .diff-table th { background:#FAFAFC; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--st-color-text-muted); padding:8px 12px; text-align:left; border-bottom:1px solid var(--st-color-border); }
+#mi-prod-rates-prototype .diff-table td { padding:9px 12px; font-size:13px; border-bottom:1px solid var(--st-color-border); }
+#mi-prod-rates-prototype .diff-table tr:last-child td { border-bottom:none; }
+#mi-prod-rates-prototype .diff-table td.new-val { color:var(--st-color-primary-active); font-weight:700; }
+#mi-prod-rates-prototype .diff-arrow { color:var(--st-color-text-muted); }
+
 /* ══════════════ PHASE 2: PRODUCTION RATES CONFIGURATION ══════════════ */
 
 /* Empty landing card (never-configured account) */
@@ -444,6 +452,36 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
   </div>
 </div>
 
+<!-- ══════════════ PHASE 3: RATE PRESET OVERWRITE CONFIRMATION MODAL (distinct from Industry-Change modal -- this never changes Industry) ══════════════ -->
+<div class="modal-backdrop" id="presetConfirmModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Apply Rate Preset Template?</div>
+        <div class="modal-subtitle">You're switching <strong id="presetConfirmIndustry">Residential Painting</strong> to <strong id="presetConfirmToRegion">Southeast</strong></div>
+      </div>
+      <button class="modal-close" onclick="cancelPresetSelectChange()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <table class="diff-table">
+        <thead><tr><th>Field</th><th>Current</th><th></th><th>New</th></tr></thead>
+        <tbody id="presetDiffTableBody"></tbody>
+      </table>
+      <div class="settings-alert settings-alert--warn">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div class="settings-alert-body">
+          <div class="settings-alert-title">This overwrites existing configuration</div>
+          <div>Applying a preset updates Hourly Cost Rate, Hourly Sell Rate, and Product Markup above, plus production rate values across every Area, Category, and Substrate configured for this Industry. This does not change any other Industry on this account, and existing Proposals and Invoices already created will not be impacted.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-primary" onclick="cancelPresetSelectChange()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmPresetSelectChange()">Apply Preset</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════ NOTES FOR JEREMY PANEL ══════════════ -->
 <div class="modal-backdrop" id="notesModal">
   <div class="modal">
@@ -486,6 +524,18 @@ body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#3
       <div class="note-item">
         <span class="note-tag gap">Open Gap (Phase 2)</span>
         <div class="note-text">Switching the Industry being viewed via the header switcher does not show the Industry-Change confirmation modal here &mdash; that modal is reserved for changing which Industries the account has (BR9/Section 11), not for browsing between Industries you've already set up. Flagging the distinction explicitly in case that's not how you pictured it.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption (Phase 3)</span>
+        <div class="note-text">The ticket doesn't specify how a preset should change substrate-level production values, only that it must (BR4/BR5). Rather than hand-authoring a preset value for every individual substrate, each preset applies a single region-wide multiplier to every substrate's rate numbers in that Industry (e.g. Southeast Painting = 0.85x, reflecting slower production), alongside its own Hourly Cost/Sell/Markup values. This keeps the mechanic demonstrable without fabricating precision the real preset values don't have yet (the ticket's own open gap).</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption (Phase 3)</span>
+        <div class="note-text">Switching the preset dropdown back to "None (custom)" only stops tracking that Industry as preset-linked (clears the badge and the misconfiguration-warning trigger) &mdash; it does not revert any values back to what they were before the preset was applied. The ticket frames presets as "recommended starting points, not immutable configuration" (BR8), and doesn't define an undo/revert behavior.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption (Phase 3)</span>
+        <div class="note-text">The misconfiguration warning (BR9) fires only when editing an existing Substrate while a preset is applied, not when adding a brand-new one to a preset-configured Category &mdash; a new Substrate was never preset-derived, so there's nothing to misconfigure. It's also scoped to whichever Category you're actively viewing rather than staying visible after you switch Categories, since a warning about "this substrate" attached to the wrong Category on screen would be confusing.</div>
       </div>
     </div>
   </div>
@@ -858,11 +908,26 @@ function renderOutcome() {
 }
 
 function renderLiveTemplateHero(ind) {
+  var regions = (PRESET_DEFS[ind.name] && PRESET_DEFS[ind.name].regions) || [];
+  var presetField = '';
+  if (regions.length) {
+    var selected = WIZARD_PRESET_SELECTIONS[ind.name] || 'none';
+    presetField = '' +
+      '<div class="settings-field settings-field--full" style="max-width:320px; margin-bottom:16px; text-align:left;">' +
+        '<label class="settings-field-label is-new">Rate Preset Template (optional)</label>' +
+        '<select class="settings-field-input" onchange="setWizardPreset(\'' + ind.name + '\', this.value)">' +
+          '<option value="none"' + (selected === 'none' ? ' selected' : '') + '>None (custom)</option>' +
+          regions.map(function (r) { return '<option value="' + r + '"' + (selected === r ? ' selected' : '') + '>' + r + '</option>'; }).join('') +
+        '</select>' +
+        '<div class="settings-field-help">Jump-start your rates with a regional starting point. No confirmation is needed here since there\'s nothing to overwrite yet &mdash; you can still edit anything afterward.</div>' +
+      '</div>';
+  }
   return '' +
     '<div class="outcome-hero is-live">' +
       '<div class="outcome-hero-icon"><i class="fas fa-check"></i></div>' +
       '<div class="outcome-hero-title">' + ind.name + ' has a Production Rate template</div>' +
       '<div class="outcome-hero-text">You\'ll be walked through setting up Areas, Categories, Substrates, Products, and Production Rates for ' + ind.name + '.</div>' +
+      presetField +
       '<button class="btn btn-primary" onclick="enterProductionRatesSetup(\'' + ind.name + '\')">Continue to Production Rates Setup</button>' +
     '</div>';
 }
@@ -959,9 +1024,25 @@ var PRODUCT_UNITS = {
   'Gutter Services': ['Linear Foot', 'Each']
 };
 
+/* Rate Preset Templates: Industry + Region only (BR1). Region taxonomy is an
+   explicit open gap per the ticket, so only Southeast is modeled here -- not
+   the full region list. Values are placeholders, not vetted real numbers. */
+var PRESET_DEFS = {
+  'Residential Painting': {
+    regions: ['Southeast'],
+    values: { Southeast: { costRate: '26.00', sellRate: '58.00', markup: '70', rateMultiplier: 0.85 } }
+  },
+  'Gutter Services': {
+    regions: ['Southeast'],
+    values: { Southeast: { costRate: '24.00', sellRate: '52.00', markup: '55', rateMultiplier: 0.90 } }
+  }
+};
+var WIZARD_PRESET_SELECTIONS = {};
+function setWizardPreset(industryName, value) { WIZARD_PRESET_SELECTIONS[industryName] = value; }
+
 function buildPaintingData() {
   return {
-    settings: { costRate: '32.00', sellRate: '60.00', markup: '75', taxRate: '5.000%' },
+    settings: { costRate: '32.00', sellRate: '60.00', markup: '75', taxRate: '5.000%', appliedPreset: null },
     products: [
       { key: 'sw-duration-ext', name: 'Sherwin-Williams Duration Exterior', unit: 'Gallon', price: '38.99' },
       { key: 'behr-ultra-int', name: 'Behr Premium Plus Ultra Interior', unit: 'Gallon', price: '44.99' },
@@ -1007,7 +1088,7 @@ function buildPaintingData() {
 
 function buildGutterData() {
   return {
-    settings: { costRate: '28.00', sellRate: '55.00', markup: '60', taxRate: '5.000%' },
+    settings: { costRate: '28.00', sellRate: '55.00', markup: '60', taxRate: '5.000%', appliedPreset: null },
     products: [
       { key: 'alum-seamless', name: 'Aluminum Seamless Gutter Stock', unit: 'Linear Foot', price: '1.85' },
       { key: 'copper-stock', name: 'Copper Gutter Stock', unit: 'Linear Foot', price: '9.25' },
@@ -1054,8 +1135,87 @@ function currentCategory() { var a = currentArea(), n = currentNav(); if (!a || 
 function enterProductionRatesSetup(name) {
   if (APP.configuredIndustries.indexOf(name) === -1) APP.configuredIndustries.push(name);
   APP.activeConfigIndustry = name;
+  var presetChoice = WIZARD_PRESET_SELECTIONS[name];
   closeWizard();
-  toast('Now configuring ' + name + ' Production Rates');
+  if (presetChoice && presetChoice !== 'none') {
+    applyPresetValues(presetChoice);
+    toast('Applied the ' + presetChoice + ' preset to ' + name + ' (no confirmation needed during first-time setup)');
+  } else {
+    toast('Now configuring ' + name + ' Production Rates');
+  }
+}
+
+/* ── Rate Preset Templates (Phase 3) ── */
+function applyPresetValues(region) {
+  var name = APP.activeConfigIndustry;
+  var def = PRESET_DEFS[name] && PRESET_DEFS[name].values[region];
+  if (!def) return;
+  var d = currentData();
+  d.settings.costRate = def.costRate;
+  d.settings.sellRate = def.sellRate;
+  d.settings.markup = def.markup;
+  d.settings.appliedPreset = region;
+  d.substrateWarningVisible = false;
+  d.areas.forEach(function (a) {
+    a.categories.forEach(function (c) {
+      c.substrates.forEach(function (s) {
+        if (s.rate.lfPerHour != null) {
+          s.rate.lfPerHour = (parseFloat(s.rate.lfPerHour) * def.rateMultiplier).toFixed(2);
+        } else if (s.rate.c1 != null) {
+          s.rate.c1 = (parseFloat(s.rate.c1) * def.rateMultiplier).toFixed(2);
+          s.rate.c2 = (parseFloat(s.rate.c2) * def.rateMultiplier).toFixed(2);
+          s.rate.c3 = (parseFloat(s.rate.c3) * def.rateMultiplier).toFixed(2);
+        }
+      });
+    });
+  });
+  renderMainPage();
+}
+function clearAppliedPreset() {
+  currentData().settings.appliedPreset = null;
+  renderMainPage();
+  toast('Preset cleared -- values remain as they were, just no longer tracked as preset-linked');
+}
+
+var pendingSettingsPreset = null;
+function onPresetSelectChange(value) {
+  var d = currentData();
+  var current = d.settings.appliedPreset || 'none';
+  if (value === current) return;
+  pendingSettingsPreset = value;
+  openPresetConfirmModal(value, current);
+}
+function openPresetConfirmModal(newValue, currentValue) {
+  var d = currentData();
+  var name = APP.activeConfigIndustry;
+  document.getElementById('presetConfirmIndustry').textContent = name;
+  document.getElementById('presetConfirmToRegion').textContent = newValue === 'none' ? 'None (custom)' : newValue;
+  var def = newValue !== 'none' ? PRESET_DEFS[name].values[newValue] : null;
+  var rows = '';
+  rows += presetDiffRow('Hourly Cost Rate', '$' + d.settings.costRate, def ? ('$' + def.costRate) : '&mdash;');
+  rows += presetDiffRow('Hourly Sell Rate', '$' + d.settings.sellRate, def ? ('$' + def.sellRate) : '&mdash;');
+  rows += presetDiffRow('Product Markup', d.settings.markup + '%', def ? (def.markup + '%') : '&mdash;');
+  document.getElementById('presetDiffTableBody').innerHTML = rows;
+  document.getElementById('presetConfirmModal').classList.add('open');
+}
+function presetDiffRow(label, current, next) {
+  return '<tr><td>' + label + '</td><td>' + current + '</td><td class="diff-arrow">&rarr;</td><td class="new-val">' + next + '</td></tr>';
+}
+function cancelPresetSelectChange() {
+  pendingSettingsPreset = null;
+  document.getElementById('presetConfirmModal').classList.remove('open');
+  renderMainPage();
+}
+function confirmPresetSelectChange() {
+  if (pendingSettingsPreset === null) return;
+  if (pendingSettingsPreset === 'none') {
+    clearAppliedPreset();
+  } else {
+    applyPresetValues(pendingSettingsPreset);
+    toast('Applied the ' + pendingSettingsPreset + ' preset to ' + APP.activeConfigIndustry);
+  }
+  pendingSettingsPreset = null;
+  document.getElementById('presetConfirmModal').classList.remove('open');
 }
 
 function renderMainPage() {
@@ -1138,10 +1298,26 @@ function renderConfigTabContent(nav) {
 
 function renderSettingsTab() {
   var s = currentData().settings;
+  var name = APP.activeConfigIndustry;
+  var regions = (PRESET_DEFS[name] && PRESET_DEFS[name].regions) || [];
+  var presetSelectHtml = '';
+  if (regions.length) {
+    var current = s.appliedPreset || 'none';
+    presetSelectHtml = '' +
+      '<div class="settings-field settings-field--full">' +
+        '<label class="settings-field-label is-new">Rate Preset Template</label>' +
+        '<select class="settings-field-input" onchange="onPresetSelectChange(this.value)">' +
+          '<option value="none"' + (current === 'none' ? ' selected' : '') + '>None (custom)</option>' +
+          regions.map(function (r) { return '<option value="' + r + '"' + (current === r ? ' selected' : '') + '>' + r + '</option>'; }).join('') +
+        '</select>' +
+        '<div class="settings-field-help">Applying a preset updates Hourly Cost Rate, Hourly Sell Rate, Product Markup, and production rate values across every Area, Category, and Substrate for ' + name + ' only. You can still edit anything afterward.' + (s.appliedPreset ? ' <span class="pill pill-live" style="margin-left:4px;">' + s.appliedPreset + ' applied</span>' : '') + '</div>' +
+      '</div>';
+  }
   return '<section class="settings-section">' +
     '<div class="settings-section-title">Proposal Defaults</div>' +
-    '<div class="settings-section-subtitle">Scoped to ' + APP.activeConfigIndustry + ' only &mdash; each Industry keeps its own rate settings.</div>' +
+    '<div class="settings-section-subtitle">Scoped to ' + name + ' only &mdash; each Industry keeps its own rate settings.</div>' +
     '<div class="settings-grid">' +
+      presetSelectHtml +
       '<div class="settings-field settings-field--compact"><label class="settings-field-label">Hourly Cost Rate</label><div class="settings-field-group"><span class="settings-field-group-prefix">$</span><input class="settings-field-input" value="' + s.costRate + '" oninput="updateSetting(\'costRate\',this.value)"></div></div>' +
       '<div class="settings-field settings-field--compact"><label class="settings-field-label">Hourly Sell Rate</label><div class="settings-field-group"><span class="settings-field-group-prefix">$</span><input class="settings-field-input" value="' + s.sellRate + '" oninput="updateSetting(\'sellRate\',this.value)"></div></div>' +
       '<div class="settings-field settings-field--compact"><label class="settings-field-label">Product Markup</label><div class="settings-field-group"><input class="settings-field-input" value="' + s.markup + '" oninput="updateSetting(\'markup\',this.value)"><span class="settings-field-group-suffix">%</span></div></div>' +
@@ -1179,7 +1355,7 @@ function setActiveArea(key) {
   currentNav().categoryKey = a.categories[0] ? a.categories[0].key : null;
   renderMainPage();
 }
-function goToSubstratesForCategory(catKey) { currentNav().categoryKey = catKey; currentNav().tab = 'substrates'; renderMainPage(); }
+function goToSubstratesForCategory(catKey) { currentNav().categoryKey = catKey; currentNav().tab = 'substrates'; currentData().substrateWarningVisible = false; renderMainPage(); }
 function hasCoats(c) { return c.coats != null; }
 
 function renderCategoriesTab() {
@@ -1244,13 +1420,29 @@ function renderSubstratesTab() {
     '</tbody></table></div>';
   }
 
-  return '<section class="settings-section">' + chipRow +
-    '<div class="section-header-row"><div class="settings-section-title">Substrates <span style="font-weight:500;color:var(--st-color-text-muted);font-size:12px;">&middot; ' + cat.name + '</span></div>' +
+  var d = currentData();
+  var warnBanner = '';
+  if (d.settings.appliedPreset && d.substrateWarningVisible) {
+    warnBanner = '' +
+      '<div class="settings-alert settings-alert--warn" style="margin-bottom:14px;">' +
+        '<i class="fas fa-exclamation-triangle"></i>' +
+        '<div class="settings-alert-body">' +
+          '<div class="settings-alert-title">Heads up</div>' +
+          '<div>This substrate\'s settings are a part of the ' + d.settings.appliedPreset + ' preset and may cause misconfiguration of your proposal calculations.</div>' +
+        '</div>' +
+        '<button class="modal-close" style="margin-top:1px;" onclick="dismissSubstrateWarning()">&times;</button>' +
+      '</div>';
+  }
+  var presetBadge = d.settings.appliedPreset ? ' <span class="pill pill-live">' + d.settings.appliedPreset + ' preset applied</span>' : '';
+
+  return '<section class="settings-section">' + chipRow + warnBanner +
+    '<div class="section-header-row"><div class="settings-section-title">Substrates <span style="font-weight:500;color:var(--st-color-text-muted);font-size:12px;">&middot; ' + cat.name + '</span>' + presetBadge + '</div>' +
       (cat.substrates.length ? '<button class="btn btn-outline-primary btn-sm" onclick="openSubstrateModal()"><i class="fas fa-plus"></i> Add Substrate</button>' : '') +
     '</div>' + body +
   '</section>';
 }
-function setActiveCategory(key) { currentNav().categoryKey = key; renderMainPage(); }
+function dismissSubstrateWarning() { currentData().substrateWarningVisible = false; renderMainPage(); }
+function setActiveCategory(key) { currentNav().categoryKey = key; currentData().substrateWarningVisible = false; renderMainPage(); }
 function renderRateSummary(rate, showCoats) {
   if (showCoats) {
     return '<span class="coat-rate-chip">1 Coat ' + rate.c1 + '</span><span class="coat-rate-chip">2 Coat ' + rate.c2 + '</span><span class="coat-rate-chip">3 Coat ' + rate.c3 + '</span>';
@@ -1402,6 +1594,7 @@ function saveSubstrateModal() {
   if (substrateModalCtx.editingKey) {
     var s = cat.substrates.find(function (x) { return x.key === substrateModalCtx.editingKey; });
     s.name = name; s.clientLabel = clientLabel; s.productKey = productKey; s.rate = rate;
+    if (currentData().settings.appliedPreset) currentData().substrateWarningVisible = true;
   } else {
     cat.substrates.push({ key: slugify(name), name: name, clientLabel: clientLabel, productKey: productKey, rate: rate });
     if (!cat.defaultSubstrateKey) cat.defaultSubstrateKey = cat.substrates[cat.substrates.length - 1].key;

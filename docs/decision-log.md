@@ -38,6 +38,16 @@ Format:
 - Decision: Removed "Send Marketing Agency Info" from `#protoGrid`, per Jeremy confirming it was pushed to production today.
 - Why: Direct request.
 - Open question: None.
+## [2026-09-10] Multi-Industry Production Rates, Phase 3: Rate Preset Templates
+
+- Decision: The preset selector (Industry + Region only, per BR1) appears both in Settings' Proposal Defaults and in the wizard's live-template hero screen (BR2), with exactly one region modeled per Industry ("Southeast") since the ticket itself leaves the full region taxonomy as an open gap. Selecting a preset in Settings always requires confirmation via a new, separate modal from the Phase 1 Industry-Change modal (BR6/BR7); selecting one in the wizard applies immediately with no confirmation, since there's nothing to overwrite yet (BR6).
+- Decision: Since the ticket doesn't define exactly how a preset should change substrate-level values (only that it must, per BR4/BR5), each preset applies a single region-wide multiplier to every substrate's rate numbers for that Industry (Southeast Painting: 0.85x; Southeast Gutter Services: 0.90x) alongside its own Hourly Cost/Sell/Markup values, rather than hand-authoring a number for every individual substrate. Flagged in-app as an assumption.
+- Decision: The misconfiguration warning (BR9) fires only on editing an existing preset-linked Substrate, not on adding a brand-new one, and is scoped to whichever Category is on screen (switching Categories clears it) rather than staying visible after the context that triggered it is gone.
+- Decision: Switching a Settings preset dropdown back to "None (custom)" only stops tracking the Industry as preset-linked; it does not revert any values, consistent with presets being "recommended starting points, not immutable configuration" (BR8) and the ticket defining no undo/revert behavior.
+- Verified per-industry independence (BR11) and Cancel behavior (values unchanged, dropdown reverts) via the same CDP interaction QA used for Phases 1-2, plus the wizard-side no-confirmation path.
+- Why: Direct request ("Go ahead and start Phase 3"), per Enhancement_Rate_Preset_Templates_Industry_Region.md.
+- Open question: Whether "None (custom)" should actually revert to pre-preset values, and whether Southeast should be the only region modeled for this checkpoint, are both left to Jeremy.
+
 ## [2026-09-10] Multi-Industry Production Rates, Phase 2: Configuration Experience
 
 - Decision: Implemented the Industry -> Areas -> Categories -> Substrates -> Products hierarchy as 5 top-level tabs (Settings/Areas/Categories/Substrates/Products) per the UI Refresh ticket's own example, replacing the old Interior Area/Exterior Area tab split with a single "Areas" tab plus Area/Category chip filters to drill down. The wizard's "Continue to Production Rates Setup" button now hands off into this real screen instead of a stub.
