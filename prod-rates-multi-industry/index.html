@@ -1,0 +1,2572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Industry Production Rates — DripJobs Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito','Segoe UI',sans-serif; background:#f4f5f8; color:#32415B; font-size:14px; }
+
+/* ── PROTO BAR ── */
+.proto-bar {
+  background:#fff; border-bottom:1px solid #DAD8E3;
+  padding:12px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+}
+.proto-bar-left { display:flex; align-items:center; gap:10px; }
+.proto-bar .back-link { font-size:12px; font-weight:500; color:#80879A; text-decoration:none; display:flex; align-items:center; gap:4px; transition:color .15s; }
+.proto-bar .back-link:hover { color:#8B85EA; }
+.proto-bar .divider { color:#DAD8E3; font-size:16px; }
+.proto-bar-title { font-size:14px; font-weight:600; color:#32415B; }
+.proto-bar-ticket {
+  font-size:11px; font-weight:600; color:#8B85EA; text-decoration:none;
+  padding:4px 10px; border:1px solid #D6D2F5; background:#E8E6FA; border-radius:999px; letter-spacing:.2px;
+}
+.proto-bar-ticket:hover { background:#8B85EA; color:#fff; }
+.proto-bar-phase { font-size:11px; font-weight:700; color:#166534; background:#E6FAF0; border:1px solid #BBF7D0; padding:4px 10px; border-radius:999px; }
+
+/* ══════════════════════════════════════════════════════════
+   Everything below is scoped to #mi-prod-rates-prototype
+   ══════════════════════════════════════════════════════════ */
+#mi-prod-rates-prototype {
+  --st-color-primary:        #8B85EA;
+  --st-color-primary-hover:  #736BE3;
+  --st-color-primary-active: #5C53DC;
+  --st-color-primary-rgb:    139, 133, 234;
+  --st-color-text:           #32415B;
+  --st-color-text-muted:     #80879A;
+  --st-color-border:         #DAD8E3;
+  --st-color-card-bg:        #FFFFFF;
+}
+
+/* ── SHELL ── */
+#mi-prod-rates-prototype .app-shell { display:flex; min-height:100vh; }
+#mi-prod-rates-prototype .sidebar {
+  width:172px; min-width:172px; background:#fff; border-right:1px solid #e8e8ec;
+  display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+#mi-prod-rates-prototype .sidebar-logo { padding:14px 16px 12px; border-bottom:1px solid #f0f0f3; display:flex; align-items:center; gap:8px; }
+#mi-prod-rates-prototype .dj-logo-mark { width:26px; height:26px; border-radius:7px; background:var(--st-color-primary); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+#mi-prod-rates-prototype .dj-logo-mark i { color:#fff; font-size:12px; }
+#mi-prod-rates-prototype .dj-logo-text { font-weight:800; font-size:14px; color:var(--st-color-primary); letter-spacing:-.3px; }
+#mi-prod-rates-prototype .sidebar-section-lbl { font-size:9.5px; font-weight:700; color:#b0b5c0; text-transform:uppercase; letter-spacing:.6px; padding:13px 14px 4px; }
+#mi-prod-rates-prototype .nav-item { display:flex; align-items:center; gap:8px; padding:6.5px 14px; color:#5a6277; font-size:12.5px; cursor:default; border-left:3px solid transparent; }
+#mi-prod-rates-prototype .nav-item i { width:14px; text-align:center; font-size:12px; }
+#mi-prod-rates-prototype .nav-item.active { background:#f0eeff; color:var(--st-color-primary); font-weight:700; border-left-color:var(--st-color-primary); }
+
+#mi-prod-rates-prototype .topbar { background:#fff; border-bottom:1px solid #e8e8ec; height:52px; padding:0 20px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:40; }
+#mi-prod-rates-prototype .search-global { display:flex; align-items:center; gap:6px; background:#f5f5f8; border:1px solid #e8e8ec; border-radius:20px; padding:6px 14px; width:260px; font-size:12.5px; color:#9aa0b0; }
+#mi-prod-rates-prototype .topbar-right { display:flex; align-items:center; gap:14px; }
+#mi-prod-rates-prototype .topbar-icon { color:#9aa0b0; font-size:15px; }
+#mi-prod-rates-prototype .topbar-user { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; }
+#mi-prod-rates-prototype .avatar-sm { width:30px; height:30px; background:var(--st-color-primary); border-radius:50%; color:#fff; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+
+#mi-prod-rates-prototype .main-content { flex:1; display:flex; flex-direction:column; min-width:0; }
+#mi-prod-rates-prototype .page-wrap { padding:22px 26px 60px; max-width:1200px; }
+#mi-prod-rates-prototype .page-title { font-size:19px; font-weight:800; color:var(--st-color-text); margin-bottom:16px; }
+
+/* ── DEMO CONTROLS BAR ── */
+#mi-prod-rates-prototype .demo-bar { background:#FBFAFF; border:1.5px dashed #C9C4F5; border-radius:10px; padding:12px 16px; margin-bottom:22px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+#mi-prod-rates-prototype .demo-bar-label { font-size:11px; font-weight:700; color:var(--st-color-primary-active); text-transform:uppercase; letter-spacing:.5px; display:flex; align-items:center; gap:6px; flex-shrink:0; }
+#mi-prod-rates-prototype .demo-bar-spacer { flex:1; min-width:6px; }
+
+/* ── SECTION CARD (design system) ── */
+#mi-prod-rates-prototype .settings-section { background:var(--st-color-card-bg); border:1px solid var(--st-color-border); border-radius:10px; padding:18px; margin-bottom:18px; }
+#mi-prod-rates-prototype .settings-section-title { font-size:14px; font-weight:700; margin:0 0 14px 0; display:flex; align-items:center; gap:8px; }
+#mi-prod-rates-prototype .settings-section-subtitle { font-size:12px; color:var(--st-color-text-muted); margin:-8px 0 14px 0; line-height:1.5; }
+
+/* ── GRID ── */
+#mi-prod-rates-prototype .settings-grid { display:grid; grid-template-columns: 1fr; gap: 18px 14px; }
+@media (min-width: 576px) { #mi-prod-rates-prototype .settings-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 992px) {
+  #mi-prod-rates-prototype .settings-grid { grid-template-columns: repeat(6, 1fr); }
+  #mi-prod-rates-prototype .settings-field          { grid-column: span 2; }
+  #mi-prod-rates-prototype .settings-field--full    { grid-column: 1 / -1; }
+  #mi-prod-rates-prototype .settings-field--half    { grid-column: span 3; }
+  #mi-prod-rates-prototype .settings-field--compact { grid-column: span 2; max-width: 180px; }
+}
+
+/* ── FLOATING LABEL FIELD (design system) ── */
+#mi-prod-rates-prototype .settings-field { position: relative; display: flex; flex-direction: column; }
+#mi-prod-rates-prototype .settings-field-label {
+  position: absolute; top: -8px; left: 10px;
+  background: var(--st-color-card-bg);
+  padding: 0 6px;
+  font-size: 11px; font-weight: 600;
+  color: var(--st-color-text-muted);
+  z-index: 2; pointer-events: none;
+  letter-spacing: 0.2px;
+}
+#mi-prod-rates-prototype .settings-field-label.is-required::after { content: " *"; color: #DC2626; }
+#mi-prod-rates-prototype .settings-field-input,
+#mi-prod-rates-prototype select.settings-field-input {
+  height: 40px; padding: 0 14px;
+  border: 1px solid var(--st-color-border); border-radius: 8px;
+  font-size: 14px; font-family: inherit;
+  background: var(--st-color-card-bg); color: var(--st-color-text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%; appearance:none;
+}
+#mi-prod-rates-prototype select.settings-field-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2380879A'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; padding-right: 32px; cursor:pointer;
+}
+#mi-prod-rates-prototype .settings-field-input:focus,
+#mi-prod-rates-prototype select.settings-field-input:focus {
+  outline: none; border-color: var(--st-color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18);
+}
+#mi-prod-rates-prototype .settings-field-input[readonly] { background:#FAFAFC; color:var(--st-color-text-muted); cursor:default; }
+
+/* ── FIELD GROUP (prefix/suffix) ── */
+#mi-prod-rates-prototype .settings-field-group {
+  display:flex; align-items:center;
+  border: 1px solid var(--st-color-border); border-radius: 8px;
+  height:40px; background:var(--st-color-card-bg);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+#mi-prod-rates-prototype .settings-field-group:focus-within {
+  border-color: var(--st-color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18);
+}
+#mi-prod-rates-prototype .settings-field-group-prefix,
+#mi-prod-rates-prototype .settings-field-group-suffix { font-size:13px; color:var(--st-color-text-muted); padding:0 12px; flex-shrink:0; }
+#mi-prod-rates-prototype .settings-field-group input {
+  border:none; outline:none; flex:1; min-width:0; height:100%;
+  font-size:14px; font-family:inherit; color:var(--st-color-text); background:transparent;
+  padding: 0 4px 0 0;
+}
+#mi-prod-rates-prototype .settings-field-group-prefix + input { padding-left:0; }
+
+/* ── BUTTONS ── */
+#mi-prod-rates-prototype .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:40px; padding:0 20px; border-radius:10px; font-size:13.5px; font-weight:700; font-family:inherit; cursor:pointer; border:1.5px solid transparent; transition:all .15s; text-decoration:none; white-space:nowrap; }
+#mi-prod-rates-prototype .btn-primary { background:var(--st-color-primary); color:#fff; }
+#mi-prod-rates-prototype .btn-primary:hover { background:var(--st-color-primary-hover); }
+#mi-prod-rates-prototype .btn-primary:active { background:var(--st-color-primary-active); }
+#mi-prod-rates-prototype .btn-primary[disabled] { opacity:.5; cursor:not-allowed; }
+#mi-prod-rates-prototype .btn-outline-primary { background:#fff; border-color:var(--st-color-primary); color:var(--st-color-primary); }
+#mi-prod-rates-prototype .btn-outline-primary:hover { background:var(--st-color-primary); color:#fff; }
+#mi-prod-rates-prototype .btn-sm { height:32px; padding:0 14px; font-size:12.5px; border-radius:8px; }
+#mi-prod-rates-prototype .btn-round { border-radius:999px; }
+
+/* ── ALERTS (4-variant system) ── */
+#mi-prod-rates-prototype .settings-alert { display:flex; gap:10px; align-items:flex-start; border-radius:8px; padding:12px 14px; font-size:13px; line-height:1.5; }
+#mi-prod-rates-prototype .settings-alert i { font-size:14px; margin-top:1px; flex-shrink:0; }
+#mi-prod-rates-prototype .settings-alert-body { flex:1; }
+#mi-prod-rates-prototype .settings-alert-title { font-weight:700; font-size:13px; margin-bottom:2px; }
+#mi-prod-rates-prototype .settings-alert--danger  { background:#FEF2F2; border:1px solid #FECACA; color:#991B1B; }
+#mi-prod-rates-prototype .settings-alert--warn    { background:#FFFBEB; border:1px solid #FDE68A; color:#92400E; }
+#mi-prod-rates-prototype .settings-alert--info    { background:#EFF6FF; border:1px solid #BFDBFE; color:#1E40AF; }
+#mi-prod-rates-prototype .settings-alert--success { background:#F0FDF4; border:1px solid #BBF7D0; color:#166534; }
+
+/* ── PILLS / BADGES ── */
+#mi-prod-rates-prototype .pill { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; }
+#mi-prod-rates-prototype .pill-primary  { background:#E8E6FA; color:#5C53DC; border:1px solid #D6D2F5; }
+#mi-prod-rates-prototype .pill-live     { background:#E6FAF0; color:#166534; border:1px solid #BBF7D0; }
+#mi-prod-rates-prototype .pill-fallback { background:#F1F1F5; color:#80879A; border:1px solid var(--st-color-border); }
+
+/* ── WIZARD OVERLAY ── */
+#mi-prod-rates-prototype .wizard-backdrop { position:fixed; inset:0; background:rgba(29,24,54,.45); z-index:900; display:flex; align-items:center; justify-content:center; padding:24px; overflow-y:auto; }
+#mi-prod-rates-prototype .wizard-backdrop[hidden] { display:none; }
+#mi-prod-rates-prototype .wizard-card { background:#fff; border-radius:14px; box-shadow:0 24px 60px rgba(0,0,0,.28); width:680px; max-width:100%; max-height:92vh; overflow-y:auto; margin:auto; }
+#mi-prod-rates-prototype .wizard-header { padding:20px 26px 0; }
+#mi-prod-rates-prototype .wizard-progress { display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+#mi-prod-rates-prototype .wizard-step-dot { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; background:#EFEFF3; color:var(--st-color-text-muted); flex-shrink:0; }
+#mi-prod-rates-prototype .wizard-step-dot.done { background:var(--st-color-primary); color:#fff; }
+#mi-prod-rates-prototype .wizard-step-dot.active { background:var(--st-color-primary); color:#fff; box-shadow:0 0 0 3px rgba(var(--st-color-primary-rgb),.22); }
+#mi-prod-rates-prototype .wizard-step-line { flex:1; height:2px; background:#EFEFF3; }
+#mi-prod-rates-prototype .wizard-step-line.done { background:var(--st-color-primary); }
+#mi-prod-rates-prototype .wizard-step-label { font-size:11px; font-weight:700; color:var(--st-color-text-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+#mi-prod-rates-prototype .wizard-title { font-size:19px; font-weight:800; margin-bottom:8px; line-height:1.3; }
+#mi-prod-rates-prototype .wizard-subtitle { font-size:13.5px; color:var(--st-color-text-muted); line-height:1.6; margin-bottom:4px; }
+#mi-prod-rates-prototype .wizard-body { padding:18px 26px 26px; }
+#mi-prod-rates-prototype .wizard-footer { display:flex; justify-content:space-between; align-items:center; padding:16px 26px; border-top:1px solid var(--st-color-border); }
+
+/* Step 1 confirm card */
+#mi-prod-rates-prototype .confirm-fact-card { background:#FAFAFC; border:1px solid var(--st-color-border); border-radius:10px; padding:18px 20px; margin:14px 0 18px; }
+#mi-prod-rates-prototype .confirm-fact-row { display:flex; gap:12px; align-items:flex-start; padding:8px 0; }
+#mi-prod-rates-prototype .confirm-fact-row + .confirm-fact-row { border-top:1px solid var(--st-color-border); }
+#mi-prod-rates-prototype .confirm-fact-icon { width:32px; height:32px; border-radius:8px; background:#EDE9FE; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+#mi-prod-rates-prototype .confirm-fact-icon i { color:var(--st-color-primary); font-size:13px; }
+#mi-prod-rates-prototype .confirm-fact-label { font-size:11px; font-weight:600; color:var(--st-color-text-muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:2px; }
+#mi-prod-rates-prototype .confirm-fact-value { font-size:14.5px; font-weight:700; color:var(--st-color-text); }
+#mi-prod-rates-prototype .confirm-choice-row { display:flex; gap:12px; margin-top:4px; }
+#mi-prod-rates-prototype .confirm-choice-row .btn { flex:1; }
+
+/* Step 2 industry grid */
+#mi-prod-rates-prototype .industry-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:14px 0 6px; }
+@media (min-width:560px) { #mi-prod-rates-prototype .industry-grid { grid-template-columns:repeat(3,1fr); } }
+#mi-prod-rates-prototype .industry-btn {
+  position:relative; border:1.5px solid var(--st-color-border); border-radius:10px; background:#fff;
+  padding:14px 12px 12px; text-align:left; cursor:pointer; transition:all .15s; font-family:inherit;
+  display:flex; flex-direction:column; gap:6px; min-height:78px;
+}
+#mi-prod-rates-prototype .industry-btn:hover { border-color:var(--st-color-primary); }
+#mi-prod-rates-prototype .industry-btn:focus-visible { outline:2px solid var(--st-color-primary); outline-offset:2px; }
+#mi-prod-rates-prototype .industry-btn.is-selected { border-color:var(--st-color-primary); background:#F8F7FF; box-shadow:0 0 0 1px var(--st-color-primary) inset; }
+#mi-prod-rates-prototype .industry-name { font-size:13px; font-weight:700; color:var(--st-color-text); line-height:1.3; padding-right:20px; }
+
+#mi-prod-rates-prototype .outcome-hero { border-radius:10px; padding:20px; margin-bottom:14px; }
+#mi-prod-rates-prototype .outcome-hero.is-live { background:#F0FDF4; border:1px solid #BBF7D0; }
+#mi-prod-rates-prototype .outcome-hero.is-fallback { background:#F8F7FF; border:1px solid #D6D2F5; }
+#mi-prod-rates-prototype .outcome-hero-icon { width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:12px; }
+#mi-prod-rates-prototype .outcome-hero.is-live .outcome-hero-icon { background:#BBF7D0; }
+#mi-prod-rates-prototype .outcome-hero.is-live .outcome-hero-icon i { color:#166534; font-size:17px; }
+#mi-prod-rates-prototype .outcome-hero.is-fallback .outcome-hero-icon { background:#E8E6FA; }
+#mi-prod-rates-prototype .outcome-hero.is-fallback .outcome-hero-icon i { color:var(--st-color-primary); font-size:17px; }
+#mi-prod-rates-prototype .outcome-hero-title { font-size:16px; font-weight:800; margin-bottom:6px; }
+#mi-prod-rates-prototype .outcome-hero-text { font-size:13.5px; line-height:1.6; color:var(--st-color-text); margin-bottom:14px; }
+
+/* Mock Line Items table */
+#mi-prod-rates-prototype .li-table { width:100%; border-collapse:collapse; }
+#mi-prod-rates-prototype .li-table th { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--st-color-text-muted); padding:8px 10px; text-align:left; border-bottom:1px solid var(--st-color-border); background:#FAFAFC; }
+#mi-prod-rates-prototype .li-table td { padding:10px; font-size:13px; border-bottom:1px solid var(--st-color-border); }
+#mi-prod-rates-prototype .li-table tr:last-child td { border-bottom:none; }
+
+/* Prototype notes panel */
+#mi-prod-rates-prototype .notes-panel { max-height:70vh; overflow-y:auto; }
+#mi-prod-rates-prototype .note-item { padding:12px 0; border-top:1px solid var(--st-color-border); }
+#mi-prod-rates-prototype .note-item:first-child { border-top:none; padding-top:0; }
+#mi-prod-rates-prototype .note-tag { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.4px; padding:2px 7px; border-radius:5px; margin-bottom:6px; display:inline-block; }
+#mi-prod-rates-prototype .note-tag.assumption { background:#FFFBEB; color:#92400E; }
+#mi-prod-rates-prototype .note-tag.gap { background:#FEF2F2; color:#991B1B; }
+#mi-prod-rates-prototype .note-text { font-size:13px; line-height:1.6; color:var(--st-color-text); }
+
+/* Generic modal (reused for Industry-Change confirmation) */
+#mi-prod-rates-prototype .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(29,24,54,.45); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+#mi-prod-rates-prototype .modal-backdrop.open { display:flex; }
+#mi-prod-rates-prototype .modal { background:#fff; border-radius:12px; box-shadow:0 24px 60px rgba(0,0,0,.25); width:520px; max-width:100%; max-height:90vh; overflow-y:auto; }
+#mi-prod-rates-prototype .modal-header { display:flex; align-items:flex-start; justify-content:space-between; padding:18px 20px 14px; border-bottom:1px solid var(--st-color-border); }
+#mi-prod-rates-prototype .modal-title { font-size:16px; font-weight:800; color:var(--st-color-text); }
+#mi-prod-rates-prototype .modal-subtitle { font-size:12px; color:var(--st-color-text-muted); margin-top:3px; }
+#mi-prod-rates-prototype .modal-close { background:none; border:none; font-size:18px; color:var(--st-color-text-muted); cursor:pointer; line-height:1; padding:2px; }
+#mi-prod-rates-prototype .modal-body { padding:20px; }
+#mi-prod-rates-prototype .modal-body p { font-size:13.5px; line-height:1.6; margin-bottom:14px; color:var(--st-color-text); }
+#mi-prod-rates-prototype .modal-footer { display:flex; justify-content:flex-end; gap:10px; padding:14px 20px; border-top:1px solid var(--st-color-border); }
+
+/* ── Preset diff table (Phase 3) ── */
+#mi-prod-rates-prototype .diff-table { width:100%; border-collapse:collapse; margin-bottom:16px; border:1px solid var(--st-color-border); border-radius:8px; overflow:hidden; }
+#mi-prod-rates-prototype .diff-table th { background:#FAFAFC; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--st-color-text-muted); padding:8px 12px; text-align:left; border-bottom:1px solid var(--st-color-border); }
+#mi-prod-rates-prototype .diff-table td { padding:9px 12px; font-size:13px; border-bottom:1px solid var(--st-color-border); }
+#mi-prod-rates-prototype .diff-table tr:last-child td { border-bottom:none; }
+#mi-prod-rates-prototype .diff-table td.new-val { color:var(--st-color-primary-active); font-weight:700; }
+#mi-prod-rates-prototype .diff-arrow { color:var(--st-color-text-muted); }
+
+/* ══════════════ PHASE 2: PRODUCTION RATES CONFIGURATION ══════════════ */
+
+/* Empty landing card (never-configured account) */
+#mi-prod-rates-prototype .empty-landing { text-align:center; padding:50px 30px; }
+#mi-prod-rates-prototype .empty-landing i.landing-icon { font-size:30px; color:#c9cbe0; margin-bottom:14px; display:block; }
+#mi-prod-rates-prototype .empty-landing-title { font-size:15px; font-weight:700; margin-bottom:6px; }
+#mi-prod-rates-prototype .empty-landing-sub { font-size:13px; color:var(--st-color-text-muted); margin-bottom:18px; }
+
+/* Industry context header */
+#mi-prod-rates-prototype .industry-header { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
+#mi-prod-rates-prototype .industry-header-left { display:flex; align-items:center; gap:12px; }
+#mi-prod-rates-prototype .industry-header-icon { width:38px; height:38px; border-radius:9px; background:#EDE9FE; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+#mi-prod-rates-prototype .industry-header-icon i { color:var(--st-color-primary); font-size:16px; }
+#mi-prod-rates-prototype .industry-header-label { font-size:11px; font-weight:700; color:var(--st-color-text-muted); text-transform:uppercase; letter-spacing:.4px; }
+#mi-prod-rates-prototype .industry-header-name { font-size:17px; font-weight:800; color:var(--st-color-text); }
+
+/* Top hierarchy tabs */
+#mi-prod-rates-prototype .pr-tabs { display:flex; gap:0; border-bottom:1px solid var(--st-color-border); margin-bottom:18px; overflow-x:auto; }
+#mi-prod-rates-prototype .pr-tab { padding:9px 18px 11px; font-size:13px; font-weight:600; color:var(--st-color-text-muted); cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; transition:color .15s, border-color .15s; }
+#mi-prod-rates-prototype .pr-tab:hover { color:var(--st-color-primary-active); }
+#mi-prod-rates-prototype .pr-tab.active { color:var(--st-color-primary); border-bottom-color:var(--st-color-primary); font-weight:700; }
+
+/* Chip filter row (Area / Category context selectors) */
+#mi-prod-rates-prototype .chip-filter-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+#mi-prod-rates-prototype .chip-filter-label { font-size:11px; font-weight:700; color:var(--st-color-text-muted); text-transform:uppercase; letter-spacing:.4px; margin-right:2px; }
+#mi-prod-rates-prototype .chip-filter { padding:6px 14px; border-radius:999px; border:1.5px solid var(--st-color-border); background:#fff; font-size:12.5px; font-weight:600; color:var(--st-color-text-muted); cursor:pointer; font-family:inherit; }
+#mi-prod-rates-prototype .chip-filter:hover { border-color:var(--st-color-primary); color:var(--st-color-primary-active); }
+#mi-prod-rates-prototype .chip-filter.active { background:var(--st-color-primary); border-color:var(--st-color-primary); color:#fff; }
+
+/* Data tables */
+#mi-prod-rates-prototype .data-table-wrap { overflow-x:auto; }
+#mi-prod-rates-prototype .data-table { width:100%; border-collapse:collapse; }
+#mi-prod-rates-prototype .data-table th { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--st-color-text-muted); padding:9px 12px; text-align:left; border-bottom:1px solid var(--st-color-border); background:#FAFAFC; white-space:nowrap; }
+#mi-prod-rates-prototype .data-table td { padding:11px 12px; font-size:13px; border-bottom:1px solid var(--st-color-border); vertical-align:top; }
+#mi-prod-rates-prototype .data-table tr:last-child td { border-bottom:none; }
+#mi-prod-rates-prototype .data-table tr:hover td { background:#FAFAFC; }
+#mi-prod-rates-prototype .data-table .row-name { font-weight:700; color:var(--st-color-text); cursor:pointer; }
+#mi-prod-rates-prototype .data-table .row-name:hover { color:var(--st-color-primary-active); text-decoration:underline; }
+#mi-prod-rates-prototype .data-table .row-meta { font-size:11.5px; color:var(--st-color-text-muted); margin-top:2px; }
+#mi-prod-rates-prototype .row-actions { display:flex; gap:8px; justify-content:flex-end; white-space:nowrap; }
+#mi-prod-rates-prototype .row-icon-btn { width:26px; height:26px; border-radius:6px; border:1px solid var(--st-color-border); background:#fff; color:var(--st-color-text-muted); font-size:11px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; }
+#mi-prod-rates-prototype .row-icon-btn:hover { border-color:var(--st-color-primary); color:var(--st-color-primary); }
+#mi-prod-rates-prototype .row-icon-btn.danger:hover { border-color:#DC2626; color:#DC2626; }
+
+/* Section header row with action button */
+#mi-prod-rates-prototype .section-header-row { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+#mi-prod-rates-prototype .section-header-row .settings-section-title { margin-bottom:0; }
+#mi-prod-rates-prototype .section-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+/* Empty state (per-hierarchy-level) */
+#mi-prod-rates-prototype .level-empty-state { text-align:center; padding:36px 24px; }
+#mi-prod-rates-prototype .level-empty-state i { font-size:22px; color:#c9cbe0; margin-bottom:10px; display:block; }
+#mi-prod-rates-prototype .level-empty-state-title { font-size:14px; font-weight:700; margin-bottom:5px; }
+#mi-prod-rates-prototype .level-empty-state-sub { font-size:12.5px; color:var(--st-color-text-muted); margin-bottom:16px; max-width:360px; margin-left:auto; margin-right:auto; line-height:1.5; }
+
+/* ══════════════ PHASE 2 REBUILD: layout parity with the real Production
+   Rates UI (Settings | [Area] Area(s) | Substrates | Products) ══════════════ */
+
+/* Boxed data table + attached footer bar, matching the real system's tables */
+#mi-prod-rates-prototype .data-table-wrap { border:1px solid var(--st-color-border); border-bottom:none; border-radius:8px 8px 0 0; }
+#mi-prod-rates-prototype .table-footer-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:10px 14px; border:1px solid var(--st-color-border); border-radius:0 0 8px 8px; background:#FAFAFC; font-size:12px; font-weight:700; color:var(--st-color-text-muted); margin-bottom:18px; }
+
+/* Drag-to-reorder handle (prototype-only, non-functional) */
+#mi-prod-rates-prototype .drag-handle-cell { width:20px; padding-right:0 !important; }
+#mi-prod-rates-prototype .drag-handle { color:#c9cbe0; font-size:12px; cursor:grab; }
+
+/* Interior/Exterior segmented toggle (Substrates tab) */
+#mi-prod-rates-prototype .pill-toggle { display:inline-flex; border:1.5px solid var(--st-color-border); border-radius:999px; padding:3px; gap:2px; }
+#mi-prod-rates-prototype .pill-toggle-btn { border:none; background:transparent; padding:7px 18px; border-radius:999px; font-size:12.5px; font-weight:700; color:var(--st-color-text-muted); cursor:pointer; font-family:inherit; }
+#mi-prod-rates-prototype .pill-toggle-btn.active { background:var(--st-color-primary); color:#fff; }
+
+/* Area Substrates "Details" column (multi-line coat/rate breakdown) */
+#mi-prod-rates-prototype .details-cell { font-size:12px; line-height:1.7; color:var(--st-color-text); }
+
+/* Products tab toolbar (search + sort, layout-only in this prototype) */
+#mi-prod-rates-prototype .table-toolbar-row { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+#mi-prod-rates-prototype .table-search-box { position:relative; flex:1; min-width:180px; max-width:320px; }
+#mi-prod-rates-prototype .table-search-box i { position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:12px; color:var(--st-color-text-muted); }
+#mi-prod-rates-prototype .table-search-input { width:100%; height:38px; padding:0 14px 0 34px; border:1px solid var(--st-color-border); border-radius:8px; font-size:13px; font-family:inherit; background:var(--st-color-card-bg); color:var(--st-color-text); }
+#mi-prod-rates-prototype .table-search-input:focus { outline:none; border-color:var(--st-color-primary); box-shadow:0 0 0 3px rgba(var(--st-color-primary-rgb),.18); }
+
+/* Demo-only reset controls inside a tab */
+#mi-prod-rates-prototype .tab-demo-controls { display:flex; gap:8px; margin-bottom:14px; }
+#mi-prod-rates-prototype .tab-demo-controls .btn { }
+
+/* ══════════════ IMPORT: per-tab + master multi-section import wizards ══════════════ */
+#mi-prod-rates-prototype .modal-xl { width:920px; }
+#mi-prod-rates-prototype .import-steps { display:flex; align-items:center; margin-bottom:22px; }
+#mi-prod-rates-prototype .import-step { display:flex; align-items:center; gap:8px; font-size:12.5px; flex-shrink:0; }
+#mi-prod-rates-prototype .import-step-num { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; background:#EFEFF3; color:var(--st-color-text-muted); flex-shrink:0; }
+#mi-prod-rates-prototype .import-step.done .import-step-num, #mi-prod-rates-prototype .import-step.active .import-step-num { background:var(--st-color-primary); color:#fff; }
+#mi-prod-rates-prototype .import-step-label { color:var(--st-color-text-muted); }
+#mi-prod-rates-prototype .import-step.done .import-step-label, #mi-prod-rates-prototype .import-step.active .import-step-label { color:var(--st-color-primary); font-weight:700; }
+#mi-prod-rates-prototype .import-step-divider { flex:1; height:2px; background:#EFEFF3; margin:0 8px; min-width:16px; }
+#mi-prod-rates-prototype .import-step-divider.done { background:var(--st-color-primary); }
+
+#mi-prod-rates-prototype .upload-zone { border:2px dashed #C9C4F5; border-radius:12px; padding:34px 22px; text-align:center; background:#FBFAFF; cursor:pointer; transition:all .15s; }
+#mi-prod-rates-prototype .upload-zone:hover { border-color:var(--st-color-primary); background:#F5F3FF; }
+#mi-prod-rates-prototype .upload-zone i.upload-icon { font-size:28px; color:var(--st-color-primary); margin-bottom:10px; display:block; }
+#mi-prod-rates-prototype .upload-zone h4 { font-size:14.5px; font-weight:700; color:var(--st-color-text); margin-bottom:5px; }
+#mi-prod-rates-prototype .upload-zone p { font-size:12.5px; color:var(--st-color-text-muted); margin-bottom:4px; }
+#mi-prod-rates-prototype .upload-zone small { font-size:11px; color:var(--st-color-text-muted); }
+#mi-prod-rates-prototype .template-link { color:var(--st-color-primary); text-decoration:underline; cursor:pointer; font-size:12.5px; margin-top:8px; display:inline-block; }
+#mi-prod-rates-prototype .file-chip { display:flex; align-items:center; gap:10px; background:#F0FDF4; border:1px solid #BBF7D0; border-radius:8px; padding:10px 14px; margin-top:10px; }
+#mi-prod-rates-prototype .file-chip i { font-size:18px; color:#166534; }
+#mi-prod-rates-prototype .file-chip-info { flex:1; }
+#mi-prod-rates-prototype .file-chip-name { font-size:13px; font-weight:700; color:#166534; }
+#mi-prod-rates-prototype .file-chip-size { font-size:11.5px; color:#16a34a; }
+#mi-prod-rates-prototype .file-chip-remove { background:none; border:none; color:var(--st-color-text-muted); cursor:pointer; font-size:16px; }
+
+#mi-prod-rates-prototype .map-table { width:100%; border-collapse:collapse; font-size:13px; }
+#mi-prod-rates-prototype .map-table th { padding:8px 12px; background:#FAFAFC; color:var(--st-color-text-muted); text-align:left; font-weight:700; font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid var(--st-color-border); }
+#mi-prod-rates-prototype .map-table td { padding:8px 10px; border-bottom:1px solid var(--st-color-border); vertical-align:middle; }
+#mi-prod-rates-prototype .col-from { font-family:monospace; font-size:11.5px; background:#F1F1F5; padding:3px 8px; border-radius:4px; color:var(--st-color-text); }
+#mi-prod-rates-prototype .col-note { font-size:11px; color:var(--st-color-text-muted); display:block; margin-top:2px; }
+#mi-prod-rates-prototype .map-select, #mi-prod-rates-prototype .conflict-select { width:100%; border:1px solid var(--st-color-border); border-radius:6px; padding:6px 10px; font-size:12.5px; background:#fff; outline:none; cursor:pointer; font-family:inherit; }
+#mi-prod-rates-prototype .map-select:focus, #mi-prod-rates-prototype .conflict-select:focus { border-color:var(--st-color-primary); }
+#mi-prod-rates-prototype .map-warn-row .map-select { border-color:#FDE68A; background:#FFFBEB; }
+
+#mi-prod-rates-prototype .preview-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+#mi-prod-rates-prototype .preview-table th { padding:8px 10px; background:#FAFAFC; color:var(--st-color-text-muted); font-weight:700; font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; text-align:left; border-bottom:1px solid var(--st-color-border); }
+#mi-prod-rates-prototype .preview-table td { padding:7px 10px; border-bottom:1px solid var(--st-color-border); vertical-align:middle; }
+#mi-prod-rates-prototype .preview-table tr.row-duplicate { background:#FFFBEB; }
+#mi-prod-rates-prototype .import-summary { background:#EFF6FF; border:1px solid #BFDBFE; border-radius:8px; padding:12px 16px; margin-bottom:14px; display:flex; gap:20px; font-size:13px; flex-wrap:wrap; }
+#mi-prod-rates-prototype .import-stat { display:flex; align-items:center; gap:6px; }
+#mi-prod-rates-prototype .import-stat-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+#mi-prod-rates-prototype .dot-green { background:#22c55e; }
+#mi-prod-rates-prototype .dot-yellow { background:#f59e0b; }
+
+#mi-prod-rates-prototype .section-group { border:1px solid var(--st-color-border); border-radius:10px; margin-bottom:14px; overflow:hidden; }
+#mi-prod-rates-prototype .section-group-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:#FAFAFC; cursor:pointer; border-bottom:1px solid var(--st-color-border); }
+#mi-prod-rates-prototype .section-group-header h4 { font-size:13px; font-weight:700; color:var(--st-color-text); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+#mi-prod-rates-prototype .section-group-body { padding:16px; }
+#mi-prod-rates-prototype .section-group-body.collapsed { display:none; }
+#mi-prod-rates-prototype .chevron { transition:transform .2s; color:var(--st-color-text-muted); font-size:11px; }
+#mi-prod-rates-prototype .chevron.open { transform:rotate(180deg); }
+
+#mi-prod-rates-prototype .sheet-option { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border:1.5px solid var(--st-color-border); border-radius:10px; margin-bottom:8px; cursor:pointer; transition:all .15s; }
+#mi-prod-rates-prototype .sheet-option:hover { border-color:var(--st-color-primary); }
+#mi-prod-rates-prototype .sheet-option.selected { border-color:var(--st-color-primary); background:#F8F7FF; }
+#mi-prod-rates-prototype .sheet-option-left { display:flex; align-items:center; gap:12px; }
+#mi-prod-rates-prototype .sheet-option-check { width:20px; height:20px; border-radius:5px; border:2px solid var(--st-color-border); display:flex; align-items:center; justify-content:center; font-size:11px; color:transparent; flex-shrink:0; }
+#mi-prod-rates-prototype .sheet-option.selected .sheet-option-check { background:var(--st-color-primary); border-color:var(--st-color-primary); color:#fff; }
+#mi-prod-rates-prototype .sheet-option-title { font-size:13.5px; font-weight:700; color:var(--st-color-text); }
+#mi-prod-rates-prototype .sheet-option-desc { font-size:12px; color:var(--st-color-text-muted); margin-top:2px; }
+#mi-prod-rates-prototype .sheet-count { font-size:11.5px; color:var(--st-color-primary-active); background:#E8E6FA; padding:2px 10px; border-radius:10px; font-weight:700; }
+
+#mi-prod-rates-prototype .success-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:16px 0; }
+#mi-prod-rates-prototype .success-card { border-radius:8px; padding:14px; text-align:left; }
+#mi-prod-rates-prototype .success-card .num { font-size:22px; font-weight:800; }
+#mi-prod-rates-prototype .success-card .lbl { font-size:11.5px; font-weight:600; margin-top:2px; }
+#mi-prod-rates-prototype .table-scroll { overflow-x:auto; }
+#mi-prod-rates-prototype .hidden { display:none !important; }
+
+@media (max-width:640px) {
+  #mi-prod-rates-prototype .sidebar { display:none; }
+  #mi-prod-rates-prototype .page-wrap { padding:16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Multi-Industry Production Rates — First-Time Setup Wizard</span>
+  </div>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span class="proto-bar-phase">Phase 1 of 4</span>
+    <a class="proto-bar-ticket" href="https://app.clickup.com/t/86b903mm5" target="_blank">Epic 86b903mm5</a>
+  </div>
+</div>
+
+<div id="mi-prod-rates-prototype">
+<div class="app-shell">
+
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="dj-logo-mark"><i class="fas fa-water"></i></div>
+      <span class="dj-logo-text">dripjobs</span>
+    </div>
+    <div class="sidebar-section-lbl">Sales</div>
+    <div class="nav-item"><i class="fas fa-address-book"></i> Contacts</div>
+    <div class="nav-item"><i class="fas fa-stream"></i> Sales Pipeline</div>
+    <div class="sidebar-section-lbl">Jobs</div>
+    <div class="nav-item"><i class="fas fa-calendar-alt"></i> Job Schedule</div>
+    <div class="nav-item"><i class="fas fa-briefcase"></i> Jobs List</div>
+    <div class="sidebar-section-lbl">Financials</div>
+    <div class="nav-item"><i class="fas fa-chart-line"></i> Job Costing</div>
+    <div class="nav-item active"><i class="fas fa-tachometer-alt"></i> Production Rates</div>
+    <div class="nav-item"><i class="fas fa-chart-bar"></i> Metrics</div>
+    <div class="sidebar-section-lbl">Resources</div>
+    <div class="nav-item"><i class="fas fa-graduation-cap"></i> DJ Academy</div>
+  </nav>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="search-global"><i class="fas fa-search"></i> Search leads, contacts, tags...</div>
+      <div class="topbar-right">
+        <i class="fas fa-bell topbar-icon"></i>
+        <div class="topbar-user"><div class="avatar-sm">JS</div> Jack Sparrow</div>
+      </div>
+    </div>
+
+    <div class="page-wrap">
+      <div class="demo-bar">
+        <span class="demo-bar-label"><i class="fas fa-flask"></i> Prototype controls</span>
+        <span id="demoBarState" style="font-size:12px; color:var(--st-color-text-muted);"></span>
+        <div class="demo-bar-spacer"></div>
+        <button class="btn btn-sm btn-outline-primary" onclick="previewIndustryChangeModal()"><i class="fas fa-exclamation-triangle"></i> Preview: Industry-Change Modal</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="resetIndustryToEmpty()"><i class="fas fa-inbox"></i> Demo: Clear to Empty States</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="restoreSampleData()"><i class="fas fa-database"></i> Demo: Restore Sample Data</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="openNotesPanel()"><i class="fas fa-sticky-note"></i> Notes for Jeremy</button>
+        <button class="btn btn-sm btn-outline-primary" onclick="restartWizard()"><i class="fas fa-undo"></i> Restart Wizard (First-Time Setup)</button>
+      </div>
+
+      <div id="mainPageContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ WIZARD ══════════════ -->
+<div class="wizard-backdrop" id="wizardBackdrop" hidden>
+  <div class="wizard-card" id="wizardCard"></div>
+</div>
+
+<!-- ══════════════ INDUSTRY-CHANGE CONFIRMATION MODAL (reusable component -- used for real by "Restore Default", and by the Notes-panel-adjacent Preview button) ══════════════ -->
+<div class="modal-backdrop" id="industryChangeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Change Industry?</div>
+        <div class="modal-subtitle" id="icmSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeIndustryChangeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>You're changing your Industry from <strong id="icmFrom">Residential Painting</strong> to <strong id="icmTo">Roofing</strong>.</p>
+      <div class="settings-alert settings-alert--warn">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div class="settings-alert-body">
+          <div class="settings-alert-title">This replaces your current Production Rates configuration</div>
+          <div id="icmWarnBody">Production Rates supports one Industry at a time. Switching replaces your current configuration with the new Industry's rates. This does not affect existing Proposals and Invoices already created.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-primary" onclick="closeIndustryChangeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmIndustryChangeModal()">Confirm Change</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PHASE 3: RATE PRESET OVERWRITE CONFIRMATION MODAL (distinct from Industry-Change modal -- this never changes Industry) ══════════════ -->
+<div class="modal-backdrop" id="presetConfirmModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Apply Preset Template?</div>
+        <div class="modal-subtitle">You're switching <strong id="presetConfirmIndustry">Residential Painting</strong> to <strong id="presetConfirmToRegion">Southeast</strong></div>
+      </div>
+      <button class="modal-close" onclick="cancelPresetSelectChange()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <table class="diff-table">
+        <thead><tr><th>Field</th><th>Current</th><th></th><th>New</th></tr></thead>
+        <tbody id="presetDiffTableBody"></tbody>
+      </table>
+      <div class="settings-alert settings-alert--warn">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div class="settings-alert-body">
+          <div class="settings-alert-title" id="presetConfirmWarnTitle">This overwrites existing configuration</div>
+          <div id="presetConfirmWarnBody">Applying a preset updates Hourly Cost Rate, Hourly Sell Rate, and Product Markup above, plus production rate values across every Area, Category, and Substrate configured for this Industry. This does not change any other Industry on this account, and existing Proposals and Invoices already created will not be impacted.</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-primary" onclick="cancelPresetSelectChange()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmPresetSelectChange()">Apply Preset</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ NOTES FOR JEREMY PANEL ══════════════ -->
+<div class="modal-backdrop" id="notesModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Notes for Jeremy</div>
+        <div class="modal-subtitle">Assumptions and open gaps flagged during this build, per the "flag rather than guess" instruction</div>
+      </div>
+      <button class="modal-close" onclick="closeNotesPanel()">&times;</button>
+    </div>
+    <div class="modal-body notes-panel">
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption</span>
+        <div class="note-text">Step 1's "No" branch is built exactly as your Phase 1 brief specified: a placeholder redirect to Company Settings. The Enhancement ticket's own text describes a more granular path ("indicate the Industry is wrong" &rarr; back into Step 2 selection) and separately flags that the address-only-wrong case is unresolved. I followed your brief's simpler version for this checkpoint — flag if you want the more granular branching built instead.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption</span>
+        <div class="note-text">The Industry-Change confirmation modal's copy is my own placeholder wording — no ticket specifies exact copy for it (only that it must warn Production Rate configuration could be affected and require confirmation). Treat the wording as a starting point, not final copy.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag gap">Open Gap (carried from tickets)</span>
+        <div class="note-text">What happens when only the Company Address is wrong (not the Industry) is explicitly flagged as unresolved in the First-Time Setup ticket. Not built here since no behavior is defined yet.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag gap">Open Gap (carried from tickets)</span>
+        <div class="note-text">Mid-wizard abandon/resume behavior is flagged as unaddressed in the source ticket. Not built here.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Correction (direct request)</span>
+        <div class="note-text">Superseded an earlier note here: I'd originally treated the real system's named per-Area rows (Office, Kitchen, Whole House, etc.) as an unrelated Proposal Builder concept, outside this hierarchy. Your reference screenshots showed they're actually the real "Interior Area" / "Exterior Area" tab tables, so the tab structure is now rebuilt to match exactly: Settings | Interior Area | Exterior Area | Substrates | Products (Gutter Services only gets one Area tab, since it has no Interior classification). Each named Area row (with its own Measurement Type, default dimensions, and Default Categories) is a new data layer on top of the existing Categories/Substrates hierarchy, not a replacement for it. The Substrates tab now combines Categories (with an Interior/Exterior toggle) and Area Substrates (with a Category chip row) into one tab, matching the real UI's layout, in place of the previous separate Areas/Categories/Substrates split.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption (tab rebuild)</span>
+        <div class="note-text">Seeded representative Area rows to match your reference screenshots (Residential Painting Interior: Office, Kitchen, Whole House; Exterior: Whole House, Exterior Body, Soffit and Fascia; Gutter Services Exterior: Whole House only) since the five tickets don't specify real ones. Last Modified dates on every row (Areas, Categories, Area Substrates, Products) are placeholder seed dates for the same reason; editing, duplicating, or adding a row stamps today's date for real, since that part is a real (if simple) business rule.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption (tab rebuild)</span>
+        <div class="note-text">Added a "Sheen" column/field to Products, matching your reference screenshot, scoped to Residential Painting only (Gutter Services products have no Sheen, so that column doesn't render for it). Duplicate (copy) actions on Areas, Categories, Area Substrates, and Products are prototype-only, as is the drag-handle reorder icon and the Products tab's Search / Sort toolbar; all match the real UI's layout per your request, but aren't wired to real reordering, search, or sort logic in this pass.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption (Phase 2)</span>
+        <div class="note-text">Products are scoped per-Industry (each Industry has its own Product list) rather than one global list shared across Industries. Not explicitly specified either way, but a shared list would let a Gutter Services product surface for a Painting substrate, which conflicts with the isolation rule repeated throughout the tickets.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Scope cut (direct request)</span>
+        <div class="note-text">Simplified to one Industry per account at a time, matching what the real system supports today, per your direct request. This removed the Primary + Additional Industries multi-select in the wizard (now a single choice) and the Industry Switcher on this Settings page (now nothing to switch between). Storing multiple simultaneous Production Rate configurations per account is deferred to V2. Restarting the wizard and picking a different Industry now wholesale-replaces the account's configuration rather than adding to it.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Superseded (direct request)</span>
+        <div class="note-text">The persistent "Restore Default (Residential Painting)" header button from the last checkpoint has been removed. Per your follow-up ("the available templates should always be accessible in the preset Template dropdown... when I clicked restore default, Gutter Services went away entirely"), the Preset Template dropdown on the Settings tab now lists every Industry's templates in one always-visible list (grouped by Industry, including a "[Industry] (Default)" entry for each), and switching Industries from that single dropdown is the one path both to a different Industry and back to Residential Painting's system default. No Industry's configuration is ever fully gone -- it's still selectable from that same dropdown to switch back to it, still with its own default seed to restore to. The separate header button and its dedicated function were removed as redundant once the dropdown covered the same ground.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Combined prototype (direct request)</span>
+        <div class="note-text">Brought in the Import Data functionality from the separate prod-rates-import prototype, per your request to combine the two: a per-tab "Import" button on Interior Area, Exterior Area, Categories, Area Substrates, and Products (4-step: Upload, Map Columns, Preview, Done), plus a page-level "Import Data" button in the Industry header that imports all sections in one multi-sheet pass (5-step: Upload, Select Sections, Map Columns, Preview, Done). No file is actually read or parsed here (same as the source prototype) -- the "detected columns" and "preview rows" are illustrative fixtures, not a real import engine. Unlike the source prototype, completing an import here actually adds or updates real rows in the current Industry's data (same as every other Add/Edit action in this file), including honoring Skip vs. Overwrite on the one demonstrated duplicate row per section.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption (Import)</span>
+        <div class="note-text">The fixture "sample file" content (column names, sample values, and the one new-vs-duplicate row per section) is generated from whichever Industry and Area/Category context is currently open, so Gutter Services shows gutter-flavored categories and no Sheen column instead of Painting's. It's still illustrative, not a real file schema -- no ticket specifies what an actual customer export looks like, so treat the specific column names as a starting point. The Master Import's per-section duplicate row always matches this Industry's first real record in that section, so Overwrite is demonstrable against something real.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption (Phase 3)</span>
+        <div class="note-text">The ticket doesn't specify how a preset should change substrate-level production values, only that it must (BR4/BR5). Rather than hand-authoring a preset value for every individual substrate, each preset applies a single region-wide multiplier to every substrate's rate numbers in that Industry (e.g. Southeast Painting = 0.85x, reflecting slower production), alongside its own Hourly Cost/Sell/Markup values. This keeps the mechanic demonstrable without fabricating precision the real preset values don't have yet (the ticket's own open gap).</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption (Phase 3)</span>
+        <div class="note-text">Per your correction: "[Industry] (Default)" is a real restore action, not just a label. Selecting it (and confirming, since it overwrites existing configuration) puts Hourly Cost/Sell/Markup, Products, and every Area's Categories/Substrates back to the rates Production Rates ships with for that Industry today &mdash; the same reset the "Demo: Restore Sample Data" button performs, now reachable through the real preset flow with its own confirmation diff.</div>
+      </div>
+      <div class="note-item">
+        <span class="note-tag assumption">Assumption (Phase 3)</span>
+        <div class="note-text">The misconfiguration warning (BR9) fires only when editing an existing Substrate while a preset is applied, not when adding a brand-new one to a preset-configured Category &mdash; a new Substrate was never preset-derived, so there's nothing to misconfigure. It's also scoped to whichever Category you're actively viewing rather than staying visible after you switch Categories, since a warning about "this substrate" attached to the wrong Category on screen would be confusing.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PHASE 2: ADD/EDIT CATEGORY MODAL ══════════════ -->
+<div class="modal-backdrop" id="categoryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="categoryModalTitle">Add Category</div>
+        <div class="modal-subtitle" id="categoryModalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeCategoryModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="settings-field">
+          <label class="settings-field-label is-required">Category Name</label>
+          <input class="settings-field-input" id="catFieldName" type="text" placeholder="e.g. Walls">
+        </div>
+        <div class="settings-field">
+          <label class="settings-field-label is-required">Default Calculation Type</label>
+          <select class="settings-field-input" id="catFieldCalcType"></select>
+        </div>
+        <div class="settings-field">
+          <label class="settings-field-label">Default Substrate</label>
+          <select class="settings-field-input" id="catFieldDefaultSubstrate"><option value="">None yet</option></select>
+        </div>
+        <div class="settings-field" id="catFieldCoatsWrap">
+          <label class="settings-field-label">Default Coats</label>
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn btn-outline-primary btn-sm coat-pick" data-coats="1" onclick="pickCoats(1)">1</button>
+            <button type="button" class="btn btn-outline-primary btn-sm coat-pick" data-coats="2" onclick="pickCoats(2)">2</button>
+            <button type="button" class="btn btn-outline-primary btn-sm coat-pick" data-coats="3" onclick="pickCoats(3)">3</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-primary" onclick="closeCategoryModal()">Close</button>
+      <button class="btn btn-primary" onclick="saveCategoryModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PHASE 2: ADD/EDIT SUBSTRATE MODAL ══════════════ -->
+<div class="modal-backdrop" id="substrateModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="substrateModalTitle">Add Substrate</div>
+        <div class="modal-subtitle" id="substrateModalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeSubstrateModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div style="display:flex; gap:14px;">
+          <div class="settings-field" style="flex:1;">
+            <label class="settings-field-label is-required">Substrate Name</label>
+            <input class="settings-field-input" id="subFieldName" type="text">
+          </div>
+          <div class="settings-field" style="flex:1;">
+            <label class="settings-field-label">Client Label</label>
+            <input class="settings-field-input" id="subFieldClientLabel" type="text">
+          </div>
+        </div>
+        <div class="settings-field">
+          <label class="settings-field-label">Default Product</label>
+          <select class="settings-field-input" id="subFieldProduct"><option value="">None</option></select>
+        </div>
+        <div id="subFieldRateWrap"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-primary" onclick="closeSubstrateModal()">Close</button>
+      <button class="btn btn-primary" onclick="saveSubstrateModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PHASE 2: ADD/EDIT PRODUCT MODAL ══════════════ -->
+<div class="modal-backdrop" id="productModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="productModalTitle">Add Product</div>
+        <div class="modal-subtitle" id="productModalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeProductModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="settings-field">
+          <label class="settings-field-label is-required">Product Name</label>
+          <input class="settings-field-input" id="prodFieldName" type="text">
+        </div>
+        <div style="display:flex; gap:14px;">
+          <div class="settings-field" style="flex:1;">
+            <label class="settings-field-label is-required">Unit</label>
+            <select class="settings-field-input" id="prodFieldUnit"></select>
+          </div>
+          <div class="settings-field" style="flex:1;">
+            <label class="settings-field-label is-required">Price / Unit</label>
+            <div class="settings-field-group">
+              <span class="settings-field-group-prefix">$</span>
+              <input class="settings-field-input" id="prodFieldPrice" type="text">
+            </div>
+          </div>
+        </div>
+        <div class="settings-field" id="prodFieldSheenWrap">
+          <label class="settings-field-label">Sheen</label>
+          <select class="settings-field-input" id="prodFieldSheen"></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-primary" onclick="closeProductModal()">Close</button>
+      <button class="btn btn-primary" onclick="saveProductModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ADD/EDIT AREA MODAL (per-Area named instances -- Office, Kitchen, Whole House, etc.) ══════════════ -->
+<div class="modal-backdrop" id="areaInstanceModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="areaInstanceModalTitle">Add Area</div>
+        <div class="modal-subtitle" id="areaInstanceModalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeAreaInstanceModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="settings-field">
+          <label class="settings-field-label is-required">Area Name</label>
+          <input class="settings-field-input" id="aiFieldName" type="text" placeholder="e.g. Office">
+        </div>
+        <div>
+          <label class="settings-field-label" style="position:static; display:block; margin-bottom:8px;">Measurement Type</label>
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn btn-outline-primary btn-sm ai-measure-pick" data-type="Area" onclick="pickAreaInstanceMeasureType('Area')">Area</button>
+            <button type="button" class="btn btn-outline-primary btn-sm ai-measure-pick" data-type="Wall" onclick="pickAreaInstanceMeasureType('Wall')">Wall</button>
+            <button type="button" class="btn btn-outline-primary btn-sm ai-measure-pick" data-type="Surface" onclick="pickAreaInstanceMeasureType('Surface')">Surface</button>
+          </div>
+        </div>
+        <div id="aiFieldDimsWrap" style="display:flex; gap:14px;"></div>
+        <div>
+          <label class="settings-field-label" style="position:static; display:block; margin-bottom:8px;">Default Area Categories</label>
+          <div id="aiFieldCategories" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+        <div id="aiFieldLastModifiedWrap" style="font-size:11.5px; color:var(--st-color-text-muted);"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-primary" onclick="closeAreaInstanceModal()">Close</button>
+      <button class="btn btn-primary" onclick="saveAreaInstanceModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ IMPORT: per-tab wizard (Upload → Map Columns → Preview → Done) ══════════════ -->
+<div class="modal-backdrop" id="tabImportModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="tabImportTitle">Import Data</div>
+        <div class="modal-subtitle" id="tabImportSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeTabImportModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="import-steps">
+        <div class="import-step active" id="tabImportStep1"><div class="import-step-num">1</div><div class="import-step-label">Upload</div></div>
+        <div class="import-step-divider" id="tabImportDiv1"></div>
+        <div class="import-step" id="tabImportStep2"><div class="import-step-num">2</div><div class="import-step-label">Map Columns</div></div>
+        <div class="import-step-divider" id="tabImportDiv2"></div>
+        <div class="import-step" id="tabImportStep3"><div class="import-step-num">3</div><div class="import-step-label">Preview</div></div>
+        <div class="import-step-divider" id="tabImportDiv3"></div>
+        <div class="import-step" id="tabImportStep4"><div class="import-step-num">4</div><div class="import-step-label">Done</div></div>
+      </div>
+
+      <div id="tabImportStepContent1">
+        <div class="upload-zone" id="tabUploadZone" onclick="simulateFileUpload('tab')">
+          <i class="fas fa-folder-open upload-icon"></i>
+          <h4>Drag &amp; drop your file here</h4>
+          <p>or click to browse</p>
+          <small>Supports .CSV and .XLSX &middot; Max 10MB</small><br>
+          <span class="template-link" onclick="event.stopPropagation(); toast('Sample template download is not wired up in this prototype.')">Download sample template</span>
+        </div>
+        <div id="tabFileChip" class="file-chip hidden">
+          <i class="fas fa-file-alt"></i>
+          <div class="file-chip-info"><div class="file-chip-name">production_rates_export.csv</div><div class="file-chip-size">Rows detected, ready to map</div></div>
+          <button class="file-chip-remove" onclick="removeUploadedFile('tab')">&times;</button>
+        </div>
+      </div>
+
+      <div id="tabImportStepContent2" class="hidden">
+        <div class="settings-alert settings-alert--info" style="margin-bottom:14px;">
+          <i class="fas fa-info-circle"></i>
+          <div class="settings-alert-body">We detected <strong id="tabColCount">0 columns</strong>. Match each to a DripJobs field, or choose "Do Not Import" to skip it.</div>
+        </div>
+        <div class="table-scroll"><table class="map-table">
+          <thead><tr><th>Your File Column</th><th>Sample Value</th><th>Maps To</th></tr></thead>
+          <tbody id="tabMappingBody"></tbody>
+        </table></div>
+      </div>
+
+      <div id="tabImportStepContent3" class="hidden">
+        <div class="import-summary" id="tabImportSummary"></div>
+        <div class="table-scroll"><table class="preview-table"><thead><tr id="tabPreviewHeader"></tr></thead><tbody id="tabPreviewBody"></tbody></table></div>
+      </div>
+
+      <div id="tabImportStepContent4" class="hidden">
+        <div style="text-align:center; padding:20px 10px;">
+          <i class="fas fa-check-circle" style="font-size:44px; color:#22c55e; margin-bottom:12px; display:block;"></i>
+          <div style="font-size:17px; font-weight:800; margin-bottom:8px;">Import Complete</div>
+          <p style="font-size:13.5px; color:var(--st-color-text-muted);" id="tabImportSuccessMsg"></p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-primary" id="tabImportBtnCancel" onclick="closeTabImportModal()">Cancel</button>
+      <button class="btn btn-outline-primary hidden" id="tabImportBtnBack" onclick="tabImportBack()">Back</button>
+      <button class="btn btn-primary" id="tabImportBtnNext" onclick="tabImportNext()">Next</button>
+      <button class="btn btn-primary hidden" id="tabImportBtnDone" onclick="closeTabImportModal()">View Imported Records</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ IMPORT: master multi-section wizard (Upload → Select Sections → Map Columns → Preview → Done) ══════════════ -->
+<div class="modal-backdrop" id="masterImportModal">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Import Production Rates Data</div>
+        <div class="modal-subtitle">Bring in Areas, Categories, Area Substrates, and Products from your previous platform in one pass.</div>
+      </div>
+      <button class="modal-close" onclick="closeMasterImportModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="import-steps">
+        <div class="import-step active" id="masterImportStep1"><div class="import-step-num">1</div><div class="import-step-label">Upload</div></div>
+        <div class="import-step-divider" id="masterImportDiv1"></div>
+        <div class="import-step" id="masterImportStep2"><div class="import-step-num">2</div><div class="import-step-label">Select Sections</div></div>
+        <div class="import-step-divider" id="masterImportDiv2"></div>
+        <div class="import-step" id="masterImportStep3"><div class="import-step-num">3</div><div class="import-step-label">Map Columns</div></div>
+        <div class="import-step-divider" id="masterImportDiv3"></div>
+        <div class="import-step" id="masterImportStep4"><div class="import-step-num">4</div><div class="import-step-label">Preview</div></div>
+        <div class="import-step-divider" id="masterImportDiv4"></div>
+        <div class="import-step" id="masterImportStep5"><div class="import-step-num">5</div><div class="import-step-label">Done</div></div>
+      </div>
+
+      <div id="masterImportStepContent1">
+        <div class="upload-zone" id="masterUploadZone" onclick="simulateFileUpload('master')">
+          <i class="fas fa-file-excel upload-icon"></i>
+          <h4>Drag &amp; drop your master file here</h4>
+          <p>Excel (.xlsx) with multiple sheets recommended for a full migration</p>
+          <small>Also accepts .CSV &middot; Max 10MB</small><br>
+          <span class="template-link" onclick="event.stopPropagation(); toast('Sample template download is not wired up in this prototype.')">Download master Excel template (.xlsx)</span>
+        </div>
+        <div id="masterFileChip" class="file-chip hidden">
+          <i class="fas fa-file-excel"></i>
+          <div class="file-chip-info"><div class="file-chip-name">production_rates_export.xlsx</div><div class="file-chip-size" id="masterFileSheetCount">Sheets detected</div></div>
+          <button class="file-chip-remove" onclick="removeUploadedFile('master')">&times;</button>
+        </div>
+      </div>
+
+      <div id="masterImportStepContent2" class="hidden">
+        <p style="font-size:13px; color:var(--st-color-text-muted); margin-bottom:14px;" id="masterSheetIntro"></p>
+        <div id="masterSheetOptions"></div>
+      </div>
+
+      <div id="masterImportStepContent3" class="hidden">
+        <p style="font-size:13px; color:var(--st-color-text-muted); margin-bottom:14px;">Map each section's columns to DripJobs fields. Click a section header to expand or collapse it.</p>
+        <div id="masterMapGroups"></div>
+      </div>
+
+      <div id="masterImportStepContent4" class="hidden">
+        <div class="import-summary" id="masterImportSummary"></div>
+        <div id="masterPreviewGroups"></div>
+      </div>
+
+      <div id="masterImportStepContent5" class="hidden">
+        <div style="text-align:center; padding:20px 10px;">
+          <i class="fas fa-check-circle" style="font-size:44px; color:#22c55e; margin-bottom:12px; display:block;"></i>
+          <div style="font-size:17px; font-weight:800; margin-bottom:8px;">Import Complete</div>
+          <p style="font-size:13.5px; color:var(--st-color-text-muted); margin-bottom:6px;">Your Production Rates data has been imported across all selected sections.</p>
+          <div class="success-grid" id="masterSuccessGrid"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-primary" id="masterImportBtnCancel" onclick="closeMasterImportModal()">Cancel</button>
+      <button class="btn btn-outline-primary hidden" id="masterImportBtnBack" onclick="masterImportBack()">Back</button>
+      <button class="btn btn-primary" id="masterImportBtnNext" onclick="masterImportNext()">Next</button>
+      <button class="btn btn-primary hidden" id="masterImportBtnImport" onclick="masterDoImport()">Import All Selected</button>
+      <button class="btn btn-primary hidden" id="masterImportBtnDone" onclick="closeMasterImportModal()">View Production Rates</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /#mi-prod-rates-prototype -->
+
+<script>
+var TEN_INDUSTRIES = [
+  { key:'residential-painting', name:'Residential Painting', hasTemplate:true },
+  { key:'gutter-services',      name:'Gutter Services',      hasTemplate:true },
+  { key:'roofing',              name:'Roofing',               hasTemplate:false },
+  { key:'epoxy',                name:'Epoxy',                  hasTemplate:false },
+  { key:'commercial-painting',  name:'Commercial Painting',   hasTemplate:false },
+  { key:'flooring',             name:'Flooring',               hasTemplate:false },
+  { key:'cabinet-painting',     name:'Cabinet Painting/Refinishing', hasTemplate:false },
+  { key:'deck-staining',        name:'Deck Staining & Restoration',  hasTemplate:false },
+  { key:'pressure-washing',     name:'Pressure Washing',      hasTemplate:false },
+  { key:'hvac',                 name:'HVAC',                   hasTemplate:false }
+];
+
+var COMPANY = { industry: 'Residential Painting', address: '1245 Ocean Ave, Tampa, FL 33602' };
+// What Production Rates loads by default today (Painting-only, pre-dating this
+// multi-industry work). Reachable any time via the "Residential Painting
+// (Default)" entry in the Preset Template dropdown.
+var SYSTEM_DEFAULT_INDUSTRY = 'Residential Painting';
+
+function industryByName(name) { return TEN_INDUSTRIES.find(function(i){ return i.name === name; }); }
+
+var state;
+function freshState() {
+  return {
+    screen: 'confirm',       // confirm | redirect | select | outcome
+    // Simplified per direct request: an account configures exactly one Industry at a
+    // time, matching what the real system supports today. Primary + Additional
+    // Industries (multiple simultaneous Production Rate configurations per account)
+    // is deferred to V2 -- see the Notes for Jeremy panel and the decision log.
+    selectedIndustry: null,
+    activeIndustry: null,    // which industry's outcome is currently shown
+    outcomeMode: {}          // { [industryName]: 'branch' | 'lineItems' | 'done' }
+  };
+}
+state = freshState();
+
+function launchWizard() {
+  state = freshState();
+  document.getElementById('wizardBackdrop').hidden = false;
+  render();
+}
+function restartWizard() {
+  APP.configuredIndustries = [];
+  APP.activeConfigIndustry = null;
+  launchWizard();
+  renderMainPage();
+  toast('Wizard restarted');
+}
+function closeWizard() {
+  document.getElementById('wizardBackdrop').hidden = true;
+  renderMainPage();
+}
+
+function stepNumber() {
+  if (state.screen === 'confirm' || state.screen === 'redirect') return 1;
+  if (state.screen === 'select') return 2;
+  return 3; // outcome is beyond the 2-step progress bar, shown as "done"
+}
+
+function progressHtml() {
+  var s = stepNumber();
+  function dot(n, label) {
+    var cls = s > n ? 'done' : (s === n ? 'active' : '');
+    var content = s > n ? '<i class="fas fa-check" style="font-size:10px;"></i>' : n;
+    return '<div class="wizard-step-dot ' + cls + '">' + content + '</div>';
+  }
+  return '<div class="wizard-progress">' +
+    dot(1) + '<div class="wizard-step-line ' + (s > 1 ? 'done' : '') + '"></div>' +
+    dot(2) + '<div class="wizard-step-line ' + (s > 2 ? 'done' : '') + '"></div>' +
+    dot(3) +
+  '</div>';
+}
+
+function render() {
+  var card = document.getElementById('wizardCard');
+  card.classList.remove('is-wide');
+  if (state.screen === 'confirm') card.innerHTML = renderConfirm();
+  else if (state.screen === 'redirect') card.innerHTML = renderRedirect();
+  else if (state.screen === 'select') card.innerHTML = renderSelect();
+  else if (state.screen === 'outcome') card.innerHTML = renderOutcome();
+}
+
+function renderConfirm() {
+  return '' +
+    '<div class="wizard-header">' + progressHtml() +
+      '<div class="wizard-step-label">Step 1 of 2 &middot; Confirm Details</div>' +
+      '<div class="wizard-title">Let\'s confirm a few things first</div>' +
+      '<div class="wizard-subtitle">System intelligence shows you are a <strong>' + COMPANY.industry + '</strong> company, located at <strong>' + COMPANY.address + '</strong>. Is this correct?</div>' +
+    '</div>' +
+    '<div class="wizard-body">' +
+      '<div class="confirm-fact-card">' +
+        '<div class="confirm-fact-row">' +
+          '<div class="confirm-fact-icon"><i class="fas fa-industry"></i></div>' +
+          '<div><div class="confirm-fact-label">Industry</div><div class="confirm-fact-value">' + COMPANY.industry + '</div></div>' +
+        '</div>' +
+        '<div class="confirm-fact-row">' +
+          '<div class="confirm-fact-icon"><i class="fas fa-map-marker-alt"></i></div>' +
+          '<div><div class="confirm-fact-label">Company Address</div><div class="confirm-fact-value">' + COMPANY.address + '</div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="confirm-choice-row">' +
+        '<button class="btn btn-outline-primary" onclick="onConfirmNo()">No, that\'s not right</button>' +
+        '<button class="btn btn-primary" onclick="onConfirmYes()">Yes, that\'s correct</button>' +
+      '</div>' +
+    '</div>';
+}
+
+function onConfirmYes() {
+  state.selectedIndustry = COMPANY.industry;
+  state.screen = 'select';
+  render();
+}
+function onConfirmNo() {
+  state.screen = 'redirect';
+  render();
+}
+
+function renderRedirect() {
+  return '' +
+    '<div class="wizard-header">' + progressHtml() +
+      '<div class="wizard-step-label">Step 1 of 2 &middot; Confirm Details</div>' +
+      '<div class="wizard-title">Let\'s get your info updated first</div>' +
+    '</div>' +
+    '<div class="wizard-body">' +
+      '<div class="settings-alert settings-alert--info">' +
+        '<i class="fas fa-info-circle"></i>' +
+        '<div class="settings-alert-body">' +
+          '<div class="settings-alert-title">Redirecting to Company Settings</div>' +
+          '<div>In the real product, you\'d be taken to <strong>Company Settings &gt; Company Information</strong> to correct your Industry or address before continuing setup. This prototype stops here to demonstrate the branch &mdash; no real navigation occurs.</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-top:18px; display:flex; justify-content:flex-end; gap:10px;">' +
+        '<button class="btn btn-outline-primary" onclick="restartWizard()">Restart Wizard</button>' +
+        '<button class="btn btn-primary" onclick="state.screen=\'confirm\'; render();">Back to Step 1</button>' +
+      '</div>' +
+    '</div>';
+}
+
+function renderSelect() {
+  var buttons = TEN_INDUSTRIES.map(function(ind) {
+    var isSelected = state.selectedIndustry === ind.name;
+    var cls = 'industry-btn' + (isSelected ? ' is-selected' : '');
+    return '<div role="button" tabindex="0" class="' + cls + '" onclick="selectSingleIndustry(\'' + ind.name + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();selectSingleIndustry(\'' + ind.name + '\');}">' +
+      '<span class="industry-name">' + ind.name + '</span>' +
+      (isSelected ? '<span class="pill pill-primary"><i class="fas fa-check"></i> Selected</span>' : '') +
+    '</div>';
+  }).join('');
+
+  return '' +
+    '<div class="wizard-header">' + progressHtml() +
+      '<div class="wizard-step-label">Step 2 of 2 &middot; Select Industry</div>' +
+      '<div class="wizard-title">Which Industry would you like to configure?</div>' +
+      '<div class="wizard-subtitle">Production Rates supports one Industry at a time today. <strong>' + state.selectedIndustry + '</strong> is selected from Step 1 &mdash; choose a different one below if you\'d rather set up something else.</div>' +
+    '</div>' +
+    '<div class="wizard-body">' +
+      '<div class="industry-grid">' + buttons + '</div>' +
+    '</div>' +
+    '<div class="wizard-footer">' +
+      '<button class="btn btn-outline-primary" onclick="state.screen=\'confirm\'; render();">Back</button>' +
+      '<button class="btn btn-primary" onclick="onSelectContinue()">Continue</button>' +
+    '</div>';
+}
+
+function selectSingleIndustry(name) {
+  state.selectedIndustry = name;
+  render();
+}
+
+function onSelectContinue() {
+  state.activeIndustry = state.selectedIndustry;
+  state.screen = 'outcome';
+  render();
+}
+
+function renderOutcome() {
+  var active = industryByName(state.activeIndustry);
+  var mode = state.outcomeMode[active.name] || 'branch';
+
+  var mainHtml;
+  if (mode === 'done') {
+    mainHtml = '<div class="settings-alert settings-alert--success">' +
+      '<i class="fas fa-check-circle"></i>' +
+      '<div class="settings-alert-body"><div class="settings-alert-title">Setup complete for ' + active.name + '</div><div>You can close the wizard, or restart it to set up a different Industry.</div></div>' +
+    '</div>';
+  } else if (mode === 'lineItems') {
+    mainHtml = renderLineItemsMock(active);
+  } else if (active.hasTemplate) {
+    mainHtml = renderLiveTemplateHero(active);
+  } else {
+    mainHtml = renderFallbackHero(active);
+  }
+
+  return '' +
+    '<div class="wizard-header">' + progressHtml() +
+      '<div class="wizard-step-label">Setup Outcome</div>' +
+      '<div class="wizard-title">Setting up: ' + active.name + '</div>' +
+    '</div>' +
+    '<div class="wizard-body">' + mainHtml + '</div>' +
+    '<div class="wizard-footer">' +
+      '<button class="btn btn-outline-primary" onclick="restartWizard()">Restart Wizard</button>' +
+      '<button class="btn btn-outline-primary" onclick="closeWizard()">Close</button>' +
+    '</div>';
+}
+
+function renderLiveTemplateHero(ind) {
+  var regions = (PRESET_DEFS[ind.name] && PRESET_DEFS[ind.name].regions) || [];
+  var presetField = '';
+  if (regions.length) {
+    var selected = WIZARD_PRESET_SELECTIONS[ind.name] || 'none';
+    presetField = '' +
+      '<div class="settings-field settings-field--full" style="max-width:320px; margin-bottom:16px; text-align:left;">' +
+        '<label class="settings-field-label is-new">Preset Template (optional)</label>' +
+        '<select class="settings-field-input" onchange="setWizardPreset(\'' + ind.name + '\', this.value)">' +
+          '<option value="none"' + (selected === 'none' ? ' selected' : '') + '>' + ind.name + ' (Default)</option>' +
+          regions.map(function (r) { return '<option value="' + r + '"' + (selected === r ? ' selected' : '') + '>' + r + '</option>'; }).join('') +
+        '</select>' +
+        '<div class="settings-field-help">Jump-start your rates with a regional starting point. No confirmation is needed here since there\'s nothing to overwrite yet &mdash; you can still edit anything afterward.</div>' +
+      '</div>';
+  }
+  return '' +
+    '<div class="outcome-hero is-live">' +
+      '<div class="outcome-hero-icon"><i class="fas fa-check"></i></div>' +
+      '<div class="outcome-hero-title">' + ind.name + ' has a Production Rate template</div>' +
+      '<div class="outcome-hero-text">You\'ll be walked through setting up Areas, Categories, Substrates, Products, and Production Rates for ' + ind.name + '.</div>' +
+      presetField +
+      '<button class="btn btn-primary" onclick="enterProductionRatesSetup(\'' + ind.name + '\')">Continue to Production Rates Setup</button>' +
+    '</div>';
+}
+
+function renderFallbackHero(ind) {
+  return '' +
+    '<div class="outcome-hero is-fallback">' +
+      '<div class="outcome-hero-icon"><i class="fas fa-info"></i></div>' +
+      '<div class="outcome-hero-title">' + ind.name + '</div>' +
+      '<div class="outcome-hero-text">Production Rate templates aren\'t available for ' + ind.name + ' yet. You can continue setting up your Products and Line Items using the existing estimating experience. Your Industry selection has been saved and can be used when ' + ind.name + ' Production Rate support becomes available.</div>' +
+      '<button class="btn btn-primary" onclick="showLineItems(\'' + ind.name + '\')">Continue to Products / Line Items</button>' +
+    '</div>';
+}
+
+function showLineItems(name) {
+  state.outcomeMode[name] = 'lineItems';
+  render();
+}
+function markDone(name) {
+  state.outcomeMode[name] = 'done';
+  render();
+}
+
+function renderLineItemsMock(ind) {
+  return '' +
+    '<div class="settings-section" style="margin-bottom:0;">' +
+      '<div class="settings-section-title">Products &amp; Line Items <span style="font-size:11px; font-weight:600; color:var(--st-color-text-muted);">(' + ind.name + ')</span></div>' +
+      '<div class="settings-section-subtitle">Generic estimating setup &mdash; used until a Production Rate template exists for this Industry.</div>' +
+      '<table class="li-table">' +
+        '<thead><tr><th>Line Item</th><th>Unit</th><th>Price</th></tr></thead>' +
+        '<tbody id="liRows">' +
+          '<tr><td>' + (ind.name === 'HVAC' ? 'System Diagnostic Visit' : 'Standard Service Call') + '</td><td>Each</td><td>$95.00</td></tr>' +
+          '<tr><td>' + (ind.name === 'HVAC' ? 'Refrigerant Recharge (per lb)' : 'General Labor') + '</td><td>' + (ind.name === 'HVAC' ? 'Lb' : 'Hour') + '</td><td>$65.00</td></tr>' +
+        '</tbody>' +
+      '</table>' +
+      '<div style="margin-top:14px; display:flex; justify-content:space-between;">' +
+        '<button class="btn btn-sm btn-outline-primary" onclick="addMockLineItem()"><i class="fas fa-plus"></i> Add Line Item</button>' +
+        '<button class="btn btn-primary" onclick="markDone(\'' + ind.name + '\')">Finish Setup</button>' +
+      '</div>' +
+    '</div>';
+}
+function addMockLineItem() {
+  var rows = document.getElementById('liRows');
+  if (!rows) return;
+  var tr = document.createElement('tr');
+  tr.innerHTML = '<td>New Line Item</td><td>Each</td><td>$0.00</td>';
+  rows.appendChild(tr);
+}
+
+/* ── Industry-Change confirmation modal (reusable) ──
+   Never fires during first-time setup (the wizard applies a chosen Industry
+   directly, per BR6). Used for real by "Restore Default" below, and as an
+   isolated preview via the prototype-controls bar. */
+var pendingIndustryChangeAction = null;
+function openIndustryChangeModal(fromName, toName, subtitle, warnBody) {
+  document.getElementById('icmFrom').textContent = fromName;
+  document.getElementById('icmTo').textContent = toName;
+  document.getElementById('icmSubtitle').textContent = subtitle || '';
+  document.getElementById('icmWarnBody').textContent = warnBody || ('Production Rates supports one Industry at a time. Switching to ' + toName + ' replaces your ' + fromName + ' configuration in this account. This does not affect existing Proposals and Invoices already created.');
+  document.getElementById('industryChangeModal').classList.add('open');
+}
+function previewIndustryChangeModal() {
+  pendingIndustryChangeAction = null;
+  openIndustryChangeModal('Residential Painting', 'Roofing', 'This is a preview of a reusable component -- it never fires during first-time setup, only when changing Industry against existing configuration.');
+}
+function closeIndustryChangeModal() {
+  document.getElementById('industryChangeModal').classList.remove('open');
+  pendingIndustryChangeAction = null;
+}
+function confirmIndustryChangeModal() {
+  var action = pendingIndustryChangeAction;
+  closeIndustryChangeModal();
+  if (action) action();
+  else toast('Industry change confirmed (prototype only — this is the isolated preview)');
+}
+
+function openNotesPanel() { document.getElementById('notesModal').classList.add('open'); }
+function closeNotesPanel() { document.getElementById('notesModal').classList.remove('open'); }
+
+var toastTimer = null;
+function toast(msg) {
+  var el = document.getElementById('protoToast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'protoToast';
+    el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#32415B;color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:2000;opacity:0;transition:opacity .2s, transform .2s;pointer-events:none;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  el.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2600);
+}
+
+/* ══════════════════════════════════════════════════════════
+   PHASE 2: Multi-Industry Production Rates Configuration
+   ══════════════════════════════════════════════════════════ */
+
+var CALC_TYPES = {
+  'Residential Painting': ['Square Foot (Walls)', 'Square Foot (Ceiling)', 'Square Foot (Floor)', 'Linear Foot', 'Hours Per Item'],
+  'Gutter Services': ['Linear Foot', 'Hours Per Item']
+};
+var PRODUCT_UNITS = {
+  'Residential Painting': ['Gallon', 'Each'],
+  'Gutter Services': ['Linear Foot', 'Each']
+};
+/* Sheen is a paint-specific attribute (matches the real Products table's
+   Sheen column) -- only Industries with a Sheen list get that field and
+   column at all; Gutter Services products have no Sheen. */
+var SHEEN_OPTIONS = {
+  'Residential Painting': ['Flat', 'Eggshell', 'Satin', 'Semi-Gloss', 'Gloss']
+};
+
+/* Rate Preset Templates: Industry + Region only (BR1). Region taxonomy is an
+   explicit open gap per the ticket, so only Southeast is modeled here -- not
+   the full region list. Values are placeholders, not vetted real numbers. */
+var PRESET_DEFS = {
+  'Residential Painting': {
+    regions: ['Southeast'],
+    values: { Southeast: { costRate: '26.00', sellRate: '58.00', markup: '70', rateMultiplier: 0.85 } }
+  },
+  'Gutter Services': {
+    regions: ['Southeast'],
+    values: { Southeast: { costRate: '24.00', sellRate: '52.00', markup: '55', rateMultiplier: 0.90 } }
+  }
+};
+var WIZARD_PRESET_SELECTIONS = {};
+function setWizardPreset(industryName, value) { WIZARD_PRESET_SELECTIONS[industryName] = value; }
+
+function buildPaintingData() {
+  return {
+    settings: { costRate: '32.00', sellRate: '60.00', markup: '75', taxRate: '5.000%', appliedPreset: null },
+    products: [
+      { key: 'sw-duration-ext', name: 'Sherwin-Williams Duration Exterior', unit: 'Gallon', price: '38.99', sheen: 'Satin', lastModified: '08/12/2025' },
+      { key: 'behr-ultra-int', name: 'Behr Premium Plus Ultra Interior', unit: 'Gallon', price: '44.99', sheen: 'Eggshell', lastModified: '08/12/2025' },
+      { key: 'sw-emerald-int', name: 'Sherwin-Williams Emerald Interior', unit: 'Gallon', price: '54.99', sheen: 'Satin', lastModified: '08/10/2025' },
+      { key: 'sw-superpaint-int', name: 'Sherwin Williams SuperPaint Interior', unit: 'Gallon', price: '34.99', sheen: 'Eggshell', lastModified: '08/10/2025' }
+    ],
+    areas: [
+      { key: 'interior', name: 'Interior', categories: [
+        { key: 'walls', name: 'Walls', calcType: 'Square Foot (Walls)', defaultSubstrateKey: '8ft-light-texture', coats: 2, lastModified: '08/12/2025', substrates: [
+          { key: '8ft-light-texture', name: '8FT Light Texture', clientLabel: '8FT Light Texture', productKey: 'sw-duration-ext', rate: { c1: '175.00', c2: '150.00', c3: '125.00' }, lastModified: '08/12/2025' },
+          { key: '9ft-heavy-texture', name: '9FT Heavy Texture', clientLabel: '9FT Heavy Texture', productKey: 'sw-superpaint-int', rate: { c1: '175.00', c2: '150.00', c3: '125.00' }, lastModified: '08/12/2025' },
+          { key: '2story-light-texture', name: '2-Story Light Texture', clientLabel: '2-Story Light Texture', productKey: 'sw-duration-ext', rate: { c1: '150.00', c2: '125.00', c3: '100.00' }, lastModified: '08/11/2025' }
+        ] },
+        { key: 'ceiling', name: 'Ceilings', calcType: 'Square Foot (Ceiling)', defaultSubstrateKey: '2story-heavy-texture', coats: 2, lastModified: '08/11/2025', substrates: [
+          { key: '2story-heavy-texture', name: '(Roll) Two-Story Heavy Texture', clientLabel: 'Two-Story Heavy Texture', productKey: 'sw-emerald-int', rate: { c1: '160.00', c2: '135.00', c3: '110.00' }, lastModified: '08/11/2025' }
+        ] },
+        { key: 'trim', name: 'Trim', calcType: 'Linear Foot', defaultSubstrateKey: '3in-baseboard', coats: 2, lastModified: '08/10/2025', substrates: [
+          { key: '3in-baseboard', name: '(Brush) 3-Inch Baseboard', clientLabel: '3-Inch Baseboard', productKey: 'behr-ultra-int', rate: { c1: '220.00', c2: '190.00', c3: '160.00' }, lastModified: '08/10/2025' }
+        ] },
+        { key: 'doors', name: 'Doors', calcType: 'Hours Per Item', defaultSubstrateKey: '6panel-door-2side', coats: 2, lastModified: '08/09/2025', substrates: [
+          { key: '6panel-door-2side', name: '(Spray) 6-Panel Door - 2 Sides', clientLabel: '6-Panel Door', productKey: 'sw-emerald-int', rate: { c1: '0.50', c2: '0.75', c3: '1.00' }, lastModified: '08/09/2025' }
+        ] },
+        { key: 'cabinets', name: 'Cabinets', calcType: 'Hours Per Item', defaultSubstrateKey: 'drawers-prime', coats: 2, lastModified: '08/09/2025', substrates: [
+          { key: 'drawers-prime', name: 'Drawers - Prime', clientLabel: 'Drawers - Prime', productKey: 'sw-emerald-int', rate: { c1: '0.75', c2: '1.00', c3: '2.25' }, lastModified: '08/09/2025' },
+          { key: 'doors-finish', name: 'Doors - Finish', clientLabel: 'Doors - Finish', productKey: 'sw-emerald-int', rate: { c1: '0.75', c2: '1.00', c3: '1.25' }, lastModified: '08/09/2025' }
+        ] }
+      ], instances: [
+        { key: 'int-office', name: 'Office', measurementType: 'Area', length: '12', width: '10', height: '8', categoryKeys: ['walls', 'ceiling', 'trim'], lastModified: '08/12/2025' },
+        { key: 'int-kitchen', name: 'Kitchen', measurementType: 'Area', length: '14', width: '12', height: '9', categoryKeys: ['walls', 'ceiling', 'trim', 'cabinets'], lastModified: '08/12/2025' },
+        { key: 'int-whole-house', name: 'Whole House', measurementType: 'Area', length: '', width: '', height: '', categoryKeys: ['walls', 'ceiling', 'trim', 'doors', 'cabinets'], lastModified: '08/10/2025' }
+      ] },
+      { key: 'exterior', name: 'Exterior', categories: [
+        { key: 'siding', name: 'Siding', calcType: 'Square Foot (Walls)', defaultSubstrateKey: 'stucco-heavy-texture', coats: 2, lastModified: '08/08/2025', substrates: [
+          { key: 'stucco-heavy-texture', name: '(Roll) Stucco Siding Heavy Texture', clientLabel: 'Stucco Siding', productKey: 'sw-duration-ext', rate: { c1: '175.00', c2: '150.00', c3: '125.00' }, lastModified: '08/08/2025' }
+        ] },
+        { key: 'trim-ext', name: 'Trim', calcType: 'Linear Foot', defaultSubstrateKey: 'soffit-fascia', coats: 2, lastModified: '08/08/2025', substrates: [
+          { key: 'soffit-fascia', name: '(Spray) Soffit and Fascia', clientLabel: 'Soffit and Fascia', productKey: 'sw-duration-ext', rate: { c1: '200.00', c2: '175.00', c3: '150.00' }, lastModified: '08/08/2025' },
+          { key: '6in-wood-fascia', name: '(Brush) 6-Inch Wooden Fascia', clientLabel: '6-Inch Wooden Fascia', productKey: 'sw-duration-ext', rate: { c1: '75.00', c2: '65.00', c3: '55.00' }, lastModified: '08/07/2025' }
+        ] },
+        { key: 'doors-ext', name: 'Doors', calcType: 'Hours Per Item', defaultSubstrateKey: 'front-door-sidelights', coats: 2, lastModified: '08/07/2025', substrates: [
+          { key: 'front-door-sidelights', name: '(Spray) Front Door + Sidelights - 1 Side', clientLabel: 'Front Door + Sidelights', productKey: 'sw-duration-ext', rate: { c1: '0.75', c2: '1.00', c3: '1.50' }, lastModified: '08/07/2025' }
+        ] }
+      ], instances: [
+        { key: 'ext-whole-house', name: 'Whole House', measurementType: 'Surface', length: '', width: '', height: '', categoryKeys: ['siding', 'trim-ext', 'doors-ext'], lastModified: '08/08/2025' },
+        { key: 'ext-exterior-body', name: 'Exterior Body', measurementType: 'Wall', length: '', width: '', height: '9', categoryKeys: ['siding'], lastModified: '08/08/2025' },
+        { key: 'ext-soffit-fascia', name: 'Soffit and Fascia', measurementType: 'Wall', length: '', width: '', height: '', categoryKeys: ['trim-ext'], lastModified: '08/07/2025' }
+      ] }
+    ]
+  };
+}
+
+function buildGutterData() {
+  return {
+    settings: { costRate: '28.00', sellRate: '55.00', markup: '60', taxRate: '5.000%', appliedPreset: null },
+    products: [
+      { key: 'alum-seamless', name: 'Aluminum Seamless Gutter Stock', unit: 'Linear Foot', price: '1.85', lastModified: '08/05/2025' },
+      { key: 'copper-stock', name: 'Copper Gutter Stock', unit: 'Linear Foot', price: '9.25', lastModified: '08/05/2025' },
+      { key: 'gutter-guard-std', name: 'Standard Gutter Guard', unit: 'Linear Foot', price: '2.10', lastModified: '08/05/2025' }
+    ],
+    areas: [
+      { key: 'exterior', name: 'Exterior', categories: [
+        { key: 'gutters', name: 'Gutters', calcType: 'Linear Foot', defaultSubstrateKey: '5in-aluminum', lastModified: '08/05/2025', substrates: [
+          { key: '5in-aluminum', name: '5" Aluminum Seamless Gutter', clientLabel: '5" Aluminum Gutter', productKey: 'alum-seamless', rate: { lfPerHour: '60.00' }, lastModified: '08/05/2025' },
+          { key: '6in-aluminum', name: '6" Aluminum Seamless Gutter', clientLabel: '6" Aluminum Gutter', productKey: 'alum-seamless', rate: { lfPerHour: '55.00' }, lastModified: '08/05/2025' },
+          { key: 'copper', name: 'Copper Gutter', clientLabel: 'Copper Gutter', productKey: 'copper-stock', rate: { lfPerHour: '35.00' }, lastModified: '08/05/2025' }
+        ] },
+        { key: 'downspouts', name: 'Downspouts', calcType: 'Linear Foot', defaultSubstrateKey: '2x3-downspout', lastModified: '08/04/2025', substrates: [
+          { key: '2x3-downspout', name: '2x3 Downspout', clientLabel: '2x3 Downspout', productKey: 'alum-seamless', rate: { lfPerHour: '80.00' }, lastModified: '08/04/2025' },
+          { key: '3x4-downspout', name: '3x4 Downspout', clientLabel: '3x4 Downspout', productKey: 'alum-seamless', rate: { lfPerHour: '70.00' }, lastModified: '08/04/2025' }
+        ] },
+        { key: 'gutter-protection', name: 'Gutter Protection', calcType: 'Linear Foot', defaultSubstrateKey: 'std-guard', lastModified: '08/04/2025', substrates: [
+          { key: 'std-guard', name: 'Standard Gutter Guard', clientLabel: 'Standard Guard', productKey: 'gutter-guard-std', rate: { lfPerHour: '50.00' }, lastModified: '08/04/2025' }
+        ] },
+        { key: 'removal', name: 'Removal', calcType: 'Hours Per Item', defaultSubstrateKey: '', lastModified: '08/04/2025', substrates: [] }
+      ], instances: [
+        { key: 'ext-whole-house', name: 'Whole House', measurementType: 'Surface', length: '', width: '', height: '', categoryKeys: ['gutters', 'downspouts', 'gutter-protection'], lastModified: '08/05/2025' }
+      ] }
+    ]
+  };
+}
+
+var APP = {
+  configuredIndustries: [],
+  activeConfigIndustry: null,
+  data: { 'Residential Painting': buildPaintingData(), 'Gutter Services': buildGutterData() },
+  nav: {
+    'Residential Painting': { tab: 'settings', areaKey: 'interior', categoryKey: 'walls' },
+    'Gutter Services': { tab: 'settings', areaKey: 'exterior', categoryKey: 'gutters' }
+  }
+};
+
+function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Math.random().toString(36).slice(2, 6); }
+function pluralize(n, singular, plural) { return n + ' ' + (n === 1 ? singular : (plural || singular + 's')); }
+function isGutterIndustry() { return APP.activeConfigIndustry === 'Gutter Services'; }
+function currentData() { return APP.data[APP.activeConfigIndustry]; }
+function currentNav() { return APP.nav[APP.activeConfigIndustry]; }
+function currentArea() { var d = currentData(), n = currentNav(); return d.areas.find(function (a) { return a.key === n.areaKey; }) || d.areas[0]; }
+function currentCategory() { var a = currentArea(), n = currentNav(); if (!a || !a.categories.length) return null; return a.categories.find(function (c) { return c.key === n.categoryKey; }) || a.categories[0]; }
+
+function enterProductionRatesSetup(name) {
+  // Wholesale replace, not push -- an account configures exactly one Industry
+  // at a time (simplified per direct request; storing multiple simultaneous
+  // Production Rate configurations per account is deferred to V2).
+  APP.configuredIndustries = [name];
+  APP.activeConfigIndustry = name;
+  var presetChoice = WIZARD_PRESET_SELECTIONS[name];
+  closeWizard();
+  if (presetChoice && presetChoice !== 'none') {
+    applyPresetValues(presetChoice);
+    toast('Applied the ' + presetChoice + ' preset to ' + name + ' (no confirmation needed during first-time setup)');
+  } else {
+    toast('Now configuring ' + name + ' Production Rates');
+  }
+}
+
+/* ── Rate Preset Templates (Phase 3) ── */
+function applyPresetValues(region) {
+  var name = APP.activeConfigIndustry;
+  var def = PRESET_DEFS[name] && PRESET_DEFS[name].values[region];
+  if (!def) return;
+  var d = currentData();
+  d.settings.costRate = def.costRate;
+  d.settings.sellRate = def.sellRate;
+  d.settings.markup = def.markup;
+  d.settings.appliedPreset = region;
+  d.substrateWarningVisible = false;
+  d.areas.forEach(function (a) {
+    a.categories.forEach(function (c) {
+      c.substrates.forEach(function (s) {
+        if (s.rate.lfPerHour != null) {
+          s.rate.lfPerHour = (parseFloat(s.rate.lfPerHour) * def.rateMultiplier).toFixed(2);
+        } else if (s.rate.c1 != null) {
+          s.rate.c1 = (parseFloat(s.rate.c1) * def.rateMultiplier).toFixed(2);
+          s.rate.c2 = (parseFloat(s.rate.c2) * def.rateMultiplier).toFixed(2);
+          s.rate.c3 = (parseFloat(s.rate.c3) * def.rateMultiplier).toFixed(2);
+        }
+      });
+    });
+  });
+  renderMainPage();
+}
+/* "[Industry] (Default)" is a real restore action, not just a no-preset
+   label -- it puts Hourly Cost/Sell/Markup, Products, and every Area's
+   Categories/Substrates back to the rates Production Rates ships with for
+   that Industry today. Reused by both the preset dropdown (via confirm)
+   and the "Demo: Restore Sample Data" button (no confirm, prototype-only). */
+function defaultSeedFor(name) { return name === 'Gutter Services' ? buildGutterData() : buildPaintingData(); }
+function resetIndustryDataToDefaults(name) {
+  APP.data[name] = defaultSeedFor(name);
+  APP.nav[name] = { tab: 'settings', areaKey: APP.data[name].areas[0].key, categoryKey: null };
+}
+
+var pendingSettingsPreset = null; // { industry, selector } where selector is 'default' or a region name
+function onPresetSelectChange(value) {
+  var currentIndustry = APP.activeConfigIndustry;
+  var currentValue = currentIndustry + '::' + (currentData().settings.appliedPreset || 'default');
+  if (value === currentValue) return;
+  var parts = value.split('::');
+  pendingSettingsPreset = { industry: parts[0], selector: parts[1] };
+  openPresetConfirmModal(pendingSettingsPreset, currentIndustry);
+}
+function openPresetConfirmModal(target, currentIndustry) {
+  var d = APP.data[currentIndustry];
+  var switchingIndustry = target.industry !== currentIndustry;
+  var toLabel = target.industry + (target.selector === 'default' ? ' (Default)' : (' — ' + target.selector));
+  document.getElementById('presetConfirmIndustry').textContent = currentIndustry;
+  document.getElementById('presetConfirmToRegion').textContent = toLabel;
+
+  var def = target.selector === 'default' ? defaultSeedFor(target.industry).settings : PRESET_DEFS[target.industry].values[target.selector];
+  var rows = '';
+  rows += presetDiffRow('Hourly Cost Rate', '$' + d.settings.costRate, '$' + def.costRate);
+  rows += presetDiffRow('Hourly Sell Rate', '$' + d.settings.sellRate, '$' + def.sellRate);
+  rows += presetDiffRow('Product Markup', d.settings.markup + '%', def.markup + '%');
+  document.getElementById('presetDiffTableBody').innerHTML = rows;
+
+  var warnTitle = document.getElementById('presetConfirmWarnTitle');
+  var warnBody = document.getElementById('presetConfirmWarnBody');
+  if (switchingIndustry) {
+    warnTitle.textContent = 'This changes your Industry and overwrites your current configuration';
+    warnBody.textContent = 'Production Rates supports one Industry at a time. Switching to ' + toLabel + ' replaces your current ' + currentIndustry + ' configuration in this account -- it stays available to switch back to from this same dropdown, though. Existing Proposals and Invoices already created will not be impacted.';
+  } else {
+    warnTitle.textContent = 'This overwrites existing configuration';
+    warnBody.textContent = 'Applying a preset updates Hourly Cost Rate, Hourly Sell Rate, and Product Markup above, plus production rate values across every Area, Category, and Substrate configured for this Industry. This does not change any other Industry on this account, and existing Proposals and Invoices already created will not be impacted.';
+  }
+  document.getElementById('presetConfirmModal').classList.add('open');
+}
+function presetDiffRow(label, current, next) {
+  return '<tr><td>' + label + '</td><td>' + current + '</td><td class="diff-arrow">&rarr;</td><td class="new-val">' + next + '</td></tr>';
+}
+function cancelPresetSelectChange() {
+  pendingSettingsPreset = null;
+  document.getElementById('presetConfirmModal').classList.remove('open');
+  renderMainPage();
+}
+function confirmPresetSelectChange() {
+  if (!pendingSettingsPreset) return;
+  var target = pendingSettingsPreset;
+  if (target.industry !== APP.activeConfigIndustry) {
+    APP.configuredIndustries = [target.industry];
+    APP.activeConfigIndustry = target.industry;
+  }
+  // Presets (and Default) are absolute target states, not relative
+  // adjustments -- always start from that Industry's clean default seed,
+  // then layer a region multiplier on top if one was selected.
+  resetIndustryDataToDefaults(target.industry);
+  if (target.selector !== 'default') {
+    applyPresetValues(target.selector);
+  }
+  var label = target.industry + (target.selector === 'default' ? ' (Default)' : (' — ' + target.selector));
+  toast('Applied ' + label);
+  pendingSettingsPreset = null;
+  document.getElementById('presetConfirmModal').classList.remove('open');
+  renderMainPage();
+}
+
+function renderMainPage() {
+  var el = document.getElementById('mainPageContent');
+  var stateLabelEl = document.getElementById('demoBarState');
+  if (!APP.configuredIndustries.length) {
+    stateLabelEl.innerHTML = 'This account has <strong>no Production Rates set up yet</strong>.';
+    el.innerHTML = renderEmptyLanding();
+    return;
+  }
+  if (!APP.activeConfigIndustry || APP.configuredIndustries.indexOf(APP.activeConfigIndustry) === -1) {
+    APP.activeConfigIndustry = APP.configuredIndustries[0];
+  }
+  stateLabelEl.innerHTML = 'Viewing a previously completed setup for <strong>' + APP.configuredIndustries.join(' + ') + '</strong>.';
+  el.innerHTML = renderConfiguredPage();
+}
+
+function renderEmptyLanding() {
+  return '<div class="page-title">Production Rates</div>' +
+    '<div class="settings-section empty-landing">' +
+      '<i class="fas fa-tachometer-alt landing-icon"></i>' +
+      '<div class="empty-landing-title">No Production Rates set up yet</div>' +
+      '<div class="empty-landing-sub">Set up Production Rates to start building accurate proposals.</div>' +
+      '<button class="btn btn-primary" style="margin:0 auto;" onclick="launchWizard()"><i class="fas fa-magic"></i> Add Production Rates</button>' +
+    '</div>';
+}
+
+function tabLabel(t) { return { settings: 'Settings', areas: 'Areas', categories: 'Categories', substrates: 'Substrates', products: 'Products' }[t]; }
+
+// Tabs now mirror the real system exactly: Settings, then one tab per
+// configured Area (e.g. "Interior Area", "Exterior Area" -- Gutter Services
+// only has Exterior, so it only gets one Area tab), then Substrates, then
+// Products. Replaces the earlier Areas/Categories split, which didn't match
+// the real UI (see decision log).
+function configTabList() {
+  var d = currentData();
+  var tabs = ['settings'];
+  d.areas.forEach(function (a) { tabs.push('area:' + a.key); });
+  tabs.push('substrates');
+  tabs.push('products');
+  return tabs;
+}
+function tabLabel(t) {
+  if (t === 'settings') return 'Settings';
+  if (t === 'substrates') return 'Substrates';
+  if (t === 'products') return 'Products';
+  if (t.indexOf('area:') === 0) {
+    var area = currentData().areas.find(function (a) { return a.key === t.slice(5); });
+    return area ? area.name + ' Area' : 'Area';
+  }
+  return t;
+}
+
+function renderConfiguredPage() {
+  var name = APP.activeConfigIndustry;
+  var nav = currentNav();
+  var tabs = configTabList();
+  if (tabs.indexOf(nav.tab) === -1) nav.tab = 'settings';
+  return '' +
+    '<div class="page-title">Production Rates</div>' +
+    '<div class="industry-header">' +
+      '<div class="industry-header-left">' +
+        '<div class="industry-header-icon"><i class="fas ' + (isGutterIndustry() ? 'fa-water' : 'fa-paint-roller') + '"></i></div>' +
+        '<div><div class="industry-header-label">Industry</div><div class="industry-header-name">' + name + '</div></div>' +
+      '</div>' +
+      '<button type="button" class="btn btn-outline-primary btn-sm" onclick="openMasterImport()"><i class="fas fa-file-import"></i> Import Data</button>' +
+    '</div>' +
+    '<div class="pr-tabs">' +
+      tabs.map(function (t) {
+        return '<div class="pr-tab ' + (nav.tab === t ? 'active' : '') + '" onclick="switchConfigTab(\'' + t + '\')">' + tabLabel(t) + '</div>';
+      }).join('') +
+    '</div>' +
+    '<div>' + renderConfigTabContent(nav) + '</div>';
+}
+
+function switchConfigTab(tab) { currentNav().tab = tab; renderMainPage(); }
+
+function renderConfigTabContent(nav) {
+  if (nav.tab === 'settings') return renderSettingsTab();
+  if (nav.tab === 'substrates') return renderSubstratesTab();
+  if (nav.tab === 'products') return renderProductsTab();
+  if (nav.tab.indexOf('area:') === 0) return renderAreaInstancesTab(nav.tab.slice(5));
+  return '';
+}
+
+function renderSettingsTab() {
+  var s = currentData().settings;
+  var name = APP.activeConfigIndustry;
+  var currentValue = name + '::' + (s.appliedPreset || 'default');
+  // Every available template stays selectable here regardless of which
+  // Industry is currently configured -- this is the one always-accessible
+  // path both to a different Industry's rates and back to the system
+  // default (Residential Painting), so nothing "goes away" once you've
+  // moved on to a different Industry.
+  var optgroups = Object.keys(PRESET_DEFS).map(function (industryName) {
+    var def = PRESET_DEFS[industryName];
+    var options = '<option value="' + industryName + '::default"' + (currentValue === industryName + '::default' ? ' selected' : '') + '>' + industryName + ' (Default)</option>' +
+      def.regions.map(function (r) {
+        var val = industryName + '::' + r;
+        return '<option value="' + val + '"' + (currentValue === val ? ' selected' : '') + '>' + industryName + ' &mdash; ' + r + '</option>';
+      }).join('');
+    return '<optgroup label="' + industryName + '">' + options + '</optgroup>';
+  }).join('');
+  var presetSelectHtml = '' +
+    '<div class="settings-field settings-field--full">' +
+      '<label class="settings-field-label is-new">Preset Template</label>' +
+      '<select class="settings-field-input" onchange="onPresetSelectChange(this.value)">' + optgroups + '</select>' +
+      '<div class="settings-field-help">Applying a template from a different Industry switches this account to that Industry. Applying one from ' + name + ' updates Hourly Cost Rate, Hourly Sell Rate, Product Markup, and production rate values across every Area, Category, and Substrate here. You can still edit anything afterward.' + (s.appliedPreset ? ' <span class="pill pill-live" style="margin-left:4px;">' + s.appliedPreset + ' applied</span>' : '') + '</div>' +
+    '</div>';
+  return '<section class="settings-section">' +
+    '<div class="settings-section-title">Proposal Defaults</div>' +
+    '<div class="settings-section-subtitle">Scoped to ' + name + ' only &mdash; each Industry keeps its own rate settings.</div>' +
+    '<div class="settings-grid">' +
+      presetSelectHtml +
+      '<div class="settings-field settings-field--compact"><label class="settings-field-label">Hourly Cost Rate</label><div class="settings-field-group"><span class="settings-field-group-prefix">$</span><input class="settings-field-input" value="' + s.costRate + '" oninput="updateSetting(\'costRate\',this.value)"></div></div>' +
+      '<div class="settings-field settings-field--compact"><label class="settings-field-label">Hourly Sell Rate</label><div class="settings-field-group"><span class="settings-field-group-prefix">$</span><input class="settings-field-input" value="' + s.sellRate + '" oninput="updateSetting(\'sellRate\',this.value)"></div></div>' +
+      '<div class="settings-field settings-field--compact"><label class="settings-field-label">Product Markup</label><div class="settings-field-group"><input class="settings-field-input" value="' + s.markup + '" oninput="updateSetting(\'markup\',this.value)"><span class="settings-field-group-suffix">%</span></div></div>' +
+      '<div class="settings-field settings-field--compact"><label class="settings-field-label">Company Tax Rate</label><input class="settings-field-input" value="' + s.taxRate + '" readonly></div>' +
+    '</div>' +
+  '</section>';
+}
+function updateSetting(key, value) { currentData().settings[key] = value; }
+
+/* ── Shared row-action / footer-bar helpers (edit, duplicate, delete + a
+   "Displaying: N ___" bar under every data table, matching the real UI) ── */
+function rowActionsHtml(editCall, duplicateCall, deleteCall) {
+  return '<div class="row-actions">' +
+    '<button class="row-icon-btn" onclick="' + editCall + '" title="Edit"><i class="fas fa-pen"></i></button>' +
+    '<button class="row-icon-btn" onclick="' + duplicateCall + '" title="Duplicate"><i class="fas fa-copy"></i></button>' +
+    '<button class="row-icon-btn danger" onclick="' + deleteCall + '" title="Delete"><i class="fas fa-trash-alt"></i></button>' +
+  '</div>';
+}
+function tableFooterBar(count, singular, pluralLabel) {
+  return '<div class="table-footer-bar"><span>Displaying: ' + pluralize(count, singular, pluralLabel) + '</span></div>';
+}
+function dragHandleCell() { return '<td class="drag-handle-cell"><i class="fas fa-grip-vertical drag-handle" title="Drag to reorder (prototype only)"></i></td>'; }
+function todayStamp() {
+  var d = new Date();
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  return pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + '/' + d.getFullYear();
+}
+
+/* ── "[Area] Area" tab: named Area instances (Office, Kitchen, Whole House,
+   etc.), matching the real Interior Area / Exterior Area tables exactly. ── */
+function renderAreaInstancesTab(areaKey) {
+  var d = currentData();
+  var area = d.areas.find(function (a) { return a.key === areaKey; }) || d.areas[0];
+  var instances = area.instances || [];
+  var body;
+  if (!instances.length) {
+    body = renderLevelEmptyState('No ' + area.name + ' Areas yet', 'Add a ' + area.name + ' Area to start capturing dimensions and default Categories for it.', 'Add ' + area.name + ' Area', "openAreaInstanceModal('" + area.key + "')");
+  } else {
+    body = '<div class="data-table-wrap"><table class="data-table"><thead><tr><th></th><th>Area Name</th><th>Default Categories</th><th>Dimensions, ft</th><th>Last Modified</th><th></th></tr></thead><tbody>' +
+      instances.map(function (inst) {
+        return '<tr>' + dragHandleCell() +
+          '<td><span class="row-name" onclick="openAreaInstanceModal(\'' + area.key + '\',\'' + inst.key + '\')">' + inst.name + '</span></td>' +
+          '<td>' + areaInstanceCategoryNames(area, inst) + '</td>' +
+          '<td>' + areaInstanceDimensions(inst) + '</td>' +
+          '<td>' + inst.lastModified + '</td>' +
+          '<td>' + rowActionsHtml("openAreaInstanceModal('" + area.key + "','" + inst.key + "')", "duplicateAreaInstance('" + area.key + "','" + inst.key + "')", "deleteAreaInstance('" + area.key + "','" + inst.key + "')") + '</td>' +
+        '</tr>';
+      }).join('') +
+    '</tbody></table></div>' + tableFooterBar(instances.length, area.name + ' Area', area.name + ' Areas');
+  }
+  return '<section class="settings-section">' +
+    '<div class="section-header-row">' +
+      '<div class="settings-section-title">' + area.name + ' Area <i class="fas fa-info-circle" title="Named ' + area.name + ' Areas (e.g. rooms or elevations) used to apply default Categories and dimensions when building a Proposal." style="font-size:11px; color:var(--st-color-text-muted); cursor:help;"></i></div>' +
+      '<div class="section-actions">' +
+        '<button class="btn btn-outline-primary btn-sm" onclick="openTabImport(\'' + area.key + '\')"><i class="fas fa-file-import"></i> Import</button>' +
+        '<button class="btn btn-outline-primary btn-sm" onclick="openAreaInstanceModal(\'' + area.key + '\')"><i class="fas fa-plus"></i> Add ' + area.name + ' Area</button>' +
+      '</div>' +
+    '</div>' + body +
+  '</section>';
+}
+function areaInstanceCategoryNames(area, inst) {
+  var names = (inst.categoryKeys || []).map(function (k) {
+    var c = area.categories.find(function (x) { return x.key === k; });
+    return c ? c.name : null;
+  }).filter(Boolean);
+  return names.length ? names.join(', ') : '&mdash;';
+}
+function areaInstanceDimensions(inst) {
+  if (inst.measurementType === 'Area' && inst.length && inst.width) {
+    return inst.length + ' x ' + inst.width + (inst.height ? ' x ' + inst.height : '');
+  }
+  if (inst.measurementType === 'Wall' && inst.height) {
+    return inst.height + ' ht';
+  }
+  return '&mdash;';
+}
+
+/* ── Substrates tab: Categories (per Area, with an Interior/Exterior
+   toggle when there's more than one Area) plus Area Substrates below it
+   (scoped to a Category via the chip row) -- combined into one tab exactly
+   like the real system, instead of the two separate tabs this prototype
+   had before. ── */
+function renderAreaToggle() {
+  var d = currentData(); var nav = currentNav();
+  return '<div class="pill-toggle" style="margin-bottom:16px;">' + d.areas.map(function (a) {
+    return '<button type="button" class="pill-toggle-btn ' + (a.key === nav.areaKey ? 'active' : '') + '" onclick="setActiveArea(\'' + a.key + '\')">' + a.name + '</button>';
+  }).join('') + '</div>';
+}
+function setActiveArea(key) {
+  currentNav().areaKey = key;
+  var a = currentData().areas.find(function (x) { return x.key === key; });
+  currentNav().categoryKey = a.categories[0] ? a.categories[0].key : null;
+  renderMainPage();
+}
+function goToSubstratesForCategory(catKey) { currentNav().categoryKey = catKey; currentData().substrateWarningVisible = false; renderMainPage(); }
+
+function renderSubstratesTab() {
+  var d = currentData();
+  var nav = currentNav();
+  if (!nav.areaKey || !d.areas.some(function (a) { return a.key === nav.areaKey; })) nav.areaKey = d.areas[0].key;
+  var area = d.areas.find(function (a) { return a.key === nav.areaKey; });
+  var toggleRow = d.areas.length > 1 ? renderAreaToggle() : '';
+
+  var catBody;
+  if (!area.categories.length) {
+    catBody = renderLevelEmptyState('No Categories yet', 'Add a Category to organize the Substrates used for ' + area.name + '.', 'Add Category', 'openCategoryModal()');
+  } else {
+    catBody = '<div class="data-table-wrap"><table class="data-table"><thead><tr><th></th><th>Categories</th><th>Calculation Type</th><th>Default Substrate</th><th>Last Modified</th><th></th></tr></thead><tbody>' +
+      area.categories.map(function (c) {
+        var defSub = c.substrates.find(function (s) { return s.key === c.defaultSubstrateKey; });
+        return '<tr>' + dragHandleCell() +
+          '<td><span class="row-name" onclick="goToSubstratesForCategory(\'' + c.key + '\')">' + c.name + '</span><div class="row-meta">' + pluralize(c.substrates.length, 'Substrate') + '</div></td>' +
+          '<td>' + c.calcType + '</td>' +
+          '<td>' + (defSub ? defSub.name : '&mdash;') + '</td>' +
+          '<td>' + c.lastModified + '</td>' +
+          '<td>' + rowActionsHtml("openCategoryModal('" + c.key + "')", "duplicateCategory('" + c.key + "')", "deleteCategory('" + c.key + "')") + '</td>' +
+        '</tr>';
+      }).join('') +
+    '</tbody></table></div>' + tableFooterBar(area.categories.length, 'Category', 'Categories');
+  }
+
+  var subSectionHtml = '';
+  if (area.categories.length) {
+    if (!nav.categoryKey || !area.categories.some(function (c) { return c.key === nav.categoryKey; })) nav.categoryKey = area.categories[0].key;
+    var cat = area.categories.find(function (c) { return c.key === nav.categoryKey; });
+    var showCoats = cat.coats != null;
+    var chipRow = '<div class="chip-filter-row">' + area.categories.map(function (c) {
+      return '<button type="button" class="chip-filter ' + (c.key === nav.categoryKey ? 'active' : '') + '" onclick="setActiveCategory(\'' + c.key + '\')">' + c.name + '</button>';
+    }).join('') + '</div>';
+
+    var subBody;
+    if (!cat.substrates.length) {
+      subBody = renderLevelEmptyState('No Area Substrates yet', 'Add an Area Substrate to start capturing Production Rate values for ' + cat.name + '.', 'Add Area Substrate', 'openSubstrateModal()');
+    } else {
+      subBody = '<div class="data-table-wrap"><table class="data-table"><thead><tr><th></th><th>Area Substrates</th><th>Client Label</th><th>Default Product</th><th>Details</th><th>Last Modified</th><th></th></tr></thead><tbody>' +
+        cat.substrates.map(function (s) {
+          var prod = d.products.find(function (p) { return p.key === s.productKey; });
+          return '<tr>' + dragHandleCell() +
+            '<td class="row-name">' + s.name + '</td>' +
+            '<td>' + s.clientLabel + '</td>' +
+            '<td>' + (prod ? prod.name : '&mdash;') + '</td>' +
+            '<td class="details-cell">' + renderSubstrateDetails(s.rate, showCoats, cat.calcType) + '</td>' +
+            '<td>' + s.lastModified + '</td>' +
+            '<td>' + rowActionsHtml("openSubstrateModal('" + s.key + "')", "duplicateSubstrate('" + s.key + "')", "deleteSubstrate('" + s.key + "')") + '</td>' +
+          '</tr>';
+        }).join('') +
+      '</tbody></table></div>' + tableFooterBar(cat.substrates.length, 'Area Substrate');
+    }
+
+    var warnBanner = '';
+    if (d.settings.appliedPreset && d.substrateWarningVisible) {
+      warnBanner = '' +
+        '<div class="settings-alert settings-alert--warn" style="margin-bottom:14px;">' +
+          '<i class="fas fa-exclamation-triangle"></i>' +
+          '<div class="settings-alert-body">' +
+            '<div class="settings-alert-title">Heads up</div>' +
+            '<div>This substrate\'s settings are a part of the ' + d.settings.appliedPreset + ' preset and may cause misconfiguration of your proposal calculations.</div>' +
+          '</div>' +
+          '<button class="modal-close" style="margin-top:1px;" onclick="dismissSubstrateWarning()">&times;</button>' +
+        '</div>';
+    }
+    var presetBadge = d.settings.appliedPreset ? ' <span class="pill pill-live">' + d.settings.appliedPreset + ' preset applied</span>' : '';
+
+    subSectionHtml = '<section class="settings-section">' + chipRow + warnBanner +
+      '<div class="section-header-row"><div class="settings-section-title">Area Substrates' + presetBadge + '</div>' +
+        '<div class="section-actions">' +
+          '<button class="btn btn-outline-primary btn-sm" onclick="openTabImport(\'areaSubstrates\')"><i class="fas fa-file-import"></i> Import Area Substrates</button>' +
+          (cat.substrates.length ? '<button class="btn btn-outline-primary btn-sm" onclick="openSubstrateModal()"><i class="fas fa-plus"></i> Add Area Substrate</button>' : '') +
+        '</div>' +
+      '</div>' + subBody +
+    '</section>';
+  }
+
+  return '<section class="settings-section">' + toggleRow +
+    '<div class="section-header-row"><div class="settings-section-title">Categories</div>' +
+      '<div class="section-actions">' +
+        '<button class="btn btn-outline-primary btn-sm" onclick="openTabImport(\'categories\')"><i class="fas fa-file-import"></i> Import Categories</button>' +
+        (area.categories.length ? '<button class="btn btn-outline-primary btn-sm" onclick="openCategoryModal()"><i class="fas fa-plus"></i> Add Category</button>' : '') +
+      '</div>' +
+    '</div>' + catBody +
+  '</section>' + subSectionHtml;
+}
+function dismissSubstrateWarning() { currentData().substrateWarningVisible = false; renderMainPage(); }
+function setActiveCategory(key) { currentNav().categoryKey = key; currentData().substrateWarningVisible = false; renderMainPage(); }
+function renderSubstrateDetails(rate, showCoats, calcType) {
+  if (showCoats) {
+    return ['1', '2', '3'].map(function (n) {
+      return '<div>' + n + ' Coat - ' + rate['c' + n] + ' - ' + calcType + ' Per Man Hour</div>';
+    }).join('');
+  }
+  return '<div>' + rate.lfPerHour + ' - ' + calcType + ' Per Man Hour</div>';
+}
+
+function renderProductsTab() {
+  var d = currentData();
+  var hasSheen = d.products.some(function (p) { return p.sheen; });
+  var body;
+  if (!d.products.length) {
+    body = renderLevelEmptyState('No Products yet', 'Add a Product to reference from your Substrates.', 'Add Product', 'openProductModal()');
+  } else {
+    body = '<div class="data-table-wrap"><table class="data-table"><thead><tr><th>Product Name</th>' + (hasSheen ? '<th>Sheen</th>' : '') + '<th>Price / Unit</th><th>Last Modified</th><th></th></tr></thead><tbody>' +
+      d.products.map(function (p) {
+        return '<tr>' +
+          '<td class="row-name" onclick="openProductModal(\'' + p.key + '\')">' + p.name + '</td>' +
+          (hasSheen ? ('<td>' + (p.sheen || '&mdash;') + '</td>') : '') +
+          '<td>$' + p.price + ' / ' + p.unit + '</td>' +
+          '<td>' + (p.lastModified || '&mdash;') + '</td>' +
+          '<td>' + rowActionsHtml("openProductModal('" + p.key + "')", "duplicateProduct('" + p.key + "')", "deleteProduct('" + p.key + "')") + '</td>' +
+        '</tr>';
+      }).join('') +
+    '</tbody></table></div>' +
+    '<div class="table-footer-bar"><span>Showing 10 Items Per Page</span><span>Showing 1 to ' + d.products.length + ' of ' + d.products.length + ' entries</span></div>';
+  }
+  return '<section class="settings-section">' +
+    '<div class="section-header-row"><div class="settings-section-title">Products</div>' +
+      '<div class="section-actions">' +
+        '<button class="btn btn-outline-primary btn-sm" onclick="openTabImport(\'products\')"><i class="fas fa-file-import"></i> Import</button>' +
+        '<button class="btn btn-outline-primary btn-sm" onclick="openProductModal()"><i class="fas fa-plus"></i> Add Product</button>' +
+      '</div>' +
+    '</div>' +
+    (d.products.length ? '<div class="table-toolbar-row"><div class="table-search-box"><i class="fas fa-search"></i><input class="table-search-input" type="text" placeholder="Search Products..."></div><select class="settings-field-input" style="max-width:190px;"><option>Sort: Name (A-Z)</option><option>Sort: Last Modified</option></select></div>' : '') +
+    body +
+  '</section>';
+}
+
+function renderLevelEmptyState(title, sub, btnLabel, onclickJs) {
+  return '<div class="level-empty-state"><i class="fas fa-inbox"></i><div class="level-empty-state-title">' + title + '</div><div class="level-empty-state-sub">' + sub + '</div><button class="btn btn-primary btn-sm" onclick="' + onclickJs + '"><i class="fas fa-plus"></i> ' + btnLabel + '</button></div>';
+}
+
+/* ── Category modal ── */
+var categoryModalCtx = { editingKey: null, coats: 2 };
+function openCategoryModal(key) {
+  categoryModalCtx.editingKey = key || null;
+  var area = currentArea();
+  var gutter = isGutterIndustry();
+  document.getElementById('categoryModalTitle').textContent = key ? 'Edit Category' : 'Add Category';
+  document.getElementById('categoryModalSubtitle').textContent = area.name + ' · ' + APP.activeConfigIndustry;
+
+  var calcSel = document.getElementById('catFieldCalcType');
+  var types = CALC_TYPES[APP.activeConfigIndustry];
+  calcSel.innerHTML = types.map(function (t) { return '<option value="' + t + '">' + t + '</option>'; }).join('');
+
+  var cat = key ? area.categories.find(function (c) { return c.key === key; }) : null;
+  document.getElementById('catFieldName').value = cat ? cat.name : '';
+  calcSel.value = cat ? cat.calcType : types[0];
+
+  var subSel = document.getElementById('catFieldDefaultSubstrate');
+  var subOptions = cat ? cat.substrates : [];
+  subSel.innerHTML = '<option value="">None yet</option>' + subOptions.map(function (s) { return '<option value="' + s.key + '">' + s.name + '</option>'; }).join('');
+  subSel.value = cat ? cat.defaultSubstrateKey : '';
+
+  var coatsWrap = document.getElementById('catFieldCoatsWrap');
+  coatsWrap.style.display = gutter ? 'none' : '';
+  var coatVal = (cat && cat.coats != null) ? cat.coats : 2;
+  categoryModalCtx.coats = coatVal;
+  document.querySelectorAll('.coat-pick').forEach(function (b) {
+    var on = Number(b.dataset.coats) === coatVal;
+    b.classList.toggle('btn-primary', on);
+    b.classList.toggle('btn-outline-primary', !on);
+  });
+
+  document.getElementById('categoryModal').classList.add('open');
+}
+function pickCoats(n) {
+  categoryModalCtx.coats = n;
+  document.querySelectorAll('.coat-pick').forEach(function (b) {
+    var on = Number(b.dataset.coats) === n;
+    b.classList.toggle('btn-primary', on);
+    b.classList.toggle('btn-outline-primary', !on);
+  });
+}
+function closeCategoryModal() { document.getElementById('categoryModal').classList.remove('open'); }
+function saveCategoryModal() {
+  var area = currentArea();
+  var name = document.getElementById('catFieldName').value.trim();
+  if (!name) { toast('Category Name is required'); return; }
+  var calcType = document.getElementById('catFieldCalcType').value;
+  var defaultSubstrateKey = document.getElementById('catFieldDefaultSubstrate').value;
+  var gutter = isGutterIndustry();
+  if (categoryModalCtx.editingKey) {
+    var cat = area.categories.find(function (c) { return c.key === categoryModalCtx.editingKey; });
+    cat.name = name; cat.calcType = calcType; cat.defaultSubstrateKey = defaultSubstrateKey; cat.lastModified = todayStamp();
+    if (!gutter) cat.coats = categoryModalCtx.coats; else delete cat.coats;
+  } else {
+    var key = slugify(name);
+    var newCat = { key: key, name: name, calcType: calcType, defaultSubstrateKey: defaultSubstrateKey, lastModified: todayStamp(), substrates: [] };
+    if (!gutter) newCat.coats = categoryModalCtx.coats;
+    area.categories.push(newCat);
+    currentNav().categoryKey = key;
+  }
+  closeCategoryModal();
+  renderMainPage();
+  toast('Category saved (prototype only)');
+}
+function deleteCategory(key) {
+  if (!confirm('Delete this Category? This also removes its Substrates in this prototype.')) return;
+  var area = currentArea();
+  area.categories = area.categories.filter(function (c) { return c.key !== key; });
+  renderMainPage();
+}
+function duplicateCategory(key) {
+  var area = currentArea();
+  var cat = area.categories.find(function (c) { return c.key === key; });
+  var copy = JSON.parse(JSON.stringify(cat));
+  copy.key = slugify(cat.name + ' Copy');
+  copy.name = cat.name + ' (Copy)';
+  copy.lastModified = todayStamp();
+  copy.substrates.forEach(function (s) { s.key = slugify(s.name + ' Copy'); });
+  copy.defaultSubstrateKey = copy.substrates.length ? copy.substrates[0].key : '';
+  area.categories.push(copy);
+  renderMainPage();
+  toast('Duplicated ' + cat.name);
+}
+
+/* ── Substrate modal ── */
+var substrateModalCtx = { editingKey: null };
+function openSubstrateModal(key) {
+  substrateModalCtx.editingKey = key || null;
+  var cat = currentCategory();
+  var gutter = isGutterIndustry();
+  document.getElementById('substrateModalTitle').textContent = key ? 'Edit Substrate' : 'Add Substrate';
+  document.getElementById('substrateModalSubtitle').textContent = cat.name + ' · ' + APP.activeConfigIndustry;
+
+  var sub = key ? cat.substrates.find(function (s) { return s.key === key; }) : null;
+  document.getElementById('subFieldName').value = sub ? sub.name : '';
+  document.getElementById('subFieldClientLabel').value = sub ? sub.clientLabel : '';
+
+  var prodSel = document.getElementById('subFieldProduct');
+  var products = currentData().products;
+  prodSel.innerHTML = '<option value="">None</option>' + products.map(function (p) { return '<option value="' + p.key + '">' + p.name + '</option>'; }).join('');
+  prodSel.value = sub ? sub.productKey : '';
+
+  var rateWrap = document.getElementById('subFieldRateWrap');
+  if (gutter) {
+    var lf = (sub && sub.rate) ? sub.rate.lfPerHour : '';
+    rateWrap.innerHTML = '<div class="settings-field"><label class="settings-field-label">Production Rate (Linear Feet per Man-Hour)</label><input class="settings-field-input" id="subFieldLfPerHour" type="text" value="' + lf + '"></div>';
+  } else {
+    var c1 = (sub && sub.rate) ? sub.rate.c1 : '', c2 = (sub && sub.rate) ? sub.rate.c2 : '', c3 = (sub && sub.rate) ? sub.rate.c3 : '';
+    rateWrap.innerHTML = '<label class="settings-field-label" style="position:static; display:block; margin-bottom:2px;">Coat Spread Rate (SF per Man-Hour)</label>' +
+      '<div style="display:flex; gap:10px; margin-top:6px;">' +
+        '<div class="settings-field"><label class="settings-field-label">1 Coat</label><input class="settings-field-input" id="subFieldC1" type="text" value="' + c1 + '"></div>' +
+        '<div class="settings-field"><label class="settings-field-label">2 Coats</label><input class="settings-field-input" id="subFieldC2" type="text" value="' + c2 + '"></div>' +
+        '<div class="settings-field"><label class="settings-field-label">3 Coats</label><input class="settings-field-input" id="subFieldC3" type="text" value="' + c3 + '"></div>' +
+      '</div>';
+  }
+  document.getElementById('substrateModal').classList.add('open');
+}
+function closeSubstrateModal() { document.getElementById('substrateModal').classList.remove('open'); }
+function saveSubstrateModal() {
+  var cat = currentCategory();
+  var name = document.getElementById('subFieldName').value.trim();
+  if (!name) { toast('Substrate Name is required'); return; }
+  var clientLabel = document.getElementById('subFieldClientLabel').value.trim() || name;
+  var productKey = document.getElementById('subFieldProduct').value;
+  var gutter = isGutterIndustry();
+  var rate = gutter
+    ? { lfPerHour: document.getElementById('subFieldLfPerHour').value }
+    : { c1: document.getElementById('subFieldC1').value, c2: document.getElementById('subFieldC2').value, c3: document.getElementById('subFieldC3').value };
+
+  if (substrateModalCtx.editingKey) {
+    var s = cat.substrates.find(function (x) { return x.key === substrateModalCtx.editingKey; });
+    s.name = name; s.clientLabel = clientLabel; s.productKey = productKey; s.rate = rate; s.lastModified = todayStamp();
+    if (currentData().settings.appliedPreset) currentData().substrateWarningVisible = true;
+  } else {
+    cat.substrates.push({ key: slugify(name), name: name, clientLabel: clientLabel, productKey: productKey, rate: rate, lastModified: todayStamp() });
+    if (!cat.defaultSubstrateKey) cat.defaultSubstrateKey = cat.substrates[cat.substrates.length - 1].key;
+  }
+  closeSubstrateModal();
+  renderMainPage();
+  toast('Substrate saved (prototype only)');
+}
+function deleteSubstrate(key) {
+  if (!confirm('Delete this Substrate?')) return;
+  var cat = currentCategory();
+  cat.substrates = cat.substrates.filter(function (s) { return s.key !== key; });
+  renderMainPage();
+}
+function duplicateSubstrate(key) {
+  var cat = currentCategory();
+  var sub = cat.substrates.find(function (s) { return s.key === key; });
+  var copy = JSON.parse(JSON.stringify(sub));
+  copy.key = slugify(sub.name + ' Copy');
+  copy.name = sub.name + ' (Copy)';
+  copy.lastModified = todayStamp();
+  cat.substrates.push(copy);
+  renderMainPage();
+  toast('Duplicated ' + sub.name);
+}
+
+/* ── Product modal ── */
+var productModalCtx = { editingKey: null };
+function openProductModal(key) {
+  productModalCtx.editingKey = key || null;
+  document.getElementById('productModalTitle').textContent = key ? 'Edit Product' : 'Add Product';
+  document.getElementById('productModalSubtitle').textContent = APP.activeConfigIndustry;
+  var p = key ? currentData().products.find(function (x) { return x.key === key; }) : null;
+  document.getElementById('prodFieldName').value = p ? p.name : '';
+  var unitSel = document.getElementById('prodFieldUnit');
+  var units = PRODUCT_UNITS[APP.activeConfigIndustry];
+  unitSel.innerHTML = units.map(function (u) { return '<option value="' + u + '">' + u + '</option>'; }).join('');
+  unitSel.value = p ? p.unit : units[0];
+  document.getElementById('prodFieldPrice').value = p ? p.price : '';
+
+  var sheenOptions = SHEEN_OPTIONS[APP.activeConfigIndustry];
+  var sheenWrap = document.getElementById('prodFieldSheenWrap');
+  if (sheenOptions) {
+    sheenWrap.style.display = '';
+    var sheenSel = document.getElementById('prodFieldSheen');
+    sheenSel.innerHTML = sheenOptions.map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
+    sheenSel.value = (p && p.sheen) ? p.sheen : sheenOptions[0];
+  } else {
+    sheenWrap.style.display = 'none';
+  }
+  document.getElementById('productModal').classList.add('open');
+}
+function closeProductModal() { document.getElementById('productModal').classList.remove('open'); }
+function saveProductModal() {
+  var name = document.getElementById('prodFieldName').value.trim();
+  if (!name) { toast('Product Name is required'); return; }
+  var unit = document.getElementById('prodFieldUnit').value;
+  var price = document.getElementById('prodFieldPrice').value;
+  var sheenOptions = SHEEN_OPTIONS[APP.activeConfigIndustry];
+  var sheen = sheenOptions ? document.getElementById('prodFieldSheen').value : null;
+  var products = currentData().products;
+  if (productModalCtx.editingKey) {
+    var p = products.find(function (x) { return x.key === productModalCtx.editingKey; });
+    p.name = name; p.unit = unit; p.price = price; p.lastModified = todayStamp();
+    if (sheen) p.sheen = sheen; else delete p.sheen;
+  } else {
+    var newProduct = { key: slugify(name), name: name, unit: unit, price: price, lastModified: todayStamp() };
+    if (sheen) newProduct.sheen = sheen;
+    products.push(newProduct);
+  }
+  closeProductModal();
+  renderMainPage();
+  toast('Product saved (prototype only)');
+}
+function deleteProduct(key) {
+  if (!confirm('Delete this Product?')) return;
+  var d = currentData();
+  d.products = d.products.filter(function (p) { return p.key !== key; });
+  renderMainPage();
+}
+function duplicateProduct(key) {
+  var d = currentData();
+  var p = d.products.find(function (x) { return x.key === key; });
+  var copy = Object.assign({}, p, { key: slugify(p.name + ' Copy'), name: p.name + ' (Copy)', lastModified: todayStamp() });
+  d.products.push(copy);
+  renderMainPage();
+  toast('Duplicated ' + p.name);
+}
+
+/* ── Area modal (per-Area named instances: Office, Kitchen, Whole House) ── */
+var areaInstanceModalCtx = { areaKey: null, editingKey: null, measureType: 'Area', dims: { length: '', width: '', height: '' } };
+function openAreaInstanceModal(areaKey, instKey) {
+  var area = currentData().areas.find(function (a) { return a.key === areaKey; });
+  areaInstanceModalCtx.areaKey = areaKey;
+  areaInstanceModalCtx.editingKey = instKey || null;
+  var inst = instKey ? area.instances.find(function (i) { return i.key === instKey; }) : null;
+
+  document.getElementById('areaInstanceModalTitle').textContent = instKey ? 'Edit Area' : 'Add Area';
+  document.getElementById('areaInstanceModalSubtitle').textContent = area.name + ' Area · ' + APP.activeConfigIndustry;
+  document.getElementById('aiFieldName').value = inst ? inst.name : '';
+
+  areaInstanceModalCtx.measureType = inst ? inst.measurementType : 'Area';
+  areaInstanceModalCtx.dims = inst ? { length: inst.length, width: inst.width, height: inst.height } : { length: '', width: '', height: '' };
+  renderAreaInstanceMeasureButtons();
+  renderAreaInstanceDimsFields();
+
+  var catKeys = inst ? (inst.categoryKeys || []) : [];
+  var catsHtml = area.categories.map(function (c) {
+    var checked = catKeys.indexOf(c.key) !== -1;
+    return '<label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;"><input type="checkbox" class="ai-cat-check" value="' + c.key + '"' + (checked ? ' checked' : '') + '> ' + c.name + '</label>';
+  }).join('');
+  document.getElementById('aiFieldCategories').innerHTML = catsHtml || '<div style="font-size:12.5px; color:var(--st-color-text-muted);">No Categories exist for ' + area.name + ' yet &mdash; add one from the Substrates tab first.</div>';
+  document.getElementById('aiFieldLastModifiedWrap').textContent = inst ? ('Last Modified: ' + inst.lastModified) : '';
+
+  document.getElementById('areaInstanceModal').classList.add('open');
+}
+function pickAreaInstanceMeasureType(type) {
+  areaInstanceModalCtx.measureType = type;
+  renderAreaInstanceMeasureButtons();
+  renderAreaInstanceDimsFields();
+}
+function renderAreaInstanceMeasureButtons() {
+  document.querySelectorAll('.ai-measure-pick').forEach(function (b) {
+    var on = b.dataset.type === areaInstanceModalCtx.measureType;
+    b.classList.toggle('btn-primary', on);
+    b.classList.toggle('btn-outline-primary', !on);
+  });
+}
+function renderAreaInstanceDimsFields() {
+  var wrap = document.getElementById('aiFieldDimsWrap');
+  var d = areaInstanceModalCtx.dims;
+  if (areaInstanceModalCtx.measureType === 'Area') {
+    wrap.innerHTML =
+      '<div class="settings-field" style="flex:1;"><label class="settings-field-label">Default Length (ft)</label><input class="settings-field-input" id="aiFieldLength" type="text" value="' + d.length + '"></div>' +
+      '<div class="settings-field" style="flex:1;"><label class="settings-field-label">Default Width (ft)</label><input class="settings-field-input" id="aiFieldWidth" type="text" value="' + d.width + '"></div>' +
+      '<div class="settings-field" style="flex:1;"><label class="settings-field-label">Default Height (ft)</label><input class="settings-field-input" id="aiFieldHeight" type="text" value="' + d.height + '"></div>';
+  } else if (areaInstanceModalCtx.measureType === 'Wall') {
+    wrap.innerHTML = '<div class="settings-field" style="flex:1; max-width:200px;"><label class="settings-field-label">Default Height (ft)</label><input class="settings-field-input" id="aiFieldHeight" type="text" value="' + d.height + '"></div>';
+  } else {
+    wrap.innerHTML = '<div style="font-size:12.5px; color:var(--st-color-text-muted);">Surface Areas aggregate multiple walls or areas &mdash; no single dimension is captured.</div>';
+  }
+}
+function closeAreaInstanceModal() { document.getElementById('areaInstanceModal').classList.remove('open'); }
+function saveAreaInstanceModal() {
+  var area = currentData().areas.find(function (a) { return a.key === areaInstanceModalCtx.areaKey; });
+  var name = document.getElementById('aiFieldName').value.trim();
+  if (!name) { toast('Area Name is required'); return; }
+  var measureType = areaInstanceModalCtx.measureType;
+  var lengthEl = document.getElementById('aiFieldLength');
+  var widthEl = document.getElementById('aiFieldWidth');
+  var heightEl = document.getElementById('aiFieldHeight');
+  var length = lengthEl ? lengthEl.value : '';
+  var width = widthEl ? widthEl.value : '';
+  var height = heightEl ? heightEl.value : '';
+  var categoryKeys = Array.prototype.slice.call(document.querySelectorAll('.ai-cat-check:checked')).map(function (el) { return el.value; });
+
+  if (!area.instances) area.instances = [];
+  if (areaInstanceModalCtx.editingKey) {
+    var inst = area.instances.find(function (i) { return i.key === areaInstanceModalCtx.editingKey; });
+    inst.name = name; inst.measurementType = measureType; inst.length = length; inst.width = width; inst.height = height; inst.categoryKeys = categoryKeys; inst.lastModified = todayStamp();
+  } else {
+    area.instances.push({ key: slugify(name), name: name, measurementType: measureType, length: length, width: width, height: height, categoryKeys: categoryKeys, lastModified: todayStamp() });
+  }
+  closeAreaInstanceModal();
+  renderMainPage();
+  toast('Area saved (prototype only)');
+}
+function duplicateAreaInstance(areaKey, instKey) {
+  var area = currentData().areas.find(function (a) { return a.key === areaKey; });
+  var inst = area.instances.find(function (i) { return i.key === instKey; });
+  var copy = Object.assign({}, inst, { key: slugify(inst.name + ' Copy'), name: inst.name + ' (Copy)', lastModified: todayStamp() });
+  area.instances.push(copy);
+  renderMainPage();
+  toast('Duplicated ' + inst.name);
+}
+function deleteAreaInstance(areaKey, instKey) {
+  if (!confirm('Delete this Area?')) return;
+  var area = currentData().areas.find(function (a) { return a.key === areaKey; });
+  area.instances = area.instances.filter(function (i) { return i.key !== instKey; });
+  renderMainPage();
+}
+
+/* ══════════════ IMPORT: per-tab + master multi-section wizards ══════════════
+   Ported from the separate prod-rates-import prototype into this build, per
+   direct request to combine the two. No file is actually read or parsed --
+   the "detected columns" and "preview rows" below are illustrative fixtures
+   built from this Industry's real current data (so duplicates are demonstrable
+   against real rows), not a real import engine. Completing an import DOES
+   apply real new/updated rows to the current Industry, same as every other
+   CRUD action in this file -- see the Notes panel for what's illustrative vs
+   real here. */
+
+function matchCategoryKeysByNames(area, namesStr) {
+  var names = (namesStr || '').split(',').map(function (s) { return s.trim().toLowerCase(); });
+  return area.categories.filter(function (c) { return names.indexOf(c.name.toLowerCase()) !== -1; }).map(function (c) { return c.key; });
+}
+
+function buildImportConfig(type) {
+  var d = currentData();
+  var gutter = isGutterIndustry();
+  if (type === 'categories') {
+    var caArea = currentArea();
+    var existingCat = caArea.categories[0];
+    var dupCatName = existingCat ? existingCat.name : (gutter ? 'Gutters' : 'Walls');
+    var calcFallback = gutter ? 'Linear Foot' : 'Hours Per Item';
+    return {
+      kind: 'category', areaKey: caArea.key,
+      title: 'Import Categories',
+      sub: 'Upload a CSV with your ' + caArea.name.toLowerCase() + ' substrate category data.',
+      cols: [
+        { f: 'category_name', s: dupCatName, m: ['Category Name (required)', 'Do Not Import'] },
+        { f: 'calc_type', s: existingCat ? existingCat.calcType : calcFallback, m: ['Default Calculation Type', 'Do Not Import'] }
+      ],
+      ph: ['Category Name', 'Calculation Type', 'Status'],
+      rows: [
+        { vals: ['Stairs', calcFallback], status: 'new' },
+        { vals: [dupCatName, existingCat ? existingCat.calcType : calcFallback], status: 'dup', dupName: dupCatName }
+      ],
+      sectionLabel: 'Categories'
+    };
+  }
+  if (type === 'areaSubstrates') {
+    var cat = currentCategory();
+    var showCoats = !!(cat && cat.coats != null);
+    var existingSub = cat ? cat.substrates[0] : null;
+    var dupSubName = existingSub ? existingSub.name : 'Sample Substrate';
+    var ph = showCoats ? ['Substrate Name', 'Client Label', '1-Coat', '2-Coat', '3-Coat', 'Status'] : ['Substrate Name', 'Client Label', 'LF / Man-Hour', 'Status'];
+    var newRow = showCoats ? ['Imported Substrate', 'Imported Substrate', '150.00', '125.00', '100.00'] : ['Imported Substrate', 'Imported Substrate', '50.00'];
+    var dupRow = showCoats ? [dupSubName, dupSubName, '180.00', '155.00', '130.00'] : [dupSubName, dupSubName, '55.00'];
+    return {
+      kind: 'substrate', categoryKey: cat ? cat.key : null, showCoats: showCoats,
+      title: 'Import Area Substrates',
+      sub: 'Upload a CSV with your area substrate production rate data' + (cat ? (' for ' + cat.name) : '') + '.',
+      cols: [
+        { f: 'substrate_name', s: dupSubName, m: ['Substrate Name (required)', 'Do Not Import'] },
+        { f: 'client_label', s: dupSubName, m: ['Substrate Client Label', 'Do Not Import'] },
+        { f: 'rate_1', s: showCoats ? '150' : '50', m: [showCoats ? 'Spreadrate - 1 Coat' : 'Production Rate (LF/Man-Hour)', 'Do Not Import'] }
+      ],
+      ph: ph,
+      rows: [ { vals: newRow, status: 'new' }, { vals: dupRow, status: 'dup', dupName: dupSubName } ],
+      sectionLabel: 'Area Substrates'
+    };
+  }
+  if (type === 'products') {
+    var existingProd = d.products[0];
+    var dupProdName = existingProd ? existingProd.name : 'Sample Product';
+    var hasSheenOptions = !!SHEEN_OPTIONS[APP.activeConfigIndustry];
+    var ph2 = hasSheenOptions ? ['Product Name', 'Price', 'Unit', 'Sheen', 'Status'] : ['Product Name', 'Price', 'Unit', 'Status'];
+    var newRow2 = hasSheenOptions ? ['New Imported Product', '29.00', 'Gallon', 'Flat'] : ['New Imported Product', '29.00', 'Each'];
+    var dupRow2 = hasSheenOptions
+      ? [dupProdName, existingProd ? existingProd.price : '38.99', existingProd ? existingProd.unit : 'Gallon', (existingProd && existingProd.sheen) ? existingProd.sheen : 'Satin']
+      : [dupProdName, existingProd ? existingProd.price : '1.85', existingProd ? existingProd.unit : 'Each'];
+    var cols2 = [
+      { f: 'product_name', s: dupProdName, m: ['Product Name (required)', 'Do Not Import'] },
+      { f: 'price', s: existingProd ? existingProd.price : '29.00', m: ['Product Price ($)', 'Do Not Import'] },
+      { f: 'unit_type', s: existingProd ? existingProd.unit : 'Gallon', m: ['Unit', 'Do Not Import'] }
+    ];
+    if (hasSheenOptions) cols2.push({ f: 'finish', s: 'Satin', m: ['Sheen', 'Do Not Import'] });
+    return {
+      kind: 'product',
+      title: 'Import Products',
+      sub: 'Upload a CSV with your product / material list.',
+      cols: cols2, ph: ph2,
+      rows: [ { vals: newRow2, status: 'new' }, { vals: dupRow2, status: 'dup', dupName: dupProdName } ],
+      sectionLabel: 'Products'
+    };
+  }
+  // Interior/Exterior Area import (type is an area key, e.g. 'interior'/'exterior')
+  var area = d.areas.find(function (a) { return a.key === type; });
+  var catNames = area.categories.map(function (c) { return c.name; });
+  var sample = catNames.slice(0, 2).join(', ') || (gutter ? 'Gutters' : 'Walls, Trim');
+  var existingInst = (area.instances || [])[0];
+  var dupName = existingInst ? existingInst.name : 'Whole House';
+  var isInterior = area.key === 'interior';
+  var newRowNames = isInterior ? ['Sun Room', 'Mud Room'] : (gutter ? ['Back Porch', 'Detached Garage'] : ['Exterior Gable', 'Exterior Decking']);
+  return {
+    kind: 'area', areaKey: area.key,
+    title: 'Import ' + area.name + ' Areas',
+    sub: 'Upload a CSV or Excel file with your ' + area.name.toLowerCase() + ' area data.',
+    cols: [
+      { f: 'area_name', s: 'New Room', m: ['Area Name (required)', 'Do Not Import'] },
+      { f: 'length_ft', s: '24', m: ['Default Length (ft)', 'Do Not Import'] },
+      { f: 'width_ft', s: '18', m: ['Default Width (ft)', 'Do Not Import'] },
+      { f: 'height_ft', s: '8', m: ['Default Height (ft)', 'Do Not Import'] },
+      { f: 'area_types', s: sample, m: ['Default Categories', 'Do Not Import'] }
+    ],
+    ph: ['Area Name', 'L', 'W', 'H', 'Categories', 'Status'],
+    rows: [
+      { vals: [newRowNames[0], '18', '14', '9', sample], status: 'new' },
+      { vals: [newRowNames[1], '8', '6', '8', catNames[0] || sample], status: 'new' },
+      { vals: [dupName, '16', '12', '9', sample], status: 'dup', dupName: dupName }
+    ],
+    sectionLabel: area.name + ' Areas'
+  };
+}
+
+function applyImportRow(cfg, row) {
+  if (cfg.kind === 'area') {
+    var area = currentData().areas.find(function (a) { return a.key === cfg.areaKey; });
+    if (!area.instances) area.instances = [];
+    if (row.status === 'dup') {
+      var existingInst = area.instances.find(function (i) { return i.name === row.dupName; });
+      if (existingInst) {
+        existingInst.length = row.vals[1]; existingInst.width = row.vals[2]; existingInst.height = row.vals[3];
+        existingInst.lastModified = todayStamp();
+        return 'updated';
+      }
+    }
+    var categoryKeys = matchCategoryKeysByNames(area, row.vals[4]);
+    area.instances.push({ key: slugify(row.vals[0]), name: row.vals[0], measurementType: 'Area', length: row.vals[1], width: row.vals[2], height: row.vals[3], categoryKeys: categoryKeys, lastModified: todayStamp() });
+    return 'added';
+  }
+  if (cfg.kind === 'category') {
+    var carea = currentData().areas.find(function (a) { return a.key === cfg.areaKey; });
+    if (row.status === 'dup') {
+      var existingCat = carea.categories.find(function (c) { return c.name === row.dupName; });
+      if (existingCat) { existingCat.calcType = row.vals[1]; existingCat.lastModified = todayStamp(); return 'updated'; }
+    }
+    carea.categories.push({ key: slugify(row.vals[0]), name: row.vals[0], calcType: row.vals[1], defaultSubstrateKey: '', lastModified: todayStamp(), substrates: [] });
+    return 'added';
+  }
+  if (cfg.kind === 'substrate') {
+    var cat = null;
+    currentData().areas.forEach(function (a) { var found = a.categories.find(function (c) { return c.key === cfg.categoryKey; }); if (found) cat = found; });
+    if (!cat) return 'skipped';
+    if (row.status === 'dup') {
+      var existingSub = cat.substrates.find(function (s) { return s.name === row.dupName; });
+      if (existingSub) {
+        existingSub.clientLabel = row.vals[1];
+        existingSub.rate = cfg.showCoats ? { c1: row.vals[2], c2: row.vals[3], c3: row.vals[4] } : { lfPerHour: row.vals[2] };
+        existingSub.lastModified = todayStamp();
+        return 'updated';
+      }
+    }
+    var rate = cfg.showCoats ? { c1: row.vals[2], c2: row.vals[3], c3: row.vals[4] } : { lfPerHour: row.vals[2] };
+    cat.substrates.push({ key: slugify(row.vals[0]), name: row.vals[0], clientLabel: row.vals[1], productKey: '', rate: rate, lastModified: todayStamp() });
+    if (!cat.defaultSubstrateKey) cat.defaultSubstrateKey = cat.substrates[cat.substrates.length - 1].key;
+    return 'added';
+  }
+  // product
+  var d = currentData();
+  var hasSheenOptions = !!SHEEN_OPTIONS[APP.activeConfigIndustry];
+  if (row.status === 'dup') {
+    var existingProd = d.products.find(function (p) { return p.name === row.dupName; });
+    if (existingProd) {
+      existingProd.price = row.vals[1]; existingProd.unit = row.vals[2];
+      if (hasSheenOptions && row.vals[3]) existingProd.sheen = row.vals[3];
+      existingProd.lastModified = todayStamp();
+      return 'updated';
+    }
+  }
+  var newProd = { key: slugify(row.vals[0]), name: row.vals[0], price: row.vals[1], unit: row.vals[2], lastModified: todayStamp() };
+  if (hasSheenOptions && row.vals[3]) newProd.sheen = row.vals[3];
+  d.products.push(newProd);
+  return 'added';
+}
+
+/* ---- Tab-scoped import (4 steps) ---- */
+var tabImportStep = 1, tabImportCfg = null;
+function openTabImport(type) {
+  tabImportCfg = buildImportConfig(type);
+  document.getElementById('tabImportTitle').textContent = tabImportCfg.title;
+  document.getElementById('tabImportSubtitle').textContent = tabImportCfg.sub;
+  document.getElementById('tabUploadZone').classList.remove('hidden');
+  document.getElementById('tabFileChip').classList.add('hidden');
+  showTabImportStep(1);
+  document.getElementById('tabImportModal').classList.add('open');
+}
+function closeTabImportModal() { document.getElementById('tabImportModal').classList.remove('open'); }
+function showTabImportStep(s) {
+  for (var i = 1; i <= 4; i++) {
+    var el = document.getElementById('tabImportStepContent' + i); if (el) el.classList.toggle('hidden', i !== s);
+    var st = document.getElementById('tabImportStep' + i); if (st) st.className = 'import-step ' + (i < s ? 'done' : i === s ? 'active' : '');
+    var dv = document.getElementById('tabImportDiv' + i); if (dv) dv.className = 'import-step-divider' + (i < s ? ' done' : '');
+  }
+  tabImportStep = s;
+  document.getElementById('tabImportBtnCancel').classList.toggle('hidden', s === 4);
+  document.getElementById('tabImportBtnBack').classList.toggle('hidden', s <= 1);
+  document.getElementById('tabImportBtnNext').classList.toggle('hidden', s >= 4);
+  document.getElementById('tabImportBtnDone').classList.toggle('hidden', s < 4);
+  document.getElementById('tabImportBtnNext').textContent = s === 3 ? 'Import Records' : 'Next';
+}
+function simulateFileUpload(ctx) {
+  if (ctx === 'tab') { document.getElementById('tabUploadZone').classList.add('hidden'); document.getElementById('tabFileChip').classList.remove('hidden'); }
+  else { document.getElementById('masterUploadZone').classList.add('hidden'); document.getElementById('masterFileChip').classList.remove('hidden'); }
+}
+function removeUploadedFile(ctx) {
+  if (ctx === 'tab') { document.getElementById('tabUploadZone').classList.remove('hidden'); document.getElementById('tabFileChip').classList.add('hidden'); }
+  else { document.getElementById('masterUploadZone').classList.remove('hidden'); document.getElementById('masterFileChip').classList.add('hidden'); }
+}
+function tabImportNext() {
+  if (tabImportStep === 1) { buildTabMapTable(); showTabImportStep(2); }
+  else if (tabImportStep === 2) { buildTabPreview(); showTabImportStep(3); }
+  else if (tabImportStep === 3) { applyTabImport(); showTabImportStep(4); }
+}
+function tabImportBack() { if (tabImportStep > 1) showTabImportStep(tabImportStep - 1); }
+function buildTabMapTable() {
+  var tb = document.getElementById('tabMappingBody'); tb.innerHTML = '';
+  document.getElementById('tabColCount').textContent = tabImportCfg.cols.length + ' columns';
+  tabImportCfg.cols.forEach(function (col) {
+    var opts = col.m.map(function (m, i) { return '<option' + (i === 0 ? ' selected' : '') + '>' + m + '</option>'; }).join('');
+    tb.innerHTML += '<tr><td><span class="col-from">' + col.f + '</span></td><td style="font-size:12px; color:var(--st-color-text-muted);">' + col.s + '</td><td><select class="map-select">' + opts + '</select></td></tr>';
+  });
+}
+function buildTabPreview() {
+  var th = document.getElementById('tabPreviewHeader'); var tb = document.getElementById('tabPreviewBody');
+  th.innerHTML = tabImportCfg.ph.map(function (h) { return '<th>' + h + '</th>'; }).join('');
+  tb.innerHTML = ''; var nw = 0, dp = 0;
+  tabImportCfg.rows.forEach(function (row, idx) {
+    if (row.status === 'new') nw++; else dp++;
+    var cells = row.vals.map(function (v) { return '<td>' + v + '</td>'; }).join('');
+    var statusCell = row.status === 'new'
+      ? '<td><span class="pill pill-live">New</span></td>'
+      : '<td><select class="conflict-select" data-row="' + idx + '"><option value="skip">Skip (keep existing)</option><option value="overwrite">Overwrite</option></select></td>';
+    tb.innerHTML += '<tr class="' + (row.status === 'dup' ? 'row-duplicate' : '') + '">' + cells + statusCell + '</tr>';
+  });
+  document.getElementById('tabImportSummary').innerHTML =
+    '<div class="import-stat"><div class="import-stat-dot dot-green"></div><strong>' + nw + ' new</strong></div>' +
+    (dp ? '<div class="import-stat"><div class="import-stat-dot dot-yellow"></div><strong>' + dp + ' duplicate' + (dp === 1 ? '' : 's') + '</strong></div>' : '');
+}
+function applyTabImport() {
+  var cfg = tabImportCfg;
+  var resolutions = Array.prototype.slice.call(document.querySelectorAll('#tabPreviewBody .conflict-select')).map(function (s) { return s.value; });
+  var dupIdx = 0, addedCount = 0, updatedCount = 0, skippedCount = 0;
+  cfg.rows.forEach(function (row) {
+    if (row.status === 'dup') {
+      var resolution = resolutions[dupIdx++];
+      if (resolution === 'skip') { skippedCount++; return; }
+    }
+    var result = applyImportRow(cfg, row);
+    if (result === 'updated') updatedCount++; else if (result === 'added') addedCount++; else skippedCount++;
+  });
+  renderMainPage();
+  var msgParts = [];
+  if (addedCount) msgParts.push(addedCount + ' added');
+  if (updatedCount) msgParts.push(updatedCount + ' updated');
+  if (skippedCount) msgParts.push(skippedCount + ' skipped');
+  document.getElementById('tabImportSuccessMsg').textContent = cfg.sectionLabel + ': ' + (msgParts.join(', ') || 'nothing imported') + '.';
+}
+
+/* ---- Master multi-section import (5 steps) ---- */
+var masterImportStep = 1, masterAllTypes = [], masterIncludedTypes = [], masterConfigs = {};
+function masterSectionTypes() {
+  var types = currentData().areas.map(function (a) { return a.key; });
+  types.push('categories', 'areaSubstrates', 'products');
+  return types;
+}
+function openMasterImport() {
+  masterAllTypes = masterSectionTypes();
+  masterIncludedTypes = masterAllTypes.slice();
+  masterConfigs = {};
+  masterAllTypes.forEach(function (t) { masterConfigs[t] = buildImportConfig(t); });
+  document.getElementById('masterUploadZone').classList.remove('hidden');
+  document.getElementById('masterFileChip').classList.add('hidden');
+  document.getElementById('masterFileSheetCount').textContent = masterAllTypes.length + ' sheets detected';
+  var importBtn = document.getElementById('masterImportBtnImport');
+  importBtn.disabled = false; importBtn.textContent = 'Import All Selected';
+  showMasterImportStep(1);
+  document.getElementById('masterImportModal').classList.add('open');
+}
+function closeMasterImportModal() { document.getElementById('masterImportModal').classList.remove('open'); }
+function showMasterImportStep(s) {
+  for (var i = 1; i <= 5; i++) {
+    var el = document.getElementById('masterImportStepContent' + i); if (el) el.classList.toggle('hidden', i !== s);
+    var st = document.getElementById('masterImportStep' + i); if (st) st.className = 'import-step ' + (i < s ? 'done' : i === s ? 'active' : '');
+    var dv = document.getElementById('masterImportDiv' + i); if (dv) dv.className = 'import-step-divider' + (i < s ? ' done' : '');
+  }
+  masterImportStep = s;
+  document.getElementById('masterImportBtnCancel').classList.toggle('hidden', s === 5);
+  document.getElementById('masterImportBtnBack').classList.toggle('hidden', s <= 1);
+  document.getElementById('masterImportBtnNext').classList.toggle('hidden', s >= 4);
+  document.getElementById('masterImportBtnImport').classList.toggle('hidden', s !== 4);
+  document.getElementById('masterImportBtnDone').classList.toggle('hidden', s < 5);
+  document.getElementById('masterImportBtnNext').textContent = s === 3 ? 'Next: Preview' : 'Next';
+  if (s === 2) { document.getElementById('masterSheetIntro').textContent = 'We found ' + masterAllTypes.length + ' sheets in your file. Select which sections to import.'; renderMasterSheetOptions(); }
+  if (s === 3) renderMasterMapGroups();
+  if (s === 4) renderMasterPreviewGroups();
+}
+function masterImportNext() { if (masterImportStep < 4) showMasterImportStep(masterImportStep + 1); }
+function masterImportBack() { if (masterImportStep > 1) showMasterImportStep(masterImportStep - 1); }
+function renderMasterSheetOptions() {
+  var wrap = document.getElementById('masterSheetOptions');
+  wrap.innerHTML = masterAllTypes.map(function (t) {
+    var cfg = masterConfigs[t];
+    var selected = masterIncludedTypes.indexOf(t) !== -1;
+    return '<div class="sheet-option' + (selected ? ' selected' : '') + '" onclick="toggleMasterSection(\'' + t + '\')">' +
+      '<div class="sheet-option-left"><div class="sheet-option-check"><i class="fas fa-check"></i></div>' +
+        '<div><div class="sheet-option-title">' + cfg.sectionLabel + '</div><div class="sheet-option-desc">Sheet: "' + cfg.sectionLabel.replace(/ /g, '_') + '" &middot; ' + cfg.rows.length + ' rows detected</div></div>' +
+      '</div>' +
+      '<span class="sheet-count">' + cfg.rows.length + ' rows</span>' +
+    '</div>';
+  }).join('');
+}
+function toggleMasterSection(t) {
+  var idx = masterIncludedTypes.indexOf(t);
+  if (idx === -1) masterIncludedTypes.push(t); else masterIncludedTypes.splice(idx, 1);
+  renderMasterSheetOptions();
+}
+function toggleSectionGroup(header) {
+  var body = header.nextElementSibling;
+  var chevron = header.querySelector('.chevron');
+  body.classList.toggle('collapsed');
+  chevron.classList.toggle('open');
+}
+function renderMasterMapGroups() {
+  var wrap = document.getElementById('masterMapGroups');
+  wrap.innerHTML = masterIncludedTypes.map(function (t) {
+    var cfg = masterConfigs[t];
+    var rowsHtml = cfg.cols.map(function (col) {
+      var opts = col.m.map(function (m, i) { return '<option' + (i === 0 ? ' selected' : '') + '>' + m + '</option>'; }).join('');
+      return '<tr><td><span class="col-from">' + col.f + '</span></td><td style="font-size:12px; color:var(--st-color-text-muted);">' + col.s + '</td><td><select class="map-select">' + opts + '</select></td></tr>';
+    }).join('');
+    return '<div class="section-group">' +
+      '<div class="section-group-header" onclick="toggleSectionGroup(this)"><h4>' + cfg.sectionLabel + ' <span class="pill pill-live">' + cfg.cols.length + ' columns</span></h4><i class="fas fa-chevron-down chevron open"></i></div>' +
+      '<div class="section-group-body"><table class="map-table"><thead><tr><th>Your Column</th><th>Sample</th><th>Maps To</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>' +
+    '</div>';
+  }).join('');
+}
+function renderMasterPreviewGroups() {
+  var wrap = document.getElementById('masterPreviewGroups');
+  var totalNew = 0, totalDup = 0;
+  wrap.innerHTML = masterIncludedTypes.map(function (t) {
+    var cfg = masterConfigs[t];
+    var nw = cfg.rows.filter(function (r) { return r.status === 'new'; }).length;
+    var dp = cfg.rows.length - nw;
+    totalNew += nw; totalDup += dp;
+    var theadHtml = cfg.ph.map(function (h) { return '<th>' + h + '</th>'; }).join('');
+    var rowsHtml = cfg.rows.map(function (row, idx) {
+      var cells = row.vals.map(function (v) { return '<td>' + v + '</td>'; }).join('');
+      var statusCell = row.status === 'new'
+        ? '<td><span class="pill pill-live">New</span></td>'
+        : '<td><select class="conflict-select" data-type="' + t + '" data-row="' + idx + '"><option value="skip">Skip (keep existing)</option><option value="overwrite">Overwrite</option></select></td>';
+      return '<tr class="' + (row.status === 'dup' ? 'row-duplicate' : '') + '">' + cells + statusCell + '</tr>';
+    }).join('');
+    return '<p style="font-size:13px; font-weight:700; color:var(--st-color-text); margin:14px 0 8px;">' + cfg.sectionLabel + ' (' + cfg.rows.length + ' rows)</p>' +
+      '<div class="table-scroll"><table class="preview-table"><thead><tr>' + theadHtml + '</tr></thead><tbody>' + rowsHtml + '</tbody></table></div>';
+  }).join('');
+  document.getElementById('masterImportSummary').innerHTML =
+    '<div class="import-stat"><div class="import-stat-dot dot-green"></div><strong>' + totalNew + ' new record' + (totalNew === 1 ? '' : 's') + '</strong> across ' + masterIncludedTypes.length + ' section' + (masterIncludedTypes.length === 1 ? '' : 's') + '</div>' +
+    (totalDup ? '<div class="import-stat"><div class="import-stat-dot dot-yellow"></div><strong>' + totalDup + ' duplicate' + (totalDup === 1 ? '' : 's') + '</strong></div>' : '');
+}
+function masterDoImport() {
+  var btn = document.getElementById('masterImportBtnImport');
+  btn.disabled = true; btn.textContent = 'Importing...';
+  var counts = {};
+  masterIncludedTypes.forEach(function (t) {
+    var cfg = masterConfigs[t];
+    var added = 0, updated = 0, skipped = 0;
+    cfg.rows.forEach(function (row, idx) {
+      if (row.status === 'dup') {
+        var sel = document.querySelector('.conflict-select[data-type="' + t + '"][data-row="' + idx + '"]');
+        var resolution = sel ? sel.value : 'skip';
+        if (resolution === 'skip') { skipped++; return; }
+      }
+      var result = applyImportRow(cfg, row);
+      if (result === 'updated') updated++; else if (result === 'added') added++; else skipped++;
+    });
+    counts[t] = { added: added, updated: updated, skipped: skipped, label: cfg.sectionLabel };
+  });
+  renderMainPage();
+  setTimeout(function () {
+    btn.disabled = false; btn.textContent = 'Import All Selected';
+    renderMasterSuccessGrid(counts);
+    showMasterImportStep(5);
+  }, 700);
+}
+function renderMasterSuccessGrid(counts) {
+  var wrap = document.getElementById('masterSuccessGrid');
+  wrap.innerHTML = Object.keys(counts).map(function (t) {
+    var c = counts[t];
+    return '<div class="success-card" style="background:#F0FDF4; border:1px solid #BBF7D0;"><div class="num" style="color:#166534;">' + (c.added + c.updated) + '</div><div class="lbl" style="color:#16a34a;">' + c.label + '</div></div>';
+  }).join('');
+}
+
+/* ── Empty-state demo controls ── */
+function resetIndustryToEmpty() {
+  if (!APP.activeConfigIndustry) { toast('Set up an Industry first (via the wizard) to use this control'); return; }
+  var d = currentData();
+  d.areas.forEach(function (a) { a.categories = []; a.instances = []; });
+  d.products = [];
+  currentNav().categoryKey = null;
+  renderMainPage();
+  toast('Cleared Categories, Areas &amp; Products for ' + APP.activeConfigIndustry + ' (demo)');
+}
+function restoreSampleData() {
+  if (!APP.activeConfigIndustry) { toast('Set up an Industry first (via the wizard) to use this control'); return; }
+  var name = APP.activeConfigIndustry;
+  resetIndustryDataToDefaults(name);
+  renderMainPage();
+  toast('Sample data restored for ' + name);
+}
+
+/* ── Boot: default to a returning user who already completed setup for
+   Residential Painting, matching what the real system supports today (one
+   Industry per account). The first-time wizard (Phase 1) is still fully
+   replayable via Restart Wizard, including selecting Gutter Services instead. */
+APP.configuredIndustries = ['Residential Painting'];
+APP.activeConfigIndustry = 'Residential Painting';
+renderMainPage();
+</script>
+
+</body>
+</html>
