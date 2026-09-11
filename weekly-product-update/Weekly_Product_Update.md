@@ -1,109 +1,70 @@
 # DripJobs Weekly Product Update
 
-**Period:** August 24 – August 28, 2026
-**Release:** Aug 26 & Aug 27 deployments · 13 updates
+**Period:** September 7 – September 11, 2026
+**Release:** Sep 8 deployment · 10 updates
 
 ---
 
 ## Proposal Builder
 
-### Fixed "View Details" Button Overlapping Line Item Text on Package Selection Cards (*Aug 27*)
-**What changed:** Fixed a layout bug where the "View Details" button on Good/Better/Best package cards in the customer-facing proposal view rendered directly on top of the line item name instead of beside or below it.
-**Why it matters:** Customers reviewing package options can now read every line item name without a button covering the text.
+### Fixed Accepted Proposals Missing Their Activity Log Event and Metrics Credit (*Sep 8*)
+**What changed:** Fixed a bug where accepting a proposal didn't always record an Activity Log event on the contact, and didn't always credit the acceptance toward that proposal's metrics.
+**Why it matters:** Every accepted proposal now shows up correctly in the contact's Activity Log and in your proposal metrics, so acceptance history and reporting stay accurate.
 **Action needed:** None
 
-### Improved Loading Feedback and Send Speed for Mobile Proposal Sends (*Aug 27*)
-**What changed:** Investigated and addressed an elevated, inconsistent delay when sending a proposal from a mobile device, and added a visible loading indicator during the send so the screen no longer goes blank with no feedback.
-**Why it matters:** Sending a proposal from your phone now shows clear progress instead of an unexplained delay that looks stalled.
-**Action needed:** None
-
----
-
-## Job Costing
-
-### Fixed Job Costing Complete Zapier Trigger Not Firing Automatically (*Aug 26*)
-**What changed:** Fixed a bug where the "Job Costing Complete" Zapier trigger only fired when run manually, not when a job costing record was actually completed.
-**Why it matters:** Zaps built on the Job Costing Complete trigger now fire automatically as intended, without needing a manual test run first.
+### Fixed Proposal Downloads Missing Images and Attachments on One Account (*Sep 8*)
+**What changed:** Fixed a bug on one account where downloading a proposal produced a PDF missing its images and attachments, while the on-screen proposal displayed them correctly.
+**Why it matters:** Downloaded proposal PDFs now match what you and your customer see on screen, images and attachments included.
 **Action needed:** None
 
 ---
 
-## Jobs List & Sales List
+## Command Center
 
-### Added Job Address Column to the Jobs List (*Aug 27*)
-**What changed:** The Jobs List now has a "Job Address" column showing the job's full service address (street, city, state, zip) from its Accepted proposal. On CSV export, the address breaks out into four separate columns.
-**Why it matters:** You can see a job's service address directly in the Jobs List and pull it into spreadsheets or mail merges without manually splitting it out.
+### Fixed Tasks Tab Getting Clipped When Jobi AI and QUO Are Both Enabled (*Sep 8*)
+**What changed:** Fixed a layout bug where Command Center's Tasks tab got visually clipped on accounts with both Jobi AI and QUO enabled, cutting off part of the tab's content.
+**Why it matters:** The Tasks tab now displays fully regardless of which combination of Jobi AI and QUO you have enabled.
 **Action needed:** None
 
 ---
 
-## Appointments
+## Integrations
 
-### Added Per-User Holiday Calendar Display, US & Canada (*Aug 27*)
-**What changed:** Added a per-user Holiday Calendar preference (None, United States, Canada, or both) that displays non-editable holiday blocks on the Appointments and Job Schedule calendars for the selected region(s). Defaults to None for all users.
-**Why it matters:** You can see recognized holidays right on your calendar so you don't inadvertently schedule work on a day you or your team observes as a holiday.
-**Action needed:** None. Opt in from your calendar settings if you'd like holiday blocks displayed; existing calendar behavior is unchanged until you do.
-
----
-
-## Metrics & Reporting
-
-### Added DripSense (AI Metrics Insights) (*Aug 27*)
-**What changed:** Added an AI-generated insights panel to the Metrics Dashboard that translates your performance data into plain-English observations, comparing your selected time period against the equivalent prior period and calling out a likely driver when one is clear. Insights only generate when you click "Run Insights," so viewing different date ranges never uses AI credits on its own.
-**Why it matters:** You get a plain-English summary of what changed in your numbers and why, without manually interpreting every chart and ratio yourself.
-**Action needed:** None. Click "Run Insights" on the Metrics Dashboard whenever you want an updated summary for your selected period.
-
----
-
-## Customer Portal
-
-### Increased Size and Prominence of the Proposal Hero Image Upload Button (*Aug 27*)
-**What changed:** The Upload button for the Proposal Hero Image in Customer Portal > Portal Visual Identity settings is now larger and more visually prominent.
-**Why it matters:** The upload control for your proposal branding image is easier to find and use when setting up your portal.
+### Fixed Google Calendar Syncing Appointments to the Wrong Admin's Calendar (*Sep 8*)
+**What changed:** Fixed a bug where some appointments synced to a different admin's connected Google Calendar than the one they were actually assigned to.
+**Why it matters:** Appointments now sync to the correct admin's Google Calendar, so everyone's calendar reflects only the appointments actually assigned to them.
 **Action needed:** None
 
----
+### Fixed a QuickBooks Sync Failure Caused by a Stale Discount Mapping (*Sep 8*)
+**What changed:** Fixed a bug where QuickBooks sync failed on invoices carrying a discount mapped to an item that had since been removed or changed in QuickBooks.
+**Why it matters:** Invoices with discounts now sync to QuickBooks reliably instead of silently failing when a mapped discount item is no longer current.
+**Action needed:** None. Re-sync any invoice that previously failed for this reason.
 
-## Contacts
+### Added "Send Marketing Agency Info" to the Zapier Integration Card (*New · Sep 8*)
+**What changed:** Added a "Send Marketing Agency Info" action to the Zapier integration card, so a Zap can push a contact's marketing agency details out to other tools.
+**Why it matters:** Marketing agency info can now flow into whatever other systems you connect through Zapier, without a manual export.
+**Action needed:** None. Build a Zap using the new action if you'd like to use it.
 
-### Added Support for Multiple Phone Numbers and Emails on Contact Records (*Aug 26*)
-**What changed:** A Contact record can now store multiple phone numbers, email addresses, and physical addresses, with one entry per category marked as Primary. The Primary values are used by default across communications, drips, proposals, and invoices, and existing addresses from a contact's past deals and jobs were backfilled onto the contact record automatically.
-**Why it matters:** You can keep a complete contact profile instead of overwriting a customer's old number or email when they give you a new one, and everything still sends to the right Primary contact info by default.
-**Action needed:** None. Review a contact's Primary phone, email, and address if you'd like to adjust which one is used by default.
-
----
-
-## Communications
-
-### Fixed Drips Still Sending After Being Disabled on a Deal (*Aug 27*)
-**What changed:** Fixed a bug where a drip message could still send up to roughly 40 minutes after Drips were disabled on a Deal, most notably in the Project Completed stage.
-**Why it matters:** Disabling Drips on a deal now reliably stops all further scheduled drip messages for that deal.
+### Fixed Routemize Appointments Ignoring Communication Settings (*Sep 8*)
+**What changed:** Fixed a bug where appointments created through the Routemize integration sent customer communications even when that contact's communication settings had them disabled.
+**Why it matters:** Routemize-created appointments now respect a contact's communication preferences the same way appointments created directly in DripJobs already do.
 **Action needed:** None
 
-### Fixed Blast Email Performance Tab Not Reflecting Opened Emails (*Aug 27*)
-**What changed:** Fixed a bug where a Blast email campaign's Performance tab showed zero opens even when recipients had opened the email, which the contact-level Activity tab was already recording correctly.
-**Why it matters:** Blast performance metrics now match what's actually happening with your recipients, so you can trust the open counts you're reviewing.
-**Action needed:** None
-
----
-
-## Booking Form
-
-### Fixed Booking Form Not Restoring Scroll Position After Selecting a Date (*Aug 27*)
-**What changed:** Fixed a bug where selecting a date in the Booking Form's Preferred Date or Alternate Date picker dropped the customer somewhere else on the page instead of returning them to the field they were completing.
-**Why it matters:** Customers filling out a booking form no longer lose their place and have to scroll back down after picking a date.
+### Added Stripe Payment Support to the "Payment Received" Zapier Trigger (*New · Sep 8*)
+**What changed:** The "Payment Received" Zapier trigger now fires for Stripe payments in addition to the payment methods it already covered.
+**Why it matters:** Zaps built on "Payment Received" now catch Stripe payments too, instead of missing them.
 **Action needed:** None
 
 ---
 
 ## Admin Tools
 
-### Simplified Branch Admin Tool for Bulk Company Number Entry (*Aug 26*)
-**What changed:** The Branch Admin tool now has one simplified screen where a Super Admin can paste in multiple company numbers at once and run the existing branch stored procedure against all of them in a single submission, instead of processing one company number at a time.
-**Why it matters:** Bulk branch admin work that used to take one company at a time now runs as a single batch, with a clear per-company success or failure result.
-**Action needed:** None (Super Admin tool only)
+### Added Accepted File Format Helper Text to Company Logo Upload (*New · Sep 8*)
+**What changed:** The Company Logo upload in Company Settings now shows helper text listing the accepted file formats before you pick a file.
+**Why it matters:** You know which file types will work before attempting an upload, instead of finding out only after a failed attempt.
+**Action needed:** None
 
-### Added HealthScore Dashboard At-Risk Account Finder (*Aug 27*)
-**What changed:** Added a focused view of the HealthScore Dashboard that lets Super Admins filter accounts by Health tier, Plan, OBCSS owner, and signup date to find at-risk accounts, with contact info surfaced directly so a rep can reach out without impersonating the account.
-**Why it matters:** Onboarding and CS reps can find and act on accounts likely to churn straight from a filtered list, instead of digging through accounts one at a time.
-**Action needed:** None (Super Admin tool only)
+### Fixed Company Settings' Horizontal Tab Bar Not Responding to Drag at 100% Zoom (*Sep 8*)
+**What changed:** Fixed a bug where Company Settings' horizontal tab bar didn't respond to click-and-drag scrolling at 100% browser zoom, even though scrolling worked at other zoom levels.
+**Why it matters:** You can now drag-scroll the Company Settings tab bar at any zoom level, including the default 100%.
+**Action needed:** None
