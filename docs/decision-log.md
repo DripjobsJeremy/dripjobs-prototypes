@@ -9,6 +9,11 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-11] Deal Stage / Deal-Proposal Status: added proposal states to the Status helper text (86bbyr3w2)
+
+- Decision: Updated the Sales Pipeline "Deal/Proposal Status" helper text to "Shows the current status of the deal or proposal. It's set automatically as the deal progresses, and tracks the proposal as it is pending, accepted, or rejected." The Jobs Pipeline "Job Status" copy is unchanged.
+- Why: Direct request to call out the pending/accepted/rejected proposal states in the helper text.
+
 ## [2026-09-11] Deal Stage / Deal-Proposal Status: confirmed final copy, added Sales/Jobs pipeline toggle (86bbyr3w2)
 
 - Decision: Replaced the ticket's earlier draft helper text with Jeremy's confirmed final copy, and added a "Sales Pipeline (Deal)" / "Jobs Pipeline (Job)" segmented toggle above the modal so both label sets are demonstrated in one prototype: Deal Stage/Deal-Proposal Status (Sales) and Job Stage/Job Status (Jobs), each with its own confirmed helper text. Toggling also swaps the modal title and the Stage/Status sample values (Sales shows Estimate Scheduled/Scheduled, Jobs shows Project Scheduled/Scheduled, matching the ticket's own "scheduling the job" trigger example). Only the Stage/Status fields and modal title change between the two, every other section stays identical, per the ticket's scope.
