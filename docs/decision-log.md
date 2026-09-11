@@ -9,6 +9,16 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-11] Weekly Product Update + Product Roadmap refreshed for Sep 7-11, 2026
+
+- Decision: Rebuilt `weekly-product-update/index.html` and `Weekly_Product_Update.md` with 10 tickets pushed to production on Sep 8 (2 Proposal Builder, 1 Command Center, 5 Integrations, 2 Admin Tools). Rebuilt `dripjobs-product-roadmap/index.html` from a fresh workspace-wide pull of the bare 🎯 tag (19 in-flight tickets after excluding 10 pushed-to-production): Needs PM Analysis (8), Needs Design (7), Ready for Dev (1, new: 86bbyr3w2), In Progress (2, unchanged), On Hold/Parked (1, new: 86bbrc11c moved here on "qa kickback" status). Removed 86bbky76u from PR Created since it shipped this week and now appears in the weekly update instead.
+- Why: Routine weekly refresh per Jeremy's instruction, sourced directly from ClickUp. Continued using the workspace-wide bare "🎯" tag scoping (not the Active Triage list, not "🎯 focus") per the 2026-09-04 correction below, honoring "pull only from that list" as "match what the saved Overview view at that URL shows."
+
+## [2026-09-11] Hub cards synced to current ClickUp status
+
+- Decision: Corrected 5 `#protoGrid` cards whose badges no longer matched their linked ClickUp ticket: Holiday Calendar Display (86bbrazc3) triage → On Hold (reused the existing `status-postponed` bucket/color, removed its bullseye badge since the ticket no longer carries the 🎯 tag), Link Multiple Google Calendars (86bbkb1vp) In QA Testing → QA Kickback (also mapped to `status-postponed`, grouping kickback with the roadmap's off-happy-path convention), Multi-Industry Production Rates (86b903mm5) and Rate Preset Templates (86bbwt19j) Needs Design → Needs PM Analysis, and Deal Stage & Deal/Proposal Status (86bbyr3w2) Needs Design → Ready for Dev (added its new bullseye badge, the ticket picked up the 🎯 tag since the last sync).
+- Why: Direct request to align hub cards with live ClickUp status. No existing `.status-*` class fit "on hold" or "qa kickback" exactly, reused `status-postponed` for both since the roadmap already treats kickback/on-hold/postponed as one "off the happy path" family, rather than adding new classes for a one-off distinction.
+
 ## [2026-09-11] Deal Stage / Deal-Proposal Status: added proposal states to the Status helper text (86bbyr3w2)
 
 - Decision: Updated the Sales Pipeline "Deal/Proposal Status" helper text to "Shows the current status of the deal or proposal. It's set automatically as the deal progresses, and tracks the proposal as it is pending, accepted, or rejected." The Jobs Pipeline "Job Status" copy is unchanged.
