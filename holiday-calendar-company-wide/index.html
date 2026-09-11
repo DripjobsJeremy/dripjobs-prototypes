@@ -303,7 +303,7 @@
 
   <div class="hcd-header">
     <h1>Holiday Calendar: Company-Wide Region, Per-User Display Toggle</h1>
-    <p>Prototype for ticket 86bbv6zhh. Replaces the per-user region model shipped in <a href="https://app.clickup.com/t/86bbc0rvr" target="_blank">86bbc0rvr</a> and its on-hold follow-up <a href="https://app.clickup.com/t/86bbrazc3" target="_blank">86bbrazc3</a>, superseded by this ticket and being closed (BR-9). Holiday Region (None / United States / Canada / United States &amp; Canada) is now a single Company Settings value that a Company Admin manages for the whole company. The old per-user control is repurposed rather than replaced with something new: a "Holidays" entry now appears in each calendar's existing Event Type filter, checked by default, independently uncheckable per calendar.</p>
+    <p>Prototype for ticket 86bbv6zhh. Replaces the per-user region model shipped in <a href="https://app.clickup.com/t/86bbc0rvr" target="_blank">86bbc0rvr</a> and its on-hold follow-up <a href="https://app.clickup.com/t/86bbrazc3" target="_blank">86bbrazc3</a>, superseded by this ticket and being closed (BR-9). Holiday Region (None / United States / Canada / United States &amp; Canada) is now a single Company Settings value that a Company Admin manages for the whole company. The old per-user control is repurposed rather than replaced with something new: a "Holidays" entry now appears in each calendar's existing Event Type filter, checked by default, independently uncheckable per calendar, and split into separate US and Canada entries whenever both are enabled at once.</p>
   </div>
 
   <div class="settings-section">
@@ -351,7 +351,15 @@
           <div class="hcd-currency-map-row"><b>CAD</b> → Canada</div>
           <div class="hcd-currency-map-row"><b>Any other currency</b> → United States (fallback)</div>
         </div>
-        <div style="margin-top:8px;">This demo company's currency is USD, which is why Holiday Region starts on United States. The same mapping applies to every new signup going forward and was applied to every existing company at rollout, with the default visibility toggle enabled, regardless of any per-user region previously selected under 86bbc0rvr.</div>
+        <div style="margin-top:8px;">A USD company's Holiday Region would default to United States alone. This prototype starts on <b>United States &amp; Canada</b> instead, so the independent US/Canada entries below (BR-2) are visible right away without changing the Region select first. The same currency mapping applies to every new signup going forward and was applied to every existing company at rollout, with the default visibility toggle enabled, regardless of any per-user region previously selected under 86bbc0rvr.</div>
+      </div>
+    </div>
+
+    <div class="settings-alert settings-alert--warn" style="margin-top:14px;">
+      <span class="settings-alert-icon">✏️</span>
+      <div>
+        <div class="settings-alert-title">Correction to BR-2's assumption</div>
+        <div>The ticket's own flagged assumption (a single "Holidays" entry for whichever region is enabled) was wrong. When Region is <b>United States &amp; Canada</b>, the Event Type filter shows <b>two independent entries</b>, US Holidays and CA Holidays, so a user can keep one country's holidays visible while hiding the other's. A single-country Region (United States or Canada alone) still gets just one "Holidays" entry, there's nothing to split in that case.</div>
       </div>
     </div>
   </div>
@@ -548,10 +556,10 @@
     <div class="hcd-ac-list">
       <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Company Settings Holiday Region control, None/US/Canada/Both, Admin-only</b> — <span class="muted">the Company Settings card above, try "Viewing as: Standard User" to see it lock.</span></span></div>
       <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Company Settings default visibility setting, Admin-only</b> — <span class="muted">the toggle beside the region select in the same card.</span></span></div>
-      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Holidays entry appears in the Appointments Event Type filter when enabled</b> — <span class="muted">open Appointments' Event Types dropdown with any region other than None selected.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Holidays entry appears in the Appointments Event Type filter when enabled</b> — <span class="muted">open Appointments' Event Types dropdown with any region other than None selected, one entry for a single-country region, two, US and CA, when Region is "United States &amp; Canada" (corrected BR-2, see the note above).</span></span></div>
       <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Holidays entry appears in the Job Schedule Event Type filter when enabled</b> — <span class="muted">same, Job Schedule tab.</span></span></div>
       <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>No Holidays entry in either filter when region is None</b> — <span class="muted">set Company Settings Region to None and reopen either Event Types dropdown.</span></span></div>
-      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Unchecking Holidays on Appointments hides holidays there only</b> — <span class="muted">try it, Job Schedule's holiday blocks are unaffected.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Unchecking Holidays on Appointments hides holidays there only</b> — <span class="muted">with Region on "United States &amp; Canada," try unchecking just US Holidays on Appointments, CA Holidays there and both entries on Job Schedule are unaffected.</span></span></div>
       <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Unchecking Holidays on Job Schedule hides holidays there only</b> — <span class="muted">same, reverse direction.</span></span></div>
       <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>No new toggle or control beyond the existing Event Type filter</b> — <span class="muted">the dedicated Holiday Calendar select from 86bbrazc3 is gone, see Before/After above.</span></span></div>
       <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Holiday display, labeling, and timezone behavior matches 86bbc0rvr</b> — <span class="muted">dashed amber styling, country flags on same-named holidays, unchanged rule engine, BR-7, now reading one company region instead of a per-user one.</span></span></div>
@@ -568,14 +576,19 @@
   const DEMO_TODAY = new Date(2026, 7, 18); // Aug 18, 2026 — matches the ticket's screenshots
 
   // ── Company-level state (BR-1, BR-3) ──
-  let companyHolidayRegion = 'us'; // this demo company's currency is USD, mapped per BR-6/BR-10
-  let companyDefaultVisibility = true; // Holidays entry checked by default company-wide (BR-3)
+  // Demo starts on 'both' so the US/Canada independent-entry split (corrected BR-2 assumption) is visible
+  // immediately without needing to change the Region select first. A USD company's real default is 'us' alone,
+  // see the currency mapping note in Company Settings.
+  let companyHolidayRegion = 'both';
+  let companyDefaultVisibility = true; // Holidays entry(ies) checked by default company-wide (BR-3)
   let viewerRole = 'admin'; // 'admin' | 'standard', gates Company Settings editing (BR-11)
 
-  // ── Per-calendar state (BR-4, BR-8): visibility is independent per calendar, region is not ──
+  // ── Per-calendar state (BR-4, BR-8): visibility is independent per calendar AND per country.
+  // When Region is a single country, only that key is ever shown/used. When Region is "both", US and CA
+  // are two separate entries a user can check independently, per Jeremy's correction to the ticket's BR-2 assumption.
   const calState = {
-    appt: { view: 'month', anchor: new Date(2026, 7, 1), holidayVisible: true, holidayOverridden: false },
-    job:  { view: 'month', anchor: new Date(2026, 7, 1), holidayVisible: true, holidayOverridden: false },
+    appt: { view: 'month', anchor: new Date(2026, 7, 1), holidayVisible: { us: true, ca: true }, holidayOverridden: { us: false, ca: false } },
+    job:  { view: 'month', anchor: new Date(2026, 7, 1), holidayVisible: { us: true, ca: true }, holidayOverridden: { us: false, ca: false } },
   };
 
   // ── Sample events (decorative, matches the ticket's screenshots) ──
@@ -645,12 +658,17 @@
   function dateKey(d) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
-  function holidaysOnDate(date, region) {
-    if (region === 'none') return [];
+  // Company region says which countries exist at all; a calendar's own holidayVisible flags (per country)
+  // decide which of those the current calendar actually renders (BR-2, BR-4, corrected assumption).
+  function countryEnabledAtCompany(country) {
+    return companyHolidayRegion === country || companyHolidayRegion === 'both';
+  }
+  function holidaysOnDateForCalendar(date, calId) {
+    const visible = calState[calId].holidayVisible;
     const year = date.getFullYear();
     let list = [];
-    if (region === 'us' || region === 'both') list = list.concat(US_HOLIDAY_RULES.map(h => ({ name: h.name, country: 'US', date: h.rule(year) })));
-    if (region === 'ca' || region === 'both') list = list.concat(CA_HOLIDAY_RULES.map(h => ({ name: h.name, country: 'CA', date: h.rule(year) })));
+    if (countryEnabledAtCompany('us') && visible.us) list = list.concat(US_HOLIDAY_RULES.map(h => ({ name: h.name, country: 'US', date: h.rule(year) })));
+    if (countryEnabledAtCompany('ca') && visible.ca) list = list.concat(CA_HOLIDAY_RULES.map(h => ({ name: h.name, country: 'CA', date: h.rule(year) })));
     return list.filter(h => sameDay(h.date, date));
   }
   function regionLabel(region) {
@@ -658,12 +676,12 @@
   }
 
   // ── Rendering ──
-  function lineHTML(l) {
+  function lineHTML(l, showCountryFlag) {
     if (l.kind === 'event') {
       const color = l.color || '#7C3AED';
       return `<div class="hcd-event-chip" style="border-left-color:${color}"><span class="hcd-event-time">${l.time}</span><span class="hcd-event-title">${l.title}</span></div>`;
     }
-    const tag = companyHolidayRegion === 'both' ? `<span class="hcd-flag">${l.country}</span>` : '';
+    const tag = showCountryFlag ? `<span class="hcd-flag">${l.country}</span>` : '';
     const countryName = l.country === 'US' ? 'United States' : 'Canada';
     return `<div class="hcd-holiday-chip" title="${l.name} — ${countryName} holiday, non-editable"><span class="hcd-holiday-name">${l.name}</span>${tag}</div>`;
   }
@@ -684,14 +702,18 @@
     return cells;
   }
 
-  function calendarShowsHolidays(calId) {
-    return companyHolidayRegion !== 'none' && calState[calId].holidayVisible;
+  // A country flag on the chip only earns its keep when both countries are actually rendering together
+  // on this calendar right now, otherwise there's no ambiguity to resolve.
+  function showFlagFor(calId) {
+    const v = calState[calId].holidayVisible;
+    return countryEnabledAtCompany('us') && countryEnabledAtCompany('ca') && v.us && v.ca;
   }
 
   function monthCellHTML(calId, cellDate, isOtherMonth) {
     const key = dateKey(cellDate);
+    const flag = showFlagFor(calId);
     const events = (EVENTS[calId][key] || []).map(e => ({ ...e, kind: 'event' }));
-    const holidays = calendarShowsHolidays(calId) ? holidaysOnDate(cellDate, companyHolidayRegion).map(h => ({ ...h, kind: 'holiday' })) : [];
+    const holidays = holidaysOnDateForCalendar(cellDate, calId).map(h => ({ ...h, kind: 'holiday' }));
     const lines = events.concat(holidays);
     const visible = lines.slice(0, 3);
     const overflow = lines.length - visible.length;
@@ -700,8 +722,8 @@
     const classes = ['hcd-month-cell', isOtherMonth ? 'hcd-month-cell--other' : '', isToday ? 'hcd-month-cell--today' : ''].filter(Boolean).join(' ');
     return `<div class="${classes}">
       <div class="hcd-month-date">${cellDate.getDate()}</div>
-      <div class="hcd-month-lines">${visible.map(lineHTML).join('')}</div>
-      ${overflow > 0 ? `<button type="button" class="hcd-month-more" data-target="${cellId}-extra" data-count="${overflow}">+${overflow} more</button><div class="hcd-month-extra" id="${cellId}-extra" hidden>${lines.slice(3).map(lineHTML).join('')}</div>` : ''}
+      <div class="hcd-month-lines">${visible.map(l => lineHTML(l, flag)).join('')}</div>
+      ${overflow > 0 ? `<button type="button" class="hcd-month-more" data-target="${cellId}-extra" data-count="${overflow}">+${overflow} more</button><div class="hcd-month-extra" id="${cellId}-extra" hidden>${lines.slice(3).map(l => lineHTML(l, flag)).join('')}</div>` : ''}
     </div>`;
   }
 
@@ -727,18 +749,19 @@
 
   function render3Day(calId) {
     const state = calState[calId];
+    const flag = showFlagFor(calId);
     const dates = [0, 1, 2].map(o => { const d = new Date(state.anchor); d.setDate(d.getDate() + o); return d; });
     const grid = document.getElementById(`${calId}-grid`);
     grid.innerHTML = `<div class="hcd-3day-grid">${dates.map(d => {
       const key = dateKey(d);
       const events = EVENTS[calId][key] || [];
-      const holidays = calendarShowsHolidays(calId) ? holidaysOnDate(d, companyHolidayRegion) : [];
+      const holidays = holidaysOnDateForCalendar(d, calId);
       const isToday = sameDay(d, DEMO_TODAY);
       return `<div class="hcd-3day-col ${isToday ? 'hcd-3day-col--today' : ''}">
         <div class="hcd-3day-head">${d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</div>
         <div class="hcd-3day-allday-label">All-day</div>
-        <div class="hcd-3day-allday">${holidays.length ? holidays.map(h => lineHTML({ ...h, kind: 'holiday' })).join('') : '<div class="hcd-3day-empty">—</div>'}</div>
-        <div class="hcd-3day-events">${events.length ? events.map(e => lineHTML({ ...e, kind: 'event' })).join('') : '<div class="hcd-3day-empty">No events</div>'}</div>
+        <div class="hcd-3day-allday">${holidays.length ? holidays.map(h => lineHTML({ ...h, kind: 'holiday' }, flag)).join('') : '<div class="hcd-3day-empty">—</div>'}</div>
+        <div class="hcd-3day-events">${events.length ? events.map(e => lineHTML({ ...e, kind: 'event' }, flag)).join('') : '<div class="hcd-3day-empty">No events</div>'}</div>
       </div>`;
     }).join('')}</div>`;
     const end = dates[2];
@@ -772,6 +795,20 @@
     job: ['Jobs', 'Crew Assignments'],
   };
 
+  // When Region is a single country, one "Holidays" entry covers it (unchanged from the original design).
+  // When Region is "United States & Canada", the entry splits into two independently-checkable rows,
+  // one per country, per Jeremy's correction: a user must be able to keep one country's holidays visible
+  // while hiding the other's, not just toggle both together.
+  function holidayFilterRows() {
+    if (companyHolidayRegion === 'us') return [{ key: 'us', label: 'Holidays', tag: 'US' }];
+    if (companyHolidayRegion === 'ca') return [{ key: 'ca', label: 'Holidays', tag: 'CA' }];
+    if (companyHolidayRegion === 'both') return [
+      { key: 'us', label: 'US Holidays', tag: null },
+      { key: 'ca', label: 'CA Holidays', tag: null },
+    ];
+    return [];
+  }
+
   function renderEventTypeFilter(calId) {
     const state = calState[calId];
     const menu = document.getElementById(`${calId}-eventTypeMenu`);
@@ -782,14 +819,19 @@
         <input type="checkbox" checked disabled />${label}
       </label>`).join('');
 
+    const rows = holidayFilterRows();
     let hasFilter = false;
-    if (companyHolidayRegion !== 'none') {
-      html += `<div class="hcd-eventtype-divider"></div>
-        <label class="hcd-eventtype-item hcd-eventtype-item--holiday" title="Region is set by your Company Admin in Company Settings. Unchecking this only hides holidays on this calendar, for you.">
-          <input type="checkbox" ${state.holidayVisible ? 'checked' : ''} onchange="onHolidayVisibilityChange('${calId}', this.checked)" />
-          Holidays <span class="hcd-eventtype-region-tag">${regionLabel(companyHolidayRegion)}</span>
+    if (rows.length) {
+      html += `<div class="hcd-eventtype-divider"></div>`;
+      rows.forEach(row => {
+        const checked = state.holidayVisible[row.key];
+        if (!checked) hasFilter = true;
+        const tag = row.tag ? `<span class="hcd-eventtype-region-tag">${row.tag}</span>` : '';
+        html += `<label class="hcd-eventtype-item hcd-eventtype-item--holiday" title="Region is set by your Company Admin in Company Settings. Unchecking this only hides these holidays on this calendar, for you.">
+          <input type="checkbox" ${checked ? 'checked' : ''} onchange="onHolidayVisibilityChange('${calId}', '${row.key}', this.checked)" />
+          ${row.label}${tag}
         </label>`;
-      if (!state.holidayVisible) hasFilter = true;
+      });
     }
     menu.innerHTML = html;
     btn.classList.toggle('has-filter', hasFilter);
@@ -809,11 +851,12 @@
     });
   });
 
-  // A user's own checked state is independent per calendar (BR-4) and persists once they've set it,
-  // regardless of later company default changes.
-  function onHolidayVisibilityChange(calId, checked) {
-    calState[calId].holidayVisible = checked;
-    calState[calId].holidayOverridden = true;
+  // A user's own checked state is independent per calendar AND per country (BR-4) and persists once
+  // they've set it, regardless of later company default changes. Unchecking US on Appointments, for
+  // example, never touches CA on Appointments or either country on Job Schedule.
+  function onHolidayVisibilityChange(calId, countryKey, checked) {
+    calState[calId].holidayVisible[countryKey] = checked;
+    calState[calId].holidayOverridden[countryKey] = true;
     renderEventTypeFilter(calId);
     renderCalendar(calId);
   }
@@ -831,12 +874,14 @@
     companyDefaultVisibility = checked;
     document.getElementById('companyDefaultVisLabel').textContent = checked ? 'On' : 'Off';
     ['appt', 'job'].forEach(calId => {
-      // Only calendars the user hasn't already overridden pick up the new company default (BR-4).
-      if (!calState[calId].holidayOverridden) {
-        calState[calId].holidayVisible = checked;
-        renderEventTypeFilter(calId);
-        renderCalendar(calId);
-      }
+      // Only the country rows a user hasn't already overridden, on each calendar, pick up the new default (BR-4).
+      ['us', 'ca'].forEach(countryKey => {
+        if (!calState[calId].holidayOverridden[countryKey]) {
+          calState[calId].holidayVisible[countryKey] = checked;
+        }
+      });
+      renderEventTypeFilter(calId);
+      renderCalendar(calId);
     });
   }
 
