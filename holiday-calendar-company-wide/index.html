@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Holiday Calendar — Independent Per-Calendar Controls — DripJobs</title>
+<title>Holiday Calendar: Company-Wide Region + Display Toggle — DripJobs</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -58,7 +58,7 @@
 
   .hcd-header { margin-bottom: 20px; }
   .hcd-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-  .hcd-header p { font-size: 13px; color: var(--color-text-muted); line-height: 1.6; max-width: 800px; }
+  .hcd-header p { font-size: 13px; color: var(--color-text-muted); line-height: 1.6; max-width: 820px; }
   .hcd-header p a { color: var(--color-primary); font-weight: 600; }
 
   /* ── settings-section / alert / tabs (design system patterns, scoped) ── */
@@ -95,7 +95,41 @@
   #hcd-page .settings-tab-link:nth-child(2) { background: #E6FAF0; }
   #hcd-page .settings-tab-link.active { box-shadow: inset 0 0 0 2px var(--color-primary); font-weight: 600; }
 
-  /* ── Before / After: User Profile removal ── */
+  /* ── Company Settings: role switch, fields, toggle ── */
+  .hcd-role-switch { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .hcd-role-switch-label { font-size: 12px; font-weight: 700; color: var(--color-text-muted); }
+  .hcd-role-btn {
+    border: 1px solid var(--color-border); background: #fff; border-radius: 999px;
+    padding: 6px 14px; font-size: 12px; font-weight: 700; color: var(--color-text-muted);
+    cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .hcd-role-btn.active { border-color: var(--color-primary); background: #F0EDFB; color: var(--color-primary-active); }
+
+  .hcd-company-fields { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-end; }
+  .hcd-company-field { display: flex; flex-direction: column; gap: 6px; }
+  .hcd-company-field label { font-size: 11px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+  .hcd-company-field-row { display: flex; align-items: center; gap: 10px; }
+  .hcd-company-field-row span { font-size: 12px; color: var(--color-text); font-weight: 600; }
+
+  .hcd-toggle { position: relative; display: inline-flex; align-items: center; width: 38px; height: 22px; flex-shrink: 0; }
+  .hcd-toggle input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+  .hcd-toggle-track { position: absolute; inset: 0; background: #DAD8E3; border-radius: 999px; transition: background 0.15s; pointer-events: none; }
+  .hcd-toggle input:checked ~ .hcd-toggle-track { background: var(--color-primary); }
+  .hcd-toggle-knob { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); pointer-events: none; }
+  .hcd-toggle input:checked ~ .hcd-toggle-knob { transform: translateX(16px); }
+  .hcd-toggle input:disabled { cursor: not-allowed; }
+  .hcd-toggle input:disabled ~ .hcd-toggle-track { opacity: 0.5; }
+
+  .hcd-role-lock-note {
+    margin-top: 14px; font-size: 12px; color: #92400E; background: #FFFBEB;
+    border: 1px solid #FDE68A; border-radius: 8px; padding: 8px 12px;
+  }
+
+  .hcd-currency-map { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; font-size: 12px; }
+  .hcd-currency-map-row { display: flex; gap: 8px; }
+  .hcd-currency-map-row b { min-width: 130px; display: inline-block; }
+
+  /* ── Before / after: repurposed per-calendar control ── */
   .hcd-migrate-row { display: flex; align-items: stretch; gap: 14px; flex-wrap: wrap; }
   .hcd-migrate-col { flex: 1 1 260px; }
   .hcd-migrate-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--color-text-muted); margin-bottom: 8px; }
@@ -119,7 +153,7 @@
   .hcd-after-badge-dot { width: 8px; height: 8px; border-radius: 999px; background: #166534; flex-shrink: 0; }
 
   /* ── Calendar panel header (Google Calendar badge / New button) ── */
-  .hcd-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .hcd-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
   .hcd-panel-head h2 { font-size: 16px; font-weight: 700; }
   .hcd-panel-head-right { display: flex; align-items: center; gap: 8px; }
   .hcd-gcal-badge {
@@ -130,6 +164,7 @@
     background: var(--color-primary); color: #fff; border: none; border-radius: 8px;
     padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: default; opacity: 0.9;
   }
+  .hcd-gcal-independent-note { font-size: 11px; color: var(--color-text-muted); margin-bottom: 10px; }
 
   /* ── Toolbar ── */
   .hcd-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 0; border-top: 1px solid #F0EFF5; border-bottom: 1px solid #F0EFF5; margin-bottom: 12px; }
@@ -150,11 +185,32 @@
     padding: 5px 9px; font-size: 12px; color: var(--color-text); font-weight: 600; font-family: inherit;
   }
   .hcd-toolbar-spacer { flex: 1 1 auto; min-width: 4px; }
-  .hcd-holiday-wrap { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .hcd-holiday-wrap label { font-size: 12px; font-weight: 700; }
-  .hcd-select.hcd-holiday-select { border-color: var(--color-primary); color: var(--color-primary-active); }
-  .hcd-pref-hint { font-size: 11px; color: var(--color-text-muted); width: 100%; margin-top: 2px; }
-  .hcd-pref-hint b { color: var(--color-text); font-weight: 700; }
+
+  /* ── Event Type filter (custom checkbox dropdown, carries the Holidays entry) ── */
+  .hcd-eventtype-wrap { position: relative; }
+  .hcd-eventtype-btn { cursor: pointer; position: relative; }
+  .hcd-eventtype-btn.has-filter::after {
+    content: ''; position: absolute; top: -3px; right: -3px; width: 7px; height: 7px;
+    border-radius: 999px; background: var(--color-primary); border: 1.5px solid #fff;
+  }
+  .hcd-eventtype-menu {
+    position: absolute; top: calc(100% + 4px); left: 0; z-index: 30; min-width: 220px;
+    background: #fff; border: 1px solid var(--color-border); border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(50,65,91,0.14); padding: 6px;
+  }
+  .hcd-eventtype-item {
+    display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px;
+    font-size: 12px; font-weight: 600; color: var(--color-text); cursor: default;
+  }
+  .hcd-eventtype-item input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--color-primary); flex-shrink: 0; }
+  .hcd-eventtype-item--holiday { cursor: pointer; }
+  .hcd-eventtype-item--holiday input { cursor: pointer; }
+  .hcd-eventtype-item--holiday:hover { background: #F8F7FE; }
+  .hcd-eventtype-divider { border-top: 1px solid var(--color-border); margin: 4px 2px; }
+  .hcd-eventtype-region-tag {
+    margin-left: auto; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px;
+    color: var(--color-primary-active); background: #E8E6FA; border-radius: 999px; padding: 2px 7px; flex-shrink: 0;
+  }
 
   /* ── Calendar + side panel row ── */
   .hcd-cal-row { display: flex; gap: 16px; align-items: flex-start; }
@@ -238,44 +294,86 @@
   <div class="proto-bar-left">
     <a class="back-link" href="../index.html">← Hub</a>
     <span class="divider">|</span>
-    <span class="proto-bar-title">Holiday Calendar — Independent Per-Calendar Controls</span>
+    <span class="proto-bar-title">Holiday Calendar: Company-Wide Region + Display Toggle</span>
   </div>
-  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bbrazc3" target="_blank">86bbrazc3</a>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bbv6zhh" target="_blank">86bbv6zhh</a>
 </div>
 
 <div class="proto-content" id="hcd-page">
 
   <div class="hcd-header">
-    <h1>Holiday Calendar — Independent Per-Calendar Controls</h1>
-    <p>Prototype for ticket 86bbrazc3, a follow-up to <a href="https://app.clickup.com/t/86bbc0rvr" target="_blank">86bbc0rvr</a>. The Holiday Calendar preference (None / United States / Canada / United States &amp; Canada) moves out of User Profile entirely. Each calendar, Appointments and Job Schedule, now has its own independent control: changing one has no effect on the other. This supersedes the original ticket's BR-2 (single per-user setting) and BR-8 (one control governs both calendars).</p>
+    <h1>Holiday Calendar: Company-Wide Region, Per-User Display Toggle</h1>
+    <p>Prototype for ticket 86bbv6zhh. Replaces the per-user region model shipped in <a href="https://app.clickup.com/t/86bbc0rvr" target="_blank">86bbc0rvr</a> and its on-hold follow-up <a href="https://app.clickup.com/t/86bbrazc3" target="_blank">86bbrazc3</a>, superseded by this ticket and being closed (BR-9). Holiday Region (None / United States / Canada / United States &amp; Canada) is now a single Company Settings value that a Company Admin manages for the whole company. The old per-user control is repurposed rather than replaced with something new: a "Holidays" entry now appears in each calendar's existing Event Type filter, checked by default, independently uncheckable per calendar.</p>
   </div>
 
-  <div class="settings-alert settings-alert--info">
-    <span class="settings-alert-icon">ℹ️</span>
-    <div>
-      <div class="settings-alert-title">Migration at rollout (BR-8)</div>
-      <div>This demo user previously had <b>United States &amp; Canada</b> selected in User Profile. At rollout, that single value seeds both the Appointments and the Job Schedule preference below. From here forward the two are independently editable, try changing one and confirm the other doesn't move.</div>
+  <div class="settings-section">
+    <div class="settings-section-title">Company Settings → Holidays (BR-1, BR-3, BR-11)</div>
+    <div class="settings-section-subtitle">Editable only by Company Admin role or higher. Determines what the whole company sees.</div>
+
+    <div class="hcd-role-switch">
+      <span class="hcd-role-switch-label">Viewing as:</span>
+      <button type="button" class="hcd-role-btn active" id="roleBtn-admin" onclick="setViewerRole('admin')">Company Admin</button>
+      <button type="button" class="hcd-role-btn" id="roleBtn-standard" onclick="setViewerRole('standard')">Standard User</button>
+    </div>
+
+    <div class="hcd-company-fields">
+      <div class="hcd-company-field">
+        <label for="companyRegionSelect">Holiday Region</label>
+        <select class="hcd-select" id="companyRegionSelect" onchange="onCompanyRegionChange(this.value)">
+          <option value="none">None</option>
+          <option value="us">United States</option>
+          <option value="ca">Canada</option>
+          <option value="both">United States &amp; Canada</option>
+        </select>
+      </div>
+      <div class="hcd-company-field">
+        <label for="companyDefaultVisToggle">Show holidays by default</label>
+        <div class="hcd-company-field-row">
+          <label class="hcd-toggle">
+            <input type="checkbox" id="companyDefaultVisToggle" checked onchange="onCompanyDefaultVisibilityChange(this.checked)" />
+            <span class="hcd-toggle-track"></span>
+            <span class="hcd-toggle-knob"></span>
+          </label>
+          <span id="companyDefaultVisLabel">On</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hcd-role-lock-note" id="roleLockNote" hidden>🔒 Only Company Admin or higher can edit these settings (BR-11). Signed in as Standard User, both controls above are disabled.</div>
+
+    <div class="settings-alert settings-alert--info" style="margin-top:14px;">
+      <span class="settings-alert-icon">ℹ️</span>
+      <div>
+        <div class="settings-alert-title">Signup and rollout defaults (BR-6, BR-10)</div>
+        <div>Holiday Region is derived automatically from the company's currency, set in Company Settings → Payments → Currency, the same mapping pattern Acorn Finance uses:</div>
+        <div class="hcd-currency-map">
+          <div class="hcd-currency-map-row"><b>USD</b> → United States</div>
+          <div class="hcd-currency-map-row"><b>CAD</b> → Canada</div>
+          <div class="hcd-currency-map-row"><b>Any other currency</b> → United States (fallback)</div>
+        </div>
+        <div style="margin-top:8px;">This demo company's currency is USD, which is why Holiday Region starts on United States. The same mapping applies to every new signup going forward and was applied to every existing company at rollout, with the default visibility toggle enabled, regardless of any per-user region previously selected under 86bbc0rvr.</div>
+      </div>
     </div>
   </div>
 
   <div class="settings-section">
-    <div class="settings-section-title">Before / after: User Profile (BR-1)</div>
-    <div class="settings-section-subtitle">The preference no longer lives in a shared location. It's now set from within each calendar.</div>
+    <div class="settings-section-title">Before / after: the per-calendar control (BR-2, BR-9)</div>
+    <div class="settings-section-subtitle">No new control is added to either calendar. The dedicated region select from the on-hold 86bbrazc3 prototype is gone; its job moves into the Event Type filter that already exists on the page.</div>
     <div class="hcd-migrate-row">
       <div class="hcd-migrate-col">
-        <div class="hcd-migrate-label">Before — User Profile</div>
+        <div class="hcd-migrate-label">Before, 86bbrazc3 (superseded, being closed)</div>
         <div class="hcd-profile-mock">
-          <div class="hcd-profile-mock-row"><span>Time Zone</span><span>Eastern Time (US &amp; Canada)</span></div>
-          <div class="hcd-profile-mock-row hcd-profile-mock-removed"><span>Holiday Calendar</span><span class="hcd-profile-mock-removed-tag">Removed</span></div>
-          <div class="hcd-profile-mock-row"><span>Notification Preferences</span><span>Manage &rsaquo;</span></div>
+          <div class="hcd-profile-mock-row"><span>View</span><span>Month ▾</span></div>
+          <div class="hcd-profile-mock-row hcd-profile-mock-removed"><span>Dedicated "Holiday Calendar" select</span><span class="hcd-profile-mock-removed-tag">Removed</span></div>
+          <div class="hcd-profile-mock-row"><span>All Event Types</span><span>▾</span></div>
         </div>
       </div>
       <div class="hcd-arrow-col">→</div>
       <div class="hcd-migrate-col">
-        <div class="hcd-migrate-label">After — set per calendar</div>
+        <div class="hcd-migrate-label">After, this ticket</div>
         <div class="hcd-after-badges">
-          <div class="hcd-after-badge"><span class="hcd-after-badge-dot"></span>Appointments calendar toolbar, below</div>
-          <div class="hcd-after-badge"><span class="hcd-after-badge-dot"></span>Job Schedule calendar toolbar, below</div>
+          <div class="hcd-after-badge"><span class="hcd-after-badge-dot"></span>Region set once, company-wide, in Company Settings above</div>
+          <div class="hcd-after-badge"><span class="hcd-after-badge-dot"></span>Per-calendar visibility lives inside the existing Event Types filter, below</div>
         </div>
       </div>
     </div>
@@ -297,6 +395,7 @@
         <button class="hcd-btn-decorative" title="Not part of this prototype">+ New Appointment ▾</button>
       </div>
     </div>
+    <div class="hcd-gcal-independent-note">Works the same whether or not Google Calendar is connected (BR-5), holidays are driven by Company Settings and the filter below, never by the calendar sync.</div>
 
     <div class="hcd-toolbar">
       <div class="hcd-view-toggle">
@@ -308,19 +407,12 @@
         <span class="hcd-month-label" id="appt-monthLabel"></span>
         <button class="hcd-nav-btn" onclick="shiftAnchor('appt',1)">›</button>
       </div>
-      <select class="hcd-select" disabled><option>All Event Types</option></select>
+      <div class="hcd-eventtype-wrap" id="appt-eventTypeWrap">
+        <button type="button" class="hcd-select hcd-eventtype-btn" id="appt-eventTypeBtn" onclick="toggleEventTypeMenu('appt')">Event Types ▾</button>
+        <div class="hcd-eventtype-menu" id="appt-eventTypeMenu" hidden></div>
+      </div>
       <select class="hcd-select" disabled><option>All Users</option></select>
       <div class="hcd-toolbar-spacer"></div>
-      <div class="hcd-holiday-wrap">
-        <label for="appt-holidaySelect">Holiday Calendar</label>
-        <select class="hcd-select hcd-holiday-select" id="appt-holidaySelect" onchange="onHolidayChange('appt', this.value)">
-          <option value="none">None</option>
-          <option value="us">United States</option>
-          <option value="ca">Canada</option>
-          <option value="both">United States &amp; Canada</option>
-        </select>
-      </div>
-      <div class="hcd-pref-hint">Applies to <b>this calendar only</b>. Job Schedule has its own, independent selection.</div>
     </div>
 
     <div class="hcd-cal-row">
@@ -366,6 +458,7 @@
         <button class="hcd-btn-decorative" title="Not part of this prototype">+ New Event ▾</button>
       </div>
     </div>
+    <div class="hcd-gcal-independent-note">Works the same whether or not Google Calendar is connected (BR-5), holidays are driven by Company Settings and the filter below, never by the calendar sync.</div>
 
     <div class="hcd-toolbar">
       <div class="hcd-view-toggle">
@@ -379,18 +472,11 @@
       </div>
       <select class="hcd-select" disabled><option>All Crews</option></select>
       <select class="hcd-select" disabled><option>All Users</option></select>
-      <select class="hcd-select" disabled><option>All Event Types</option></select>
-      <div class="hcd-toolbar-spacer"></div>
-      <div class="hcd-holiday-wrap">
-        <label for="job-holidaySelect">Holiday Calendar</label>
-        <select class="hcd-select hcd-holiday-select" id="job-holidaySelect" onchange="onHolidayChange('job', this.value)">
-          <option value="none">None</option>
-          <option value="us">United States</option>
-          <option value="ca">Canada</option>
-          <option value="both">United States &amp; Canada</option>
-        </select>
+      <div class="hcd-eventtype-wrap" id="job-eventTypeWrap">
+        <button type="button" class="hcd-select hcd-eventtype-btn" id="job-eventTypeBtn" onclick="toggleEventTypeMenu('job')">Event Types ▾</button>
+        <div class="hcd-eventtype-menu" id="job-eventTypeMenu" hidden></div>
       </div>
-      <div class="hcd-pref-hint">Applies to <b>this calendar only</b>. Appointments has its own, independent selection.</div>
+      <div class="hcd-toolbar-spacer"></div>
     </div>
 
     <div class="hcd-cal-row">
@@ -458,15 +544,21 @@
 
   <div class="settings-section">
     <div class="settings-section-title">Acceptance criteria coverage</div>
-    <div class="settings-section-subtitle">How this prototype demonstrates each acceptance criterion from ticket 86bbrazc3.</div>
+    <div class="settings-section-subtitle">How this prototype demonstrates each acceptance criterion from ticket 86bbv6zhh.</div>
     <div class="hcd-ac-list">
-      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Holiday Calendar control no longer appears in User Profile</b> — <span class="muted">the "Before / after: User Profile" card above shows the row removed.</span></span></div>
-      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Control present within the Appointments calendar</b> — <span class="muted">Appointments tab toolbar, same four options as before.</span></span></div>
-      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Control present within the Job Schedule calendar</b> — <span class="muted">Job Schedule tab toolbar, same four options.</span></span></div>
-      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Changing one has no effect on the other</b> — <span class="muted">each select drives its own calendar's holiday blocks only, try it below.</span></span></div>
-      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>A user can set different regions (or None) independently</b> — <span class="muted">e.g. set Appointments to United States and Job Schedule to None.</span></span></div>
-      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Holiday block behavior matches 86bbc0rvr, applied per calendar</b> — <span class="muted">labeling, dashed amber styling, timezone-based resolution, and non-blocking scheduling are unchanged, BR-6, just driven by two values instead of one.</span></span></div>
-      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Existing users' prior selection carries forward to both calendars at rollout</b> — <span class="muted">both selects load pre-set to this demo user's prior value, United States &amp; Canada, per the migration alert above.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Company Settings Holiday Region control, None/US/Canada/Both, Admin-only</b> — <span class="muted">the Company Settings card above, try "Viewing as: Standard User" to see it lock.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Company Settings default visibility setting, Admin-only</b> — <span class="muted">the toggle beside the region select in the same card.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Holidays entry appears in the Appointments Event Type filter when enabled</b> — <span class="muted">open Appointments' Event Types dropdown with any region other than None selected.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Holidays entry appears in the Job Schedule Event Type filter when enabled</b> — <span class="muted">same, Job Schedule tab.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>No Holidays entry in either filter when region is None</b> — <span class="muted">set Company Settings Region to None and reopen either Event Types dropdown.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Unchecking Holidays on Appointments hides holidays there only</b> — <span class="muted">try it, Job Schedule's holiday blocks are unaffected.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Unchecking Holidays on Job Schedule hides holidays there only</b> — <span class="muted">same, reverse direction.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>No new toggle or control beyond the existing Event Type filter</b> — <span class="muted">the dedicated Holiday Calendar select from 86bbrazc3 is gone, see Before/After above.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Holiday display, labeling, and timezone behavior matches 86bbc0rvr</b> — <span class="muted">dashed amber styling, country flags on same-named holidays, unchanged rule engine, BR-7, now reading one company region instead of a per-user one.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Google Calendar connection has no bearing</b> — <span class="muted">note under each calendar's connected badge, region and filter state never read the Google Calendar connection.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>New signups get Region from signup currency, Holidays checked by default</b> — <span class="muted">signup/rollout note in Company Settings above.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>Existing companies get Region from currency at rollout, checked by default regardless of prior per-user picks</b> — <span class="muted">same note, this demo company starts on United States from its USD currency.</span></span></div>
+      <div class="hcd-ac-item"><span class="hcd-ac-check">✓</span><span><b>A non-admin cannot access or edit the company settings</b> — <span class="muted">switch "Viewing as" to Standard User above, both controls disable and a lock note appears.</span></span></div>
     </div>
   </div>
 
@@ -474,11 +566,16 @@
 
 <script>
   const DEMO_TODAY = new Date(2026, 7, 18); // Aug 18, 2026 — matches the ticket's screenshots
-  const MIGRATED_LEGACY_VALUE = 'both'; // this demo user's prior single User Profile value, seeds both calendars at rollout
 
+  // ── Company-level state (BR-1, BR-3) ──
+  let companyHolidayRegion = 'us'; // this demo company's currency is USD, mapped per BR-6/BR-10
+  let companyDefaultVisibility = true; // Holidays entry checked by default company-wide (BR-3)
+  let viewerRole = 'admin'; // 'admin' | 'standard', gates Company Settings editing (BR-11)
+
+  // ── Per-calendar state (BR-4, BR-8): visibility is independent per calendar, region is not ──
   const calState = {
-    appt: { view: 'month', anchor: new Date(2026, 7, 1), holidayRegion: MIGRATED_LEGACY_VALUE },
-    job:  { view: 'month', anchor: new Date(2026, 7, 1), holidayRegion: MIGRATED_LEGACY_VALUE },
+    appt: { view: 'month', anchor: new Date(2026, 7, 1), holidayVisible: true, holidayOverridden: false },
+    job:  { view: 'month', anchor: new Date(2026, 7, 1), holidayVisible: true, holidayOverridden: false },
   };
 
   // ── Sample events (decorative, matches the ticket's screenshots) ──
@@ -498,7 +595,7 @@
   };
 
   // ── Holiday date-rule engine (fixed-date and relative-weekday rules, resolves for any year) ──
-  // Unchanged from ticket 86bbc0rvr's prototype, BR-6 carries this forward as-is.
+  // Unchanged from ticket 86bbc0rvr's prototype, BR-7 carries this forward as-is.
   function fixedDate(y, m, d) { return new Date(y, m, d); }
   function nthWeekday(y, m, weekday, n) {
     const first = new Date(y, m, 1);
@@ -556,14 +653,17 @@
     if (region === 'ca' || region === 'both') list = list.concat(CA_HOLIDAY_RULES.map(h => ({ name: h.name, country: 'CA', date: h.rule(year) })));
     return list.filter(h => sameDay(h.date, date));
   }
+  function regionLabel(region) {
+    return region === 'us' ? 'US' : region === 'ca' ? 'CA' : 'US & CA';
+  }
 
   // ── Rendering ──
-  function lineHTML(l, calRegion) {
+  function lineHTML(l) {
     if (l.kind === 'event') {
       const color = l.color || '#7C3AED';
       return `<div class="hcd-event-chip" style="border-left-color:${color}"><span class="hcd-event-time">${l.time}</span><span class="hcd-event-title">${l.title}</span></div>`;
     }
-    const tag = calRegion === 'both' ? `<span class="hcd-flag">${l.country}</span>` : '';
+    const tag = companyHolidayRegion === 'both' ? `<span class="hcd-flag">${l.country}</span>` : '';
     const countryName = l.country === 'US' ? 'United States' : 'Canada';
     return `<div class="hcd-holiday-chip" title="${l.name} — ${countryName} holiday, non-editable"><span class="hcd-holiday-name">${l.name}</span>${tag}</div>`;
   }
@@ -584,11 +684,14 @@
     return cells;
   }
 
+  function calendarShowsHolidays(calId) {
+    return companyHolidayRegion !== 'none' && calState[calId].holidayVisible;
+  }
+
   function monthCellHTML(calId, cellDate, isOtherMonth) {
-    const region = calState[calId].holidayRegion;
     const key = dateKey(cellDate);
     const events = (EVENTS[calId][key] || []).map(e => ({ ...e, kind: 'event' }));
-    const holidays = holidaysOnDate(cellDate, region).map(h => ({ ...h, kind: 'holiday' }));
+    const holidays = calendarShowsHolidays(calId) ? holidaysOnDate(cellDate, companyHolidayRegion).map(h => ({ ...h, kind: 'holiday' })) : [];
     const lines = events.concat(holidays);
     const visible = lines.slice(0, 3);
     const overflow = lines.length - visible.length;
@@ -597,8 +700,8 @@
     const classes = ['hcd-month-cell', isOtherMonth ? 'hcd-month-cell--other' : '', isToday ? 'hcd-month-cell--today' : ''].filter(Boolean).join(' ');
     return `<div class="${classes}">
       <div class="hcd-month-date">${cellDate.getDate()}</div>
-      <div class="hcd-month-lines">${visible.map(l => lineHTML(l, region)).join('')}</div>
-      ${overflow > 0 ? `<button type="button" class="hcd-month-more" data-target="${cellId}-extra" data-count="${overflow}">+${overflow} more</button><div class="hcd-month-extra" id="${cellId}-extra" hidden>${lines.slice(3).map(l => lineHTML(l, region)).join('')}</div>` : ''}
+      <div class="hcd-month-lines">${visible.map(lineHTML).join('')}</div>
+      ${overflow > 0 ? `<button type="button" class="hcd-month-more" data-target="${cellId}-extra" data-count="${overflow}">+${overflow} more</button><div class="hcd-month-extra" id="${cellId}-extra" hidden>${lines.slice(3).map(lineHTML).join('')}</div>` : ''}
     </div>`;
   }
 
@@ -624,19 +727,18 @@
 
   function render3Day(calId) {
     const state = calState[calId];
-    const region = state.holidayRegion;
     const dates = [0, 1, 2].map(o => { const d = new Date(state.anchor); d.setDate(d.getDate() + o); return d; });
     const grid = document.getElementById(`${calId}-grid`);
     grid.innerHTML = `<div class="hcd-3day-grid">${dates.map(d => {
       const key = dateKey(d);
       const events = EVENTS[calId][key] || [];
-      const holidays = holidaysOnDate(d, region);
+      const holidays = calendarShowsHolidays(calId) ? holidaysOnDate(d, companyHolidayRegion) : [];
       const isToday = sameDay(d, DEMO_TODAY);
       return `<div class="hcd-3day-col ${isToday ? 'hcd-3day-col--today' : ''}">
         <div class="hcd-3day-head">${d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</div>
         <div class="hcd-3day-allday-label">All-day</div>
-        <div class="hcd-3day-allday">${holidays.length ? holidays.map(h => lineHTML({ ...h, kind: 'holiday' }, region)).join('') : '<div class="hcd-3day-empty">—</div>'}</div>
-        <div class="hcd-3day-events">${events.length ? events.map(e => lineHTML({ ...e, kind: 'event' }, region)).join('') : '<div class="hcd-3day-empty">No events</div>'}</div>
+        <div class="hcd-3day-allday">${holidays.length ? holidays.map(h => lineHTML({ ...h, kind: 'holiday' })).join('') : '<div class="hcd-3day-empty">—</div>'}</div>
+        <div class="hcd-3day-events">${events.length ? events.map(e => lineHTML({ ...e, kind: 'event' })).join('') : '<div class="hcd-3day-empty">No events</div>'}</div>
       </div>`;
     }).join('')}</div>`;
     const end = dates[2];
@@ -664,15 +766,90 @@
     renderCalendar(calId);
   }
 
-  // Each calendar's preference is independent: only the calendar the select belongs to re-renders.
-  function onHolidayChange(calId, value) {
-    calState[calId].holidayRegion = value;
+  // ── Event Type filter dropdown (BR-2): carries the Holidays entry, independent per calendar ──
+  const DECORATIVE_EVENT_TYPES = {
+    appt: ['On-Site Estimates', 'Follow-ups'],
+    job: ['Jobs', 'Crew Assignments'],
+  };
+
+  function renderEventTypeFilter(calId) {
+    const state = calState[calId];
+    const menu = document.getElementById(`${calId}-eventTypeMenu`);
+    const btn = document.getElementById(`${calId}-eventTypeBtn`);
+
+    let html = DECORATIVE_EVENT_TYPES[calId].map(label => `
+      <label class="hcd-eventtype-item" title="Not part of this prototype">
+        <input type="checkbox" checked disabled />${label}
+      </label>`).join('');
+
+    let hasFilter = false;
+    if (companyHolidayRegion !== 'none') {
+      html += `<div class="hcd-eventtype-divider"></div>
+        <label class="hcd-eventtype-item hcd-eventtype-item--holiday" title="Region is set by your Company Admin in Company Settings. Unchecking this only hides holidays on this calendar, for you.">
+          <input type="checkbox" ${state.holidayVisible ? 'checked' : ''} onchange="onHolidayVisibilityChange('${calId}', this.checked)" />
+          Holidays <span class="hcd-eventtype-region-tag">${regionLabel(companyHolidayRegion)}</span>
+        </label>`;
+      if (!state.holidayVisible) hasFilter = true;
+    }
+    menu.innerHTML = html;
+    btn.classList.toggle('has-filter', hasFilter);
+  }
+
+  function toggleEventTypeMenu(calId) {
+    const otherId = calId === 'appt' ? 'job' : 'appt';
+    document.getElementById(`${otherId}-eventTypeMenu`).hidden = true;
+    const menu = document.getElementById(`${calId}-eventTypeMenu`);
+    menu.hidden = !menu.hidden;
+  }
+
+  document.addEventListener('click', (e) => {
+    ['appt', 'job'].forEach(calId => {
+      const wrap = document.getElementById(`${calId}-eventTypeWrap`);
+      if (wrap && !wrap.contains(e.target)) document.getElementById(`${calId}-eventTypeMenu`).hidden = true;
+    });
+  });
+
+  // A user's own checked state is independent per calendar (BR-4) and persists once they've set it,
+  // regardless of later company default changes.
+  function onHolidayVisibilityChange(calId, checked) {
+    calState[calId].holidayVisible = checked;
+    calState[calId].holidayOverridden = true;
+    renderEventTypeFilter(calId);
     renderCalendar(calId);
   }
 
-  // ── Init selects to the migrated legacy value ──
-  document.getElementById('appt-holidaySelect').value = MIGRATED_LEGACY_VALUE;
-  document.getElementById('job-holidaySelect').value = MIGRATED_LEGACY_VALUE;
+  // ── Company Settings handlers (BR-1, BR-3) ──
+  function onCompanyRegionChange(value) {
+    companyHolidayRegion = value;
+    ['appt', 'job'].forEach(calId => {
+      renderEventTypeFilter(calId);
+      renderCalendar(calId);
+    });
+  }
+
+  function onCompanyDefaultVisibilityChange(checked) {
+    companyDefaultVisibility = checked;
+    document.getElementById('companyDefaultVisLabel').textContent = checked ? 'On' : 'Off';
+    ['appt', 'job'].forEach(calId => {
+      // Only calendars the user hasn't already overridden pick up the new company default (BR-4).
+      if (!calState[calId].holidayOverridden) {
+        calState[calId].holidayVisible = checked;
+        renderEventTypeFilter(calId);
+        renderCalendar(calId);
+      }
+    });
+  }
+
+  // ── Role gate (BR-11) ──
+  function setViewerRole(role) {
+    viewerRole = role;
+    const isAdmin = role === 'admin';
+    document.getElementById('roleBtn-admin').classList.toggle('active', isAdmin);
+    document.getElementById('roleBtn-standard').classList.toggle('active', !isAdmin);
+    document.getElementById('companyRegionSelect').disabled = !isAdmin;
+    document.getElementById('companyDefaultVisToggle').disabled = !isAdmin;
+    document.getElementById('roleLockNote').hidden = isAdmin;
+  }
 
   // ── Tabs ──
   document.querySelectorAll('.settings-tab-link').forEach(a => {
@@ -685,6 +862,10 @@
   });
 
   // ── Init ──
+  document.getElementById('companyRegionSelect').value = companyHolidayRegion;
+  document.getElementById('companyDefaultVisToggle').checked = companyDefaultVisibility;
+  renderEventTypeFilter('appt');
+  renderEventTypeFilter('job');
   renderCalendar('appt');
   renderCalendar('job');
 </script>
