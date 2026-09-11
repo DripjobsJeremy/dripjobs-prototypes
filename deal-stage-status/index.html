@@ -4,7 +4,7 @@
 <script src="../gate.js"></script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deal Stage &amp; Deal/Proposal Status, DripJobs</title>
+<title>Deal Stage &amp; Deal/Proposal Status (Read-Only), DripJobs</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <style>
@@ -341,7 +341,7 @@
     <span class="proto-bar-title">Deal Stage &amp; Deal/Proposal Status</span>
   </div>
   <div class="proto-bar-right">
-    <span class="proto-bar-pill muted">New</span>
+    <span class="proto-bar-pill muted">Needs Design</span>
     <a class="proto-bar-pill" href="https://app.clickup.com/t/8633445/86bbyr3w2" target="_blank">86bbyr3w2</a>
   </div>
 </div>
@@ -350,7 +350,7 @@
 
   <div class="mock-context">
     <span class="tag">Mockup · Ticket 86bbyr3w2</span>
-    <span>Edit Deal Details modal: Deal Stage &amp; Deal/Proposal Status fields only. All other sections unchanged from current UI.</span>
+    <span>Edit Deal Details modal: Deal Stage &amp; Deal/Proposal Status fields only, now read-only per the 2026-09-10 pivot (was an editable, stage-filtered dropdown in the earlier version of this ticket). All other sections unchanged from current UI.</span>
   </div>
 
   <div class="deal-modal">
@@ -409,23 +409,16 @@
 
         <div class="dj-hr"></div>
 
-        <!-- CHANGED FIELDS: Deal Stage + Deal/Proposal Status (stacked vertically, matches current modal layout) -->
+        <!-- CHANGED FIELDS: Deal Stage + Deal/Proposal Status now read-only, per pivot to Option A (2026-09-10) -->
         <div class="dj-row single dj-field-wrap-changed">
           <div class="dj-field">
             <label>
               Deal Stage
-              <span class="br-chip">i<span class="tip">Relabeled from "Stage" per AC. Selecting a stage filters the statuses available below.</span></span>
-              <span class="changed-badge">Updated</span>
+              <span class="br-chip">i<span class="tip">BR1: Relabeled from "Stage" and made read-only. Stage is already set correctly by actions elsewhere (proposal sent, appointment scheduled, job completed, etc.), so this control no longer accepts edits.</span></span>
+              <span class="changed-badge">Now Read-Only</span>
             </label>
-            <select id="dealStage">
-              <option value="cold_leads">Cold Leads</option>
-              <option value="warm_leads">Warm Leads</option>
-              <option value="estimate_requested">Estimate Requested</option>
-              <option value="estimate_scheduled" selected>Estimate Scheduled</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="in_draft">In Draft</option>
-            </select>
-            <div class="dj-helper">Tracks the deal's position in your pipeline. Changing this moves the deal to a different stage.</div>
+            <input type="text" value="Estimate Scheduled" disabled>
+            <div class="dj-helper">Shows where this deal or job currently sits in the pipeline. It's set automatically based on actions like sending a proposal or scheduling an appointment, and can't be changed here.</div>
           </div>
         </div>
 
@@ -433,11 +426,11 @@
           <div class="dj-field">
             <label>
               Deal/Proposal Status
-              <span class="br-chip">i<span class="tip">Relabeled from "Deal Status" per AC. Options are filtered to only those valid for the selected Deal Stage.</span></span>
-              <span class="changed-badge">Updated</span>
+              <span class="br-chip">i<span class="tip">BR2: Relabeled from "Deal Status" and made read-only, same reasoning as Deal Stage above.</span></span>
+              <span class="changed-badge">Now Read-Only</span>
             </label>
-            <select id="dealStatus"></select>
-            <div class="dj-helper">Status of the deal at this stage. Once a proposal is sent, this tracks whether it's pending, accepted, or rejected.</div>
+            <input type="text" value="Scheduled" disabled>
+            <div class="dj-helper">Shows the current status of the deal or proposal. It's set automatically as the deal or job progresses, and can't be changed here.</div>
           </div>
         </div>
 
@@ -511,47 +504,14 @@
 <div class="dj-toast" id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Saved</span></div>
 
 <script>
-  // Full status set per ticket: Open, Pending, Accepted, Rejected, Scheduled, Cancelled
-  // (Completed removed, that's a Jobs Pipeline stage, not a Deal Pipeline status).
-  // Which statuses are valid per stage was not specified in the ticket, this mapping
-  // is a placeholder for Jeremy to confirm, see docs/decision-log.md.
-  var statusesByStage = {
-    cold_leads:         ["Open"],
-    warm_leads:         ["Open","Pending"],
-    estimate_requested: ["Open","Pending","Scheduled"],
-    estimate_scheduled: ["Scheduled","Pending"],
-    cancelled:          ["Cancelled"],
-    in_draft:           ["Open"]
-  };
-
-  var stageSelect = document.getElementById('dealStage');
-  var statusSelect = document.getElementById('dealStatus');
-
-  function populateStatuses(stageKey, preferredValue) {
-    var options = statusesByStage[stageKey] || [];
-    statusSelect.innerHTML = "";
-    options.forEach(function(opt) {
-      var el = document.createElement('option');
-      el.value = opt;
-      el.textContent = opt;
-      statusSelect.appendChild(el);
-    });
-    if (preferredValue && options.indexOf(preferredValue) !== -1) {
-      statusSelect.value = preferredValue;
-    }
-  }
-
-  stageSelect.addEventListener('change', function() {
-    populateStatuses(this.value);
-  });
-
-  // initial state mirrors the provided screenshot: Estimate Scheduled / Scheduled
-  populateStatuses('estimate_scheduled', 'Scheduled');
-
+  // Deal Stage and Deal/Proposal Status are read-only display fields as of the
+  // 2026-09-10 pivot, no stage-aware filtering logic needed. Save still applies
+  // to the other editable fields in this modal, per AC: "No Save or submit
+  // action is exposed for Stage or Status from this modal."
   var toast = document.getElementById('toast');
   var toastMsg = document.getElementById('toastMsg');
   document.getElementById('saveBtn').addEventListener('click', function() {
-    toastMsg.textContent = "Saved, Deal Stage: " + stageSelect.options[stageSelect.selectedIndex].text + ", Status: " + statusSelect.value;
+    toastMsg.textContent = "Saved";
     toast.classList.add('show');
     setTimeout(function() { toast.classList.remove('show'); }, 2600);
   });
