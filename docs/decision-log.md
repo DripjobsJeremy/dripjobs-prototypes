@@ -9,6 +9,19 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-11] Deal Stage / Deal-Proposal Status: confirmed final copy, added Sales/Jobs pipeline toggle (86bbyr3w2)
+
+- Decision: Replaced the ticket's earlier draft helper text with Jeremy's confirmed final copy, and added a "Sales Pipeline (Deal)" / "Jobs Pipeline (Job)" segmented toggle above the modal so both label sets are demonstrated in one prototype: Deal Stage/Deal-Proposal Status (Sales) and Job Stage/Job Status (Jobs), each with its own confirmed helper text. Toggling also swaps the modal title and the Stage/Status sample values (Sales shows Estimate Scheduled/Scheduled, Jobs shows Project Scheduled/Scheduled, matching the ticket's own "scheduling the job" trigger example). Only the Stage/Status fields and modal title change between the two, every other section stays identical, per the ticket's scope.
+- Why: Direct request to confirm the copy and show both pipeline versions in one prototype rather than two separate files.
+- Assumption: The Job modal's record number (#3109241) is an illustrative placeholder pulled from the ticket's own list of walkthrough record IDs, not a confirmed real Job ID tied to this ticket, it doesn't affect the AC.
+
+## [2026-09-11] Deal Stage / Deal-Proposal Status: pivoted to read-only per ticket update (86bbyr3w2)
+
+- Decision: Rebuilt `deal-stage-status/index.html` per the ticket's confirmed pivot away from the editable, stage-filtered dropdown: Deal Stage and Deal/Proposal Status are now read-only fields (disabled text inputs, matching the modal's existing Contact/Lead Source read-only pattern), with new helper text and BR-chip annotations explaining why. Removed the now-obsolete stage-to-status filtering JS and simplified the Save toast to a generic "Saved" message, since AC explicitly requires no Save/submit action for these two fields. Updated the hub card's status to "Needs Design" (matches the ticket's current ClickUp status) and rewrote its description.
+- Why: Direct ticket walkthrough across all 8 Sales and 5 Jobs Pipeline stages showed both dropdowns were unfiltered and non-functional (edits silently failed to save) and that Stage/Status are already correctly driven by other actions in the app (proposal created/sent/accepted, appointment scheduled, job scheduled/completed). Per Jeremy's confirmed direction, retrofitting filtering logic into a control that duplicates that behavior was rejected in favor of removing the broken edit affordance entirely.
+- Assumption: Used the two draft helper-text replacements quoted verbatim in the ticket ("Shows where this deal or job currently sits in the pipeline..." / "Shows the current status of the deal or proposal...") even though the ticket itself flags that copy as pending Jeremy's final re-approval (the earlier helper text was written assuming the fields stayed editable, and no longer fits). This prototype only covers the Sales/Deal modal, matching the original prototype's scope, not the parallel Job Stage/Job Status read-only view on the Jobs Pipeline side mentioned in the ticket.
+- Open question: Final sign-off on the two helper-text strings above is still pending per the ticket; flag before this ships to dev.
+
 ## [2026-09-10] Deal Stage / Deal-Proposal Status (ticket 86bbyr3w2)
 
 - Decision: Built the Edit Deal Details modal mockup Jeremy supplied for ticket 86bbyr3w2 into a standalone prototype at `deal-stage-status/index.html`, wrapped in the standard proto-bar and added to the hub. Only the "Stage" and "Deal Status" fields change (relabeled to Deal Stage and Deal/Proposal Status, with the Status options filtered by the selected Stage); Contact Information, Drips, Job Address, and Assignment sections are unchanged from the current UI, per the mockup's own scope note.

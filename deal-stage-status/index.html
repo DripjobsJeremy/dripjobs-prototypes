@@ -4,7 +4,7 @@
 <script src="../gate.js"></script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Deal Stage &amp; Deal/Proposal Status, DripJobs</title>
+<title>Deal Stage &amp; Deal/Proposal Status (Read-Only), DripJobs</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <style>
@@ -288,6 +288,36 @@
 
   #dj-mock-wrap .dj-hr { height: 1px; background: var(--st-color-border); margin: 16px 0; }
 
+  /* ---- Pipeline toggle ---- */
+  #dj-mock-wrap .pipeline-toggle {
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto 16px auto;
+    display: flex;
+    background: #E8E6F5;
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
+  }
+  #dj-mock-wrap .pipeline-toggle-btn {
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--st-color-text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  #dj-mock-wrap .pipeline-toggle-btn:hover { color: var(--st-color-text); }
+  #dj-mock-wrap .pipeline-toggle-btn.active {
+    background: #FFFFFF;
+    color: var(--st-color-primary-active);
+    box-shadow: 0 1px 4px rgba(50,65,91,0.15);
+  }
+
   #dj-mock-wrap .btn {
     height: 38px;
     padding: 0 18px;
@@ -341,7 +371,7 @@
     <span class="proto-bar-title">Deal Stage &amp; Deal/Proposal Status</span>
   </div>
   <div class="proto-bar-right">
-    <span class="proto-bar-pill muted">New</span>
+    <span class="proto-bar-pill muted">Needs Design</span>
     <a class="proto-bar-pill" href="https://app.clickup.com/t/8633445/86bbyr3w2" target="_blank">86bbyr3w2</a>
   </div>
 </div>
@@ -350,12 +380,17 @@
 
   <div class="mock-context">
     <span class="tag">Mockup · Ticket 86bbyr3w2</span>
-    <span>Edit Deal Details modal: Deal Stage &amp; Deal/Proposal Status fields only. All other sections unchanged from current UI.</span>
+    <span>Edit Deal/Job Details modal: Stage &amp; Status fields only, now read-only per the confirmed pivot (was an editable, stage-filtered dropdown in the earlier version of this ticket). Toggle below shows the Sales Pipeline (Deal) and Jobs Pipeline (Job) copy side by side. All other sections shown are unchanged from current UI and don't differ between the two.</span>
+  </div>
+
+  <div class="pipeline-toggle" role="tablist" aria-label="Pipeline version">
+    <button type="button" class="pipeline-toggle-btn active" id="toggleSales" data-pipeline="sales">Sales Pipeline (Deal)</button>
+    <button type="button" class="pipeline-toggle-btn" id="toggleJobs" data-pipeline="jobs">Jobs Pipeline (Job)</button>
   </div>
 
   <div class="deal-modal">
     <div class="deal-modal-header">
-      <h2>Edit Deal #3199203 Details</h2>
+      <h2 id="modalTitle">Edit Deal #3199203 Details</h2>
       <span class="close-x">&times;</span>
     </div>
 
@@ -409,35 +444,28 @@
 
         <div class="dj-hr"></div>
 
-        <!-- CHANGED FIELDS: Deal Stage + Deal/Proposal Status (stacked vertically, matches current modal layout) -->
+        <!-- CHANGED FIELDS: Stage + Status now read-only, per pivot to Option A. Copy switches with the pipeline toggle above. -->
         <div class="dj-row single dj-field-wrap-changed">
           <div class="dj-field">
             <label>
-              Deal Stage
-              <span class="br-chip">i<span class="tip">Relabeled from "Stage" per AC. Selecting a stage filters the statuses available below.</span></span>
-              <span class="changed-badge">Updated</span>
+              <span id="stageLabelText">Deal Stage</span>
+              <span class="br-chip">i<span class="tip">BR1: Relabeled from "Stage" and made read-only. This value is already set correctly by actions elsewhere in the app, so this control no longer accepts edits.</span></span>
+              <span class="changed-badge">Now Read-Only</span>
             </label>
-            <select id="dealStage">
-              <option value="cold_leads">Cold Leads</option>
-              <option value="warm_leads">Warm Leads</option>
-              <option value="estimate_requested">Estimate Requested</option>
-              <option value="estimate_scheduled" selected>Estimate Scheduled</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="in_draft">In Draft</option>
-            </select>
-            <div class="dj-helper">Tracks the deal's position in your pipeline. Changing this moves the deal to a different stage.</div>
+            <input type="text" id="stageValueInput" value="Estimate Scheduled" disabled>
+            <div class="dj-helper" id="stageHelperText">Shows where this deal currently sits in the pipeline. It's set automatically based on actions like sending a proposal or scheduling an appointment.</div>
           </div>
         </div>
 
         <div class="dj-row single dj-field-wrap-changed" style="margin-top:14px;">
           <div class="dj-field">
             <label>
-              Deal/Proposal Status
-              <span class="br-chip">i<span class="tip">Relabeled from "Deal Status" per AC. Options are filtered to only those valid for the selected Deal Stage.</span></span>
-              <span class="changed-badge">Updated</span>
+              <span id="statusLabelText">Deal/Proposal Status</span>
+              <span class="br-chip">i<span class="tip">BR2: Relabeled from "Status" and made read-only, same reasoning as Stage above.</span></span>
+              <span class="changed-badge">Now Read-Only</span>
             </label>
-            <select id="dealStatus"></select>
-            <div class="dj-helper">Status of the deal at this stage. Once a proposal is sent, this tracks whether it's pending, accepted, or rejected.</div>
+            <input type="text" id="statusValueInput" value="Scheduled" disabled>
+            <div class="dj-helper" id="statusHelperText">Shows the current status of the deal or proposal. It's set automatically as the deal progresses.</div>
           </div>
         </div>
 
@@ -511,47 +539,53 @@
 <div class="dj-toast" id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Saved</span></div>
 
 <script>
-  // Full status set per ticket: Open, Pending, Accepted, Rejected, Scheduled, Cancelled
-  // (Completed removed, that's a Jobs Pipeline stage, not a Deal Pipeline status).
-  // Which statuses are valid per stage was not specified in the ticket, this mapping
-  // is a placeholder for Jeremy to confirm, see docs/decision-log.md.
-  var statusesByStage = {
-    cold_leads:         ["Open"],
-    warm_leads:         ["Open","Pending"],
-    estimate_requested: ["Open","Pending","Scheduled"],
-    estimate_scheduled: ["Scheduled","Pending"],
-    cancelled:          ["Cancelled"],
-    in_draft:           ["Open"]
+  // Deal Stage and Deal/Proposal Status (Job Stage / Job Status on the Jobs
+  // Pipeline) are read-only display fields, no stage-aware filtering logic
+  // needed. Save still applies to the other editable fields in this modal,
+  // per AC: "No Save or submit action is exposed for Stage or Status from
+  // this modal." The toggle below only swaps the Stage/Status copy, per the
+  // ticket, every other field stays the same regardless of pipeline.
+  var pipelineCopy = {
+    sales: {
+      modalTitle: "Edit Deal #3199203 Details",
+      stageLabel: "Deal Stage",
+      stageValue: "Estimate Scheduled",
+      stageHelper: "Shows where this deal currently sits in the pipeline. It's set automatically based on actions like sending a proposal or scheduling an appointment.",
+      statusLabel: "Deal/Proposal Status",
+      statusValue: "Scheduled",
+      statusHelper: "Shows the current status of the deal or proposal. It's set automatically as the deal progresses."
+    },
+    jobs: {
+      modalTitle: "Edit Job #3109241 Details",
+      stageLabel: "Job Stage",
+      stageValue: "Project Scheduled",
+      stageHelper: "Shows where this job currently sits in the pipeline. It's set automatically based on actions like scheduling, starting, and completing the job.",
+      statusLabel: "Job Status",
+      statusValue: "Scheduled",
+      statusHelper: "Shows the current status of the job. It's set automatically as the job progresses."
+    }
   };
 
-  var stageSelect = document.getElementById('dealStage');
-  var statusSelect = document.getElementById('dealStatus');
-
-  function populateStatuses(stageKey, preferredValue) {
-    var options = statusesByStage[stageKey] || [];
-    statusSelect.innerHTML = "";
-    options.forEach(function(opt) {
-      var el = document.createElement('option');
-      el.value = opt;
-      el.textContent = opt;
-      statusSelect.appendChild(el);
-    });
-    if (preferredValue && options.indexOf(preferredValue) !== -1) {
-      statusSelect.value = preferredValue;
-    }
+  function applyPipeline(key) {
+    var copy = pipelineCopy[key];
+    document.getElementById('modalTitle').textContent = copy.modalTitle;
+    document.getElementById('stageLabelText').textContent = copy.stageLabel;
+    document.getElementById('stageValueInput').value = copy.stageValue;
+    document.getElementById('stageHelperText').textContent = copy.stageHelper;
+    document.getElementById('statusLabelText').textContent = copy.statusLabel;
+    document.getElementById('statusValueInput').value = copy.statusValue;
+    document.getElementById('statusHelperText').textContent = copy.statusHelper;
+    document.getElementById('toggleSales').classList.toggle('active', key === 'sales');
+    document.getElementById('toggleJobs').classList.toggle('active', key === 'jobs');
   }
 
-  stageSelect.addEventListener('change', function() {
-    populateStatuses(this.value);
-  });
-
-  // initial state mirrors the provided screenshot: Estimate Scheduled / Scheduled
-  populateStatuses('estimate_scheduled', 'Scheduled');
+  document.getElementById('toggleSales').addEventListener('click', function() { applyPipeline('sales'); });
+  document.getElementById('toggleJobs').addEventListener('click', function() { applyPipeline('jobs'); });
 
   var toast = document.getElementById('toast');
   var toastMsg = document.getElementById('toastMsg');
   document.getElementById('saveBtn').addEventListener('click', function() {
-    toastMsg.textContent = "Saved, Deal Stage: " + stageSelect.options[stageSelect.selectedIndex].text + ", Status: " + statusSelect.value;
+    toastMsg.textContent = "Saved";
     toast.classList.add('show');
     setTimeout(function() { toast.classList.remove('show'); }, 2600);
   });
