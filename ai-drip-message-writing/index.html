@@ -30,11 +30,19 @@ html, body {
     background: #F4F5F8;
     color: #32415B;
 }
+/* Stack the two demo bars and the backdrop as flex items that always add up to exactly
+   one viewport, instead of guessing each bar's pixel height, so nothing ever overflows
+   into page-level scroll (which was letting the sticky demo bar drift over content). */
+body {
+    display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+}
 button { font-family: inherit; cursor: pointer; }
 a { cursor: pointer; }
 
 /* ============ HUB PROTO BAR (standard hub nav, matches _template/index.html) ============ */
 .proto-bar {
+    flex-shrink: 0;
+    position: relative; z-index: 150; /* stay visually above #modal-overlay's dimming tint (z-index:100), not just its clicks */
     background: #FFFFFF;
     border-bottom: 1px solid #DAD8E3;
     padding: 12px 24px;
@@ -63,7 +71,8 @@ a { cursor: pointer; }
 
 /* ============ DEMO BANNER (non-product UI) ============ */
 #demo-banner {
-    position: sticky; top: 0; z-index: 500;
+    flex-shrink: 0;
+    position: relative; z-index: 150; /* stay visually above #modal-overlay's dimming tint (z-index:100), not just its clicks */
     background: #1B1F2E;
     color: #fff;
     padding: 10px 20px;
@@ -123,7 +132,7 @@ body.show-annotations .br-chip { display: inline-flex; }
     filter: saturate(0.9);
     opacity: 0.55;
     pointer-events: none;
-    height: calc(100vh - 46px - 46px);
+    flex: 1; min-height: 0; /* fills whatever space is left below the two bars above, no hardcoded height guess */
     overflow: hidden;
 }
 #drips-page {
@@ -194,6 +203,9 @@ body.show-annotations .br-chip { display: inline-flex; }
     z-index: 100; display: flex; justify-content: flex-end;
     pointer-events: none; /* it's a dimming layer with no click-away handler; only the modal panel itself should capture clicks */
 }
+#modal-overlay.hidden { display: none; }
+/* With the modal closed there's nothing dimming the page anymore, matching production: no modal open, no dimmed backdrop */
+body.modal-closed #page-backdrop { opacity: 1; filter: none; }
 #edit-drip-modal {
     --st-color-primary: #8B85EA;
     --st-color-primary-hover: #736BE3;
@@ -553,7 +565,7 @@ body.show-annotations .br-chip { display: inline-flex; }
 <div id="edit-drip-modal">
     <div class="edm-header">
         <h2>Edit Drip</h2>
-        <button class="edm-close">✕</button>
+        <button class="edm-close" onclick="closeDripModal()">✕</button>
     </div>
     <div class="edm-body">
 
@@ -823,7 +835,7 @@ If you're ready to take the next steps, you can view and accept your proposal(s)
     </div>
     <div class="edm-footer">
         <button class="btn btn-primary" onclick="handleSaveDrip()">Save</button>
-        <button class="btn btn-outline">Close</button>
+        <button class="btn btn-outline" onclick="closeDripModal()">Close</button>
     </div>
 
     <!-- ============ OVERWRITE CONFIRM DIALOG (nested here so it anchors to this modal, not the full screen) ============ -->
@@ -1070,23 +1082,35 @@ const CHANNEL_LABEL = { email: 'Email', text: 'Text message' };
 // BR-2.2/BR-3: stage is one of the values Auto Loaded Context pulls from, so switching the
 // Pipeline Stage being viewed updates the "What do you want to say?" suggestion live, the same
 // way Timing stays in sync between the top section and the AI panel, without leaving the panel.
-function selectStage(stageId, el) {
-    if (stageId === currentStage) return;
-    document.querySelectorAll('.dp-stage').forEach(s => s.classList.remove('active'));
-    el.classList.add('active');
-    currentStage = stageId;
-    document.getElementById('dp-trigger-badge').textContent = 'Trigger: ' + STAGE_TRIGGER_LABEL[stageId];
+function closeDripModal() {
+    document.getElementById('modal-overlay').classList.add('hidden');
+    document.body.classList.add('modal-closed');
+}
+function openDripModal() {
+    document.getElementById('modal-overlay').classList.remove('hidden');
+    document.body.classList.remove('modal-closed');
+}
 
-    ['email', 'text'].forEach(ch => {
-        const ctxField = document.getElementById('ai-context-' + ch);
-        if (ctxField.dataset.auto !== 'false') {
-            ctxField.value = getDefaultContext(ch);
-            ctxField.classList.add('is-placeholder-value');
-            ctxField.dataset.carried = 'false';
-        }
-    });
-    updateAutoBadges('email', 'text');
-    updateAutoBadges('text', 'email');
+function selectStage(stageId, el) {
+    if (stageId !== currentStage) {
+        document.querySelectorAll('.dp-stage').forEach(s => s.classList.remove('active'));
+        el.classList.add('active');
+        currentStage = stageId;
+        document.getElementById('dp-trigger-badge').textContent = 'Trigger: ' + STAGE_TRIGGER_LABEL[stageId];
+
+        ['email', 'text'].forEach(ch => {
+            const ctxField = document.getElementById('ai-context-' + ch);
+            if (ctxField.dataset.auto !== 'false') {
+                ctxField.value = getDefaultContext(ch);
+                ctxField.classList.add('is-placeholder-value');
+                ctxField.dataset.carried = 'false';
+            }
+        });
+        updateAutoBadges('email', 'text');
+        updateAutoBadges('text', 'email');
+    }
+
+    openDripModal(); // clicking any stage (including the already-active one) reopens the modal if it was closed, matching production
 }
 
 function setDeliveryMethod(mode) {
@@ -1283,6 +1307,7 @@ function updateCharCount() {
 }
 
 function resetDemo() {
+    openDripModal();
     document.getElementById('toggle-unavailable').checked = false;
     document.getElementById('toggle-no-timing').checked = false;
     document.querySelectorAll('.dp-stage').forEach(s => s.classList.remove('active'));
