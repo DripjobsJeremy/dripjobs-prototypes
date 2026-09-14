@@ -42,7 +42,6 @@ a { cursor: pointer; }
 /* ============ HUB PROTO BAR (standard hub nav, matches _template/index.html) ============ */
 .proto-bar {
     flex-shrink: 0;
-    position: relative; z-index: 150; /* stay visually above #modal-overlay's dimming tint (z-index:100), not just its clicks */
     background: #FFFFFF;
     border-bottom: 1px solid #DAD8E3;
     padding: 12px 24px;
@@ -72,7 +71,6 @@ a { cursor: pointer; }
 /* ============ DEMO BANNER (non-product UI) ============ */
 #demo-banner {
     flex-shrink: 0;
-    position: relative; z-index: 150; /* stay visually above #modal-overlay's dimming tint (z-index:100), not just its clicks */
     background: #1B1F2E;
     color: #fff;
     padding: 10px 20px;
@@ -127,12 +125,18 @@ body.show-annotations .br-chip { display: inline-flex; }
 .br-chip:hover .br-tooltip { display: block; }
 
 /* ============ BACKGROUND PAGE (dimmed) ============ */
-#page-backdrop {
+/* #main-area is the flex:1 region below the two header bars; #page-backdrop, #modal-overlay, and
+   #edit-drip-modal are all absolutely positioned within it, so none of them can ever spatially
+   overlap the bars above, no z-index contest with them needed. */
+#main-area {
     position: relative;
+    flex: 1; min-height: 0;
+}
+#page-backdrop {
+    position: absolute; inset: 0;
     filter: saturate(0.9);
     opacity: 0.55;
     pointer-events: none;
-    flex: 1; min-height: 0; /* fills whatever space is left below the two bars above, no hardcoded height guess */
     overflow: hidden;
 }
 #drips-page {
@@ -199,7 +203,7 @@ body.show-annotations .br-chip { display: inline-flex; }
 
 /* ============ EDIT DRIP MODAL ============ */
 #modal-overlay {
-    position: fixed; inset: 0; background: rgba(20, 22, 34, 0.35);
+    position: absolute; inset: 0; background: rgba(20, 22, 34, 0.35);
     z-index: 100;
     pointer-events: none; /* it's a dimming layer with no click-away handler; only the modal panel itself should capture clicks */
 }
@@ -215,11 +219,11 @@ body.modal-closed #page-backdrop { opacity: 1; filter: none; }
     --st-color-text-muted: #80879A;
     --st-color-border: #DAD8E3;
     --st-color-card-bg: #FFFFFF;
-    width: 620px; max-width: 94vw; height: 100vh; background: #fff;
+    width: 620px; max-width: 94vw; height: 100%; background: #fff;
     box-shadow: -8px 0 30px rgba(0,0,0,0.15);
     display: flex; flex-direction: column;
     animation: slideIn .22s ease;
-    position: fixed; top: 0; right: 0; /* was a flex child of #modal-overlay; now a sibling, so it stacks independently above the header bars (z-index:200) instead of being capped by the tint's z-index:100 */
+    position: absolute; top: 0; right: 0; /* confined to #main-area (below the header bars), so it can never cover them, no z-index contest needed */
     z-index: 200;
     pointer-events: auto; /* the panel itself is interactive even though the dimming layer beside it is click-through */
 }
@@ -525,6 +529,12 @@ body.modal-closed #page-backdrop { opacity: 1; filter: none; }
     <a class="demo-link" href="https://app.clickup.com/t/8633445/86b9bmab5" target="_blank">View ticket ↗</a>
 </div>
 
+<!-- #main-area fills whatever space is left below the two header bars (flex:1 in the body column
+     layout), so anything positioned inside it (the dimmed backdrop, the modal overlay and panel)
+     is spatially confined to that region and can never visually overlap the bars above it, no
+     z-index juggling required. -->
+<div id="main-area">
+
 <!-- ============ DIMMED BACKGROUND (Drips list page context) ============ -->
 <div id="page-backdrop">
 <div id="drips-page">
@@ -563,9 +573,9 @@ body.modal-closed #page-backdrop { opacity: 1; filter: none; }
 </div>
 
 <!-- ============ EDIT DRIP MODAL ============ -->
-<!-- #modal-overlay is only the dimming tint (kept behind the header bars); #edit-drip-modal is a
-     sibling, not a child, so the actual panel can sit above the header bars independently of the
-     tint, which stays below them so it never covers/dims the bars -->
+<!-- #modal-overlay (the dimming tint) and #edit-drip-modal (the actual panel) are siblings, both
+     confined to #main-area, so the panel can sit above the tint (z-index 200 vs 100) without
+     either one ever needing to compete with the header bars, which live outside #main-area entirely -->
 <div id="modal-overlay"></div>
 <div id="edit-drip-modal">
     <div class="edm-header">
@@ -857,6 +867,8 @@ If you're ready to take the next steps, you can view and accept your proposal(s)
     </div>
 </div>
 
+</div><!-- /main-area -->
+
 <div id="handoff-note">
     <b>Handoff to Orchestrator:</b> UX spec for AI Assisted Drip Message Writing (86b9bmab5) is ready to fold into an Implementation Brief: BR-1 through BR-14 covered for both channels, updated to match the ticket's current revision (single Goal dropdown replaced with separate Tone and Type selections per BR-4/BR-5; SMS Content Guardrails and the SMS/A2P Decision Required item were both removed from scope per ticket comments, so email and text now ship on equal footing).
 </div>
@@ -897,14 +909,18 @@ function populateToneTypeSelects() {
 }
 populateToneTypeSelects();
 
-// ============ SIMULATED GENERATION (BR-6 Output): Type supplies the message structure, Tone supplies the opening/closing phrasing ============
+// ============ SIMULATED GENERATION (BR-6 Output): Type supplies the message structure, Tone supplies the opening/closing phrasing.
+// Tone words live ONLY here, never in STAGE_DEFAULT_CONTEXT below, so a selected Tone can't be contradicted by
+// leftover style words (e.g. "friendly") baked into the Context text. Context itself is written as a natural,
+// tone-neutral, first-person sentence so it slots into the message as real prose, not as a note-to-self
+// instruction about what the message should do. ============
 const TONE_PHRASES = {
-    friendly:  { opener: "Hope you're doing well!", closer: "Let me know if you have any questions, no rush at all." },
-    light:     { opener: "Just a quick note.", closer: "Feel free to reach out whenever works for you." },
-    passive:   { opener: "No pressure at all, just following up.", closer: "Only reach out if it's helpful, otherwise no need to reply." },
-    standard:  { opener: "Wanted to touch base.", closer: "Let us know if you have any questions." },
-    assertive: { opener: "Following up on this, wanted to make sure it's on your radar.", closer: "Please let us know your thoughts as soon as you can." },
-    urgent:    { opener: "Reaching out because time is limited on this.", closer: "Please respond as soon as possible so we can keep things on track." }
+    friendly:  { opener: "Hope you're doing well!", closer: "Let me know if you have any questions, no rush at all!" },
+    light:     { opener: "Just a quick note,", closer: "feel free to reach out whenever works for you." },
+    passive:   { opener: "No pressure at all,", closer: "only reach out if it's helpful, otherwise no need to reply." },
+    standard:  { opener: "Wanted to touch base.", closer: "Let me know if you have any questions." },
+    assertive: { opener: "Following up here,", closer: "please let me know your thoughts as soon as you can." },
+    urgent:    { opener: "Reaching out because time is limited on this,", closer: "please respond as soon as possible so we can keep things on track." }
 };
 
 const TYPE_STRUCTURE = {
@@ -913,16 +929,16 @@ const TYPE_STRUCTURE = {
         text:  (o,ctx,c) => `Hi {contact-name}, ${o} ${ctx} ${c}`
     },
     "check-in": {
-        email: (o,ctx,c) => `Hi {contact-name},\n\n${o} Just checking in, ${ctx}\n\n${c}`,
-        text:  (o,ctx,c) => `Hi {contact-name}, ${o} Just checking in, ${ctx} ${c}`
+        email: (o,ctx,c) => `Hi {contact-name},\n\n${o} ${ctx}\n\n${c}`,
+        text:  (o,ctx,c) => `Hi {contact-name}, ${o} ${ctx} ${c}`
     },
     "reminder": {
-        email: (o,ctx,c) => `Hi {contact-name},\n\nThis is a quick reminder: ${ctx}\n\n${o} ${c}`,
+        email: (o,ctx,c) => `Hi {contact-name},\n\nThis is a quick reminder. ${ctx}\n\n${o} ${c}`,
         text:  (o,ctx,c) => `Hi {contact-name}, quick reminder: ${ctx} ${o} ${c}`
     },
     "request": {
-        email: (o,ctx,c) => `Hi {contact-name},\n\n${o} ${ctx}\n\nCould you let us know when you get a chance?\n\n${c}`,
-        text:  (o,ctx,c) => `Hi {contact-name}, ${o} ${ctx} Could you let us know when you get a chance? ${c}`
+        email: (o,ctx,c) => `Hi {contact-name},\n\n${o} ${ctx}\n\nCould you let me know when you get a chance?\n\n${c}`,
+        text:  (o,ctx,c) => `Hi {contact-name}, ${o} ${ctx} Could you let me know when you get a chance? ${c}`
     }
 };
 
@@ -948,38 +964,41 @@ const STAGE_TRIGGER_LABEL = {
     "proposal-rejected": "Proposal Rejected"
 };
 
+// Written as tone-neutral, first-person, ready-to-send prose (not an instruction about what the
+// message should accomplish), since generateMessage() above inserts this text directly into the
+// message body: it needs to already read like a sentence a contractor would actually send.
 const STAGE_DEFAULT_CONTEXT = {
     "cold-leads": {
-        email: "Reconnect after some time has passed and invite them to pick things back up if they're still interested.",
-        text: "Friendly nudge to see if they're still interested, keep it low-pressure."
+        email: "It's been a little while since we last connected about your project, and I wanted to reach back out to see if you're still interested in getting things going.",
+        text: "Wanted to see if you're still interested in getting your project going."
     },
     "warm-leads": {
-        email: "Check in to stay top of mind and see if they have any new questions since we last talked.",
-        text: "Quick check-in to stay top of mind, keep it casual."
+        email: "I wanted to check in and see if anything new has come up or if you have any questions for me.",
+        text: "Wanted to check in and see if you had any new questions."
     },
     "estimate-requested": {
-        email: "Confirm we received their estimate request and let them know we'll be in touch to schedule a time.",
-        text: "Confirm the estimate request and let them know we'll reach out to schedule."
+        email: "I wanted to confirm we received your estimate request and let you know we'll be reaching out shortly to schedule a time to take a look.",
+        text: "Wanted to confirm we got your estimate request, we'll reach out shortly to schedule."
     },
     "estimate-scheduled": {
-        email: "Remind them about the upcoming estimate appointment and confirm the date and time still work.",
-        text: "Quick reminder about the upcoming estimate appointment."
+        email: "I wanted to confirm your upcoming estimate appointment and make sure the date and time still work for you.",
+        text: "Wanted to confirm your upcoming estimate appointment still works for you."
     },
     "in-draft": {
-        email: "Let them know their proposal is still being finalized and thank them for their patience.",
-        text: "Quick heads up that their proposal is almost ready."
+        email: "I wanted to let you know your proposal is still being put together and should be ready soon, thank you for your patience.",
+        text: "Wanted to let you know your proposal is almost ready."
     },
     "proposal-sent": {
-        email: "Check in on the proposal we sent and invite them to reach out with any questions before they decide.",
-        text: "Quick, friendly nudge to check the proposal: keep it short and casual."
+        email: "I wanted to check in on the proposal we sent over and see if you had any questions before deciding.",
+        text: "Wanted to check on the proposal we sent over."
     },
     "custom-stage": {
-        email: "General check in with this contact at their current stage.",
-        text: "Quick general check-in, keep it casual."
+        email: "I wanted to check in and see how things are going on your end.",
+        text: "Wanted to check in and see how things are going."
     },
     "proposal-rejected": {
-        email: "Circle back on the declined proposal and see if anything's changed or if they have questions about scope or pricing.",
-        text: "Check back in on the declined proposal, low-pressure."
+        email: "I wanted to circle back on the proposal we sent and see if anything's changed or if you have questions about the scope or pricing.",
+        text: "Wanted to circle back on the proposal in case anything's changed."
     }
 };
 
@@ -1074,11 +1093,39 @@ function closeDripModal() {
     document.getElementById('modal-overlay').classList.add('hidden');
     document.getElementById('edit-drip-modal').classList.add('hidden');
     document.body.classList.add('modal-closed');
+    resetAiPanels(); // closing ends this editing session, so reopening (e.g. via a different Pipeline Stage) starts the guided panel fresh instead of carrying over stale Context/Tone/Type
 }
 function openDripModal() {
     document.getElementById('modal-overlay').classList.remove('hidden');
     document.getElementById('edit-drip-modal').classList.remove('hidden');
     document.body.classList.remove('modal-closed');
+}
+
+// Resets each channel's guided-panel fields (Context/Tone/Type/preview) back to their auto/unset
+// state. Shared by closeDripModal() and resetDemo().
+function resetAiPanels() {
+    ['email', 'text'].forEach(ch => {
+        closeAiPanel(ch);
+        const ctxField = document.getElementById('ai-context-' + ch);
+        ctxField.value = '';
+        ctxField.dataset.auto = 'true';
+        ctxField.dataset.carried = 'false';
+        ctxField.classList.remove('is-placeholder-value');
+        const toneSelect = document.getElementById('ai-tone-' + ch);
+        toneSelect.selectedIndex = 0;
+        toneSelect.dataset.auto = 'true';
+        const typeSelect = document.getElementById('ai-type-' + ch);
+        typeSelect.selectedIndex = 0;
+        typeSelect.dataset.auto = 'true';
+        document.getElementById('ctx-badge-' + ch).classList.remove('show');
+        document.getElementById('tone-badge-' + ch).classList.remove('show');
+        document.getElementById('type-badge-' + ch).classList.remove('show');
+        document.getElementById('ai-alert-unavailable-' + ch).classList.remove('show');
+        document.getElementById('ai-success-' + ch).classList.remove('show');
+        document.getElementById('ai-generate-' + ch).querySelector('.btn-label').textContent = 'Generate';
+        document.getElementById('ai-preview-textarea-' + ch).value = '';
+        document.getElementById('ai-preview-notes-' + ch).textContent = '';
+    });
 }
 
 function selectStage(stageId, el) {
@@ -1329,28 +1376,7 @@ function resetDemo() {
     document.getElementById('wait-value').value = 1;
     document.getElementById('wait-unit').value = 'Day(s)';
     syncTimingUI();
-    ['email','text'].forEach(ch => {
-        closeAiPanel(ch);
-        const ctxField = document.getElementById('ai-context-' + ch);
-        ctxField.value = '';
-        ctxField.dataset.auto = 'true';
-        ctxField.dataset.carried = 'false';
-        ctxField.classList.remove('is-placeholder-value');
-        const toneSelect = document.getElementById('ai-tone-' + ch);
-        toneSelect.selectedIndex = 0;
-        toneSelect.dataset.auto = 'true';
-        const typeSelect = document.getElementById('ai-type-' + ch);
-        typeSelect.selectedIndex = 0;
-        typeSelect.dataset.auto = 'true';
-        document.getElementById('ctx-badge-' + ch).classList.remove('show');
-        document.getElementById('tone-badge-' + ch).classList.remove('show');
-        document.getElementById('type-badge-' + ch).classList.remove('show');
-        document.getElementById('ai-alert-unavailable-' + ch).classList.remove('show');
-        document.getElementById('ai-success-' + ch).classList.remove('show');
-        document.getElementById('ai-generate-' + ch).querySelector('.btn-label').textContent = 'Generate';
-        document.getElementById('ai-preview-textarea-' + ch).value = '';
-        document.getElementById('ai-preview-notes-' + ch).textContent = '';
-    });
+    resetAiPanels();
     document.getElementById('email-body').value = `Hi {contact-name},
 
 I was wondering if you had a chance to look over the proposal we sent to you yesterday?
