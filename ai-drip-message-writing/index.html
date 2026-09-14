@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Assisted Drip Message Writing: Prototype (86b9bmab5)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css">
+<style>
+
+/* ============ GLOBAL COLOR TOKENS (available to every element, including dialogs outside the scoped wrappers) ============ */
+:root {
+    --st-color-primary: #8B85EA;
+    --st-color-primary-hover: #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb: 139, 133, 234;
+    --st-color-text: #32415B;
+    --st-color-text-muted: #80879A;
+    --st-color-border: #DAD8E3;
+    --st-color-card-bg: #FFFFFF;
+}
+
+/* ============ RESET / BASE ============ */
+* { box-sizing: border-box; }
+html, body {
+    margin: 0; padding: 0;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F4F5F8;
+    color: #32415B;
+}
+button { font-family: inherit; cursor: pointer; }
+a { cursor: pointer; }
+
+/* ============ HUB PROTO BAR (standard hub nav, matches _template/index.html) ============ */
+.proto-bar {
+    background: #FFFFFF;
+    border-bottom: 1px solid #DAD8E3;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.proto-bar-left { display: flex; align-items: center; gap: 10px; }
+.proto-bar .back-link {
+    font-size: 12px; font-weight: 500; color: #80879A;
+    text-decoration: none; display: flex; align-items: center; gap: 4px;
+    transition: color 0.15s;
+}
+.proto-bar .back-link:hover { color: #8B85EA; }
+.proto-bar .divider { color: #DAD8E3; font-size: 16px; }
+.proto-bar-title { font-size: 14px; font-weight: 600; color: #32415B; }
+.proto-bar-ticket {
+    font-size: 11px; font-weight: 600; color: #8B85EA; text-decoration: none;
+    padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA;
+    border-radius: 999px; letter-spacing: 0.2px;
+}
+.proto-bar-ticket:hover { background: #8B85EA; color: #fff; }
+
+/* ============ DEMO BANNER (non-product UI) ============ */
+#demo-banner {
+    position: sticky; top: 0; z-index: 500;
+    background: #1B1F2E;
+    color: #fff;
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 18px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    border-bottom: 3px solid #8B85EA;
+}
+#demo-banner .demo-title { font-weight: 800; letter-spacing: 0.2px; }
+#demo-banner .demo-title span { color: #B5B0F7; font-weight: 600; }
+#demo-banner .demo-ctrl { display: flex; align-items: center; gap: 7px; }
+#demo-banner label { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; color: #D7D9E6; }
+#demo-banner .mini-switch {
+    width: 30px; height: 17px; border-radius: 999px; background: #454B60;
+    position: relative; transition: background .15s ease; flex-shrink: 0;
+}
+#demo-banner .mini-switch::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px;
+    border-radius: 50%; background: #fff; transition: left .15s ease;
+}
+#demo-banner input[type="checkbox"] { display: none; }
+#demo-banner input[type="checkbox"]:checked + .mini-switch { background: #8B85EA; }
+#demo-banner input[type="checkbox"]:checked + .mini-switch::after { left: 15px; }
+#demo-banner .demo-btn {
+    background: #2A2F42; color: #fff; border: 1px solid #454B60; border-radius: 7px;
+    padding: 6px 12px; font-size: 12px; font-weight: 600;
+}
+#demo-banner .demo-btn:hover { background: #363C54; }
+#demo-banner .demo-link { color: #B5B0F7; text-decoration: none; font-weight: 600; }
+#demo-banner .demo-link:hover { text-decoration: underline; }
+#demo-banner .spacer { flex: 1; }
+
+/* ============ BR ANNOTATION CHIP ============ */
+.br-chip {
+    display: none;
+    align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #5C53DC; color: #fff; font-size: 9.5px; font-weight: 800;
+    margin-left: 6px; position: relative; flex-shrink: 0;
+    vertical-align: middle;
+}
+body.show-annotations .br-chip { display: inline-flex; }
+.br-chip .br-tooltip {
+    display: none;
+    position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+    width: 240px; background: #1B1F2E; color: #fff; font-weight: 500;
+    font-size: 11.5px; line-height: 1.5; padding: 9px 11px; border-radius: 8px;
+    z-index: 900; text-align: left; white-space: normal;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+.br-chip .br-tooltip b { color: #B5B0F7; }
+.br-chip:hover .br-tooltip { display: block; }
+
+/* ============ BACKGROUND PAGE (dimmed) ============ */
+#page-backdrop {
+    position: relative;
+    filter: saturate(0.9);
+    opacity: 0.55;
+    pointer-events: none;
+    height: calc(100vh - 46px - 46px);
+    overflow: hidden;
+}
+#drips-page {
+    --st-color-primary: #8B85EA;
+    --st-color-primary-hover: #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb: 139, 133, 234;
+    --st-color-text: #32415B;
+    --st-color-text-muted: #80879A;
+    --st-color-border: #DAD8E3;
+    --st-color-card-bg: #FFFFFF;
+    display: flex;
+    height: 100%;
+}
+.dp-sidebar {
+    width: 300px; flex-shrink: 0; background: #fff;
+    border-right: 1px solid var(--st-color-border);
+    padding: 22px 18px; overflow-y: auto;
+}
+.dp-sidebar h1 { font-size: 20px; font-weight: 800; margin: 0 0 4px; }
+.dp-sidebar .dp-sub { font-size: 12.5px; color: var(--st-color-text-muted); margin: 0 0 18px; }
+.dp-pipeline-tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+.dp-pipeline-tabs span {
+    padding: 7px 16px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
+    background: #F1EFFC; color: var(--st-color-primary-active);
+}
+.dp-pipeline-tabs span.muted { background: #F3F4F7; color: var(--st-color-text-muted); }
+.dp-stage-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.dp-stage-head b { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--st-color-text-muted); }
+.dp-add-stage { font-size: 11.5px; font-weight: 700; color: var(--st-color-primary-active); }
+.dp-stage {
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 6px; font-size: 13.5px;
+}
+.dp-stage .stage-name { font-weight: 700; }
+.dp-stage .stage-meta { font-size: 11.5px; color: var(--st-color-text-muted); margin-top: 2px; }
+.dp-stage.active {
+    background: #F8F7FF; box-shadow: inset 0 0 0 1.5px var(--st-color-primary);
+}
+.dp-seq-list { margin-top: 8px; padding-left: 4px; }
+.dp-seq { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 7px; font-size: 12.5px; }
+.dp-seq.selected { background: var(--st-color-primary); color: #fff; font-weight: 700; }
+.dp-seq .default-badge { background: #1B1F2E; color: #fff; font-size: 9.5px; padding: 2px 7px; border-radius: 999px; margin-left: auto; }
+
+.dp-main { flex: 1; padding: 24px 28px; overflow-y: auto; }
+.dp-main-head {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    font-size: 15px; font-weight: 800;
+}
+.dp-trigger-badge {
+    margin: 0 auto; display: block; width: fit-content;
+    background: #F1EFFC; color: var(--st-color-primary-active);
+    font-size: 11.5px; font-weight: 700; padding: 5px 14px; border-radius: 999px;
+}
+.dp-step {
+    background: #fff; border: 1px solid var(--st-color-border); border-radius: 10px;
+    padding: 14px 16px; margin: 10px 0; display: flex; gap: 12px; align-items: flex-start;
+}
+.dp-step-icon { width: 30px; height: 30px; border-radius: 8px; background: #F1EFFC; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dp-step-meta { font-size: 11.5px; color: var(--st-color-text-muted); margin-bottom: 2px; }
+.dp-step-title { font-size: 13.5px; font-weight: 700; }
+.dp-step.highlighted { box-shadow: inset 0 0 0 2px var(--st-color-primary); }
+
+/* ============ EDIT DRIP MODAL ============ */
+#modal-overlay {
+    position: fixed; inset: 0; background: rgba(20, 22, 34, 0.35);
+    z-index: 100; display: flex; justify-content: flex-end;
+}
+#edit-drip-modal {
+    --st-color-primary: #8B85EA;
+    --st-color-primary-hover: #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb: 139, 133, 234;
+    --st-color-text: #32415B;
+    --st-color-text-muted: #80879A;
+    --st-color-border: #DAD8E3;
+    --st-color-card-bg: #FFFFFF;
+    width: 620px; max-width: 94vw; height: 100vh; background: #fff;
+    box-shadow: -8px 0 30px rgba(0,0,0,0.15);
+    display: flex; flex-direction: column;
+    animation: slideIn .22s ease;
+    position: relative; /* anchors the overwrite-confirm dialog to this modal, not the full viewport */
+}
+@keyframes slideIn { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.edm-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 24px; border-bottom: 1px solid var(--st-color-border); flex-shrink: 0;
+}
+.edm-header h2 { font-size: 17px; font-weight: 800; margin: 0; }
+.edm-close { background: none; border: none; font-size: 20px; color: var(--st-color-text-muted); line-height: 1; }
+.edm-body { flex: 1; overflow-y: auto; padding: 20px 24px 10px; }
+.edm-footer {
+    padding: 14px 24px; border-top: 1px solid var(--st-color-border);
+    display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;
+}
+
+.field-label { font-size: 11px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; color: var(--st-color-text-muted); margin-bottom: 8px; display:flex; align-items:center; }
+.edm-name-row { display: flex; gap: 14px; align-items: center; margin-bottom: 22px; }
+.edm-name-row input[type="text"].drip-name {
+    flex: 1; height: 42px; border: 1px solid var(--st-color-border); border-radius: 8px;
+    padding: 0 14px; font-size: 14.5px; font-weight: 600; color: var(--st-color-text);
+}
+.edm-name-row input.drip-name:focus { outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb),0.18); }
+.active-toggle { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--st-color-text-muted); font-weight: 600; flex-shrink: 0; }
+.switchery { width: 38px; height: 22px; border-radius: 999px; background: #DAD8E3; position: relative; flex-shrink:0; }
+.switchery::after { content:""; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.3); transition: left .15s; }
+.switchery.on { background: var(--st-color-primary); }
+.switchery.on::after { left: 18px; }
+
+.edm-section { margin-bottom: 22px; }
+.pill-toggle-group { display: flex; gap: 8px; margin-bottom: 12px; }
+.pill-toggle {
+    border: 1px solid var(--st-color-border); background: #fff; border-radius: 999px;
+    padding: 8px 16px; font-size: 12.5px; font-weight: 700; color: var(--st-color-text-muted);
+    display: flex; align-items: center; gap: 6px;
+}
+.pill-toggle.active { border-color: var(--st-color-primary); color: var(--st-color-primary-active); background: #F8F7FF; }
+.pill-toggle.unset { border-style: dashed; border-color: #E7A23D; color: #92400E; background: #FFFBEB; }
+.pill-toggle.sm { padding: 6px 13px; font-size: 11.5px; }
+
+.wait-row {
+    display: flex; align-items: center; gap: 10px; border: 1px solid var(--st-color-border);
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; background: var(--st-color-card-bg);
+}
+.wait-row.unset { border: 1.5px dashed #E7A23D; background: #FFFBEB; }
+.wait-row input[type="number"] { width: 64px; height: 36px; border: 1px solid var(--st-color-border); border-radius: 8px; text-align: center; font-size: 14px; }
+.wait-row select { height: 36px; border: 1px solid var(--st-color-border); border-radius: 8px; padding: 0 10px; font-size: 13.5px; background: #fff; }
+.wait-row .wait-suffix { font-size: 13px; color: var(--st-color-text-muted); }
+
+.info-banner {
+    background: #EFFCFB; border: 1px solid #BEEFE9; border-radius: 8px; padding: 10px 12px;
+    display: flex; align-items: center; gap: 10px; font-size: 12px; color: #0F6A63; margin-bottom: 4px;
+}
+.info-banner .new-badge { margin-left: auto; background: var(--st-color-primary); color: #fff; font-size: 9.5px; font-weight: 800; padding: 3px 8px; border-radius: 999px; flex-shrink:0; }
+
+.delivery-cards { display: flex; gap: 10px; margin: 18px 0; }
+.delivery-card {
+    flex: 1; border: 1px solid var(--st-color-border); border-radius: 10px; padding: 16px 10px;
+    text-align: center; position: relative; font-size: 12.5px; font-weight: 700;
+}
+.delivery-card .dc-icon {
+    width: 36px; height: 36px; border-radius: 9px; background: #F1EFFC; color: var(--st-color-primary-active);
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;
+}
+.delivery-card.selected { border-color: var(--st-color-primary); box-shadow: 0 0 0 1px var(--st-color-primary); }
+.delivery-card .dc-check {
+    display:none; position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--st-color-primary); color: #fff; align-items: center; justify-content: center; font-size: 11px;
+}
+.delivery-card.selected .dc-check { display: flex; }
+
+.channel-card { border: 1px solid var(--st-color-border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+.channel-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.channel-head .ch-icon { width: 26px; height: 26px; border-radius: 7px; background: #F1EFFC; color: var(--st-color-primary-active); display:flex; align-items:center; justify-content:center; }
+.channel-head .ch-title { font-size: 13.5px; font-weight: 800; }
+.channel-head .ch-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.link-btn { font-size: 12px; font-weight: 700; color: var(--st-color-primary-active); text-decoration: none; display:flex; align-items:center; gap:5px; background:none; border:none; }
+.outline-btn-sm {
+    border: 1px solid var(--st-color-primary); color: var(--st-color-primary-active); background: #fff;
+    border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; display:flex; align-items:center; gap:6px;
+}
+
+.ai-btn {
+    background: #F1EFFC; color: #5C53DC; border: 1px solid #D6D2F5; border-radius: 999px;
+    padding: 6px 14px 6px 11px; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 6px;
+    transition: background .12s ease;
+}
+.ai-btn:hover { background: #E8E6FA; }
+.ai-btn svg { width: 14px; height: 14px; }
+.ai-btn.disabled { opacity: .55; pointer-events: none; }
+
+.subject-row { display: flex; align-items: center; gap: 10px; border: 1px solid var(--st-color-border); border-radius: 8px; padding: 0 4px 0 14px; height: 42px; margin-bottom: 12px; }
+.subject-row span.lbl { font-size: 12.5px; font-weight: 700; color: var(--st-color-text-muted); flex-shrink:0; }
+.subject-row input { flex: 1; border: none; font-size: 13.5px; height: 100%; }
+.subject-row input:focus { outline: none; }
+
+.toolbar-mock { border: 1px solid var(--st-color-border); border-bottom: none; border-radius: 8px 8px 0 0; padding: 7px 10px; display: flex; gap: 12px; font-size: 11.5px; color: var(--st-color-text-muted); background: #FAFAFC; flex-wrap: wrap;}
+.body-textarea {
+    width: 100%; border: 1px solid var(--st-color-border); border-radius: 0 0 8px 8px; border-top:none;
+    min-height: 110px; padding: 12px 14px; font-size: 13.5px; font-family: inherit; resize: vertical; color: var(--st-color-text);
+    line-height: 1.6;
+}
+.body-textarea:focus { outline: none; border-color: var(--st-color-primary); }
+.sms-textarea {
+    width: 100%; border: 1px solid var(--st-color-border); border-radius: 8px;
+    min-height: 100px; padding: 12px 14px; font-size: 13.5px; font-family: inherit; resize: vertical; color: var(--st-color-text); line-height: 1.6;
+}
+.sms-textarea:focus { outline: none; border-color: var(--st-color-primary); }
+.char-count { font-size: 11.5px; color: var(--st-color-text-muted); margin-top: 6px; }
+.char-count.over { color: #DC2626; font-weight: 700; }
+
+.keywords-bar { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 12px 14px; font-size: 12px; color: #1E40AF; margin-top: 18px; }
+.keywords-bar b { display: block; margin-bottom: 4px; }
+
+.btn { border-radius: 10px; padding: 10px 20px; font-size: 13.5px; font-weight: 700; border: none; }
+.btn-primary { background: var(--st-color-primary); color: #fff; }
+.btn-primary:hover { background: var(--st-color-primary-hover); }
+.btn-outline { background: #fff; border: 1px solid var(--st-color-border); color: var(--st-color-text); }
+.btn-outline:hover { background: #F7F7FA; }
+
+/* ============ AI GUIDED PANEL ============ */
+.ai-panel {
+    display: none;
+    background: #FBFAFF; border: 1.5px solid #DCD9F7; border-radius: 10px;
+    padding: 16px 16px 14px; margin-bottom: 14px;
+}
+.ai-panel.open { display: block; animation: panelOpen .16s ease; }
+@keyframes panelOpen { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0);} }
+.ai-panel-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.ai-panel-head .aph-title { font-size: 13px; font-weight: 800; color: #4A3FBD; display:flex; align-items:center; gap:7px;}
+.ai-panel-head svg { width: 16px; height: 16px; }
+.ai-panel-close { margin-left: auto; background: none; border: none; color: var(--st-color-text-muted); font-size: 16px; }
+
+.ai-step { margin-bottom: 14px; }
+.ai-step-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: #6C63D6; margin-bottom: 7px; display: flex; align-items: center; gap: 5px; }
+.ai-step-num {
+    width: 16px; height: 16px; border-radius: 50%; background: #DCD9F7; color: #4A3FBD;
+    font-size: 9.5px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink:0;
+}
+
+.timing-blocked-msg { font-size: 12px; color: #92400E; font-weight: 600; margin-top: 8px; display:none; align-items:center; gap:6px; }
+.timing-blocked-msg.show { display: flex; }
+.timing-blocked-msg svg { width: 14px; height: 14px; flex-shrink:0; }
+
+.ai-context-input {
+    width: 100%; border: 1px solid var(--st-color-border); border-radius: 8px; padding: 10px 12px;
+    font-size: 13.5px; font-family: inherit; min-height: 56px; resize: vertical; background:#fff;
+    color: var(--st-color-text);
+}
+.ai-context-input:focus { outline: none; border-color: var(--st-color-primary); }
+.ai-context-input.is-placeholder-value { color: var(--st-color-text-muted); }
+.ai-step-hint { font-size: 11px; color: var(--st-color-text-muted); margin-top: 5px; }
+.ai-step-label .req-mark { color: #DC2626; margin-left: 2px; }
+.auto-fill-badge {
+    display: none; margin-left: 8px; text-transform: none; letter-spacing: 0;
+    font-size: 10px; font-weight: 700; color: #5C53DC; background: #EDEBFC;
+    border-radius: 999px; padding: 2px 9px; vertical-align: middle;
+}
+.auto-fill-badge.show { display: inline-block; }
+
+.ai-select {
+    width: 100%; height: 40px; border: 1px solid var(--st-color-border); border-radius: 8px;
+    padding: 0 12px; font-size: 13.5px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2380879A' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 12px center;
+    appearance: none; -webkit-appearance: none;
+}
+.ai-select:focus { outline: none; border-color: var(--st-color-primary); }
+
+.ai-panel-footer { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+.ai-generate-btn {
+    background: linear-gradient(135deg, #8B85EA, #6C63D6); color: #fff; border: none; border-radius: 999px;
+    padding: 9px 18px; font-size: 12.5px; font-weight: 800; display: flex; align-items: center; gap: 7px;
+}
+.ai-generate-btn:hover { filter: brightness(1.05); }
+.ai-generate-btn:disabled, .ai-generate-btn.disabled { opacity: .5; pointer-events: none; }
+.ai-generate-btn svg { width: 14px; height: 14px; }
+.ai-cancel-link { font-size: 12px; font-weight: 700; color: var(--st-color-text-muted); background:none; border:none; }
+
+.spinner {
+    width: 13px; height: 13px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5);
+    border-top-color: #fff; animation: spin .7s linear infinite; display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ai-inline-alert {
+    display: none; align-items: flex-start; gap: 8px; border-radius: 8px; padding: 10px 12px; font-size: 12px;
+    margin-bottom: 12px; line-height: 1.5;
+}
+.ai-inline-alert.show { display: flex; }
+.ai-inline-alert svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
+.ai-inline-alert.info { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+.ai-inline-alert.warn { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+
+.ai-success-flash {
+    display: none; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: #166534;
+    background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 999px; padding: 5px 12px; margin-bottom: 10px;
+}
+.ai-success-flash.show { display: inline-flex; }
+.ai-success-flash svg { width: 13px; height: 13px; }
+
+/* Overwrite confirm dialog, scoped to the Edit Drip modal so it appears where the user was working, not the full screen */
+#confirm-overlay {
+    display: none; position: absolute; inset: 0; background: rgba(20,22,34,0.45); z-index: 200;
+    align-items: center; justify-content: center; border-radius: inherit;
+}
+#confirm-overlay.show { display: flex; }
+.confirm-box {
+    background: #fff; border-radius: 12px; padding: 22px; width: 300px; max-width: 88%; box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    animation: confirmPop .14s ease;
+}
+@keyframes confirmPop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+.confirm-box h4 { margin: 0 0 8px; font-size: 15px; font-weight: 800; }
+.confirm-box p { margin: 0 0 18px; font-size: 13px; color: #52607A; line-height: 1.5; }
+.confirm-box .confirm-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+/* Handoff footer note (prototype meta, not product UI) */
+#handoff-note {
+    background: #fff; border-top: 3px solid #8B85EA; padding: 16px 28px; font-size: 12.5px; color: #52607A;
+}
+#handoff-note b { color: #32415B; }
+
+@media (max-width: 720px) {
+    .dp-sidebar { display: none; }
+    #edit-drip-modal { width: 100vw; }
+}
+</style>
+</head>
+<body class="show-annotations">
+
+<!-- ============ HUB TOP BAR (standard hub nav) ============ -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">AI Assisted Drip Message Writing</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86b9bmab5" target="_blank">86b9bmab5</a>
+</div>
+
+<!-- ============ DEMO BANNER ============ -->
+<div id="demo-banner">
+    <div class="demo-title">DripJobs Prototype <span>· AI Assisted Drip Message Writing · Ticket 86b9bmab5</span></div>
+    <div class="demo-ctrl">
+        <label><input type="checkbox" id="toggle-annotations" checked onchange="document.body.classList.toggle('show-annotations', this.checked)"><span class="mini-switch"></span> BR annotations</label>
+    </div>
+    <div class="demo-ctrl">
+        <label><input type="checkbox" id="toggle-unavailable"><span class="mini-switch"></span> Simulate AI unavailable</label>
+    </div>
+    <div class="demo-ctrl">
+        <label><input type="checkbox" id="toggle-no-timing" onchange="toggleTimingState(this.checked)"><span class="mini-switch"></span> Simulate new step (no timing set)</label>
+    </div>
+    <button class="demo-btn" onclick="resetDemo()">Reset demo</button>
+    <div class="spacer"></div>
+    <a class="demo-link" href="https://app.clickup.com/t/8633445/86b9bmab5" target="_blank">View ticket ↗</a>
+</div>
+
+<!-- ============ DIMMED BACKGROUND (Drips list page context) ============ -->
+<div id="page-backdrop">
+<div id="drips-page">
+    <div class="dp-sidebar">
+        <h1>Drips</h1>
+        <p class="dp-sub">Automated email and text follow-ups for each pipeline stage.</p>
+        <div class="dp-pipeline-tabs"><span>Sales Pipeline</span><span class="muted">Jobs Pipeline</span></div>
+        <div class="dp-stage-head"><b>Pipeline Stages</b><span class="dp-add-stage">+ Add Custom Stage</span></div>
+        <div class="dp-stage"><div class="stage-name">Cold Leads</div><div class="stage-meta">1 sequence · 9 drips</div></div>
+        <div class="dp-stage"><div class="stage-name">Warm Leads</div><div class="stage-meta">2 sequences · 7 drips</div></div>
+        <div class="dp-stage"><div class="stage-name">Estimate Requested</div><div class="stage-meta">2 sequences · 2 drips</div></div>
+        <div class="dp-stage"><div class="stage-name">Estimate Scheduled</div><div class="stage-meta">2 sequences · 2 drips</div></div>
+        <div class="dp-stage"><div class="stage-name">In Draft</div><div class="stage-meta">1 sequence · 2 drips</div></div>
+        <div class="dp-stage active">
+            <div class="stage-name">Proposal(s) Sent</div><div class="stage-meta">3 sequences · 12 drips</div>
+            <div class="dp-seq-list">
+                <div class="dp-seq selected">Passive Proposal Follow Up<span class="default-badge">Default</span></div>
+                <div class="dp-seq">Less Aggressive</div>
+                <div class="dp-seq">Third sequence</div>
+            </div>
+        </div>
+        <div class="dp-stage"><div class="stage-name">Custom Stage</div><div class="stage-meta">1 sequence · 1 drip</div></div>
+        <div class="dp-stage"><div class="stage-name">Proposal(s) Rejected</div><div class="stage-meta">1 sequence · 4 drips</div></div>
+    </div>
+    <div class="dp-main">
+        <div class="dp-trigger-badge">Trigger: Proposal Sent</div>
+        <div class="dp-step highlighted">
+            <div class="dp-step-icon">✉️</div>
+            <div><div class="dp-step-meta">Send email and text · 1 Day after trigger</div><div class="dp-step-title">1 Day Proposal Follow Up</div></div>
+        </div>
+        <div class="dp-step"><div class="dp-step-icon">💬</div><div><div class="dp-step-meta">Send text · 3 Days after trigger</div><div class="dp-step-title">3 Day Proposal Follow Up Text</div></div></div>
+        <div class="dp-step"><div class="dp-step-icon">✉️</div><div><div class="dp-step-meta">Send email · 4 Days after trigger</div><div class="dp-step-title">4 Day Proposal Follow Up</div></div></div>
+        <div class="dp-step"><div class="dp-step-icon">✉️</div><div><div class="dp-step-meta">Send email · 7 Days after trigger</div><div class="dp-step-title">7 Day Proposal Follow Up</div></div></div>
+    </div>
+</div>
+</div>
+
+<!-- ============ EDIT DRIP MODAL ============ -->
+<div id="modal-overlay">
+<div id="edit-drip-modal">
+    <div class="edm-header">
+        <h2>Edit Drip</h2>
+        <button class="edm-close">✕</button>
+    </div>
+    <div class="edm-body">
+
+        <div class="field-label">Drip Name</div>
+        <div class="edm-name-row">
+            <input type="text" class="drip-name" value="1 Day Proposal Follow Up">
+            <div class="active-toggle"><div class="switchery on"></div>Active</div>
+        </div>
+
+        <div class="edm-section">
+            <div class="field-label">When To Send</div>
+            <div class="pill-toggle-group" id="send-mode-group">
+                <div class="pill-toggle active" id="pill-wait" onclick="setSendMode('wait')">🕓 Wait then send</div>
+                <div class="pill-toggle" id="pill-immediate" onclick="setSendMode('immediate')">⚡ Send immediately</div>
+            </div>
+            <div class="wait-row" id="wait-row">
+                <input type="number" id="wait-value" value="1" min="0" oninput="syncTimingUI()">
+                <select id="wait-unit" onchange="syncTimingUI()">
+                    <option>Day(s)</option><option>Week(s)</option><option>Month(s)</option>
+                </select>
+                <span class="wait-suffix">after deal enters this stage</span>
+            </div>
+            <div class="info-banner">
+                <span>ℹ️</span>
+                <span>Replies to drip emails are routed to the assigned salesperson's email, or your company reply address if no salesperson is set on the deal.</span>
+                <span class="new-badge">NEW</span>
+            </div>
+        </div>
+
+        <div class="field-label">Delivery Method</div>
+        <div class="delivery-cards">
+            <div class="delivery-card"><div class="dc-icon">✉️</div>Email</div>
+            <div class="delivery-card"><div class="dc-icon">💬</div>Text</div>
+            <div class="delivery-card selected"><div class="dc-icon">✉️💬</div>Both<div class="dc-check">✓</div></div>
+        </div>
+
+        <!-- ===== EMAIL CHANNEL ===== -->
+        <div class="channel-card">
+            <div class="channel-head">
+                <div class="ch-icon">✉️</div>
+                <div class="ch-title">Email</div>
+                <div class="ch-actions">
+                    <button class="outline-btn-sm">📤 Send Test Email</button>
+                    <a class="link-btn">Preview Email Drip</a>
+                    <button class="ai-btn" id="ai-btn-email" onclick="openAiPanel('email')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.9 5.8L20 10l-6.1 2.2L12 18l-1.9-5.8L4 10l6.1-2.2z"/></svg>
+                        Generate with AI
+                        <span class="br-chip">1<span class="br-tooltip"><b>BR-1 · Entry Point</b><br>Button present in the drip step editor for email/text steps, both pipelines. Uses the light-purple AI treatment from the Proposal Builder AI button (86b321euz).</span></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Guided Panel: Email -->
+            <div class="ai-panel" id="ai-panel-email">
+                <div class="ai-panel-head">
+                    <div class="aph-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.9 5.8L20 10l-6.1 2.2L12 18l-1.9-5.8L4 10l6.1-2.2z"/></svg>
+                        Generate with AI: Email
+                        <span class="br-chip">2<span class="br-tooltip"><b>BR-2 · Guided Input Flow</b><br>One continuous panel, in order: Timing → User Context → Goal. Not three separate modals.</span></span>
+                    </div>
+                    <button class="ai-panel-close" onclick="closeAiPanel('email')">✕</button>
+                </div>
+
+                <div class="ai-step">
+                    <div class="ai-step-label"><span class="ai-step-num">1</span>Timing
+                        <span class="br-chip">3<span class="br-tooltip"><b>BR-3 · Auto Loaded Context</b><br>Timing, stage, pipeline type, channel are pulled from what's already set, the user never re-types them. Editing it here keeps "When to Send" above in sync, no need to leave the panel.</span></span>
+                    </div>
+                    <div class="pill-toggle-group" id="ai-timing-pills-email">
+                        <div class="pill-toggle sm" id="ai-pill-wait-email" onclick="setPanelSendMode('email','wait')">🕓 Wait then send</div>
+                        <div class="pill-toggle sm" id="ai-pill-immediate-email" onclick="setPanelSendMode('email','immediate')">⚡ Send immediately</div>
+                    </div>
+                    <div class="wait-row" id="ai-wait-row-email">
+                        <input type="number" class="ai-wait-value" id="ai-wait-value-email" min="0" oninput="syncWaitFromPanel('email')">
+                        <select class="ai-wait-unit" id="ai-wait-unit-email" onchange="syncWaitFromPanel('email')">
+                            <option>Day(s)</option><option>Week(s)</option><option>Month(s)</option>
+                        </select>
+                        <span class="wait-suffix">after deal enters this stage</span>
+                    </div>
+                    <div class="timing-blocked-msg" id="timing-blocked-email">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+                        Set the send delay to continue.
+                    </div>
+                </div>
+
+                <div class="ai-step">
+                    <div class="ai-step-label"><span class="ai-step-num">2</span>What do you want to say?<span class="req-mark">*</span><span class="auto-fill-badge" id="ctx-badge-email"></span></div>
+                    <textarea class="ai-context-input" id="ai-context-email" oninput="markContextEdited('email')"></textarea>
+                    <div class="ai-step-hint">Tab through to Goal to keep it, or start typing to write your own.</div>
+                </div>
+
+                <div class="ai-step">
+                    <div class="ai-step-label"><span class="ai-step-num">3</span>Goal
+                        <span class="br-chip">4<span class="br-tooltip"><b>BR-4 · Goal Options</b><br>13 options, listed in chronological pipeline order (not alphabetical) so the user can scan for their stage.</span></span>
+                        <span class="auto-fill-badge" id="goal-badge-email"></span>
+                    </div>
+                    <select class="ai-select" id="ai-goal-email" onchange="markGoalEdited('email')"></select>
+                </div>
+
+                <div class="ai-inline-alert warn" id="ai-alert-unavailable-email">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+                    <span>AI generation is unavailable right now. You can still write your message manually.<span class="br-chip">12<span class="br-tooltip"><b>BR-12 · AI Service Unavailable</b><br>Non-blocking inline error. Editor stays usable, button re-enables so the user can retry.</span></span></span>
+                </div>
+
+                <div class="ai-success-flash" id="ai-success-email">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                    Generated, feel free to edit before saving.
+                </div>
+
+                <div class="ai-panel-footer">
+                    <button class="ai-generate-btn" id="ai-generate-email" onclick="handleGenerateClick('email')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.9 5.8L20 10l-6.1 2.2L12 18l-1.9-5.8L4 10l6.1-2.2z"/></svg>
+                        <span class="btn-label">Generate</span>
+                    </button>
+                    <button class="ai-cancel-link" onclick="closeAiPanel('email')">Cancel</button>
+                </div>
+            </div>
+
+            <div class="subject-row">
+                <span class="lbl">Subject</span>
+                <input type="text" id="email-subject" value="Have you had a chance to review the proposal?">
+            </div>
+            <div class="toolbar-mock">
+                <span>Styles ▾</span><span>Font ▾</span><span>Size ▾</span><b>B</b><i>I</i><u>U</u><s>S</s><span>≡ ≡ ≡</span><span>🔗</span><span>🙂</span>
+            </div>
+            <textarea class="body-textarea" id="email-body">Hi {contact-name},
+
+I was wondering if you had a chance to look over the proposal we sent to you yesterday?
+
+We're eager to hear your thoughts, and to get started on this project! Please let me know if you have any questions regarding the specifics of the details outlined in the proposal.
+
+If you're ready to take the next steps, you can view and accept your proposal(s) here.</textarea>
+            <div class="ai-inline-alert info" id="ai-redirect-email">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                <span>I can help write a follow up related to the customer's estimate, appointment, project, or service. Try revising your context to describe what you'd like to communicate about this customer interaction.</span>
+            </div>
+        </div>
+
+        <!-- ===== TEXT CHANNEL ===== -->
+        <div class="channel-card">
+            <div class="channel-head">
+                <div class="ch-icon">💬</div>
+                <div class="ch-title">Text Message</div>
+                <div class="ch-actions">
+                    <a class="link-btn">Preview Text Message</a>
+                    <button class="ai-btn" id="ai-btn-text" onclick="openAiPanel('text')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.9 5.8L20 10l-6.1 2.2L12 18l-1.9-5.8L4 10l6.1-2.2z"/></svg>
+                        Generate with AI
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Guided Panel: Text -->
+            <div class="ai-panel" id="ai-panel-text">
+                <div class="ai-panel-head">
+                    <div class="aph-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.9 5.8L20 10l-6.1 2.2L12 18l-1.9-5.8L4 10l6.1-2.2z"/></svg>
+                        Generate with AI: Text
+                    </div>
+                    <button class="ai-panel-close" onclick="closeAiPanel('text')">✕</button>
+                </div>
+
+                <div class="ai-step">
+                    <div class="ai-step-label"><span class="ai-step-num">1</span>Timing</div>
+                    <div class="pill-toggle-group" id="ai-timing-pills-text">
+                        <div class="pill-toggle sm" id="ai-pill-wait-text" onclick="setPanelSendMode('text','wait')">🕓 Wait then send</div>
+                        <div class="pill-toggle sm" id="ai-pill-immediate-text" onclick="setPanelSendMode('text','immediate')">⚡ Send immediately</div>
+                    </div>
+                    <div class="wait-row" id="ai-wait-row-text">
+                        <input type="number" class="ai-wait-value" id="ai-wait-value-text" min="0" oninput="syncWaitFromPanel('text')">
+                        <select class="ai-wait-unit" id="ai-wait-unit-text" onchange="syncWaitFromPanel('text')">
+                            <option>Day(s)</option><option>Week(s)</option><option>Month(s)</option>
+                        </select>
+                        <span class="wait-suffix">after deal enters this stage</span>
+                    </div>
+                    <div class="timing-blocked-msg" id="timing-blocked-text">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+                        Set the send delay to continue.
+                    </div>
+                </div>
+
+                <div class="ai-step">
+                    <div class="ai-step-label"><span class="ai-step-num">2</span>What do you want to say?<span class="req-mark">*</span><span class="auto-fill-badge" id="ctx-badge-text"></span></div>
+                    <textarea class="ai-context-input" id="ai-context-text" oninput="markContextEdited('text')"></textarea>
+                    <div class="ai-step-hint">
+                        Tab through to Goal to keep it, or start typing to write your own. Keep it tied to this customer's estimate, appointment, project, or service.
+                        <span class="br-chip">6<span class="br-tooltip"><b>BR-6 · SMS Content Guardrails</b><br>Text output must relate to the customer's existing estimate, appointment, project, or service, no unrelated promo, political, or off-topic content.</span></span>
+                    </div>
+                </div>
+
+                <div class="ai-step">
+                    <div class="ai-step-label"><span class="ai-step-num">3</span>Goal<span class="auto-fill-badge" id="goal-badge-text"></span></div>
+                    <select class="ai-select" id="ai-goal-text" onchange="markGoalEdited('text')"></select>
+                </div>
+
+                <div class="ai-inline-alert warn" id="ai-alert-unavailable-text">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+                    <span>AI generation is unavailable right now. You can still write your message manually.</span>
+                </div>
+
+                <div class="ai-success-flash" id="ai-success-text">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                    Generated, feel free to edit before saving.
+                </div>
+
+                <div class="ai-panel-footer">
+                    <button class="ai-generate-btn" id="ai-generate-text" onclick="handleGenerateClick('text')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.9 5.8L20 10l-6.1 2.2L12 18l-1.9-5.8L4 10l6.1-2.2z"/></svg>
+                        <span class="btn-label">Generate</span>
+                    </button>
+                    <button class="ai-cancel-link" onclick="closeAiPanel('text')">Cancel</button>
+                </div>
+            </div>
+
+            <textarea class="sms-textarea" id="text-body" oninput="updateCharCount()">Hi {contact-name},
+I was wondering if you had a chance to look over the proposal we sent to you yesterday?
+If you're ready to take the next steps, you can view and accept your proposal(s) here.
+{view-quote-button}</textarea>
+            <div class="ai-inline-alert info" id="ai-redirect-text">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                <span>I can help write a follow up related to the customer's estimate, appointment, project, or service. Try revising your context to describe what you'd like to communicate about this customer interaction.
+                <span class="br-chip">7<span class="br-tooltip"><b>BR-7 · Out of Bounds Context Handling</b><br>Redirect reads as normal content guidance, no A2P or compliance language shown to the user. Text steps only; email is not constrained this way.</span></span></span>
+            </div>
+            <div class="char-count" id="char-count">Character count: 214/320</div>
+        </div>
+
+        <div class="keywords-bar">
+            <b>Keywords:</b>
+            {appointment-date} {appointment-location} {appointment-time} {company-name} {company-phone} {contact-name} {proposal-link}
+        </div>
+
+    </div>
+    <div class="edm-footer">
+        <button class="btn btn-primary">Save</button>
+        <button class="btn btn-outline">Close</button>
+    </div>
+
+    <!-- ============ OVERWRITE CONFIRM DIALOG (nested here so it anchors to this modal, not the full screen) ============ -->
+    <div id="confirm-overlay">
+        <div class="confirm-box">
+            <h4>Replace current message?</h4>
+            <p>This step already has message content. Regenerating will overwrite it: the current text can't be recovered after you continue.</p>
+            <div class="confirm-actions">
+                <button class="btn btn-outline" onclick="cancelOverwrite()">Cancel</button>
+                <button class="btn btn-primary" id="confirm-replace-btn" onclick="confirmOverwrite()">Replace</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div id="handoff-note">
+    <b>Handoff to Orchestrator:</b> UX spec for AI Assisted Drip Message Writing (86b9bmab5) is ready to fold into an Implementation Brief: BR-1 through BR-14 covered for both channels. One item is still open and not a product decision: whether SMS generation stays within the contractor's registered A2P campaign purpose (see 🚨 Decision Required, ticket owner Engineering/Twilio Account Team). Per the ticket, SMS scope should not ship until that's confirmed; email scope can proceed independently. Flagging back to the ticket rather than assuming an answer.
+</div>
+
+<script>
+// ============ GOAL OPTIONS (BR-4, chronological pipeline order) ============
+const GOALS = [
+    ["cold-lead", "Re engage a cold lead"],
+    ["check-in", "General check in / stay top of mind"],
+    ["book-appt", "Book an appointment"],
+    ["confirm-estimate", "Confirm estimate request"],
+    ["follow-up-estimate", "Follow up on estimate request"],
+    ["move-forward-proposal", "Move forward with a proposal"],
+    ["win-back", "Follow up on rejected proposal / win back"],
+    ["thank-you-accepted", "Thank you for accepting proposal"],
+    ["schedule-job", "Schedule a job"],
+    ["job-starting", "Job is about to start notification"],
+    ["job-completed", "Job completed notification"],
+    ["payment-reminder", "Send a payment reminder"],
+    ["review-referral", "Request a review or referral"]
+];
+
+function populateGoalSelects() {
+    ["ai-goal-email", "ai-goal-text"].forEach(id => {
+        const sel = document.getElementById(id);
+        sel.innerHTML = '<option value="" disabled selected>Select a goal…</option>' +
+            GOALS.map(([val, label]) => `<option value="${val}">${label}</option>`).join('');
+    });
+}
+populateGoalSelects();
+
+// ============ TEMPLATES (simulated generation output) ============
+const TEMPLATES = {
+    "cold-lead": {
+        email: (c,ctx) => `Hi {contact-name},\n\nIt's been a little while since we last connected about your project, and I wanted to reach back out.${ctx?` ${ctx}`:''}\n\nIf now's a better time to pick things back up, I'm happy to help, just reply to this email or give us a call.\n\nLooking forward to hearing from you.`,
+        text: (c,ctx) => `Hi {contact-name}, following up on your project with {company-name}.${ctx?` ${ctx}`:''} Still interested in moving forward? Happy to help whenever's good for you.`
+    },
+    "check-in": {
+        email: (c,ctx) => `Hi {contact-name},\n\nJust checking in to see how things are going on your end.${ctx?` ${ctx}`:''}\n\nIf anything's come up or you have questions, I'm here to help, feel free to reach out anytime.`,
+        text: (c,ctx) => `Hi {contact-name}, just checking in!${ctx?` ${ctx}`:''} Let us know if you need anything from {company-name}.`
+    },
+    "book-appt": {
+        email: (c,ctx) => `Hi {contact-name},\n\nLet's get some time on the calendar to take a look at your project.${ctx?` ${ctx}`:''}\n\nYou can pick a time that works for you here: {appointment-date} at {appointment-time}, or reply with a few windows that suit you.`,
+        text: (c,ctx) => `Hi {contact-name}, ready to schedule your appointment with {company-name}?${ctx?` ${ctx}`:''} Reply with a good day/time and we'll lock it in.`
+    },
+    "confirm-estimate": {
+        email: (c,ctx) => `Hi {contact-name},\n\nThanks for requesting an estimate from {company-name}! We've got your request and wanted to confirm the details.${ctx?` ${ctx}`:''}\n\nWe'll be in touch shortly to schedule a time to take a look.`,
+        text: (c,ctx) => `Hi {contact-name}, got your estimate request with {company-name}, thanks!${ctx?` ${ctx}`:''} We'll reach out shortly to schedule.`
+    },
+    "follow-up-estimate": {
+        email: (c,ctx) => `Hi {contact-name},\n\nFollowing up on the estimate you requested with {company-name}.${ctx?` ${ctx}`:''}\n\nLet us know a good time for us to come take a look, or if you have any questions in the meantime.`,
+        text: (c,ctx) => `Hi {contact-name}, following up on your estimate request.${ctx?` ${ctx}`:''} What's a good time for us to swing by?`
+    },
+    "move-forward-proposal": {
+        email: (c,ctx) => `Hi {contact-name},\n\nI was wondering if you had a chance to look over the proposal we sent over.${ctx?` ${ctx}`:''}\n\nWe're eager to hear your thoughts and get started on this project! If you're ready to take the next step, you can view and accept your proposal here: {proposal-link}`,
+        text: (c,ctx) => `Hi {contact-name}, had a chance to review your proposal from {company-name}?${ctx?` ${ctx}`:''} Ready when you are: {view-quote-button}`
+    },
+    "win-back": {
+        email: (c,ctx) => `Hi {contact-name},\n\nI wanted to circle back on the proposal we sent.${ctx?` ${ctx}`:''}\n\nIf your plans have changed or you had questions about the scope or pricing, I'd love the chance to revisit it with you, just let me know.`,
+        text: (c,ctx) => `Hi {contact-name}, wanted to check back on your proposal from {company-name}.${ctx?` ${ctx}`:''} Happy to revisit it if anything's changed, just reply here.`
+    },
+    "thank-you-accepted": {
+        email: (c,ctx) => `Hi {contact-name},\n\nThank you for accepting your proposal with {company-name}! We're excited to get started.${ctx?` ${ctx}`:''}\n\nWe'll follow up shortly with next steps to get your project scheduled.`,
+        text: (c,ctx) => `Hi {contact-name}, thanks for accepting your proposal with {company-name}!${ctx?` ${ctx}`:''} We'll follow up with next steps soon.`
+    },
+    "schedule-job": {
+        email: (c,ctx) => `Hi {contact-name},\n\nIt's time to get your job on the schedule!${ctx?` ${ctx}`:''}\n\nLet us know your availability at {appointment-date} and we'll confirm a start date that works for you.`,
+        text: (c,ctx) => `Hi {contact-name}, let's get your job scheduled with {company-name}.${ctx?` ${ctx}`:''} What dates work best for you?`
+    },
+    "job-starting": {
+        email: (c,ctx) => `Hi {contact-name},\n\nJust a heads up: your job with {company-name} is scheduled to begin on {appointment-date}.${ctx?` ${ctx}`:''}\n\nOur crew will arrive around {appointment-time}. Let us know if you have any questions before then.`,
+        text: (c,ctx) => `Hi {contact-name}, your job with {company-name} starts {appointment-date} around {appointment-time}.${ctx?` ${ctx}`:''} Reach out with any questions!`
+    },
+    "job-completed": {
+        email: (c,ctx) => `Hi {contact-name},\n\nYour project with {company-name} is complete! We hope you're happy with the results.${ctx?` ${ctx}`:''}\n\nIf anything needs a second look, just let us know, we're here to help.`,
+        text: (c,ctx) => `Hi {contact-name}, your project with {company-name} is all done!${ctx?` ${ctx}`:''} Let us know if you need anything else.`
+    },
+    "payment-reminder": {
+        email: (c,ctx) => `Hi {contact-name},\n\nJust a friendly reminder that payment is due for your recent project with {company-name}.${ctx?` ${ctx}`:''}\n\nYou can take care of it here whenever's convenient, let us know if you have any questions.`,
+        text: (c,ctx) => `Hi {contact-name}, friendly reminder that payment is due for your project with {company-name}.${ctx?` ${ctx}`:''} Let us know if you have questions.`
+    },
+    "review-referral": {
+        email: (c,ctx) => `Hi {contact-name},\n\nThanks again for choosing {company-name}! If you have a minute, we'd really appreciate a quick review of your experience.${ctx?` ${ctx}`:''}\n\nAnd if you know anyone else who could use our services, we'd love an introduction.`,
+        text: (c,ctx) => `Hi {contact-name}, thanks again for choosing {company-name}!${ctx?` ${ctx}`:''} We'd love a quick review, or a referral if you know someone who needs us.`
+    }
+};
+
+const GUARDRAIL_PATTERN = /discount|% ?off|percent off|promo(tion)?\b|coupon|\bsale\b|black friday|limited.time offer|free gift|giveaway|referral bonus|political|\bvote\b|election/i;
+
+// Suggested starting point for the required Context field, built from the stage/sequence the user is already viewing
+// (Proposal(s) Sent → Passive Proposal Follow Up). Real implementation would swap this per current stage.
+const DEFAULT_CONTEXT = {
+    email: "Check in on the proposal we sent and invite them to reach out with any questions before they decide.",
+    text: "Quick, friendly nudge to check the proposal: keep it short and casual."
+};
+
+// ============ STATE ============
+let pendingGenerate = null; // { channel }
+
+function setSendMode(mode) {
+    document.getElementById('pill-wait').classList.toggle('active', mode === 'wait');
+    document.getElementById('pill-immediate').classList.toggle('active', mode === 'immediate');
+    document.getElementById('wait-row').style.display = mode === 'wait' ? 'flex' : 'none';
+    document.getElementById('toggle-no-timing').checked = false;
+    syncTimingUI();
+}
+
+function toggleTimingState(noTiming) {
+    const waitPill = document.getElementById('pill-wait');
+    const immPill = document.getElementById('pill-immediate');
+    if (noTiming) {
+        waitPill.classList.remove('active');
+        immPill.classList.remove('active');
+        waitPill.classList.add('unset');
+        document.getElementById('wait-row').classList.add('unset');
+    } else {
+        waitPill.classList.remove('unset');
+        waitPill.classList.add('active');
+        document.getElementById('wait-row').classList.remove('unset');
+        document.getElementById('wait-row').style.display = 'flex';
+    }
+    syncTimingUI();
+}
+
+function timingIsSet() {
+    return !document.getElementById('toggle-no-timing').checked;
+}
+
+// BR-2/BR-3: Timing is a single underlying value (the step's send delay). The top "When to Send"
+// section and each AI panel's inline Step 1 are two views of that same value, kept in sync here,
+// so setting or confirming timing never requires leaving the guided panel.
+function syncTimingUI() {
+    const set = timingIsSet();
+    const immediate = !set ? false : document.getElementById('pill-immediate').classList.contains('active');
+    const waitVal = document.getElementById('wait-value').value || '1';
+    const waitUnit = document.getElementById('wait-unit').value;
+
+    ['email','text'].forEach(ch => {
+        const pillW = document.getElementById('ai-pill-wait-' + ch);
+        const pillI = document.getElementById('ai-pill-immediate-' + ch);
+        const waitRow = document.getElementById('ai-wait-row-' + ch);
+        const valInput = document.getElementById('ai-wait-value-' + ch);
+        const unitSelect = document.getElementById('ai-wait-unit-' + ch);
+        const blockedEl = document.getElementById('timing-blocked-' + ch);
+        const genBtn = document.getElementById('ai-generate-' + ch);
+
+        pillW.classList.toggle('unset', !set);
+        pillI.classList.toggle('unset', !set);
+        pillW.classList.toggle('active', set && !immediate);
+        pillI.classList.toggle('active', set && immediate);
+        waitRow.classList.toggle('unset', !set);
+        waitRow.style.display = (set && !immediate) ? 'flex' : (set ? 'none' : 'flex');
+        valInput.value = waitVal;
+        unitSelect.value = waitUnit;
+
+        blockedEl.classList.toggle('show', !set);
+        genBtn.classList.toggle('disabled', !set);
+    });
+}
+
+// Setting timing directly inside a panel updates the same master state the top section reads from.
+function setPanelSendMode(channel, mode) {
+    setSendMode(mode); // clears the "unset" state and updates both panels + the top section together
+}
+function syncWaitFromPanel(channel) {
+    const val = document.getElementById('ai-wait-value-' + channel).value;
+    const unit = document.getElementById('ai-wait-unit-' + channel).value;
+    document.getElementById('wait-value').value = val;
+    document.getElementById('wait-unit').value = unit;
+    document.getElementById('toggle-no-timing').checked = false;
+    syncTimingUI();
+}
+
+const CHANNEL_LABEL = { email: 'Email', text: 'Text message' };
+
+function openAiPanel(channel) {
+    const other = channel === 'email' ? 'text' : 'email';
+    document.getElementById('ai-panel-' + other).classList.remove('open');
+    document.getElementById('ai-panel-' + channel).classList.add('open');
+    document.getElementById('ai-panel-' + channel).scrollIntoView({behavior:'smooth', block:'nearest'});
+
+    // Context: carry over the other channel's current text if this field hasn't been customized yet;
+    // otherwise fall back to the BR-3 stage-based suggestion. Either way it's pre-filled, never auto-generated.
+    const ctxField = document.getElementById('ai-context-' + channel);
+    const otherCtxField = document.getElementById('ai-context-' + other);
+    if (ctxField.dataset.auto !== 'false') {
+        const carried = otherCtxField.value.trim();
+        ctxField.value = carried || DEFAULT_CONTEXT[channel];
+        ctxField.classList.add('is-placeholder-value');
+        ctxField.dataset.auto = 'true';
+        ctxField.dataset.carried = carried ? 'true' : 'false';
+    }
+
+    // Goal: carry over the other channel's selection if this one hasn't been explicitly chosen.
+    const goalSelect = document.getElementById('ai-goal-' + channel);
+    const otherGoalSelect = document.getElementById('ai-goal-' + other);
+    if (goalSelect.dataset.auto !== 'false' && otherGoalSelect.value) {
+        goalSelect.value = otherGoalSelect.value;
+        goalSelect.dataset.auto = 'true';
+    }
+
+    updateAutoBadges(channel, other);
+
+    // Select the pre-filled text so the user can immediately type over it, or Tab past to accept it.
+    setTimeout(() => { ctxField.focus(); if (ctxField.dataset.auto === 'true') ctxField.select(); }, 60);
+}
+function closeAiPanel(channel) {
+    document.getElementById('ai-panel-' + channel).classList.remove('open');
+}
+function updateAutoBadges(channel, other) {
+    const ctxField = document.getElementById('ai-context-' + channel);
+    const goalSelect = document.getElementById('ai-goal-' + channel);
+    const ctxBadge = document.getElementById('ctx-badge-' + channel);
+    const goalBadge = document.getElementById('goal-badge-' + channel);
+    const otherLabel = CHANNEL_LABEL[other];
+
+    if (ctxField.dataset.auto === 'true') {
+        ctxBadge.textContent = ctxField.dataset.carried === 'true' ? `↺ Carried over from ${otherLabel}` : '✨ Suggested for this stage';
+        ctxBadge.classList.add('show');
+    } else {
+        ctxBadge.classList.remove('show');
+    }
+
+    if (goalSelect.dataset.auto === 'true' && goalSelect.value) {
+        goalBadge.textContent = `↺ Carried over from ${otherLabel}`;
+        goalBadge.classList.add('show');
+    } else {
+        goalBadge.classList.remove('show');
+    }
+}
+function markGoalEdited(channel) {
+    const goalSelect = document.getElementById('ai-goal-' + channel);
+    goalSelect.dataset.auto = 'false';
+    document.getElementById('goal-badge-' + channel).classList.remove('show');
+}
+function markContextEdited(channel) {
+    const ctxField = document.getElementById('ai-context-' + channel);
+    ctxField.classList.remove('is-placeholder-value');
+    ctxField.dataset.auto = 'false';
+    document.getElementById('ctx-badge-' + channel).classList.remove('show');
+}
+
+function bodyFieldFor(channel) {
+    return channel === 'email' ? document.getElementById('email-body') : document.getElementById('text-body');
+}
+
+function handleGenerateClick(channel) {
+    if (!timingIsSet()) return; // blocked, message already visible
+    const body = bodyFieldFor(channel);
+    if (body.value.trim().length > 0) {
+        pendingGenerate = { channel };
+        document.getElementById('confirm-overlay').classList.add('show');
+        return;
+    }
+    runGenerate(channel);
+}
+
+function cancelOverwrite() {
+    pendingGenerate = null;
+    document.getElementById('confirm-overlay').classList.remove('show');
+}
+function confirmOverwrite() {
+    document.getElementById('confirm-overlay').classList.remove('show');
+    if (pendingGenerate) runGenerate(pendingGenerate.channel);
+    pendingGenerate = null;
+}
+
+function runGenerate(channel) {
+    const genBtn = document.getElementById('ai-generate-' + channel);
+    const label = genBtn.querySelector('.btn-label');
+    const goal = document.getElementById('ai-goal-' + channel).value;
+    const contextField = document.getElementById('ai-context-' + channel);
+    const context = contextField.value.trim();
+
+    document.getElementById('ai-alert-unavailable-' + channel).classList.remove('show');
+    document.getElementById('ai-redirect-' + channel).classList.remove('show');
+    document.getElementById('ai-success-' + channel).classList.remove('show');
+
+    // Context is required (pre-filled by default, so this only fires if the user deliberately clears it)
+    if (!context) {
+        contextField.focus();
+        contextField.style.borderColor = '#DC2626';
+        setTimeout(() => contextField.style.borderColor = '', 1200);
+        return;
+    }
+    if (!goal) {
+        document.getElementById('ai-goal-' + channel).focus();
+        document.getElementById('ai-goal-' + channel).style.borderColor = '#DC2626';
+        setTimeout(() => document.getElementById('ai-goal-' + channel).style.borderColor = '', 1200);
+        return;
+    }
+
+    // BR-6/BR-7 guardrail check: text steps only
+    if (channel === 'text' && GUARDRAIL_PATTERN.test(context)) {
+        document.getElementById('ai-redirect-' + channel).classList.add('show');
+        return;
+    }
+
+    genBtn.classList.add('disabled');
+    label.innerHTML = '<span class="spinner"></span> Generating…';
+
+    setTimeout(() => {
+        if (document.getElementById('toggle-unavailable').checked) {
+            genBtn.classList.remove('disabled');
+            label.textContent = 'Generate';
+            document.getElementById('ai-alert-unavailable-' + channel).classList.add('show');
+            return;
+        }
+
+        const tpl = TEMPLATES[goal];
+        const output = channel === 'email' ? tpl.email(null, context) : tpl.text(null, context);
+        const finalText = channel === 'text' ? output.slice(0, 320) : output;
+        bodyFieldFor(channel).value = finalText;
+
+        genBtn.classList.remove('disabled');
+        label.textContent = 'Regenerate';
+        document.getElementById('ai-success-' + channel).classList.add('show');
+        updateCharCount();
+        setTimeout(() => {
+            closeAiPanel(channel);
+            document.getElementById('ai-success-' + channel).classList.remove('show');
+        }, 1400);
+    }, 1300);
+}
+
+function updateCharCount() {
+    const val = document.getElementById('text-body').value;
+    const el = document.getElementById('char-count');
+    el.textContent = `Character count: ${val.length}/320`;
+    el.classList.toggle('over', val.length > 320);
+}
+
+function resetDemo() {
+    document.getElementById('toggle-unavailable').checked = false;
+    document.getElementById('toggle-no-timing').checked = false;
+    toggleTimingState(false);
+    setSendMode('wait');
+    document.getElementById('wait-value').value = 1;
+    document.getElementById('wait-unit').value = 'Day(s)';
+    syncTimingUI();
+    ['email','text'].forEach(ch => {
+        closeAiPanel(ch);
+        const ctxField = document.getElementById('ai-context-' + ch);
+        ctxField.value = '';
+        ctxField.dataset.auto = 'true';
+        ctxField.dataset.carried = 'false';
+        ctxField.classList.remove('is-placeholder-value');
+        const goalSelect = document.getElementById('ai-goal-' + ch);
+        goalSelect.selectedIndex = 0;
+        goalSelect.dataset.auto = 'true';
+        document.getElementById('ctx-badge-' + ch).classList.remove('show');
+        document.getElementById('goal-badge-' + ch).classList.remove('show');
+        document.getElementById('ai-alert-unavailable-' + ch).classList.remove('show');
+        document.getElementById('ai-redirect-' + ch).classList.remove('show');
+        document.getElementById('ai-success-' + ch).classList.remove('show');
+        document.getElementById('ai-generate-' + ch).querySelector('.btn-label').textContent = 'Generate';
+    });
+    document.getElementById('email-body').value = `Hi {contact-name},
+
+I was wondering if you had a chance to look over the proposal we sent to you yesterday?
+
+We're eager to hear your thoughts, and to get started on this project! Please let me know if you have any questions regarding the specifics of the details outlined in the proposal.
+
+If you're ready to take the next steps, you can view and accept your proposal(s) here.`;
+    document.getElementById('text-body').value = `Hi {contact-name},
+I was wondering if you had a chance to look over the proposal we sent to you yesterday?
+If you're ready to take the next steps, you can view and accept your proposal(s) here.
+{view-quote-button}`;
+    updateCharCount();
+}
+
+syncTimingUI();
+updateCharCount();
+</script>
+</body>
+</html>
