@@ -200,7 +200,7 @@ body.show-annotations .br-chip { display: inline-flex; }
 /* ============ EDIT DRIP MODAL ============ */
 #modal-overlay {
     position: fixed; inset: 0; background: rgba(20, 22, 34, 0.35);
-    z-index: 100; display: flex; justify-content: flex-end;
+    z-index: 100;
     pointer-events: none; /* it's a dimming layer with no click-away handler; only the modal panel itself should capture clicks */
 }
 #modal-overlay.hidden { display: none; }
@@ -219,9 +219,11 @@ body.modal-closed #page-backdrop { opacity: 1; filter: none; }
     box-shadow: -8px 0 30px rgba(0,0,0,0.15);
     display: flex; flex-direction: column;
     animation: slideIn .22s ease;
-    position: relative; /* anchors the overwrite-confirm dialog to this modal, not the full viewport */
-    pointer-events: auto; /* re-enable clicks on the panel itself; the overlay backdrop it sits in is click-through */
+    position: fixed; top: 0; right: 0; /* was a flex child of #modal-overlay; now a sibling, so it stacks independently above the header bars (z-index:200) instead of being capped by the tint's z-index:100 */
+    z-index: 200;
+    pointer-events: auto; /* the panel itself is interactive even though the dimming layer beside it is click-through */
 }
+#edit-drip-modal.hidden { display: none; }
 @keyframes slideIn { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .edm-header {
     display: flex; justify-content: space-between; align-items: center;
@@ -561,7 +563,10 @@ body.modal-closed #page-backdrop { opacity: 1; filter: none; }
 </div>
 
 <!-- ============ EDIT DRIP MODAL ============ -->
-<div id="modal-overlay">
+<!-- #modal-overlay is only the dimming tint (kept behind the header bars); #edit-drip-modal is a
+     sibling, not a child, so the actual panel can sit above the header bars independently of the
+     tint, which stays below them so it never covers/dims the bars -->
+<div id="modal-overlay"></div>
 <div id="edit-drip-modal">
     <div class="edm-header">
         <h2>Edit Drip</h2>
@@ -850,7 +855,6 @@ If you're ready to take the next steps, you can view and accept your proposal(s)
         </div>
     </div>
 </div>
-</div>
 
 <div id="handoff-note">
     <b>Handoff to Orchestrator:</b> UX spec for AI Assisted Drip Message Writing (86b9bmab5) is ready to fold into an Implementation Brief: BR-1 through BR-14 covered for both channels. One item is still open and not a product decision: whether SMS generation stays within the contractor's registered A2P campaign purpose (see 🚨 Decision Required, ticket owner Engineering/Twilio Account Team). Per the ticket, SMS scope should not ship until that's confirmed; email scope can proceed independently. Flagging back to the ticket rather than assuming an answer.
@@ -1084,10 +1088,12 @@ const CHANNEL_LABEL = { email: 'Email', text: 'Text message' };
 // way Timing stays in sync between the top section and the AI panel, without leaving the panel.
 function closeDripModal() {
     document.getElementById('modal-overlay').classList.add('hidden');
+    document.getElementById('edit-drip-modal').classList.add('hidden');
     document.body.classList.add('modal-closed');
 }
 function openDripModal() {
     document.getElementById('modal-overlay').classList.remove('hidden');
+    document.getElementById('edit-drip-modal').classList.remove('hidden');
     document.body.classList.remove('modal-closed');
 }
 
