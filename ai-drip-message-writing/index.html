@@ -629,7 +629,7 @@ body.modal-closed #page-backdrop { opacity: 1; filter: none; }
                     <div class="aph-title">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.9 5.8L20 10l-6.1 2.2L12 18l-1.9-5.8L4 10l6.1-2.2z"/></svg>
                         Generate with AI: Email
-                        <span class="br-chip">2<span class="br-tooltip"><b>BR-2 · Guided Input Flow</b><br>One continuous panel, in order: Timing → User Context → Goal. Not three separate modals.</span></span>
+                        <span class="br-chip">2<span class="br-tooltip"><b>BR-2 · Guided Input Flow</b><br>One continuous panel, in order: Timing → User Context → Tone → Type. Not four separate modals.</span></span>
                     </div>
                     <button class="ai-panel-close" onclick="closeAiPanel('email')">✕</button>
                 </div>
@@ -659,20 +659,28 @@ body.modal-closed #page-backdrop { opacity: 1; filter: none; }
                 <div class="ai-step">
                     <div class="ai-step-label"><span class="ai-step-num">2</span>What do you want to say?<span class="req-mark">*</span><span class="auto-fill-badge" id="ctx-badge-email"></span></div>
                     <textarea class="ai-context-input" id="ai-context-email" oninput="markContextEdited('email')"></textarea>
-                    <div class="ai-step-hint">Tab through to Goal to keep it, or start typing to write your own.</div>
+                    <div class="ai-step-hint">Tab through to Tone to keep it, or start typing to write your own.</div>
                 </div>
 
                 <div class="ai-step">
-                    <div class="ai-step-label"><span class="ai-step-num">3</span>Goal
-                        <span class="br-chip">4<span class="br-tooltip"><b>BR-4 · Goal Options</b><br>13 options, listed in chronological pipeline order (not alphabetical) so the user can scan for their stage.</span></span>
-                        <span class="auto-fill-badge" id="goal-badge-email"></span>
+                    <div class="ai-step-label"><span class="ai-step-num">3</span>Tone
+                        <span class="br-chip">4<span class="br-tooltip"><b>BR-4 · Tone Options</b><br>6 options, listed in ascending intensity order (Friendly through Urgent/Time Sensitive), not alphabetical, so the user can gauge how strong the message will read. Starter list, flagged pending refinement.</span></span>
+                        <span class="auto-fill-badge" id="tone-badge-email"></span>
                     </div>
-                    <select class="ai-select" id="ai-goal-email" onchange="markGoalEdited('email')"></select>
+                    <select class="ai-select" id="ai-tone-email" onchange="markToneEdited('email')"></select>
+                </div>
+
+                <div class="ai-step">
+                    <div class="ai-step-label"><span class="ai-step-num">4</span>Type
+                        <span class="br-chip">5<span class="br-tooltip"><b>BR-5 · Type Options</b><br>4 options in the defined order (Follow up, Check in, Reminder, Request), not alphabetized. Starter list, flagged pending refinement.</span></span>
+                        <span class="auto-fill-badge" id="type-badge-email"></span>
+                    </div>
+                    <select class="ai-select" id="ai-type-email" onchange="markTypeEdited('email')"></select>
                 </div>
 
                 <div class="ai-inline-alert warn" id="ai-alert-unavailable-email">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-                    <span>AI generation is unavailable right now. You can still write your message manually.<span class="br-chip">12<span class="br-tooltip"><b>BR-12 · AI Service Unavailable</b><br>Non-blocking inline error. Editor stays usable, button re-enables so the user can retry.</span></span></span>
+                    <span>AI generation is unavailable right now. You can still write your message manually.<span class="br-chip">11<span class="br-tooltip"><b>BR-11 · AI Service Unavailable</b><br>Non-blocking inline error. Editor stays usable, button re-enables so the user can retry.</span></span></span>
                 </div>
 
                 <div class="ai-panel-footer">
@@ -720,10 +728,6 @@ I was wondering if you had a chance to look over the proposal we sent to you yes
 We're eager to hear your thoughts, and to get started on this project! Please let me know if you have any questions regarding the specifics of the details outlined in the proposal.
 
 If you're ready to take the next steps, you can view and accept your proposal(s) here.</textarea>
-            <div class="ai-inline-alert info" id="ai-redirect-email">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-                <span>I can help write a follow up related to the customer's estimate, appointment, project, or service. Try revising your context to describe what you'd like to communicate about this customer interaction.</span>
-            </div>
         </div>
 
         <!-- ===== TEXT CHANNEL ===== -->
@@ -773,15 +777,17 @@ If you're ready to take the next steps, you can view and accept your proposal(s)
                 <div class="ai-step">
                     <div class="ai-step-label"><span class="ai-step-num">2</span>What do you want to say?<span class="req-mark">*</span><span class="auto-fill-badge" id="ctx-badge-text"></span></div>
                     <textarea class="ai-context-input" id="ai-context-text" oninput="markContextEdited('text')"></textarea>
-                    <div class="ai-step-hint">
-                        Tab through to Goal to keep it, or start typing to write your own. Keep it tied to this customer's estimate, appointment, project, or service.
-                        <span class="br-chip">6<span class="br-tooltip"><b>BR-6 · SMS Content Guardrails</b><br>Text output must relate to the customer's existing estimate, appointment, project, or service, no unrelated promo, political, or off-topic content.</span></span>
-                    </div>
+                    <div class="ai-step-hint">Tab through to Tone to keep it, or start typing to write your own.</div>
                 </div>
 
                 <div class="ai-step">
-                    <div class="ai-step-label"><span class="ai-step-num">3</span>Goal<span class="auto-fill-badge" id="goal-badge-text"></span></div>
-                    <select class="ai-select" id="ai-goal-text" onchange="markGoalEdited('text')"></select>
+                    <div class="ai-step-label"><span class="ai-step-num">3</span>Tone<span class="auto-fill-badge" id="tone-badge-text"></span></div>
+                    <select class="ai-select" id="ai-tone-text" onchange="markToneEdited('text')"></select>
+                </div>
+
+                <div class="ai-step">
+                    <div class="ai-step-label"><span class="ai-step-num">4</span>Type<span class="auto-fill-badge" id="type-badge-text"></span></div>
+                    <select class="ai-select" id="ai-type-text" onchange="markTypeEdited('text')"></select>
                 </div>
 
                 <div class="ai-inline-alert warn" id="ai-alert-unavailable-text">
@@ -824,11 +830,6 @@ If you're ready to take the next steps, you can view and accept your proposal(s)
 I was wondering if you had a chance to look over the proposal we sent to you yesterday?
 If you're ready to take the next steps, you can view and accept your proposal(s) here.
 {view-quote-button}</textarea>
-            <div class="ai-inline-alert info" id="ai-redirect-text">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-                <span>I can help write a follow up related to the customer's estimate, appointment, project, or service. Try revising your context to describe what you'd like to communicate about this customer interaction.
-                <span class="br-chip">7<span class="br-tooltip"><b>BR-7 · Out of Bounds Context Handling</b><br>Redirect reads as normal content guidance, no A2P or compliance language shown to the user. Text steps only; email is not constrained this way.</span></span></span>
-            </div>
             <div class="char-count" id="char-count">Character count: 214/320</div>
         </div>
 
@@ -857,101 +858,84 @@ If you're ready to take the next steps, you can view and accept your proposal(s)
 </div>
 
 <div id="handoff-note">
-    <b>Handoff to Orchestrator:</b> UX spec for AI Assisted Drip Message Writing (86b9bmab5) is ready to fold into an Implementation Brief: BR-1 through BR-14 covered for both channels. One item is still open and not a product decision: whether SMS generation stays within the contractor's registered A2P campaign purpose (see 🚨 Decision Required, ticket owner Engineering/Twilio Account Team). Per the ticket, SMS scope should not ship until that's confirmed; email scope can proceed independently. Flagging back to the ticket rather than assuming an answer.
+    <b>Handoff to Orchestrator:</b> UX spec for AI Assisted Drip Message Writing (86b9bmab5) is ready to fold into an Implementation Brief: BR-1 through BR-14 covered for both channels, updated to match the ticket's current revision (single Goal dropdown replaced with separate Tone and Type selections per BR-4/BR-5; SMS Content Guardrails and the SMS/A2P Decision Required item were both removed from scope per ticket comments, so email and text now ship on equal footing).
 </div>
 
 <!-- ============ SAVE CONFIRMATION TOAST (matches the hub's existing save-toast convention) ============ -->
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-// ============ GOAL OPTIONS (BR-4, chronological pipeline order) ============
-const GOALS = [
-    ["cold-lead", "Re engage a cold lead"],
-    ["check-in", "General check in / stay top of mind"],
-    ["book-appt", "Book an appointment"],
-    ["confirm-estimate", "Confirm estimate request"],
-    ["follow-up-estimate", "Follow up on estimate request"],
-    ["move-forward-proposal", "Move forward with a proposal"],
-    ["win-back", "Follow up on rejected proposal / win back"],
-    ["thank-you-accepted", "Thank you for accepting proposal"],
-    ["schedule-job", "Schedule a job"],
-    ["job-starting", "Job is about to start notification"],
-    ["job-completed", "Job completed notification"],
-    ["payment-reminder", "Send a payment reminder"],
-    ["review-referral", "Request a review or referral"]
+// ============ TONE OPTIONS (BR-4, ascending intensity order) ============
+const TONE_OPTIONS = [
+    ["friendly", "Friendly"],
+    ["light", "Light"],
+    ["passive", "Passive"],
+    ["standard", "Standard"],
+    ["assertive", "Assertive"],
+    ["urgent", "Urgent / Time Sensitive"]
 ];
 
-function populateGoalSelects() {
-    ["ai-goal-email", "ai-goal-text"].forEach(id => {
+// ============ TYPE OPTIONS (BR-5, defined order) ============
+const TYPE_OPTIONS = [
+    ["follow-up", "Follow up"],
+    ["check-in", "Check in"],
+    ["reminder", "Reminder"],
+    ["request", "Request"]
+];
+
+function populateToneTypeSelects() {
+    ["ai-tone-email", "ai-tone-text"].forEach(id => {
         const sel = document.getElementById(id);
-        sel.innerHTML = '<option value="" disabled selected>Select a goal…</option>' +
-            GOALS.map(([val, label]) => `<option value="${val}">${label}</option>`).join('');
+        sel.innerHTML = '<option value="" disabled selected>Select a tone…</option>' +
+            TONE_OPTIONS.map(([val, label]) => `<option value="${val}">${label}</option>`).join('');
+    });
+    ["ai-type-email", "ai-type-text"].forEach(id => {
+        const sel = document.getElementById(id);
+        sel.innerHTML = '<option value="" disabled selected>Select a type…</option>' +
+            TYPE_OPTIONS.map(([val, label]) => `<option value="${val}">${label}</option>`).join('');
     });
 }
-populateGoalSelects();
+populateToneTypeSelects();
 
-// ============ TEMPLATES (simulated generation output) ============
-const TEMPLATES = {
-    "cold-lead": {
-        email: (c,ctx) => `Hi {contact-name},\n\nIt's been a little while since we last connected about your project, and I wanted to reach back out.${ctx?` ${ctx}`:''}\n\nIf now's a better time to pick things back up, I'm happy to help, just reply to this email or give us a call.\n\nLooking forward to hearing from you.`,
-        text: (c,ctx) => `Hi {contact-name}, following up on your project with {company-name}.${ctx?` ${ctx}`:''} Still interested in moving forward? Happy to help whenever's good for you.`
+// ============ SIMULATED GENERATION (BR-6 Output): Type supplies the message structure, Tone supplies the opening/closing phrasing ============
+const TONE_PHRASES = {
+    friendly:  { opener: "Hope you're doing well!", closer: "Let me know if you have any questions, no rush at all." },
+    light:     { opener: "Just a quick note.", closer: "Feel free to reach out whenever works for you." },
+    passive:   { opener: "No pressure at all, just following up.", closer: "Only reach out if it's helpful, otherwise no need to reply." },
+    standard:  { opener: "Wanted to touch base.", closer: "Let us know if you have any questions." },
+    assertive: { opener: "Following up on this, wanted to make sure it's on your radar.", closer: "Please let us know your thoughts as soon as you can." },
+    urgent:    { opener: "Reaching out because time is limited on this.", closer: "Please respond as soon as possible so we can keep things on track." }
+};
+
+const TYPE_STRUCTURE = {
+    "follow-up": {
+        email: (o,ctx,c) => `Hi {contact-name},\n\n${o} ${ctx}\n\n${c}`,
+        text:  (o,ctx,c) => `Hi {contact-name}, ${o} ${ctx} ${c}`
     },
     "check-in": {
-        email: (c,ctx) => `Hi {contact-name},\n\nJust checking in to see how things are going on your end.${ctx?` ${ctx}`:''}\n\nIf anything's come up or you have questions, I'm here to help, feel free to reach out anytime.`,
-        text: (c,ctx) => `Hi {contact-name}, just checking in!${ctx?` ${ctx}`:''} Let us know if you need anything from {company-name}.`
+        email: (o,ctx,c) => `Hi {contact-name},\n\n${o} Just checking in, ${ctx}\n\n${c}`,
+        text:  (o,ctx,c) => `Hi {contact-name}, ${o} Just checking in, ${ctx} ${c}`
     },
-    "book-appt": {
-        email: (c,ctx) => `Hi {contact-name},\n\nLet's get some time on the calendar to take a look at your project.${ctx?` ${ctx}`:''}\n\nYou can pick a time that works for you here: {appointment-date} at {appointment-time}, or reply with a few windows that suit you.`,
-        text: (c,ctx) => `Hi {contact-name}, ready to schedule your appointment with {company-name}?${ctx?` ${ctx}`:''} Reply with a good day/time and we'll lock it in.`
+    "reminder": {
+        email: (o,ctx,c) => `Hi {contact-name},\n\nThis is a quick reminder: ${ctx}\n\n${o} ${c}`,
+        text:  (o,ctx,c) => `Hi {contact-name}, quick reminder: ${ctx} ${o} ${c}`
     },
-    "confirm-estimate": {
-        email: (c,ctx) => `Hi {contact-name},\n\nThanks for requesting an estimate from {company-name}! We've got your request and wanted to confirm the details.${ctx?` ${ctx}`:''}\n\nWe'll be in touch shortly to schedule a time to take a look.`,
-        text: (c,ctx) => `Hi {contact-name}, got your estimate request with {company-name}, thanks!${ctx?` ${ctx}`:''} We'll reach out shortly to schedule.`
-    },
-    "follow-up-estimate": {
-        email: (c,ctx) => `Hi {contact-name},\n\nFollowing up on the estimate you requested with {company-name}.${ctx?` ${ctx}`:''}\n\nLet us know a good time for us to come take a look, or if you have any questions in the meantime.`,
-        text: (c,ctx) => `Hi {contact-name}, following up on your estimate request.${ctx?` ${ctx}`:''} What's a good time for us to swing by?`
-    },
-    "move-forward-proposal": {
-        email: (c,ctx) => `Hi {contact-name},\n\nI was wondering if you had a chance to look over the proposal we sent over.${ctx?` ${ctx}`:''}\n\nWe're eager to hear your thoughts and get started on this project! If you're ready to take the next step, you can view and accept your proposal here: {proposal-link}`,
-        text: (c,ctx) => `Hi {contact-name}, had a chance to review your proposal from {company-name}?${ctx?` ${ctx}`:''} Ready when you are: {view-quote-button}`
-    },
-    "win-back": {
-        email: (c,ctx) => `Hi {contact-name},\n\nI wanted to circle back on the proposal we sent.${ctx?` ${ctx}`:''}\n\nIf your plans have changed or you had questions about the scope or pricing, I'd love the chance to revisit it with you, just let me know.`,
-        text: (c,ctx) => `Hi {contact-name}, wanted to check back on your proposal from {company-name}.${ctx?` ${ctx}`:''} Happy to revisit it if anything's changed, just reply here.`
-    },
-    "thank-you-accepted": {
-        email: (c,ctx) => `Hi {contact-name},\n\nThank you for accepting your proposal with {company-name}! We're excited to get started.${ctx?` ${ctx}`:''}\n\nWe'll follow up shortly with next steps to get your project scheduled.`,
-        text: (c,ctx) => `Hi {contact-name}, thanks for accepting your proposal with {company-name}!${ctx?` ${ctx}`:''} We'll follow up with next steps soon.`
-    },
-    "schedule-job": {
-        email: (c,ctx) => `Hi {contact-name},\n\nIt's time to get your job on the schedule!${ctx?` ${ctx}`:''}\n\nLet us know your availability at {appointment-date} and we'll confirm a start date that works for you.`,
-        text: (c,ctx) => `Hi {contact-name}, let's get your job scheduled with {company-name}.${ctx?` ${ctx}`:''} What dates work best for you?`
-    },
-    "job-starting": {
-        email: (c,ctx) => `Hi {contact-name},\n\nJust a heads up: your job with {company-name} is scheduled to begin on {appointment-date}.${ctx?` ${ctx}`:''}\n\nOur crew will arrive around {appointment-time}. Let us know if you have any questions before then.`,
-        text: (c,ctx) => `Hi {contact-name}, your job with {company-name} starts {appointment-date} around {appointment-time}.${ctx?` ${ctx}`:''} Reach out with any questions!`
-    },
-    "job-completed": {
-        email: (c,ctx) => `Hi {contact-name},\n\nYour project with {company-name} is complete! We hope you're happy with the results.${ctx?` ${ctx}`:''}\n\nIf anything needs a second look, just let us know, we're here to help.`,
-        text: (c,ctx) => `Hi {contact-name}, your project with {company-name} is all done!${ctx?` ${ctx}`:''} Let us know if you need anything else.`
-    },
-    "payment-reminder": {
-        email: (c,ctx) => `Hi {contact-name},\n\nJust a friendly reminder that payment is due for your recent project with {company-name}.${ctx?` ${ctx}`:''}\n\nYou can take care of it here whenever's convenient, let us know if you have any questions.`,
-        text: (c,ctx) => `Hi {contact-name}, friendly reminder that payment is due for your project with {company-name}.${ctx?` ${ctx}`:''} Let us know if you have questions.`
-    },
-    "review-referral": {
-        email: (c,ctx) => `Hi {contact-name},\n\nThanks again for choosing {company-name}! If you have a minute, we'd really appreciate a quick review of your experience.${ctx?` ${ctx}`:''}\n\nAnd if you know anyone else who could use our services, we'd love an introduction.`,
-        text: (c,ctx) => `Hi {contact-name}, thanks again for choosing {company-name}!${ctx?` ${ctx}`:''} We'd love a quick review, or a referral if you know someone who needs us.`
+    "request": {
+        email: (o,ctx,c) => `Hi {contact-name},\n\n${o} ${ctx}\n\nCould you let us know when you get a chance?\n\n${c}`,
+        text:  (o,ctx,c) => `Hi {contact-name}, ${o} ${ctx} Could you let us know when you get a chance? ${c}`
     }
 };
 
-const GUARDRAIL_PATTERN = /discount|% ?off|percent off|promo(tion)?\b|coupon|\bsale\b|black friday|limited.time offer|free gift|giveaway|referral bonus|political|\bvote\b|election/i;
+function generateMessage(channel, type, tone, context) {
+    const phrases = TONE_PHRASES[tone];
+    return TYPE_STRUCTURE[type][channel](phrases.opener, context, phrases.closer);
+}
 
 // Suggested starting point for the required Context field, and the trigger label shown in the
 // background Drips view, keyed by pipeline stage (BR-3: stage is one of the things Auto Loaded
-// Context pulls from). Assumption: exact per-stage copy wasn't in the ticket text available here,
-// so these extend the same voice as the existing Proposal(s) Sent entry and TEMPLATES above,
+// Context pulls from). Assumption: the ticket confirms this mechanism (BR-2/BR-3, "static per
+// stage/sequence template library") but only gives one worked example (Proposal(s) Sent), so
+// these extend the same voice for the other 7 stages,
 // flagged in the decision log rather than guessed at silently.
 const STAGE_TRIGGER_LABEL = {
     "cold-leads": "Cold Lead",
@@ -1151,12 +1135,18 @@ function openAiPanel(channel) {
         ctxField.dataset.carried = carried ? 'true' : 'false';
     }
 
-    // Goal: carry over the other channel's selection if this one hasn't been explicitly chosen.
-    const goalSelect = document.getElementById('ai-goal-' + channel);
-    const otherGoalSelect = document.getElementById('ai-goal-' + other);
-    if (goalSelect.dataset.auto !== 'false' && otherGoalSelect.value) {
-        goalSelect.value = otherGoalSelect.value;
-        goalSelect.dataset.auto = 'true';
+    // BR-14: Tone and Type carry over the other channel's selection if this one hasn't been explicitly chosen.
+    const toneSelect = document.getElementById('ai-tone-' + channel);
+    const otherToneSelect = document.getElementById('ai-tone-' + other);
+    if (toneSelect.dataset.auto !== 'false' && otherToneSelect.value) {
+        toneSelect.value = otherToneSelect.value;
+        toneSelect.dataset.auto = 'true';
+    }
+    const typeSelect = document.getElementById('ai-type-' + channel);
+    const otherTypeSelect = document.getElementById('ai-type-' + other);
+    if (typeSelect.dataset.auto !== 'false' && otherTypeSelect.value) {
+        typeSelect.value = otherTypeSelect.value;
+        typeSelect.dataset.auto = 'true';
     }
 
     updateAutoBadges(channel, other);
@@ -1171,9 +1161,11 @@ function closeAiPanel(channel) {
 }
 function updateAutoBadges(channel, other) {
     const ctxField = document.getElementById('ai-context-' + channel);
-    const goalSelect = document.getElementById('ai-goal-' + channel);
+    const toneSelect = document.getElementById('ai-tone-' + channel);
+    const typeSelect = document.getElementById('ai-type-' + channel);
     const ctxBadge = document.getElementById('ctx-badge-' + channel);
-    const goalBadge = document.getElementById('goal-badge-' + channel);
+    const toneBadge = document.getElementById('tone-badge-' + channel);
+    const typeBadge = document.getElementById('type-badge-' + channel);
     const otherLabel = CHANNEL_LABEL[other];
 
     if (ctxField.dataset.auto === 'true') {
@@ -1183,17 +1175,29 @@ function updateAutoBadges(channel, other) {
         ctxBadge.classList.remove('show');
     }
 
-    if (goalSelect.dataset.auto === 'true' && goalSelect.value) {
-        goalBadge.textContent = `↺ Carried over from ${otherLabel}`;
-        goalBadge.classList.add('show');
+    if (toneSelect.dataset.auto === 'true' && toneSelect.value) {
+        toneBadge.textContent = `↺ Carried over from ${otherLabel}`;
+        toneBadge.classList.add('show');
     } else {
-        goalBadge.classList.remove('show');
+        toneBadge.classList.remove('show');
+    }
+
+    if (typeSelect.dataset.auto === 'true' && typeSelect.value) {
+        typeBadge.textContent = `↺ Carried over from ${otherLabel}`;
+        typeBadge.classList.add('show');
+    } else {
+        typeBadge.classList.remove('show');
     }
 }
-function markGoalEdited(channel) {
-    const goalSelect = document.getElementById('ai-goal-' + channel);
-    goalSelect.dataset.auto = 'false';
-    document.getElementById('goal-badge-' + channel).classList.remove('show');
+function markToneEdited(channel) {
+    const toneSelect = document.getElementById('ai-tone-' + channel);
+    toneSelect.dataset.auto = 'false';
+    document.getElementById('tone-badge-' + channel).classList.remove('show');
+}
+function markTypeEdited(channel) {
+    const typeSelect = document.getElementById('ai-type-' + channel);
+    typeSelect.dataset.auto = 'false';
+    document.getElementById('type-badge-' + channel).classList.remove('show');
 }
 function markContextEdited(channel) {
     const ctxField = document.getElementById('ai-context-' + channel);
@@ -1254,12 +1258,12 @@ function confirmOverwrite() {
 function runGenerate(channel) {
     const genBtn = document.getElementById('ai-generate-' + channel);
     const label = genBtn.querySelector('.btn-label');
-    const goal = document.getElementById('ai-goal-' + channel).value;
+    const tone = document.getElementById('ai-tone-' + channel).value;
+    const type = document.getElementById('ai-type-' + channel).value;
     const contextField = document.getElementById('ai-context-' + channel);
     const context = contextField.value.trim();
 
     document.getElementById('ai-alert-unavailable-' + channel).classList.remove('show');
-    document.getElementById('ai-redirect-' + channel).classList.remove('show');
 
     // Context is required (pre-filled by default, so this only fires if the user deliberately clears it)
     if (!context) {
@@ -1268,16 +1272,16 @@ function runGenerate(channel) {
         setTimeout(() => contextField.style.borderColor = '', 1200);
         return;
     }
-    if (!goal) {
-        document.getElementById('ai-goal-' + channel).focus();
-        document.getElementById('ai-goal-' + channel).style.borderColor = '#DC2626';
-        setTimeout(() => document.getElementById('ai-goal-' + channel).style.borderColor = '', 1200);
+    if (!tone) {
+        document.getElementById('ai-tone-' + channel).focus();
+        document.getElementById('ai-tone-' + channel).style.borderColor = '#DC2626';
+        setTimeout(() => document.getElementById('ai-tone-' + channel).style.borderColor = '', 1200);
         return;
     }
-
-    // BR-6/BR-7 guardrail check: text steps only
-    if (channel === 'text' && GUARDRAIL_PATTERN.test(context)) {
-        document.getElementById('ai-redirect-' + channel).classList.add('show');
+    if (!type) {
+        document.getElementById('ai-type-' + channel).focus();
+        document.getElementById('ai-type-' + channel).style.borderColor = '#DC2626';
+        setTimeout(() => document.getElementById('ai-type-' + channel).style.borderColor = '', 1200);
         return;
     }
 
@@ -1293,8 +1297,7 @@ function runGenerate(channel) {
             return;
         }
 
-        const tpl = TEMPLATES[goal];
-        const output = channel === 'email' ? tpl.email(null, context) : tpl.text(null, context);
+        const output = generateMessage(channel, type, tone, context);
         const finalText = channel === 'text' ? output.slice(0, 320) : output;
 
         label.textContent = 'Regenerate';
@@ -1333,13 +1336,16 @@ function resetDemo() {
         ctxField.dataset.auto = 'true';
         ctxField.dataset.carried = 'false';
         ctxField.classList.remove('is-placeholder-value');
-        const goalSelect = document.getElementById('ai-goal-' + ch);
-        goalSelect.selectedIndex = 0;
-        goalSelect.dataset.auto = 'true';
+        const toneSelect = document.getElementById('ai-tone-' + ch);
+        toneSelect.selectedIndex = 0;
+        toneSelect.dataset.auto = 'true';
+        const typeSelect = document.getElementById('ai-type-' + ch);
+        typeSelect.selectedIndex = 0;
+        typeSelect.dataset.auto = 'true';
         document.getElementById('ctx-badge-' + ch).classList.remove('show');
-        document.getElementById('goal-badge-' + ch).classList.remove('show');
+        document.getElementById('tone-badge-' + ch).classList.remove('show');
+        document.getElementById('type-badge-' + ch).classList.remove('show');
         document.getElementById('ai-alert-unavailable-' + ch).classList.remove('show');
-        document.getElementById('ai-redirect-' + ch).classList.remove('show');
         document.getElementById('ai-success-' + ch).classList.remove('show');
         document.getElementById('ai-generate-' + ch).querySelector('.btn-label').textContent = 'Generate';
         document.getElementById('ai-preview-textarea-' + ch).value = '';
