@@ -35,7 +35,6 @@ a { cursor: pointer; }
 
 /* ============ HUB PROTO BAR (standard hub nav, matches _template/index.html) ============ */
 .proto-bar {
-    position: relative; z-index: 600; /* above #demo-banner (500) and the always-open #modal-overlay (100) so the back link stays clickable */
     background: #FFFFFF;
     border-bottom: 1px solid #DAD8E3;
     padding: 12px 24px;
@@ -193,6 +192,7 @@ body.show-annotations .br-chip { display: inline-flex; }
 #modal-overlay {
     position: fixed; inset: 0; background: rgba(20, 22, 34, 0.35);
     z-index: 100; display: flex; justify-content: flex-end;
+    pointer-events: none; /* it's a dimming layer with no click-away handler; only the modal panel itself should capture clicks */
 }
 #edit-drip-modal {
     --st-color-primary: #8B85EA;
@@ -208,6 +208,7 @@ body.show-annotations .br-chip { display: inline-flex; }
     display: flex; flex-direction: column;
     animation: slideIn .22s ease;
     position: relative; /* anchors the overwrite-confirm dialog to this modal, not the full viewport */
+    pointer-events: auto; /* re-enable clicks on the panel itself; the overlay backdrop it sits in is click-through */
 }
 @keyframes slideIn { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .edm-header {
