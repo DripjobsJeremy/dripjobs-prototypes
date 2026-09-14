@@ -261,8 +261,10 @@ body.show-annotations .br-chip { display: inline-flex; }
 .delivery-cards { display: flex; gap: 10px; margin: 18px 0; }
 .delivery-card {
     flex: 1; border: 1px solid var(--st-color-border); border-radius: 10px; padding: 16px 10px;
-    text-align: center; position: relative; font-size: 12.5px; font-weight: 700;
+    text-align: center; position: relative; font-size: 12.5px; font-weight: 700; cursor: pointer;
+    transition: border-color .12s ease, box-shadow .12s ease;
 }
+.delivery-card:hover { border-color: var(--st-color-primary); }
 .delivery-card .dc-icon {
     width: 36px; height: 36px; border-radius: 9px; background: #F1EFFC; color: var(--st-color-primary-active);
     display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;
@@ -385,6 +387,53 @@ body.show-annotations .br-chip { display: inline-flex; }
     border-top-color: #fff; animation: spin .7s linear infinite; display: inline-block;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============ AI GENERATED PREVIEW (review/edit/confirm before applying to the real editor) ============ */
+.ai-preview { display: none; }
+.ai-preview.open { display: block; animation: panelOpen .16s ease; }
+.ai-preview-head {
+    display: flex; align-items: center; gap: 7px; margin-bottom: 12px;
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: #6C63D6;
+}
+.ai-preview-head svg { width: 14px; height: 14px; }
+.ai-preview-notes {
+    background: #F1EFFC; border: 1px solid #DCD9F7; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;
+}
+.ai-preview-notes-label {
+    font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: #4A3FBD; margin-bottom: 4px;
+}
+.ai-preview-notes-text { font-size: 12.5px; color: #4A3FBD; line-height: 1.5; }
+.ai-preview-textarea {
+    width: 100%; border: 1px solid var(--st-color-border); border-radius: 8px; padding: 12px 14px;
+    font-size: 13.5px; font-family: inherit; color: var(--st-color-text); line-height: 1.6;
+    min-height: 110px; resize: vertical; background: #fff;
+}
+.ai-preview-textarea:focus { outline: none; border-color: var(--st-color-primary); }
+.ai-preview-actions { display: flex; justify-content: flex-end; align-items: center; gap: 16px; margin-top: 12px; }
+.ai-preview-discard { background: none; border: none; font-size: 12px; font-weight: 700; color: var(--st-color-text-muted); }
+.ai-preview-discard:hover { color: #DC2626; }
+.ai-preview-use {
+    background: linear-gradient(135deg, #8B85EA, #6C63D6); color: #fff; border: none; border-radius: 999px;
+    padding: 9px 18px; font-size: 12.5px; font-weight: 800;
+}
+.ai-preview-use:hover { filter: brightness(1.05); }
+
+/* ============ SAVE CONFIRMATION TOAST (matches the hub's existing save-toast convention) ============ */
+.toast-container {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+}
+.toast {
+    background: #1C2333; color: #fff; padding: 12px 18px; border-radius: 10px;
+    font-size: 13px; font-weight: 600;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    display: flex; align-items: center; gap: 8px;
+    opacity: 0; transform: translateY(8px); transition: all 0.25s ease;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { border-left: 3px solid #34D399; }
+.toast svg { width: 15px; height: 15px; flex-shrink: 0; }
 
 .ai-inline-alert {
     display: none; align-items: flex-start; gap: 8px; border-radius: 8px; padding: 10px 12px; font-size: 12px;
@@ -532,13 +581,13 @@ body.show-annotations .br-chip { display: inline-flex; }
 
         <div class="field-label">Delivery Method</div>
         <div class="delivery-cards">
-            <div class="delivery-card"><div class="dc-icon">✉️</div>Email</div>
-            <div class="delivery-card"><div class="dc-icon">💬</div>Text</div>
-            <div class="delivery-card selected"><div class="dc-icon">✉️💬</div>Both<div class="dc-check">✓</div></div>
+            <div class="delivery-card" id="delivery-card-email" onclick="setDeliveryMethod('email')"><div class="dc-icon">✉️</div>Email<div class="dc-check">✓</div></div>
+            <div class="delivery-card" id="delivery-card-text" onclick="setDeliveryMethod('text')"><div class="dc-icon">💬</div>Text<div class="dc-check">✓</div></div>
+            <div class="delivery-card selected" id="delivery-card-both" onclick="setDeliveryMethod('both')"><div class="dc-icon">✉️💬</div>Both<div class="dc-check">✓</div></div>
         </div>
 
         <!-- ===== EMAIL CHANNEL ===== -->
-        <div class="channel-card">
+        <div class="channel-card" id="channel-card-email">
             <div class="channel-head">
                 <div class="ch-icon">✉️</div>
                 <div class="ch-title">Email</div>
@@ -564,6 +613,7 @@ body.show-annotations .br-chip { display: inline-flex; }
                     <button class="ai-panel-close" onclick="closeAiPanel('email')">✕</button>
                 </div>
 
+                <div class="ai-input-section" id="ai-input-section-email">
                 <div class="ai-step">
                     <div class="ai-step-label"><span class="ai-step-num">1</span>Timing
                         <span class="br-chip">3<span class="br-tooltip"><b>BR-3 · Auto Loaded Context</b><br>Timing, stage, pipeline type, channel are pulled from what's already set, the user never re-types them. Editing it here keeps "When to Send" above in sync, no need to leave the panel.</span></span>
@@ -604,17 +654,34 @@ body.show-annotations .br-chip { display: inline-flex; }
                     <span>AI generation is unavailable right now. You can still write your message manually.<span class="br-chip">12<span class="br-tooltip"><b>BR-12 · AI Service Unavailable</b><br>Non-blocking inline error. Editor stays usable, button re-enables so the user can retry.</span></span></span>
                 </div>
 
-                <div class="ai-success-flash" id="ai-success-email">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-                    Generated, feel free to edit before saving.
-                </div>
-
                 <div class="ai-panel-footer">
                     <button class="ai-generate-btn" id="ai-generate-email" onclick="handleGenerateClick('email')">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.9 5.8L20 10l-6.1 2.2L12 18l-1.9-5.8L4 10l6.1-2.2z"/></svg>
                         <span class="btn-label">Generate</span>
                     </button>
                     <button class="ai-cancel-link" onclick="closeAiPanel('email')">Cancel</button>
+                </div>
+                </div>
+
+                <div class="ai-preview" id="ai-preview-email">
+                    <div class="ai-preview-head">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.9 5.8L20 10l-6.1 2.2L12 18l-1.9-5.8L4 10l6.1-2.2z"/></svg>
+                        AI-Generated Email
+                    </div>
+                    <div class="ai-preview-notes">
+                        <div class="ai-preview-notes-label">Based on your notes</div>
+                        <div class="ai-preview-notes-text" id="ai-preview-notes-email"></div>
+                    </div>
+                    <textarea class="ai-preview-textarea" id="ai-preview-textarea-email"></textarea>
+                    <div class="ai-preview-actions">
+                        <button class="ai-preview-discard" onclick="discardAiPreview('email')">✕ Discard</button>
+                        <button class="ai-preview-use" onclick="useAiPreview('email')">✓ Use Email</button>
+                    </div>
+                </div>
+
+                <div class="ai-success-flash" id="ai-success-email">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                    Added to your message.
                 </div>
             </div>
 
@@ -639,7 +706,7 @@ If you're ready to take the next steps, you can view and accept your proposal(s)
         </div>
 
         <!-- ===== TEXT CHANNEL ===== -->
-        <div class="channel-card">
+        <div class="channel-card" id="channel-card-text">
             <div class="channel-head">
                 <div class="ch-icon">💬</div>
                 <div class="ch-title">Text Message</div>
@@ -662,6 +729,7 @@ If you're ready to take the next steps, you can view and accept your proposal(s)
                     <button class="ai-panel-close" onclick="closeAiPanel('text')">✕</button>
                 </div>
 
+                <div class="ai-input-section" id="ai-input-section-text">
                 <div class="ai-step">
                     <div class="ai-step-label"><span class="ai-step-num">1</span>Timing</div>
                     <div class="pill-toggle-group" id="ai-timing-pills-text">
@@ -700,17 +768,34 @@ If you're ready to take the next steps, you can view and accept your proposal(s)
                     <span>AI generation is unavailable right now. You can still write your message manually.</span>
                 </div>
 
-                <div class="ai-success-flash" id="ai-success-text">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-                    Generated, feel free to edit before saving.
-                </div>
-
                 <div class="ai-panel-footer">
                     <button class="ai-generate-btn" id="ai-generate-text" onclick="handleGenerateClick('text')">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.9 5.8L20 10l-6.1 2.2L12 18l-1.9-5.8L4 10l6.1-2.2z"/></svg>
                         <span class="btn-label">Generate</span>
                     </button>
                     <button class="ai-cancel-link" onclick="closeAiPanel('text')">Cancel</button>
+                </div>
+                </div>
+
+                <div class="ai-preview" id="ai-preview-text">
+                    <div class="ai-preview-head">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l1.9 5.8L20 10l-6.1 2.2L12 18l-1.9-5.8L4 10l6.1-2.2z"/></svg>
+                        AI-Generated Text
+                    </div>
+                    <div class="ai-preview-notes">
+                        <div class="ai-preview-notes-label">Based on your notes</div>
+                        <div class="ai-preview-notes-text" id="ai-preview-notes-text"></div>
+                    </div>
+                    <textarea class="ai-preview-textarea" id="ai-preview-textarea-text"></textarea>
+                    <div class="ai-preview-actions">
+                        <button class="ai-preview-discard" onclick="discardAiPreview('text')">✕ Discard</button>
+                        <button class="ai-preview-use" onclick="useAiPreview('text')">✓ Use Text</button>
+                    </div>
+                </div>
+
+                <div class="ai-success-flash" id="ai-success-text">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                    Added to your message.
                 </div>
             </div>
 
@@ -733,7 +818,7 @@ If you're ready to take the next steps, you can view and accept your proposal(s)
 
     </div>
     <div class="edm-footer">
-        <button class="btn btn-primary">Save</button>
+        <button class="btn btn-primary" onclick="handleSaveDrip()">Save</button>
         <button class="btn btn-outline">Close</button>
     </div>
 
@@ -741,7 +826,7 @@ If you're ready to take the next steps, you can view and accept your proposal(s)
     <div id="confirm-overlay">
         <div class="confirm-box">
             <h4>Replace current message?</h4>
-            <p>This step already has message content. Regenerating will overwrite it: the current text can't be recovered after you continue.</p>
+            <p>This step already has message content. Using this draft will overwrite it: the current text can't be recovered after you continue.</p>
             <div class="confirm-actions">
                 <button class="btn btn-outline" onclick="cancelOverwrite()">Cancel</button>
                 <button class="btn btn-primary" id="confirm-replace-btn" onclick="confirmOverwrite()">Replace</button>
@@ -754,6 +839,9 @@ If you're ready to take the next steps, you can view and accept your proposal(s)
 <div id="handoff-note">
     <b>Handoff to Orchestrator:</b> UX spec for AI Assisted Drip Message Writing (86b9bmab5) is ready to fold into an Implementation Brief: BR-1 through BR-14 covered for both channels. One item is still open and not a product decision: whether SMS generation stays within the contractor's registered A2P campaign purpose (see 🚨 Decision Required, ticket owner Engineering/Twilio Account Team). Per the ticket, SMS scope should not ship until that's confirmed; email scope can proceed independently. Flagging back to the ticket rather than assuming an answer.
 </div>
+
+<!-- ============ SAVE CONFIRMATION TOAST (matches the hub's existing save-toast convention) ============ -->
+<div class="toast-container" id="toastContainer"></div>
 
 <script>
 // ============ GOAL OPTIONS (BR-4, chronological pipeline order) ============
@@ -848,7 +936,7 @@ const DEFAULT_CONTEXT = {
 };
 
 // ============ STATE ============
-let pendingGenerate = null; // { channel }
+let pendingUse = null; // { channel } - set when Use Email/Use Text needs an overwrite confirmation first
 
 function setSendMode(mode) {
     document.getElementById('pill-wait').classList.toggle('active', mode === 'wait');
@@ -926,6 +1014,20 @@ function syncWaitFromPanel(channel) {
 
 const CHANNEL_LABEL = { email: 'Email', text: 'Text message' };
 
+function setDeliveryMethod(mode) {
+    document.getElementById('delivery-card-email').classList.toggle('selected', mode === 'email');
+    document.getElementById('delivery-card-text').classList.toggle('selected', mode === 'text');
+    document.getElementById('delivery-card-both').classList.toggle('selected', mode === 'both');
+
+    const showEmail = mode === 'email' || mode === 'both';
+    const showText = mode === 'text' || mode === 'both';
+    document.getElementById('channel-card-email').style.display = showEmail ? '' : 'none';
+    document.getElementById('channel-card-text').style.display = showText ? '' : 'none';
+
+    if (!showEmail) closeAiPanel('email');
+    if (!showText) closeAiPanel('text');
+}
+
 function openAiPanel(channel) {
     const other = channel === 'email' ? 'text' : 'email';
     document.getElementById('ai-panel-' + other).classList.remove('open');
@@ -959,6 +1061,8 @@ function openAiPanel(channel) {
 }
 function closeAiPanel(channel) {
     document.getElementById('ai-panel-' + channel).classList.remove('open');
+    document.getElementById('ai-preview-' + channel).classList.remove('open');
+    document.getElementById('ai-input-section-' + channel).style.display = '';
 }
 function updateAutoBadges(channel, other) {
     const ctxField = document.getElementById('ai-context-' + channel);
@@ -999,23 +1103,47 @@ function bodyFieldFor(channel) {
 
 function handleGenerateClick(channel) {
     if (!timingIsSet()) return; // blocked, message already visible
-    const body = bodyFieldFor(channel);
-    if (body.value.trim().length > 0) {
-        pendingGenerate = { channel };
-        document.getElementById('confirm-overlay').classList.add('show');
-        return;
-    }
     runGenerate(channel);
 }
 
+// The overwrite-confirm dialog now guards the moment content actually changes: clicking
+// Use Email/Use Text on the preview, not Generate (generating only fills the preview, it
+// never touches the real editor until the user explicitly applies it).
+function useAiPreview(channel) {
+    const body = bodyFieldFor(channel);
+    if (body.value.trim().length > 0) {
+        pendingUse = { channel };
+        document.getElementById('confirm-overlay').classList.add('show');
+        return;
+    }
+    applyAiPreview(channel);
+}
+
+function discardAiPreview(channel) {
+    document.getElementById('ai-preview-' + channel).classList.remove('open');
+    document.getElementById('ai-input-section-' + channel).style.display = '';
+}
+
+function applyAiPreview(channel) {
+    const text = document.getElementById('ai-preview-textarea-' + channel).value;
+    bodyFieldFor(channel).value = text;
+    if (channel === 'text') updateCharCount();
+
+    document.getElementById('ai-success-' + channel).classList.add('show');
+    setTimeout(() => {
+        closeAiPanel(channel); // also resets the preview/input-section state for next time
+        document.getElementById('ai-success-' + channel).classList.remove('show');
+    }, 1100);
+}
+
 function cancelOverwrite() {
-    pendingGenerate = null;
+    pendingUse = null;
     document.getElementById('confirm-overlay').classList.remove('show');
 }
 function confirmOverwrite() {
     document.getElementById('confirm-overlay').classList.remove('show');
-    if (pendingGenerate) runGenerate(pendingGenerate.channel);
-    pendingGenerate = null;
+    if (pendingUse) applyAiPreview(pendingUse.channel);
+    pendingUse = null;
 }
 
 function runGenerate(channel) {
@@ -1027,7 +1155,6 @@ function runGenerate(channel) {
 
     document.getElementById('ai-alert-unavailable-' + channel).classList.remove('show');
     document.getElementById('ai-redirect-' + channel).classList.remove('show');
-    document.getElementById('ai-success-' + channel).classList.remove('show');
 
     // Context is required (pre-filled by default, so this only fires if the user deliberately clears it)
     if (!context) {
@@ -1053,8 +1180,9 @@ function runGenerate(channel) {
     label.innerHTML = '<span class="spinner"></span> Generating…';
 
     setTimeout(() => {
+        genBtn.classList.remove('disabled');
+
         if (document.getElementById('toggle-unavailable').checked) {
-            genBtn.classList.remove('disabled');
             label.textContent = 'Generate';
             document.getElementById('ai-alert-unavailable-' + channel).classList.add('show');
             return;
@@ -1063,16 +1191,12 @@ function runGenerate(channel) {
         const tpl = TEMPLATES[goal];
         const output = channel === 'email' ? tpl.email(null, context) : tpl.text(null, context);
         const finalText = channel === 'text' ? output.slice(0, 320) : output;
-        bodyFieldFor(channel).value = finalText;
 
-        genBtn.classList.remove('disabled');
         label.textContent = 'Regenerate';
-        document.getElementById('ai-success-' + channel).classList.add('show');
-        updateCharCount();
-        setTimeout(() => {
-            closeAiPanel(channel);
-            document.getElementById('ai-success-' + channel).classList.remove('show');
-        }, 1400);
+        document.getElementById('ai-preview-notes-' + channel).textContent = context;
+        document.getElementById('ai-preview-textarea-' + channel).value = finalText;
+        document.getElementById('ai-input-section-' + channel).style.display = 'none';
+        document.getElementById('ai-preview-' + channel).classList.add('open');
     }, 1300);
 }
 
@@ -1086,6 +1210,7 @@ function updateCharCount() {
 function resetDemo() {
     document.getElementById('toggle-unavailable').checked = false;
     document.getElementById('toggle-no-timing').checked = false;
+    setDeliveryMethod('both');
     toggleTimingState(false);
     setSendMode('wait');
     document.getElementById('wait-value').value = 1;
@@ -1107,6 +1232,8 @@ function resetDemo() {
         document.getElementById('ai-redirect-' + ch).classList.remove('show');
         document.getElementById('ai-success-' + ch).classList.remove('show');
         document.getElementById('ai-generate-' + ch).querySelector('.btn-label').textContent = 'Generate';
+        document.getElementById('ai-preview-textarea-' + ch).value = '';
+        document.getElementById('ai-preview-notes-' + ch).textContent = '';
     });
     document.getElementById('email-body').value = `Hi {contact-name},
 
@@ -1120,6 +1247,26 @@ I was wondering if you had a chance to look over the proposal we sent to you yes
 If you're ready to take the next steps, you can view and accept your proposal(s) here.
 {view-quote-button}`;
     updateCharCount();
+}
+
+function showToast(message, type) {
+    type = type || 'success';
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    toast.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>' + message + '</span>';
+    container.appendChild(toast);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => toast.classList.add('show'));
+    });
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2800);
+}
+
+function handleSaveDrip() {
+    showToast('Drip updated', 'success');
 }
 
 syncTimingUI();
