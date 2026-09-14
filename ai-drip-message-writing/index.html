@@ -35,7 +35,6 @@ a { cursor: pointer; }
 
 /* ============ HUB PROTO BAR (standard hub nav, matches _template/index.html) ============ */
 .proto-bar {
-    position: relative; z-index: 600; /* above #demo-banner (500) and the always-open #modal-overlay (100) so the back link stays clickable */
     background: #FFFFFF;
     border-bottom: 1px solid #DAD8E3;
     padding: 12px 24px;
@@ -157,7 +156,9 @@ body.show-annotations .br-chip { display: inline-flex; }
 .dp-add-stage { font-size: 11.5px; font-weight: 700; color: var(--st-color-primary-active); }
 .dp-stage {
     border-radius: 8px; padding: 10px 12px; margin-bottom: 6px; font-size: 13.5px;
+    pointer-events: auto; cursor: pointer; /* clickable through the dimmed backdrop so a stage can be selected, per BR-3 */
 }
+.dp-stage:hover:not(.active) { background: #F7F7FA; }
 .dp-stage .stage-name { font-weight: 700; }
 .dp-stage .stage-meta { font-size: 11.5px; color: var(--st-color-text-muted); margin-top: 2px; }
 .dp-stage.active {
@@ -191,6 +192,7 @@ body.show-annotations .br-chip { display: inline-flex; }
 #modal-overlay {
     position: fixed; inset: 0; background: rgba(20, 22, 34, 0.35);
     z-index: 100; display: flex; justify-content: flex-end;
+    pointer-events: none; /* it's a dimming layer with no click-away handler; only the modal panel itself should capture clicks */
 }
 #edit-drip-modal {
     --st-color-primary: #8B85EA;
@@ -206,6 +208,7 @@ body.show-annotations .br-chip { display: inline-flex; }
     display: flex; flex-direction: column;
     animation: slideIn .22s ease;
     position: relative; /* anchors the overwrite-confirm dialog to this modal, not the full viewport */
+    pointer-events: auto; /* re-enable clicks on the panel itself; the overlay backdrop it sits in is click-through */
 }
 @keyframes slideIn { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 .edm-header {
@@ -516,12 +519,12 @@ body.show-annotations .br-chip { display: inline-flex; }
         <p class="dp-sub">Automated email and text follow-ups for each pipeline stage.</p>
         <div class="dp-pipeline-tabs"><span>Sales Pipeline</span><span class="muted">Jobs Pipeline</span></div>
         <div class="dp-stage-head"><b>Pipeline Stages</b><span class="dp-add-stage">+ Add Custom Stage</span></div>
-        <div class="dp-stage"><div class="stage-name">Cold Leads</div><div class="stage-meta">1 sequence · 9 drips</div></div>
-        <div class="dp-stage"><div class="stage-name">Warm Leads</div><div class="stage-meta">2 sequences · 7 drips</div></div>
-        <div class="dp-stage"><div class="stage-name">Estimate Requested</div><div class="stage-meta">2 sequences · 2 drips</div></div>
-        <div class="dp-stage"><div class="stage-name">Estimate Scheduled</div><div class="stage-meta">2 sequences · 2 drips</div></div>
-        <div class="dp-stage"><div class="stage-name">In Draft</div><div class="stage-meta">1 sequence · 2 drips</div></div>
-        <div class="dp-stage active">
+        <div class="dp-stage" data-stage="cold-leads" onclick="selectStage('cold-leads', this)"><div class="stage-name">Cold Leads</div><div class="stage-meta">1 sequence · 9 drips</div></div>
+        <div class="dp-stage" data-stage="warm-leads" onclick="selectStage('warm-leads', this)"><div class="stage-name">Warm Leads</div><div class="stage-meta">2 sequences · 7 drips</div></div>
+        <div class="dp-stage" data-stage="estimate-requested" onclick="selectStage('estimate-requested', this)"><div class="stage-name">Estimate Requested</div><div class="stage-meta">2 sequences · 2 drips</div></div>
+        <div class="dp-stage" data-stage="estimate-scheduled" onclick="selectStage('estimate-scheduled', this)"><div class="stage-name">Estimate Scheduled</div><div class="stage-meta">2 sequences · 2 drips</div></div>
+        <div class="dp-stage" data-stage="in-draft" onclick="selectStage('in-draft', this)"><div class="stage-name">In Draft</div><div class="stage-meta">1 sequence · 2 drips</div></div>
+        <div class="dp-stage active" data-stage="proposal-sent" onclick="selectStage('proposal-sent', this)">
             <div class="stage-name">Proposal(s) Sent</div><div class="stage-meta">3 sequences · 12 drips</div>
             <div class="dp-seq-list">
                 <div class="dp-seq selected">Passive Proposal Follow Up<span class="default-badge">Default</span></div>
@@ -529,11 +532,11 @@ body.show-annotations .br-chip { display: inline-flex; }
                 <div class="dp-seq">Third sequence</div>
             </div>
         </div>
-        <div class="dp-stage"><div class="stage-name">Custom Stage</div><div class="stage-meta">1 sequence · 1 drip</div></div>
-        <div class="dp-stage"><div class="stage-name">Proposal(s) Rejected</div><div class="stage-meta">1 sequence · 4 drips</div></div>
+        <div class="dp-stage" data-stage="custom-stage" onclick="selectStage('custom-stage', this)"><div class="stage-name">Custom Stage</div><div class="stage-meta">1 sequence · 1 drip</div></div>
+        <div class="dp-stage" data-stage="proposal-rejected" onclick="selectStage('proposal-rejected', this)"><div class="stage-name">Proposal(s) Rejected</div><div class="stage-meta">1 sequence · 4 drips</div></div>
     </div>
     <div class="dp-main">
-        <div class="dp-trigger-badge">Trigger: Proposal Sent</div>
+        <div class="dp-trigger-badge" id="dp-trigger-badge">Trigger: Proposal Sent</div>
         <div class="dp-step highlighted">
             <div class="dp-step-icon">✉️</div>
             <div><div class="dp-step-meta">Send email and text · 1 Day after trigger</div><div class="dp-step-title">1 Day Proposal Follow Up</div></div>
@@ -929,15 +932,64 @@ const TEMPLATES = {
 
 const GUARDRAIL_PATTERN = /discount|% ?off|percent off|promo(tion)?\b|coupon|\bsale\b|black friday|limited.time offer|free gift|giveaway|referral bonus|political|\bvote\b|election/i;
 
-// Suggested starting point for the required Context field, built from the stage/sequence the user is already viewing
-// (Proposal(s) Sent → Passive Proposal Follow Up). Real implementation would swap this per current stage.
-const DEFAULT_CONTEXT = {
-    email: "Check in on the proposal we sent and invite them to reach out with any questions before they decide.",
-    text: "Quick, friendly nudge to check the proposal: keep it short and casual."
+// Suggested starting point for the required Context field, and the trigger label shown in the
+// background Drips view, keyed by pipeline stage (BR-3: stage is one of the things Auto Loaded
+// Context pulls from). Assumption: exact per-stage copy wasn't in the ticket text available here,
+// so these extend the same voice as the existing Proposal(s) Sent entry and TEMPLATES above,
+// flagged in the decision log rather than guessed at silently.
+const STAGE_TRIGGER_LABEL = {
+    "cold-leads": "Cold Lead",
+    "warm-leads": "Warm Lead",
+    "estimate-requested": "Estimate Requested",
+    "estimate-scheduled": "Estimate Scheduled",
+    "in-draft": "Proposal In Draft",
+    "proposal-sent": "Proposal Sent",
+    "custom-stage": "Custom Stage",
+    "proposal-rejected": "Proposal Rejected"
 };
+
+const STAGE_DEFAULT_CONTEXT = {
+    "cold-leads": {
+        email: "Reconnect after some time has passed and invite them to pick things back up if they're still interested.",
+        text: "Friendly nudge to see if they're still interested, keep it low-pressure."
+    },
+    "warm-leads": {
+        email: "Check in to stay top of mind and see if they have any new questions since we last talked.",
+        text: "Quick check-in to stay top of mind, keep it casual."
+    },
+    "estimate-requested": {
+        email: "Confirm we received their estimate request and let them know we'll be in touch to schedule a time.",
+        text: "Confirm the estimate request and let them know we'll reach out to schedule."
+    },
+    "estimate-scheduled": {
+        email: "Remind them about the upcoming estimate appointment and confirm the date and time still work.",
+        text: "Quick reminder about the upcoming estimate appointment."
+    },
+    "in-draft": {
+        email: "Let them know their proposal is still being finalized and thank them for their patience.",
+        text: "Quick heads up that their proposal is almost ready."
+    },
+    "proposal-sent": {
+        email: "Check in on the proposal we sent and invite them to reach out with any questions before they decide.",
+        text: "Quick, friendly nudge to check the proposal: keep it short and casual."
+    },
+    "custom-stage": {
+        email: "General check in with this contact at their current stage.",
+        text: "Quick general check-in, keep it casual."
+    },
+    "proposal-rejected": {
+        email: "Circle back on the declined proposal and see if anything's changed or if they have questions about scope or pricing.",
+        text: "Check back in on the declined proposal, low-pressure."
+    }
+};
+
+function getDefaultContext(channel) {
+    return STAGE_DEFAULT_CONTEXT[currentStage][channel];
+}
 
 // ============ STATE ============
 let pendingUse = null; // { channel } - set when Use Email/Use Text needs an overwrite confirmation first
+let currentStage = 'proposal-sent'; // which sidebar Pipeline Stage is selected; drives getDefaultContext()
 
 function setSendMode(mode) {
     document.getElementById('pill-wait').classList.toggle('active', mode === 'wait');
@@ -1015,6 +1067,28 @@ function syncWaitFromPanel(channel) {
 
 const CHANNEL_LABEL = { email: 'Email', text: 'Text message' };
 
+// BR-2.2/BR-3: stage is one of the values Auto Loaded Context pulls from, so switching the
+// Pipeline Stage being viewed updates the "What do you want to say?" suggestion live, the same
+// way Timing stays in sync between the top section and the AI panel, without leaving the panel.
+function selectStage(stageId, el) {
+    if (stageId === currentStage) return;
+    document.querySelectorAll('.dp-stage').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    currentStage = stageId;
+    document.getElementById('dp-trigger-badge').textContent = 'Trigger: ' + STAGE_TRIGGER_LABEL[stageId];
+
+    ['email', 'text'].forEach(ch => {
+        const ctxField = document.getElementById('ai-context-' + ch);
+        if (ctxField.dataset.auto !== 'false') {
+            ctxField.value = getDefaultContext(ch);
+            ctxField.classList.add('is-placeholder-value');
+            ctxField.dataset.carried = 'false';
+        }
+    });
+    updateAutoBadges('email', 'text');
+    updateAutoBadges('text', 'email');
+}
+
 function setDeliveryMethod(mode) {
     document.getElementById('delivery-card-email').classList.toggle('selected', mode === 'email');
     document.getElementById('delivery-card-text').classList.toggle('selected', mode === 'text');
@@ -1041,7 +1115,7 @@ function openAiPanel(channel) {
     const otherCtxField = document.getElementById('ai-context-' + other);
     if (ctxField.dataset.auto !== 'false') {
         const carried = otherCtxField.value.trim();
-        ctxField.value = carried || DEFAULT_CONTEXT[channel];
+        ctxField.value = carried || getDefaultContext(channel);
         ctxField.classList.add('is-placeholder-value');
         ctxField.dataset.auto = 'true';
         ctxField.dataset.carried = carried ? 'true' : 'false';
@@ -1211,6 +1285,10 @@ function updateCharCount() {
 function resetDemo() {
     document.getElementById('toggle-unavailable').checked = false;
     document.getElementById('toggle-no-timing').checked = false;
+    document.querySelectorAll('.dp-stage').forEach(s => s.classList.remove('active'));
+    document.querySelector('.dp-stage[data-stage="proposal-sent"]').classList.add('active');
+    currentStage = 'proposal-sent';
+    document.getElementById('dp-trigger-badge').textContent = 'Trigger: ' + STAGE_TRIGGER_LABEL[currentStage];
     setDeliveryMethod('both');
     toggleTimingState(false);
     setSendMode('wait');
