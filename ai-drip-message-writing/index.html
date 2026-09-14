@@ -563,7 +563,7 @@ body.modal-closed #page-backdrop { opacity: 1; filter: none; }
         <div class="dp-trigger-badge" id="dp-trigger-badge">Trigger: Proposal Sent</div>
         <div class="dp-step highlighted">
             <div class="dp-step-icon">✉️</div>
-            <div><div class="dp-step-meta">Send email and text · 1 Day after trigger</div><div class="dp-step-title">1 Day Proposal Follow Up</div></div>
+            <div><div class="dp-step-meta" id="dp-step-highlighted-meta">Send email and text · 1 Day after trigger</div><div class="dp-step-title" id="dp-step-highlighted-title">1 Day Proposal Follow Up</div></div>
         </div>
         <div class="dp-step"><div class="dp-step-icon">💬</div><div><div class="dp-step-meta">Send text · 3 Days after trigger</div><div class="dp-step-title">3 Day Proposal Follow Up Text</div></div></div>
         <div class="dp-step"><div class="dp-step-icon">✉️</div><div><div class="dp-step-meta">Send email · 4 Days after trigger</div><div class="dp-step-title">4 Day Proposal Follow Up</div></div></div>
@@ -586,7 +586,7 @@ body.modal-closed #page-backdrop { opacity: 1; filter: none; }
 
         <div class="field-label">Drip Name</div>
         <div class="edm-name-row">
-            <input type="text" class="drip-name" value="1 Day Proposal Follow Up">
+            <input type="text" class="drip-name" id="drip-name-input" value="1 Day Proposal Follow Up">
             <div class="active-toggle"><div class="switchery on"></div>Active</div>
         </div>
 
@@ -1002,6 +1002,69 @@ const STAGE_DEFAULT_CONTEXT = {
     }
 };
 
+// The actual drip step being edited (Drip Name, Subject, Email/Text body, plus the matching label
+// on the highlighted step card in the background list), one representative drip per stage. Switching
+// stages navigates to a different drip record, so these replace the fields outright, unlike
+// STAGE_DEFAULT_CONTEXT's Context suggestion which only fills in while still unedited.
+const STAGE_DRIP_DATA = {
+    "cold-leads": {
+        name: "30 Day Cold Lead Check In",
+        stepMeta: "Send email and text · 30 Days after trigger",
+        subject: "Still thinking about your project?",
+        emailBody: "Hi {contact-name},\n\nIt's been a little while since we last connected about your project, and I wanted to reach back out.\n\nIf now's a better time to pick things back up, I'm happy to help, just reply to this email or give us a call.\n\nLooking forward to hearing from you.",
+        textBody: "Hi {contact-name},\nJust checking to see if you're still interested in getting your project going.\nHappy to help whenever works for you."
+    },
+    "warm-leads": {
+        name: "Warm Lead Check In",
+        stepMeta: "Send email and text · 5 Days after trigger",
+        subject: "Checking in on your project",
+        emailBody: "Hi {contact-name},\n\nJust checking in to see how things are going on your end, and if you have any new questions since we last talked.\n\nWe're here to help whenever you're ready.\n\nLooking forward to hearing from you.",
+        textBody: "Hi {contact-name},\nJust checking in! Let us know if you have any new questions.\nWe're here to help whenever you're ready."
+    },
+    "estimate-requested": {
+        name: "Estimate Request Confirmation",
+        stepMeta: "Send email and text · Immediately after trigger",
+        subject: "We received your estimate request",
+        emailBody: "Hi {contact-name},\n\nThanks for requesting an estimate from {company-name}! We wanted to confirm we received your request.\n\nWe'll be in touch shortly to schedule a time to take a look.\n\nTalk soon!",
+        textBody: "Hi {contact-name},\nThanks for your estimate request with {company-name}! We'll reach out shortly to schedule a time."
+    },
+    "estimate-scheduled": {
+        name: "Estimate Appointment Reminder",
+        stepMeta: "Send email and text · 1 Day before appointment",
+        subject: "Reminder: your upcoming estimate appointment",
+        emailBody: "Hi {contact-name},\n\nJust a reminder about your upcoming estimate appointment at {appointment-date} around {appointment-time}.\n\nLet us know if anything's changed on your end, otherwise we'll see you then!",
+        textBody: "Hi {contact-name},\nReminder: your estimate appointment is {appointment-date} around {appointment-time}. See you then!"
+    },
+    "in-draft": {
+        name: "Proposal In Progress Update",
+        stepMeta: "Send email · 2 Days after trigger",
+        subject: "Your proposal is on its way",
+        emailBody: "Hi {contact-name},\n\nJust wanted to let you know your proposal is still being put together and should be ready soon.\n\nThanks so much for your patience, we're looking forward to sharing it with you.",
+        textBody: "Hi {contact-name},\nJust a heads up that your proposal is almost ready! Thanks for your patience."
+    },
+    "proposal-sent": {
+        name: "1 Day Proposal Follow Up",
+        stepMeta: "Send email and text · 1 Day after trigger",
+        subject: "Have you had a chance to review the proposal?",
+        emailBody: "Hi {contact-name},\n\nI was wondering if you had a chance to look over the proposal we sent to you yesterday?\n\nWe're eager to hear your thoughts, and to get started on this project! Please let me know if you have any questions regarding the specifics of the details outlined in the proposal.\n\nIf you're ready to take the next steps, you can view and accept your proposal(s) here.",
+        textBody: "Hi {contact-name},\nI was wondering if you had a chance to look over the proposal we sent to you yesterday?\nIf you're ready to take the next steps, you can view and accept your proposal(s) here.\n{view-quote-button}"
+    },
+    "custom-stage": {
+        name: "Custom Stage Check In",
+        stepMeta: "Send email and text · 3 Days after trigger",
+        subject: "Checking in",
+        emailBody: "Hi {contact-name},\n\nJust wanted to check in and see how things are going on your end.\n\nLet us know if there's anything we can help with.",
+        textBody: "Hi {contact-name},\nJust checking in, how are things going on your end?"
+    },
+    "proposal-rejected": {
+        name: "Proposal Win Back",
+        stepMeta: "Send email and text · 5 Days after trigger",
+        subject: "Still interested? Let's revisit your proposal",
+        emailBody: "Hi {contact-name},\n\nI wanted to circle back on the proposal we sent.\n\nIf your plans have changed or you had questions about the scope or pricing, I'd love the chance to revisit it with you, just let me know.",
+        textBody: "Hi {contact-name},\nWanted to check back on your proposal. Happy to revisit it if anything's changed, just reply here."
+    }
+};
+
 function getDefaultContext(channel) {
     return STAGE_DEFAULT_CONTEXT[currentStage][channel];
 }
@@ -1134,6 +1197,17 @@ function selectStage(stageId, el) {
         el.classList.add('active');
         currentStage = stageId;
         document.getElementById('dp-trigger-badge').textContent = 'Trigger: ' + STAGE_TRIGGER_LABEL[stageId];
+
+        // Switching stages means viewing a different drip, so its Drip Name/Subject/Body replace
+        // the fields outright (not just an unedited-suggestion refill like Context below).
+        const drip = STAGE_DRIP_DATA[stageId];
+        document.getElementById('drip-name-input').value = drip.name;
+        document.getElementById('dp-step-highlighted-title').textContent = drip.name;
+        document.getElementById('dp-step-highlighted-meta').textContent = drip.stepMeta;
+        document.getElementById('email-subject').value = drip.subject;
+        document.getElementById('email-body').value = drip.emailBody;
+        document.getElementById('text-body').value = drip.textBody;
+        updateCharCount();
 
         ['email', 'text'].forEach(ch => {
             const ctxField = document.getElementById('ai-context-' + ch);
@@ -1377,17 +1451,13 @@ function resetDemo() {
     document.getElementById('wait-unit').value = 'Day(s)';
     syncTimingUI();
     resetAiPanels();
-    document.getElementById('email-body').value = `Hi {contact-name},
-
-I was wondering if you had a chance to look over the proposal we sent to you yesterday?
-
-We're eager to hear your thoughts, and to get started on this project! Please let me know if you have any questions regarding the specifics of the details outlined in the proposal.
-
-If you're ready to take the next steps, you can view and accept your proposal(s) here.`;
-    document.getElementById('text-body').value = `Hi {contact-name},
-I was wondering if you had a chance to look over the proposal we sent to you yesterday?
-If you're ready to take the next steps, you can view and accept your proposal(s) here.
-{view-quote-button}`;
+    const drip = STAGE_DRIP_DATA[currentStage];
+    document.getElementById('drip-name-input').value = drip.name;
+    document.getElementById('dp-step-highlighted-title').textContent = drip.name;
+    document.getElementById('dp-step-highlighted-meta').textContent = drip.stepMeta;
+    document.getElementById('email-subject').value = drip.subject;
+    document.getElementById('email-body').value = drip.emailBody;
+    document.getElementById('text-body').value = drip.textBody;
     updateCharCount();
 }
 
