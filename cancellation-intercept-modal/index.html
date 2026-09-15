@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cancellation Intercept Modal - DripJobs</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  /* ══════════════════════════════════════════════
+     DESIGN TOKENS (docs/design-system.md)
+     ══════════════════════════════════════════════ */
+  :root {
+    --st-color-primary:        #8B85EA;
+    --st-color-primary-hover:  #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb:    139, 133, 234;
+    --st-color-text:           #32415B;
+    --st-color-text-muted:     #80879A;
+    --st-color-border:         #DAD8E3;
+    --st-color-card-bg:        #FFFFFF;
+    --st-teal:                 #0DCECE;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; background: #F3F1FC; color: var(--st-color-text); }
+  button { font-family: inherit; }
+  a { color: var(--st-color-primary-active); }
+
+  /* ══════════════════════════════════════════════
+     PROTO BAR (hub chrome)
+     ══════════════════════════════════════════════ */
+  .proto-bar {
+    background: #fff; border-bottom: 1px solid var(--st-color-border);
+    padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap; position: relative; z-index: 50;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .back-link {
+    font-size: 12px; font-weight: 500; color: var(--st-color-text-muted);
+    text-decoration: none; display: flex; align-items: center; gap: 4px; transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--st-color-primary); }
+  .divider { color: var(--st-color-border); font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; }
+  .proto-bar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .proto-bar-pill {
+    font-size: 11px; font-weight: 600; color: var(--st-color-primary-active);
+    padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA;
+    border-radius: 999px; letter-spacing: 0.2px; text-decoration: none;
+  }
+  .proto-bar-pill.muted { color: var(--st-color-text-muted); background: #F3F1FC; border-color: var(--st-color-border); }
+  .proto-bar-pill:hover { background: var(--st-color-primary); color: #fff; border-color: var(--st-color-primary); }
+  .proto-bar-pill.muted:hover { background: #F3F1FC; color: var(--st-color-text-muted); }
+
+  /* ══════════════════════════════════════════════
+     DEMO CONTROL BANNER (prototype-only, not app chrome)
+     ══════════════════════════════════════════════ */
+  #demo-banner {
+    background: #1E2433; color: #fff; padding: 10px 16px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 14px; font-size: 12.5px;
+    border-bottom: 3px solid var(--st-color-primary); position: relative; z-index: 200;
+  }
+  #demo-banner .demo-title { font-weight: 700; letter-spacing: 0.2px; white-space: nowrap; }
+  #demo-banner .demo-group { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  #demo-banner select, #demo-banner button {
+    font-size: 12.5px; padding: 6px 10px; border-radius: 6px; font-family: 'DM Sans', sans-serif;
+    border: 1px solid #444d63; background: #2A3143; color: #fff; cursor: pointer;
+  }
+  #demo-banner button.reset-btn { background: var(--st-color-primary); border-color: var(--st-color-primary); font-weight: 600; }
+  #demo-banner button.reset-btn:hover { background: var(--st-color-primary-hover); }
+  #demo-banner label.toggle-label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  #demo-banner .spacer { flex: 1 1 auto; min-width: 8px; }
+  #demo-banner .demo-note { color: #b7bccb; font-size: 11.5px; }
+
+  /* ══════════════════════════════════════════════
+     APP SHELL (Nunito, matches production)
+     ══════════════════════════════════════════════ */
+  #dj-app { font-family: 'Nunito', sans-serif; font-size: 14px; color: #32415B; }
+
+  .app-header {
+    background: #fff; border-bottom: 1px solid #DAD8E3;
+    padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    position: relative; z-index: 10;
+  }
+  .app-header-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+  .app-logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .app-logo-mark { width: 28px; height: 28px; background: linear-gradient(135deg,#7C3AED,#0DCECE); border-radius: 7px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 800; }
+  .app-logo-text { font-size: 16px; font-weight: 700; color: #7C3AED; }
+  .app-search { flex: 1; max-width: 420px; position: relative; }
+  .app-search input {
+    width: 100%; height: 34px; border: 1px solid #DAD8E3; border-radius: 8px;
+    padding: 0 34px 0 12px; font-size: 13px; font-family: 'Nunito', sans-serif; background: #F9FAFC; color: #32415B;
+  }
+  .app-search i { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #9CA3AF; font-size: 12px; }
+  .app-header-right { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
+  .app-header-icon { color: #9CA3AF; font-size: 15px; position: relative; cursor: default; }
+  .app-header-icon.alert { color: #F59E0B; }
+
+  .user-menu-wrap { position: relative; }
+  .user-chip {
+    display: flex; align-items: center; gap: 8px; cursor: pointer; border-radius: 8px; padding: 6px 8px;
+    background: transparent; border: none; min-height: 48px;
+  }
+  .user-chip:hover { background: #F4F5F8; }
+  .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: #EDE9FE; color: #7C3AED; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .user-chip-name { font-size: 13px; font-weight: 600; color: #32415B; font-family: 'Nunito', sans-serif; }
+  .user-chip i.chev { color: #9CA3AF; font-size: 11px; }
+
+  .user-dropdown {
+    position: absolute; top: 56px; right: 0; width: 250px;
+    background: #fff; border: 1px solid var(--st-color-border); border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12); padding: 6px; display: none; z-index: 30;
+  }
+  .user-dropdown.open { display: block; }
+  .user-dropdown-item {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+    padding: 10px 10px; border-radius: 8px; border: none; background: none; cursor: pointer;
+    font-size: 13.5px; font-family: 'Nunito', sans-serif; color: var(--st-color-text); min-height: 40px; position: relative;
+  }
+  .user-dropdown-item:hover, .user-dropdown-item:focus-visible { background: #F4F5F8; outline: none; }
+  .user-dropdown-item.highlight { background: rgba(var(--st-color-primary-rgb), 0.12); font-weight: 700; }
+  .user-dropdown-divider { height: 1px; background: var(--st-color-border); margin: 6px 4px; }
+
+  /* ── Sidebar ── */
+  .app-body { display: flex; }
+  .sidebar { width: 200px; min-width: 200px; background: #fff; border-right: 1px solid #DAD8E3; padding: 14px 0; }
+  .sidebar-company { padding: 4px 16px 12px; font-size: 13px; font-weight: 700; color: #32415B; border-bottom: 1px solid #DAD8E3; margin-bottom: 8px; }
+  .sidebar-section-label { padding: 12px 16px 4px; font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.6px; }
+  .sidebar-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 16px; font-size: 12.5px; font-weight: 500; color: #4B5563; cursor: default; }
+  .sidebar-item .sidebar-item-label { display: flex; align-items: center; gap: 8px; }
+  .sidebar-item i.chev { font-size: 10px; color: #C4C9D4; }
+  .sidebar-badge { background: #7C3AED; color: #fff; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 8px; }
+  .sidebar-item.active { background: #F4F3F8; color: var(--st-color-primary-active); font-weight: 700; border-left: 3px solid var(--st-color-primary); padding-left: 13px; }
+  .sidebar-item.active i { color: var(--st-color-primary-active) !important; }
+  .sidebar-footer { border-top: 1px solid #DAD8E3; }
+  .sidebar-footer .sidebar-item { padding: 12px 16px; font-weight: 600; color: #32415B; background: #F4F3F8; }
+
+  /* ── Background pipeline (dimmed context only) ── */
+  .main-content { flex: 1; min-width: 0; }
+  .pipeline-bg { padding: 22px 24px; }
+  .pipeline-bg h1 { font-size: 20px; margin: 0 0 4px 0; font-weight: 700; }
+  .pipeline-bg .pipeline-sub { color: var(--st-color-text-muted); font-size: 13px; margin-bottom: 18px; }
+  .pipeline-cols { display: flex; gap: 14px; overflow: hidden; }
+  .pipeline-col { flex: 1; min-width: 200px; background: #fff; border: 1px solid var(--st-color-border); border-radius: 10px; padding: 12px; }
+  .pipeline-col-head { font-size: 12.5px; font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between; }
+  .pipeline-card { background: #F9F9FC; border: 1px solid var(--st-color-border); border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 12px; }
+  .pipeline-card .pc-title { font-weight: 700; margin-bottom: 4px; }
+  .pipeline-card .pc-meta { color: var(--st-color-text-muted); font-size: 11px; }
+  .pipeline-empty { text-align: center; color: var(--st-color-text-muted); font-size: 12px; padding: 20px 0; }
+
+  /* ══════════════════════════════════════════════
+     MODAL OVERLAY SYSTEM
+     ══════════════════════════════════════════════ */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(30,36,51,0.55);
+    display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 12px; max-width: 420px; width: 100%; font-family: 'Nunito', sans-serif;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.25); position: relative; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-close-x {
+    position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; min-width: 32px; min-height: 32px;
+    border-radius: 50%; border: none; background: #F1F1F6; color: var(--st-color-text-muted);
+    display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; z-index: 5;
+  }
+  .modal-close-x:hover { background: #E5E5EE; color: var(--st-color-text); }
+  .modal-close-x:focus-visible { outline: 3px solid var(--st-color-primary); outline-offset: 2px; }
+
+  /* ── Manage Subscriptions modal ── */
+  .ms-header { text-align: center; padding: 22px 22px 10px; }
+  .ms-logo { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 18px; color: var(--st-color-primary); margin-bottom: 2px; }
+  .ms-subtitle { font-size: 12.5px; font-weight: 700; color: var(--st-color-primary-active); margin: 0; }
+  .ms-body { padding: 6px 18px 18px; }
+  .ms-plan-card { border: 1px solid var(--st-color-border); border-radius: 10px; padding: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; min-height: 48px; width: 100%; background: none; font-family: inherit; text-align: left; }
+  .ms-plan-card:hover { border-color: var(--st-color-primary); }
+  .ms-plan-name { font-weight: 700; font-size: 14px; margin-bottom: 2px; color: var(--st-color-text); }
+  .ms-plan-detail { font-size: 12.5px; color: var(--st-color-text-muted); }
+  .ms-plan-price { font-size: 12px; color: var(--st-color-text-muted); text-align: right; }
+  .ms-arrow { color: var(--st-color-text-muted); font-size: 18px; margin-left: 8px; }
+  .ms-links { margin-top: 14px; display: flex; flex-direction: column; gap: 4px; }
+  .ms-link-btn {
+    display: flex; align-items: center; gap: 10px; text-align: left; background: none; border: none;
+    color: var(--st-color-primary-active); font-size: 13.5px; font-weight: 600; font-family: inherit; padding: 10px 4px; cursor: pointer; min-height: 44px;
+  }
+  .ms-link-btn:hover { text-decoration: underline; }
+  .ms-footer { text-align: center; font-size: 11.5px; color: var(--st-color-text-muted); padding: 14px 18px; border-top: 1px solid var(--st-color-border); }
+
+  /* ── Subscription Details modal ── */
+  .sd-header { padding: 18px 18px 4px; }
+  .sd-back { background: none; border: none; color: var(--st-color-primary-active); font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 8px 4px; min-height: 40px; font-family: inherit; }
+  .sd-body { padding: 6px 18px 18px; }
+  .sd-price { font-size: 22px; font-weight: 700; margin: 6px 0 0; }
+  .sd-price-note { font-size: 12px; color: var(--st-color-text-muted); margin-bottom: 12px; }
+  .sd-view-breakdown { float: right; font-size: 12.5px; color: var(--st-color-primary-active); text-decoration: none; font-weight: 700; }
+  .sd-plan-name { font-weight: 700; font-size: 14px; margin: 14px 0 6px; }
+  .sd-feature-list { font-size: 13px; color: var(--st-color-text); margin: 0 0 14px; line-height: 1.8; }
+  .sd-payment-card {
+    border: 1px solid var(--st-color-border); border-radius: 10px; padding: 12px 14px;
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; cursor: pointer; min-height: 48px;
+  }
+  .sd-payment-card:hover { border-color: var(--st-color-primary); }
+  .card-icon { width: 26px; height: 18px; border-radius: 3px; background: linear-gradient(135deg,#EB5757,#F2994A); display: inline-block; margin-right: 8px; vertical-align: middle; }
+  .sd-links { display: flex; flex-direction: column; gap: 2px; }
+  .sd-link-btn { text-align: left; background: none; border: none; color: var(--st-color-primary-active); font-size: 13.5px; font-weight: 600; font-family: inherit; padding: 10px 2px; cursor: pointer; min-height: 44px; position: relative; }
+  .sd-link-btn:hover { text-decoration: underline; }
+  .sd-link-btn.danger-link { color: #B91C1C; }
+
+  /* ══════════════════════════════════════════════
+     INTERCEPT MODAL (new — ticket 86bbah6jq)
+     ══════════════════════════════════════════════ */
+  #intercept-modal .modal-box { max-width: 520px; }
+  .ic-header { padding: 26px 26px 4px; text-align: center; }
+  .ic-heading { font-size: 19px; font-weight: 800; margin: 4px 0 4px; color: var(--st-color-text); }
+  .ic-subheading { font-size: 13.5px; color: var(--st-color-text-muted); margin: 0 0 18px; line-height: 1.5; }
+
+  .ic-video-area {
+    margin: 0 26px 18px; border-radius: 12px; overflow: hidden;
+    background: #1E2433; position: relative; aspect-ratio: 16/9;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ic-video-poster {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    background: radial-gradient(circle at 50% 35%, #323a52 0%, #1E2433 70%);
+  }
+  .ic-tanner-avatar {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--st-color-primary), var(--st-color-primary-active));
+    color: #fff; font-size: 28px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.08); font-family: 'Nunito', sans-serif;
+  }
+  .ic-video-caption { color: #E4E6F0; font-size: 12.5px; font-weight: 600; }
+  .ic-play-btn {
+    width: 60px; height: 60px; min-width: 48px; min-height: 48px; border-radius: 50%;
+    background: rgba(255,255,255,0.92); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+    position: relative; z-index: 2;
+  }
+  .ic-play-btn:hover { background: #fff; transform: scale(1.04); }
+  .ic-play-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  .ic-play-icon { width: 0; height: 0; border-top: 11px solid transparent; border-bottom: 11px solid transparent; border-left: 18px solid var(--st-color-primary-active); margin-left: 4px; }
+
+  .ic-video-playing .ic-video-poster { display: none; }
+  .ic-playing-surface {
+    position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    background: linear-gradient(160deg,#2A3454,#1E2433);
+  }
+  .ic-video-playing .ic-playing-surface { display: flex; }
+  .ic-playing-surface .ic-tanner-avatar { animation: ic-pulse 2.2s ease-in-out infinite; }
+  @keyframes ic-pulse { 0%,100% { box-shadow: 0 0 0 4px rgba(255,255,255,0.08);} 50% { box-shadow: 0 0 0 10px rgba(255,255,255,0.14);} }
+  .ic-progress-track { position: absolute; left: 14px; right: 14px; bottom: 14px; height: 4px; background: rgba(255,255,255,0.25); border-radius: 4px; overflow: hidden; }
+  .ic-progress-fill { height: 100%; width: 0%; background: var(--st-teal); border-radius: 4px; }
+  .ic-video-playing .ic-progress-fill { animation: ic-fillbar 14s linear forwards; }
+  @keyframes ic-fillbar { from { width: 0%; } to { width: 100%; } }
+  .ic-pause-btn {
+    position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; min-width: 34px; min-height: 34px;
+    border-radius: 50%; background: rgba(0,0,0,0.35); border: none; color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; z-index: 3;
+  }
+  .ic-pause-btn:hover { background: rgba(0,0,0,0.5); }
+  .ic-pause-icon { display: flex; gap: 3px; }
+  .ic-pause-icon span { width: 3px; height: 12px; background: #fff; border-radius: 1px; }
+  @media (prefers-reduced-motion: reduce) {
+    .ic-video-playing .ic-progress-fill { animation: none; width: 60%; }
+    .ic-playing-surface .ic-tanner-avatar { animation: none; }
+  }
+
+  /* Video load-failure fallback (BR7) */
+  .ic-fallback { display: none; margin: 0 26px 18px; }
+  .ic-fallback.show { display: block; }
+  .ic-fallback-notice {
+    background: #f0fafa; border-left: 4px solid var(--st-teal); border-radius: 6px;
+    padding: 10px 12px; font-size: 12.5px; color: var(--st-color-text); margin-bottom: 12px; display: flex; gap: 8px; align-items: flex-start;
+  }
+  .ic-fallback-message {
+    border: 1px solid var(--st-color-border); border-radius: 10px; padding: 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .ic-fallback-message p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--st-color-text); }
+  .ic-fallback-message a { font-weight: 700; }
+
+  .ic-video-area.state-failed { display: none; }
+
+  .ic-actions { padding: 4px 26px 26px; display: flex; flex-direction: column; gap: 10px; }
+  .ic-btn {
+    min-height: 48px; border-radius: 10px; font-size: 14.5px; font-weight: 700; font-family: 'Nunito', sans-serif; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid transparent; text-decoration: none;
+  }
+  .ic-btn:focus-visible { outline: 3px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .ic-btn-primary { background: var(--st-color-primary); color: #fff; }
+  .ic-btn-primary:hover { background: var(--st-color-primary-hover); }
+  .ic-btn-secondary { background: #fff; border-color: var(--st-color-border); color: var(--st-color-text); }
+  .ic-btn-secondary:hover { border-color: var(--st-color-primary); color: var(--st-color-primary-active); }
+  .ic-btn-tertiary { background: none; border: none; color: var(--st-color-text-muted); font-weight: 600; font-size: 13.5px; min-height: 40px; }
+  .ic-btn-tertiary:hover { color: #B91C1C; text-decoration: underline; }
+
+  /* ══════════════════════════════════════════════
+     EXISTING "SORRY TO SEE YOU GO" PAGE (unchanged, BR4/BR6)
+     ══════════════════════════════════════════════ */
+  #cancellation-page { display: none; font-family: 'Nunito', sans-serif; }
+  #cancellation-page.show { display: block; }
+  .cp-wrap { max-width: 900px; margin: 0 auto; padding: 30px 20px 60px; }
+  .cp-logo { display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 20px; color: var(--st-color-primary); margin-bottom: 22px; }
+  .cp-rule { height: 3px; background: var(--st-color-text); margin-bottom: 22px; opacity: 0.85; }
+  .cp-title { text-align: center; font-size: 17px; margin-bottom: 22px; }
+  .cp-cols { display: flex; gap: 18px; margin-bottom: 22px; flex-wrap: wrap; }
+  .cp-card { flex: 1; min-width: 260px; border: 1px solid var(--st-color-border); border-radius: 10px; padding: 16px; }
+  .cp-card h3 { font-size: 14px; margin: 0 0 10px; }
+  .cp-list { list-style: none; margin: 0; padding: 0; font-size: 12.5px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+  .cp-list li { color: var(--st-color-text); }
+  .cp-list li::before { content: "\2715  "; color: #B91C1C; }
+  .cp-msg { display: flex; gap: 10px; font-size: 12.5px; }
+  .cp-msg-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--st-color-primary), var(--st-color-primary-active)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; flex: 0 0 auto; }
+  .cp-msg b { display: block; margin-top: 4px; }
+  .cp-important { text-align: center; font-size: 12.5px; margin-bottom: 12px; }
+  .cp-back-btn { display: flex; margin: 0 auto 26px; background: #1E2433; color: #fff; border: none; border-radius: 999px; padding: 12px 22px; font-size: 13.5px; font-weight: 700; font-family: inherit; cursor: pointer; align-items: center; gap: 6px; min-height: 48px; }
+  .cp-back-btn:hover { background: #2A3143; }
+  .cp-form { border: 1px solid var(--st-color-border); border-radius: 10px; padding: 18px; }
+  .cp-form-label { font-size: 12.5px; font-weight: 700; margin-bottom: 8px; }
+  .cp-required { color: var(--st-color-text-muted); font-weight: 500; font-size: 10.5px; margin-left: 6px; }
+  .cp-radio-row { font-size: 12.5px; display: flex; align-items: center; gap: 6px; padding: 5px 0; }
+  .cp-scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--st-color-text-muted); margin: 10px 0; }
+  .cp-input { width: 100%; border: 1px solid var(--st-color-border); border-radius: 8px; height: 40px; padding: 0 12px; font-size: 13px; font-family: inherit; margin: 10px 0 14px; }
+  .cp-checkbox-row { font-size: 12px; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
+  .cp-form-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .cp-btn-cancel { background: #E5E5EE; color: var(--st-color-text-muted); border: none; border-radius: 999px; padding: 12px 22px; font-weight: 700; font-size: 13.5px; font-family: inherit; min-height: 48px; cursor: not-allowed; }
+  .cp-btn-nevermind { background: #1E2433; color: #fff; border: none; border-radius: 999px; padding: 12px 22px; font-weight: 700; font-size: 13.5px; font-family: inherit; min-height: 48px; cursor: pointer; }
+  .cp-btn-nevermind:hover { background: #2A3143; }
+  .cp-footnote { text-align: center; font-size: 11px; color: var(--st-color-text-muted); margin-top: 18px; }
+
+  /* ══════════════════════════════════════════════
+     BR ANNOTATION CHIPS (dev handoff reference, toggled off by default)
+     ══════════════════════════════════════════════ */
+  .br-chip {
+    position: absolute; z-index: 40; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--st-color-primary-active); color: #fff; font-size: 10.5px; font-weight: 700;
+    display: none; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25); font-family: 'DM Sans', sans-serif;
+  }
+  body.show-br .br-chip { display: flex; }
+  .br-chip:hover .br-tooltip, .br-chip:focus-visible .br-tooltip { display: block; }
+  .br-chip:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .br-tooltip {
+    display: none; position: absolute; top: 26px; left: 0; width: 240px;
+    background: #1E2433; color: #fff; font-size: 11.5px; font-weight: 400; line-height: 1.5;
+    border-radius: 8px; padding: 10px 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); z-index: 41; text-align: left;
+  }
+  .br-tooltip b { display: block; margin-bottom: 3px; color: var(--st-teal); font-size: 11px; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  @media (max-width: 560px) {
+    .pipeline-cols { display: none; }
+    .modal-box { max-height: 100vh; border-radius: 0; }
+    .modal-overlay { padding: 0; }
+    #intercept-modal .modal-box { max-width: 100%; min-height: 100vh; border-radius: 0; }
+    #demo-banner { font-size: 11.5px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Proto bar ── -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">&larr; Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Cancellation Intercept Modal (Retention Video + Scheduling)</span>
+  </div>
+  <div class="proto-bar-right">
+    <span class="proto-bar-pill muted">Ready for Dev</span>
+    <a class="proto-bar-pill" href="https://app.clickup.com/t/8633445/86bbah6jq" target="_blank">86bbah6jq</a>
+  </div>
+</div>
+
+<!-- ── Demo control banner (prototype-only) ── -->
+<div id="demo-banner" role="region" aria-label="Prototype demo controls">
+  <span class="demo-title">Demo controls</span>
+  <div class="demo-group">
+    <label for="video-state-select">Video state:</label>
+    <select id="video-state-select">
+      <option value="ready">Ready to play</option>
+      <option value="playing">Playing</option>
+      <option value="failed">Load failed (BR7 fallback)</option>
+    </select>
+  </div>
+  <label class="toggle-label">
+    <input type="checkbox" id="br-toggle" />
+    Show business-rule annotations
+  </label>
+  <span class="spacer"></span>
+  <span class="demo-note">Flow: profile menu &rarr; Manage Billing &rarr; Subscription Details &rarr; Cancel Subscription. Modal shows on every attempt.</span>
+  <button class="reset-btn" id="reset-demo-btn" type="button">Reset flow</button>
+</div>
+
+<div id="dj-app">
+
+  <!-- ── Header ── -->
+  <div class="app-header">
+    <div class="app-header-left">
+      <div class="app-logo">
+        <div class="app-logo-mark">D</div>
+        <div class="app-logo-text">dripjobs</div>
+      </div>
+      <div class="app-search"><input type="text" placeholder="Search leads, contacts, tags..." readonly><i class="fa-solid fa-magnifying-glass"></i></div>
+    </div>
+    <div class="app-header-right">
+      <i class="fa-solid fa-triangle-exclamation app-header-icon alert" aria-hidden="true"></i>
+      <i class="fa-regular fa-bell app-header-icon" aria-hidden="true"></i>
+      <div class="user-menu-wrap">
+        <button class="user-chip" id="user-menu-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="user-dropdown">
+          <span class="user-avatar">JH</span>
+          <span class="user-chip-name">Jeremy Harrison</span>
+          <i class="fa-solid fa-chevron-down chev" aria-hidden="true"></i>
+        </button>
+        <div class="user-dropdown" id="user-dropdown" role="menu">
+          <button class="user-dropdown-item" role="menuitem">My Profile</button>
+          <button class="user-dropdown-item highlight" role="menuitem" id="open-manage-billing">Manage Billing</button>
+          <button class="user-dropdown-item" role="menuitem">Change Password</button>
+          <div class="user-dropdown-divider"></div>
+          <button class="user-dropdown-item" role="menuitem">Schedule Refresher</button>
+          <button class="user-dropdown-item" role="menuitem">Schedule Advanced Training</button>
+          <button class="user-dropdown-item" role="menuitem">Schedule Setup</button>
+          <button class="user-dropdown-item" role="menuitem">What's New</button>
+          <button class="user-dropdown-item" role="menuitem">Suggest a Feature</button>
+          <div class="user-dropdown-divider"></div>
+          <button class="user-dropdown-item" role="menuitem">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-body">
+
+    <!-- ── Sidebar (context only) ── -->
+    <nav class="sidebar" aria-hidden="true">
+      <div class="sidebar-company">The Nest</div>
+
+      <div class="sidebar-section-label">Sales</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-address-book" style="color:#9CA3AF;font-size:12px;"></i> Contacts</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-list" style="color:#9CA3AF;font-size:12px;"></i> Sales List</span></div>
+      <div class="sidebar-item active"><span class="sidebar-item-label"><i class="fa-solid fa-diagram-project"></i> Sales Pipeline</span></div>
+
+      <div class="sidebar-section-label">Jobs</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-arrows-rotate" style="color:#9CA3AF;font-size:12px;"></i> Change Orders</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-regular fa-calendar" style="color:#9CA3AF;font-size:12px;"></i> Job Schedule</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-list-check" style="color:#9CA3AF;font-size:12px;"></i> Jobs List</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-diagram-project" style="color:#9CA3AF;font-size:12px;"></i> Jobs Pipeline</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-file-pen" style="color:#9CA3AF;font-size:12px;"></i> Work Orders</span></div>
+
+      <div class="sidebar-section-label">Daily Operations</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-regular fa-calendar-check" style="color:#9CA3AF;font-size:12px;"></i> Appointments</span><span class="sidebar-badge">2 new</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-regular fa-comment" style="color:#9CA3AF;font-size:12px;"></i> Chat</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-regular fa-envelope" style="color:#9CA3AF;font-size:12px;"></i> Email</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-regular fa-square-check" style="color:#9CA3AF;font-size:12px;"></i> Tasks</span></div>
+
+      <div class="sidebar-section-label">Documents</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-file-invoice-dollar" style="color:#9CA3AF;font-size:12px;"></i> Invoices</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-file-lines" style="color:#9CA3AF;font-size:12px;"></i> Proposals</span><i class="fa-solid fa-chevron-right chev"></i></div>
+
+      <div class="sidebar-section-label">Financials</div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-coins" style="color:#9CA3AF;font-size:12px;"></i> Job Costing</span><i class="fa-solid fa-chevron-right chev"></i></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-gauge-high" style="color:#9CA3AF;font-size:12px;"></i> Production Rates</span></div>
+      <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-chart-line" style="color:#9CA3AF;font-size:12px;"></i> Metrics</span><i class="fa-solid fa-chevron-right chev"></i></div>
+
+      <div style="height:8px;"></div>
+      <div class="sidebar-footer">
+        <div class="sidebar-item"><span class="sidebar-item-label"><i class="fa-solid fa-gear" style="color:#32415B;font-size:12px;"></i> Settings</span><i class="fa-solid fa-chevron-up chev" style="color:#32415B;"></i></div>
+      </div>
+    </nav>
+
+    <!-- ── Background pipeline (context only, dimmed by the modal backdrop) ── -->
+    <main class="main-content pipeline-bg" aria-hidden="true">
+      <h1>Sales Pipeline</h1>
+      <div class="pipeline-sub">Total Deals: 18 &middot; Total Value: $62,879.31</div>
+      <div class="pipeline-cols">
+        <div class="pipeline-col">
+          <div class="pipeline-col-head">Cold Leads <span>6</span></div>
+          <div class="pipeline-card"><div class="pc-title">Dripjobs Harrison</div><div class="pc-meta">Special Event &middot; Updated 14d ago</div></div>
+          <div class="pipeline-card"><div class="pc-title">Laura Close</div><div class="pc-meta">None of Your Business &middot; Updated 1mo ago</div></div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pipeline-col-head">Warm Leads <span>0</span></div>
+          <div class="pipeline-empty">No Deals</div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pipeline-col-head">Estimate Requested <span>1</span></div>
+          <div class="pipeline-card"><div class="pc-title">Darron Deal</div><div class="pc-meta">Skywriting &middot; Updated 4d ago</div></div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pipeline-col-head">Estimate Scheduled <span>3</span></div>
+          <div class="pipeline-card"><div class="pc-title">Assigned User TEST</div><div class="pc-meta">Tue, Jul 28 &middot; Updated 1mo ago</div></div>
+          <div class="pipeline-card"><div class="pc-title">Bart Simpson</div><div class="pc-meta">Mon, Jul 20 &middot; Updated 2mo ago</div></div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pipeline-col-head">In Draft <span>6</span></div>
+          <div class="pipeline-card"><div class="pc-title">Tommy Moss (Deal 2)</div><div class="pc-meta">$0.00 Pending</div></div>
+          <div class="pipeline-card"><div class="pc-title">Harrison Project</div><div class="pc-meta">$2,709.30 Pending</div></div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MODAL: MANAGE SUBSCRIPTIONS (existing, unchanged)
+       ══════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="manage-subscriptions-modal" role="dialog" aria-modal="true" aria-labelledby="ms-title">
+    <div class="modal-box">
+      <button class="modal-close-x" aria-label="Close Manage Subscriptions" data-close="manage-subscriptions-modal">&#10005;</button>
+      <div class="ms-header">
+        <div class="ms-logo"><span style="font-size:20px;">&#128167;</span>dripjobs</div>
+        <p class="ms-subtitle" id="ms-title">Manage Subscriptions</p>
+      </div>
+      <div class="ms-body">
+        <button class="ms-plan-card" id="open-subscription-details">
+          <div>
+            <div class="ms-plan-name">DripJobs Advanced</div>
+            <div class="ms-plan-detail">Additional DripJobs User &times; 5<br>+3 more items</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="ms-plan-price">$0.00<br>Billed every month</div>
+          </div>
+        </button>
+        <div class="ms-links">
+          <button class="ms-link-btn"><i class="fa-regular fa-user" aria-hidden="true"></i> Account Information</button>
+          <button class="ms-link-btn"><i class="fa-regular fa-credit-card" aria-hidden="true"></i> Payment Methods</button>
+          <button class="ms-link-btn"><i class="fa-regular fa-clock" aria-hidden="true"></i> Billing History</button>
+        </div>
+      </div>
+      <div class="ms-footer">Questions? Our Support Team would be glad to help</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       MODAL: SUBSCRIPTION DETAILS (existing, unchanged)
+       ══════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="subscription-details-modal" role="dialog" aria-modal="true" aria-labelledby="sd-title">
+    <div class="modal-box">
+      <button class="modal-close-x" aria-label="Close Subscription Details" data-close="subscription-details-modal">&#10005;</button>
+      <div class="sd-header">
+        <button class="sd-back" id="back-to-manage-subscriptions">&lsaquo; Subscription Details</button>
+      </div>
+      <div class="sd-body">
+        <a href="#" class="sd-view-breakdown" onclick="return false;">View breakdown &rarr;</a>
+        <p class="sd-price" id="sd-title">$0.00</p>
+        <p class="sd-price-note">Billed every month</p>
+        <p class="sd-plan-name">DripJobs Advanced</p>
+        <p class="sd-feature-list">Additional DripJobs User &times; 5<br>DripJobs Ai<br>Production rates<br>Job-costing</p>
+        <div class="sd-payment-card">
+          <div><span class="card-icon" aria-hidden="true"></span>Paid via ending 8030</div>
+          <i class="fa-solid fa-chevron-right" style="color:var(--st-color-text-muted); font-size:12px;" aria-hidden="true"></i>
+        </div>
+        <div class="sd-links">
+          <button class="sd-link-btn">Edit Subscription</button>
+          <button class="sd-link-btn danger-link" id="open-intercept-modal">
+            Cancel Subscription
+            <span class="br-chip" style="top:6px; right:-24px; left:auto;" tabindex="0" aria-label="Business rule 1 detail">1
+              <span class="br-tooltip"><b>BR1</b>Clicking this action must trigger the intercept modal before any cancellation processing or Chargebee redirect occurs.</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       NEW: CANCELLATION INTERCEPT MODAL (ticket 86bbah6jq)
+       ══════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="intercept-modal" role="dialog" aria-modal="true" aria-labelledby="ic-heading">
+    <div class="modal-box">
+      <button class="modal-close-x" aria-label="Close and return to Subscription Details" id="intercept-close-x" style="position:absolute;">&#10005;
+        <span class="br-chip" style="top:-6px; right:-6px; left:auto; width:18px; height:18px;" tabindex="-1" aria-hidden="true">8
+          <span class="br-tooltip" style="left:auto; right:0;"><b>BR8</b>Closing without choosing one of the three actions (X or backdrop click) returns to Subscription Details, where cancellation was initiated. No cancellation is taken. Distinct from "Take Me Back to My Account," which exits all the way to the base app.</span>
+        </span>
+      </button>
+
+      <div class="ic-header">
+        <h2 class="ic-heading" id="ic-heading">Before you cancel, hear from Tanner</h2>
+        <p class="ic-subheading">DripJobs' founder wanted to leave you a personal message first.</p>
+      </div>
+
+      <!-- Working video state (BR2: Google Drive asset, plays inline in this modal).
+           The ticket doesn't include the confirmed Google Drive file ID yet, so this
+           prototype simulates the poster/playing states on a timer rather than embedding
+           a real <iframe src="https://drive.google.com/file/d/FILE_ID/preview">. Swap in
+           the real embed once the asset's share link is provided; the frame.io link in
+           the ticket is a dev-side fallback approach only, not a second source shown to users. -->
+      <div class="ic-video-area" id="ic-video-area" style="position:relative;">
+        <div class="ic-video-poster" id="ic-video-poster">
+          <div class="ic-tanner-avatar" aria-hidden="true">T</div>
+          <div class="ic-video-caption">A message from Tanner, Founder &amp; CEO</div>
+          <button class="ic-play-btn" id="ic-play-btn" aria-label="Play Tanner's message">
+            <span class="ic-play-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="ic-playing-surface">
+          <div class="ic-tanner-avatar" aria-hidden="true">T</div>
+          <div class="ic-video-caption">Playing &mdash; Tanner's message</div>
+          <button class="ic-pause-btn" id="ic-pause-btn" aria-label="Pause video">
+            <span class="ic-pause-icon" aria-hidden="true"><span></span><span></span></span>
+          </button>
+          <div class="ic-progress-track"><div class="ic-progress-fill"></div></div>
+        </div>
+        <span class="br-chip" style="top:8px; left:8px;" tabindex="0" aria-label="Business rule 2 detail">2
+          <span class="br-tooltip"><b>BR2</b>Confirmed source: Google Drive. Must play inline in this modal, the user never navigates away from DripJobs. The frame.io link in the ticket is a dev-side fallback approach only, not a second source presented to the user.</span>
+        </span>
+      </div>
+
+      <!-- Load-failure fallback state (BR7) -->
+      <div class="ic-fallback" id="ic-fallback">
+        <div class="ic-fallback-notice">
+          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+          <span>This video couldn't load, but here's Tanner's message.</span>
+        </div>
+        <div class="ic-fallback-message" style="position:relative;">
+          <div class="ic-tanner-avatar" style="width:44px; height:44px; font-size:16px; flex:0 0 auto;" aria-hidden="true">T</div>
+          <p>Wait, please don't go. I'm Tanner, founder of DripJobs. If something hasn't clicked yet, our team offers free, hands on onboarding, and I'd love the chance to make it right. Schedule a quick call below, no pressure, just support. Or email me directly anytime at <a href="mailto:tanner@dripjobs.com">tanner@dripjobs.com</a>.</p>
+          <span class="br-chip" style="top:-8px; left:-8px;" tabindex="0" aria-label="Business rule 7 detail">7
+            <span class="br-tooltip"><b>BR7</b>If the video can't load or play, show this load-failure notice and condensed message in its place. All three actions below stay available regardless of video status.</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="ic-actions" style="position:relative;">
+        <span class="br-chip" style="top:-6px; right:8px; left:auto;" tabindex="0" aria-label="Business rule 3 detail">3
+          <span class="br-tooltip" style="left:auto; right:0;"><b>BR3</b>The modal presents exactly these three actions &mdash; no more, no fewer.</span>
+        </span>
+        <a class="ic-btn ic-btn-primary" id="ic-schedule-call" href="https://calendly.com/daniel-lee-dripjobs/dripjobs-complimentary-onboarding-level-1" target="_blank" rel="noopener" style="position:relative;">
+          Schedule a Call
+          <span class="br-chip" style="top:-8px; right:-8px; left:auto; background:#fff; color:var(--st-color-primary-active); border-color:var(--st-color-primary-active);" tabindex="0" aria-label="Business rule 4 detail">4
+            <span class="br-tooltip" style="left:auto; right:0; background:#1E2433;"><b>BR4</b>Opens Daniel Lee's Calendly booking page in a new tab. Nothing syncs back into DripJobs from this action, and it never gates or blocks cancellation later.</span>
+          </span>
+        </a>
+        <button class="ic-btn ic-btn-secondary" id="ic-take-me-back" style="position:relative;">
+          Take Me Back to My Account
+          <span class="br-chip" style="top:-8px; right:-8px; left:auto; background:#fff; color:var(--st-color-primary-active); border-color:var(--st-color-primary-active);" tabindex="0" aria-label="Business rule 5 detail">5
+            <span class="br-tooltip" style="left:auto; right:0; background:#1E2433;"><b>BR5 / BR8</b>Closes everything and returns to the base app. No cancellation action is taken. Distinct from the X/backdrop close, which only returns one level to Subscription Details.</span>
+          </span>
+        </button>
+        <button class="ic-btn ic-btn-tertiary" id="ic-cancel-subscription" style="position:relative;">
+          Cancel My Subscription
+          <span class="br-chip" style="top:-2px; right:-14px; left:auto; background:#fff; color:#B91C1C; border-color:#B91C1C;" tabindex="0" aria-label="Business rule 6 detail">6
+            <span class="br-tooltip" style="left:auto; right:0; background:#1E2433;"><b>BR6 / BR9</b>Proceeds to the existing cancellation flow exactly as it works today, unchanged by this ticket, even if a call was already scheduled. Chargebee is only touched here, never just by opening this modal.</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       EXISTING: "WE'RE SORRY TO SEE YOU GO" PAGE (unchanged flow target, BR4/BR6)
+       ══════════════════════════════════════════════ -->
+  <div id="cancellation-page">
+    <div class="cp-wrap">
+      <div class="cp-logo"><span style="font-size:20px;">&#128167;</span>dripjobs</div>
+      <div class="cp-rule"></div>
+      <p class="cp-title">Jesus, we're sorry to see you go! <strong>Are you sure you want to cancel?</strong></p>
+      <div class="cp-cols">
+        <div class="cp-card">
+          <h3>Here's what you'll lose</h3>
+          <ul class="cp-list">
+            <li>Automatic Follow-Ups</li><li>Lead Nurturing</li>
+            <li>Two-Way Texting</li><li>DripJobs Chat</li>
+            <li>Drip Text &amp; Emails</li><li>Sales &amp; Lead Metrics</li>
+            <li>Contact Data</li><li>Sales &amp; Jobs Pipelines</li>
+            <li>Pipeline Automation</li><li>DripJobs Community</li>
+            <li>Customer Portal</li><li>Proposal Builder</li>
+            <li>Invoicing</li><li>Appointment Center</li>
+          </ul>
+        </div>
+        <div class="cp-card">
+          <h3>Do you mind giving us some feedback?</h3>
+          <div class="cp-msg">
+            <div class="cp-msg-avatar" aria-hidden="true">T</div>
+            <div>Hi Jesus, I just wanted to take a minute to thank you for the time you've spent with us. We fully support your decision to cancel and appreciate you being a customer. As a fellow contractor myself, I built this software with you in mind, so I'm sorry we missed the mark. Would you mind leaving some feedback to help us improve?
+              <b>Tanner</b>
+              <span style="color:var(--st-color-primary-active); font-size:11.5px;">Founder &amp; CEO</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="cp-important">Important: By canceling your subscription, <strong>you will lose your account, your data, and features</strong> associated with your plan.</p>
+      <button class="cp-back-btn" id="cp-never-mind-top">&lsaquo; Never mind! Take me back to my account.</button>
+      <div class="cp-form">
+        <div class="cp-form-label">Please share your reason for leaving<span class="cp-required">REQUIRED</span></div>
+        <div class="cp-radio-row"><input type="radio" name="reason" disabled /> Doesn't meet our needs</div>
+        <div class="cp-radio-row"><input type="radio" name="reason" disabled /> Too busy - don't have time</div>
+        <div class="cp-radio-row"><input type="radio" name="reason" disabled /> Only wanted to see what it does</div>
+        <div class="cp-radio-row"><input type="radio" name="reason" disabled /> Out of budget or downsizing</div>
+        <div class="cp-radio-row"><input type="radio" name="reason" disabled /> I'm just taking a break, will be back</div>
+        <div class="cp-radio-row"><input type="radio" name="reason" disabled /> Too complicated or hard to use</div>
+        <div class="cp-radio-row"><input type="radio" name="reason" disabled /> Missing features or integrations</div>
+        <div class="cp-radio-row"><input type="radio" name="reason" disabled /> Other</div>
+        <div class="cp-form-label" style="margin-top:14px;">How likely are you to return?<span class="cp-required">REQUIRED</span></div>
+        <div class="cp-scale">
+          <span>No chance!</span>
+          <span style="display:flex; gap:10px;">1 2 3 4 5 6 7 8 9 10</span>
+          <span>Absolutely will!</span>
+        </div>
+        <div class="cp-form-label" style="margin-top:8px;">Anything else you'd like to share about your experience?</div>
+        <input class="cp-input" type="text" placeholder="Start typing..." disabled />
+        <div class="cp-checkbox-row"><input type="checkbox" disabled /> I understand that by proceeding, I will immediately lose access to my account, including all data and records since joining.</div>
+        <div class="cp-form-actions">
+          <button class="cp-btn-cancel" disabled>Cancel my account</button>
+          <button class="cp-btn-nevermind" id="cp-never-mind-bottom">Never mind</button>
+        </div>
+      </div>
+      <p class="cp-footnote">This screen reflects the existing Chargebee-bound cancellation flow and is unchanged by ticket 86bbah6jq (BR4/BR6).</p>
+    </div>
+  </div>
+
+<div aria-live="polite" class="sr-only" id="live-region"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var liveRegion = document.getElementById("live-region");
+  function announce(msg) { liveRegion.textContent = msg; }
+
+  var lastFocusedBeforeModal = null;
+
+  function openOverlay(id) {
+    var el = document.getElementById(id);
+    lastFocusedBeforeModal = document.activeElement;
+    el.classList.add("open");
+    var focusable = el.querySelector(".modal-close-x, button, a, [tabindex]");
+    if (focusable) focusable.focus();
+    document.addEventListener("keydown", trapHandlerFor(el));
+  }
+
+  function closeOverlay(id) {
+    var el = document.getElementById(id);
+    el.classList.remove("open");
+    document.removeEventListener("keydown", trapHandlerFor(el));
+  }
+
+  function trapHandlerFor(modalEl) {
+    return function (e) {
+      if (e.key === "Escape") {
+        var openOverlayEl = document.querySelector(".modal-overlay.open");
+        if (openOverlayEl) {
+          var closer = openOverlayEl.querySelector("[data-close], #intercept-close-x");
+          if (closer) closer.click();
+        }
+        return;
+      }
+      if (e.key !== "Tab") return;
+      var focusables = modalEl.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])');
+      if (!focusables.length) return;
+      var first = focusables[0], last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+  }
+
+  // Backdrop click closes (BR8 behavior — same as X, one level back)
+  document.getElementById("manage-subscriptions-modal").addEventListener("click", function (e) {
+    if (e.target === this) closeOverlay("manage-subscriptions-modal");
+  });
+  document.getElementById("subscription-details-modal").addEventListener("click", function (e) {
+    if (e.target === this) closeOverlay("subscription-details-modal");
+  });
+  document.getElementById("intercept-modal").addEventListener("click", function (e) {
+    if (e.target === this) {
+      closeOverlay("intercept-modal");
+      openOverlay("subscription-details-modal");
+      announce("Returned to Subscription Details. No cancellation was made.");
+    }
+  });
+
+  // ===== User menu =====
+  var userTrigger = document.getElementById("user-menu-trigger");
+  var userDropdown = document.getElementById("user-dropdown");
+  userTrigger.addEventListener("click", function () {
+    var isOpen = userDropdown.classList.toggle("open");
+    userTrigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+  document.addEventListener("click", function (e) {
+    if (!userTrigger.contains(e.target) && !userDropdown.contains(e.target)) {
+      userDropdown.classList.remove("open");
+      userTrigger.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  // ===== Flow wiring =====
+  document.getElementById("open-manage-billing").addEventListener("click", function () {
+    userDropdown.classList.remove("open");
+    userTrigger.setAttribute("aria-expanded", "false");
+    openOverlay("manage-subscriptions-modal");
+  });
+
+  document.getElementById("open-subscription-details").addEventListener("click", function () {
+    closeOverlay("manage-subscriptions-modal");
+    openOverlay("subscription-details-modal");
+  });
+  document.getElementById("back-to-manage-subscriptions").addEventListener("click", function () {
+    closeOverlay("subscription-details-modal");
+    openOverlay("manage-subscriptions-modal");
+  });
+
+  // BR1: Cancel Subscription must show the intercept modal first, no Chargebee action yet (BR9)
+  document.getElementById("open-intercept-modal").addEventListener("click", function () {
+    closeOverlay("subscription-details-modal");
+    openOverlay("intercept-modal");
+    resetVideoToCurrentState();
+    announce("Cancellation intercept modal opened. Message from Tanner.");
+  });
+
+  document.querySelectorAll('[data-close="manage-subscriptions-modal"]').forEach(function (b) {
+    b.addEventListener("click", function () {
+      closeOverlay("manage-subscriptions-modal");
+      if (lastFocusedBeforeModal) lastFocusedBeforeModal.focus();
+    });
+  });
+  document.querySelectorAll('[data-close="subscription-details-modal"]').forEach(function (b) {
+    b.addEventListener("click", function () {
+      closeOverlay("subscription-details-modal");
+      if (lastFocusedBeforeModal) lastFocusedBeforeModal.focus();
+    });
+  });
+
+  // BR8: Intercept modal close (X) returns one level to Subscription Details, no cancellation
+  document.getElementById("intercept-close-x").addEventListener("click", function () {
+    closeOverlay("intercept-modal");
+    openOverlay("subscription-details-modal");
+    announce("Returned to Subscription Details. No cancellation was made.");
+  });
+
+  // BR5: Take Me Back to My Account — closes everything, returns to base app
+  document.getElementById("ic-take-me-back").addEventListener("click", function () {
+    closeOverlay("intercept-modal");
+    closeOverlay("subscription-details-modal");
+    closeOverlay("manage-subscriptions-modal");
+    if (lastFocusedBeforeModal) lastFocusedBeforeModal.focus();
+    announce("Returned to your account. No cancellation was made.");
+  });
+
+  // BR6/BR9: Cancel My Subscription -> existing, unchanged cancellation flow (only here is Chargebee touched)
+  document.getElementById("ic-cancel-subscription").addEventListener("click", function () {
+    closeOverlay("intercept-modal");
+    closeOverlay("subscription-details-modal");
+    closeOverlay("manage-subscriptions-modal");
+    document.getElementById("cancellation-page").classList.add("show");
+    document.getElementById("dj-app").style.display = "none";
+    window.scrollTo(0, 0);
+    announce("Proceeding to the existing cancellation flow.");
+  });
+
+  // "Never mind" on the existing cancellation page returns to the app (out of scope of this ticket, wired for demo continuity)
+  function backFromCancellationPage() {
+    document.getElementById("cancellation-page").classList.remove("show");
+    document.getElementById("dj-app").style.display = "";
+    window.scrollTo(0, 0);
+  }
+  document.getElementById("cp-never-mind-top").addEventListener("click", backFromCancellationPage);
+  document.getElementById("cp-never-mind-bottom").addEventListener("click", backFromCancellationPage);
+
+  // ===== Video states =====
+  var videoArea = document.getElementById("ic-video-area");
+  var fallback = document.getElementById("ic-fallback");
+  var playBtn = document.getElementById("ic-play-btn");
+  var pauseBtn = document.getElementById("ic-pause-btn");
+  var videoStateSelect = document.getElementById("video-state-select");
+
+  function applyVideoState(state) {
+    videoArea.classList.remove("ic-video-playing");
+    videoArea.classList.remove("state-failed");
+    fallback.classList.remove("show");
+
+    if (state === "failed") {
+      videoArea.classList.add("state-failed");
+      fallback.classList.add("show");
+    } else if (state === "playing") {
+      videoArea.classList.add("ic-video-playing");
+    }
+    // "ready" = default poster state, nothing extra needed
+  }
+
+  function resetVideoToCurrentState() {
+    applyVideoState(videoStateSelect.value);
+  }
+
+  videoStateSelect.addEventListener("change", function () {
+    applyVideoState(this.value);
+  });
+
+  playBtn.addEventListener("click", function () {
+    videoStateSelect.value = "playing";
+    applyVideoState("playing");
+    announce("Playing Tanner's message.");
+  });
+  pauseBtn.addEventListener("click", function () {
+    videoStateSelect.value = "ready";
+    applyVideoState("ready");
+    announce("Video paused.");
+  });
+
+  // ===== BR annotation toggle =====
+  var brToggle = document.getElementById("br-toggle");
+  brToggle.addEventListener("change", function () {
+    document.body.classList.toggle("show-br", this.checked);
+  });
+
+  // ===== Reset demo =====
+  document.getElementById("reset-demo-btn").addEventListener("click", function () {
+    closeOverlay("manage-subscriptions-modal");
+    closeOverlay("subscription-details-modal");
+    closeOverlay("intercept-modal");
+    document.getElementById("cancellation-page").classList.remove("show");
+    document.getElementById("dj-app").style.display = "";
+    videoStateSelect.value = "ready";
+    applyVideoState("ready");
+    userDropdown.classList.remove("open");
+    userTrigger.setAttribute("aria-expanded", "false");
+    window.scrollTo(0, 0);
+    announce("Demo reset.");
+  });
+
+})();
+</script>
+
+</body>
+</html>

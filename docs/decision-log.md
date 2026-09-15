@@ -9,6 +9,12 @@ Format:
 - Why:
 - Open question (if any):
 
+## [2026-09-15] Cancellation Intercept Modal built and added to hub (ticket 86bbah6jq)
+
+- Decision: Built the clickable prototype from Jeremy's supplied HTML draft, rebuilding the surrounding chrome (app header, sidebar, Sales Pipeline background) to match production using the same Nunito app-shell pattern already used in other hub prototypes (e.g. active-company-confirmation-modal), and reskinning the existing modal markup/logic to that same font and the design-system color tokens. Kept the draft's state machine and BR-chip annotations largely as given since they already satisfied all nine business rules (focus trap, Escape/backdrop/X parity, live region, 14s progress bar with `prefers-reduced-motion` fallback, sub-560px edge-to-edge modal). The ticket's confirmed Google Drive video asset ID wasn't supplied, so the video area still simulates poster/playing/failed states on a timer rather than embedding a real Drive `<iframe>`; flagged inline in the file's markup as a to-do for whoever has the real share link.
+- Why: Direct request to build the ticket's clickable prototype and match it to current production UI/design-system rules.
+- Open question: Confirm the actual Google Drive file ID/share link for Tanner's video before this goes to dev, so the simulated video area can be swapped for a real inline embed.
+
 ## [2026-09-14] AI Assisted Drip Message Writing: modal panel restructured to stop covering the demo banner (ticket 86b9bmab5)
 
 - Decision: A headless test caught that the previous fix (raising the always-open modal panel to `z-index: 200` so it wins over the header bars) had a side effect: the panel is 620px wide and full viewport height, so it physically covered the right portion of the dark demo banner underneath it, including the "Reset demo" button, wherever they overlapped, making it unreachable by a real click. Rebuilt the layout instead of tuning z-index further: wrapped the dimmed backdrop and the modal (overlay + panel) inside a new `#main-area`, the flex:1 region below the two header bars in the body's column layout, and switched all three from `position: fixed` to `position: absolute` confined within it. They can no longer spatially overlap the header bars at all, so the earlier `z-index: 150` patch on `.proto-bar`/`#demo-banner` came out too, it's no longer needed.
