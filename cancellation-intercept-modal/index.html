@@ -245,30 +245,33 @@
   .ic-play-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
   .ic-play-icon { width: 0; height: 0; border-top: 11px solid transparent; border-bottom: 11px solid transparent; border-left: 18px solid var(--st-color-primary-active); margin-left: 4px; }
 
-  .ic-video-playing .ic-video-poster { display: none; }
-  .ic-playing-surface {
+  .ic-video-loading .ic-video-poster, .ic-video-playing .ic-video-poster { display: none; }
+
+  /* Transitional "connecting" state between Play click and the real Drive
+     iframe reporting loaded. The 14s/60%-reduced-motion progress bar the
+     ticket specified for "playing" lives here, since it can't be kept in
+     sync with the real embed's own player once that takes over (see the
+     markup comment above the video area). */
+  .ic-loading-surface {
     position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-    background: linear-gradient(160deg,#2A3454,#1E2433);
+    background: linear-gradient(160deg,#2A3454,#1E2433); z-index: 2;
   }
-  .ic-video-playing .ic-playing-surface { display: flex; }
-  .ic-playing-surface .ic-tanner-avatar { animation: ic-pulse 2.2s ease-in-out infinite; }
+  .ic-video-loading .ic-loading-surface { display: flex; }
+  .ic-loading-surface .ic-tanner-avatar { animation: ic-pulse 2.2s ease-in-out infinite; }
   @keyframes ic-pulse { 0%,100% { box-shadow: 0 0 0 4px rgba(255,255,255,0.08);} 50% { box-shadow: 0 0 0 10px rgba(255,255,255,0.14);} }
   .ic-progress-track { position: absolute; left: 14px; right: 14px; bottom: 14px; height: 4px; background: rgba(255,255,255,0.25); border-radius: 4px; overflow: hidden; }
   .ic-progress-fill { height: 100%; width: 0%; background: var(--st-teal); border-radius: 4px; }
-  .ic-video-playing .ic-progress-fill { animation: ic-fillbar 14s linear forwards; }
+  .ic-video-loading .ic-progress-fill { animation: ic-fillbar 14s linear forwards; }
   @keyframes ic-fillbar { from { width: 0%; } to { width: 100%; } }
-  .ic-pause-btn {
-    position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; min-width: 34px; min-height: 34px;
-    border-radius: 50%; background: rgba(0,0,0,0.35); border: none; color: #fff; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; z-index: 3;
-  }
-  .ic-pause-btn:hover { background: rgba(0,0,0,0.5); }
-  .ic-pause-icon { display: flex; gap: 3px; }
-  .ic-pause-icon span { width: 3px; height: 12px; background: #fff; border-radius: 1px; }
   @media (prefers-reduced-motion: reduce) {
-    .ic-video-playing .ic-progress-fill { animation: none; width: 60%; }
-    .ic-playing-surface .ic-tanner-avatar { animation: none; }
+    .ic-video-loading .ic-progress-fill { animation: none; width: 60%; }
+    .ic-loading-surface .ic-tanner-avatar { animation: none; }
   }
+
+  /* Real inline Google Drive player (BR2). Hidden until Play swaps in the iframe. */
+  .ic-video-frame { position: absolute; inset: 0; display: none; }
+  .ic-video-playing .ic-video-frame { display: block; }
+  .ic-video-frame iframe { width: 100%; height: 100%; border: none; display: block; }
 
   /* Video load-failure fallback (BR7) */
   .ic-fallback { display: none; margin: 0 26px 18px; }
@@ -589,12 +592,14 @@
         <p class="ic-subheading">DripJobs' founder wanted to leave you a personal message first.</p>
       </div>
 
-      <!-- Working video state (BR2: Google Drive asset, plays inline in this modal).
-           The ticket doesn't include the confirmed Google Drive file ID yet, so this
-           prototype simulates the poster/playing states on a timer rather than embedding
-           a real <iframe src="https://drive.google.com/file/d/FILE_ID/preview">. Swap in
-           the real embed once the asset's share link is provided; the frame.io link in
-           the ticket is a dev-side fallback approach only, not a second source shown to users. -->
+      <!-- Working video state (BR2: real Google Drive asset, plays inline in this modal).
+           Confirmed file: "DripJobs Cancellation Video.mp4" (Drive id 1rJfd3ubemVEr7dTTLgguYR9Bl4RMzWc-),
+           shared "anyone with the link" so it plays without a sign-in wall. Embedded via Drive's
+           standard /preview iframe on demand (not loaded until Play is clicked). Drive's /preview
+           embed brings its own native play/pause/scrubber chrome and exposes no scriptable playback
+           API, so the custom pause button + synced progress bar this ticket originally sketched can't
+           be layered over the real player, only over the loading transition below. The frame.io link
+           in the ticket is a dev-side fallback approach only, not a second source shown to users. -->
       <div class="ic-video-area" id="ic-video-area" style="position:relative;">
         <div class="ic-video-poster" id="ic-video-poster">
           <div class="ic-tanner-avatar" aria-hidden="true">T</div>
@@ -603,16 +608,14 @@
             <span class="ic-play-icon" aria-hidden="true"></span>
           </button>
         </div>
-        <div class="ic-playing-surface">
+        <div class="ic-loading-surface" id="ic-loading-surface">
           <div class="ic-tanner-avatar" aria-hidden="true">T</div>
-          <div class="ic-video-caption">Playing &mdash; Tanner's message</div>
-          <button class="ic-pause-btn" id="ic-pause-btn" aria-label="Pause video">
-            <span class="ic-pause-icon" aria-hidden="true"><span></span><span></span></span>
-          </button>
+          <div class="ic-video-caption">Connecting to Tanner's message&hellip;</div>
           <div class="ic-progress-track"><div class="ic-progress-fill"></div></div>
         </div>
+        <div class="ic-video-frame" id="ic-video-frame"></div>
         <span class="br-chip" style="top:8px; left:8px;" tabindex="0" aria-label="Business rule 2 detail">2
-          <span class="br-tooltip"><b>BR2</b>Confirmed source: Google Drive. Must play inline in this modal, the user never navigates away from DripJobs. The frame.io link in the ticket is a dev-side fallback approach only, not a second source presented to the user.</span>
+          <span class="br-tooltip"><b>BR2</b>Confirmed source: Google Drive (real asset embedded here). Must play inline in this modal, the user never navigates away from DripJobs. The frame.io link in the ticket is a dev-side fallback approach only, not a second source presented to the user.</span>
         </span>
       </div>
 
@@ -867,24 +870,67 @@
   document.getElementById("cp-never-mind-bottom").addEventListener("click", backFromCancellationPage);
 
   // ===== Video states =====
+  // Real Drive asset (BR2): "DripJobs Cancellation Video.mp4", shared "anyone with the
+  // link", embedded via Drive's standard /preview iframe once the user opts in.
+  var DRIVE_FILE_ID = "1rJfd3ubemVEr7dTTLgguYR9Bl4RMzWc-";
+  var DRIVE_EMBED_SRC = "https://drive.google.com/file/d/" + DRIVE_FILE_ID + "/preview";
+  var LOAD_TIMEOUT_MS = 10000;
+
   var videoArea = document.getElementById("ic-video-area");
+  var videoFrame = document.getElementById("ic-video-frame");
   var fallback = document.getElementById("ic-fallback");
   var playBtn = document.getElementById("ic-play-btn");
-  var pauseBtn = document.getElementById("ic-pause-btn");
   var videoStateSelect = document.getElementById("video-state-select");
+  var loadTimeoutId = null;
+
+  function clearPendingLoad() {
+    if (loadTimeoutId) { clearTimeout(loadTimeoutId); loadTimeoutId = null; }
+  }
 
   function applyVideoState(state) {
-    videoArea.classList.remove("ic-video-playing");
-    videoArea.classList.remove("state-failed");
+    clearPendingLoad();
+    videoArea.classList.remove("ic-video-loading", "ic-video-playing", "state-failed");
     fallback.classList.remove("show");
+    videoFrame.innerHTML = "";
 
     if (state === "failed") {
       videoArea.classList.add("state-failed");
       fallback.classList.add("show");
     } else if (state === "playing") {
-      videoArea.classList.add("ic-video-playing");
+      loadRealVideo();
     }
     // "ready" = default poster state, nothing extra needed
+  }
+
+  // Loads the real Drive iframe behind a brief "connecting" transition. A Drive
+  // /preview embed exposes no scriptable playback API, so there's no reliable
+  // cross-origin way to detect a genuine load failure (its own error page still
+  // fires the iframe's load event); this timeout guard catches the case that
+  // actually matters client-side, a slow or hung network request, and falls
+  // back to the BR7 notice if the iframe hasn't reported loaded in time.
+  function loadRealVideo() {
+    videoArea.classList.add("ic-video-loading");
+    var iframe = document.createElement("iframe");
+    iframe.src = DRIVE_EMBED_SRC;
+    iframe.setAttribute("allow", "autoplay");
+    iframe.setAttribute("title", "A message from Tanner, Founder & CEO");
+    // A cross-origin iframe can still take Tab focus and then swallow further
+    // keyboard navigation inside its own document, which would break the modal's
+    // focus trap. Excluding it from this page's tab order keeps Tab/Shift+Tab
+    // cycling through our own controls; the video is still reachable by click/touch.
+    iframe.setAttribute("tabindex", "-1");
+    iframe.addEventListener("load", function () {
+      clearPendingLoad();
+      videoArea.classList.remove("ic-video-loading");
+      videoArea.classList.add("ic-video-playing");
+      announce("Playing Tanner's message.");
+    });
+    videoFrame.appendChild(iframe);
+    loadTimeoutId = setTimeout(function () {
+      videoStateSelect.value = "failed";
+      applyVideoState("failed");
+      announce("This video couldn't load, but here's Tanner's message.");
+    }, LOAD_TIMEOUT_MS);
   }
 
   function resetVideoToCurrentState() {
@@ -898,12 +944,7 @@
   playBtn.addEventListener("click", function () {
     videoStateSelect.value = "playing";
     applyVideoState("playing");
-    announce("Playing Tanner's message.");
-  });
-  pauseBtn.addEventListener("click", function () {
-    videoStateSelect.value = "ready";
-    applyVideoState("ready");
-    announce("Video paused.");
+    announce("Connecting to Tanner's message.");
   });
 
   // ===== BR annotation toggle =====
