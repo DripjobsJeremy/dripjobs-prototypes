@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-15] Cancellation Intercept Modal: auto-pause video on any of the 3 actions (ticket 86bbah6jq)
+
+- Decision: Clicking Schedule a Call, Take Me Back to My Account, or Cancel My Subscription now stops the video if it's loading or playing. Since Drive's `/preview` embed exposes no scriptable pause command, this unloads the iframe and resets the video area back to the poster/ready state, the closest real "pause" available (documented previously as a constraint of this embed). Matters most for Schedule a Call, since that opens Calendly in a new tab but leaves this modal, and the video, open behind it; a no-op if the video was never started.
+- Why: Direct request.
+- Open question: None.
+
 Format:
 
 ## [YYYY-MM-DD] Prototype name or feature

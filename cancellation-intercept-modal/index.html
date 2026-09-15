@@ -531,7 +531,7 @@
             <div class="ms-plan-detail">Additional DripJobs User &times; 5<br>+3 more items</div>
           </div>
           <div style="text-align:right;">
-            <div class="ms-plan-price">$0.00<br>Billed every month</div>
+            <div class="ms-plan-price">$147.00<br>Billed every month</div>
           </div>
         </button>
         <div class="ms-links">
@@ -555,7 +555,7 @@
       </div>
       <div class="sd-body">
         <a href="#" class="sd-view-breakdown" onclick="return false;">View breakdown &rarr;</a>
-        <p class="sd-price" id="sd-title">$0.00</p>
+        <p class="sd-price" id="sd-title">$147.00</p>
         <p class="sd-price-note">Billed every month</p>
         <p class="sd-plan-name">DripJobs Advanced</p>
         <p class="sd-feature-list">Additional DripJobs User &times; 5<br>DripJobs Ai<br>Production rates<br>Job-costing</p>
@@ -840,8 +840,15 @@
     announce("Returned to Subscription Details. No cancellation was made.");
   });
 
+  // Schedule a Call opens Calendly in a new tab (BR4) but the modal itself stays open
+  // behind it, so pause the video rather than leaving it playing unattended.
+  document.getElementById("ic-schedule-call").addEventListener("click", function () {
+    pauseVideo();
+  });
+
   // BR5: Take Me Back to My Account — closes everything, returns to base app
   document.getElementById("ic-take-me-back").addEventListener("click", function () {
+    pauseVideo();
     closeOverlay("intercept-modal");
     closeOverlay("subscription-details-modal");
     closeOverlay("manage-subscriptions-modal");
@@ -851,6 +858,7 @@
 
   // BR6/BR9: Cancel My Subscription -> existing, unchanged cancellation flow (only here is Chargebee touched)
   document.getElementById("ic-cancel-subscription").addEventListener("click", function () {
+    pauseVideo();
     closeOverlay("intercept-modal");
     closeOverlay("subscription-details-modal");
     closeOverlay("manage-subscriptions-modal");
@@ -900,6 +908,19 @@
       loadRealVideo();
     }
     // "ready" = default poster state, nothing extra needed
+  }
+
+  // Stops the video when the user takes one of the three modal actions. Drive's
+  // /preview embed exposes no scriptable pause command, so the closest real
+  // "pause" available is unloading the iframe and resetting to the poster state;
+  // this matters most for Schedule a Call, since that opens a new tab but leaves
+  // this modal (and the video) open behind it.
+  function pauseVideo() {
+    var wasPlaying = videoArea.classList.contains("ic-video-loading") || videoArea.classList.contains("ic-video-playing");
+    if (!wasPlaying) return;
+    videoStateSelect.value = "ready";
+    applyVideoState("ready");
+    announce("Video paused.");
   }
 
   // Loads the real Drive iframe behind a brief "connecting" transition. A Drive
