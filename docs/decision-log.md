@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-16] Cancellation Intercept Modal: toggleable autoplay-on-open variant for comparison (ticket 86bbah6jq)
+
+- Decision: Added a "Autoplay video on modal open" demo-banner toggle (off by default, so the shipped poster + Play button behavior is unchanged) that starts the real video the instant the intercept modal opens instead of waiting for Play. Enabling it reveals an inline warning in the demo banner: this loads a cross-origin Google Drive iframe, and browsers are inconsistent about honoring autoplay-with-sound in a freshly embedded cross-origin player even right after a genuine user click, so production could end up silently muted or not playing at all. This is a prototype-only comparison tool, not a proposed default; Reset flow clears the toggle and warning back to off.
+- Why: Direct request, following up on the open question of whether to autoplay the video versus requiring Play. If Jeremy picks autoplay, the "Before you cancel, hear from Tanner... wanted to leave you a personal message first" heading copy needs a copywriter pass, since it currently reads as an invitation to press Play rather than acknowledging the video is already rolling.
+- Open question: Whether to ship poster+Play (current default) or autoplay-on-open; if autoplay, the heading copy needs to go back through the copywriter project, and the autoplay reliability risk flagged above should be confirmed acceptable (or de-risked with a real `<video>` embed) before it's treated as dev-ready.
+
 ## [2026-09-15] Cancellation Intercept Modal: auto-pause video on any of the 3 actions (ticket 86bbah6jq)
 
 - Decision: Clicking Schedule a Call, Take Me Back to My Account, or Cancel My Subscription now stops the video if it's loading or playing. Since Drive's `/preview` embed exposes no scriptable pause command, this unloads the iframe and resets the video area back to the poster/ready state, the closest real "pause" available (documented previously as a constraint of this embed). Matters most for Schedule a Call, since that opens Calendly in a new tab but leaves this modal, and the video, open behind it; a no-op if the video was never started.
