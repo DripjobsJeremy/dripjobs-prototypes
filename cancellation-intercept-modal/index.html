@@ -61,9 +61,10 @@
      ══════════════════════════════════════════════ */
   #demo-banner {
     background: #1E2433; color: #fff; padding: 10px 16px;
-    display: flex; flex-wrap: wrap; align-items: center; gap: 14px; font-size: 12.5px;
+    display: flex; flex-direction: column; gap: 8px; font-size: 12.5px;
     border-bottom: 3px solid var(--st-color-primary); position: relative; z-index: 200;
   }
+  #demo-banner .demo-banner-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
   #demo-banner .demo-title { font-weight: 700; letter-spacing: 0.2px; white-space: nowrap; }
   #demo-banner .demo-group { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
   #demo-banner select, #demo-banner button {
@@ -75,6 +76,13 @@
   #demo-banner label.toggle-label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
   #demo-banner .spacer { flex: 1 1 auto; min-width: 8px; }
   #demo-banner .demo-note { color: #b7bccb; font-size: 11.5px; }
+  #demo-banner .demo-warning-row {
+    display: none; align-items: flex-start; gap: 8px; background: rgba(253,230,138,0.12);
+    border-left: 3px solid #FDE68A; border-radius: 4px; padding: 8px 10px; font-size: 11.5px;
+    color: #FDE68A; line-height: 1.5;
+  }
+  #demo-banner .demo-warning-row.show { display: flex; }
+  #demo-banner .demo-warning-row i { margin-top: 1px; flex: 0 0 auto; }
 
   /* ══════════════════════════════════════════════
      APP SHELL (Nunito, matches production)
@@ -386,22 +394,32 @@
 
 <!-- ── Demo control banner (prototype-only) ── -->
 <div id="demo-banner" role="region" aria-label="Prototype demo controls">
-  <span class="demo-title">Demo controls</span>
-  <div class="demo-group">
-    <label for="video-state-select">Video state:</label>
-    <select id="video-state-select">
-      <option value="ready">Ready to play</option>
-      <option value="playing">Playing</option>
-      <option value="failed">Load failed (BR7 fallback)</option>
-    </select>
+  <div class="demo-banner-row">
+    <span class="demo-title">Demo controls</span>
+    <div class="demo-group">
+      <label for="video-state-select">Video state:</label>
+      <select id="video-state-select">
+        <option value="ready">Ready to play</option>
+        <option value="playing">Playing</option>
+        <option value="failed">Load failed (BR7 fallback)</option>
+      </select>
+    </div>
+    <label class="toggle-label">
+      <input type="checkbox" id="autoplay-toggle" />
+      Autoplay video on modal open
+    </label>
+    <label class="toggle-label">
+      <input type="checkbox" id="br-toggle" />
+      Show business-rule annotations
+    </label>
+    <span class="spacer"></span>
+    <span class="demo-note">Flow: profile menu &rarr; Manage Billing &rarr; Subscription Details &rarr; Cancel Subscription. Modal shows on every attempt.</span>
+    <button class="reset-btn" id="reset-demo-btn" type="button">Reset flow</button>
   </div>
-  <label class="toggle-label">
-    <input type="checkbox" id="br-toggle" />
-    Show business-rule annotations
-  </label>
-  <span class="spacer"></span>
-  <span class="demo-note">Flow: profile menu &rarr; Manage Billing &rarr; Subscription Details &rarr; Cancel Subscription. Modal shows on every attempt.</span>
-  <button class="reset-btn" id="reset-demo-btn" type="button">Reset flow</button>
+  <div class="demo-warning-row" id="autoplay-warning-row" role="alert">
+    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+    <span>Autoplay preview only, not a confirmed production behavior. This loads a cross-origin Google Drive iframe; browsers are inconsistent about honoring autoplay-with-sound in a freshly embedded cross-origin player, even right after a genuine user click. In production this could silently play muted, or not play at all, which is worse than the reliable poster + Play button state.</span>
+  </div>
 </div>
 
 <div id="dj-app">
@@ -816,7 +834,14 @@
   document.getElementById("open-intercept-modal").addEventListener("click", function () {
     closeOverlay("subscription-details-modal");
     openOverlay("intercept-modal");
-    resetVideoToCurrentState();
+    // Prototype-only demo toggle (see the autoplay warning in the demo banner):
+    // starts the real video immediately instead of waiting for the Play button.
+    if (autoplayToggle.checked) {
+      videoStateSelect.value = "playing";
+      applyVideoState("playing");
+    } else {
+      resetVideoToCurrentState();
+    }
     announce("Cancellation intercept modal opened. Message from Tanner.");
   });
 
@@ -889,7 +914,15 @@
   var fallback = document.getElementById("ic-fallback");
   var playBtn = document.getElementById("ic-play-btn");
   var videoStateSelect = document.getElementById("video-state-select");
+  var autoplayToggle = document.getElementById("autoplay-toggle");
+  var autoplayWarningRow = document.getElementById("autoplay-warning-row");
   var loadTimeoutId = null;
+
+  // Prototype-only: toggling autoplay on/off surfaces the reliability warning
+  // (see BR2 comment above the video area for the full explanation).
+  autoplayToggle.addEventListener("change", function () {
+    autoplayWarningRow.classList.toggle("show", this.checked);
+  });
 
   function clearPendingLoad() {
     if (loadTimeoutId) { clearTimeout(loadTimeoutId); loadTimeoutId = null; }
@@ -983,6 +1016,8 @@
     document.getElementById("dj-app").style.display = "";
     videoStateSelect.value = "ready";
     applyVideoState("ready");
+    autoplayToggle.checked = false;
+    autoplayWarningRow.classList.remove("show");
     userDropdown.classList.remove("open");
     userTrigger.setAttribute("aria-expanded", "false");
     window.scrollTo(0, 0);
