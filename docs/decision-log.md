@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-16] Cancellation Intercept Modal: Drive embed actually autoplays now (ticket 86bbah6jq)
+
+- Decision: The video area was already loading the real Drive iframe on Play (or immediately on modal open, with the autoplay toggle on), but the embed itself still sat paused on its first frame until the user clicked Play a second time inside Drive's own player. Added `?autoplay=1` to the Drive `/preview` embed URL, which is Google's (undocumented but widely used) signal for the embed to start itself. This applies to both paths: the standard Play-button flow now starts playing on the first click instead of needing a second click inside Drive's UI, and the autoplay-on-open demo toggle now genuinely starts Tanner talking as soon as the video loads, no click at all.
+- Why: Direct report that the autoplay toggle loaded the video but didn't actually start playing it.
+- Open question: This doesn't change the reliability caveat already flagged (and shown in the demo banner's autoplay warning): browsers can still decline to honor autoplay-with-sound in a cross-origin embed, so production should treat this as a best-effort request, not a guarantee, same as before.
+
 ## [2026-09-16] Cancellation Intercept Modal: toggleable autoplay-on-open variant for comparison (ticket 86bbah6jq)
 
 - Decision: Added a "Autoplay video on modal open" demo-banner toggle (off by default, so the shipped poster + Play button behavior is unchanged) that starts the real video the instant the intercept modal opens instead of waiting for Play. Enabling it reveals an inline warning in the demo banner: this loads a cross-origin Google Drive iframe, and browsers are inconsistent about honoring autoplay-with-sound in a freshly embedded cross-origin player even right after a genuine user click, so production could end up silently muted or not playing at all. This is a prototype-only comparison tool, not a proposed default; Reset flow clears the toggle and warning back to off.
