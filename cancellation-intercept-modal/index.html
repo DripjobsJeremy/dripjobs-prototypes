@@ -294,12 +294,15 @@
     font-size: 11.5px; color: var(--st-color-text-muted); line-height: 1.5;
   }
   .ic-playback-help.show { display: block; }
-  .ic-playback-help button {
+
+  /* Shared inline text-link button, used by the playback safety net above and
+     the BR7 retry action below. */
+  .ic-inline-action-btn {
     background: none; border: none; padding: 0; margin-left: 4px; font: inherit;
     color: var(--st-color-primary-active); font-weight: 600; cursor: pointer; text-decoration: underline;
   }
-  .ic-playback-help button:hover { color: var(--st-color-primary-hover); }
-  .ic-playback-help button:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .ic-inline-action-btn:hover { color: var(--st-color-primary-hover); }
+  .ic-inline-action-btn:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
 
   /* Video load-failure fallback (BR7) */
   .ic-fallback { display: none; margin: 0 26px 18px; }
@@ -667,14 +670,14 @@
            user stuck looking at a video that isn't doing anything. -->
       <div class="ic-playback-help" id="ic-playback-help">
         Your browser may have had trouble starting this automatically.
-        <button type="button" id="ic-playback-help-btn">Click play</button>
+        <button type="button" id="ic-playback-help-btn" class="ic-inline-action-btn">Click play</button>
       </div>
 
       <!-- Load-failure fallback state (BR7) -->
       <div class="ic-fallback" id="ic-fallback">
         <div class="ic-fallback-notice">
           <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-          <span>This video couldn't load, but here's Tanner's message.</span>
+          <span>This video couldn't load, but here's Tanner's message. Your browser may have had trouble loading it — <button type="button" id="ic-fallback-retry-btn" class="ic-inline-action-btn">click play</button> to try again.</span>
         </div>
         <div class="ic-fallback-message" style="position:relative;">
           <div class="ic-tanner-avatar" style="width:44px; height:44px; font-size:16px; flex:0 0 auto;" aria-hidden="true">T</div>
@@ -957,6 +960,7 @@
   var icSubheading = document.getElementById("ic-subheading");
   var playbackHelp = document.getElementById("ic-playback-help");
   var playbackHelpBtn = document.getElementById("ic-playback-help-btn");
+  var fallbackRetryBtn = document.getElementById("ic-fallback-retry-btn");
   var loadTimeoutId = null;
 
   // Copy: the poster+Play default invites the user to start the video themselves,
@@ -1017,6 +1021,14 @@
     videoStateSelect.value = "ready";
     applyVideoState("ready");
     announce("Returned to the play button.");
+  });
+
+  // BR7 retry: gives the load-failure screen a way to try the real video again,
+  // instead of only offering the Schedule a Call / email Tanner path.
+  fallbackRetryBtn.addEventListener("click", function () {
+    videoStateSelect.value = "playing";
+    applyVideoState("playing");
+    announce("Trying to play the video again.");
   });
 
   // Stops the video when the user takes one of the three modal actions. Drive's

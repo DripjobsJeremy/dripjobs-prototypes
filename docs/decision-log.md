@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-16] Cancellation Intercept Modal: added a retry to the BR7 load-failure screen too (ticket 86bbah6jq)
+
+- Decision: Clarified which screen the "click play" helper text from the prior session was meant for, since there are two distinct failure states in this build: the persistent safety net under an actually-loaded video (for a silently-blocked autoplay), and the separate BR7 "couldn't load at all" screen (network/genuine failure, Tanner photo + message + mailto, no video to click play on today). Jeremy confirmed both: added a "click play to try again" retry action to the BR7 screen's notice as well, which re-attempts loading the real video (same path as the video-state select's "Playing" option) rather than only offering Schedule a Call / email Tanner. Pulled the shared inline text-link button style into one `.ic-inline-action-btn` class used by both.
+- Why: Direct clarification and follow-up request.
+- Open question: None.
+
 ## [2026-09-16] Cancellation Intercept Modal: autoplay is now the default, with a persistent fallback affordance (ticket 86bbah6jq)
 
 - Decision: Jeremy asked to make the autoplay variant the default and, if the browser was inconsistent and the video didn't play, fall back to the already-built poster + Play screen with reassuring helper text ("Your browser may have had issues loading the message, click play"). Flagged a real constraint first: the Drive `/preview` embed gives no signal that distinguishes "loaded and actually playing" from "loaded but the browser silently blocked autoplay," so a conditionally-triggered fallback isn't technically possible here. Built the closest honest equivalent instead: the autoplay toggle now defaults to checked (autoplay-on-open is the shipped behavior, using the "a word from Tanner" copy variant), and a small "Your browser may have had trouble starting this automatically. Click play" line is always shown under the video for as long as it's in the playing state, not just when something's confirmed wrong. Clicking it resets to the poster and a guaranteed manual Play click. The demo toggle now works in reverse: unchecking it previews the previous manual-Play-required flow for comparison, and Reset flow returns to the new default (checked).
