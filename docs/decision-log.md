@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-16] Cancellation Intercept Modal: pause on every exit path, fixed the demo banner covering the modal heading (ticket 86bbah6jq)
+
+- Decision: Two fixes. First, the video-pause behavior only covered the 3 action buttons, not the X close, backdrop click, or Escape (BR8's "return to Subscription Details" exit); all of those now call the same `pauseVideo()`, so the video stops however the user navigates away, autoplay or not. Second, once the demo banner grew to two rows (plus the autoplay warning), it was tall enough to render on top of the modal's heading/subheading, since the modal was a `position:fixed` full-viewport overlay centered against the whole browser window rather than the space below the header bars, and the banner's z-index (raised in an earlier fix so its own controls stay clickable over an open modal) meant it drew over that top portion. Fixed the same way as `ai-drip-message-writing`'s equivalent bug: wrapped `#dj-app`, the modal overlays, and the cancellation page in a `#main-area` region (`flex:1` below the proto bar and demo banner in the body's column layout), switched the modals from `position:fixed` to `position:absolute` confined within it, and removed the now-unneeded z-index bump on the demo banner, since the modal can no longer spatially reach behind it.
+- Why: Direct reports of both issues.
+- Open question: None.
+
 ## [2026-09-16] Cancellation Intercept Modal: separate heading copy for the autoplay variant (ticket 86bbah6jq)
 
 - Decision: Jeremy supplied revised copy for when the autoplay demo toggle is on: "Before you cancel, a word from Tanner" / "DripJobs' founder has a personal message for you." (swapped from "hear from Tanner" / "wanted to leave you a personal message first," since the default copy invites the user to press play, which reads oddly once the video is already talking on load). Wired both heading and subheading to swap live with the toggle, holding correctly while the modal is open and resetting to the default copy on Reset flow, same two-line structure and length as the original so neither variant needs layout changes.
