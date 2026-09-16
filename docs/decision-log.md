@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-16] Cancellation Intercept Modal: separate heading copy for the autoplay variant (ticket 86bbah6jq)
+
+- Decision: Jeremy supplied revised copy for when the autoplay demo toggle is on: "Before you cancel, a word from Tanner" / "DripJobs' founder has a personal message for you." (swapped from "hear from Tanner" / "wanted to leave you a personal message first," since the default copy invites the user to press play, which reads oddly once the video is already talking on load). Wired both heading and subheading to swap live with the toggle, holding correctly while the modal is open and resetting to the default copy on Reset flow, same two-line structure and length as the original so neither variant needs layout changes.
+- Why: Direct request, with copy supplied.
+- Open question: None, copy confirmed by Jeremy.
+
 ## [2026-09-16] Cancellation Intercept Modal: Drive embed actually autoplays now (ticket 86bbah6jq)
 
 - Decision: The video area was already loading the real Drive iframe on Play (or immediately on modal open, with the autoplay toggle on), but the embed itself still sat paused on its first frame until the user clicked Play a second time inside Drive's own player. Added `?autoplay=1` to the Drive `/preview` embed URL, which is Google's (undocumented but widely used) signal for the embed to start itself. This applies to both paths: the standard Play-button flow now starts playing on the first click instead of needing a second click inside Drive's UI, and the autoplay-on-open demo toggle now genuinely starts Tanner talking as soon as the video loads, no click at all.

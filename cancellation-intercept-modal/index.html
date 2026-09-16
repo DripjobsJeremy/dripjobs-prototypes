@@ -607,7 +607,7 @@
 
       <div class="ic-header">
         <h2 class="ic-heading" id="ic-heading">Before you cancel, hear from Tanner</h2>
-        <p class="ic-subheading">DripJobs' founder wanted to leave you a personal message first.</p>
+        <p class="ic-subheading" id="ic-subheading">DripJobs' founder wanted to leave you a personal message first.</p>
       </div>
 
       <!-- Working video state (BR2: real Google Drive asset, plays inline in this modal).
@@ -916,12 +916,35 @@
   var videoStateSelect = document.getElementById("video-state-select");
   var autoplayToggle = document.getElementById("autoplay-toggle");
   var autoplayWarningRow = document.getElementById("autoplay-warning-row");
+  var icHeading = document.getElementById("ic-heading");
+  var icSubheading = document.getElementById("ic-subheading");
   var loadTimeoutId = null;
 
+  // Copy: the poster+Play default invites the user to start the video themselves,
+  // "hear from Tanner" / "wanted to leave you a message." Once autoplay starts it
+  // for them, that framing reads oddly against a video that's already talking, so
+  // the autoplay variant swaps to present-tense, no-action-implied copy instead.
+  var HEADING_COPY = {
+    "default": "Before you cancel, hear from Tanner",
+    "autoplay": "Before you cancel, a word from Tanner"
+  };
+  var SUBHEADING_COPY = {
+    "default": "DripJobs' founder wanted to leave you a personal message first.",
+    "autoplay": "DripJobs' founder has a personal message for you."
+  };
+
+  function updateInterceptCopy() {
+    var variant = autoplayToggle.checked ? "autoplay" : "default";
+    icHeading.textContent = HEADING_COPY[variant];
+    icSubheading.textContent = SUBHEADING_COPY[variant];
+  }
+
   // Prototype-only: toggling autoplay on/off surfaces the reliability warning
-  // (see BR2 comment above the video area for the full explanation).
+  // (see BR2 comment above the video area for the full explanation) and swaps
+  // the heading/subheading copy to match.
   autoplayToggle.addEventListener("change", function () {
     autoplayWarningRow.classList.toggle("show", this.checked);
+    updateInterceptCopy();
   });
 
   function clearPendingLoad() {
@@ -1018,6 +1041,7 @@
     applyVideoState("ready");
     autoplayToggle.checked = false;
     autoplayWarningRow.classList.remove("show");
+    updateInterceptCopy();
     userDropdown.classList.remove("open");
     userTrigger.setAttribute("aria-expanded", "false");
     window.scrollTo(0, 0);
