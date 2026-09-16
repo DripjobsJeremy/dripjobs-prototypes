@@ -26,7 +26,13 @@
     --st-teal:                 #0DCECE;
   }
 
-  body { font-family: 'DM Sans', sans-serif; background: #F3F1FC; color: var(--st-color-text); }
+  html, body { height: 100%; }
+  body { font-family: 'DM Sans', sans-serif; background: #F3F1FC; color: var(--st-color-text); display: flex; flex-direction: column; min-height: 100vh; }
+  /* Everything below the proto bar + demo banner. Modals are confined to this
+     region (not the full viewport) so a tall demo banner can never render on
+     top of a centered modal's heading; flex:1 lets it fill any leftover
+     viewport height even when #dj-app's own content is shorter. */
+  #main-area { position: relative; flex: 1 1 auto; }
   button { font-family: inherit; }
   a { color: var(--st-color-primary-active); }
 
@@ -62,7 +68,7 @@
   #demo-banner {
     background: #1E2433; color: #fff; padding: 10px 16px;
     display: flex; flex-direction: column; gap: 8px; font-size: 12.5px;
-    border-bottom: 3px solid var(--st-color-primary); position: relative; z-index: 200;
+    border-bottom: 3px solid var(--st-color-primary); position: relative;
   }
   #demo-banner .demo-banner-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
   #demo-banner .demo-title { font-weight: 700; letter-spacing: 0.2px; white-space: nowrap; }
@@ -164,7 +170,7 @@
      MODAL OVERLAY SYSTEM
      ══════════════════════════════════════════════ */
   .modal-overlay {
-    position: fixed; inset: 0; background: rgba(30,36,51,0.55);
+    position: absolute; inset: 0; background: rgba(30,36,51,0.55);
     display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px;
   }
   .modal-overlay.open { display: flex; }
@@ -421,6 +427,8 @@
     <span>Autoplay preview only, not a confirmed production behavior. This loads a cross-origin Google Drive iframe; browsers are inconsistent about honoring autoplay-with-sound in a freshly embedded cross-origin player, even right after a genuine user click. In production this could silently play muted, or not play at all, which is worse than the reliable poster + Play button state.</span>
   </div>
 </div>
+
+<div id="main-area">
 
 <div id="dj-app">
 
@@ -740,6 +748,8 @@
     </div>
   </div>
 
+</div>
+
 <div aria-live="polite" class="sr-only" id="live-region"></div>
 
 <script>
@@ -794,6 +804,7 @@
   });
   document.getElementById("intercept-modal").addEventListener("click", function (e) {
     if (e.target === this) {
+      pauseVideo();
       closeOverlay("intercept-modal");
       openOverlay("subscription-details-modal");
       announce("Returned to Subscription Details. No cancellation was made.");
@@ -860,6 +871,7 @@
 
   // BR8: Intercept modal close (X) returns one level to Subscription Details, no cancellation
   document.getElementById("intercept-close-x").addEventListener("click", function () {
+    pauseVideo();
     closeOverlay("intercept-modal");
     openOverlay("subscription-details-modal");
     announce("Returned to Subscription Details. No cancellation was made.");
