@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-16] Hub: removed the stale "Holiday Calendar Display (post release update)" card
+
+- Decision: Removed the `#protoGrid` card pointing at `holiday-calendar-display/` and ticket 86bbrazc3. That card was a leftover from a separate 2026-09-02 session that had repointed the original shipped 86bbc0rvr prototype to 86bbrazc3 in place, independently of the same day's other session which built a brand-new `holiday-calendar-independent-controls/` (later renamed `holiday-calendar-company-wide/`) prototype for the same ticket lineage. Since 86bbrazc3 is being closed and superseded by 86bbv6zhh, and Jeremy confirmed `holiday-calendar-company-wide/` (linked to 86bbv6zhh) is the current one, the duplicate card is gone rather than repointed, `holiday-calendar-display/` stays on disk unlinked from the hub as the as-built record of the original shipped 86bbc0rvr feature.
+- Why: Direct request after flagging the duplicate/stale card discovered while merging the 86bbv6zhh rework.
+- Open question: None.
+
 ## [2026-09-16] Cancellation Intercept Modal: added a retry to the BR7 load-failure screen too (ticket 86bbah6jq)
 
 - Decision: Clarified which screen the "click play" helper text from the prior session was meant for, since there are two distinct failure states in this build: the persistent safety net under an actually-loaded video (for a silently-blocked autoplay), and the separate BR7 "couldn't load at all" screen (network/genuine failure, Tanner photo + message + mailto, no video to click play on today). Jeremy confirmed both: added a "click play to try again" retry action to the BR7 screen's notice as well, which re-attempts loading the real video (same path as the video-state select's "Playing" option) rather than only offering Schedule a Call / email Tanner. Pulled the shared inline text-link button style into one `.ic-inline-action-btn` class used by both.
