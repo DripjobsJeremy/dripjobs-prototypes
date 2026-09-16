@@ -287,6 +287,20 @@
   .ic-video-playing .ic-video-frame { display: block; }
   .ic-video-frame iframe { width: 100%; height: 100%; border: none; display: block; }
 
+  /* Persistent "not playing?" safety net (see markup comment above for why this
+     can't be conditional). Deliberately quiet, not an alarm. */
+  .ic-playback-help {
+    display: none; margin: -8px 26px 16px; text-align: center;
+    font-size: 11.5px; color: var(--st-color-text-muted); line-height: 1.5;
+  }
+  .ic-playback-help.show { display: block; }
+  .ic-playback-help button {
+    background: none; border: none; padding: 0; margin-left: 4px; font: inherit;
+    color: var(--st-color-primary-active); font-weight: 600; cursor: pointer; text-decoration: underline;
+  }
+  .ic-playback-help button:hover { color: var(--st-color-primary-hover); }
+  .ic-playback-help button:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+
   /* Video load-failure fallback (BR7) */
   .ic-fallback { display: none; margin: 0 26px 18px; }
   .ic-fallback.show { display: block; }
@@ -411,20 +425,20 @@
       </select>
     </div>
     <label class="toggle-label">
-      <input type="checkbox" id="autoplay-toggle" />
-      Autoplay video on modal open
+      <input type="checkbox" id="autoplay-toggle" checked />
+      Autoplay video on modal open (default)
     </label>
     <label class="toggle-label">
       <input type="checkbox" id="br-toggle" />
       Show business-rule annotations
     </label>
     <span class="spacer"></span>
-    <span class="demo-note">Flow: profile menu &rarr; Manage Billing &rarr; Subscription Details &rarr; Cancel Subscription. Modal shows on every attempt.</span>
+    <span class="demo-note">Flow: profile menu &rarr; Manage Billing &rarr; Subscription Details &rarr; Cancel Subscription. Modal shows on every attempt. Uncheck autoplay to compare the previous manual Play flow.</span>
     <button class="reset-btn" id="reset-demo-btn" type="button">Reset flow</button>
   </div>
   <div class="demo-warning-row" id="autoplay-warning-row" role="alert">
     <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-    <span>Autoplay preview only, not a confirmed production behavior. This loads a cross-origin Google Drive iframe; browsers are inconsistent about honoring autoplay-with-sound in a freshly embedded cross-origin player, even right after a genuine user click. In production this could silently play muted, or not play at all, which is worse than the reliable poster + Play button state.</span>
+    <span>Autoplay is the shipped default here, but this loads a cross-origin Google Drive iframe, and browsers are inconsistent about honoring autoplay-with-sound in a freshly embedded cross-origin player, even right after a genuine user click. There's no reliable way to detect a silent block from this embed, so the "Your browser may have had trouble&hellip; Click play" safety net below the video is always shown while it's playing, not just when something's confirmed wrong.</span>
   </div>
 </div>
 
@@ -643,6 +657,17 @@
         <span class="br-chip" style="top:8px; left:8px;" tabindex="0" aria-label="Business rule 2 detail">2
           <span class="br-tooltip"><b>BR2</b>Confirmed source: Google Drive (real asset embedded here). Must play inline in this modal, the user never navigates away from DripJobs. The frame.io link in the ticket is a dev-side fallback approach only, not a second source presented to the user.</span>
         </span>
+      </div>
+
+      <!-- Persistent autoplay safety net, shown the whole time the real Drive player is
+           up. A cross-origin Drive /preview embed has no scriptable playback API, so
+           there is no way to detect "loaded fine but the browser silently blocked
+           autoplay" versus "actually playing" and conditionally show this only on
+           failure; it's always available instead, so a silent block never leaves the
+           user stuck looking at a video that isn't doing anything. -->
+      <div class="ic-playback-help" id="ic-playback-help">
+        Your browser may have had trouble starting this automatically.
+        <button type="button" id="ic-playback-help-btn">Click play</button>
       </div>
 
       <!-- Load-failure fallback state (BR7) -->
@@ -930,6 +955,8 @@
   var autoplayWarningRow = document.getElementById("autoplay-warning-row");
   var icHeading = document.getElementById("ic-heading");
   var icSubheading = document.getElementById("ic-subheading");
+  var playbackHelp = document.getElementById("ic-playback-help");
+  var playbackHelpBtn = document.getElementById("ic-playback-help-btn");
   var loadTimeoutId = null;
 
   // Copy: the poster+Play default invites the user to start the video themselves,
@@ -958,6 +985,10 @@
     autoplayWarningRow.classList.toggle("show", this.checked);
     updateInterceptCopy();
   });
+  // Sync the warning row + copy to the toggle's default (checked) state on load,
+  // since it starts checked in markup and "change" only fires on user interaction.
+  autoplayWarningRow.classList.toggle("show", autoplayToggle.checked);
+  updateInterceptCopy();
 
   function clearPendingLoad() {
     if (loadTimeoutId) { clearTimeout(loadTimeoutId); loadTimeoutId = null; }
@@ -967,6 +998,7 @@
     clearPendingLoad();
     videoArea.classList.remove("ic-video-loading", "ic-video-playing", "state-failed");
     fallback.classList.remove("show");
+    playbackHelp.classList.remove("show");
     videoFrame.innerHTML = "";
 
     if (state === "failed") {
@@ -977,6 +1009,15 @@
     }
     // "ready" = default poster state, nothing extra needed
   }
+
+  // "Not playing?" safety net click: falls back to a guaranteed, direct user
+  // gesture on the poster's own Play button, which is never subject to the
+  // cross-origin autoplay ambiguity above.
+  playbackHelpBtn.addEventListener("click", function () {
+    videoStateSelect.value = "ready";
+    applyVideoState("ready");
+    announce("Returned to the play button.");
+  });
 
   // Stops the video when the user takes one of the three modal actions. Drive's
   // /preview embed exposes no scriptable pause command, so the closest real
@@ -1012,6 +1053,7 @@
       clearPendingLoad();
       videoArea.classList.remove("ic-video-loading");
       videoArea.classList.add("ic-video-playing");
+      playbackHelp.classList.add("show");
       announce("Playing Tanner's message.");
     });
     videoFrame.appendChild(iframe);
@@ -1051,8 +1093,8 @@
     document.getElementById("dj-app").style.display = "";
     videoStateSelect.value = "ready";
     applyVideoState("ready");
-    autoplayToggle.checked = false;
-    autoplayWarningRow.classList.remove("show");
+    autoplayToggle.checked = true;
+    autoplayWarningRow.classList.add("show");
     updateInterceptCopy();
     userDropdown.classList.remove("open");
     userTrigger.setAttribute("aria-expanded", "false");
