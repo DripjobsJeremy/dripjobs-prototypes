@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Address Line 2 Entry Points - DripJobs</title>
+<style>
+  :root{
+    --st-color-primary:        #8B85EA;
+    --st-color-primary-hover:  #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb:    139, 133, 234;
+    --st-color-text:           #32415B;
+    --st-color-text-muted:     #80879A;
+    --st-color-border:         #DAD8E3;
+    --teal:                    #0DCECE;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  /* Stack the hub proto bar, the demo control banner, and the stage as flex
+     items that always add up to exactly one viewport, matching the pattern
+     used by other prototypes with their own demo banner (e.g.
+     ai-drip-message-writing), instead of a fixed banner + padding-offset hack. */
+  body{
+    font-family: Calibri, Nunito, -apple-system, "Segoe UI", Arial, sans-serif;
+    color:var(--st-color-text);
+    background:#3B3F46;
+    display:flex; flex-direction:column; height:100vh; overflow:hidden;
+  }
+
+  /* ===== Hub proto bar (standard hub nav, matches _template/index.html) ===== */
+  .proto-bar{
+    flex-shrink:0;
+    background:#fff; border-bottom:1px solid #DAD8E3;
+    padding:12px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    font-family: Nunito, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  .proto-bar-left{ display:flex; align-items:center; gap:10px; }
+  .proto-bar .back-link{
+    font-size:12px; font-weight:500; color:var(--st-color-text-muted);
+    text-decoration:none; display:flex; align-items:center; gap:4px; transition:color .15s;
+  }
+  .proto-bar .back-link:hover{ color:var(--st-color-primary); }
+  .proto-bar .divider{ color:var(--st-color-border); font-size:16px; }
+  .proto-bar-title{ font-size:14px; font-weight:600; color:var(--st-color-text); }
+  .proto-bar-ticket{
+    font-size:11px; font-weight:600; color:var(--st-color-primary); text-decoration:none;
+    padding:4px 10px; border:1px solid #D6D2F5; background:#E8E6FA;
+    border-radius:999px; letter-spacing:.2px;
+  }
+  .proto-bar-ticket:hover{ background:var(--st-color-primary); color:#fff; }
+
+  /* ===== Demo control banner (outside prototype chrome) ===== */
+  .demo-banner{
+    flex-shrink:0;
+    background:#1F2430; color:#fff;
+    padding:10px 16px;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    font-size:12.5px;
+    border-bottom:1px solid #33394a;
+  }
+  .demo-banner .demo-title{font-weight:700; font-size:12px; color:#B9B4F5; margin-right:6px; white-space:nowrap;}
+  .demo-banner button{
+    background:#2B3140; color:#E7E7F0; border:1px solid #454C5F;
+    border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:600;
+    cursor:pointer; white-space:nowrap;
+  }
+  .demo-banner button:hover{ background:#374057; }
+  .demo-banner button.active{ background:var(--st-color-primary); border-color:var(--st-color-primary); color:#fff; }
+  .demo-banner button:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  .demo-toggle-wrap{
+    margin-left:auto; display:flex; align-items:center; gap:8px;
+    background:#2B3140; border:1px solid #454C5F; border-radius:999px; padding:6px 12px;
+    white-space:nowrap;
+  }
+  .demo-toggle-wrap label{ cursor:pointer; display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; }
+  .demo-scope-note{
+    width:100%; font-size:11.5px; color:#9AA1B4; padding-top:2px; line-height:1.5;
+  }
+  .demo-scope-note b{ color:#D8D6F7; }
+
+  /* mini switch used only in the demo banner itself */
+  .mini-switch{ position:relative; display:inline-flex; width:34px; height:18px; flex:none; }
+  .mini-switch input{ position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
+  .mini-switch .track{ position:absolute; inset:0; background:#555C70; border-radius:999px; transition:.15s; }
+  .mini-switch .track::after{ content:""; position:absolute; top:2px; left:2px; width:14px; height:14px; background:#fff; border-radius:50%; transition:.15s; }
+  .mini-switch input:checked ~ .track{ background:var(--teal); }
+  .mini-switch input:checked ~ .track::after{ left:18px; }
+  .mini-switch input:focus-visible ~ .track{ box-shadow:0 0 0 3px rgba(13,206,206,.4); }
+
+  /* ===== Stage ===== */
+  .stage{
+    flex:1 1 auto; overflow-y:auto;
+    padding:40px 20px 60px;
+    display:flex; justify-content:center; align-items:flex-start;
+  }
+  .stage.stage--booking{ background:#F4F5F9; }
+
+  /* ===== Modal shell (matches production New Lead / New Proposal / New Appointment modals) ===== */
+  .proto-modal{ display:none; }
+  .proto-modal.is-active{ display:block; }
+  .proto-modal-card{
+    background:#fff; width:548px; max-width:100%;
+    border-radius:10px; box-shadow:0 24px 60px rgba(0,0,0,.35);
+    overflow:hidden;
+  }
+  .proto-modal-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; border-bottom:1px solid #EDEBF6;
+  }
+  .proto-modal-header h1{ font-size:16px; font-weight:700; margin:0; color:var(--st-color-text); }
+  .proto-modal-close{
+    background:none; border:none; font-size:16px; line-height:1; color:var(--st-color-text-muted);
+    width:32px; height:32px; border-radius:6px; cursor:pointer;
+  }
+  .proto-modal-close:hover{ background:#F3F2FA; }
+  .proto-modal-close:focus-visible{ outline:2px solid var(--st-color-primary); outline-offset:1px; }
+  .proto-modal-body{ padding:18px 20px; max-height:76vh; overflow-y:auto; }
+  .proto-modal-footer{
+    display:flex; justify-content:flex-end; gap:10px;
+    padding:14px 20px; border-top:1px solid #EDEBF6; background:#FAFAFC;
+  }
+
+  /* ===== Section card ===== */
+  .proto-section{
+    background:#F7F7FB; border:1px solid #EFEEF6; border-radius:8px;
+    padding:14px 16px; margin-bottom:14px;
+  }
+  .proto-section:last-child{ margin-bottom:0; }
+  .proto-section-title{
+    display:flex; align-items:center; gap:7px;
+    font-size:11px; font-weight:700; letter-spacing:0.4px; text-transform:uppercase;
+    color:var(--st-color-text-muted); margin:0 0 12px 0;
+  }
+  .proto-icon{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+
+  /* ===== Fields ===== */
+  .proto-field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+  .proto-field-row:last-child{ margin-bottom:0; }
+  .proto-field-row.triple{ grid-template-columns:1.3fr .85fr .85fr; }
+  .proto-field{ display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .proto-field.full{ grid-column:1 / -1; }
+  .proto-field label{ font-size:12px; font-weight:600; color:var(--st-color-text-muted); display:flex; align-items:center; gap:4px; }
+  .proto-field label .req{ color:#DC2626; }
+  .proto-field input,
+  .proto-field select,
+  .proto-field textarea{
+    height:40px; border:1px solid var(--st-color-border); border-radius:6px;
+    padding:0 12px; font-size:13.5px; font-family:inherit; color:var(--st-color-text); background:#fff; width:100%;
+  }
+  .proto-field textarea{ height:auto; min-height:64px; padding:9px 12px; resize:vertical; }
+  .proto-field input::placeholder, .proto-field textarea::placeholder{ color:#B7BAC6; }
+  .proto-field input:focus, .proto-field select:focus, .proto-field textarea:focus{
+    outline:none; border-color:var(--st-color-primary); box-shadow:0 0 0 3px rgba(var(--st-color-primary-rgb),.18);
+  }
+  .proto-field select{ appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2380879A' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat:no-repeat; background-position:right 10px center; background-size:14px; padding-right:30px; }
+
+  /* row with two toggles side by side, e.g. Reminders / Communication */
+  .proto-toggle-pair{ display:flex; justify-content:space-between; gap:16px; }
+  .toggle-row{ display:flex; align-items:center; gap:10px; cursor:pointer; }
+  .toggle-row span{ font-size:13px; font-weight:600; color:var(--st-color-text); }
+  .proto-toggle{ position:relative; display:inline-flex; width:38px; height:20px; flex:none; }
+  .proto-toggle input{ position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; }
+  .proto-toggle .track{ position:absolute; inset:0; background:var(--st-color-border); border-radius:999px; transition:.15s; }
+  .proto-toggle .track::after{ content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; background:#fff; border-radius:50%; box-shadow:0 1px 2px rgba(0,0,0,.25); transition:.15s; }
+  .proto-toggle input:checked ~ .track{ background:var(--st-color-primary); }
+  .proto-toggle input:checked ~ .track::after{ left:20px; }
+  .proto-toggle input:focus-visible ~ .track{ box-shadow:0 0 0 3px rgba(var(--st-color-primary-rgb),.35); }
+
+  .field-locked-note{
+    font-size:11px; color:var(--st-color-text-muted); background:#F1F1F6; border-radius:6px;
+    padding:6px 8px; margin:0 0 6px 0; line-height:1.4;
+  }
+  .field-helper-note{
+    font-size:11px; color:var(--st-color-text-muted); margin:6px 0 0 0; line-height:1.4;
+  }
+  select:disabled{ background:#F1F1F6; color:var(--st-color-text-muted); cursor:not-allowed; }
+
+  .proto-inline-note{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:#F0FAFA; border-left:4px solid var(--teal); border-radius:0 6px 6px 0;
+    padding:8px 12px; font-size:12px; color:var(--st-color-text); margin-bottom:12px;
+  }
+
+  /* ===== Buttons ===== */
+  .btn{ font-size:13.5px; font-weight:700; border-radius:8px; padding:0 18px; height:40px; cursor:pointer; border:1px solid transparent; }
+  .btn-primary{ background:var(--st-color-primary); color:#fff; }
+  .btn-primary:hover{ background:var(--st-color-primary-hover); }
+  .btn-outline{ background:#fff; color:var(--st-color-text); border-color:var(--st-color-border); }
+  .btn-outline:hover{ background:#F7F7FB; }
+  .btn:focus-visible{ outline:2px solid var(--st-color-primary-active); outline-offset:2px; }
+
+  /* ===== New-field emphasis + BR annotation chip (toggleable) ===== */
+  .proto-field.is-new{ position:relative; }
+  .new-badge{
+    display:none;
+    font-size:9px; font-weight:800; letter-spacing:.4px; color:#0B8F8F;
+    background:#E6FAFA; border:1px solid #BEF0F0; border-radius:4px;
+    padding:1px 6px; text-transform:uppercase;
+  }
+  body.show-annotations .proto-field.is-new .new-badge{ display:inline-block; }
+  body.show-annotations .proto-field.is-new input{
+    border-color:var(--teal); box-shadow:0 0 0 3px rgba(13,206,206,.14);
+  }
+
+  .br-chip{
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:9.5px; font-weight:800; color:#fff; background:var(--st-color-primary-active);
+    border-radius:999px; padding:1px 7px; cursor:help; position:relative; line-height:1.5;
+    border:none;
+  }
+  body:not(.show-annotations) .br-chip{ display:none; }
+  .br-chip .tip{
+    display:none; position:absolute; bottom:135%; left:50%; transform:translateX(-50%);
+    width:230px; background:#1F2430; color:#fff; font-size:11px; font-weight:400; line-height:1.45;
+    padding:9px 11px; border-radius:7px; box-shadow:0 10px 28px rgba(0,0,0,.35); z-index:80; text-align:left;
+    white-space:normal;
+  }
+  .br-chip:hover .tip, .br-chip:focus-visible .tip{ display:block; }
+  .br-chip:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+
+  body.show-annotations .settings-field.is-new .new-badge,
+  body.show-annotations .cs-display-item.is-new .new-badge{ display:inline-block; }
+  body.show-annotations .settings-field.is-new .settings-field-input{
+    border-color:var(--teal); box-shadow:0 0 0 3px rgba(13,206,206,.14);
+  }
+
+  /* ===== Company Settings (settings-page pattern) ===== */
+  #company-settings-page{
+    max-width:1180px; width:100%; margin:0 auto; color:var(--st-color-text); font-size:14px;
+    background:#fff; border-radius:10px; padding:22px; box-shadow:0 20px 60px rgba(0,0,0,.25);
+  }
+  .cs-view-toggle{ display:inline-flex; border:1px solid var(--st-color-border); border-radius:999px; padding:3px; margin-bottom:18px; }
+  .cs-view-btn{ background:none; border:none; border-radius:999px; padding:6px 16px; font-size:12.5px; font-weight:700; color:var(--st-color-text-muted); cursor:pointer; }
+  .cs-view-btn.active{ background:var(--st-color-primary); color:#fff; }
+  .cs-view-btn:focus-visible{ outline:2px solid var(--st-color-primary-active); outline-offset:2px; }
+
+  .settings-section{ background:#fff; border:1px solid var(--st-color-border); border-radius:10px; padding:18px; margin-bottom:18px; }
+  .settings-section:last-child{ margin-bottom:0; }
+  .settings-section-title{ font-size:14px; font-weight:600; margin:0 0 14px 0; }
+  .settings-section-subtitle{ font-size:12px; color:var(--st-color-text-muted); margin:-8px 0 14px 0; }
+  .settings-grid{ display:grid; grid-template-columns:1fr; gap:18px 14px; }
+  @media (min-width:576px){ .settings-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (min-width:992px){
+    .settings-grid{ grid-template-columns:repeat(6,1fr); }
+    .settings-field{ grid-column:span 2; }
+    .settings-field--full{ grid-column:1 / -1; }
+    .settings-field--compact{ grid-column:span 2; max-width:180px; }
+  }
+  .settings-field{ position:relative; display:flex; flex-direction:column; }
+  .settings-field-label{
+    position:absolute; top:-8px; left:10px; background:#fff; padding:0 6px;
+    font-size:11px; font-weight:500; color:var(--st-color-text-muted); z-index:1; pointer-events:none; letter-spacing:.2px;
+    display:flex; align-items:center; gap:4px;
+  }
+  .settings-field-label.is-required::after{ content:" *"; color:#DC2626; }
+  .settings-field-input{
+    height:40px; padding:0 14px; border:1px solid var(--st-color-border); border-radius:8px;
+    font-size:14px; background:#fff; width:100%; color:var(--st-color-text); font-family:inherit;
+  }
+  .settings-field-input:focus{ outline:none; border-color:var(--st-color-primary); box-shadow:0 0 0 3px rgba(var(--st-color-primary-rgb),.18); }
+  .settings-field-input:disabled{ background:#F1F1F6; color:var(--st-color-text-muted); cursor:not-allowed; }
+  .settings-field-group{ position:relative; display:flex; align-items:center; border:1px solid var(--st-color-border); border-radius:8px; overflow:hidden; }
+  .settings-field-group:focus-within{ border-color:var(--st-color-primary); box-shadow:0 0 0 3px rgba(var(--st-color-primary-rgb),.18); }
+  .settings-field-group .settings-field-input{ border:none; height:38px; }
+  .settings-field-group-suffix{ padding:0 12px; font-size:13px; color:var(--st-color-text-muted); border-left:1px solid var(--st-color-border); height:38px; display:flex; align-items:center; }
+  .cs-helper-text{ font-size:12px; color:var(--st-color-text-muted); margin:8px 0 0 0; }
+  .cs-subsection-label{ font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--st-color-text-muted); margin:0 0 12px 0; }
+  .settings-checkbox-row{
+    display:inline-flex; align-items:center; gap:8px; background:#F7F7FB; border:1px solid var(--st-color-border);
+    border-radius:8px; padding:8px 12px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:16px;
+  }
+  .settings-checkbox-row input{ accent-color:var(--st-color-primary); width:15px; height:15px; }
+  .settings-alert{ display:flex; align-items:flex-start; gap:10px; border-radius:8px; padding:10px 12px; font-size:13px; margin-top:12px; }
+  .settings-alert--info-brand{ background:#E8E6FA; border:1px solid #D6D2F5; color:#5C53DC; }
+  .cs-actions{ display:flex; gap:10px; padding-top:4px; }
+
+  .cs-display-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:18px 20px; }
+  .cs-display-item{ display:flex; flex-direction:column; gap:4px; }
+  .cs-display-label{ font-size:11px; font-weight:500; letter-spacing:.5px; text-transform:uppercase; color:var(--st-color-text-muted); display:flex; align-items:center; gap:4px; }
+  .cs-display-value{ font-size:16px; font-weight:600; color:var(--st-color-text); }
+
+  /* ===== Booking form (public, non-modal) ===== */
+  .proto-booking{ width:520px; max-width:100%; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,.12); }
+  .booking-logo{ text-align:center; padding:22px 20px 6px; }
+  .booking-logo .brand{ font-size:19px; font-weight:800; color:#5C2CE0; letter-spacing:.2px; }
+  .booking-logo .brand-sub{ font-size:10px; color:#9C8FE0; letter-spacing:.5px; text-transform:uppercase; }
+  .booking-hero{
+    background:linear-gradient(135deg,#6A3FE0,#5228C7);
+    color:#fff; padding:16px 22px 18px; margin:10px 20px 0; border-radius:10px;
+  }
+  .booking-hero h2{ font-size:15px; margin:0 0 4px; font-weight:700; }
+  .booking-hero p{ font-size:12.5px; margin:0; opacity:.9; }
+  .booking-body{ padding:20px 22px 24px; }
+  .booking-step{ display:flex; align-items:center; gap:8px; margin:18px 0 12px; }
+  .booking-step:first-child{ margin-top:6px; }
+  .booking-step .num{
+    width:20px; height:20px; border-radius:50%; background:#5C2CE0; color:#fff;
+    font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .booking-step .label{ font-size:13.5px; font-weight:700; color:var(--st-color-text); }
+  .booking-field{ margin-bottom:14px; }
+  .booking-field label{ display:flex; gap:4px; font-size:12px; font-weight:600; color:var(--st-color-text-muted); margin-bottom:5px; }
+  .booking-field label .req{ color:#DC2626; }
+  .booking-field input, .booking-field textarea{
+    width:100%; height:42px; border:1px solid var(--st-color-border); border-radius:8px;
+    padding:0 13px; font-size:13.5px; font-family:inherit; color:var(--st-color-text);
+  }
+  .booking-field textarea{ height:auto; min-height:80px; padding:10px 13px; resize:vertical; }
+  .booking-field input:focus, .booking-field textarea:focus{
+    outline:none; border-color:#5C2CE0; box-shadow:0 0 0 3px rgba(92,44,224,.16);
+  }
+  .booking-row{ display:flex; gap:12px; }
+  .booking-row .booking-field{ flex:1; min-width:0; }
+  .booking-submit{
+    width:100%; height:44px; border-radius:8px; border:none; background:#5C2CE0; color:#fff;
+    font-size:14px; font-weight:700; margin-top:6px; cursor:pointer;
+  }
+  .booking-submit:focus-visible{ outline:2px solid #1F2430; outline-offset:2px; }
+
+  @media (max-width: 640px){
+    .demo-banner .demo-title{ display:none; }
+  }
+</style>
+</head>
+<body class="show-annotations">
+
+<!-- Icon sprite -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="icon-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></symbol>
+  <symbol id="icon-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></symbol>
+  <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></symbol>
+  <symbol id="icon-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.6 7-12a7 7 0 10-14 0c0 5.4 7 12 7 12z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+  <symbol id="icon-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+  <symbol id="icon-droplet" viewBox="0 0 24 24"><path d="M12 2s7 8 7 13a7 7 0 11-14 0c0-5 7-13 7-13z"/></symbol>
+  <symbol id="icon-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 21c0-3.5 3-5.6 6.5-5.6s6.5 2.1 6.5 5.6"/><circle cx="17" cy="8.5" r="2.6"/><path d="M15.5 15.7c2.7.4 5 2.3 5 5.3"/></symbol>
+  <symbol id="icon-doc" viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3"/></symbol>
+</svg>
+
+<!-- ===== Hub proto bar ===== -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">&larr; Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Address Line 2: Company Settings + Job/Appointment Address Display</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/86bbwn0r2" target="_blank">86bbwn0r2</a>
+</div>
+
+<!-- ===== Demo control banner ===== -->
+<div class="demo-banner">
+  <span class="demo-title">Ticket 86bbwn0r2 — Address Line 2</span>
+  <button type="button" data-target="lead" class="active">New Lead</button>
+  <button type="button" data-target="proposal">New Proposal</button>
+  <button type="button" data-target="onsite">New On-Site Estimate</button>
+  <button type="button" data-target="other">New Appointment (Other)</button>
+  <button type="button" data-target="booking">Booking Form</button>
+  <button type="button" data-target="company">Company Settings</button>
+  <div class="demo-toggle-wrap">
+    <label>
+      <span class="mini-switch">
+        <input type="checkbox" id="annotationToggle" checked aria-label="Show BR annotations">
+        <span class="track"></span>
+      </span>
+      Show BR chips
+    </label>
+  </div>
+  <div class="demo-scope-note">
+    Scope: <b>BR1–BR8</b> shown here — Company Settings (BR1–BR3) plus the four Job/Appointment entry points (BR4–BR7), including the Addresses On File auto-populate + save-as-new-address behavior confirmed for all four. BR9–BR13 (display parity elsewhere, PDFs, {job-location}/{appointment-location} keywords, Zapier) are display-only / backend and already confirmed working in current production per the ticket — not rebuilt in this prototype.
+  </div>
+</div>
+
+<div class="stage" id="stage">
+
+  <!-- ===================== NEW LEAD ===================== -->
+  <div class="proto-modal is-active" data-screen="lead">
+    <div class="proto-modal-card">
+      <div class="proto-modal-header">
+        <h1>New Lead</h1>
+        <button type="button" class="proto-modal-close" aria-label="Close">✕</button>
+      </div>
+      <div class="proto-modal-body">
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#3AA76D"><use href="#icon-user"/></svg>Contact Information</p>
+          <div class="proto-field-row">
+            <div class="proto-field full">
+              <label for="lead-contact">Contact</label>
+              <select id="lead-contact">
+                <option value="new" selected>New Contact</option>
+                <option value="existing">Dripjobs Harrison</option>
+              </select>
+            </div>
+          </div>
+          <div class="proto-field-row">
+            <div class="proto-field"><label for="lead-fn">First Name</label><input id="lead-fn" placeholder="Enter a first name"></div>
+            <div class="proto-field"><label for="lead-ln">Last Name</label><input id="lead-ln" placeholder="Enter a last name"></div>
+          </div>
+          <div class="proto-field-row">
+            <div class="proto-field"><label for="lead-email">E-mail</label><input id="lead-email" placeholder="Enter an email"></div>
+            <div class="proto-field"><label for="lead-phone">Phone</label><input id="lead-phone" placeholder="Enter a phone number"></div>
+          </div>
+          <div class="proto-field-row">
+            <div class="proto-field">
+              <label for="lead-source">Lead Source <span class="req">*</span></label>
+              <p id="lead-source-note" class="field-locked-note" style="display:none;">Lead source is set on the contact record and cannot be changed when starting a new lead.</p>
+              <select id="lead-source">
+                <option value="">Select a lead source...</option>
+                <option value="special">Special Event</option>
+              </select>
+            </div>
+            <div class="proto-field"><label for="lead-dealname">Deal Name</label><input id="lead-dealname" placeholder="Give this job a unique name..."></div>
+          </div>
+          <div class="proto-field-row">
+            <div class="proto-field full"><label for="lead-stage">Stage</label><select id="lead-stage"><option>Cold Leads</option></select></div>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:var(--teal)"><use href="#icon-droplet"/></svg>Drips</p>
+          <label class="toggle-row" style="justify-content:space-between; width:100%;">
+            <span>Disable</span>
+            <span class="proto-toggle"><input type="checkbox" aria-label="Disable drips"><span class="track"></span></span>
+          </label>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#E07C3A"><use href="#icon-pin"/></svg>Job Address</p>
+
+          <div id="lead-addr-plain">
+            <div class="proto-field-row">
+              <div class="proto-field full">
+                <label for="lead-addr1">Address Line 1</label>
+                <input id="lead-addr1" placeholder="Enter address line 1">
+              </div>
+            </div>
+            <div class="proto-field-row">
+              <div class="proto-field full is-new">
+                <label for="lead-addr2">Address Line 2 <span class="new-badge">New</span><span class="br-chip" tabindex="0">BR7<span class="tip">BR7. New Lead must include an optional Address Line 2 field in the Job Address section, positioned between Address Line 1 and City.</span></span></label>
+                <input id="lead-addr2" placeholder="Apt, suite, etc. (optional)">
+              </div>
+            </div>
+            <div class="proto-field-row triple">
+              <div class="proto-field"><label for="lead-city">City</label><input id="lead-city" placeholder="Enter city"></div>
+              <div class="proto-field"><label for="lead-state">State</label><input id="lead-state" placeholder="Enter state"></div>
+              <div class="proto-field"><label for="lead-zip">Zip</label><input id="lead-zip" placeholder="Enter zip"></div>
+            </div>
+          </div>
+
+          <div id="lead-addr-onfile" style="display:none;">
+            <div class="proto-field-row">
+              <div class="proto-field full">
+                <label for="lead-onfile-select">Addresses On File</label>
+                <select id="lead-onfile-select">
+                  <option value="new">+ Add New Address</option>
+                  <option value="gaRental" selected>GA Rental - 2630 Sam Nelson Rd, Canton, Georgia, 30114</option>
+                  <option value="flHome">FL Home - 221 N Nashville Ave, Hernando, FL, 34442</option>
+                  <option value="dallas">6789 Hiram Acworth Hwy, Dallas, GA 30157</option>
+                </select>
+                <p class="field-helper-note">Pick an address already on this contact's record, or leave + Add New Address selected and type a different one below.</p>
+                <div class="proto-inline-note" id="lead-newaddr-note" style="display:none;">This doesn't match an address on file — it'll be saved as a new address on this contact's record.</div>
+              </div>
+            </div>
+            <div class="proto-field-row">
+              <div class="proto-field full">
+                <label for="lead-onfile-addr1">Address Line 1</label>
+                <input id="lead-onfile-addr1" placeholder="Enter address line 1">
+              </div>
+            </div>
+            <div class="proto-field-row">
+              <div class="proto-field full is-new">
+                <label for="lead-onfile-addr2">Address Line 2 <span class="new-badge">New</span><span class="br-chip" tabindex="0">BR7<span class="tip">BR7. New Lead must include an optional Address Line 2 field in the Job Address section, positioned between Address Line 1 and City. Edge case: when an address is selected from Addresses On File that includes Line 2, the Job address inherits Line 2 at selection time. Per 86bbrc11c: editing any field afterward (incl. Line 2) so it no longer matches the stored record saves it as a new address on the contact, not an overwrite — e.g. Building B + Unit 1B / Unit 2B become distinct saved addresses.</span></span></label>
+                <input id="lead-onfile-addr2" placeholder="Apt, suite, etc. (optional)">
+              </div>
+            </div>
+            <div class="proto-field-row triple">
+              <div class="proto-field"><label for="lead-onfile-city">City</label><input id="lead-onfile-city" placeholder="Enter city"></div>
+              <div class="proto-field"><label for="lead-onfile-state">State</label><input id="lead-onfile-state" placeholder="Enter state"></div>
+              <div class="proto-field"><label for="lead-onfile-zip">Zip</label><input id="lead-onfile-zip" placeholder="Enter zip"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#8B85EA"><use href="#icon-users"/></svg>Assignment</p>
+          <div class="proto-field-row">
+            <div class="proto-field"><label for="lead-sales">Salesperson</label><select id="lead-sales"><option>Jeremy Harrison</option></select></div>
+            <div class="proto-field"><label for="lead-pm">Project Manager</label><select id="lead-pm"><option>Select a project manager...</option></select></div>
+          </div>
+        </div>
+
+      </div>
+      <div class="proto-modal-footer">
+        <button type="button" class="btn btn-outline">Close</button>
+        <button type="button" class="btn btn-primary">Start</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== NEW PROPOSAL ===================== -->
+  <div class="proto-modal" data-screen="proposal">
+    <div class="proto-modal-card">
+      <div class="proto-modal-header">
+        <h1>New Proposal</h1>
+        <button type="button" class="proto-modal-close" aria-label="Close">✕</button>
+      </div>
+      <div class="proto-modal-body">
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#5C53DC"><use href="#icon-doc"/></svg>Template</p>
+          <div class="proto-field-row">
+            <div class="proto-field full"><label for="prop-template">Proposal Template</label><select id="prop-template"><option>CMC Exterior — Standard (Default)</option></select></div>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#3AA76D"><use href="#icon-user"/></svg>Contact Information</p>
+          <div class="proto-field-row">
+            <div class="proto-field full">
+              <label for="prop-contact">Contact</label>
+              <select id="prop-contact">
+                <option value="new" selected>New Contact</option>
+                <option value="existing">Dripjobs Harrison</option>
+              </select>
+            </div>
+          </div>
+          <div class="proto-field-row">
+            <div class="proto-field"><label for="prop-fn">First Name</label><input id="prop-fn" placeholder="Enter a first name"></div>
+            <div class="proto-field"><label for="prop-ln">Last Name</label><input id="prop-ln" placeholder="Enter a last name"></div>
+          </div>
+          <div class="proto-field-row">
+            <div class="proto-field"><label for="prop-email">E-mail</label><input id="prop-email" placeholder="Enter an email"></div>
+            <div class="proto-field"><label for="prop-phone">Phone</label><input id="prop-phone" placeholder="Enter a phone number"></div>
+          </div>
+          <div class="proto-field-row">
+            <div class="proto-field">
+              <label for="prop-source">Lead Source <span class="req">*</span></label>
+              <p id="prop-source-note" class="field-locked-note" style="display:none;">Lead source is set on the contact record and cannot be changed when starting a new lead.</p>
+              <select id="prop-source">
+                <option value="">Select a lead source...</option>
+                <option value="special">Special Event</option>
+              </select>
+            </div>
+            <div class="proto-field"><label for="prop-dealname">Deal Name</label><input id="prop-dealname" placeholder="Give this job a unique name..."></div>
+          </div>
+          <div class="proto-field-row">
+            <div class="proto-field full"><label for="prop-stage">Stage</label><input id="prop-stage" value="In Draft" readonly></div>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:var(--teal)"><use href="#icon-droplet"/></svg>Drips</p>
+          <label class="toggle-row" style="justify-content:space-between; width:100%;">
+            <span>Disable</span>
+            <span class="proto-toggle"><input type="checkbox" aria-label="Disable drips"><span class="track"></span></span>
+          </label>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#E07C3A"><use href="#icon-pin"/></svg>Job Address</p>
+
+          <!-- Manual entry state: shown for a brand-new contact (no addresses on file yet) -->
+          <div id="prop-addr-plain">
+            <div class="proto-field-row">
+              <div class="proto-field full">
+                <label for="prop-addr1">Address Line 1</label>
+                <input id="prop-addr1" placeholder="Enter address line 1">
+              </div>
+            </div>
+            <div class="proto-field-row">
+              <div class="proto-field full is-new">
+                <label for="prop-addr2">Address Line 2 <span class="new-badge">New</span><span class="br-chip" tabindex="0">BR4<span class="tip">BR4. New Proposal must include an optional Address Line 2 field in the Job Address section, positioned between Address Line 1 and City.</span></span></label>
+                <input id="prop-addr2" placeholder="Apt, suite, etc. (optional)">
+              </div>
+            </div>
+            <div class="proto-field-row triple">
+              <div class="proto-field"><label for="prop-city">City</label><input id="prop-city" placeholder="Enter city"></div>
+              <div class="proto-field"><label for="prop-state">State</label><input id="prop-state" placeholder="Enter state"></div>
+              <div class="proto-field"><label for="prop-zip">Zip</label><input id="prop-zip" placeholder="Enter zip"></div>
+            </div>
+          </div>
+
+          <!-- Addresses On File state: shown when the selected contact has one or more saved addresses.
+               Address field auto-populates with the contact's Primary Address. -->
+          <div id="prop-addr-onfile" style="display:none;">
+            <div class="proto-field-row">
+              <div class="proto-field full">
+                <label for="prop-onfile-select">Addresses On File</label>
+                <select id="prop-onfile-select">
+                  <option value="new">+ Add New Address</option>
+                  <option value="gaRental" selected>GA Rental - 2630 Sam Nelson Rd, Canton, Georgia, 30114</option>
+                  <option value="flHome">FL Home - 221 N Nashville Ave, Hernando, FL, 34442</option>
+                  <option value="dallas">6789 Hiram Acworth Hwy, Dallas, GA 30157</option>
+                </select>
+                <p class="field-helper-note">Pick an address already on this contact's record, or leave + Add New Address selected and type a different one below.</p>
+                <div class="proto-inline-note" id="prop-newaddr-note" style="display:none;">This doesn't match an address on file — it'll be saved as a new address on this contact's record.</div>
+              </div>
+            </div>
+            <div class="proto-field-row">
+              <div class="proto-field full">
+                <label for="prop-onfile-addr1">Address Line 1</label>
+                <input id="prop-onfile-addr1" placeholder="Enter address line 1">
+              </div>
+            </div>
+            <div class="proto-field-row">
+              <div class="proto-field full is-new">
+                <label for="prop-onfile-addr2">Address Line 2 <span class="new-badge">New</span><span class="br-chip" tabindex="0">BR4<span class="tip">BR4. New Proposal must include an optional Address Line 2 field in the Job Address section, positioned between Address Line 1 and City. Edge case: when an address is selected from Addresses On File that includes Line 2, the Job address inherits Line 2 at selection time. Per 86bbrc11c: editing any field afterward (incl. Line 2) so it no longer matches the stored record saves it as a new address on the contact, not an overwrite — e.g. Building B + Unit 1B / Unit 2B become distinct saved addresses.</span></span></label>
+                <input id="prop-onfile-addr2" placeholder="Apt, suite, etc. (optional)">
+              </div>
+            </div>
+            <div class="proto-field-row triple">
+              <div class="proto-field"><label for="prop-onfile-city">City</label><input id="prop-onfile-city" placeholder="Enter city"></div>
+              <div class="proto-field"><label for="prop-onfile-state">State</label><input id="prop-onfile-state" placeholder="Enter state"></div>
+              <div class="proto-field"><label for="prop-onfile-zip">Zip</label><input id="prop-onfile-zip" placeholder="Enter zip"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#8B85EA"><use href="#icon-users"/></svg>Assignment</p>
+          <div class="proto-field-row">
+            <div class="proto-field"><label for="prop-sales">Salesperson</label><select id="prop-sales"><option>Jeremy Harrison</option></select></div>
+            <div class="proto-field"><label for="prop-pm">Project Manager</label><select id="prop-pm"><option>Select a project manager...</option></select></div>
+          </div>
+        </div>
+
+      </div>
+      <div class="proto-modal-footer">
+        <button type="button" class="btn btn-outline">Close</button>
+        <button type="button" class="btn btn-primary">Start</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== NEW ON-SITE ESTIMATE ===================== -->
+  <div class="proto-modal" data-screen="onsite">
+    <div class="proto-modal-card">
+      <div class="proto-modal-header">
+        <h1>New On-Site Estimate</h1>
+        <button type="button" class="proto-modal-close" aria-label="Close">✕</button>
+      </div>
+      <div class="proto-modal-body">
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#8B85EA"><use href="#icon-calendar"/></svg>Event Details</p>
+          <div class="proto-field-row">
+            <div class="proto-field"><label for="os-color">Event Color</label><select id="os-color"><option>Purple</option></select></div>
+            <div class="proto-field"><label for="os-assign">Assign To</label><select id="os-assign"><option>Jeremy Harrison</option></select></div>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#3F8FE0"><use href="#icon-clock"/></svg>Schedule</p>
+          <div class="proto-field-row triple">
+            <div class="proto-field"><label for="os-date">Scheduled Date</label><input id="os-date" value="09/17/2026"></div>
+            <div class="proto-field"><label for="os-start">Start Time</label><input id="os-start" value="07:00 AM"></div>
+            <div class="proto-field"><label for="os-end">End Time</label><input id="os-end" value="08:00 AM"></div>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#D99A2B"><use href="#icon-bell"/></svg>Reminders</p>
+          <div class="proto-toggle-pair">
+            <label class="toggle-row"><span>Email</span><span class="proto-toggle"><input type="checkbox" checked aria-label="Email reminder"><span class="track"></span></span></label>
+            <label class="toggle-row"><span>SMS</span><span class="proto-toggle"><input type="checkbox" checked aria-label="SMS reminder"><span class="track"></span></span></label>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#3AA76D"><use href="#icon-user"/></svg>Contact</p>
+          <div class="proto-field-row">
+            <div class="proto-field">
+              <label for="os-contact">Contact</label>
+              <select id="os-contact">
+                <option value="new" selected>New Contact</option>
+                <option value="existing">Dripjobs Harrison</option>
+              </select>
+            </div>
+            <div class="proto-field"><label for="os-dealname">Deal Name</label><input id="os-dealname" placeholder="Deal Name"></div>
+          </div>
+          <div class="proto-field-row" id="os-source-row">
+            <div class="proto-field full"><label for="os-source">Lead Source</label><select id="os-source"><option>Select a lead source...</option></select></div>
+          </div>
+          <div class="proto-field-row">
+            <div class="proto-field"><label for="os-fn">First Name</label><input id="os-fn" placeholder="First Name"></div>
+            <div class="proto-field"><label for="os-ln">Last Name</label><input id="os-ln" placeholder="Last Name"></div>
+          </div>
+          <div class="proto-field-row">
+            <div class="proto-field"><label for="os-email">E-mail</label><input id="os-email" placeholder="E-Mail Address"></div>
+            <div class="proto-field"><label for="os-phone">Phone</label><input id="os-phone" placeholder="Phone Number"></div>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#E07C3A"><use href="#icon-pin"/></svg>Appointment Address</p>
+
+          <div id="os-addr-plain">
+            <div class="proto-field-row">
+              <div class="proto-field full">
+                <label for="os-addr1">Address Line 1</label>
+                <input id="os-addr1" placeholder="Address Line 1">
+              </div>
+            </div>
+            <div class="proto-field-row">
+              <div class="proto-field full is-new">
+                <label for="os-addr2">Address Line 2 <span class="new-badge">New</span><span class="br-chip" tabindex="0">BR5<span class="tip">BR5. New On Site Estimate (New/Edit Appointment &gt; On Site Estimate) must include an optional Address Line 2 field in the Appointment Address section, positioned between Address Line 1 and City.</span></span></label>
+                <input id="os-addr2" placeholder="Apt, suite, etc. (optional)">
+              </div>
+            </div>
+            <div class="proto-field-row triple">
+              <div class="proto-field"><label for="os-city">City</label><input id="os-city" placeholder="City"></div>
+              <div class="proto-field"><label for="os-state">State</label><input id="os-state" placeholder="State"></div>
+              <div class="proto-field"><label for="os-zip">Zip</label><input id="os-zip" placeholder="Zip"></div>
+            </div>
+          </div>
+
+          <div id="os-addr-onfile" style="display:none;">
+            <div class="proto-field-row">
+              <div class="proto-field full">
+                <label for="os-onfile-select">Addresses On File</label>
+                <select id="os-onfile-select">
+                  <option value="new">+ Add New Address</option>
+                  <option value="gaRental" selected>GA Rental - 2630 Sam Nelson Rd, Canton, Georgia, 30114</option>
+                  <option value="flHome">FL Home - 221 N Nashville Ave, Hernando, FL, 34442</option>
+                  <option value="dallas">6789 Hiram Acworth Hwy, Dallas, GA 30157</option>
+                </select>
+                <p class="field-helper-note">Pick an address already on this contact's record, or leave + Add New Address selected and type a different one below.</p>
+                <div class="proto-inline-note" id="os-newaddr-note" style="display:none;">This doesn't match an address on file — it'll be saved as a new address on this contact's record.</div>
+              </div>
+            </div>
+            <div class="proto-field-row">
+              <div class="proto-field full">
+                <label for="os-onfile-addr1">Address Line 1</label>
+                <input id="os-onfile-addr1" placeholder="Address Line 1">
+              </div>
+            </div>
+            <div class="proto-field-row">
+              <div class="proto-field full is-new">
+                <label for="os-onfile-addr2">Address Line 2 <span class="new-badge">New</span><span class="br-chip" tabindex="0">BR5<span class="tip">BR5. New On Site Estimate must include an optional Address Line 2 field in the Appointment Address section, positioned between Address Line 1 and City. Edge case: when an address is selected from Addresses On File that includes Line 2, the Appointment address inherits Line 2 at selection time. Per 86bbrc11c: editing any field afterward (incl. Line 2) so it no longer matches the stored record saves it as a new address on the contact, not an overwrite — e.g. Building B + Unit 1B / Unit 2B become distinct saved addresses.</span></span></label>
+                <input id="os-onfile-addr2" placeholder="Apt, suite, etc. (optional)">
+              </div>
+            </div>
+            <div class="proto-field-row triple">
+              <div class="proto-field"><label for="os-onfile-city">City</label><input id="os-onfile-city" placeholder="City"></div>
+              <div class="proto-field"><label for="os-onfile-state">State</label><input id="os-onfile-state" placeholder="State"></div>
+              <div class="proto-field"><label for="os-onfile-zip">Zip</label><input id="os-onfile-zip" placeholder="Zip"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title">Appointment Details</p>
+          <div class="proto-field-row">
+            <div class="proto-field full"><textarea placeholder="Enter details about this appointment..."></textarea></div>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#D9518B"><use href="#icon-mail"/></svg>Communication</p>
+          <div class="proto-toggle-pair">
+            <label class="toggle-row"><span>Send Email</span><span class="proto-toggle"><input type="checkbox" checked aria-label="Send email"><span class="track"></span></span></label>
+            <label class="toggle-row"><span>Send SMS</span><span class="proto-toggle"><input type="checkbox" checked aria-label="Send SMS"><span class="track"></span></span></label>
+          </div>
+        </div>
+
+      </div>
+      <div class="proto-modal-footer">
+        <button type="button" class="btn btn-outline">Close</button>
+        <button type="button" class="btn btn-primary">Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== NEW APPOINTMENT — OTHER (Project Walkthrough) ===================== -->
+  <div class="proto-modal" data-screen="other">
+    <div class="proto-modal-card">
+      <div class="proto-modal-header">
+        <h1>New Project Walkthrough</h1>
+        <button type="button" class="proto-modal-close" aria-label="Close">✕</button>
+      </div>
+      <div class="proto-modal-body">
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#3255C7"><use href="#icon-calendar"/></svg>Event Details</p>
+          <div class="proto-field-row">
+            <div class="proto-field"><label for="ot-color">Event Color</label><select id="ot-color"><option>Dark Blue</option></select></div>
+            <div class="proto-field"><label for="ot-assign">Assign To</label><select id="ot-assign"><option>Jeremy Harrison</option></select></div>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#3F8FE0"><use href="#icon-clock"/></svg>Schedule</p>
+          <div class="proto-field-row triple">
+            <div class="proto-field"><label for="ot-date">Date</label><input id="ot-date" value="09/17/2026"></div>
+            <div class="proto-field"><label for="ot-start">Start Time</label><input id="ot-start" value="07:00 AM"></div>
+            <div class="proto-field"><label for="ot-end">End Time</label><input id="ot-end" value="07:30 AM"></div>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#D99A2B"><use href="#icon-bell"/></svg>Reminders</p>
+          <div class="proto-toggle-pair">
+            <label class="toggle-row"><span>Email</span><span class="proto-toggle"><input type="checkbox" aria-label="Email reminder"><span class="track"></span></span></label>
+            <label class="toggle-row"><span>SMS</span><span class="proto-toggle"><input type="checkbox" aria-label="SMS reminder"><span class="track"></span></span></label>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#3AA76D"><use href="#icon-user"/></svg>Contact</p>
+          <div class="proto-field-row">
+            <div class="proto-field full">
+              <label for="ot-contact">Contact</label>
+              <select id="ot-contact">
+                <option value="new" selected>New Contact</option>
+                <option value="existing">Dripjobs Harrison</option>
+              </select>
+            </div>
+          </div>
+          <div class="proto-field-row">
+            <div class="proto-field"><label for="ot-fn">First Name</label><input id="ot-fn" placeholder="First Name"></div>
+            <div class="proto-field"><label for="ot-ln">Last Name</label><input id="ot-ln" placeholder="Last Name"></div>
+          </div>
+          <div class="proto-field-row">
+            <div class="proto-field"><label for="ot-email">E-mail</label><input id="ot-email" placeholder="E-Mail Address"></div>
+            <div class="proto-field"><label for="ot-phone">Phone</label><input id="ot-phone" placeholder="Phone Number"></div>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#E07C3A"><use href="#icon-pin"/></svg>Appointment Address</p>
+
+          <div id="ot-addr-plain">
+            <div class="proto-field-row">
+              <div class="proto-field full">
+                <label for="ot-street">Street</label>
+                <input id="ot-street" placeholder="Street">
+              </div>
+            </div>
+            <div class="proto-field-row">
+              <div class="proto-field full is-new">
+                <label for="ot-addr2">Address Line 2 <span class="new-badge">New</span><span class="br-chip" tabindex="0">BR6<span class="tip">BR6. New/Edit Appointment for other/custom appointment types (e.g. Project Walkthrough) must include an optional Address Line 2 field in the Appointment Address section, positioned between Street and City.</span></span></label>
+                <input id="ot-addr2" placeholder="Apt, suite, etc. (optional)">
+              </div>
+            </div>
+            <div class="proto-field-row triple">
+              <div class="proto-field"><label for="ot-city">City</label><input id="ot-city" placeholder="City"></div>
+              <div class="proto-field"><label for="ot-state">State</label><input id="ot-state" placeholder="State"></div>
+              <div class="proto-field"><label for="ot-postal">Postal Code</label><input id="ot-postal" placeholder="Postal Code"></div>
+            </div>
+          </div>
+
+          <div id="ot-addr-onfile" style="display:none;">
+            <div class="proto-field-row">
+              <div class="proto-field full">
+                <label for="ot-onfile-select">Addresses On File</label>
+                <select id="ot-onfile-select">
+                  <option value="new">+ Add New Address</option>
+                  <option value="gaRental" selected>GA Rental - 2630 Sam Nelson Rd, Canton, Georgia, 30114</option>
+                  <option value="flHome">FL Home - 221 N Nashville Ave, Hernando, FL, 34442</option>
+                  <option value="dallas">6789 Hiram Acworth Hwy, Dallas, GA 30157</option>
+                </select>
+                <p class="field-helper-note">Pick an address already on this contact's record, or leave + Add New Address selected and type a different one below.</p>
+                <div class="proto-inline-note" id="ot-newaddr-note" style="display:none;">This doesn't match an address on file — it'll be saved as a new address on this contact's record.</div>
+              </div>
+            </div>
+            <div class="proto-field-row">
+              <div class="proto-field full">
+                <label for="ot-onfile-addr1">Address Line 1</label>
+                <input id="ot-onfile-addr1" placeholder="Enter address line 1">
+              </div>
+            </div>
+            <div class="proto-field-row">
+              <div class="proto-field full is-new">
+                <label for="ot-onfile-addr2">Address Line 2 <span class="new-badge">New</span><span class="br-chip" tabindex="0">BR6<span class="tip">BR6. New/Edit Appointment for other/custom appointment types must include an optional Address Line 2 field in the Appointment Address section, positioned between Street and City. Edge case: when an address is selected from Addresses On File that includes Line 2, the Appointment address inherits Line 2 at selection time. Per 86bbrc11c: editing any field afterward (incl. Line 2) so it no longer matches the stored record saves it as a new address on the contact, not an overwrite — e.g. Building B + Unit 1B / Unit 2B become distinct saved addresses.</span></span></label>
+                <input id="ot-onfile-addr2" placeholder="Apt, suite, etc. (optional)">
+              </div>
+            </div>
+            <div class="proto-field-row triple">
+              <div class="proto-field"><label for="ot-onfile-city">City</label><input id="ot-onfile-city" placeholder="City"></div>
+              <div class="proto-field"><label for="ot-onfile-state">State</label><input id="ot-onfile-state" placeholder="State"></div>
+              <div class="proto-field"><label for="ot-onfile-zip">Postal Code</label><input id="ot-onfile-zip" placeholder="Postal Code"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title">Appointment Details</p>
+          <div class="proto-field-row">
+            <div class="proto-field full"><textarea placeholder="Enter details about this appointment..."></textarea></div>
+          </div>
+        </div>
+
+        <div class="proto-section">
+          <p class="proto-section-title"><svg class="proto-icon" style="color:#D9518B"><use href="#icon-mail"/></svg>Communication</p>
+          <div class="proto-toggle-pair">
+            <label class="toggle-row"><span>Send Email</span><span class="proto-toggle"><input type="checkbox" aria-label="Send email"><span class="track"></span></span></label>
+            <label class="toggle-row"><span>Send SMS</span><span class="proto-toggle"><input type="checkbox" aria-label="Send SMS"><span class="track"></span></span></label>
+          </div>
+        </div>
+
+      </div>
+      <div class="proto-modal-footer">
+        <button type="button" class="btn btn-outline">Close</button>
+        <button type="button" class="btn btn-primary">Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PUBLIC BOOKING FORM ===================== -->
+  <div class="proto-modal" data-screen="booking">
+    <div class="proto-booking">
+      <div class="booking-logo">
+        <div class="brand">✦ Sparrow's Nest</div>
+        <div class="brand-sub">Creative Colors</div>
+      </div>
+      <div class="booking-hero">
+        <h2>What Can We Do For You?</h2>
+        <p>Tell us what to paint; we'll paint it!</p>
+      </div>
+      <div class="booking-body">
+
+        <div class="booking-step"><span class="num">1</span><span class="label">Contact Information</span></div>
+        <div class="booking-row">
+          <div class="booking-field"><label>First Name <span class="req">*</span></label><input placeholder="First Name"></div>
+          <div class="booking-field"><label>Last Name <span class="req">*</span></label><input placeholder="Last Name"></div>
+        </div>
+        <div class="booking-field"><label>Email Address <span class="req">*</span></label><input placeholder="Your Email Address"></div>
+        <div class="booking-field"><label>Phone Number <span class="req">*</span></label><input placeholder="Your Phone"></div>
+
+        <div class="booking-step"><span class="num">2</span><span class="label">Project Address</span></div>
+        <div class="booking-field"><label>Address <span class="req">*</span></label><input placeholder="Street 1"></div>
+        <div class="booking-field" style="position:relative;">
+          <label style="justify-content:flex-start;">
+            Address Line 2
+            <span class="new-badge" style="display:none;">New</span>
+            <span class="br-chip" tabindex="0" style="display:none;">BR8<span class="tip">BR8. The public Booking Form's Project Address section must include an optional Address Line 2 field, positioned between Address and City.</span></span>
+          </label>
+          <input placeholder="Apt, suite, etc. (optional)">
+        </div>
+        <div class="booking-field"><label>City <span class="req">*</span></label><input placeholder="City"></div>
+        <div class="booking-row">
+          <div class="booking-field"><label>State/Province <span class="req">*</span></label><input placeholder="State"></div>
+          <div class="booking-field"><label>Postal Code <span class="req">*</span></label><input placeholder="Zip"></div>
+        </div>
+
+        <div class="booking-step"><span class="num">3</span><span class="label">Service Details</span></div>
+        <div class="booking-field">
+          <label>Tell us about your project <span class="req">*</span></label>
+          <textarea placeholder="Enter as many details as you can..."></textarea>
+        </div>
+
+        <button type="button" class="booking-submit">Submit Request</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== COMPANY SETTINGS (BR1–BR3) ===================== -->
+  <div class="proto-modal" data-screen="company">
+    <div id="company-settings-page">
+
+      <div class="cs-view-toggle">
+        <button type="button" class="cs-view-btn active" data-view="edit">Edit View</button>
+        <button type="button" class="cs-view-btn" data-view="display">Display View</button>
+      </div>
+
+      <!-- ===== Edit view ===== -->
+      <div id="cs-edit-view">
+
+        <section class="settings-section">
+          <h4 class="settings-section-title">Company Details</h4>
+          <div class="settings-grid">
+            <div class="settings-field"><label class="settings-field-label is-required">Company Name</label><input class="settings-field-input" value="Sparrow's Nest Painting"></div>
+            <div class="settings-field"><label class="settings-field-label is-required">Short Name</label><input class="settings-field-input" value="The Nest"></div>
+            <div class="settings-field"><label class="settings-field-label">Business Type</label><select class="settings-field-input"><option>Painting</option></select></div>
+            <div class="settings-field"><label class="settings-field-label is-required">Time Zone</label><select class="settings-field-input"><option>Eastern Standard Time</option></select></div>
+            <div class="settings-field"><label class="settings-field-label">License Number</label><input class="settings-field-input" value="L987616"></div>
+            <div class="settings-field"><label class="settings-field-label">Phone</label><input class="settings-field-input" value="(555) 555-5555"></div>
+            <div class="settings-field settings-field--compact">
+              <label class="settings-field-label">Tax Rate</label>
+              <div class="settings-field-group"><input class="settings-field-input" value="5.000"><span class="settings-field-group-suffix">%</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h4 class="settings-section-title">Tax Information</h4>
+          <p class="settings-section-subtitle">Your business tax registration number and how it appears on invoices.</p>
+          <div class="settings-grid">
+            <div class="settings-field settings-field--full">
+              <label class="settings-field-label">Tax Registration Number</label>
+              <input class="settings-field-input" value="123456789">
+            </div>
+          </div>
+          <p class="cs-helper-text">Enter your business tax registration number to display it on invoices (e.g., VAT number, GST number, state tax permit).</p>
+
+          <p class="cs-subsection-label" style="margin-top:18px;">Invoice Display Options</p>
+          <label class="toggle-row">
+            <span class="proto-toggle"><input type="checkbox" checked aria-label="Show tax registration number on invoices"><span class="track"></span></span>
+            <span>Show tax registration number on invoices</span>
+          </label>
+          <p class="cs-helper-text">Automatically include your tax registration number on every invoice.</p>
+
+          <div class="settings-alert settings-alert--info-brand">
+            <span aria-hidden="true">✓</span>
+            <div>The label "Tax Reg #:" and your registration number will appear in the company information block at the top of every invoice PDF.</div>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h4 class="settings-section-title">Addresses</h4>
+          <p class="settings-section-subtitle">Where your business is located and where invoices are billed.</p>
+
+          <label class="settings-checkbox-row">
+            <input type="checkbox" id="cs-billing-same" checked>
+            Billing same as physical
+          </label>
+
+          <p class="cs-subsection-label">Physical Address</p>
+          <div class="settings-grid">
+            <div class="settings-field settings-field--full">
+              <label class="settings-field-label">Company Address</label>
+              <input class="settings-field-input" id="cs-phys-addr1" value="1234 Reynolds Rd">
+            </div>
+            <div class="settings-field settings-field--full is-new">
+              <label class="settings-field-label">Address Line 2 <span class="new-badge">New</span><span class="br-chip" tabindex="0">BR1<span class="tip">BR1. Company Settings &gt; Company Information gains an optional Address Line 2 field for both the physical address and the billing address, positioned between Street and City, in both edit and display views.</span></span></label>
+              <input class="settings-field-input" id="cs-phys-addr2" placeholder="Apt, suite, etc. (optional)">
+            </div>
+            <div class="settings-field"><label class="settings-field-label">City</label><input class="settings-field-input" id="cs-phys-city" value="Lakeland"></div>
+            <div class="settings-field"><label class="settings-field-label">State</label><input class="settings-field-input" id="cs-phys-state" value="GA"></div>
+            <div class="settings-field"><label class="settings-field-label">Zip</label><input class="settings-field-input" id="cs-phys-zip" value="33801"></div>
+          </div>
+
+          <p class="cs-subsection-label" style="margin-top:20px;">Billing Address</p>
+          <div class="settings-grid">
+            <div class="settings-field settings-field--full">
+              <label class="settings-field-label">Billing Company Name</label>
+              <input class="settings-field-input billing-address-field" id="cs-bill-company" disabled>
+            </div>
+            <div class="settings-field settings-field--full">
+              <label class="settings-field-label">Billing Address</label>
+              <input class="settings-field-input billing-address-field" id="cs-bill-addr1" value="1234 Reynolds Rd" disabled>
+            </div>
+            <div class="settings-field settings-field--full is-new">
+              <label class="settings-field-label">Address Line 2 <span class="new-badge">New</span><span class="br-chip" tabindex="0">BR1<span class="tip">BR1 (billing). Optional per BR3 — existing records without it are unaffected. Per BR2, wherever this address is displayed or transmitted, Address Line 2 must appear alongside it, including the existing Zapier billing-address payload field.</span></span></label>
+              <input class="settings-field-input billing-address-field" id="cs-bill-addr2" placeholder="Apt, suite, etc. (optional)" disabled>
+            </div>
+            <div class="settings-field"><label class="settings-field-label">City</label><input class="settings-field-input billing-address-field" id="cs-bill-city" value="Lakeland" disabled></div>
+            <div class="settings-field"><label class="settings-field-label">State</label><input class="settings-field-input billing-address-field" id="cs-bill-state" value="GA" disabled></div>
+            <div class="settings-field"><label class="settings-field-label">Zip</label><input class="settings-field-input billing-address-field" id="cs-bill-zip" value="33801" disabled></div>
+          </div>
+        </section>
+
+        <div class="cs-actions">
+          <button type="button" class="btn btn-primary">Save</button>
+          <button type="button" class="btn btn-outline">Cancel - Return to Dashboard</button>
+        </div>
+      </div>
+
+      <!-- ===== Display view — demonstrates BR1's "…in both edit and display views" ===== -->
+      <div id="cs-display-view" style="display:none;">
+
+        <section class="settings-section">
+          <h4 class="settings-section-title">Company Information</h4>
+          <div class="cs-display-grid">
+            <div class="cs-display-item"><span class="cs-display-label">Company Name</span><span class="cs-display-value">Sparrow's Nest Painting</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">Short Name</span><span class="cs-display-value">The Nest</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">Business Type</span><span class="cs-display-value">Painting</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">Time Zone</span><span class="cs-display-value">Eastern Standard Time</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">License Number</span><span class="cs-display-value">L987616</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">Phone</span><span class="cs-display-value">(555) 555-5555</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">Tax Rate</span><span class="cs-display-value">5.000%</span></div>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h4 class="settings-section-title">Tax Information</h4>
+          <div class="cs-display-grid">
+            <div class="cs-display-item"><span class="cs-display-label">Tax Registration Number</span><span class="cs-display-value">123456789</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">Show on Invoices</span><span class="cs-display-value">Yes</span></div>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h4 class="settings-section-title">Addresses</h4>
+
+          <p class="cs-subsection-label">Physical Address</p>
+          <div class="cs-display-grid">
+            <div class="cs-display-item"><span class="cs-display-label">Address</span><span class="cs-display-value" id="cs-disp-phys-addr1">1234 Reynolds Rd</span></div>
+            <div class="cs-display-item is-new"><span class="cs-display-label">Address Line 2 <span class="new-badge">New</span><span class="br-chip" tabindex="0">BR1<span class="tip">BR1. Address Line 2 must appear in the Company Information display view wherever this address is shown, exactly as it does here in the edit view.</span></span></span><span class="cs-display-value" id="cs-disp-phys-addr2">—</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">City</span><span class="cs-display-value" id="cs-disp-phys-city">Lakeland</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">State</span><span class="cs-display-value" id="cs-disp-phys-state">GA</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">Zip</span><span class="cs-display-value" id="cs-disp-phys-zip">33801</span></div>
+          </div>
+
+          <p class="cs-subsection-label" style="margin-top:18px;">Billing Address</p>
+          <div class="cs-display-grid">
+            <div class="cs-display-item"><span class="cs-display-label">Address</span><span class="cs-display-value" id="cs-disp-bill-addr1">1234 Reynolds Rd</span></div>
+            <div class="cs-display-item is-new"><span class="cs-display-label">Address Line 2 <span class="new-badge">New</span><span class="br-chip" tabindex="0">BR1<span class="tip">BR2. Where populated, Address Line 2 on a Company Information address must appear anywhere that address is currently displayed or transmitted — including this display view and the existing Zapier billing-address payload field.</span></span></span><span class="cs-display-value" id="cs-disp-bill-addr2">—</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">City</span><span class="cs-display-value" id="cs-disp-bill-city">Lakeland</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">State</span><span class="cs-display-value" id="cs-disp-bill-state">GA</span></div>
+            <div class="cs-display-item"><span class="cs-display-label">Zip</span><span class="cs-display-value" id="cs-disp-bill-zip">33801</span></div>
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var screens = document.querySelectorAll('.proto-modal');
+  var buttons = document.querySelectorAll('.demo-banner button[data-target]');
+  var stage = document.getElementById('stage');
+  var annotationToggle = document.getElementById('annotationToggle');
+
+  function showScreen(name){
+    screens.forEach(function(s){
+      s.classList.toggle('is-active', s.getAttribute('data-screen') === name);
+    });
+    buttons.forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-target') === name);
+    });
+    stage.classList.toggle('stage--booking', name === 'booking');
+  }
+
+  buttons.forEach(function(b){
+    b.addEventListener('click', function(){ showScreen(b.getAttribute('data-target')); });
+  });
+
+  annotationToggle.addEventListener('change', function(){
+    document.body.classList.toggle('show-annotations', annotationToggle.checked);
+    // booking form's badge/chip are inline-styled (display:none) since they sit outside
+    // the .proto-field.is-new pattern used by the modal screens
+    var bookingExtras = document.querySelectorAll('.proto-modal[data-screen="booking"] .new-badge, .proto-modal[data-screen="booking"] .br-chip');
+    bookingExtras.forEach(function(el){
+      el.style.display = annotationToggle.checked ? (el.classList.contains('br-chip') ? 'inline-flex' : 'inline-block') : 'none';
+    });
+  });
+
+  // initialize booking badge visibility to match default checked state
+  annotationToggle.dispatchEvent(new Event('change'));
+
+  // ---- Shared: existing-contact auto-populate + Addresses On File ----
+  // Used by New Proposal, New Lead, and New On-Site Estimate — all three pull
+  // Job/Appointment Address from the same contact address book once a contact
+  // with saved addresses is selected (per ticket 86bbwn0r2 edge case).
+  var ADDRESS_BOOK = {
+    gaRental: { line1:'2630 Sam Nelson Rd', line2:'', city:'Canton',   state:'Georgia', zip:'30114' },
+    flHome:   { line1:'221 N Nashville Ave', line2:'', city:'Hernando', state:'FL',      zip:'34442' },
+    dallas:   { line1:'6789 Hiram Acworth Hwy', line2:'', city:'Dallas', state:'GA',     zip:'30157' }
+  };
+
+  function applyOnFileAddress(key, fields){
+    if (key === 'new'){
+      fields.addr1.value=''; fields.addr2.value=''; fields.city.value=''; fields.state.value=''; fields.zip.value='';
+      fields.addr1.focus();
+      return;
+    }
+    var a = ADDRESS_BOOK[key];
+    if (!a) return;
+    fields.addr1.value = a.line1;
+    fields.addr2.value = a.line2;
+    fields.city.value  = a.city;
+    fields.state.value = a.state;
+    fields.zip.value   = a.zip;
+  }
+
+  function wireContactAddressToggle(cfg){
+    var contact    = document.getElementById(cfg.contactId);
+    var addrPlain  = document.getElementById(cfg.plainId);
+    var addrOnFile = document.getElementById(cfg.onFileId);
+    var onFileSelect = document.getElementById(cfg.onFileSelectId);
+    var onFileFields = {
+      addr1: document.getElementById(cfg.onFileSelectId.replace('-select','-addr1')),
+      addr2: document.getElementById(cfg.onFileSelectId.replace('-select','-addr2')),
+      city:  document.getElementById(cfg.onFileSelectId.replace('-select','-city')),
+      state: document.getElementById(cfg.onFileSelectId.replace('-select','-state')),
+      zip:   document.getElementById(cfg.onFileSelectId.replace('-select','-zip'))
+    };
+
+    if (!contact || !addrPlain || !addrOnFile || !onFileSelect) return;
+
+    var notePrefix = cfg.onFileSelectId.replace('-onfile-select', '');
+    var newAddrNote = document.getElementById(notePrefix + '-newaddr-note');
+
+    function syncNewAddrNote(){
+      if (newAddrNote) newAddrNote.style.display = (onFileSelect.value === 'new') ? 'flex' : 'none';
+    }
+
+    onFileSelect.addEventListener('change', function(){
+      applyOnFileAddress(this.value, onFileFields);
+      syncNewAddrNote();
+    });
+
+    // If the user hand-edits any field while a saved address is selected, the fields
+    // no longer represent that stored record — flip the selector to "+ Add New Address"
+    // so it's never left silently pointing at an address that no longer matches what's
+    // on screen. Only fires on real user input, not our own programmatic prefill.
+    // Per ticket 86bbrc11c: since the resulting address no longer exactly matches what's
+    // on file, it saves as a NEW address on the contact rather than overwriting the
+    // original — e.g. editing Line 2 to "Apt 3B" on a selected street address keeps that
+    // street's original entry intact and adds a distinct unit-level address alongside it.
+    ['addr1','addr2','city','state','zip'].forEach(function(key){
+      var field = onFileFields[key];
+      if (!field) return;
+      field.addEventListener('input', function(){
+        if (onFileSelect.value !== 'new') onFileSelect.value = 'new';
+        syncNewAddrNote();
+      });
+    });
+
+    contact.addEventListener('change', function(){
+      var isExisting = this.value === 'existing';
+      addrPlain.style.display  = isExisting ? 'none'  : 'block';
+      addrOnFile.style.display = isExisting ? 'block' : 'none';
+
+      if (isExisting){
+        if (cfg.fn) cfg.fn.value = 'Dripjobs';
+        if (cfg.ln) cfg.ln.value = 'Harrison';
+        if (cfg.email) cfg.email.value = 'jeremy+1@dripjobs.com';
+        if (cfg.phone) cfg.phone.value = '(700) 555-0077';
+        if (cfg.dealname) cfg.dealname.value = 'Dripjobs Harrison';
+        if (cfg.onExisting) cfg.onExisting();
+        onFileSelect.value = 'gaRental';                 // contact's Primary Address
+        applyOnFileAddress('gaRental', onFileFields);     // auto-populate on contact selection
+        syncNewAddrNote();
+      } else {
+        if (cfg.fn) cfg.fn.value = '';
+        if (cfg.ln) cfg.ln.value = '';
+        if (cfg.email) cfg.email.value = '';
+        if (cfg.phone) cfg.phone.value = '';
+        if (cfg.dealname) cfg.dealname.value = '';
+        if (cfg.onNew) cfg.onNew();
+      }
+    });
+  }
+
+  // New Proposal — Lead Source stays visible but locked
+  wireContactAddressToggle({
+    contactId: 'prop-contact', plainId: 'prop-addr-plain', onFileId: 'prop-addr-onfile', onFileSelectId: 'prop-onfile-select',
+    fn: document.getElementById('prop-fn'), ln: document.getElementById('prop-ln'),
+    email: document.getElementById('prop-email'), phone: document.getElementById('prop-phone'),
+    dealname: document.getElementById('prop-dealname'),
+    onExisting: function(){
+      var src = document.getElementById('prop-source'), note = document.getElementById('prop-source-note');
+      src.value = 'special'; src.disabled = true; note.style.display = 'block';
+    },
+    onNew: function(){
+      var src = document.getElementById('prop-source'), note = document.getElementById('prop-source-note');
+      src.value = ''; src.disabled = false; note.style.display = 'none';
+    }
+  });
+
+  // New Lead — Lead Source stays visible but locked (same pattern as New Proposal)
+  wireContactAddressToggle({
+    contactId: 'lead-contact', plainId: 'lead-addr-plain', onFileId: 'lead-addr-onfile', onFileSelectId: 'lead-onfile-select',
+    fn: document.getElementById('lead-fn'), ln: document.getElementById('lead-ln'),
+    email: document.getElementById('lead-email'), phone: document.getElementById('lead-phone'),
+    dealname: document.getElementById('lead-dealname'),
+    onExisting: function(){
+      var src = document.getElementById('lead-source'), note = document.getElementById('lead-source-note');
+      src.value = 'special'; src.disabled = true; note.style.display = 'block';
+    },
+    onNew: function(){
+      var src = document.getElementById('lead-source'), note = document.getElementById('lead-source-note');
+      src.value = ''; src.disabled = false; note.style.display = 'none';
+    }
+  });
+
+  // New On-Site Estimate — Lead Source row hides entirely for an existing contact (per screenshot)
+  wireContactAddressToggle({
+    contactId: 'os-contact', plainId: 'os-addr-plain', onFileId: 'os-addr-onfile', onFileSelectId: 'os-onfile-select',
+    fn: document.getElementById('os-fn'), ln: document.getElementById('os-ln'),
+    email: document.getElementById('os-email'), phone: document.getElementById('os-phone'),
+    dealname: document.getElementById('os-dealname'),
+    onExisting: function(){ document.getElementById('os-source-row').style.display = 'none'; },
+    onNew: function(){ document.getElementById('os-source-row').style.display = 'flex'; }
+  });
+
+  // New/Edit Appointment (Other, e.g. Project Walkthrough) — no Lead Source field on this modal at all
+  wireContactAddressToggle({
+    contactId: 'ot-contact', plainId: 'ot-addr-plain', onFileId: 'ot-addr-onfile', onFileSelectId: 'ot-onfile-select',
+    fn: document.getElementById('ot-fn'), ln: document.getElementById('ot-ln'),
+    email: document.getElementById('ot-email'), phone: document.getElementById('ot-phone')
+  });
+
+  // ---- Company Settings (BR1–BR3) ----
+
+  // Edit / Display view toggle
+  var csViewBtns = document.querySelectorAll('.cs-view-btn');
+  var csEditView = document.getElementById('cs-edit-view');
+  var csDisplayView = document.getElementById('cs-display-view');
+  csViewBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      csViewBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var view = btn.getAttribute('data-view');
+      csEditView.style.display = (view === 'edit') ? 'block' : 'none';
+      csDisplayView.style.display = (view === 'display') ? 'block' : 'none';
+    });
+  });
+
+  // Live-sync each edit field to its Display View counterpart, so switching to
+  // Display View demonstrates BR1's "…in both edit and display views" requirement
+  // with whatever the user actually typed (empty Address Line 2 shows the
+  // DripJobs em-dash empty-state convention).
+  function csSyncField(editId, dispId){
+    var editEl = document.getElementById(editId), dispEl = document.getElementById(dispId);
+    if (!editEl || !dispEl) return;
+    function update(){ var v = editEl.value.trim(); dispEl.textContent = v || '—'; }
+    editEl.addEventListener('input', update);
+    update();
+  }
+  ['addr1','addr2','city','state','zip'].forEach(function(key){
+    csSyncField('cs-phys-' + key, 'cs-disp-phys-' + key);
+    csSyncField('cs-bill-' + key, 'cs-disp-bill-' + key);
+  });
+
+  // Billing same as physical — mirrors physical address into billing (disabled) fields,
+  // matching the .billing-address-field toggle pattern in the design system.
+  var csBillingSame = document.getElementById('cs-billing-same');
+  var csPhysFields = ['addr1','addr2','city','state','zip'].map(function(k){ return document.getElementById('cs-phys-' + k); });
+  var csBillAddressFields = ['addr1','addr2','city','state','zip'].map(function(k){ return document.getElementById('cs-bill-' + k); });
+
+  function csMirrorBilling(){
+    csBillAddressFields.forEach(function(billField, i){
+      billField.value = csPhysFields[i].value;
+      billField.dispatchEvent(new Event('input'));
+    });
+  }
+
+  if (csBillingSame){
+    csBillingSame.addEventListener('change', function(){
+      var same = this.checked;
+      csBillAddressFields.forEach(function(f){ f.disabled = same; });
+      if (same) csMirrorBilling();
+    });
+    csPhysFields.forEach(function(f){
+      f.addEventListener('input', function(){ if (csBillingSame.checked) csMirrorBilling(); });
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
