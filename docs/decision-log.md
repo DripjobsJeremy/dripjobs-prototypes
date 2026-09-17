@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-17] Address Line 2 (Company Settings + Job/Appointment Address Display): built the pre-supplied prototype into the hub (ticket 86bbwn0r2)
+
+- Decision: Jeremy supplied an already-built clickable prototype covering BR1 to BR8 (Company Settings physical/billing address, New Lead, New Proposal, New On-Site Estimate, New Appointment/Other, Booking Form, all with the Addresses On File auto-populate and edit-flips-to-new-address behavior wired up). Landed it as-is at `address-line-2-entry-points/`, only adding the standard hub chrome (gate.js, proto-bar, hub card) and converting its fixed-position demo banner to the flex-stacked layout other prototypes use, so it sits below the proto-bar instead of overlapping it. No design decisions were made in this pass since the interaction design was already resolved in the supplied file.
+- Why: Direct request to build the supplied prototype into the hub.
+- Open question: BR9 to BR13 (display parity in Command Center/PDFs/keywords, Zapier payload population) are display-only or backend per the ticket and confirmed already working in production, so intentionally not rebuilt here, per the prototype's own demo-banner scope note.
+
 ## [2026-09-16] Cancellation Intercept Modal: added a retry to the BR7 load-failure screen too (ticket 86bbah6jq)
 
 - Decision: Clarified which screen the "click play" helper text from the prior session was meant for, since there are two distinct failure states in this build: the persistent safety net under an actually-loaded video (for a silently-blocked autoplay), and the separate BR7 "couldn't load at all" screen (network/genuine failure, Tanner photo + message + mailto, no video to click play on today). Jeremy confirmed both: added a "click play to try again" retry action to the BR7 screen's notice as well, which re-attempts loading the real video (same path as the video-state select's "Playing" option) rather than only offering Schedule a Call / email Tanner. Pulled the shared inline text-link button style into one `.ic-inline-action-btn` class used by both.
