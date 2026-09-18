@@ -8,6 +8,36 @@ Append a short entry after any session with a real design or scope decision. New
 - Why: Direct request after flagging the duplicate/stale card discovered while merging the 86bbv6zhh rework.
 - Open question: None.
 
+## [2026-09-18] Per-Package Discount Action: split each package's line-item footer into Subtotal/Total (ticket 86bc33f26)
+
+- Decision: Resolved the open question from the prior entry: Jeremy confirmed the per-package line-item table footer should split the same way the reference screenshot showed. "Package Total" now spans only the first three columns (Product/Service, Quantity, Price) and fills the Subtotal and Total columns separately, with the Total figure in a highlighted pill (light purple bg, bold purple text) matching production. Values use the same assumed flat 5% split as the Totals card (Subtotal = Total ÷ 1.05).
+- Why: Direct follow-up request to extend the same tax-split treatment to the package footer.
+- Open question: None.
+
+## [2026-09-18] Per-Package Discount Action: added a Tax line to the proposal Totals card (ticket 86bc33f26)
+
+- Decision: Added a "Tax" row between Subtotal and the dark Total bar in the bottom Totals card, matching the three-row layout Jeremy shared from production. Scoped this to the Totals card only (not each package's own line-item footer, which the reference screenshot also showed split into Subtotal/Total columns) since only the Totals card was named. Since this prototype has no real tax config to read, it assumes a flat 5% rate per Jeremy's instruction and backs Subtotal/Tax out of each package's existing (tax-inclusive) total: Subtotal = Total ÷ 1.05, Tax = Total − Subtotal.
+- Why: Direct request; tax rate given as an explicit assumption rather than guessed.
+- Open question: Confirm whether the per-package line-item table footer should also split into Subtotal/Total columns like the reference screenshot, since that wasn't explicitly asked for and wasn't changed here.
+
+## [2026-09-18] Per-Package Discount Action: confirmed Select/Deselect Package menu behavior against production (ticket 86bc33f26)
+
+- Decision: Jeremy confirmed, with a production screenshot, that the "Select Package" menu item should relabel to "Deselect Package" (green check icon, light green row highlight) once that package is selected, rather than keeping a static "Select Package" label. Updated the prototype's kebab menu to relabel and restyle the item on selection instead of only toggling `aria-checked` silently. Also confirmed Apply Discount stays in the ⋮ menu (not a footer button) — no change needed there.
+- Why: Direct confirmation against the existing production UI, resolving the open question from the prior session's build.
+- Open question: None.
+
+## [2026-09-18] Per-Package Discount Action: built the pre-supplied prototype into the hub (ticket 86bc33f26)
+
+- Decision: Jeremy supplied an already-built clickable prototype (BR1-BR8) adding a package-scoped "Apply Discount" action to the Proposal Builder's per-package ⋮ menu, alongside a pre-existing (unlabeled) fix making the Proposal Total only reflect the currently Selected package. Landed it as-is at `package-discount-action/`, only adding the standard hub chrome (proto-bar, hub card); the supplied file's own dark demo-banner (BR-annotation toggle, reset) was kept below the proto-bar, matching the layout used for other pre-supplied prototypes. No design decisions were made in this pass since the interaction design (menu placement, one-discount-per-package V1 cap, negative line-item pattern) was already resolved in the supplied file.
+- Why: Direct request to build the supplied prototype into the hub.
+- Open question: The prototype's own dev notes flag two items for PM: whether "Select Package" toggling off the already-selected package (returning total to $0.00) matches intended behavior or needs an explicit "Remove Selection" state, and confirming Apply Discount's placement in the ⋮ menu vs. the package footer row, since the ticket left both open.
+
+## [2026-09-17] Address Line 2 (Company Settings + Job/Appointment Address Display): built the pre-supplied prototype into the hub (ticket 86bbwn0r2)
+
+- Decision: Jeremy supplied an already-built clickable prototype covering BR1 to BR8 (Company Settings physical/billing address, New Lead, New Proposal, New On-Site Estimate, New Appointment/Other, Booking Form, all with the Addresses On File auto-populate and edit-flips-to-new-address behavior wired up). Landed it as-is at `address-line-2-entry-points/`, only adding the standard hub chrome (gate.js, proto-bar, hub card) and converting its fixed-position demo banner to the flex-stacked layout other prototypes use, so it sits below the proto-bar instead of overlapping it. No design decisions were made in this pass since the interaction design was already resolved in the supplied file.
+- Why: Direct request to build the supplied prototype into the hub.
+- Open question: BR9 to BR13 (display parity in Command Center/PDFs/keywords, Zapier payload population) are display-only or backend per the ticket and confirmed already working in production, so intentionally not rebuilt here, per the prototype's own demo-banner scope note.
+
 ## [2026-09-16] Cancellation Intercept Modal: added a retry to the BR7 load-failure screen too (ticket 86bbah6jq)
 
 - Decision: Clarified which screen the "click play" helper text from the prior session was meant for, since there are two distinct failure states in this build: the persistent safety net under an actually-loaded video (for a silently-blocked autoplay), and the separate BR7 "couldn't load at all" screen (network/genuine failure, Tanner photo + message + mailto, no video to click play on today). Jeremy confirmed both: added a "click play to try again" retry action to the BR7 screen's notice as well, which re-attempts loading the real video (same path as the video-state select's "Playing" option) rather than only offering Schedule a Call / email Tanner. Pulled the shared inline text-link button style into one `.ic-inline-action-btn` class used by both.
