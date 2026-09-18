@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DripJobs: Calendar Settings, Ticket 86bc3at0e Prototype</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, Roboto, Arial, sans-serif;
+    background: #F5F5F8;
+    color: #32415B;
+  }
+
+  /* ============ HUB TOP BAR (standard hub nav) ============ */
+  .proto-bar {
+    background: #FFFFFF;
+    border-bottom: 1px solid #DAD8E3;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; }
+  .proto-bar .back-link {
+    font-size: 12px;
+    font-weight: 500;
+    color: #80879A;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.15s;
+  }
+  .proto-bar .back-link:hover { color: #8B85EA; }
+  .proto-bar .divider { color: #DAD8E3; font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; color: #32415B; }
+  .proto-bar-ticket {
+    font-size: 11px;
+    font-weight: 600;
+    color: #5C53DC;
+    text-decoration: none;
+    padding: 4px 10px;
+    border: 1px solid #D6D2F5;
+    background: #E8E6FA;
+    border-radius: 999px;
+    letter-spacing: 0.2px;
+  }
+  .proto-bar-ticket:hover { background: #8B85EA; color: #fff; }
+
+  /* ============ DEMO CONTROL BANNER (non-product UI) ============ */
+  #demo-banner {
+    background: #FFB020;
+    color: #1A1A1A;
+    padding: 10px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    position: sticky;
+    top: 0;
+    z-index: 500;
+    border-bottom: 2px solid #1A1A1A;
+  }
+  #demo-banner strong { font-weight: 700; }
+  #demo-banner .demo-group { display: flex; align-items: center; gap: 8px; }
+  #demo-banner select, #demo-banner button {
+    font-size: 12.5px;
+    border-radius: 6px;
+    border: 1px solid #1A1A1A;
+    background: #fff;
+    color: #1A1A1A;
+    padding: 5px 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  #demo-banner button.active-toggle { background: #1A1A1A; color: #FFB020; }
+  #demo-note {
+    flex-basis: 100%;
+    font-size: 12.5px;
+    font-style: italic;
+    display: none;
+  }
+  #demo-note.show { display: block; }
+
+  /* BR chip */
+  .br-chip {
+    display: none;
+    background: #FFF4E5;
+    color: #B45309;
+    border: 1px solid #FCD9A0;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-left: 8px;
+    cursor: help;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  body.show-br .br-chip { display: inline-block; }
+
+  /* ============ TOP HEADER (context only, unchanged) ============ */
+  #top-header {
+    height: 60px;
+    background: #fff;
+    border-bottom: 1px solid #DAD8E3;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 20px;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; color: #32415B; }
+  .logo .logo-mark { width: 28px; height: 28px; border-radius: 8px; background: #8B85EA; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; }
+  .top-search { flex: 1; max-width: 480px; position: relative; }
+  .top-search input {
+    width: 100%; height: 38px; border-radius: 8px; border: 1px solid #DAD8E3;
+    padding: 0 14px 0 36px; font-size: 13px; color: #32415B; background: #F8F8FA;
+  }
+  .top-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #80879A; font-size: 13px; }
+  .top-right { display: flex; align-items: center; gap: 18px; margin-left: auto; color: #80879A; font-size: 16px; }
+  .top-right .avatar { width: 30px; height: 30px; border-radius: 50%; background: #32415B; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .top-user { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #32415B; font-weight: 600; }
+
+  /* ============ LAYOUT ============ */
+  #shell { display: flex; min-height: calc(100vh - 60px); }
+
+  /* ============ SIDEBAR (context only, unchanged) ============ */
+  #sidebar {
+    width: 200px;
+    background: #fff;
+    border-right: 1px solid #DAD8E3;
+    padding: 14px 0;
+    flex-shrink: 0;
+  }
+  .nest-row { display: flex; align-items: center; gap: 8px; padding: 8px 16px 14px; font-size: 13px; font-weight: 600; color: #32415B; border-bottom: 1px solid #EFEFF3; margin-bottom: 8px; }
+  .nest-row .dot { width: 20px; height: 20px; border-radius: 6px; background: #E6FAFA; display: inline-flex; align-items: center; justify-content: center; color: #0DCECE; font-size: 10px; }
+  .nav-section-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.6px; color: #B9BECB; padding: 12px 16px 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 16px;
+    font-size: 13.5px; color: #4C566E; text-decoration: none; cursor: default;
+    position: relative;
+  }
+  .nav-item i { width: 16px; font-size: 13px; color: #80879A; }
+  .nav-item .badge { margin-left: auto; background: #8B85EA; color: #fff; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 6px; }
+  .nav-item.active { background: #8B85EA; color: #fff; border-radius: 8px; margin: 0 8px; padding: 9px 8px; }
+  .nav-item.active i { color: #fff; }
+  .nav-item.parent-active { color: #32415B; font-weight: 700; }
+  .nav-item.parent-active i { color: #32415B; }
+  .nav-subitem { padding-left: 30px; font-size: 13px; }
+
+  /* ============ MAIN CONTENT ============ */
+  #main { flex: 1; padding: 24px 28px 60px; max-width: 1200px; }
+
+  /* ---- settings-page design-system tokens & patterns ---- */
+  #settings-page {
+    --st-color-primary: #8B85EA;
+    --st-color-primary-hover: #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb: 139, 133, 234;
+    --st-color-text: #32415B;
+    --st-color-text-muted: #80879A;
+    --st-color-border: #DAD8E3;
+    --st-color-card-bg: #FFFFFF;
+  }
+
+  .settings-tabs nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 20px; scrollbar-width: none; }
+  .settings-tabs nav::-webkit-scrollbar { display: none; }
+  .settings-tab-link {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 16px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--st-color-text);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .settings-tab-link:nth-child(1) { background: #E8E6FA; }
+  .settings-tab-link:nth-child(2) { background: #FAF0E6; }
+  .settings-tab-link:nth-child(3) { background: #E6FAF0; }
+  .settings-tab-link:nth-child(4) { background: #E6F3FA; }
+  .settings-tab-link:nth-child(5) { background: #FAF7E6; }
+  .settings-tab-link:nth-child(6) { background: #FAE6E6; }
+  .settings-tab-link:nth-child(7) { background: #F0FAE6; }
+  .settings-tab-link:nth-child(8) { background: #E6FAFA; }
+  .settings-tab-link:nth-child(9) { background: #FAEAE6; }
+  .settings-tab-link:nth-child(10) { background: #EFEFF3; }
+  .settings-tab-link:nth-child(11) { background: #FAE6F0; }
+  .settings-tab-link.active { box-shadow: inset 0 0 0 2px var(--st-color-primary); font-weight: 700; }
+  .settings-tab-link:focus-visible { outline: 3px solid var(--st-color-primary-active); outline-offset: 2px; }
+
+  .settings-section {
+    background: var(--st-color-card-bg);
+    border: 1px solid var(--st-color-border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  .settings-section-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+  .settings-section-title { font-size: 15px; font-weight: 700; margin: 0; display: flex; align-items: center; }
+  .settings-section-subtitle { font-size: 12.5px; color: var(--st-color-text-muted); margin: 4px 0 16px 0; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 10px; font-size: 13.5px; font-weight: 600; padding: 9px 16px; border: 1px solid transparent; cursor: pointer; min-height: 40px; }
+  .btn-primary { background: var(--st-color-primary); color: #fff; }
+  .btn-primary:hover { background: var(--st-color-primary-hover); }
+  .btn-outline-primary { background: #fff; border: 1px solid var(--st-color-primary); color: var(--st-color-primary-active); }
+  .btn-outline-primary:hover { background: #F3F2FD; }
+  .btn:focus-visible { outline: 3px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .btn-sm { padding: 5px 12px; font-size: 12.5px; border-radius: 8px; min-height: 30px; }
+  .btn-round { border-radius: 999px; }
+  .btn-danger-outline { background: #fff; border: 1px solid #E6B4B4; color: #B42318; }
+
+  table.dj-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.dj-table thead th { text-align: left; color: var(--st-color-text-muted); font-weight: 600; font-size: 12.5px; padding: 10px 8px; border-bottom: 1px solid var(--st-color-border); background: #FAFAFC; }
+  table.dj-table tbody td { padding: 12px 8px; border-bottom: 1px solid #F0F0F4; vertical-align: middle; }
+  .color-dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+  .color-label { font-weight: 600; }
+  .row-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* Toggle row per design system */
+  .settings-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 6px 4px;
+    border-radius: 8px;
+  }
+  .settings-toggle-row + .settings-toggle-row { margin-top: 4px; }
+  .toggle-label-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    flex: 1;
+    min-height: 48px;
+    padding: 4px 0;
+  }
+  .toggle-label-wrap:focus-within,
+  .toggle-label-wrap.focus-ring { box-shadow: 0 0 0 3px rgba(139,133,234,0.28); border-radius: 8px; }
+
+  .dj-switch { position: relative; width: 42px; height: 22px; flex-shrink: 0; }
+  .dj-switch input { position: absolute; opacity: 0; width: 42px; height: 22px; margin: 0; cursor: pointer; }
+  .dj-switch .track {
+    position: absolute; inset: 0; border-radius: 999px; background: #DADCE3; transition: background 0.15s ease;
+  }
+  .dj-switch .thumb {
+    position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.25); transition: transform 0.15s ease;
+  }
+  .dj-switch input:checked + .track { background: #8B85EA; }
+  .dj-switch input:checked ~ .thumb { transform: translateX(20px); }
+  .dj-switch input:focus-visible ~ .track { outline: 3px solid var(--st-color-primary-active); outline-offset: 2px; }
+
+  .settings-toggle-label { font-size: 14px; font-weight: 500; color: var(--st-color-text); }
+  .toggle-help {
+    color: var(--st-color-text-muted);
+    font-size: 13px;
+    cursor: help;
+    flex-shrink: 0;
+  }
+  .toggle-help:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; border-radius: 50%; }
+
+  .state-pill {
+    font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px 9px; margin-left: auto;
+  }
+  .state-pill.on { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+  .state-pill.off { background: #EFEFF3; color: #4C566E; border: 1px solid #DAD8E3; }
+
+  .footer-actions { display: flex; gap: 12px; align-items: center; margin-top: 4px; }
+  .footer-actions .link-cancel { color: var(--st-color-primary-active); font-size: 13.5px; font-weight: 600; text-decoration: none; background: none; border: none; cursor: pointer; }
+
+  /* App Settings inline notice */
+  #app-settings-note {
+    display: none;
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    color: #1E40AF;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  #app-settings-note.show { display: block; }
+  #app-settings-note strong { display: block; margin-bottom: 4px; font-size: 13.5px; }
+
+  #generic-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #32415B; color: #fff; font-size: 13px; padding: 10px 18px; border-radius: 8px;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; z-index: 900;
+  }
+  #generic-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* new-section highlight ring used briefly to draw the eye */
+  .new-section-highlight { outline: 2px dashed #8B85EA; outline-offset: 4px; }
+
+  .tooltip-wrap { position: relative; display: inline-flex; }
+  .tooltip-bubble {
+    position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
+    background: #32415B; color: #fff; font-size: 12px; padding: 6px 10px; border-radius: 6px;
+    white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.15s ease; z-index: 20;
+  }
+  .tooltip-wrap:hover .tooltip-bubble,
+  .tooltip-wrap:focus-within .tooltip-bubble { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ============ HUB TOP BAR (standard hub nav) ============ -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Event Banner Relocation</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bc3at0e" target="_blank">86bc3at0e</a>
+</div>
+
+<!-- ============ DEMO CONTROLS (non-product UI, for stakeholder review only) ============ -->
+<div id="demo-banner" role="region" aria-label="Prototype demo controls">
+  <span><strong>PROTOTYPE, Ticket 86bc3at0e:</strong> Relocate Event Banner Toggles to Calendar Tab</span>
+  <div class="demo-group">
+    <label for="accountSim" style="font-weight:600;">Simulate:</label>
+    <select id="accountSim">
+      <option value="existing">Existing account (preserved values)</option>
+      <option value="new">Newly created account (post-launch default)</option>
+    </select>
+  </div>
+  <div class="demo-group">
+    <button id="brToggleBtn" type="button">Show BR annotations</button>
+  </div>
+  <div id="demo-note"></div>
+</div>
+
+<!-- ============ TOP HEADER (context only) ============ -->
+<div id="top-header">
+  <div class="logo"><span class="logo-mark"><i class="fa fa-circle-nodes"></i></span>dripjobs</div>
+  <div class="top-search">
+    <i class="fa fa-search"></i>
+    <input type="text" placeholder="Search leads, contacts, tags..." readonly>
+  </div>
+  <div class="top-right">
+    <i class="fa fa-triangle-exclamation" style="color:#F59E0B;"></i>
+    <i class="fa fa-bell"></i>
+    <span class="top-user"><span class="avatar">JH</span>Jeremy Harrison <i class="fa fa-chevron-down" style="font-size:10px;"></i></span>
+  </div>
+</div>
+
+<div id="shell">
+  <!-- ============ SIDEBAR (context only) ============ -->
+  <div id="sidebar" aria-hidden="true">
+    <div class="nest-row"><span class="dot"><i class="fa fa-house"></i></span>The Nest</div>
+
+    <div class="nav-section-label">SALES</div>
+    <div class="nav-item"><i class="fa fa-address-book"></i>Contacts</div>
+    <div class="nav-item"><i class="fa fa-table-list"></i>Sales List</div>
+    <div class="nav-item"><i class="fa fa-diagram-project"></i>Sales Pipeline</div>
+
+    <div class="nav-section-label">JOBS</div>
+    <div class="nav-item"><i class="fa fa-arrows-rotate"></i>Change Orders</div>
+    <div class="nav-item"><i class="fa fa-calendar-days"></i>Job Schedule</div>
+    <div class="nav-item"><i class="fa fa-list"></i>Jobs List</div>
+    <div class="nav-item"><i class="fa fa-diagram-project"></i>Jobs Pipeline</div>
+    <div class="nav-item"><i class="fa fa-clipboard-list"></i>Work Orders</div>
+
+    <div class="nav-section-label">DAILY OPERATIONS</div>
+    <div class="nav-item"><i class="fa fa-clock"></i>Appointments<span class="badge">2 new</span></div>
+    <div class="nav-item"><i class="fa fa-comment"></i>Chat</div>
+    <div class="nav-item"><i class="fa fa-envelope"></i>Email<span class="badge">New</span></div>
+    <div class="nav-item"><i class="fa fa-square-check"></i>Tasks</div>
+
+    <div class="nav-section-label">DOCUMENTS</div>
+    <div class="nav-item"><i class="fa fa-file-invoice"></i>Invoices</div>
+    <div class="nav-item"><i class="fa fa-file-signature"></i>Proposals<i class="fa fa-chevron-right" style="margin-left:auto;font-size:10px;"></i></div>
+
+    <div class="nav-section-label">FINANCIALS</div>
+    <div class="nav-item parent-active"><i class="fa fa-gear"></i>Settings<i class="fa fa-chevron-up" style="margin-left:auto;font-size:10px;"></i></div>
+    <div class="nav-item nav-subitem"><i class="fa fa-clipboard"></i>Booking Form</div>
+    <div class="nav-item nav-subitem"><i class="fa fa-tags"></i>Card Labels</div>
+    <div class="nav-item active nav-subitem"><i class="fa fa-house"></i>Company Settings</div>
+    <div class="nav-item nav-subitem"><i class="fa fa-users"></i>Crews</div>
+    <div class="nav-item nav-subitem"><i class="fa fa-user-group"></i>Employees</div>
+    <div class="nav-item nav-subitem"><i class="fa fa-calculator"></i>Job Costing Settings</div>
+    <div class="nav-item nav-subitem"><i class="fa fa-box"></i>Products / Services</div>
+    <div class="nav-item nav-subitem"><i class="fa fa-bell"></i>Reminders</div>
+    <div class="nav-item nav-subitem"><i class="fa fa-truck"></i>Subcontractors</div>
+    <div class="nav-item nav-subitem"><i class="fa fa-user"></i>Users</div>
+  </div>
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <div id="main">
+    <div id="settings-page">
+
+      <div class="settings-tabs">
+        <nav role="tablist" aria-label="Company Settings sections">
+          <button class="settings-tab-link" type="button" data-tab="company-info" role="tab" aria-selected="false">Company Information</button>
+          <button class="settings-tab-link" type="button" data-tab="brand" role="tab" aria-selected="false">Brand</button>
+          <button class="settings-tab-link" type="button" data-tab="email" role="tab" aria-selected="false">Email Settings</button>
+          <button class="settings-tab-link" type="button" data-tab="app-settings" role="tab" aria-selected="false">App Settings <span class="br-chip" title="BR-5: toggles no longer appear here after relocation">BR-5</span></button>
+          <button class="settings-tab-link active" type="button" data-tab="calendar" role="tab" aria-selected="true">Calendar</button>
+          <button class="settings-tab-link" type="button" data-tab="templates" role="tab" aria-selected="false">Templates</button>
+          <button class="settings-tab-link" type="button" data-tab="notifications" role="tab" aria-selected="false">Notifications</button>
+          <button class="settings-tab-link" type="button" data-tab="payments" role="tab" aria-selected="false">Payments</button>
+          <button class="settings-tab-link" type="button" data-tab="integrations" role="tab" aria-selected="false">Integrations</button>
+          <button class="settings-tab-link" type="button" data-tab="portal" role="tab" aria-selected="false">Customer Portal</button>
+          <button class="settings-tab-link" type="button" data-tab="addons" role="tab" aria-selected="false">Add-Ons</button>
+        </nav>
+      </div>
+
+      <!-- Inline notice shown only when App Settings tab is clicked -->
+      <div id="app-settings-note" role="status">
+        <strong><i class="fa fa-circle-info"></i>&nbsp; App Settings &gt; Estimate Settings (not modeled in this prototype)</strong>
+        No screenshot of this section was provided, so it isn't rebuilt here. Per BR-5, once this ticket ships, "Add crew name to event banner" and "Add job total to event banner" no longer appear under Estimate Settings, both now live in the Calendar tab shown below.
+      </div>
+
+      <!-- ============ EVENT TYPES (existing, unchanged) ============ -->
+      <section class="settings-section">
+        <div class="settings-section-header">
+          <div>
+            <h2 class="settings-section-title">Event Types</h2>
+            <p class="settings-section-subtitle" style="margin-top:2px;">The appointment types your team can schedule on the calendar.</p>
+          </div>
+          <button class="btn btn-primary" type="button"><i class="fa fa-plus"></i>&nbsp;Add Event Type</button>
+        </div>
+
+        <table class="dj-table">
+          <thead>
+            <tr><th>Name</th><th>Calendar</th><th>Default Color</th><th style="text-align:right;">Actions</th></tr>
+          </thead>
+          <tbody id="event-types-body">
+            <!-- rows injected by JS to keep markup compact -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ============ NEW: EVENT BANNER DISPLAY (relocated toggles) ============ -->
+      <section class="settings-section" id="event-banner-section">
+        <div class="settings-section-header">
+          <div>
+            <h2 class="settings-section-title">
+              Event Banner Display
+              <span class="br-chip" title="BR-1 & BR-2: both toggles relocated here from App Settings > Estimate Settings">BR-1, BR-2</span>
+            </h2>
+            <p class="settings-section-subtitle" style="margin-top:2px;">Choose what shows on the job schedule event banner.</p>
+          </div>
+        </div>
+
+        <div class="settings-toggle-row">
+          <label class="toggle-label-wrap" for="crewNameToggle">
+            <span class="dj-switch">
+              <input type="checkbox" id="crewNameToggle" role="switch" aria-checked="false">
+              <span class="track"></span>
+              <span class="thumb"></span>
+            </span>
+            <span class="settings-toggle-label">Add crew name to event banner</span>
+          </label>
+          <span class="tooltip-wrap">
+            <button type="button" class="toggle-help" aria-label="Why this setting matters">
+              <i class="fa fa-circle-info"></i>
+            </button>
+            <span class="tooltip-bubble">Shows the assigned crew's name on the Job Schedule event banner.</span>
+          </span>
+          <span class="br-chip" title="BR-3: preserves this company's existing saved value, never resets on relocation">BR-3</span>
+          <span class="state-pill off" id="crewNameState">OFF</span>
+        </div>
+
+        <div class="settings-toggle-row">
+          <label class="toggle-label-wrap" for="jobTotalToggle">
+            <span class="dj-switch">
+              <input type="checkbox" id="jobTotalToggle" role="switch" aria-checked="true" checked>
+              <span class="track"></span>
+              <span class="thumb"></span>
+            </span>
+            <span class="settings-toggle-label">Add job total to event banner</span>
+          </label>
+          <span class="tooltip-wrap">
+            <button type="button" class="toggle-help" aria-label="Why this setting matters">
+              <i class="fa fa-circle-info"></i>
+            </button>
+            <span class="tooltip-bubble">Shows the job's total dollar amount on the Job Schedule event banner.</span>
+          </span>
+          <span class="br-chip" title="BR-6: new accounts created after launch default this ON, existing accounts keep their saved value (BR-3)">BR-6</span>
+          <span class="state-pill on" id="jobTotalState">ON</span>
+        </div>
+      </section>
+
+      <div class="footer-actions">
+        <button class="btn btn-primary" type="button">Save</button>
+        <button class="link-cancel" type="button">Cancel - Return to Dashboard</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="generic-toast" role="status"></div>
+
+<script>
+  // ---- Event Types table data (from provided screenshot, unchanged) ----
+  var eventTypes = [
+    { name: "On-Site Estimate", calendar: "Appointments", color: "Purple", hex: "#8B85EA", editOnly: true },
+    { name: "Google Event", calendar: "Appointments", color: "Dark Blue", hex: "#2E4E8F", editOnly: true },
+    { name: "Project Walkthrough", calendar: "Appointments", color: "Dark Blue", hex: "#2E4E8F" },
+    { name: "Site Visit", calendar: "Appointments", color: "Mint", hex: "#3FBF8F" },
+    { name: "Punch-Out", calendar: "Appointments", color: "Orange", hex: "#F2994A" },
+    { name: "Scope Clarification", calendar: "Appointments", color: "Light Blue", hex: "#4FA8E0" },
+    { name: "Payment Collection", calendar: "Appointments", color: "Green", hex: "#3AA655" },
+    { name: "Warranty Work", calendar: "Jobs", color: "Purple", hex: "#8B85EA" },
+    { name: "Meeting Block", calendar: "Jobs", color: "Yellow", hex: "#E0B93A" },
+    { name: "New Job (No Proposal)", calendar: "Jobs", color: "Mint", hex: "#3FBF8F" },
+    { name: "Personal Appointment", calendar: "Appointments", color: "Gray", hex: "#9AA1AE" },
+    { name: "2nd Time Estimate", calendar: "Appointments", color: "Gold", hex: "#C9A227" },
+    { name: "Touch Ups", calendar: "Jobs", color: "Purple", hex: "#8B85EA" }
+  ];
+
+  var tbody = document.getElementById("event-types-body");
+  eventTypes.forEach(function (row) {
+    var tr = document.createElement("tr");
+    var actions = row.editOnly
+      ? '<button class="btn btn-outline-primary btn-sm" type="button">Edit</button>'
+      : '<button class="btn btn-outline-primary btn-sm" type="button">Edit</button>' +
+        '<button class="btn btn-danger-outline btn-sm" type="button">Delete</button>';
+    tr.innerHTML =
+      '<td><span class="color-dot" style="background:' + row.hex + '"></span>' + row.name + '</td>' +
+      '<td>' + row.calendar + '</td>' +
+      '<td class="color-label" style="color:' + row.hex + '">' + row.color + '</td>' +
+      '<td><div class="row-actions">' + actions + '</div></td>';
+    tbody.appendChild(tr);
+  });
+
+  // ---- Toggle switch behavior ----
+  function wireToggle(inputId, statePillId) {
+    var input = document.getElementById(inputId);
+    var pill = document.getElementById(statePillId);
+    function sync() {
+      input.setAttribute("aria-checked", input.checked ? "true" : "false");
+      pill.textContent = input.checked ? "ON" : "OFF";
+      pill.classList.toggle("on", input.checked);
+      pill.classList.toggle("off", !input.checked);
+    }
+    input.addEventListener("change", sync);
+    sync();
+  }
+  wireToggle("crewNameToggle", "crewNameState");
+  wireToggle("jobTotalToggle", "jobTotalState");
+
+  // ---- Demo: account-type simulation (BR-3 vs BR-6) ----
+  var accountSim = document.getElementById("accountSim");
+  var demoNote = document.getElementById("demo-note");
+  var crewInput = document.getElementById("crewNameToggle");
+  var jobInput = document.getElementById("jobTotalToggle");
+
+  function applySim(mode) {
+    if (mode === "existing") {
+      // Existing company's previously saved values, untouched by the relocation (BR-3)
+      crewInput.checked = false;
+      jobInput.checked = true;
+      demoNote.textContent = "Showing an EXISTING account's saved values, carried over unchanged by the relocation (BR-3).";
+    } else {
+      // New account created after this ships: job total defaults ON (BR-6), crew name default is unchanged (still OFF)
+      crewInput.checked = false;
+      jobInput.checked = true;
+      demoNote.textContent = "Showing a NEW account created after launch: \"Add job total to event banner\" defaults ON out of the box (BR-6); \"Add crew name\" default is unchanged (still OFF).";
+    }
+    crewInput.dispatchEvent(new Event("change"));
+    jobInput.dispatchEvent(new Event("change"));
+    demoNote.classList.add("show");
+  }
+  accountSim.addEventListener("change", function () { applySim(this.value); });
+
+  // ---- BR annotation toggle ----
+  var brBtn = document.getElementById("brToggleBtn");
+  brBtn.addEventListener("click", function () {
+    document.body.classList.toggle("show-br");
+    var on = document.body.classList.contains("show-br");
+    brBtn.textContent = on ? "Hide BR annotations" : "Show BR annotations";
+    brBtn.classList.toggle("active-toggle", on);
+  });
+
+  // ---- Toast helper ----
+  var toast = document.getElementById("generic-toast");
+  var toastTimer;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 3200);
+  }
+
+  // ---- Tab clicks ----
+  var appSettingsNote = document.getElementById("app-settings-note");
+  var tabs = document.querySelectorAll(".settings-tab-link");
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      tabs.forEach(function (t) { t.classList.remove("active"); t.setAttribute("aria-selected", "false"); });
+
+      if (tab.dataset.tab === "calendar") {
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+        appSettingsNote.classList.remove("show");
+      } else if (tab.dataset.tab === "app-settings") {
+        appSettingsNote.classList.add("show");
+        appSettingsNote.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        appSettingsNote.classList.remove("show");
+        showToast("\"" + tab.textContent.trim() + "\" isn't part of this prototype, only Calendar and App Settings relate to this ticket.");
+      }
+    });
+  });
+
+  // Initialize with existing-account values
+  applySim("existing");
+</script>
+</body>
+</html>

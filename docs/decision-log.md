@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-18] Event Banner Relocation: built the pre-supplied prototype into the hub (ticket 86bc3at0e)
+
+- Decision: Jeremy supplied an already-built clickable prototype (BR1, BR2, BR3, BR5, BR6) moving the "Add crew name to event banner" and "Add job total to event banner" toggles from App Settings &gt; Estimate Settings into a new Event Banner Display section on the Calendar tab of Company Settings, with existing-account values preserved (BR-3) and new accounts defaulting "Add job total" ON (BR-6). Landed it as-is at `event-banner-relocation/`, only adding the standard hub chrome (gate.js, proto-bar, hub card); the supplied file's own demo banner (account-type simulation, BR-annotation toggle) was kept below the proto-bar, matching the layout used for other pre-supplied prototypes.
+- Why: Direct request to build the supplied prototype into the hub.
+- Open question: The App Settings tab shows an inline notice instead of the real Estimate Settings section, since no screenshot of that section was supplied, so it isn't rebuilt here.
+
 ## [2026-09-16] Hub: removed the stale "Holiday Calendar Display (post release update)" card
 
 - Decision: Removed the `#protoGrid` card pointing at `holiday-calendar-display/` and ticket 86bbrazc3. That card was a leftover from a separate 2026-09-02 session that had repointed the original shipped 86bbc0rvr prototype to 86bbrazc3 in place, independently of the same day's other session which built a brand-new `holiday-calendar-independent-controls/` (later renamed `holiday-calendar-company-wide/`) prototype for the same ticket lineage. Since 86bbrazc3 is being closed and superseded by 86bbv6zhh, and Jeremy confirmed `holiday-calendar-company-wide/` (linked to 86bbv6zhh) is the current one, the duplicate card is gone rather than repointed, `holiday-calendar-display/` stays on disk unlinked from the hub as the as-built record of the original shipped 86bbc0rvr feature.
