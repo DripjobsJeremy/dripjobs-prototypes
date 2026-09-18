@@ -255,6 +255,14 @@
     border-top:1px solid var(--st-color-border);
     border-bottom:none;
   }
+  .pkg-total-highlight{
+    display:inline-block;
+    background:#F1F0FC;
+    color:var(--st-color-primary-active);
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:6px;
+  }
 
   .package-foot{
     display:flex;
@@ -563,7 +571,7 @@
         <tr><td class="line-name">Exterior Painting</td><td class="num">1.00</td><td class="num">$3,150.00</td><td class="num">$3,150.00</td><td class="num">$3,150.00</td></tr>
       </tbody>
       <tfoot>
-        <tr class="pkg-total-row"><td colspan="4">Package Total</td><td class="num" data-pkg-total>$3,150.00</td></tr>
+        <tr class="pkg-total-row"><td colspan="3">Package Total</td><td class="num" data-pkg-subtotal>$3,000.00</td><td class="num"><span class="pkg-total-highlight" data-pkg-total>$3,150.00</span></td></tr>
       </tfoot>
     </table>
     <div class="package-foot">
@@ -615,7 +623,7 @@
         <tr class="discount-row"><td class="line-name">5% Discount <span class="br-chip" tabindex="0">BR-3<span class="br-tip">Calculated discount is inserted as a negative line item within this package's item list — same pattern the proposal-level discount already uses.</span></span></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num">($200.00)</td></tr>
       </tbody>
       <tfoot>
-        <tr class="pkg-total-row"><td colspan="4">Package Total</td><td class="num">$4,000.00</td></tr>
+        <tr class="pkg-total-row"><td colspan="3">Package Total</td><td class="num">$3,809.52</td><td class="num"><span class="pkg-total-highlight">$4,000.00</span></td></tr>
       </tfoot>
     </table>
     <div class="package-foot">
@@ -668,7 +676,7 @@
         <tr class="discount-row"><td class="line-name">10% Discount <span class="br-chip" tabindex="0">BR-2<span class="br-tip">Discount amount is calculated against this package's combined (line item + Area) subtotal at the moment it was applied — $5,541.17.</span></span></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num">($554.12)</td></tr>
       </tbody>
       <tfoot>
-        <tr class="pkg-total-row"><td colspan="4">Package Total</td><td class="num">$5,254.11</td></tr>
+        <tr class="pkg-total-row"><td colspan="3">Package Total</td><td class="num">$5,003.91</td><td class="num"><span class="pkg-total-highlight">$5,254.11</span></td></tr>
       </tfoot>
     </table>
     <div class="package-foot">
@@ -710,7 +718,7 @@
   <div class="dev-notes">
     <h3>Dev &amp; accessibility notes</h3>
     <ul>
-      <li><strong>Totals layout (updated to match production):</strong> the proposal-level Totals card now shows Subtotal, Tax, and a dark "Total" bar, matching the live UI's three-row pattern. This prototype has no access to the account's real configured tax rate, so it assumes a flat 5% on the selected package's total (Subtotal = Total ÷ 1.05, Tax = Total − Subtotal) purely for display; the real tax calculation/config is out of scope for this ticket.</li>
+      <li><strong>Totals layout (updated to match production):</strong> the proposal-level Totals card now shows Subtotal, Tax, and a dark "Total" bar, matching the live UI's three-row pattern. This prototype has no access to the account's real configured tax rate, so it assumes a flat 5% on the selected package's total (Subtotal = Total ÷ 1.05, Tax = Total − Subtotal) purely for display; the real tax calculation/config is out of scope for this ticket. Each package's own line-item table footer now mirrors this split too: "Package Total" spans the first three columns and fills the Subtotal/Total columns with the same pre-tax/tax-inclusive figures, the Total figure highlighted, matching production.</li>
       <li><strong>Menu structure (updated to match production):</strong> the ⋮ menu now mirrors the live "Squire" package menu exactly — an <em>Actions</em> group (Edit Package, Duplicate Package, Apply Discount) and a <em>Status</em> group (Mark as Recommended, Select Package), with Delete Package separated below. Icons are inline SVG (Feather-style), <code>aria-hidden</code>, so the button's own text is what assistive tech announces.</li>
       <li><strong>Proposal Total fix (not one of the 86bc33f26 BRs — a related correction):</strong> the Proposal Total now stays <strong>$0.00</strong> until a package is marked <em>Selected</em> via the Status group, matching the existing single-package-selection model. Selecting a different package deselects the previous one (mutually exclusive) and the total switches to that package's live total, including any applied discount.</li>
       <li><strong>Select Package semantics (confirmed against production):</strong> modeled as <code>role="menuitemradio"</code> with <code>aria-checked</code> across the three packages' Select Package items, so assistive tech gets an explicit checked/unchecked state rather than relying on the visual "Selected" pill alone. Matching the live menu, the item relabels itself to "Deselect Package" (green icon, light green row highlight) once its package is selected; clicking it again deselects that package, returning the Proposal Total to $0.00.</li>
@@ -975,6 +983,7 @@
     pkgState[currentPkgKey] = newTotal;
     card.querySelector('[data-total-display]').textContent = fmt(newTotal);
     card.querySelector('[data-pkg-total]').textContent = fmt(newTotal);
+    card.querySelector('[data-pkg-subtotal]').textContent = fmt(newTotal / (1 + TAX_RATE));
 
     // disable further discounting on this package (BR-8, V1)
     var discountMenuItem = card.querySelector('[data-apply-discount]');
