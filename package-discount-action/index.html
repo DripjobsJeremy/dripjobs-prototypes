@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Per-Package Discount — DripJobs Prototype (86bc33f26)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --st-color-primary:#8B85EA;
+    --st-color-primary-hover:#736BE3;
+    --st-color-primary-active:#5C53DC;
+    --st-color-primary-rgb:139,133,234;
+    --st-color-text:#32415B;
+    --st-color-text-muted:#80879A;
+    --st-color-border:#DAD8E3;
+    --st-color-card-bg:#FFFFFF;
+    --st-danger:#DC2626;
+    --st-danger-bg:#FEF2F2;
+    --st-danger-border:#FECACA;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Nunito',-apple-system,BlinkMacSystemFont,sans-serif;
+    color:var(--st-color-text);
+    background:#F5F5F8;
+    font-size:14px;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--st-color-primary-active);}
+
+  /* ---------- Hub top bar (standard hub nav) ---------- */
+  .proto-bar{
+    background:#FFFFFF;
+    border-bottom:1px solid var(--st-color-border);
+    padding:12px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .proto-bar-left{display:flex;align-items:center;gap:10px;}
+  .proto-bar .back-link{
+    font-size:12px;font-weight:500;color:var(--st-color-text-muted);
+    text-decoration:none;display:flex;align-items:center;gap:4px;
+    transition:color .15s;
+  }
+  .proto-bar .back-link:hover{color:var(--st-color-primary);}
+  .proto-bar .divider{color:var(--st-color-border);font-size:16px;}
+  .proto-bar-title{font-size:14px;font-weight:600;color:var(--st-color-text);}
+  .proto-bar-ticket{
+    font-size:11px;font-weight:600;color:var(--st-color-primary-active);
+    text-decoration:none;padding:4px 10px;border:1px solid #D6D2F5;
+    background:#E8E6FA;border-radius:999px;letter-spacing:0.2px;
+  }
+  .proto-bar-ticket:hover{background:var(--st-color-primary);color:#fff;}
+
+  /* ---------- Demo control banner ---------- */
+  #demo-banner{
+    background:#1A1A1A;
+    color:#FFC94D;
+    padding:10px 20px;
+    font-size:12.5px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    position:sticky;
+    top:0;
+    z-index:500;
+  }
+  #demo-banner .demo-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  #demo-banner strong{color:#fff;}
+  .demo-btn{
+    background:transparent;
+    border:1px solid #FFC94D;
+    color:#FFC94D;
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .demo-btn:hover{background:rgba(255,201,77,0.12);}
+  .demo-btn:focus-visible, button:focus-visible, [tabindex]:focus-visible, a:focus-visible, input:focus-visible{
+    outline:3px solid #2684FF;
+    outline-offset:2px;
+  }
+
+  /* ---------- Page shell ---------- */
+  #proposal-page{max-width:900px;margin:0 auto;padding:28px 20px 80px;}
+
+  .proposal-header{
+    background:var(--st-color-card-bg);
+    border:1px solid var(--st-color-border);
+    border-radius:10px;
+    padding:18px 20px;
+    margin-bottom:18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .proposal-header .biz-name{font-size:16px;font-weight:700;color:var(--st-color-text);}
+  .proposal-header .biz-meta{font-size:12.5px;color:var(--st-color-text-muted);margin-top:4px;}
+  .proposal-header .prop-meta{text-align:right;font-size:12.5px;color:var(--st-color-text-muted);}
+  .proposal-header .prop-meta .prop-id{font-weight:700;color:var(--st-color-text);font-size:14px;}
+
+  .section-label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--st-color-text);
+    margin:26px 0 10px 2px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  /* ---------- Package card ---------- */
+  .package-card{
+    background:var(--st-color-card-bg);
+    border:1px solid var(--st-color-border);
+    border-radius:10px;
+    margin-bottom:16px;
+    overflow:visible;
+  }
+  .package-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    padding:16px 18px;
+    background:#F7F7FB;
+    border-bottom:1px solid var(--st-color-border);
+    border-radius:10px 10px 0 0;
+    position:relative;
+  }
+  .package-head .pkg-title{font-size:14px;font-weight:700;color:var(--st-color-text);}
+  .package-head .pkg-desc{font-size:12.5px;color:var(--st-color-text-muted);margin-top:3px;max-width:520px;}
+  .package-head .pkg-right{display:flex;align-items:center;gap:14px;}
+  .package-head .pkg-total{font-size:15px;font-weight:700;color:var(--st-color-text);white-space:nowrap;}
+
+  .kebab-btn{
+    width:44px;height:44px;
+    display:flex;align-items:center;justify-content:center;
+    background:transparent;border:1px solid transparent;border-radius:8px;
+    cursor:pointer;color:var(--st-color-text-muted);font-size:18px;line-height:1;
+  }
+  .kebab-btn:hover{background:#EDEDF5;color:var(--st-color-text);}
+
+  .kebab-menu{
+    position:absolute;
+    top:56px;
+    right:18px;
+    min-width:220px;
+    background:#fff;
+    border:1px solid var(--st-color-border);
+    border-radius:10px;
+    box-shadow:0 8px 24px rgba(50,65,91,0.16);
+    z-index:60;
+    padding:6px;
+    display:none;
+  }
+  .kebab-menu.open{display:block;}
+  .kebab-menu button{
+    width:100%;
+    text-align:left;
+    background:none;
+    border:none;
+    padding:11px 12px;
+    font-size:13.5px;
+    font-family:inherit;
+    color:var(--st-color-text);
+    border-radius:8px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-height:44px;
+  }
+  .kebab-menu button:hover:not(:disabled){background:#F1F0FC;}
+  .kebab-menu button:disabled{color:#B7BCC8;cursor:not-allowed;}
+  .kebab-menu button.destructive{color:var(--st-danger);}
+  .kebab-menu button.destructive:hover{background:var(--st-danger-bg);}
+  .kebab-menu hr{border:none;border-top:1px solid var(--st-color-border);margin:4px 6px;}
+  .kebab-menu .menu-icon{font-size:14px;width:16px;text-align:center;flex-shrink:0;}
+  .kebab-menu .menu-sub{display:block;font-size:11px;color:var(--st-color-text-muted);font-weight:400;margin-top:1px;}
+  .kebab-menu .menu-ico{flex-shrink:0;color:var(--st-color-text-muted);}
+  .kebab-menu button:hover:not(:disabled) .menu-ico{color:var(--st-color-primary-active);}
+  .kebab-menu button.destructive .menu-ico{color:var(--st-danger);}
+  .menu-section-label{
+    font-size:10.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;
+    color:var(--st-color-text-muted);padding:9px 12px 4px;
+  }
+  .kebab-menu button[aria-checked="true"] .menu-ico{color:var(--st-color-primary-active);}
+  .kebab-menu button[aria-checked="true"]::after{
+    content:"✓";margin-left:auto;color:var(--st-color-primary-active);font-weight:700;
+  }
+
+  /* ---------- Selected state ---------- */
+  .selected-badge{
+    display:none;
+    background:#ECFDF5;color:#166534;border:1px solid #BBF7D0;
+    font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:6px;
+    margin-left:8px;vertical-align:middle;
+  }
+  .selected-badge.show{display:inline-block;}
+  .package-card.is-selected{border-color:var(--st-color-primary);box-shadow:0 0 0 1px var(--st-color-primary);}
+  .package-card.is-selected .package-head{border-radius:9px 9px 0 0;}
+
+  /* line items table */
+  .line-table{width:100%;border-collapse:collapse;}
+  .line-table thead th{
+    text-align:left;
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:0.4px;
+    text-transform:uppercase;
+    color:var(--st-color-text-muted);
+    padding:10px 18px 6px;
+    border-bottom:1px solid var(--st-color-border);
+  }
+  .line-table thead th.num{text-align:right;}
+  .line-table tbody td{
+    padding:12px 18px;
+    border-bottom:1px solid #EEEEF3;
+    font-size:13.5px;
+    vertical-align:middle;
+  }
+  .line-table tbody tr:last-child td{border-bottom:none;}
+  .line-table td.num{text-align:right;white-space:nowrap;}
+  .line-name{color:var(--st-color-primary-active);font-weight:600;}
+  .line-name.area{display:flex;align-items:center;gap:6px;}
+  .area-badge{
+    background:#E6F3FA;color:#1E6A8C;font-size:10px;font-weight:700;
+    padding:2px 6px;border-radius:5px;letter-spacing:0.3px;
+  }
+  .desc-only-badge{
+    background:#F4A24A;color:#fff;font-size:10.5px;font-weight:700;
+    padding:3px 8px;border-radius:5px;
+  }
+  .discount-row td{color:var(--st-color-text);}
+  .discount-row .line-name{color:var(--st-color-text);font-weight:600;}
+  .discount-row .num{color:var(--st-danger);font-weight:600;}
+  .discount-row{background:#FCFAFF;}
+
+  .pkg-total-row td{
+    padding:12px 18px;
+    font-weight:700;
+    font-size:13.5px;
+    border-top:1px solid var(--st-color-border);
+    border-bottom:none;
+  }
+
+  .package-foot{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    padding:14px 18px;
+    flex-wrap:wrap;
+  }
+
+  /* buttons (design system) */
+  .btn{
+    font-family:inherit;
+    font-size:13.5px;
+    font-weight:600;
+    border-radius:10px;
+    padding:0 16px;
+    height:40px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition:background-color .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .btn-outline-primary{background:#fff;border-color:var(--st-color-primary);color:var(--st-color-primary-active);}
+  .btn-outline-primary:hover{background:#F1F0FC;}
+  .btn-primary{background:var(--st-color-primary);border-color:var(--st-color-primary);color:#fff;}
+  .btn-primary:hover{background:var(--st-color-primary-hover);}
+  .btn-primary:disabled{background:#D9D6F7;border-color:#D9D6F7;cursor:not-allowed;}
+
+  /* Totals footer */
+  .totals-card{
+    background:var(--st-color-card-bg);
+    border:1px solid var(--st-color-border);
+    border-radius:10px;
+    margin-top:20px;
+    overflow:hidden;
+  }
+  .totals-card .totals-head{
+    padding:16px 20px 12px;
+    font-size:15px;
+    font-weight:700;
+    color:var(--st-color-text);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .totals-card .totals-hint{
+    padding:0 20px 14px;
+    font-size:11.5px;
+    color:var(--st-color-text-muted);
+    margin-top:-6px;
+  }
+  .totals-line{display:flex;border-top:1px solid var(--st-color-border);}
+  .totals-line .totals-spacer{flex:0 0 42%;}
+  .totals-line .totals-content{
+    flex:1;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:13px 20px;
+  }
+  .totals-line.subtotal-line .totals-content{color:var(--st-color-text-muted);font-size:13px;}
+  .totals-line.total-line .totals-content{
+    background:#5B6478;
+    color:#fff;
+    font-weight:700;
+    font-size:14px;
+  }
+  .totals-line.total-line{border-top:none;}
+  .totals-line.total-line .totals-content{border-radius:0 0 9px 0;}
+  .totals-value{font-weight:700;}
+  .totals-line.subtotal-line .totals-value{font-weight:600;color:var(--st-color-text);}
+
+  /* ---------- BR annotation chips ---------- */
+  .br-chip{
+    display:none;
+    background:#FFF4E5;
+    border:1px solid #F4A24A;
+    color:#9A5B12;
+    font-size:10.5px;
+    font-weight:700;
+    padding:2px 7px;
+    border-radius:6px;
+    cursor:help;
+    position:relative;
+    white-space:nowrap;
+    letter-spacing:0.2px;
+  }
+  body.show-br .br-chip{display:inline-flex;align-items:center;}
+  .br-chip .br-tip{
+    display:none;
+    position:absolute;
+    bottom:135%;
+    left:0;
+    background:#1A1A1A;
+    color:#fff;
+    font-weight:500;
+    font-size:11.5px;
+    padding:8px 10px;
+    border-radius:8px;
+    width:250px;
+    line-height:1.4;
+    z-index:80;
+    white-space:normal;
+    letter-spacing:0;
+  }
+  .br-chip:hover .br-tip, .br-chip:focus .br-tip{display:block;}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(50,65,91,0.45);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:200;
+    padding:16px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    background:#fff;
+    border-radius:12px;
+    width:100%;
+    max-width:420px;
+    max-height:92vh;
+    overflow-y:auto;
+    box-shadow:0 20px 50px rgba(0,0,0,0.25);
+  }
+  .modal-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 20px 14px;
+    border-bottom:1px solid var(--st-color-border);
+  }
+  .modal-head h2{font-size:16px;margin:0;font-weight:700;color:var(--st-color-text);}
+  .modal-close{
+    background:none;border:none;font-size:18px;color:var(--st-color-text-muted);
+    cursor:pointer;width:36px;height:36px;border-radius:8px;
+  }
+  .modal-close:hover{background:#F1F0FC;color:var(--st-color-text);}
+  .modal-body{padding:18px 20px;}
+
+  .info-box{
+    background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;
+    padding:12px 14px;margin-bottom:18px;
+  }
+  .info-box .info-label{font-size:11.5px;color:#1E40AF;font-weight:600;display:flex;align-items:center;gap:6px;}
+  .info-box .info-value{font-size:18px;font-weight:700;color:#1E40AF;margin-top:2px;}
+
+  .field-label{font-size:12px;font-weight:600;color:var(--st-color-text);margin:0 0 8px;display:block;}
+
+  .quick-discount-group{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  .qd-btn{
+    flex:1;
+    min-width:56px;
+    height:44px;
+    border-radius:8px;
+    border:1px solid var(--st-color-border);
+    background:#fff;
+    color:var(--st-color-text);
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .qd-btn[aria-pressed="true"]{background:var(--st-color-primary);border-color:var(--st-color-primary);color:#fff;}
+  .qd-btn:hover:not([aria-pressed="true"]){border-color:var(--st-color-primary);}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+  .field-group{
+    display:flex;align-items:center;
+    border:1px solid var(--st-color-border);
+    border-radius:8px;
+    height:44px;
+    overflow:hidden;
+  }
+  .field-group:focus-within{border-color:var(--st-color-primary);box-shadow:0 0 0 3px rgba(var(--st-color-primary-rgb),0.18);}
+  .field-group input{
+    border:none;outline:none;flex:1;height:100%;padding:0 4px 0 12px;font-size:14px;font-family:inherit;color:var(--st-color-text);width:0;
+  }
+  .field-group .suffix, .field-group .prefix{
+    color:var(--st-color-text-muted);font-size:14px;padding:0 12px;flex-shrink:0;
+  }
+  .field-group .prefix{padding-right:2px;}
+
+  .text-field{
+    border:1px solid var(--st-color-border);
+    border-radius:8px;
+    height:44px;
+    width:100%;
+    padding:0 14px;
+    font-size:14px;
+    font-family:inherit;
+    color:var(--st-color-text);
+    margin-bottom:16px;
+  }
+  .text-field:focus{outline:none;border-color:var(--st-color-primary);box-shadow:0 0 0 3px rgba(var(--st-color-primary-rgb),0.18);}
+  textarea.text-field{height:76px;padding:10px 14px;resize:vertical;font-family:inherit;}
+
+  .modal-foot{
+    display:flex;justify-content:flex-end;gap:10px;
+    padding:16px 20px;border-top:1px solid var(--st-color-border);
+  }
+
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+
+  .dev-notes{
+    margin-top:34px;
+    background:#fff;
+    border:1px solid var(--st-color-border);
+    border-radius:10px;
+    padding:18px 20px;
+  }
+  .dev-notes h3{font-size:13.5px;margin:0 0 10px;}
+  .dev-notes ul{margin:0;padding-left:20px;font-size:12.5px;color:var(--st-color-text-muted);line-height:1.6;}
+  .dev-notes li{margin-bottom:4px;}
+</style>
+</head>
+<body>
+
+<!-- ============ HUB TOP BAR (standard hub nav) ============ -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Per-Package Discount</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bc33f26" target="_blank">86bc33f26</a>
+</div>
+
+<div id="demo-banner">
+  <div class="demo-left">
+    <strong>PROTOTYPE — Ticket 86bc33f26</strong>
+    <span>Add Per Package Discount Action for All Packages</span>
+  </div>
+  <div class="demo-left">
+    <button class="demo-btn" id="toggle-br">Show BR annotations</button>
+    <button class="demo-btn" id="reset-demo">Reset demo</button>
+  </div>
+</div>
+
+<div id="proposal-page">
+
+  <div class="proposal-header">
+    <div>
+      <div class="biz-name">Sparrow's Nest Painting</div>
+      <div class="biz-meta">2630 Sam Nixon Rd, Canton, Georgia 30115 &nbsp;·&nbsp; (700) 555-0277</div>
+    </div>
+    <div class="prop-meta">
+      <div class="prop-id">Proposal #3360227</div>
+      <div>Jeremy Harrison · Pending</div>
+    </div>
+  </div>
+
+  <div class="section-label">
+    Packages
+    <span class="br-chip" tabindex="0">BR-7<span class="br-tip">The proposal-level "Apply Discount" modal stays hidden whenever any package is present on the proposal — unchanged by this ticket. This adds a separate, package-scoped action alongside it.</span></span>
+  </div>
+
+  <!-- ================= SQUIRE (line items only, no discount yet — interactive) ================= -->
+  <div class="package-card" data-package="squire">
+    <div class="package-head">
+      <div>
+        <div class="pkg-title">Squire <span class="selected-badge" data-selected-badge>Selected</span></div>
+        <div class="pkg-desc">Base package: Minimum flair but same high quality work.</div>
+      </div>
+      <div class="pkg-right">
+        <div class="pkg-total" data-total-display>$3,150.00</div>
+        <button class="kebab-btn" aria-haspopup="true" aria-expanded="false" aria-label="Package actions for Squire" data-kebab-toggle>⋮</button>
+        <div class="kebab-menu" role="menu" data-kebab-menu>
+          <div class="menu-section-label" role="presentation">Actions</div>
+          <button role="menuitem"><svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Edit Package</button>
+          <button role="menuitem"><svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg> Duplicate Package</button>
+          <button role="menuitem" data-apply-discount>
+            <svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span>Apply Discount
+              <span class="br-chip" tabindex="0">BR-1<span class="br-tip">Every package has its own discount action, available regardless of composition — line items, an Area, or both.</span></span>
+            </span>
+          </button>
+          <hr>
+          <div class="menu-section-label" role="presentation">Status</div>
+          <button role="menuitem"><svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Mark as Recommended</button>
+          <button role="menuitemradio" aria-checked="false" data-select-package>
+            <svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Select Package
+          </button>
+          <hr>
+          <button role="menuitem" class="destructive"><svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Delete Package</button>
+        </div>
+      </div>
+    </div>
+    <table class="line-table" aria-label="Squire package line items">
+      <thead>
+        <tr><th>Product / Service</th><th class="num">Quantity</th><th class="num">Price</th><th class="num">Subtotal</th><th class="num">Total</th></tr>
+      </thead>
+      <tbody data-line-body>
+        <tr><td class="line-name">No Warranty</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"><span class="desc-only-badge">Description only</span></td></tr>
+        <tr><td class="line-name">General Prep</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"><span class="desc-only-badge">Description only</span></td></tr>
+        <tr><td class="line-name">Basic Paint</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"><span class="desc-only-badge">Description only</span></td></tr>
+        <tr><td class="line-name">Exterior Painting</td><td class="num">1.00</td><td class="num">$3,150.00</td><td class="num">$3,150.00</td><td class="num">$3,150.00</td></tr>
+      </tbody>
+      <tfoot>
+        <tr class="pkg-total-row"><td colspan="4">Package Total</td><td class="num" data-pkg-total>$3,150.00</td></tr>
+      </tfoot>
+    </table>
+    <div class="package-foot">
+      <button class="btn btn-outline-primary">Add Area</button>
+      <button class="btn btn-outline-primary">Add Multiple Items</button>
+      <button class="btn btn-primary">Add Item</button>
+    </div>
+  </div>
+
+  <!-- ================= FENDER (line items only, discount already applied) ================= -->
+  <div class="package-card" data-package="fender">
+    <div class="package-head">
+      <div>
+        <div class="pkg-title">Fender <span class="selected-badge" data-selected-badge>Selected</span></div>
+        <div class="pkg-desc">Mid-range package: We'll up the materials, offer the same stellar craftsmanship, and thrown in a 5-year warranty.</div>
+      </div>
+      <div class="pkg-right">
+        <div class="pkg-total">$4,000.00</div>
+        <button class="kebab-btn" aria-haspopup="true" aria-expanded="false" aria-label="Package actions for Fender" data-kebab-toggle>⋮</button>
+        <div class="kebab-menu" role="menu" data-kebab-menu>
+          <div class="menu-section-label" role="presentation">Actions</div>
+          <button role="menuitem"><svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Edit Package</button>
+          <button role="menuitem"><svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg> Duplicate Package</button>
+          <button role="menuitem" disabled title="One discount per package (V1)">
+            <svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span>Apply Discount<span class="menu-sub">Already discounted — remove line item to reapply</span></span>
+          </button>
+          <hr>
+          <div class="menu-section-label" role="presentation">Status</div>
+          <button role="menuitem"><svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Mark as Recommended</button>
+          <button role="menuitemradio" aria-checked="false" data-select-package>
+            <svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Select Package
+          </button>
+          <hr>
+          <button role="menuitem" class="destructive"><svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Delete Package</button>
+        </div>
+      </div>
+    </div>
+    <table class="line-table" aria-label="Fender package line items">
+      <thead>
+        <tr><th>Product / Service</th><th class="num">Quantity</th><th class="num">Price</th><th class="num">Subtotal</th><th class="num">Total</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="line-name">5-Year Warranty</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"><span class="desc-only-badge">Description only</span></td></tr>
+        <tr><td class="line-name">Extensive Prep &amp; Repair</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"><span class="desc-only-badge">Description only</span></td></tr>
+        <tr><td class="line-name">Premium Paint</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"><span class="desc-only-badge">Description only</span></td></tr>
+        <tr><td class="line-name">Exterior Painting</td><td class="num">1.00</td><td class="num">$4,000.00</td><td class="num">$4,000.00</td><td class="num">$4,200.00</td></tr>
+        <tr class="discount-row"><td class="line-name">5% Discount <span class="br-chip" tabindex="0">BR-3<span class="br-tip">Calculated discount is inserted as a negative line item within this package's item list — same pattern the proposal-level discount already uses.</span></span></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num">($200.00)</td></tr>
+      </tbody>
+      <tfoot>
+        <tr class="pkg-total-row"><td colspan="4">Package Total</td><td class="num">$4,000.00</td></tr>
+      </tfoot>
+    </table>
+    <div class="package-foot">
+      <button class="btn btn-outline-primary">Add Area</button>
+      <button class="btn btn-outline-primary">Add Multiple Items</button>
+      <button class="btn btn-primary">Add Item</button>
+    </div>
+  </div>
+
+  <!-- ================= FENDER CUSTOM (line items + Area, discount already applied) ================= -->
+  <div class="package-card" data-package="fender-custom">
+    <div class="package-head">
+      <div>
+        <div class="pkg-title">Fender Custom <span class="selected-badge" data-selected-badge>Selected</span></div>
+        <div class="pkg-desc">Top-Tier: The best of the best + a 10-year warranty and color consultation.</div>
+      </div>
+      <div class="pkg-right">
+        <div class="pkg-total">$5,254.11</div>
+        <button class="kebab-btn" aria-haspopup="true" aria-expanded="false" aria-label="Package actions for Fender Custom" data-kebab-toggle>⋮</button>
+        <div class="kebab-menu" role="menu" data-kebab-menu>
+          <div class="menu-section-label" role="presentation">Actions</div>
+          <button role="menuitem"><svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Edit Package</button>
+          <button role="menuitem"><svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg> Duplicate Package</button>
+          <button role="menuitem" disabled title="One discount per package (V1)">
+            <svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span>Apply Discount<span class="menu-sub">Already discounted — remove line item to reapply</span></span>
+          </button>
+          <hr>
+          <div class="menu-section-label" role="presentation">Status</div>
+          <button role="menuitem"><svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Mark as Recommended</button>
+          <button role="menuitemradio" aria-checked="false" data-select-package>
+            <svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Select Package
+          </button>
+          <hr>
+          <button role="menuitem" class="destructive"><svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Delete Package</button>
+        </div>
+      </div>
+    </div>
+    <table class="line-table" aria-label="Fender Custom package line items">
+      <thead>
+        <tr><th>Product / Service</th><th class="num">Quantity</th><th class="num">Price</th><th class="num">Subtotal</th><th class="num">Total</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="line-name">10-Year Warranty</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"><span class="desc-only-badge">Description only</span></td></tr>
+        <tr><td class="line-name area">Whole House <span class="area-badge">AREA</span> <span class="br-chip" tabindex="0">BR-1<span class="br-tip">This package mixes an Area with line items — the discount action works the same way here as it does on a line-items-only package.</span></span></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num">$5,608.23</td></tr>
+        <tr><td class="line-name">Extensive Prep &amp; Repair</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"><span class="desc-only-badge">Description only</span></td></tr>
+        <tr><td class="line-name">Color Consultation</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num">$200.00</td></tr>
+        <tr><td class="line-name">Premium Paint</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num"><span class="desc-only-badge">Description only</span></td></tr>
+        <tr class="discount-row"><td class="line-name">10% Discount <span class="br-chip" tabindex="0">BR-2<span class="br-tip">Discount amount is calculated against this package's combined (line item + Area) subtotal at the moment it was applied — $5,541.17.</span></span></td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num">($554.12)</td></tr>
+      </tbody>
+      <tfoot>
+        <tr class="pkg-total-row"><td colspan="4">Package Total</td><td class="num">$5,254.11</td></tr>
+      </tfoot>
+    </table>
+    <div class="package-foot">
+      <button class="btn btn-outline-primary">Add Area</button>
+      <button class="btn btn-outline-primary">Add Multiple Items</button>
+      <button class="btn btn-primary">Add Item</button>
+    </div>
+  </div>
+
+  <div class="totals-card">
+    <div class="totals-head">
+      Totals
+      <span class="br-chip" tabindex="0">BR-6<span class="br-tip">Each package's discount and total are independent — discounting Squire has no effect on Fender or Fender Custom's totals.</span></span>
+    </div>
+    <div class="totals-hint" id="proposal-total-hint">No package selected yet</div>
+    <div class="totals-line subtotal-line">
+      <div class="totals-spacer"></div>
+      <div class="totals-content">
+        <span>Subtotal</span>
+        <span class="totals-value" id="proposal-subtotal">$0.00</span>
+      </div>
+    </div>
+    <div class="totals-line total-line">
+      <div class="totals-spacer"></div>
+      <div class="totals-content">
+        <span>Total</span>
+        <span class="totals-value" id="proposal-total">$0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dev-notes">
+    <h3>Dev &amp; accessibility notes</h3>
+    <ul>
+      <li><strong>Totals layout (updated to match production):</strong> the proposal-level Totals card now uses the same two-row pattern as the live UI — a plain "Subtotal" row and a dark "Total" bar below it. Subtotal mirrors Total here since no proposal-level tax/fee logic is in scope for this ticket; if a future ticket introduces one, Subtotal would diverge from Total at that point.</li>
+      <li><strong>Menu structure (updated to match production):</strong> the ⋮ menu now mirrors the live "Squire" package menu exactly — an <em>Actions</em> group (Edit Package, Duplicate Package, Apply Discount) and a <em>Status</em> group (Mark as Recommended, Select Package), with Delete Package separated below. Icons are inline SVG (Feather-style), <code>aria-hidden</code>, so the button's own text is what assistive tech announces.</li>
+      <li><strong>Proposal Total fix (not one of the 86bc33f26 BRs — a related correction):</strong> the Proposal Total now stays <strong>$0.00</strong> until a package is marked <em>Selected</em> via the Status group, matching the existing single-package-selection model. Selecting a different package deselects the previous one (mutually exclusive) and the total switches to that package's live total, including any applied discount.</li>
+      <li><strong>Select Package semantics:</strong> modeled as <code>role="menuitemradio"</code> with <code>aria-checked</code> across the three packages' Select Package items, so assistive tech gets an explicit checked/unchecked state rather than relying on the visual "Selected" pill alone. <strong>Open question for PM:</strong> clicking "Select Package" on the already-selected package toggles it off in this prototype (returning the total to $0.00) since the label doesn't change to "Deselect" — confirm this matches intended behavior, or if an explicit "Remove Selection" state is preferred.</li>
+      <li><strong>Placement decision:</strong> "Apply Discount" lives in the package's existing ⋮ menu next to Edit Package, not as a 4th footer button — it's an occasional, one-per-package action (BR-8), and adding it to the Add Area / Add Multiple Items / Add Item row would raise decision cost (Hick's Law) on a row that's already used repeatedly during build-out. Flagging for confirmation since the ticket left placement open.</li>
+      <li><strong>Keyboard/focus:</strong> ⋮ button and menu items are native <code>&lt;button&gt;</code>s, 44px hit area, visible focus ring, <code>aria-haspopup</code>/<code>aria-expanded</code> on the trigger, <code>role="menu"</code>/<code>role="menuitem"</code> on the list. Escape closes the menu and returns focus to the ⋮ button; clicking outside also closes it.</li>
+      <li><strong>Modal:</strong> focus moves to the "Discount" field on open, is trapped in the dialog, and returns to the triggering ⋮ button on close. Quick Discount % buttons use <code>aria-pressed</code> rather than color alone to show selection.</li>
+      <li><strong>Disabled state after applying:</strong> per BR-8 (flagged in the ticket as a V1 assumption), the menu item disables with a visible sub-label — not just a tooltip — once a package has a discount line, and a native <code>title</code> attribute backs it up for pointer users.</li>
+      <li><strong>State change announcement:</strong> applying a discount posts an <code>aria-live="polite"</code> confirmation ("Discount applied to the Squire package") so screen reader users get the same confirmation sighted users get from the new line item appearing.</li>
+      <li><strong>Two-way sync:</strong> Quick Discount buttons, the % field, and the $ field all update each other live against the package's subtotal, matching BR-2.</li>
+      <li>Negative line items reuse the existing line-item row pattern (BR-3) — no new component introduced.</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- aria-live region for state changes -->
+<div class="sr-only" role="status" aria-live="polite" id="live-region"></div>
+
+<!-- ================= Apply Discount Modal ================= -->
+<div class="modal-overlay" id="discount-modal" role="dialog" aria-modal="true" aria-labelledby="discount-modal-title">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="discount-modal-title">Apply Discount — Squire</h2>
+      <button class="modal-close" id="modal-close-btn" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-box">
+        <div class="info-label">Package Subtotal</div>
+        <div class="info-value" id="modal-subtotal">$3,150.00</div>
+      </div>
+
+      <span class="field-label" id="qd-label">Quick Discount</span>
+      <div class="quick-discount-group" role="group" aria-labelledby="qd-label">
+        <button type="button" class="qd-btn" data-pct="5" aria-pressed="false">5%</button>
+        <button type="button" class="qd-btn" data-pct="10" aria-pressed="false">10%</button>
+        <button type="button" class="qd-btn" data-pct="15" aria-pressed="false">15%</button>
+        <button type="button" class="qd-btn" data-pct="20" aria-pressed="false">20%</button>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <label class="field-label" for="discount-pct">Discount</label>
+          <div class="field-group">
+            <input type="number" id="discount-pct" inputmode="decimal" min="0" max="100">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+        <div>
+          <label class="field-label" for="discount-amt">Amount</label>
+          <div class="field-group">
+            <span class="prefix">$</span>
+            <input type="number" id="discount-amt" inputmode="decimal" min="0">
+          </div>
+        </div>
+      </div>
+
+      <label class="field-label" for="discount-name">Name</label>
+      <input type="text" class="text-field" id="discount-name" value="Package Discount">
+
+      <label class="field-label" for="discount-note">Note</label>
+      <textarea class="text-field" id="discount-note" placeholder="You can add an optional note here…"></textarea>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline-primary" id="modal-cancel-btn">Close</button>
+      <button class="btn btn-primary" id="modal-save-btn">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var liveRegion = document.getElementById('live-region');
+  var pkgState = { 'squire': 3150.00, 'fender': 4000.00, 'fender-custom': 5254.11 }; // packageKey -> current running total
+  var selectedPackage = null; // null = no package selected -> Proposal Total is $0.00
+  var totalHint = document.getElementById('proposal-total-hint');
+
+  var fmt = function(n){
+    var neg = n < 0;
+    var v = Math.abs(n).toFixed(2);
+    var parts = v.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return (neg ? '($' : '$') + parts.join('.') + (neg ? ')' : '');
+  };
+
+  function updateProposalTotal(){
+    var totalEl = document.getElementById('proposal-total');
+    var subtotalEl = document.getElementById('proposal-subtotal');
+    if(selectedPackage){
+      var val = fmt(pkgState[selectedPackage]);
+      totalEl.textContent = val;
+      subtotalEl.textContent = val; // no proposal-level tax/fee logic in scope; Subtotal mirrors Total here
+      totalHint.textContent = 'Reflects the selected package: ' + document.querySelector('.package-card[data-package="' + selectedPackage + '"] .pkg-title').textContent.replace('Selected','').trim();
+    } else {
+      totalEl.textContent = '$0.00';
+      subtotalEl.textContent = '$0.00';
+      totalHint.textContent = 'No package selected yet';
+    }
+  }
+
+  /* ---------------- Select Package (mutually exclusive) ---------------- */
+  var selectButtons = document.querySelectorAll('[data-select-package]');
+  selectButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var card = btn.closest('.package-card');
+      var pkgKey = card.getAttribute('data-package');
+      var pkgLabel = card.querySelector('.pkg-title').textContent.trim();
+
+      var alreadySelected = selectedPackage === pkgKey;
+
+      // clear all
+      selectButtons.forEach(function(b){ b.setAttribute('aria-checked','false'); });
+      document.querySelectorAll('[data-selected-badge]').forEach(function(badge){ badge.classList.remove('show'); });
+      document.querySelectorAll('.package-card').forEach(function(c){ c.classList.remove('is-selected'); });
+
+      if(alreadySelected){
+        selectedPackage = null;
+        liveRegion.textContent = pkgLabel + ' package deselected. Proposal total is now $0.00.';
+      } else {
+        selectedPackage = pkgKey;
+        btn.setAttribute('aria-checked','true');
+        card.querySelector('[data-selected-badge]').classList.add('show');
+        card.classList.add('is-selected');
+        liveRegion.textContent = pkgLabel + ' package selected. Proposal total is now ' + fmt(pkgState[pkgKey]) + '.';
+      }
+      updateProposalTotal();
+      closeAllMenus(null);
+      btn.focus();
+    });
+  });
+
+  /* ---------------- BR annotation toggle ---------------- */
+  document.getElementById('toggle-br').addEventListener('click', function(){
+    var on = document.body.classList.toggle('show-br');
+    this.textContent = on ? 'Hide BR annotations' : 'Show BR annotations';
+  });
+
+  /* ---------------- Reset ---------------- */
+  document.getElementById('reset-demo').addEventListener('click', function(){
+    location.reload();
+  });
+
+  /* ---------------- Kebab menus ---------------- */
+  var kebabButtons = document.querySelectorAll('[data-kebab-toggle]');
+  function closeAllMenus(exceptBtn){
+    kebabButtons.forEach(function(btn){
+      if(btn === exceptBtn) return;
+      btn.setAttribute('aria-expanded','false');
+      btn.nextElementSibling.classList.remove('open');
+    });
+  }
+  kebabButtons.forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var menu = btn.nextElementSibling;
+      var isOpen = menu.classList.contains('open');
+      closeAllMenus(null);
+      if(!isOpen){
+        menu.classList.add('open');
+        btn.setAttribute('aria-expanded','true');
+        var firstItem = menu.querySelector('button:not(:disabled)');
+        if(firstItem) firstItem.focus();
+      }
+    });
+    btn.addEventListener('keydown', function(e){
+      if(e.key === 'Escape'){ closeAllMenus(null); btn.focus(); }
+    });
+  });
+  document.addEventListener('click', function(){ closeAllMenus(null); });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeAllMenus(null);
+  });
+
+  /* ---------------- Discount modal ---------------- */
+  var modal = document.getElementById('discount-modal');
+  var modalTitle = document.getElementById('discount-modal-title');
+  var modalSubtotal = document.getElementById('modal-subtotal');
+  var pctInput = document.getElementById('discount-pct');
+  var amtInput = document.getElementById('discount-amt');
+  var nameInput = document.getElementById('discount-name');
+  var qdButtons = document.querySelectorAll('.qd-btn');
+  var currentPkgKey = null;
+  var currentSubtotal = 0;
+  var lastFocusedEl = null;
+
+  function openModalFor(pkgKey, pkgLabel){
+    currentPkgKey = pkgKey;
+    currentSubtotal = pkgState[pkgKey];
+    modalTitle.textContent = 'Apply Discount — ' + pkgLabel;
+    modalSubtotal.textContent = fmt(currentSubtotal);
+    pctInput.value = '';
+    amtInput.value = '0.00';
+    nameInput.value = 'Package Discount';
+    document.getElementById('discount-note').value = '';
+    qdButtons.forEach(function(b){ b.setAttribute('aria-pressed','false'); });
+    lastFocusedEl = document.activeElement;
+    modal.classList.add('open');
+    closeAllMenus(null);
+    setTimeout(function(){ pctInput.focus(); }, 10);
+  }
+  function closeModal(){
+    modal.classList.remove('open');
+    if(lastFocusedEl) lastFocusedEl.focus();
+  }
+
+  document.querySelectorAll('[data-apply-discount]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      openModalFor('squire', 'Squire');
+    });
+  });
+  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+  document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+  modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+  });
+
+  /* two-way sync: quick % <-> % field <-> $ field */
+  qdButtons.forEach(function(b){
+    b.addEventListener('click', function(){
+      qdButtons.forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      var pct = parseFloat(b.dataset.pct);
+      pctInput.value = pct;
+      amtInput.value = (currentSubtotal * pct / 100).toFixed(2);
+    });
+  });
+  pctInput.addEventListener('input', function(){
+    qdButtons.forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+    var pct = parseFloat(pctInput.value) || 0;
+    amtInput.value = (currentSubtotal * pct / 100).toFixed(2);
+  });
+  amtInput.addEventListener('input', function(){
+    qdButtons.forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+    var amt = parseFloat(amtInput.value) || 0;
+    pctInput.value = currentSubtotal > 0 ? (amt / currentSubtotal * 100).toFixed(2) : 0;
+  });
+
+  /* Save: insert negative line item into the Squire package, recalc total, disable menu item */
+  document.getElementById('modal-save-btn').addEventListener('click', function(){
+    var amt = parseFloat(amtInput.value) || 0;
+    if(amt <= 0){ pctInput.focus(); return; }
+    var name = nameInput.value.trim() || 'Package Discount';
+
+    var card = document.querySelector('.package-card[data-package="' + currentPkgKey + '"]');
+    var body = card.querySelector('[data-line-body]');
+    var tr = document.createElement('tr');
+    tr.className = 'discount-row';
+    tr.innerHTML = '<td class="line-name">' + name + '</td><td class="num"></td><td class="num"></td><td class="num"></td><td class="num">' + fmt(-amt) + '</td>';
+    body.appendChild(tr);
+
+    var newTotal = currentSubtotal - amt;
+    pkgState[currentPkgKey] = newTotal;
+    card.querySelector('[data-total-display]').textContent = fmt(newTotal);
+    card.querySelector('[data-pkg-total]').textContent = fmt(newTotal);
+
+    // disable further discounting on this package (BR-8, V1)
+    var discountMenuItem = card.querySelector('[data-apply-discount]');
+    discountMenuItem.disabled = true;
+    discountMenuItem.title = 'One discount per package (V1)';
+    discountMenuItem.innerHTML = '<svg class="menu-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span>Apply Discount<span class="menu-sub">Already discounted — remove line item to reapply</span></span>';
+
+    // Proposal Total only reflects the currently selected package
+    updateProposalTotal();
+
+    liveRegion.textContent = 'Discount applied to the Squire package. New package total ' + fmt(newTotal) +
+      (selectedPackage === currentPkgKey ? '. Proposal total updated to match.' : '. Squire is not the selected package, so the Proposal Total is unchanged.');
+
+    closeModal();
+  });
+})();
+</script>
+
+</body>
+</html>
