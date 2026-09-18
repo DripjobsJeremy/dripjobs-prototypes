@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-16] Hub: removed the stale "Holiday Calendar Display (post release update)" card
+
+- Decision: Removed the `#protoGrid` card pointing at `holiday-calendar-display/` and ticket 86bbrazc3. That card was a leftover from a separate 2026-09-02 session that had repointed the original shipped 86bbc0rvr prototype to 86bbrazc3 in place, independently of the same day's other session which built a brand-new `holiday-calendar-independent-controls/` (later renamed `holiday-calendar-company-wide/`) prototype for the same ticket lineage. Since 86bbrazc3 is being closed and superseded by 86bbv6zhh, and Jeremy confirmed `holiday-calendar-company-wide/` (linked to 86bbv6zhh) is the current one, the duplicate card is gone rather than repointed, `holiday-calendar-display/` stays on disk unlinked from the hub as the as-built record of the original shipped 86bbc0rvr feature.
+- Why: Direct request after flagging the duplicate/stale card discovered while merging the 86bbv6zhh rework.
+- Open question: None.
+
 ## [2026-09-18] Per-Package Discount Action: split each package's line-item footer into Subtotal/Total (ticket 86bc33f26)
 
 - Decision: Resolved the open question from the prior entry: Jeremy confirmed the per-package line-item table footer should split the same way the reference screenshot showed. "Package Total" now spans only the first three columns (Product/Service, Quantity, Price) and fills the Subtotal and Total columns separately, with the Total figure in a highlighted pill (light purple bg, bold purple text) matching production. Values use the same assumed flat 5% split as the Totals card (Subtotal = Total ÷ 1.05).
