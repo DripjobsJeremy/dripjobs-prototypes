@@ -318,7 +318,7 @@
     align-items:center;
     padding:13px 20px;
   }
-  .totals-line.subtotal-line .totals-content{color:var(--st-color-text-muted);font-size:13px;}
+  .totals-line.subtotal-line .totals-content, .totals-line.tax-line .totals-content{color:var(--st-color-text-muted);font-size:13px;}
   .totals-line.total-line .totals-content{
     background:#5B6478;
     color:#fff;
@@ -328,7 +328,7 @@
   .totals-line.total-line{border-top:none;}
   .totals-line.total-line .totals-content{border-radius:0 0 9px 0;}
   .totals-value{font-weight:700;}
-  .totals-line.subtotal-line .totals-value{font-weight:600;color:var(--st-color-text);}
+  .totals-line.subtotal-line .totals-value, .totals-line.tax-line .totals-value{font-weight:600;color:var(--st-color-text);}
 
   /* ---------- BR annotation chips ---------- */
   .br-chip{
@@ -691,6 +691,13 @@
         <span class="totals-value" id="proposal-subtotal">$0.00</span>
       </div>
     </div>
+    <div class="totals-line tax-line">
+      <div class="totals-spacer"></div>
+      <div class="totals-content">
+        <span>Tax</span>
+        <span class="totals-value" id="proposal-tax">$0.00</span>
+      </div>
+    </div>
     <div class="totals-line total-line">
       <div class="totals-spacer"></div>
       <div class="totals-content">
@@ -703,7 +710,7 @@
   <div class="dev-notes">
     <h3>Dev &amp; accessibility notes</h3>
     <ul>
-      <li><strong>Totals layout (updated to match production):</strong> the proposal-level Totals card now uses the same two-row pattern as the live UI — a plain "Subtotal" row and a dark "Total" bar below it. Subtotal mirrors Total here since no proposal-level tax/fee logic is in scope for this ticket; if a future ticket introduces one, Subtotal would diverge from Total at that point.</li>
+      <li><strong>Totals layout (updated to match production):</strong> the proposal-level Totals card now shows Subtotal, Tax, and a dark "Total" bar, matching the live UI's three-row pattern. This prototype has no access to the account's real configured tax rate, so it assumes a flat 5% on the selected package's total (Subtotal = Total ÷ 1.05, Tax = Total − Subtotal) purely for display; the real tax calculation/config is out of scope for this ticket.</li>
       <li><strong>Menu structure (updated to match production):</strong> the ⋮ menu now mirrors the live "Squire" package menu exactly — an <em>Actions</em> group (Edit Package, Duplicate Package, Apply Discount) and a <em>Status</em> group (Mark as Recommended, Select Package), with Delete Package separated below. Icons are inline SVG (Feather-style), <code>aria-hidden</code>, so the button's own text is what assistive tech announces.</li>
       <li><strong>Proposal Total fix (not one of the 86bc33f26 BRs — a related correction):</strong> the Proposal Total now stays <strong>$0.00</strong> until a package is marked <em>Selected</em> via the Status group, matching the existing single-package-selection model. Selecting a different package deselects the previous one (mutually exclusive) and the total switches to that package's live total, including any applied discount.</li>
       <li><strong>Select Package semantics (confirmed against production):</strong> modeled as <code>role="menuitemradio"</code> with <code>aria-checked</code> across the three packages' Select Package items, so assistive tech gets an explicit checked/unchecked state rather than relying on the visual "Selected" pill alone. Matching the live menu, the item relabels itself to "Deselect Package" (green icon, light green row highlight) once its package is selected; clicking it again deselects that package, returning the Proposal Total to $0.00.</li>
@@ -788,17 +795,24 @@
     return (neg ? '($' : '$') + parts.join('.') + (neg ? ')' : '');
   };
 
+  var TAX_RATE = 0.05; // assumed flat rate for this prototype; real per-account tax config is out of scope
+
   function updateProposalTotal(){
     var totalEl = document.getElementById('proposal-total');
     var subtotalEl = document.getElementById('proposal-subtotal');
+    var taxEl = document.getElementById('proposal-tax');
     if(selectedPackage){
-      var val = fmt(pkgState[selectedPackage]);
-      totalEl.textContent = val;
-      subtotalEl.textContent = val; // no proposal-level tax/fee logic in scope; Subtotal mirrors Total here
+      var total = pkgState[selectedPackage];
+      var subtotal = total / (1 + TAX_RATE);
+      var tax = total - subtotal;
+      totalEl.textContent = fmt(total);
+      subtotalEl.textContent = fmt(subtotal);
+      taxEl.textContent = fmt(tax);
       totalHint.textContent = 'Reflects the selected package: ' + document.querySelector('.package-card[data-package="' + selectedPackage + '"] .pkg-title').textContent.replace('Selected','').trim();
     } else {
       totalEl.textContent = '$0.00';
       subtotalEl.textContent = '$0.00';
+      taxEl.textContent = '$0.00';
       totalHint.textContent = 'No package selected yet';
     }
   }
