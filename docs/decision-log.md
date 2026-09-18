@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-18] Per-Package Discount Action: split each package's line-item footer into Subtotal/Total (ticket 86bc33f26)
+
+- Decision: Resolved the open question from the prior entry: Jeremy confirmed the per-package line-item table footer should split the same way the reference screenshot showed. "Package Total" now spans only the first three columns (Product/Service, Quantity, Price) and fills the Subtotal and Total columns separately, with the Total figure in a highlighted pill (light purple bg, bold purple text) matching production. Values use the same assumed flat 5% split as the Totals card (Subtotal = Total ÷ 1.05).
+- Why: Direct follow-up request to extend the same tax-split treatment to the package footer.
+- Open question: None.
+
 ## [2026-09-18] Per-Package Discount Action: added a Tax line to the proposal Totals card (ticket 86bc33f26)
 
 - Decision: Added a "Tax" row between Subtotal and the dark Total bar in the bottom Totals card, matching the three-row layout Jeremy shared from production. Scoped this to the Totals card only (not each package's own line-item footer, which the reference screenshot also showed split into Subtotal/Total columns) since only the Totals card was named. Since this prototype has no real tax config to read, it assumes a flat 5% rate per Jeremy's instruction and backs Subtotal/Tax out of each package's existing (tax-inclusive) total: Subtotal = Total ÷ 1.05, Tax = Total − Subtotal.
