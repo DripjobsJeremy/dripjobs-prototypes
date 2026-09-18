@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-18] Weekly Product Update + Product Roadmap refreshed for Sep 14-18, 2026
+
+- Decision: Rebuilt `weekly-product-update/index.html` and `Weekly_Product_Update.md` with the 6 tickets pushed to production on Sep 17 (Contacts, Communications, 2 Invoicing, Production Rates, Admin Tools). Rebuilt `dripjobs-product-roadmap/index.html` from a fresh workspace-wide pull of the bare 🎯 tag: 22 in-flight tickets across all 13 pipeline stages (Triage and PR Created both populated this week for the first time in a few cycles) plus 1 on hold/parked. Updated both Release Notes cards on the hub to the new dates.
+- Why: Routine weekly refresh per Jeremy's instruction, sourced directly from ClickUp. Continued using the workspace-wide bare "🎯" tag scoping (not the Active Triage list, not "🎯 focus") per the 2026-09-04 decision, honoring "pull only from that list" as "match what the saved Overview view at that URL shows."
+
 ## [2026-09-18] Event Banner Relocation: built the pre-supplied prototype into the hub (ticket 86bc3at0e)
 
 - Decision: Jeremy supplied an already-built clickable prototype (BR1, BR2, BR3, BR5, BR6) moving the "Add crew name to event banner" and "Add job total to event banner" toggles from App Settings &gt; Estimate Settings into a new Event Banner Display section on the Calendar tab of Company Settings, with existing-account values preserved (BR-3) and new accounts defaulting "Add job total" ON (BR-6). Landed it as-is at `event-banner-relocation/`, only adding the standard hub chrome (gate.js, proto-bar, hub card); the supplied file's own demo banner (account-type simulation, BR-annotation toggle) was kept below the proto-bar, matching the layout used for other pre-supplied prototypes.

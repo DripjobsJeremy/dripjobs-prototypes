@@ -1,70 +1,54 @@
 # DripJobs Weekly Product Update
 
-**Period:** September 7 – September 11, 2026
-**Release:** Sep 8 deployment · 10 updates
+**Period:** September 14 – September 18, 2026
+**Release:** Sep 17 deployment · 6 updates
 
 ---
 
-## Proposal Builder
+## Contacts
 
-### Fixed Accepted Proposals Missing Their Activity Log Event and Metrics Credit (*Sep 8*)
-**What changed:** Fixed a bug where accepting a proposal didn't always record an Activity Log event on the contact, and didn't always credit the acceptance toward that proposal's metrics.
-**Why it matters:** Every accepted proposal now shows up correctly in the contact's Activity Log and in your proposal metrics, so acceptance history and reporting stay accurate.
-**Action needed:** None
-
-### Fixed Proposal Downloads Missing Images and Attachments on One Account (*Sep 8*)
-**What changed:** Fixed a bug on one account where downloading a proposal produced a PDF missing its images and attachments, while the on-screen proposal displayed them correctly.
-**Why it matters:** Downloaded proposal PDFs now match what you and your customer see on screen, images and attachments included.
+### Fixed Duplicate Contact Info Validation, Secondary Contact Search, and New Addresses Not Saving to Existing Contacts (*Sep 17*)
+**What changed:** Fixed several contact data issues: duplicate email and phone validation now applies to every email and phone field on a contact, not just the primary; contacts can now be found in search by any of their secondary emails and phone numbers, not just the primary; a stray hover indicator in the Stores view is fixed; and a new address entered while creating a Lead, Proposal, or Onsite Estimate for an existing contact now automatically saves to that Contact record too.
+**Why it matters:** Contact records stay accurate and duplicate-free, you can find a contact by any of their emails or phone numbers, and an address you enter once is available for reuse going forward instead of getting lost.
 **Action needed:** None
 
 ---
 
-## Command Center
+## Communications
 
-### Fixed Tasks Tab Getting Clipped When Jobi AI and QUO Are Both Enabled (*Sep 8*)
-**What changed:** Fixed a layout bug where Command Center's Tasks tab got visually clipped on accounts with both Jobi AI and QUO enabled, cutting off part of the tab's content.
-**Why it matters:** The Tasks tab now displays fully regardless of which combination of Jobi AI and QUO you have enabled.
+### Fixed Blast Performance Tab Not Tracking Activity After Send (*Sep 17*)
+**What changed:** Fixed a bug where a Blast's Performance tab could fail to track and display delivery and engagement activity (opens, clicks, bounces, and similar events) after the blast was sent.
+**Why it matters:** Blast Performance metrics now reliably reflect what actually happened after you hit send, so you can trust the numbers you're looking at.
 **Action needed:** None
 
 ---
 
-## Integrations
+## Invoicing
 
-### Fixed Google Calendar Syncing Appointments to the Wrong Admin's Calendar (*Sep 8*)
-**What changed:** Fixed a bug where some appointments synced to a different admin's connected Google Calendar than the one they were actually assigned to.
-**Why it matters:** Appointments now sync to the correct admin's Google Calendar, so everyone's calendar reflects only the appointments actually assigned to them.
+### Secured Invoice Email Sending Against Unauthorized and Spam Sends (*Sep 17*)
+**What changed:** Closed a security gap where invoice emails could be sent to a recipient not associated with that invoice's contact, bypassing the app's built-in checks. Every invoice email send is now independently validated on the server, not just in the browser.
+**Why it matters:** Invoice emails can no longer be sent to unauthorized or spoofed recipients, protecting your accounts and customers from spam and abuse.
 **Action needed:** None
 
-### Fixed a QuickBooks Sync Failure Caused by a Stale Discount Mapping (*Sep 8*)
-**What changed:** Fixed a bug where QuickBooks sync failed on invoices carrying a discount mapped to an item that had since been removed or changed in QuickBooks.
-**Why it matters:** Invoices with discounts now sync to QuickBooks reliably instead of silently failing when a mapped discount item is no longer current.
-**Action needed:** None. Re-sync any invoice that previously failed for this reason.
-
-### Added "Send Marketing Agency Info" to the Zapier Integration Card (*New · Sep 8*)
-**What changed:** Added a "Send Marketing Agency Info" action to the Zapier integration card, so a Zap can push a contact's marketing agency details out to other tools.
-**Why it matters:** Marketing agency info can now flow into whatever other systems you connect through Zapier, without a manual export.
-**Action needed:** None. Build a Zap using the new action if you'd like to use it.
-
-### Fixed Routemize Appointments Ignoring Communication Settings (*Sep 8*)
-**What changed:** Fixed a bug where appointments created through the Routemize integration sent customer communications even when that contact's communication settings had them disabled.
-**Why it matters:** Routemize-created appointments now respect a contact's communication preferences the same way appointments created directly in DripJobs already do.
+### Fixed Voided Invoices Still Showing a Balance Due and Payment Button in the Customer Portal (*Sep 17*)
+**What changed:** Fixed a bug where a voided invoice still showed its original balance due and an active "Pay" button in the customer portal, letting a customer attempt to pay an invoice you'd already voided.
+**Why it matters:** Customers can no longer be misled into paying, or trying to pay, an invoice that's already been voided, avoiding confusing payment attempts and reconciliation headaches.
 **Action needed:** None
 
-### Added Stripe Payment Support to the "Payment Received" Zapier Trigger (*New · Sep 8*)
-**What changed:** The "Payment Received" Zapier trigger now fires for Stripe payments in addition to the payment methods it already covered.
-**Why it matters:** Zaps built on "Payment Received" now catch Stripe payments too, instead of missing them.
+---
+
+## Production Rates
+
+### Updated the Production Rates "Schedule Demo" Link (*Sep 17*)
+**What changed:** Updated the "Schedule demo" link in Production Rates to point to the correct booking page.
+**Why it matters:** Clicking Schedule demo from Production Rates now takes you to the right scheduling page instead of an outdated one.
 **Action needed:** None
 
 ---
 
 ## Admin Tools
 
-### Added Accepted File Format Helper Text to Company Logo Upload (*New · Sep 8*)
-**What changed:** The Company Logo upload in Company Settings now shows helper text listing the accepted file formats before you pick a file.
-**Why it matters:** You know which file types will work before attempting an upload, instead of finding out only after a failed attempt.
-**Action needed:** None
-
-### Fixed Company Settings' Horizontal Tab Bar Not Responding to Drag at 100% Zoom (*Sep 8*)
-**What changed:** Fixed a bug where Company Settings' horizontal tab bar didn't respond to click-and-drag scrolling at 100% browser zoom, even though scrolling worked at other zoom levels.
-**Why it matters:** You can now drag-scroll the Company Settings tab bar at any zoom level, including the default 100%.
+### Fixed a Custom Pipeline Stage That Couldn't Be Deleted Due to Stale Deal Assignments (*Sep 17*)
+**What changed:** Fixed a bug where deleting a custom pipeline stage could be blocked by stale deal-stage associations, even after every deal had already been moved off that stage.
+**Why it matters:** You can now delete a custom stage once all deals are actually off it, without a false "deals still assigned" error blocking you.
 **Action needed:** None
