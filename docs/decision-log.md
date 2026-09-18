@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-18] Per-Package Discount Action: added a Tax line to the proposal Totals card (ticket 86bc33f26)
+
+- Decision: Added a "Tax" row between Subtotal and the dark Total bar in the bottom Totals card, matching the three-row layout Jeremy shared from production. Scoped this to the Totals card only (not each package's own line-item footer, which the reference screenshot also showed split into Subtotal/Total columns) since only the Totals card was named. Since this prototype has no real tax config to read, it assumes a flat 5% rate per Jeremy's instruction and backs Subtotal/Tax out of each package's existing (tax-inclusive) total: Subtotal = Total ÷ 1.05, Tax = Total − Subtotal.
+- Why: Direct request; tax rate given as an explicit assumption rather than guessed.
+- Open question: Confirm whether the per-package line-item table footer should also split into Subtotal/Total columns like the reference screenshot, since that wasn't explicitly asked for and wasn't changed here.
+
 ## [2026-09-18] Per-Package Discount Action: confirmed Select/Deselect Package menu behavior against production (ticket 86bc33f26)
 
 - Decision: Jeremy confirmed, with a production screenshot, that the "Select Package" menu item should relabel to "Deselect Package" (green check icon, light green row highlight) once that package is selected, rather than keeping a static "Select Package" label. Updated the prototype's kebab menu to relabel and restyle the item on selection instead of only toggling `aria-checked` silently. Also confirmed Apply Discount stays in the ⋮ menu (not a footer button) — no change needed there.
