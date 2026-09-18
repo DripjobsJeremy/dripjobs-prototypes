@@ -2,6 +2,18 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-18] Per-Package Discount Action: confirmed Select/Deselect Package menu behavior against production (ticket 86bc33f26)
+
+- Decision: Jeremy confirmed, with a production screenshot, that the "Select Package" menu item should relabel to "Deselect Package" (green check icon, light green row highlight) once that package is selected, rather than keeping a static "Select Package" label. Updated the prototype's kebab menu to relabel and restyle the item on selection instead of only toggling `aria-checked` silently. Also confirmed Apply Discount stays in the ⋮ menu (not a footer button) — no change needed there.
+- Why: Direct confirmation against the existing production UI, resolving the open question from the prior session's build.
+- Open question: None.
+
+## [2026-09-18] Per-Package Discount Action: built the pre-supplied prototype into the hub (ticket 86bc33f26)
+
+- Decision: Jeremy supplied an already-built clickable prototype (BR1-BR8) adding a package-scoped "Apply Discount" action to the Proposal Builder's per-package ⋮ menu, alongside a pre-existing (unlabeled) fix making the Proposal Total only reflect the currently Selected package. Landed it as-is at `package-discount-action/`, only adding the standard hub chrome (proto-bar, hub card); the supplied file's own dark demo-banner (BR-annotation toggle, reset) was kept below the proto-bar, matching the layout used for other pre-supplied prototypes. No design decisions were made in this pass since the interaction design (menu placement, one-discount-per-package V1 cap, negative line-item pattern) was already resolved in the supplied file.
+- Why: Direct request to build the supplied prototype into the hub.
+- Open question: The prototype's own dev notes flag two items for PM: whether "Select Package" toggling off the already-selected package (returning total to $0.00) matches intended behavior or needs an explicit "Remove Selection" state, and confirming Apply Discount's placement in the ⋮ menu vs. the package footer row, since the ticket left both open.
+
 ## [2026-09-17] Address Line 2 (Company Settings + Job/Appointment Address Display): built the pre-supplied prototype into the hub (ticket 86bbwn0r2)
 
 - Decision: Jeremy supplied an already-built clickable prototype covering BR1 to BR8 (Company Settings physical/billing address, New Lead, New Proposal, New On-Site Estimate, New Appointment/Other, Booking Form, all with the Addresses On File auto-populate and edit-flips-to-new-address behavior wired up). Landed it as-is at `address-line-2-entry-points/`, only adding the standard hub chrome (gate.js, proto-bar, hub card) and converting its fixed-position demo banner to the flex-stacked layout other prototypes use, so it sits below the proto-bar instead of overlapping it. No design decisions were made in this pass since the interaction design was already resolved in the supplied file.
