@@ -408,6 +408,25 @@
   .btn-danger { background: #F43F5E; color: #fff; border-radius: 2px; }
   .btn-danger:hover { background: #E11D48; }
   .btn-plain { background: #fff; border: 1px solid #32415B; color: #32415B; border-radius: 2px; }
+  /* Existing "Choose a new write-to calendar" modal */
+  .dj-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 900; padding: 16px; }
+  .dj-modal { background: #fff; width: 470px; max-width: 100%; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; text-align: left; }
+  .dj-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #EEEEF2; }
+  .dj-modal-head h2 { font-size: 14.5px; font-weight: 700; margin: 0; color: #32415B; }
+  .dj-modal-head button { border: none; background: none; font-size: 18px; color: #80879A; cursor: pointer; width: 32px; height: 32px; }
+  .dj-modal-body { padding: 18px 20px 20px; font-size: 12.5px; color: #32415B; line-height: 1.5; }
+  .dj-modal-body > p { margin: 0 0 14px; }
+  .dj-modal-body label { display: block; font-size: 11px; font-weight: 700; color: #4C566E; margin-bottom: 6px; }
+  .dj-modal-body select { width: 100%; height: 40px; border: 1px solid #DAD8E3; border-radius: 8px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #32415B; background: #fff; }
+  .dj-modal-body select:focus { outline: none; border-color: #8B85EA; box-shadow: 0 0 0 3px rgba(139,133,234,0.18); }
+  .dj-modal-body .help { font-size: 10.5px; color: #80879A; margin: 8px 0 0; }
+  .dj-modal-foot { display: flex; justify-content: space-between; gap: 10px; padding: 14px 20px; background: #F3F3F7; }
+  .dj-modal-foot .btn { min-width: 96px; border-radius: 8px; }
+  .btn-white { background: #fff; border: 1px solid #DAD8E3; color: #32415B; }
+  .btn-red { background: #DC3545; color: #fff; }
+  .btn-red:hover { background: #C82333; }
+  .make-wt { font-size: 9.5px; font-weight: 700; padding: 5px 7px; border-radius: 4px; background: #6A5AEB; color: #fff; border: none; cursor: pointer; font-family: inherit; min-height: 24px; }
+  .make-wt:hover { background: #5C53DC; }
   .changed-flag { display: inline-block; margin-left: 6px; }
   .integ-foot .flow-link { font-weight: 400; }
 
@@ -544,7 +563,9 @@
     pendingLinks: [],
     writeTo: null,
     mcPending: [],
-    lastSynced: '09/22/2026 04:20 PM',
+    synced: {},          // calendar index -> last synced text
+    reassign: null,      // write-to calendar being unlinked while others stay linked
+    reassignTo: null,
     confirmUnlink: null,
     arrived: false,
     mobileTip: false
@@ -861,7 +882,7 @@
     var note = document.getElementById('demo-note');
     var STEP = { choose: 1, consent: 2, link: 3, writeto: 4, done: 5 };
     if (state.flow === 'manage') {
-      note.textContent = 'Existing Manage Calendars page, unchanged (BR7). Reached from Manage Calendars on the connected Google card, which replaces the Manage Calendars button in the old header widget. Unlinking your last calendar asks to confirm, then disconnects Google entirely and shows the empty state. Use the sidebar, or the Google icon on Appointments or Job Schedule, to leave.';
+      note.textContent = 'Existing Manage Calendars page, unchanged (BR7). Reached from Manage Calendars on the connected Google card, which replaces the Manage Calendars button in the old header widget. Unlinking the write-to calendar asks you to pick a new one first; unlinking your last calendar asks to confirm, then disconnects Google entirely. Use the sidebar, or the Google icon on Appointments or Job Schedule, to leave.';
     } else if (state.flow) {
       note.textContent = 'Existing Google connect flow, step ' + STEP[state.flow] + ' of 5 (BR7). Screens match production' +
         (state.flow === 'link' ? ', subtitle em dash swapped for a colon' : '') +
@@ -981,7 +1002,7 @@
       var linkedRows = state.linked.map(function (i) {
         var c = cals[i], w = state.writeTo === i;
         return '<tr><td class="cal-name"><span class="cal-swatch" style="background:' + c[1] + '"></span>' + esc(c[0]) + (w ? '<span class="wt-badge">Write-to calendar</span>' : '') + '</td>' +
-          '<td>' + c[2] + '</td><td>' + state.lastSynced + '</td><td class="c">' + (w ? '<span style="color:#34C38F" aria-label="Write-to calendar">&#10003;</span>' : '') + '</td>' +
+          '<td>' + c[2] + '</td><td>' + (state.synced[i] || 'Not yet synced') + '</td><td class="c">' + (w ? '<span style="color:#34C38F" aria-label="Write-to calendar">&#10003;</span>' : (c[3] ? '<button type="button" class="make-wt" data-mc-make="' + i + '">Make write-to</button>' : '')) + '</td>' +
           '<td class="r"><button type="button" class="unlink-btn" data-mc-unlink="' + i + '">Unlink</button></td></tr>';
       }).join('');
       var others = cals.map(function (c, i) { return i; }).filter(function (i) { return state.linked.indexOf(i) < 0; });
@@ -1015,7 +1036,19 @@
       br(8, 'BR8: Was "Continue to appointments". Now returns the user to the Google integration card.') + '</span></div></div>';
   }
 
+  function calLabel(i) { return calendars()[i][0].split('@')[0]; }
   function confirmModal() {
+    if (state.reassign !== null) {
+      var cals = calendars();
+      var opts = state.linked.filter(function (i) { return i !== state.reassign && cals[i][3]; });
+      return '<div class="dj-modal-backdrop" data-mc-re="cancel"><div class="dj-modal" role="dialog" aria-modal="true" aria-labelledby="reTitle">' +
+        '<div class="dj-modal-head"><h2 id="reTitle">Choose a new write-to calendar</h2><button type="button" data-mc-re="cancel" aria-label="Close">&times;</button></div>' +
+        '<div class="dj-modal-body"><p><b>' + esc(calLabel(state.reassign)) + '</b> is the calendar DripJobs writes to. Pick which of your other calendars should receive new appointments and jobs once it is unlinked.</p>' +
+        '<label for="reSelect">New write-to calendar</label><select id="reSelect" data-mc-re-pick' + (opts.length ? '' : ' disabled') + '>' +
+        (opts.length ? opts.map(function (i) { return '<option value="' + i + '"' + (state.reassignTo === i ? ' selected' : '') + '>' + esc(calLabel(i)) + '</option>'; }).join('') : '<option>No other write-to capable calendars linked</option>') + '</select>' +
+        '<p class="help">Events already synced stay on the unlinked calendar in Google. Events imported from it are removed from DripJobs.</p></div>' +
+        '<div class="dj-modal-foot"><button type="button" class="btn btn-white" data-mc-re="cancel">Cancel</button><button type="button" class="btn btn-red" data-mc-re="yes"' + (opts.length ? '' : ' disabled') + '>Unlink Calendar</button></div></div></div>';
+    }
     if (state.confirmUnlink === null) return '';
     var nm = calendars()[state.confirmUnlink][0].split('@')[0];
     return '<div class="dj-alert-backdrop" data-mc-confirm="cancel"><div class="dj-alert" role="alertdialog" aria-modal="true" aria-labelledby="unlinkTitle">' +
@@ -1045,10 +1078,11 @@
   }
   function ensureLinkedDefaults() {
     // When "Connected" is set from the demo bar, assume the user's own calendar is linked and is the write-to
-    if (state.connected && !state.linked.length) { state.linked = [3]; state.writeTo = 3; }
+    if (state.connected && !state.linked.length) { state.linked = [3]; state.writeTo = 3; state.synced = { 3: '09/22/2026 04:20 PM' }; }
   }
 
   document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && state.reassign !== null) { var r0 = state.reassign; state.reassign = null; render(); var rb = document.querySelector('[data-mc-unlink="' + r0 + '"]'); if (rb) rb.focus(); return; }
     if (e.key === 'Escape' && state.confirmUnlink !== null) { var w0 = state.confirmUnlink; state.confirmUnlink = null; render(); var ub = document.querySelector('[data-mc-unlink="' + w0 + '"]'); if (ub) ub.focus(); return; }
     if (e.key === 'Escape' && state.mobileTip) { state.mobileTip = false; render(); }
   });
@@ -1088,9 +1122,33 @@
         var yb = document.querySelector('[data-mc-confirm="yes"]'); if (yb) yb.focus();
         return;
       }
+      if (state.writeTo === ui) {
+        // Unlinking the write-to calendar while others stay linked: pick a replacement first (existing behavior)
+        var cs = calendars();
+        var first = state.linked.filter(function (x) { return x !== ui && cs[x][3]; })[0];
+        state.reassign = ui; state.reassignTo = first === undefined ? null : first;
+        render();
+        var sel = document.getElementById('reSelect'); if (sel) sel.focus({ preventScroll: true });
+        return;
+      }
       state.linked = state.linked.filter(function (x) { return x !== ui; });
-      if (state.writeTo === ui) state.writeTo = null;
       render(); return;
+    }
+    var mk = e.target.closest('[data-mc-make]');
+    if (mk) { state.writeTo = +mk.dataset.mcMake; render(); return; }
+    var re = e.target.closest('[data-mc-re]');
+    if (re && !re.disabled) {
+      if (re.dataset.mcRe === 'cancel' && e.target !== re && re.classList.contains('dj-modal-backdrop')) return;
+      var gone = state.reassign;
+      state.reassign = null;
+      if (re.dataset.mcRe === 'yes') {
+        state.linked = state.linked.filter(function (x) { return x !== gone; });
+        delete state.synced[gone];
+        state.writeTo = state.reassignTo;
+      }
+      render();
+      var fb = document.querySelector('[data-mc-unlink="' + (re.dataset.mcRe === 'yes' ? state.writeTo : gone) + '"]'); if (fb) fb.focus();
+      return;
     }
     var mcc = e.target.closest('[data-mc-confirm]');
     if (mcc) {
@@ -1099,7 +1157,7 @@
       state.confirmUnlink = null;
       if (mcc.dataset.mcConfirm === 'yes') {
         // Last calendar unlinked: DripJobs disconnects from Google entirely (existing behavior)
-        state.connected = false; state.linked = []; state.writeTo = null; state.syncJobs = false;
+        state.connected = false; state.linked = []; state.writeTo = null; state.syncJobs = false; state.synced = {};
       }
       render();
       var back = mcc.dataset.mcConfirm === 'yes' ? document.querySelector('.mc-empty-state .btn') : document.querySelector('[data-mc-unlink="' + was + '"]');
@@ -1110,7 +1168,8 @@
     if (mca && !mca.disabled) {
       if (mca.dataset.mc === 'sync') {
         var d = new Date(), h = d.getHours(), pad = function (x) { return (x < 10 ? '0' : '') + x; };
-        state.lastSynced = pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + '/' + d.getFullYear() + ' ' + pad(h % 12 || 12) + ':' + pad(d.getMinutes()) + ' ' + (h < 12 ? 'AM' : 'PM');
+        var stamp = pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + '/' + d.getFullYear() + ' ' + pad(h % 12 || 12) + ':' + pad(d.getMinutes()) + ' ' + (h < 12 ? 'AM' : 'PM');
+        state.linked.forEach(function (x) { state.synced[x] = stamp; });
       } else {
         state.linked = state.linked.concat(state.mcPending).sort(function (x, y) { return x - y; });
         state.mcPending = [];
@@ -1151,6 +1210,7 @@
       var el = document.querySelector('[data-flow-pick="' + i + '"]'); if (el) el.focus();
       return;
     }
+    if (t.id === 'reSelect') { state.reassignTo = +t.value; return; }
     if (t.dataset.mcPick !== undefined) {
       var mi = +t.dataset.mcPick, mk = state.mcPending.indexOf(mi);
       if (t.checked && mk < 0) state.mcPending.push(mi);
