@@ -427,6 +427,22 @@
   .btn-red:hover { background: #C82333; }
   .make-wt { font-size: 9.5px; font-weight: 700; padding: 5px 7px; border-radius: 4px; background: #6A5AEB; color: #fff; border: none; cursor: pointer; font-family: inherit; min-height: 24px; }
   .make-wt:hover { background: #5C53DC; }
+  /* Save / Cancel page actions (existing Company Settings pattern) */
+  .settings-actions { border-top: 1px solid #E6E6EC; margin-top: 40px; padding: 22px 0 0; display: flex; gap: 10px; flex-wrap: wrap; }
+  .settings-actions .btn { min-height: 34px; }
+  .settings-copyright { border-top: 1px solid #E6E6EC; margin-top: 26px; padding-top: 10px; text-align: center; font-size: 11.5px; color: #80879A; }
+  .phone .settings-actions .btn { width: 100%; }
+  /* Unsaved-toggle reminder: hover or focus a toggle switched ON but not yet saved */
+  .settings-toggle-row { position: relative; }
+  .save-hint {
+    position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 30; width: 230px;
+    background: #32415B; color: #fff; font-size: 12px; font-weight: 600; line-height: 1.4;
+    padding: 8px 12px; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    opacity: 0; visibility: hidden; transition: opacity 0.12s ease; pointer-events: none;
+  }
+  .save-hint::after { content: ""; position: absolute; top: 100%; left: 14px; border: 6px solid transparent; border-top-color: #32415B; }
+  .settings-toggle-row.pending-on:hover .save-hint,
+  .settings-toggle-row.pending-on:focus-within .save-hint { opacity: 1; visibility: visible; }
   .changed-flag { display: inline-block; margin-left: 6px; }
   .integ-foot .flow-link { font-weight: 400; }
 
@@ -558,6 +574,8 @@
     view: 'appointments',   // appointments | jobschedule | card
     br: false,
     syncJobs: false,
+    pendingSync: null,   // unsaved Sync Jobs value (null = no change)
+    pendingDisconnect: false,
     flow: null,          // null | choose | consent | link | writeto | done
     linked: [],          // indexes into calendars()
     pendingLinks: [],
@@ -730,19 +748,20 @@
         '<button type="button" class="btn btn-google" data-gcal="signin" style="width:100%">' + G_SVG + 'Sign in with Google</button>' +
         '<div style="margin-top:8px">' + br(7, 'BR7: Launches the existing Google sign-in and calendar selection flow (account, consent, link calendars, write-to calendar, all set). Only change: the last step returns here instead of to Appointments (BR8).') +
         br(13, 'BR13: Not Connected shows only the sign-in action. Sync Jobs and Disconnect are hidden.') +
-        br(8, 'BR8: After connecting or disconnecting, the user stays on this card.') + '</div>';
+        br(8, 'BR8: After connecting or disconnecting (on Save), the user stays on this card.') + '</div>';
     } else {
       html += '<div class="gcal-status-line"><i class="fa-solid fa-circle-check"></i>Appointments &amp; Job Schedule: Connected' +
         br(9, 'BR9: One combined, account-level status line when connected.') + '</div>';
-      html += '<div class="settings-toggle-row">' +
-        '<label class="dj-switch"><input type="checkbox" class="form-check-input switchery" id="syncJobsToggle" data-gcal="sync"' + (state.syncJobs ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
+      var syncOn = state.pendingSync === null ? state.syncJobs : state.pendingSync;
+      html += '<div class="settings-toggle-row' + (state.pendingSync === true ? ' pending-on' : '') + '">' + '<span class="save-hint" role="tooltip">Click Save at the bottom of the page to apply this change.</span>' +
+        '<label class="dj-switch"><input type="checkbox" class="form-check-input switchery" id="syncJobsToggle" data-gcal="sync"' + (syncOn ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
         '<label class="settings-toggle-label" for="syncJobsToggle">Sync Jobs to Google Calendar</label>' +
         br(11, 'BR11: Moved here from My Profile (removed there per BR10). Visible only when connected (BR13).') +
         br(14, 'BR14 open gap: whether to add a separate Sync Appointments to Google toggle is undecided (Out of Scope / V2).') + '</div>';
-      html += '<div class="settings-toggle-row">' +
-        '<label class="dj-switch"><input type="checkbox" class="form-check-input switchery" id="disconnectToggle" data-gcal="disconnect"><span class="track"></span><span class="thumb"></span></label>' +
+      html += '<div class="settings-toggle-row' + (state.pendingDisconnect ? ' pending-on' : '') + '">' + '<span class="save-hint" role="tooltip">Click Save at the bottom of the page to apply this change.</span>' +
+        '<label class="dj-switch"><input type="checkbox" class="form-check-input switchery" id="disconnectToggle" data-gcal="disconnect"' + (state.pendingDisconnect ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
         '<label class="settings-toggle-label" for="disconnectToggle">Disconnect Google Calendar</label>' +
-        br(12, 'BR12: Helper text states disconnecting removes both calendar connections. Disconnecting returns the card to Not Connected, user stays here (BR8).') + '</div>' +
+        br(12, 'BR12: Helper text states disconnecting removes both calendar connections. Disconnecting takes effect on Save, then the card returns to Not Connected and the user stays here (BR8).') + '</div>' +
         '<div class="settings-toggle-help">Disconnecting removes both your Appointments calendar and Job Schedule calendar connections.</div>';
     }
     html += '</div>';
@@ -803,6 +822,13 @@
     }).join('') + '</nav></div>';
   }
 
+  function settingsActions() {
+    return '<div class="settings-actions"><button type="button" class="btn btn-primary" data-settings="save">Save</button>' +
+      '<button type="button" class="btn btn-outline-primary" data-settings="cancel">Cancel - Return to Dashboard</button>' +
+      br(8, 'Toggle changes on the card only apply after Save. Hovering a toggle switched ON reminds the user to click Save.') + '</div>' +
+      '<div class="settings-copyright">Copyright &copy; 2026 Dripjobs</div>';
+  }
+
   // BR5: admin lands on full Company Settings > Integrations, at the Google card
   function adminIntegrationsPage(mobile) {
     return settingsTabs() +
@@ -810,14 +836,14 @@
       br(5, 'BR5: Admins land on the full Company Settings Integrations page, scrolled to and highlighted at their Google card.') + '</h2>' +
       '<p class="integrations-sub">Connect DripJobs to the third-party services you already use.</p>' +
       '<div class="integrations-grid">' + googleCard() + (mobile ? '' : siblingCards()) + '</div>' +
-      (mobile ? '<div class="m-rest-note">Remaining integration cards continue below, unchanged.</div>' : '') + '</div>';
+      (mobile ? '<div class="m-rest-note">Remaining integration cards continue below, unchanged.</div>' : '') + '</div>' + settingsActions();
   }
 
   // BR6: non-admin scoped view, Google card only
   function scopedPage() {
     return '<div class="page-header" style="padding:0"><h1 class="page-title" style="margin-bottom:14px">Google Calendar' +
       br(6, 'BR6: Non-admins see only the Google integration card. No Settings tabs, other cards, or Settings navigation. Their normal sidebar (which never had Settings) is unchanged.') + '</h1></div>' +
-      '<div class="scoped-col" style="padding:0">' + googleCard() + '</div>';
+      '<div class="scoped-col" style="padding:0">' + googleCard() + '</div>' + settingsActions();
   }
 
   /* ---------- Mobile (BR15) ---------- */
@@ -890,8 +916,8 @@
         (state.flow === 'writeto' ? '. Changed here: the button reads Continue, since this step now leads to the All set screen' : '') + '.';
     } else if (state.view === 'card') {
       note.textContent = state.role === 'admin'
-        ? 'Admin landed on Company Settings > Integrations at the Google card. Connect or disconnect here: you stay on this card.'
-        : 'Non-admin landed on the scoped view: the Google card only, no other Settings content. Use the sidebar or Go to buttons to return.';
+        ? 'Admin landed on Company Settings > Integrations at the Google card. Toggle changes apply only after Save (hover a toggle you switched ON for the reminder). Connect or disconnect here: you stay on this card.'
+        : 'Non-admin landed on the scoped view: the Google card only, no other Settings content. Toggle changes apply only after Save. Use the sidebar or Go to buttons to return.';
     } else {
       note.textContent = (state.viewport === 'desktop' ? 'Hover' : 'Tap the (i) next to') + ' the Google icon to see the ' + (state.connected ? 'manage' : 'connect') + ' tooltip, then ' + (state.viewport === 'desktop' ? 'click' : 'tap') + ' it to open the Google integration card as ' + (state.role === 'admin' ? 'an admin.' : 'a non-admin.') + ' Sync Jobs and Disconnect are no longer on My Profile (BR10, not shown here).';
     }
@@ -1058,7 +1084,10 @@
       '<div class="dj-alert-actions"><button type="button" class="btn btn-danger" data-mc-confirm="yes">Yes, disconnect</button><button type="button" class="btn btn-plain" data-mc-confirm="cancel">Cancel</button></div></div></div>';
   }
 
+  function clearPending() { state.pendingSync = null; state.pendingDisconnect = false; }
+
   function startFlow(step) {
+    clearPending();
     state.flow = step;
     if (step === 'link') state.pendingLinks = state.linked.slice();
     state.mobileTip = false;
@@ -1097,15 +1126,35 @@
       else if (k === 'viewport') state.viewport = v;
       else if (k === 'view') state.view = v;
       else if (k === 'br') state.br = !state.br;
-      if (k !== 'br') state.flow = null;
+      if (k !== 'br') { state.flow = null; clearPending(); }
       if (k === 'connected' && !state.connected) { state.linked = []; state.writeTo = null; }
       state.mobileTip = false;
       render();
       return;
     }
     var go = e.target.closest('[data-go]');
-    if (go) { state.flow = null; state.view = go.dataset.go; render(); window.scrollTo(0, 0); return; }
+    if (go) { state.flow = null; clearPending(); state.view = go.dataset.go; render(); window.scrollTo(0, 0); return; }
 
+    var sv = e.target.closest('[data-settings]');
+    if (sv) {
+      if (sv.dataset.settings === 'save') {
+        if (state.pendingSync !== null) state.syncJobs = state.pendingSync;
+        if (state.pendingDisconnect) {
+          // Disconnect removes both calendar connections; user stays on the card (BR8, BR12)
+          state.connected = false; state.syncJobs = false; state.linked = []; state.writeTo = null; state.synced = {};
+        }
+        clearPending();
+        render();
+        focusCard();
+      } else {
+        // Cancel discards unsaved changes. The Dashboard isn't part of this prototype, so it returns to Appointments.
+        clearPending();
+        state.view = 'appointments';
+        render();
+        window.scrollTo(0, 0);
+      }
+      return;
+    }
     var g = e.target.closest('[data-gcal]');
     if (g) {
       var act = g.dataset.gcal;
@@ -1225,15 +1274,14 @@
       var r = document.querySelector('[data-flow-write="' + state.writeTo + '"]'); if (r) r.focus();
       return;
     }
-    if (t.dataset.gcal === 'sync') { state.syncJobs = t.checked; }
-    if (t.dataset.gcal === 'disconnect' && t.checked) {
-      // Disconnect removes both calendar connections; user stays on the card (BR8, BR12)
-      state.connected = false;
-      state.syncJobs = false;
-      state.linked = [];
-      state.writeTo = null;
-      render();
-      focusCard();
+    // Card toggles are staged until Save; switching one ON shows the save reminder on hover
+    if (t.dataset.gcal === 'sync') {
+      state.pendingSync = t.checked === state.syncJobs ? null : t.checked;
+      t.closest('.settings-toggle-row').classList.toggle('pending-on', state.pendingSync === true);
+    }
+    if (t.dataset.gcal === 'disconnect') {
+      state.pendingDisconnect = t.checked;
+      t.closest('.settings-toggle-row').classList.toggle('pending-on', t.checked);
     }
   });
 

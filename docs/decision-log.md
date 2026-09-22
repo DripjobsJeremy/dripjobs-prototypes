@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-22] Google Calendar Icon: toggles apply on Save (ticket 86bc5bcfc)
+
+- Decision: Per Jeremy, the Google card's Sync Jobs and Disconnect toggles now only stage a change. The card refreshes to its new state (e.g. Not Connected after Disconnect) only when the user clicks Save. Added the existing Company Settings page actions below the Integrations grid, "Save" and "Cancel - Return to Dashboard" plus the copyright line, and a hover/focus tooltip on any toggle switched ON but not yet saved ("Click Save at the bottom of the page to apply this change.").
+- Assumptions: The non-admin scoped view gets the same Save / Cancel buttons, since its toggles need saving too. Cancel discards unsaved changes and, since the Dashboard isn't part of this prototype, lands on Appointments. Leaving the page any other way also discards unsaved changes, with no unsaved-changes warning. The reminder is hover/focus only, so it won't show on touch devices (mobile is gated anyway, BR15).
+
 ## [2026-09-22] Google Calendar Icon: real connect flow replaces the stand-in (ticket 86bc5bcfc)
 
 - Decision: Replaced the BR7 stand-in popup with the existing 5-step connect flow from Jeremy's production screenshots: Google account chooser, Google consent, Choose the calendars to link, Choose your write-to calendar, You're all set. Screens match production, apart from sample accounts and calendars in place of real staff emails, and the link step's subtitle em dash swapped for a colon per repo rules. Consent Cancel returns to the card still Not Connected.
