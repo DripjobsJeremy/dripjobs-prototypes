@@ -2,6 +2,13 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-22] Google Calendar Icon + Scoped Settings Access (ticket 86bc5bcfc)
+
+- Decision: Rebuilt Jeremy's finalized UX prototype as `google-calendar-icon-settings/`, matched to the supplied production screenshots (Appointments as admin and non-admin, Company Settings &gt; Integrations). Only the header widget changes on the calendar pages (replaced by a compact Google icon with hover/focus tooltip); the new Google Calendar card sits first in the Integrations grid using the existing sibling card shell, with design-system internals (Switchery-style toggles with the `.switchery` hook kept, 12px muted helper text, 10px buttons). Sign-in and Disconnect are now fully clickable and keep the user on the card (BR8).
+- Removed from the finalized version to stay within ticket scope: the "Switch Google Account" button when connected, the scoped view's Settings breadcrumb and info banner (BR6 says nothing but the card), and the always-on per-calendar dual status. BR chip numbers were re-aligned to the ticket's BR1 to BR15. The mobile (i) is its own 48px tap target, separate from the Connect G / Manage G button, which navigates like the desktop icon.
+- Assumptions: the existing Google sign-in and calendar selection flow (BR7) is shown as a labeled stand-in modal since it wasn't supplied. Job Schedule has no screenshot, so it reuses the Appointments shell with sample jobs. My Profile (BR10) isn't rebuilt, no screenshot supplied. Tooltip, status line, and helper copy are placeholders pending Copywriter.
+- Open question: When connected, should the card offer a way to change the Google account or selected calendar without disconnecting first? The ticket doesn't say, so the card shows only the status line and the two toggles.
+
 ## [2026-09-18] Weekly Product Update + Product Roadmap refreshed for Sep 14-18, 2026
 
 - Decision: Rebuilt `weekly-product-update/index.html` and `Weekly_Product_Update.md` with the 6 tickets pushed to production on Sep 17 (Contacts, Communications, 2 Invoicing, Production Rates, Admin Tools). Rebuilt `dripjobs-product-roadmap/index.html` from a fresh workspace-wide pull of the bare 🎯 tag: 22 in-flight tickets across all 13 pipeline stages (Triage and PR Created both populated this week for the first time in a few cycles) plus 1 on hold/parked. Updated both Release Notes cards on the hub to the new dates.
