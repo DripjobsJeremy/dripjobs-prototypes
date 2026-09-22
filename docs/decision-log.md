@@ -2,12 +2,18 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-22] Google Calendar Icon: real connect flow replaces the stand-in (ticket 86bc5bcfc)
+
+- Decision: Replaced the BR7 stand-in popup with the existing 5-step connect flow from Jeremy's production screenshots: Google account chooser, Google consent, Choose the calendars to link, Choose your write-to calendar, You're all set. Screens match production, apart from sample accounts and calendars in place of real staff emails, and the link step's subtitle em dash swapped for a colon per repo rules. Consent Cancel returns to the card still Not Connected.
+- Changed to meet BR8 (user stays on the card): the All set screen's "Continue to appointments" is now "Back to Google Calendar" and returns to the card. Its helper line now says calendars are managed from the Google Calendar card, not the Appointments page. The write-to step's button reads "Continue", since in this ordering it leads to All set.
+- Added: a "Manage Calendars" footer link on the connected card that reopens the existing link-calendars step. The header widget was the only way back into this flow, so without it connected users couldn't link more calendars or change the write-to calendar without disconnecting. This resolves the earlier open question about changing the account or calendar while connected.
+- Open question: Confirm the step order (write-to screen before All set) and that relabeling the write-to button from "Continue to appointments" to "Continue" is acceptable.
+
 ## [2026-09-22] Google Calendar Icon + Scoped Settings Access (ticket 86bc5bcfc)
 
 - Decision: Rebuilt Jeremy's finalized UX prototype as `google-calendar-icon-settings/`, matched to the supplied production screenshots (Appointments as admin and non-admin, Company Settings &gt; Integrations). Only the header widget changes on the calendar pages (replaced by a compact Google icon with hover/focus tooltip); the new Google Calendar card sits first in the Integrations grid using the existing sibling card shell, with design-system internals (Switchery-style toggles with the `.switchery` hook kept, 12px muted helper text, 10px buttons). Sign-in and Disconnect are now fully clickable and keep the user on the card (BR8).
 - Removed from the finalized version to stay within ticket scope: the "Switch Google Account" button when connected, the scoped view's Settings breadcrumb and info banner (BR6 says nothing but the card), and the always-on per-calendar dual status. BR chip numbers were re-aligned to the ticket's BR1 to BR15. The mobile (i) is its own 48px tap target, separate from the Connect G / Manage G button, which navigates like the desktop icon.
-- Assumptions: the existing Google sign-in and calendar selection flow (BR7) is shown as a labeled stand-in modal since it wasn't supplied. Job Schedule has no screenshot, so it reuses the Appointments shell with sample jobs. My Profile (BR10) isn't rebuilt, no screenshot supplied. Tooltip, status line, and helper copy are placeholders pending Copywriter.
-- Open question: When connected, should the card offer a way to change the Google account or selected calendar without disconnecting first? The ticket doesn't say, so the card shows only the status line and the two toggles.
+- Assumptions: Job Schedule has no screenshot, so it reuses the Appointments shell with sample jobs. My Profile (BR10) isn't rebuilt, no screenshot supplied. Tooltip, status line, and helper copy are placeholders pending Copywriter.
 
 ## [2026-09-18] Weekly Product Update + Product Roadmap refreshed for Sep 14-18, 2026
 
