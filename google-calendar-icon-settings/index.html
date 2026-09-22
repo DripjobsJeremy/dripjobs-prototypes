@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DripJobs: Google Calendar Icon and Scoped Settings, Ticket 86bc5bcfc Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Nunito, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #FFFFFF;
+    color: #32415B;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; }
+  a { color: inherit; }
+
+  /* ============ HUB TOP BAR (standard hub nav) ============ */
+  .proto-bar {
+    background: #FFFFFF;
+    border-bottom: 1px solid #DAD8E3;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .proto-bar .back-link {
+    font-size: 12px; font-weight: 500; color: #80879A; text-decoration: none;
+    display: flex; align-items: center; gap: 4px; transition: color 0.15s; flex-shrink: 0;
+  }
+  .proto-bar .back-link:hover { color: #8B85EA; }
+  .proto-bar .divider { color: #DAD8E3; font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 600; color: #32415B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .proto-bar-ticket {
+    font-size: 11px; font-weight: 600; color: #5C53DC; text-decoration: none;
+    padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA; border-radius: 999px;
+    letter-spacing: 0.2px; flex-shrink: 0;
+  }
+  .proto-bar-ticket:hover { background: #8B85EA; color: #fff; }
+
+  /* ============ DEMO CONTROL BANNER (non-product UI) ============ */
+  #demo-banner {
+    background: #FFB020;
+    color: #1A1A1A;
+    padding: 10px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 18px;
+    font-size: 13px;
+    position: sticky;
+    top: 0;
+    z-index: 500;
+    border-bottom: 2px solid #1A1A1A;
+  }
+  #demo-banner strong { font-weight: 800; }
+  #demo-banner .demo-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  #demo-banner button {
+    font-size: 12.5px; border-radius: 6px; border: 1px solid #1A1A1A; background: #fff; color: #1A1A1A;
+    padding: 5px 9px; cursor: pointer; font-weight: 700;
+  }
+  #demo-banner button.active-toggle { background: #1A1A1A; color: #FFB020; }
+  #demo-note { flex-basis: 100%; font-size: 12.5px; font-style: italic; }
+
+  /* BR chip (annotation only) */
+  .br-chip {
+    display: none;
+    background: #FFF4E5; color: #B45309; border: 1px solid #FCD9A0;
+    font-size: 10.5px; font-weight: 800; letter-spacing: 0.3px; border-radius: 999px;
+    padding: 2px 8px; cursor: help; white-space: nowrap; vertical-align: middle;
+    font-style: normal;
+  }
+  body.show-br .br-chip { display: inline-block; }
+
+  /* ============ DESIGN SYSTEM TOKENS ============ */
+  #gcal-page {
+    --st-color-primary:        #8B85EA;
+    --st-color-primary-hover:  #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb:    139, 133, 234;
+    --st-color-text:           #32415B;
+    --st-color-text-muted:     #80879A;
+    --st-color-border:         #DAD8E3;
+    --st-color-card-bg:        #FFFFFF;
+  }
+
+  /* ============ TOP HEADER (context, unchanged) ============ */
+  .top-header {
+    height: 50px; background: #fff; border-bottom: 1px solid #E6E6EC;
+    display: flex; align-items: center; gap: 24px; padding: 0 20px 0 14px;
+  }
+  .logo { display: flex; align-items: center; gap: 6px; width: 200px; flex-shrink: 0; text-decoration: none; }
+  .logo-mark {
+    width: 34px; height: 34px; border-radius: 50%; border: 3px solid #6A5AEB;
+    display: inline-flex; align-items: center; justify-content: center; color: #6A5AEB; font-size: 13px; font-weight: 800;
+  }
+  .logo-text { font-size: 28px; font-weight: 600; color: #6A5AEB; letter-spacing: -0.5px; }
+  .top-search {
+    flex: 1; max-width: 288px; height: 36px; border: 1px solid #DAD8E3; border-radius: 999px;
+    display: flex; align-items: center; gap: 10px; padding: 0 14px; color: #80879A; font-size: 13px;
+  }
+  .top-search .fa-arrow-right { margin-left: auto; font-size: 12px; }
+  .top-right { margin-left: auto; display: flex; align-items: center; gap: 22px; font-size: 16px; color: #80879A; }
+  .top-right .fa-circle-exclamation { color: #F5A623; }
+  .top-user { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #32415B; }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: #3B4660; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; }
+
+  /* ============ LAYOUT ============ */
+  .shell { display: flex; min-height: calc(100vh - 50px); }
+
+  /* ============ SIDEBAR (context, unchanged) ============ */
+  .sidebar {
+    width: 214px; flex-shrink: 0; background: #fff; border-right: 1px solid #E6E6EC;
+    padding: 0 8px 64px; position: relative;
+  }
+  .nest-row { display: flex; align-items: center; gap: 14px; padding: 8px 8px 12px; font-size: 13.5px; font-weight: 600; border-bottom: 1px solid #E6E6EC; margin: 0 4px 6px; }
+  .nest-row .nest-logo { width: 32px; height: 32px; border-radius: 50%; background: #F3F1FC; display: inline-flex; align-items: center; justify-content: center; color: #8B85EA; font-size: 12px; }
+  .nav-section { border-bottom: 1px solid #E6E6EC; margin: 0 4px; padding-bottom: 6px; }
+  .nav-section:last-of-type { border-bottom: none; }
+  .nav-section-label { font-size: 10.5px; font-weight: 600; letter-spacing: 0.8px; color: #80879A; padding: 14px 6px 8px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 6px;
+    font-size: 13px; font-weight: 600; color: #1F2A3D; text-decoration: none; cursor: pointer;
+    background: none; border: none; width: 100%; text-align: left;
+  }
+  .nav-item i { width: 16px; font-size: 14px; color: #1F2A3D; text-align: center; }
+  .nav-item:hover { background: #F5F4FE; }
+  .nav-item .nav-badge { margin-left: auto; background: rgba(255,255,255,0.28); color: #fff; font-size: 9.5px; font-weight: 700; border-radius: 4px; padding: 2px 5px; }
+  .nav-item .nav-badge.new { background: #34C38F; color: #fff; }
+  .nav-item .nav-chevron { margin-left: auto; font-size: 10px; }
+  .nav-item.active { background: #8B85EA; color: #fff; }
+  .nav-item.active i { color: #fff; }
+  .nav-item.no-link { cursor: default; }
+  .settings-bar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 44px; background: #4A5468; color: #fff;
+    display: flex; align-items: center; gap: 12px; padding: 0 16px; font-size: 13.5px; font-weight: 600;
+  }
+  .settings-bar .fa-chevron-up { margin-left: auto; font-size: 11px; }
+  .settings-bar.active { background: #8B85EA; }
+
+  /* ============ MAIN ============ */
+  .main { flex: 1; min-width: 0; padding: 22px 12px 40px 14px; }
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 0 12px 0 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .page-title { font-size: 21px; font-weight: 600; color: #1F2A3D; margin: 6px 0 0; }
+  .page-actions { display: flex; align-items: center; gap: 14px; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 10px;
+    font-size: 13px; font-weight: 600; padding: 8px 14px; border: 1px solid transparent; cursor: pointer; min-height: 36px;
+  }
+  .btn-primary { background: var(--st-color-primary); color: #fff; }
+  .btn-primary:hover { background: var(--st-color-primary-hover); }
+  .btn-outline-primary { background: #fff; border: 1px solid var(--st-color-primary); color: var(--st-color-primary-active); }
+  .btn-outline-primary:hover { background: var(--st-color-primary); color: #fff; }
+  .btn-sm { padding: 4px 10px; font-size: 11.5px; border-radius: 8px; min-height: 28px; }
+  .btn:focus-visible, .nav-item:focus-visible, .gcal-icon-btn:focus-visible, .mobile-gbtn:focus-visible, .mobile-info-btn:focus-visible {
+    outline: 3px solid var(--st-color-primary-active); outline-offset: 2px;
+  }
+  .btn-google {
+    background: #fff; border: 1px solid #DAD8E3; color: #32415B; font-weight: 600;
+  }
+  .btn-google:hover { border-color: var(--st-color-primary); }
+  .g-logo { width: 18px; height: 18px; flex-shrink: 0; display: block; }
+
+  /* ============ NEW: COMPACT GOOGLE ICON (BR1 to BR4) ============ */
+  .gcal-icon-wrap { position: relative; display: flex; align-items: center; gap: 6px; }
+  .gcal-icon-btn {
+    width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--st-color-border); background: #fff;
+    display: inline-flex; align-items: center; justify-content: center; cursor: pointer; position: relative;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease; padding: 0;
+  }
+  .gcal-icon-btn:hover { border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+  .gcal-status-dot {
+    position: absolute; right: -1px; bottom: -1px; width: 12px; height: 12px; border-radius: 50%;
+    border: 2px solid #fff; background: #C6CAD6;
+  }
+  .gcal-status-dot.connected { background: #22C55E; }
+  .gcal-tooltip {
+    position: absolute; top: calc(100% + 10px); right: 0; width: 230px; z-index: 60;
+    background: #32415B; color: #fff; font-size: 12px; font-weight: 600; line-height: 1.4;
+    padding: 8px 12px; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    opacity: 0; visibility: hidden; transition: opacity 0.12s ease; pointer-events: none;
+  }
+  .gcal-tooltip::after { content: ""; position: absolute; bottom: 100%; right: 13px; border: 6px solid transparent; border-bottom-color: #32415B; }
+  .gcal-icon-btn:hover + .gcal-tooltip, .gcal-icon-btn:focus-visible + .gcal-tooltip { opacity: 1; visibility: visible; }
+
+  /* ============ CALENDAR TOOLBAR + GRID (context, unchanged) ============ */
+  .cal-toolbar { display: flex; align-items: center; gap: 28px; padding: 0 0 20px; flex-wrap: wrap; }
+  .seg { display: flex; border: 1px solid #DAD8E3; border-radius: 4px; overflow: hidden; height: 36px; }
+  .seg button { border: none; background: #fff; font-size: 13px; color: #32415B; padding: 0 36px; display: flex; align-items: center; gap: 6px; cursor: default; }
+  .seg button.active { background: #E9E9EF; }
+  .seg button + button { border-left: 1px solid #DAD8E3; }
+  .month-nav { width: 396px; max-width: 100%; height: 36px; border: 1px solid #DAD8E3; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; padding: 0 52px; font-size: 13px; }
+  .fake-select { width: 255px; max-width: 100%; height: 36px; border: 1px solid #DAD8E3; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 13px; color: #1F2A3D; }
+  .fake-select i { font-size: 10px; }
+
+  .cal-body { display: flex; gap: 14px; align-items: flex-start; }
+  .cal-scroll { flex: 1; min-width: 0; overflow-x: auto; }
+  .cal-grid { min-width: 720px; border: 1px solid #DAD8E3; }
+  .cal-head, .cal-rows { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .cal-head div { text-align: center; font-size: 13px; font-weight: 700; color: #1F2A3D; padding: 10px 0; border-right: 1px solid #DAD8E3; border-bottom: 1px solid #DAD8E3; }
+  .cal-head div:last-child, .cal-cell:nth-child(7n) { border-right: none; }
+  .cal-cell { min-height: 164px; border-right: 1px solid #DAD8E3; border-bottom: 1px solid #DAD8E3; padding: 2px 3px 4px 5px; }
+  .cal-cell.weekend { background: #F3F4F8; }
+  .cal-cell.today { background: #FBF9E4; }
+  .cal-day { text-align: right; font-size: 12.5px; color: #32415B; padding-right: 2px; }
+  .cal-cell.muted .cal-day { color: #B9BECB; }
+  .cal-event { margin-top: 6px; background: #B7ADF6; border-left: 4px solid #5B3FD9; border-radius: 2px; padding: 2px 5px; font-size: 11px; color: #1F2340; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cal-event b { display: block; font-weight: 700; overflow: hidden; text-overflow: ellipsis; }
+  .cal-event.orange { background: #FDDAB7; border-left-color: #F59E42; }
+  .cal-event.holiday { background: repeating-linear-gradient(135deg, #E4E6EE 0 6px, #F2F3F7 6px 12px); border-left-color: #B9BECB; padding: 5px 6px; font-weight: 700; color: #4C566E; }
+  .cal-event.job { background: #CDEFE5; border-left-color: #1FA37A; }
+
+  .side-panel { width: 274px; flex-shrink: 0; background: #EEEEF3; border-radius: 6px; padding: 12px; }
+  .side-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; margin-bottom: 8px; padding: 0 2px; }
+  .side-title .count { background: #fff; font-size: 12px; padding: 0 5px; border-radius: 3px; }
+  .side-title .btn { margin-left: auto; }
+  .req-card { background: #fff; border-radius: 4px; padding: 8px 6px 6px; margin-top: 8px; }
+  .req-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; }
+  .req-top span { font-size: 10px; font-weight: 500; }
+  .req-sub { font-size: 11.5px; margin: 2px 0 8px; }
+  .req-bottom { display: flex; justify-content: space-between; align-items: center; }
+  .req-tag { background: #F3F4F8; border-radius: 3px; padding: 3px 8px; font-size: 12.5px; }
+
+  /* ============ SETTINGS: TAB CHIPS (design system section 6) ============ */
+  .settings-tabs nav { display: flex; gap: 8px; overflow-x: auto; padding: 0 4px 12px; margin-bottom: 8px; scrollbar-width: none; border-bottom: 1px solid #E6E6EC; }
+  .settings-tabs nav::-webkit-scrollbar { display: none; }
+  .settings-tab-link {
+    flex-shrink: 0; border: none; border-radius: 16px; padding: 7px 14px; font-size: 11.5px; font-weight: 600;
+    color: var(--st-color-text); cursor: default; white-space: nowrap; text-decoration: none;
+  }
+  .settings-tab-link:nth-child(1)  { background: #E8E6FA; }
+  .settings-tab-link:nth-child(2)  { background: #FAF0E6; }
+  .settings-tab-link:nth-child(3)  { background: #E6FAF0; }
+  .settings-tab-link:nth-child(4)  { background: #E6F3FA; }
+  .settings-tab-link:nth-child(5)  { background: #FAF7E6; }
+  .settings-tab-link:nth-child(6)  { background: #FAE6E6; }
+  .settings-tab-link:nth-child(7)  { background: #F0FAE6; }
+  .settings-tab-link:nth-child(8)  { background: #E6FAFA; }
+  .settings-tab-link:nth-child(9)  { background: #FAEAE6; }
+  .settings-tab-link:nth-child(10) { background: #EFEFF3; }
+  .settings-tab-link:nth-child(11) { background: #FAE6F0; }
+  .settings-tab-link.active { box-shadow: inset 0 0 0 2px var(--st-color-primary); }
+
+  .integrations-wrap { border: 1px solid #DAD8E3; border-radius: 10px; padding: 14px 12px 18px; margin-top: 10px; }
+  .integrations-title { font-size: 13px; font-weight: 500; margin: 0 0 4px; }
+  .integrations-sub { font-size: 11px; color: #4C566E; margin: 0 0 18px 14px; }
+  .integrations-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 20px; }
+  @media (max-width: 1180px) { .integrations-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 700px)  { .integrations-grid { grid-template-columns: 1fr; } }
+
+  /* Integration card shell (matches existing sibling cards) */
+  .integ-card {
+    background: #fff; border-radius: 4px; box-shadow: 0 1px 4px rgba(31,42,61,0.10), 0 0 0 1px #F0F0F4;
+    display: flex; flex-direction: column; min-height: 296px; transition: box-shadow 0.4s ease;
+  }
+  .integ-head { min-height: 72px; padding: 10px 14px; border-bottom: 1px solid #EEEEF2; display: flex; align-items: center; gap: 8px; }
+  .integ-head .head-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .integ-body { padding: 14px; font-size: 11.5px; color: #1F2A3D; flex: 1; line-height: 1.5; }
+  .integ-body p { margin: 0 0 10px; }
+  .integ-foot { border-top: 1px solid #EEEEF2; padding: 12px 14px; display: flex; justify-content: space-between; gap: 10px; font-size: 11.5px; color: var(--st-color-primary-active); min-height: 42px; align-items: center; }
+  .integ-foot.end { justify-content: flex-end; }
+  .integ-label { font-weight: 700; font-size: 11.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .status-pill { display: inline-block; background: #F87171; color: #fff; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 3px; line-height: 1.5; }
+  .status-pill.connected { background: #34C38F; }
+  .status-pill.grey { background: #A7ABB8; border-radius: 999px; padding: 2px 9px; }
+  .gear-btn { width: 22px; height: 22px; border-radius: 6px; background: #8B85EA; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; }
+  .copy-group { display: flex; border: 1px solid #DAD8E3; border-radius: 4px; overflow: hidden; }
+  .copy-group .val { flex: 1; min-width: 0; background: #EEEEF2; padding: 6px 10px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .copy-group .val.white { background: #fff; }
+  .copy-group .cp { border-left: 1px solid #DAD8E3; padding: 6px 12px; font-size: 11px; background: #fff; }
+  .acorn-info { background: #D8F3F8; border: 1px solid #A9E1EC; padding: 10px 12px; color: #1F5A6B; font-size: 11px; line-height: 1.55; border-radius: 2px; }
+  .qb-box { background: #FDF2F2; border: 1px solid #F6C9C9; border-radius: 4px; padding: 10px; color: #9B1C1C; font-size: 11px; }
+  .qb-btn { background: #2CA01C; color: #fff; border-radius: 4px; display: flex; justify-content: center; align-items: center; gap: 8px; height: 34px; font-weight: 700; font-size: 12px; margin-top: 8px; }
+  .qb-acc { border: 1px solid #DAD8E3; border-radius: 4px; padding: 7px 8px; font-size: 10.5px; font-weight: 600; margin-top: 8px; display: flex; justify-content: space-between; }
+
+  /* ============ NEW: GOOGLE CALENDAR CARD (BR7 to BR13) ============ */
+  .integ-card.gcal-arrived { box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.55), 0 1px 4px rgba(31,42,61,0.10); }
+  .gcal-name { font-size: 15px; font-weight: 700; color: #1F2A3D; }
+  .gcal-desc { font-size: 12px; color: var(--st-color-text-muted); margin: 0 0 12px; }
+  .gcal-status-line { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; margin-bottom: 14px; }
+  .gcal-status-line i { color: #22C55E; font-size: 14px; }
+  .settings-toggle-row { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+  .settings-toggle-row + .settings-toggle-row { margin-top: 12px; }
+  .settings-toggle-label { font-size: 13px; font-weight: 600; cursor: pointer; }
+  .settings-toggle-help { font-size: 12px; color: var(--st-color-text-muted); margin: 2px 0 0 52px; line-height: 1.45; }
+  /* Visual stand-in for Switchery; .switchery class kept on the input as the real JS hook */
+  .dj-switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+  .dj-switch input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+  .dj-switch .track { position: absolute; inset: 0; border-radius: 999px; background: #fff; border: 1px solid #DAD8E3; transition: background 0.15s ease, border-color 0.15s ease; }
+  .dj-switch .thumb { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: transform 0.15s ease; }
+  .dj-switch input:checked + .track { background: #8B85EA; border-color: #8B85EA; }
+  .dj-switch input:checked ~ .thumb { transform: translateX(18px); }
+  .dj-switch input:focus-visible + .track { box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.35); }
+
+  /* Scoped (non-admin) view */
+  .scoped-col { max-width: 420px; padding: 0 12px; }
+  .scoped-col .integ-card { min-height: 0; }
+
+  /* ============ EXISTING CONNECT FLOW (BR7, unchanged apart from final return) ============ */
+  /* Google-hosted screens */
+  .g-stage { min-height: calc(100vh - 110px); background: #F0F4F9; padding: 36px 16px 24px; font-family: "Google Sans", Roboto, Arial, sans-serif; color: #1F1F1F; }
+  .g-card { max-width: 1040px; margin: 0 auto; background: #fff; border-radius: 28px; overflow: hidden; }
+  .g-card-top { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid #C4C7C5; font-size: 14px; font-weight: 500; color: #444746; }
+  .g-card-body { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 36px 36px 40px; }
+  .g-app-logo { width: 40px; height: 40px; border-radius: 50%; border: 3px solid #6A5AEB; color: #6A5AEB; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; margin-bottom: 30px; }
+  .g-h1 { font-size: 40px; font-weight: 400; line-height: 1.25; margin: 0 0 18px; }
+  .g-h1 .blue, .g-link { color: #0B57D0; }
+  .g-sub { font-size: 16px; margin: 0; }
+  .g-acct-list { margin-top: 40px; }
+  .g-acct { display: flex; align-items: center; gap: 12px; width: 100%; background: none; border: none; border-bottom: 1px solid #C4C7C5; padding: 12px 8px; text-align: left; cursor: pointer; font-family: inherit; color: #1F1F1F; min-height: 60px; }
+  .g-acct:hover { background: #F7F9FC; }
+  .g-acct .g-av { width: 28px; height: 28px; border-radius: 50%; background: #8D6E63; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .g-acct .g-av.alt { background: #3949AB; }
+  .g-acct b { display: block; font-size: 15px; font-weight: 500; }
+  .g-acct small { font-size: 13.5px; color: #444746; }
+  .g-acct.inert { cursor: default; }
+  .g-acct.inert:hover { background: none; }
+  .g-fine { font-size: 13.5px; color: #1F1F1F; margin-top: 30px; line-height: 1.5; }
+  .g-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
+  .g-chip .g-av { width: 22px; height: 22px; font-size: 11px; border-radius: 50%; background: #8D6E63; color: #fff; display: inline-flex; align-items: center; justify-content: center; }
+  .g-scope { display: flex; gap: 14px; align-items: flex-start; font-size: 15px; line-height: 1.45; margin: 18px 0 30px; }
+  .g-scope .cal-ico { width: 20px; height: 20px; border-radius: 3px; background: #fff; border: 2px solid #4285F4; font-size: 9px; font-weight: 700; color: #1A73E8; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .g-h3 { font-size: 19px; font-weight: 400; margin: 0 0 12px; }
+  .g-p { font-size: 13.5px; line-height: 1.5; margin: 0 0 10px; color: #1F1F1F; }
+  .g-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 40px; }
+  .g-btn { min-height: 40px; border-radius: 999px; border: 1px solid #747775; background: #fff; color: #0B57D0; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; }
+  .g-btn:hover { background: #F3F6FC; }
+  .g-btn:focus-visible, .g-acct:focus-visible { outline: 3px solid #0B57D0; outline-offset: 2px; }
+  .g-foot { max-width: 1040px; margin: 16px auto 0; display: flex; justify-content: space-between; font-size: 12px; color: #1F1F1F; padding: 0 16px; }
+  .g-foot span + span { margin-left: 30px; }
+  @media (max-width: 760px) { .g-card-body { grid-template-columns: 1fr; padding: 24px 20px 28px; } .g-h1 { font-size: 30px; } }
+
+  /* DripJobs-hosted screens */
+  .flow-title { font-size: 19px; font-weight: 500; color: #32415B; margin: 0 0 4px; }
+  .flow-sub { font-size: 12px; color: #4C566E; margin: 0 0 16px; max-width: 480px; line-height: 1.5; }
+  .flow-sub.wide { max-width: none; }
+  .flow-card { border: 1px solid #DAD8E3; border-radius: 8px; overflow: hidden; background: #fff; }
+  .flow-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #EEEEF2; }
+  .flow-card-head b { font-size: 12px; font-weight: 700; display: block; }
+  .flow-card-head small { font-size: 10.5px; color: #80879A; }
+  .flow-info { background: #EFEEFB; color: #4C566E; font-size: 11px; padding: 10px 18px; display: flex; gap: 8px; align-items: center; border-bottom: 1px solid #E3E1F5; }
+  .flow-info i { color: #8B85EA; }
+  .flow-table-wrap { overflow-x: auto; }
+  table.flow-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  .flow-table th { text-align: left; font-size: 9.5px; font-weight: 700; letter-spacing: 0.6px; color: #80879A; text-transform: uppercase; padding: 12px 10px; border-bottom: 1px solid #EEEEF2; }
+  .flow-table td { font-size: 11.5px; color: #80879A; padding: 0 10px; height: 43px; border-bottom: 1px solid #EEEEF2; }
+  .flow-table td.cal-name { color: #1F2A3D; font-weight: 600; font-size: 12px; }
+  .flow-table tr.sel td { background: #F3F2FD; }
+  .flow-table tr.sel td:first-child { box-shadow: inset 3px 0 0 #8B85EA; }
+  .flow-table tr.off td { cursor: default; }
+  .flow-table td:first-child, .flow-table th:first-child { width: 48px; padding-left: 18px; }
+  .flow-table input { width: 15px; height: 15px; accent-color: #8B85EA; cursor: pointer; margin: 0; }
+  .flow-table input:disabled { cursor: not-allowed; }
+  .flow-table label { display: flex; align-items: center; height: 43px; cursor: pointer; }
+  .cal-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 8px; vertical-align: -1px; }
+  .access-pill { font-size: 9.5px; font-weight: 700; padding: 3px 7px; border-radius: 999px; background: #EFEFF3; color: #80879A; white-space: nowrap; }
+  .access-pill.write { background: #E8E6FA; color: #5C53DC; }
+  .flow-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; background: #FAFAFC; font-size: 11.5px; color: #4C566E; flex-wrap: wrap; }
+  .flow-link { background: none; border: none; padding: 0; font: inherit; font-size: 11.5px; font-weight: 700; color: #5C53DC; cursor: pointer; min-height: 32px; }
+  .flow-link:hover { text-decoration: underline; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .done-body { text-align: center; padding: 32px 18px 30px; }
+  .done-check { width: 36px; height: 36px; border-radius: 50%; background: #E3F6EC; color: #15803D; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; margin-bottom: 16px; }
+  .done-body h2 { font-size: 13.5px; font-weight: 700; margin: 0 0 10px; }
+  .done-body p { font-size: 11.5px; color: #4C566E; margin: 0 0 14px; }
+  .done-body .meta { font-size: 10.5px; color: #80879A; margin: 0; }
+  /* Manage Calendars (existing page, reached from the card) */
+  .mc-section { background: #fff; border-radius: 4px; box-shadow: 0 1px 4px rgba(31,42,61,0.08); padding: 16px 14px 18px; margin-bottom: 18px; }
+  .mc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid #EEEEF2; }
+  .mc-head h2 { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; margin: 0; }
+  .mc-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  .mc-table th { text-align: left; font-size: 10px; font-weight: 700; color: #1F2A3D; padding: 12px 18px; border-bottom: 1px solid #EEEEF2; }
+  .mc-table td { font-size: 10.5px; color: #32415B; padding: 10px 18px; border-bottom: 1px solid #EEEEF2; }
+  .mc-table td.cal-name { font-weight: 700; }
+  .mc-table th.c, .mc-table td.c { text-align: center; }
+  .mc-table th.r, .mc-table td.r { text-align: right; }
+  .wt-badge { background: #6A5AEB; color: #fff; font-size: 8.5px; font-weight: 600; padding: 2px 5px; border-radius: 2px; margin-left: 10px; white-space: nowrap; }
+  .unlink-btn { background: #FEF2F2; border: 1px solid #F6A8A8; color: #DC2626; font-size: 9.5px; font-weight: 600; border-radius: 3px; padding: 3px 7px; cursor: pointer; font-family: inherit; min-height: 22px; }
+  .unlink-btn:hover { background: #FDE2E2; }
+  .mc-help { font-size: 10px; color: #4C566E; margin: 28px 0 10px; }
+  .mc-row { display: flex; align-items: center; gap: 12px; border: 1px solid #DAD8E3; border-radius: 4px; padding: 8px 12px; margin-bottom: 7px; cursor: pointer; }
+  .mc-row.sel { border-color: #8B85EA; box-shadow: 0 0 0 1px #8B85EA; }
+  .mc-row input { width: 13px; height: 13px; accent-color: #6A5AEB; margin: 0; cursor: pointer; }
+  .mc-row .nm { font-size: 10.5px; font-weight: 700; }
+  .mc-row small { display: block; font-size: 9px; color: #80879A; margin-left: 14px; }
+  .mc-row .access-pill { margin-left: auto; font-size: 8.5px; }
+  .mc-foot { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #EEEEF2; margin-top: 12px; padding-top: 12px; font-size: 9.5px; color: #4C566E; }
+  .mc-empty { font-size: 11px; color: #80879A; padding: 14px 18px; }
+  .mc-empty-state { padding: 26px 3px 4px; }
+  .mc-empty-state b { display: block; font-size: 12px; margin-bottom: 8px; }
+  .mc-empty-state p { font-size: 10.5px; color: #80879A; margin: 0 0 14px; max-width: 420px; line-height: 1.6; }
+  /* Existing unlink confirmation (production alert pattern) */
+  .dj-alert-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 900; padding: 16px; }
+  .dj-alert { position: relative; background: #fff; width: 358px; max-width: 100%; padding: 28px 22px 16px; text-align: center; border-radius: 2px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+  .dj-alert-x { position: absolute; top: 6px; right: 6px; width: 32px; height: 32px; border: none; background: none; font-size: 20px; cursor: pointer; color: #1F2A3D; }
+  .dj-alert-ico { width: 58px; height: 58px; border-radius: 50%; border: 2px solid #F8BB86; color: #F8BB86; font-size: 30px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .dj-alert h2 { font-size: 21px; font-weight: 500; margin: 0 0 12px; color: #4C566E; }
+  .dj-alert p { font-size: 12px; color: #4C566E; margin: 0 0 14px; line-height: 1.4; }
+  .dj-alert-actions { display: flex; justify-content: center; gap: 10px; }
+  .btn-danger { background: #F43F5E; color: #fff; border-radius: 2px; }
+  .btn-danger:hover { background: #E11D48; }
+  .btn-plain { background: #fff; border: 1px solid #32415B; color: #32415B; border-radius: 2px; }
+  /* Existing "Choose a new write-to calendar" modal */
+  .dj-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 900; padding: 16px; }
+  .dj-modal { background: #fff; width: 470px; max-width: 100%; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; text-align: left; }
+  .dj-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #EEEEF2; }
+  .dj-modal-head h2 { font-size: 14.5px; font-weight: 700; margin: 0; color: #32415B; }
+  .dj-modal-head button { border: none; background: none; font-size: 18px; color: #80879A; cursor: pointer; width: 32px; height: 32px; }
+  .dj-modal-body { padding: 18px 20px 20px; font-size: 12.5px; color: #32415B; line-height: 1.5; }
+  .dj-modal-body > p { margin: 0 0 14px; }
+  .dj-modal-body label { display: block; font-size: 11px; font-weight: 700; color: #4C566E; margin-bottom: 6px; }
+  .dj-modal-body select { width: 100%; height: 40px; border: 1px solid #DAD8E3; border-radius: 8px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #32415B; background: #fff; }
+  .dj-modal-body select:focus { outline: none; border-color: #8B85EA; box-shadow: 0 0 0 3px rgba(139,133,234,0.18); }
+  .dj-modal-body .help { font-size: 10.5px; color: #80879A; margin: 8px 0 0; }
+  .dj-modal-foot { display: flex; justify-content: space-between; gap: 10px; padding: 14px 20px; background: #F3F3F7; }
+  .dj-modal-foot .btn { min-width: 96px; border-radius: 8px; }
+  .btn-white { background: #fff; border: 1px solid #DAD8E3; color: #32415B; }
+  .btn-red { background: #DC3545; color: #fff; }
+  .btn-red:hover { background: #C82333; }
+  .make-wt { font-size: 9.5px; font-weight: 700; padding: 5px 7px; border-radius: 4px; background: #6A5AEB; color: #fff; border: none; cursor: pointer; font-family: inherit; min-height: 24px; }
+  .make-wt:hover { background: #5C53DC; }
+  .changed-flag { display: inline-block; margin-left: 6px; }
+  .integ-foot .flow-link { font-weight: 400; }
+
+  /* ============ NON-ADMIN EXTRAS (context, from screenshot) ============ */
+  .chat-bubble { position: fixed; right: 36px; bottom: 100px; width: 44px; height: 44px; border-radius: 50%; background: #6A5AEB; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 50; }
+  .start-here { position: fixed; right: 82px; bottom: 26px; background: #6A5AEB; color: #fff; border-radius: 999px; padding: 10px 14px 10px 20px; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; z-index: 50; }
+  .start-here span { background: #fff; color: #6A5AEB; width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; }
+
+  /* ============ MOBILE PREVIEW (BR15) ============ */
+  .mobile-stage { background: #F5F5F8; min-height: calc(100vh - 110px); padding: 20px 16px 40px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .gate-alert { max-width: 390px; width: 100%; background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; border-radius: 8px; padding: 10px 12px; font-size: 12.5px; display: flex; gap: 10px; }
+  .gate-alert b { display: block; font-size: 13px; }
+  .phone { width: 390px; max-width: 100%; border: 10px solid #1C1C1E; border-radius: 34px; background: #fff; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.22); }
+  .phone-screen { height: 700px; overflow-y: auto; position: relative; }
+  .m-top { height: 52px; border-bottom: 1px solid #E6E6EC; display: flex; align-items: center; gap: 14px; padding: 0 14px; }
+  .m-top .fa-bars { font-size: 18px; }
+  .m-top .logo-text { font-size: 22px; }
+  .m-top .avatar { margin-left: auto; }
+  .m-page { padding: 14px; }
+  .m-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+  .m-title { font-size: 19px; font-weight: 600; }
+  .mobile-gcal { position: relative; display: flex; align-items: center; }
+  .mobile-gbtn { min-height: 48px; border-radius: 999px; border: 1px solid #DAD8E3; background: #fff; padding: 0 14px 0 12px; display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; color: #32415B; cursor: pointer; }
+  .mobile-gbtn.connected { border-color: #BBF7D0; background: #F0FDF4; color: #166534; }
+  .mobile-info-btn { width: 48px; height: 48px; border: none; background: none; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+  .mobile-info-btn span { width: 22px; height: 22px; border-radius: 50%; background: #E8E6FA; color: #5C53DC; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-style: italic; }
+  .mobile-tip { position: absolute; top: calc(100% + 4px); right: 4px; width: 230px; background: #32415B; color: #fff; font-size: 12px; font-weight: 600; line-height: 1.4; padding: 9px 12px; border-radius: 8px; z-index: 20; display: none; }
+  .mobile-tip.show { display: block; }
+  .mobile-tip::after { content: ""; position: absolute; bottom: 100%; right: 16px; border: 6px solid transparent; border-bottom-color: #32415B; }
+  .m-new { width: 100%; min-height: 48px; margin-bottom: 14px; }
+  .m-agenda-day { font-size: 11px; font-weight: 700; color: #80879A; letter-spacing: 0.5px; text-transform: uppercase; margin: 12px 0 6px; }
+  .m-event { background: #B7ADF6; border-left: 4px solid #5B3FD9; border-radius: 3px; padding: 8px 10px; font-size: 12.5px; margin-bottom: 6px; }
+  .m-event.orange { background: #FDDAB7; border-left-color: #F59E42; }
+  .m-event.job { background: #CDEFE5; border-left-color: #1FA37A; }
+  .m-event b { display: block; }
+  .phone .integ-card { min-height: 0; }
+  .phone .settings-toggle-row { min-height: 48px; }
+  .phone .btn { min-height: 48px; }
+  .phone .settings-tabs nav { padding-left: 0; }
+  .m-rest-note { font-size: 12px; color: #80879A; text-align: center; padding: 16px 8px; border: 1px dashed #DAD8E3; border-radius: 8px; margin-top: 16px; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .logo { width: auto; }
+    .top-search { display: none; }
+    .top-user .name { display: none; }
+    .side-panel { display: none; }
+    .cal-toolbar { gap: 12px; }
+    .seg button { padding: 0 16px; }
+    .month-nav { padding: 0 16px; width: 100%; }
+    .fake-select { width: 100%; }
+    .start-here, .chat-bubble { display: none; }
+  }
+  @media (max-width: 600px) {
+    .proto-bar { padding: 12px 16px; }
+    #demo-banner { padding: 10px 16px; }
+    .main { padding: 18px 16px 40px; }
+    .page-header { padding: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Hub top bar -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">&larr; Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Google Calendar Icon and Scoped Settings Access</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bc5bcfc" target="_blank">86bc5bcfc</a>
+</div>
+
+<!-- Demo controls (prototype only, not product UI) -->
+<div id="demo-banner" role="region" aria-label="Prototype demo controls">
+  <strong><i class="fa-solid fa-wrench"></i> PROTOTYPE</strong>
+  <div class="demo-group">
+    <span>User:</span>
+    <button data-demo="role" data-value="admin">Admin (Jeremy)</button>
+    <button data-demo="role" data-value="nonadmin">Non-admin (Billy)</button>
+  </div>
+  <div class="demo-group">
+    <span>Google:</span>
+    <button data-demo="connected" data-value="0">Not Connected</button>
+    <button data-demo="connected" data-value="1">Connected</button>
+  </div>
+  <div class="demo-group">
+    <span>Viewport:</span>
+    <button data-demo="viewport" data-value="desktop">Desktop</button>
+    <button data-demo="viewport" data-value="mobile">Mobile</button>
+  </div>
+  <div class="demo-group">
+    <span>Go to:</span>
+    <button data-demo="view" data-value="appointments">Appointments</button>
+    <button data-demo="view" data-value="jobschedule">Job Schedule</button>
+  </div>
+  <div class="demo-group">
+    <button data-demo="br" id="brToggle">Show BR notes</button>
+  </div>
+  <div id="demo-note"></div>
+</div>
+
+<div id="gcal-page">
+  <div id="app"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var G_SVG = '<svg class="g-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.69 28.18A11.96 11.96 0 0 1 11 24c0-1.45.25-2.86.69-4.18v-5.7H4.34A21.96 21.96 0 0 0 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg>';
+
+  var USERS = {
+    admin:    { name: 'Jeremy Harrison', initials: 'JH', email: 'jeremy@thenestpainting.com' },
+    nonadmin: { name: 'Billy Loomis',    initials: 'BL', email: 'billy@thenestpainting.com' }
+  };
+
+  // Tooltip copy: placeholder wording pending Copywriter (see ticket Handoff to Copywriter)
+  var TIP = {
+    off: { hover: 'Connect your Google account to sync your calendar with DripJobs.', tap: 'Connect your Google account to sync your calendar with DripJobs.' },
+    on:  { hover: 'Google Calendar is connected. Click to manage your Google account.', tap: 'Google Calendar is connected. Tap to manage your Google account.' }
+  };
+
+  var state = {
+    role: 'admin',
+    connected: false,
+    viewport: 'desktop',
+    view: 'appointments',   // appointments | jobschedule | card
+    br: false,
+    syncJobs: false,
+    flow: null,          // null | choose | consent | link | writeto | done
+    linked: [],          // indexes into calendars()
+    pendingLinks: [],
+    writeTo: null,
+    mcPending: [],
+    synced: {},          // calendar index -> last synced text
+    reassign: null,      // write-to calendar being unlinked while others stay linked
+    reassignTo: null,
+    confirmUnlink: null,
+    arrived: false,
+    mobileTip: false
+  };
+
+  function br(n, text) { return ' <span class="br-chip" title="' + text + '">BR' + n + '</span>'; }
+
+  /* ---------- Chrome ---------- */
+  var NAV = {
+    admin: [
+      ['SALES', [['fa-regular fa-user', 'Contacts'], ['fa-regular fa-rectangle-list', 'Sales List'], ['fa-regular fa-handshake', 'Sales Pipeline']]],
+      ['JOBS', [['fa-solid fa-briefcase', 'Change Orders'], ['fa-regular fa-calendar', 'Job Schedule', 'jobschedule'], ['fa-solid fa-list', 'Jobs List'], ['fa-solid fa-briefcase', 'Jobs Pipeline'], ['fa-regular fa-clipboard', 'Work Orders']]],
+      ['DAILY OPERATIONS', [['fa-regular fa-clock', 'Appointments', 'appointments', '1 new'], ['fa-regular fa-message', 'Chat'], ['fa-regular fa-envelope', 'Email', '', 'New'], ['fa-regular fa-square-check', 'Tasks']]],
+      ['DOCUMENTS', [['fa-regular fa-credit-card', 'Invoices'], ['fa-regular fa-file-lines', 'Proposals', '', '>']]],
+      ['FINANCIALS', [['fa-regular fa-money-bill-1', 'Job Costing', '', '>'], ['fa-solid fa-paint-roller', 'Production Rates'], ['fa-solid fa-chart-line', 'Metrics', '', '>']]],
+      ['MARKETING', []]
+    ],
+    nonadmin: [
+      ['SALES', [['fa-regular fa-rectangle-list', 'Sales List'], ['fa-regular fa-handshake', 'Sales Pipeline']]],
+      ['JOBS', [['fa-regular fa-calendar', 'Job Schedule', 'jobschedule'], ['fa-solid fa-briefcase', 'Jobs Pipeline']]],
+      ['DAILY OPERATIONS', [['fa-regular fa-clock', 'Appointments', 'appointments', '1 new'], ['fa-regular fa-envelope', 'Email', '', 'New'], ['fa-regular fa-square-check', 'Tasks']]],
+      ['RESOURCES', [['fa-solid fa-graduation-cap', 'DJ Academy']]]
+    ]
+  };
+
+  function topHeader() {
+    var u = USERS[state.role];
+    return '<div class="top-header">' +
+      '<a class="logo" href="#" onclick="return false"><span class="logo-mark">&bull;&bull;</span><span class="logo-text">dripjobs</span></a>' +
+      '<div class="top-search"><i class="fa-solid fa-magnifying-glass"></i>Search leads, contacts, tags...<i class="fa-solid fa-arrow-right"></i></div>' +
+      '<div class="top-right"><i class="fa-solid fa-circle-exclamation"></i><i class="fa-regular fa-bell"></i>' +
+      '<div class="top-user"><span class="avatar">' + u.initials + '</span><span class="name">' + u.name + '</span><i class="fa-solid fa-chevron-down" style="font-size:9px"></i></div></div>' +
+      '</div>';
+  }
+
+  function sidebar() {
+    var html = '<nav class="sidebar" aria-label="Main navigation">';
+    html += '<div class="nest-row"><span class="nest-logo"><i class="fa-solid fa-feather"></i></span>The Nest</div>';
+    NAV[state.role].forEach(function (sec) {
+      html += '<div class="nav-section"><div class="nav-section-label">' + sec[0] + '</div>';
+      sec[1].forEach(function (it) {
+        var target = it[2] || '';
+        var active = target && target === state.view;
+        var tag = target ? 'button' : 'div';
+        html += '<' + tag + ' class="nav-item' + (active ? ' active' : '') + (target ? '' : ' no-link') + '"' +
+          (target ? ' type="button" data-go="' + target + '"' : '') + '>' +
+          '<i class="' + it[0] + '"></i><span>' + it[1] + '</span>';
+        if (it[3] === '>') html += '<i class="fa-solid fa-chevron-right nav-chevron"></i>';
+        else if (it[3]) html += '<span class="nav-badge' + (it[3] === 'New' ? ' new' : '') + '"' + (active ? '' : (it[3] === 'New' ? '' : ' style="background:#8B85EA"')) + '>' + it[3] + '</span>';
+        html += '</' + tag + '>';
+      });
+      html += '</div>';
+    });
+    if (state.role === 'admin') {
+      html += '<div class="settings-bar' + (state.view === 'card' ? ' active' : '') + '"><i class="fa-solid fa-gear"></i>Settings<i class="fa-solid fa-chevron-up"></i></div>';
+    }
+    return html + '</nav>';
+  }
+
+  /* ---------- NEW compact Google icon (replaces "Google Calendar / Status / Sign in with Google" widget) ---------- */
+  function gcalIcon() {
+    var tip = state.connected ? TIP.on.hover : TIP.off.hover;
+    var label = state.connected ? 'Google Calendar connected. Manage your Google account' : 'Connect your Google account';
+    return '<div class="gcal-icon-wrap">' +
+      br(1, 'BR1: Compact Google icon replaces the old Google Calendar status widget and Sign in with Google button, on both Appointments and Job Schedule.') +
+      '<button type="button" class="gcal-icon-btn" data-gcal="open" aria-label="' + label + '" aria-describedby="gcalTip">' +
+        G_SVG + '<span class="gcal-status-dot' + (state.connected ? ' connected' : '') + '"></span>' +
+      '</button>' +
+      '<div class="gcal-tooltip" id="gcalTip" role="tooltip">' + tip + '</div>' +
+      (state.connected
+        ? br(3, 'BR3: Connected hover tooltip says the user can manage their connected Google account.')
+        : br(2, 'BR2: Not connected hover tooltip invites the user to connect their Google account or calendar.')) +
+      br(4, 'BR4: Clicking the icon goes to the Google integration card. Admins: full Integrations page (BR5). Non-admins: scoped card-only view (BR6).') +
+      '</div>';
+  }
+
+  /* ---------- Calendar pages (context, unchanged apart from the icon) ---------- */
+  var WEEKS = [
+    [[30, 1], [31, 1], [1], [2], [3], [4], [5]],
+    [[6], [7], [8], [9], [10], [11], [12]],
+    [[13], [14], [15], [16], [17], [18], [19]],
+    [[20], [21], [22, 0, 1], [23], [24], [25], [26]],
+    [[27], [28], [29], [30], [1, 1], [2, 1], [3, 1]]
+  ];
+  function apptEvents() {
+    var ev = {
+      1:  [['orange', '07:00 - 07:30 AM', 'Alf FromSpace - Punch-Out']],
+      11: [['', '10:30 - 11:30 AM', 'Jeremy Wayne - On-Site Estimate']],
+      17: [['', '12:00 - 01:00 PM', 'Tommy Moss - On-Site Estimate']],
+      18: [['', '07:00 - 08:00 AM', 'Adam Addams II - On-Site Estimate']],
+      21: [['', '04:20 - 05:20 PM', 'Barney Blank - On-Site Estimate']],
+      28: [['', '07:00 - 08:00 AM', 'Darron Deal - On-Site Estimate']]
+    };
+    if (state.role === 'admin') {
+      ev[7] = [['holiday', '', 'Labor Day (US)'], ['holiday', '', 'Labour Day (CA)']];
+      ev[30] = [['holiday', '', 'National Day for Truth and Reconciliation (CA)']];
+    }
+    return ev;
+  }
+  var JOB_EVENTS = {
+    3:  [['job', '08:00 AM - 04:00 PM', 'Harper Residence - Interior Repaint']],
+    8:  [['job', '08:00 AM - 04:00 PM', 'Maple St Duplex - Exterior']],
+    9:  [['job', '08:00 AM - 04:00 PM', 'Maple St Duplex - Exterior']],
+    15: [['job', '07:30 AM - 12:00 PM', 'Oakview HOA - Trim & Doors']],
+    23: [['job', '08:00 AM - 04:00 PM', 'Lopez Kitchen - Cabinets']],
+    24: [['job', '08:00 AM - 04:00 PM', 'Lopez Kitchen - Cabinets']]
+  };
+
+  function calGrid(events) {
+    var html = '<div class="cal-scroll"><div class="cal-grid"><div class="cal-head"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div class="cal-rows">';
+    WEEKS.forEach(function (w) {
+      w.forEach(function (c, i) {
+        var muted = !!c[1], today = !!c[2];
+        var cls = 'cal-cell' + (muted ? ' muted' : '') + (today ? ' today' : '') + ((i === 0 || i === 6) && !today ? ' weekend' : '');
+        html += '<div class="' + cls + '"><div class="cal-day">' + c[0] + '</div>';
+        (!muted && events[c[0]] || []).forEach(function (e) {
+          html += '<div class="cal-event ' + e[0] + '" title="' + e[2] + '">' + (e[1] ? e[1] + '<b>' + e[2] + '</b>' : e[2]) + '</div>';
+        });
+        html += '</div>';
+      });
+    });
+    return html + '</div></div></div>';
+  }
+
+  function calendarPage(which) {
+    var appt = which === 'appointments';
+    var html = '<div class="page-header"><h1 class="page-title">' + (appt ? 'Appointments' : 'Job Schedule') + '</h1>' +
+      '<div class="page-actions">' + gcalIcon() +
+      '<button type="button" class="btn btn-primary">' + (appt ? 'New Appointment' : 'New Event') + ' <i class="fa-solid fa-chevron-down" style="font-size:9px"></i></button></div></div>';
+    html += '<div class="cal-toolbar">' +
+      '<div class="seg"><button class="active"><i class="fa-regular fa-calendar"></i>Month</button><button><i class="fa-solid fa-list"></i>3 Days</button></div>' +
+      '<div class="month-nav"><i class="fa-solid fa-chevron-left" style="font-size:10px"></i>September 2026<i class="fa-solid fa-chevron-right" style="font-size:10px"></i></div>' +
+      (appt ? '' : '<div class="fake-select">All Crews<i class="fa-solid fa-chevron-down"></i></div>') +
+      '<div class="fake-select">All Event Types<i class="fa-solid fa-chevron-down"></i></div>' +
+      '<div class="fake-select">All Users<i class="fa-solid fa-chevron-down"></i></div></div>';
+    html += '<div class="cal-body">' + calGrid(appt ? apptEvents() : JOB_EVENTS);
+    if (appt) {
+      html += '<aside class="side-panel"><div class="side-title">Requests <span class="count">1</span><button class="btn btn-sm btn-outline-primary" type="button">Select</button></div>' +
+        '<div class="req-card"><div class="req-top">Michael Dorsey <span>8 months ago</span></div><div class="req-sub">Kitchen &amp; Bath Remodel</div>' +
+        '<div class="req-bottom"><span class="req-tag">A Little Bird</span><button type="button" class="btn btn-sm btn-primary"><i class="fa-regular fa-calendar"></i>Schedule</button></div></div></aside>';
+    } else {
+      html += '<aside class="side-panel"><div class="side-title">Pending Schedule <span class="count">2</span></div>' +
+        '<div class="req-card"><div class="req-top">Tiff Adams <span>$3,000.00</span></div><div class="req-sub">Proposal #2468547</div>' +
+        '<div class="req-bottom"><span class="req-tag">Interior</span><button type="button" class="btn btn-sm btn-primary"><i class="fa-regular fa-calendar"></i>Schedule</button></div></div>' +
+        '<div class="req-card"><div class="req-top">Al\'s House <span>$5,000.00</span></div><div class="req-sub">Proposal #1952900</div>' +
+        '<div class="req-bottom"><span class="req-tag">Exterior</span><button type="button" class="btn btn-sm btn-primary"><i class="fa-regular fa-calendar"></i>Schedule</button></div></div></aside>';
+    }
+    return html + '</div>';
+  }
+
+  /* ---------- NEW Google integration card ---------- */
+  function googleCard() {
+    var c = state.connected;
+    var html = '<div class="integ-card' + (state.arrived ? ' gcal-arrived' : '') + '" id="gcal-card" tabindex="-1" aria-label="Google Calendar integration">';
+    html += '<div class="integ-head">' + G_SVG.replace('class="g-logo"', 'class="g-logo" style="width:26px;height:26px"') +
+      '<span class="gcal-name">Google Calendar</span>' +
+      '<div class="head-right"><span class="status-pill' + (c ? ' connected' : '') + '">' + (c ? 'Connected' : 'Not Connected') + '</span>' +
+      br(9, 'BR9: Header status pill is account level. When Not Connected it is the only status indicator, no per-calendar line.') + '</div></div>';
+    html += '<div class="integ-body">';
+    if (!c) {
+      html += '<p class="gcal-desc">Sign in with Google to connect your Appointments and Job Schedule calendars.</p>' +
+        '<button type="button" class="btn btn-google" data-gcal="signin" style="width:100%">' + G_SVG + 'Sign in with Google</button>' +
+        '<div style="margin-top:8px">' + br(7, 'BR7: Launches the existing Google sign-in and calendar selection flow (account, consent, link calendars, write-to calendar, all set). Only change: the last step returns here instead of to Appointments (BR8).') +
+        br(13, 'BR13: Not Connected shows only the sign-in action. Sync Jobs and Disconnect are hidden.') +
+        br(8, 'BR8: After connecting or disconnecting, the user stays on this card.') + '</div>';
+    } else {
+      html += '<div class="gcal-status-line"><i class="fa-solid fa-circle-check"></i>Appointments &amp; Job Schedule: Connected' +
+        br(9, 'BR9: One combined, account-level status line when connected.') + '</div>';
+      html += '<div class="settings-toggle-row">' +
+        '<label class="dj-switch"><input type="checkbox" class="form-check-input switchery" id="syncJobsToggle" data-gcal="sync"' + (state.syncJobs ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
+        '<label class="settings-toggle-label" for="syncJobsToggle">Sync Jobs to Google Calendar</label>' +
+        br(11, 'BR11: Moved here from My Profile (removed there per BR10). Visible only when connected (BR13).') +
+        br(14, 'BR14 open gap: whether to add a separate Sync Appointments to Google toggle is undecided (Out of Scope / V2).') + '</div>';
+      html += '<div class="settings-toggle-row">' +
+        '<label class="dj-switch"><input type="checkbox" class="form-check-input switchery" id="disconnectToggle" data-gcal="disconnect"><span class="track"></span><span class="thumb"></span></label>' +
+        '<label class="settings-toggle-label" for="disconnectToggle">Disconnect Google Calendar</label>' +
+        br(12, 'BR12: Helper text states disconnecting removes both calendar connections. Disconnecting returns the card to Not Connected, user stays here (BR8).') + '</div>' +
+        '<div class="settings-toggle-help">Disconnecting removes both your Appointments calendar and Job Schedule calendar connections.</div>';
+    }
+    html += '</div>';
+    if (c) {
+      // Existing "Manage Calendars" entry point, relocated here since the header widget is gone
+      html += '<div class="integ-foot end"><button type="button" class="flow-link" data-flow="manage">Manage Calendars <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></button>' +
+        br(7, 'BR7: Opens the existing Manage Calendars page, unchanged. This entry point used to be the Manage Calendars button in the connected header widget, which the icon replaces (BR1).') + '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  /* ---------- Existing sibling cards (context, unchanged) ---------- */
+  function siblingCards() {
+    return '' +
+    // Acorn
+    '<div class="integ-card"><div class="integ-head"><span style="font-family:Georgia,serif;font-size:21px;color:#1F2A3D"><i class="fa-solid fa-shield-halved" style="color:#2F6FD6;font-size:14px"></i>Acorn</span></div>' +
+    '<div class="integ-body"><div class="integ-label" style="justify-content:space-between">Add Financing widget option to proposals<label class="dj-switch" style="transform:scale(.8)"><input type="checkbox" checked disabled><span class="track"></span><span class="thumb"></span></label></div>' +
+    '<div class="acorn-info"><b>How does the Acorn integration work?</b><br>Dripjobs now integrates with <b>Acorn Finance</b>, allowing you to offer financing options to your customers <b>at no cost to you.</b> A financing widget with estimated payments will appear on your proposals, giving customers the option to apply for financing directly. You\'ll be updated on their status, and once approved, they receive funds from the bank and pay you.</div></div>' +
+    '<div class="integ-foot"><span>View Brochure</span><span>Help Article</span><span>How Financing Works</span></div></div>' +
+    // Zapier
+    '<div class="integ-card"><div class="integ-head"><span style="font-size:22px;font-weight:700;color:#FF4A00;letter-spacing:-.5px">zapier</span></div>' +
+    '<div class="integ-body"><div class="integ-label">API Key</div><div style="display:flex;gap:14px;align-items:center"><div class="copy-group" style="flex:1"><span class="val">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span><span class="cp">Copy</span></div><span class="btn btn-sm btn-primary"><i class="fa-solid fa-rotate"></i>Regenerate</span></div>' +
+    '<div style="border-top:1px solid #EEEEF2;margin:14px 0 12px"></div><div class="integ-label">Marketing Agency</div><p style="font-size:10.5px;color:#4C566E">Send your agency a ready-made message with the API key and account details they need to route your leads into DripJobs.</p>' +
+    '<span class="btn btn-sm btn-outline-primary" style="width:100%"><i class="fa-regular fa-envelope"></i>Send Marketing Agency Info</span></div>' +
+    '<div class="integ-foot"><span>Schedule a Demo</span><span>Help Articles <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></span></div></div>' +
+    // CompanyCam
+    '<div class="integ-card"><div class="integ-head"><span style="width:44px;height:44px;background:#1E6FBF;color:#fff;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:20px"><i class="fa-solid fa-camera"></i></span><span style="font-size:12px;letter-spacing:.5px">COMPANYCAM</span><div class="head-right"><span class="gear-btn"><i class="fa-solid fa-gear"></i></span></div></div>' +
+    '<div class="integ-body"><div class="integ-label">Email</div><p>office@thenestpainting.com</p><div class="integ-label">API Key</div><p>kSZiQCHydW&lowast;&lowast;&lowast;&lowast;&lowast;&lowast;&lowast;&lowast;&lowast;&lowast;&lowast;&lowast;&lowast;&lowast;&lowast;&lowast;</p><div class="integ-label">Show on Command Center</div><p>True</p><p style="font-size:10.5px">If you need help you can follow our CompanyCam Setup Instructions below.</p></div>' +
+    '<div class="integ-foot end"><span>CompanyCam Setup <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></span></div></div>' +
+    // QuickBooks
+    '<div class="integ-card"><div class="integ-head"><span style="font-size:20px;font-weight:700;color:#1F2A3D"><span style="color:#2CA01C">&#9679;</span> quickbooks<span style="font-size:9px;vertical-align:top">.</span></span></div>' +
+    '<div class="integ-body"><div class="qb-box"><span class="status-pill grey">Not Connected</span><div style="margin:8px 0 6px;font-weight:600"><i class="fa-solid fa-circle-xmark"></i> QuickBooks isn\'t connected</div>Connect your QuickBooks Online account to start syncing invoices, payments, and contacts.<div class="qb-btn"><i class="fa-solid fa-circle"></i>Connect to QuickBooks</div></div>' +
+    '<div class="qb-acc">How does the QuickBooks integration work?<i class="fa-solid fa-chevron-down" style="font-size:8px"></i></div></div><div class="integ-foot"></div></div>' +
+    // QuickBooks Time
+    '<div class="integ-card"><div class="integ-head"><span style="font-size:20px;font-weight:700;color:#1F2A3D"><span style="color:#2CA01C">&#9679;</span> time</span></div>' +
+    '<div class="integ-body"><div class="integ-label">Status <span class="status-pill">Disconnected</span></div><span class="btn btn-sm btn-primary btn-round" style="min-height:20px;padding:2px 8px;font-size:10px;margin-top:8px"><i class="fa-solid fa-gear"></i>Connect Quickbooks Time</span></div>' +
+    '<div class="integ-foot end"><span>Quickbooks Time Setup <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></span></div></div>' +
+    // Angi
+    '<div class="integ-card"><div class="integ-head"><span style="font-size:22px;font-weight:800;color:#1F2A3D">Angi</span><span style="font-size:14px;font-weight:600">Leads</span></div>' +
+    '<div class="integ-body"><div class="integ-label">Webhook URL</div><div class="copy-group"><span class="val white">https://app.dripjobs.com/api/angi/createlead?haKey=0000-SAMPLE-KEY</span><span class="cp">Copy</span></div><p style="font-size:10.5px;margin-top:80px">If you need help you can follow our Angi Leads Setup Instructions below.</p></div>' +
+    '<div class="integ-foot end"><span>Angi Leads Setup <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></span></div></div>' +
+    // Twilio
+    '<div class="integ-card"><div class="integ-head"><span style="font-size:22px;font-weight:800;color:#F22F46"><i class="fa-regular fa-circle-dot"></i> twilio</span><div class="head-right"><span class="btn btn-sm btn-round" style="background:#F87171;color:#fff;min-height:20px;padding:2px 10px;font-size:9.5px">Remove External Twilio Number</span><span class="gear-btn"><i class="fa-solid fa-gear"></i></span></div></div>' +
+    '<div class="integ-body"><div class="integ-label">Phone Number</div><p>+18135550142</p><p style="font-size:10.5px;margin-top:70px">If you need help you can follow our Twilio Setup Instructions and A2P Registration Instructions below.</p></div><div class="integ-foot"></div></div>' +
+    // Quo
+    '<div class="integ-card"><div class="integ-head"><span style="background:#E6F24A;font-size:9px;font-weight:800;padding:8px 5px;border-radius:4px">QUO</span><div class="head-right"><span class="gear-btn"><i class="fa-solid fa-gear"></i></span></div></div>' +
+    '<div class="integ-body"><div class="integ-label">Status <span class="status-pill">Not connected</span></div><p style="margin:30px 0 0 14px">Connect your Quo account to enable call tracking and transcripts.</p></div><div class="integ-foot"></div></div>' +
+    // Routemize
+    '<div class="integ-card"><div class="integ-head"><span style="width:24px;height:24px;border-radius:6px;background:#6A5AEB;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px"><i class="fa-solid fa-location-arrow"></i></span><span style="font-size:12px;letter-spacing:.5px">ROUTEMIZE</span><div class="head-right"><span class="gear-btn"><i class="fa-solid fa-gear"></i></span></div></div>' +
+    '<div class="integ-body"><div class="integ-label">Status <span class="status-pill">Not connected</span></div><p style="margin:30px 0 10px 14px">Connect your Routemize account to enable route optimization.</p><p style="margin-left:14px">Don\'t have an account?<br>Head to <span style="color:#5C53DC">Routemize.com</span> to create an account and get started.</p></div><div class="integ-foot"></div></div>';
+  }
+
+  var TABS = ['Company Information', 'Brand', 'Email Settings', 'App Settings', 'Calendar', 'Templates', 'Notifications', 'Payments', 'Integrations', 'Customer Portal', 'Add-Ons'];
+  function settingsTabs() {
+    return '<div class="settings-tabs"><nav aria-label="Company Settings tabs">' + TABS.map(function (t) {
+      return '<a class="settings-tab-link' + (t === 'Integrations' ? ' active' : '') + '" data-tab="' + t.toLowerCase().replace(/[^a-z]+/g, '-') + '">' + t + '</a>';
+    }).join('') + '</nav></div>';
+  }
+
+  // BR5: admin lands on full Company Settings > Integrations, at the Google card
+  function adminIntegrationsPage(mobile) {
+    return settingsTabs() +
+      '<div class="integrations-wrap"><h2 class="integrations-title">Application Integrations' +
+      br(5, 'BR5: Admins land on the full Company Settings Integrations page, scrolled to and highlighted at their Google card.') + '</h2>' +
+      '<p class="integrations-sub">Connect DripJobs to the third-party services you already use.</p>' +
+      '<div class="integrations-grid">' + googleCard() + (mobile ? '' : siblingCards()) + '</div>' +
+      (mobile ? '<div class="m-rest-note">Remaining integration cards continue below, unchanged.</div>' : '') + '</div>';
+  }
+
+  // BR6: non-admin scoped view, Google card only
+  function scopedPage() {
+    return '<div class="page-header" style="padding:0"><h1 class="page-title" style="margin-bottom:14px">Google Calendar' +
+      br(6, 'BR6: Non-admins see only the Google integration card. No Settings tabs, other cards, or Settings navigation. Their normal sidebar (which never had Settings) is unchanged.') + '</h1></div>' +
+      '<div class="scoped-col" style="padding:0">' + googleCard() + '</div>';
+  }
+
+  /* ---------- Mobile (BR15) ---------- */
+  function mobileGcal() {
+    var c = state.connected;
+    return '<div class="mobile-gcal">' +
+      '<button type="button" class="mobile-gbtn' + (c ? ' connected' : '') + '" data-gcal="open">' + G_SVG + (c ? 'Manage G' : 'Connect G') + '</button>' +
+      '<button type="button" class="mobile-info-btn" data-gcal="tip" aria-label="More info" aria-expanded="' + state.mobileTip + '" aria-controls="mTip"><span>i</span></button>' +
+      '<div class="mobile-tip' + (state.mobileTip ? ' show' : '') + '" id="mTip" role="tooltip">' + (c ? TIP.on.tap : TIP.off.tap) + '</div></div>';
+  }
+
+  function mobilePage() {
+    var u = USERS[state.role];
+    var screen = '<div class="m-top"><i class="fa-solid fa-bars"></i><span class="logo-text">dripjobs</span><span class="avatar">' + u.initials + '</span></div><div class="m-page">';
+    if (state.view === 'card') {
+      screen += state.role === 'admin' ? adminIntegrationsPage(true) : scopedPage();
+    } else {
+      var appt = state.view === 'appointments';
+      screen += '<div class="m-title-row"><div class="m-title">' + (appt ? 'Appointments' : 'Job Schedule') + '</div>' + mobileGcal() + '</div>';
+      var list = appt
+        ? [['Tue, Sep 1', 'orange', '07:00 - 07:30 AM', 'Alf FromSpace - Punch-Out'], ['Fri, Sep 11', '', '10:30 - 11:30 AM', 'Jeremy Wayne - On-Site Estimate'], ['Thu, Sep 17', '', '12:00 - 01:00 PM', 'Tommy Moss - On-Site Estimate'], ['Fri, Sep 18', '', '07:00 - 08:00 AM', 'Adam Addams II - On-Site Estimate'], ['Mon, Sep 21', '', '04:20 - 05:20 PM', 'Barney Blank - On-Site Estimate']]
+        : [['Thu, Sep 3', 'job', '08:00 AM - 04:00 PM', 'Harper Residence - Interior Repaint'], ['Tue, Sep 8', 'job', '08:00 AM - 04:00 PM', 'Maple St Duplex - Exterior'], ['Tue, Sep 15', 'job', '07:30 AM - 12:00 PM', 'Oakview HOA - Trim & Doors']];
+      list.forEach(function (e) {
+        screen += '<div class="m-agenda-day">' + e[0] + '</div><div class="m-event ' + e[1] + '">' + e[2] + '<b>' + e[3].replace('&', '&amp;') + '</b></div>';
+      });
+    }
+    screen += '</div>';
+    return '<div class="mobile-stage">' +
+      '<div class="gate-alert"><i class="fa-solid fa-triangle-exclamation" style="margin-top:2px"></i><div><b>Mobile is gated' + br(15, 'BR15: Mobile shows Connect G / Manage G with a tap-activated (i) tooltip carrying the desktop hover message.') + '</b>' +
+      'Ships only after the Google Calendar OAuth mobile issue is resolved. Tap the Google button to open the card, or the (i) to see the tooltip.</div></div>' +
+      '<div class="phone"><div class="phone-screen">' + screen + '</div></div></div>';
+  }
+
+  /* ---------- Render ---------- */
+  function render() {
+    document.body.classList.toggle('show-br', state.br);
+    var app = document.getElementById('app');
+    if (state.flow === 'choose' || state.flow === 'consent') {
+      app.innerHTML = googlePage();
+    } else if (state.flow) {
+      app.innerHTML = topHeader() + '<div class="shell">' + sidebar() + '<main class="main" style="padding:22px 18px 40px">' + djFlowPage() + '</main></div>';
+    } else if (state.viewport === 'mobile') {
+      app.innerHTML = mobilePage();
+    } else {
+      var content;
+      if (state.view === 'card') content = state.role === 'admin' ? adminIntegrationsPage(false) : scopedPage();
+      else content = calendarPage(state.view);
+      app.innerHTML = topHeader() + '<div class="shell">' + sidebar() + '<main class="main">' + content + '</main></div>' +
+        (state.role === 'nonadmin' ? '<div class="chat-bubble" aria-hidden="true"><i class="fa-regular fa-comment"></i></div><div class="start-here" aria-hidden="true">Start Here! <span>6</span></div>' : '');
+    }
+    syncDemo();
+  }
+
+  function syncDemo() {
+    document.querySelectorAll('[data-demo="role"]').forEach(function (b) { b.classList.toggle('active-toggle', b.dataset.value === state.role); });
+    document.querySelectorAll('[data-demo="connected"]').forEach(function (b) { b.classList.toggle('active-toggle', (b.dataset.value === '1') === state.connected); });
+    document.querySelectorAll('[data-demo="viewport"]').forEach(function (b) { b.classList.toggle('active-toggle', b.dataset.value === state.viewport); });
+    document.querySelectorAll('[data-demo="view"]').forEach(function (b) { b.classList.toggle('active-toggle', b.dataset.value === state.view); });
+    var brBtn = document.getElementById('brToggle');
+    brBtn.classList.toggle('active-toggle', state.br);
+    brBtn.textContent = state.br ? 'Hide BR notes' : 'Show BR notes';
+    var note = document.getElementById('demo-note');
+    var STEP = { choose: 1, consent: 2, link: 3, writeto: 4, done: 5 };
+    if (state.flow === 'manage') {
+      note.textContent = 'Existing Manage Calendars page, unchanged (BR7). Reached from Manage Calendars on the connected Google card, which replaces the Manage Calendars button in the old header widget. Unlinking the write-to calendar asks you to pick a new one first; unlinking your last calendar asks to confirm, then disconnects Google entirely. Use the sidebar, or the Google icon on Appointments or Job Schedule, to leave.';
+    } else if (state.flow) {
+      note.textContent = 'Existing Google connect flow, step ' + STEP[state.flow] + ' of 5 (BR7). Screens match production' +
+        (state.flow === 'link' ? ', subtitle em dash swapped for a colon' : '') +
+        (state.flow === 'done' ? '. Changed here: the final button and helper line now return you to the Google card (BR8)' : '') +
+        (state.flow === 'writeto' ? '. Changed here: the button reads Continue, since this step now leads to the All set screen' : '') + '.';
+    } else if (state.view === 'card') {
+      note.textContent = state.role === 'admin'
+        ? 'Admin landed on Company Settings > Integrations at the Google card. Connect or disconnect here: you stay on this card.'
+        : 'Non-admin landed on the scoped view: the Google card only, no other Settings content. Use the sidebar or Go to buttons to return.';
+    } else {
+      note.textContent = (state.viewport === 'desktop' ? 'Hover' : 'Tap the (i) next to') + ' the Google icon to see the ' + (state.connected ? 'manage' : 'connect') + ' tooltip, then ' + (state.viewport === 'desktop' ? 'click' : 'tap') + ' it to open the Google integration card as ' + (state.role === 'admin' ? 'an admin.' : 'a non-admin.') + ' Sync Jobs and Disconnect are no longer on My Profile (BR10, not shown here).';
+    }
+  }
+
+  function goToCard() {
+    state.view = 'card';
+    state.mobileTip = false;
+    state.arrived = true;
+    render();
+    window.scrollTo(0, 0);
+    var card = document.getElementById('gcal-card');
+    if (card) {
+      card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      card.focus({ preventScroll: true });
+    }
+    setTimeout(function () {
+      state.arrived = false;
+      var el = document.getElementById('gcal-card');
+      if (el) el.classList.remove('gcal-arrived');
+    }, 1800);
+  }
+
+  function focusCard() {
+    var card = document.getElementById('gcal-card');
+    if (card) card.focus({ preventScroll: true });
+  }
+
+  /* ---------- Existing connect flow (BR7) ---------- */
+  // Sample calendars on the signed-in Google account; [name, color, time zone, write-to capable]
+  function calendars() {
+    return [
+      ['office@thenestpainting.com', '#7B7FD6', 'America/New_York', 0],
+      ['estimates@thenestpainting.com', '#E07A6B', 'America/Chicago', 0],
+      ['crew.alpha@thenestpainting.com', '#B0204A', 'America/New_York', 0],
+      [USERS[state.role].email, '#2D8FE0', 'America/New_York', 1],
+      ['crew.bravo@thenestpainting.com', '#7A5230', 'America/New_York', 0],
+      ['sales@thenestpainting.com', '#F2711C', 'America/New_York', 0],
+      ['warranty@thenestpainting.com', '#8E2FB5', 'America/Denver', 0],
+      ['Payroll: The Nest reminders', '#E3C23B', 'America/Los_Angeles', 0],
+      ['Production Team', '#B0204A', 'America/New_York', 1],
+      ['marketing@thenestpainting.com', '#E0245E', 'America/Chicago', 0],
+      ['bookkeeping@thenestpainting.com', '#A89A8C', 'America/New_York', 0],
+      ['US Holidays: The Nest', '#A89A8C', 'America/New_York', 0]
+    ];
+  }
+  function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function accessPill(w) { return '<span class="access-pill' + (w ? ' write' : '') + '">' + (w ? 'Write-to capable' : 'Reference only') + '</span>'; }
+
+  function googlePage() {
+    var u = USERS[state.role];
+    var first = u.name.charAt(0);
+    var body;
+    if (state.flow === 'choose') {
+      body = '<div><span class="g-app-logo">&bull;&bull;</span><h1 class="g-h1">Choose an account</h1><p class="g-sub">to continue to <span class="g-link">DripJobs</span></p></div>' +
+        '<div><div class="g-acct-list">' +
+        '<button type="button" class="g-acct" data-flow="account"><span class="g-av">' + first + '</span><span><b>' + u.name + '</b><small>' + u.email + '</small></span></button>' +
+        '<button type="button" class="g-acct" data-flow="account"><span class="g-av alt">' + first + '</span><span><b>' + u.name + '</b><small>' + u.name.split(' ')[0].toLowerCase() + '.personal@gmail.com</small></span></button>' +
+        '<div class="g-acct inert"><i class="fa-regular fa-circle-user" style="width:28px;text-align:center;font-size:18px"></i><span><b>Use another account</b></span></div></div>' +
+        '<p class="g-fine">Before using this app, you can review DripJobs’s <span class="g-link"><b>Privacy Policy</b></span> and <span class="g-link"><b>Terms of Service</b></span>.</p></div>';
+    } else {
+      body = '<div><span class="g-app-logo">&bull;&bull;</span><h1 class="g-h1"><span class="blue">DripJobs</span> wants to access your Google Account</h1>' +
+        '<span class="g-chip"><span class="g-av">' + first + '</span>' + u.email + '</span></div>' +
+        '<div><h2 class="g-h3" style="margin-top:20px">This will allow <span class="g-link">DripJobs</span> to:</h2>' +
+        '<div class="g-scope"><span class="cal-ico">31</span><span>See, edit, share, and permanently delete all the calendars you can access using Google Calendar</span><i class="fa-solid fa-circle-info" style="color:#0B57D0;margin-left:auto"></i></div>' +
+        '<h2 class="g-h3">Make sure you trust DripJobs</h2>' +
+        '<p class="g-p">Review DripJobs’s <span class="g-link">Privacy Policy</span> and <span class="g-link">Terms of Service</span> to understand how DripJobs will process and protect your data.</p>' +
+        '<p class="g-p">To make changes at any time, go to your <span class="g-link">Google Account</span>.</p>' +
+        '<p class="g-p">Learn how Google helps you <span class="g-link">share data safely</span>.</p>' +
+        '<div class="g-actions"><button type="button" class="g-btn" data-flow="cancel">Cancel</button><button type="button" class="g-btn" data-flow="allow">Allow</button></div></div>';
+    }
+    return '<div class="g-stage"><div class="g-card"><div class="g-card-top">' + G_SVG + 'Sign in with Google</div><div class="g-card-body">' + body + '</div></div>' +
+      '<div class="g-foot"><span>English (United States) <i class="fa-solid fa-caret-down"></i></span><span><span>Help</span><span>Privacy</span><span>Terms</span></span></div></div>';
+  }
+
+  function djFlowPage() {
+    var cals = calendars();
+    if (state.flow === 'link') {
+      var n = state.pendingLinks.length;
+      var rows = cals.map(function (c, i) {
+        var on = state.pendingLinks.indexOf(i) > -1, was = state.linked.indexOf(i) > -1;
+        return '<tr class="' + (on ? 'sel' : '') + '"><td><label><input type="checkbox" data-flow-pick="' + i + '"' + (on ? ' checked' : '') + ' aria-label="Link ' + esc(c[0]) + '"></label></td>' +
+          '<td class="cal-name"><span class="cal-swatch" style="background:' + c[1] + '"></span>' + esc(c[0]) + '</td><td>' + c[2] + '</td><td>' + accessPill(c[3]) + '</td><td>' + (was ? 'Linked' : 'Not linked') + '</td></tr>';
+      }).join('');
+      return '<h1 class="flow-title">Choose the calendars to link</h1>' +
+        '<p class="flow-sub wide">Select as many as you like: you’ll pick which one receives new appointments next.</p>' +
+        '<div class="flow-card"><div class="flow-card-head"><div><b>Calendars on this Google account</b><small>' + cals.length + ' found · ' + cals.length + ' available to link</small></div><button type="button" class="btn btn-primary btn-sm" style="min-height:32px;padding:6px 14px">Refresh list</button></div>' +
+        '<div class="flow-info"><i class="fa-solid fa-circle-info"></i>Events from every calendar you link are shown in DripJobs for reference. DripJobs only adds appointments and jobs to the one calendar you designate as the write-to calendar, which you can change at any time.</div>' +
+        '<div class="flow-table-wrap"><table class="flow-table"><thead><tr><th></th><th>Calendar</th><th>Time Zone</th><th>Your Access</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<div class="flow-foot"><span>' + (n ? '<b>' + n + '</b> calendar' + (n > 1 ? 's' : '') + ' selected' : 'None selected') + '</span>' +
+        '<button type="button" class="btn btn-primary" data-flow="link"' + (n ? '' : ' disabled') + '>Link Selected Calendars</button></div></div>';
+    }
+    if (state.flow === 'writeto') {
+      var capable = state.linked.filter(function (i) { return cals[i][3]; }).length;
+      var wrows = state.linked.map(function (i) {
+        var c = cals[i], on = state.writeTo === i;
+        return '<tr class="' + (on ? 'sel' : '') + (c[3] ? '' : ' off') + '"><td><label><input type="radio" name="writeto" data-flow-write="' + i + '"' + (on ? ' checked' : '') + (c[3] ? '' : ' disabled') + ' aria-label="Write to ' + esc(c[0]) + '"></label></td>' +
+          '<td class="cal-name"><span class="cal-swatch" style="background:' + c[1] + '"></span>' + esc(c[0]) + '</td><td>' + c[2] + '</td><td>' + accessPill(c[3]) + '</td></tr>';
+      }).join('');
+      return '<h1 class="flow-title">Choose your write-to calendar</h1>' +
+        '<p class="flow-sub">DripJobs adds the appointments and jobs it creates to one calendar. Everything else stays read-only and is shown for reference. You can change this later.</p>' +
+        '<div class="flow-card"><div class="flow-card-head"><b>Linked calendars</b><small>' + state.linked.length + ' linked · ' + capable + ' can receive events</small></div>' +
+        '<div class="flow-table-wrap"><table class="flow-table"><thead><tr><th></th><th>Calendar</th><th>Time Zone</th><th>Your Access</th></tr></thead><tbody>' + wrows + '</tbody></table></div>' +
+        '<div class="flow-foot"><button type="button" class="flow-link" data-flow="more">Link more calendars</button>' +
+        '<button type="button" class="btn btn-primary" data-flow="finish"' + (state.writeTo === null ? ' disabled' : '') + '>Continue</button></div></div>';
+    }
+    if (state.flow === 'manage') {
+      var linkedRows = state.linked.map(function (i) {
+        var c = cals[i], w = state.writeTo === i;
+        return '<tr><td class="cal-name"><span class="cal-swatch" style="background:' + c[1] + '"></span>' + esc(c[0]) + (w ? '<span class="wt-badge">Write-to calendar</span>' : '') + '</td>' +
+          '<td>' + c[2] + '</td><td>' + (state.synced[i] || 'Not yet synced') + '</td><td class="c">' + (w ? '<span style="color:#34C38F" aria-label="Write-to calendar">&#10003;</span>' : (c[3] ? '<button type="button" class="make-wt" data-mc-make="' + i + '">Make write-to</button>' : '')) + '</td>' +
+          '<td class="r"><button type="button" class="unlink-btn" data-mc-unlink="' + i + '">Unlink</button></td></tr>';
+      }).join('');
+      var others = cals.map(function (c, i) { return i; }).filter(function (i) { return state.linked.indexOf(i) < 0; });
+      var n2 = state.mcPending.length;
+      var otherRows = others.map(function (i) {
+        var c = cals[i], on = state.mcPending.indexOf(i) > -1;
+        return '<label class="mc-row' + (on ? ' sel' : '') + '"><input type="checkbox" data-mc-pick="' + i + '"' + (on ? ' checked' : '') + '>' +
+          '<span><span class="cal-swatch" style="background:' + c[1] + ';margin-right:6px"></span><span class="nm">' + esc(c[0]) + '</span><small>' + c[2] + '</small></span>' + accessPill(c[3]) + '</label>';
+      }).join('');
+      return '<h1 class="flow-title" tabindex="-1">Manage Calendars</h1>' +
+        '<p class="flow-sub wide">Events from every linked calendar appear in DripJobs for reference. DripJobs adds the appointments and jobs it creates to the write-to calendar only.</p>' +
+        '<section class="mc-section"><div class="mc-head"' + (state.connected ? '' : ' style="border-bottom:none;padding-bottom:0"') + '><h2>Linked Calendars</h2>' + (state.connected ? '<button type="button" class="btn btn-primary btn-sm" data-mc="sync" style="min-height:24px;padding:3px 8px;font-size:10px;border-radius:4px"><i class="fa-solid fa-rotate"></i>Sync now</button>' : '') + '</div>' +
+        (!state.connected ? '' : linkedRows ? '<div class="flow-table-wrap"><table class="mc-table"><thead><tr><th>Calendar</th><th>Time Zone</th><th>Last Synced</th><th class="c">Write To</th><th class="r">Action</th></tr></thead><tbody>' + linkedRows + '</tbody></table></div>'
+          : '<div class="mc-empty">No calendars linked.</div>') +
+        (!state.connected ? '<div class="mc-empty-state"><b>No Google calendars linked</b><p>Connect your Google account to link calendars. Their events will appear in DripJobs, and you\u2019ll choose which one receives new appointments.</p>' +
+          '<button type="button" class="btn btn-primary" data-gcal="signin">Connect Google Calendar</button></div></section>' + confirmModal() : '</section>' +
+        '<section class="mc-section"><div class="mc-head" style="border-bottom:none;padding-bottom:0"><h2>Link Another Calendar</h2></div>' +
+        '<p class="mc-help">Select the calendars to link. Their events appear in DripJobs for reference.</p>' + otherRows +
+        '<div class="mc-foot"><span>' + (n2 ? n2 + ' calendar' + (n2 > 1 ? 's' : '') + ' selected' : 'None selected') + '</span>' +
+        '<button type="button" class="btn btn-primary btn-sm" data-mc="link" style="border-radius:4px"' + (n2 ? '' : ' disabled') + '>Link Selected Calendars</button></div></section>' + confirmModal());
+    }
+    // done
+    var w = state.writeTo !== null ? cals[state.writeTo][0].split('@')[0] : '';
+    return '<h1 class="flow-title">You’re all set</h1>' +
+      '<p class="flow-sub wide">Your calendars are connected. Events from every linked calendar appear in DripJobs for reference, and DripJobs adds the appointments and jobs it creates to the calendar you chose.</p>' +
+      '<div class="flow-card"><div class="done-body"><div class="done-check">&#10003;</div><h2>Your Google Calendar is now linked to DripJobs.</h2>' +
+      '<p>Manage your linked calendars anytime from the Google Calendar card.' + br(8, 'BR8: Copy updated. It used to point to the Appointments page, where the widget no longer exists.') + '</p>' +
+      '<p class="meta">' + state.linked.length + ' calendar' + (state.linked.length > 1 ? 's' : '') + ' linked · DripJobs writes to <b>' + esc(w) + '</b></p></div>' +
+      '<div class="flow-foot"><button type="button" class="flow-link" data-flow="manage">Manage Calendars</button>' +
+      '<span><button type="button" class="btn btn-primary" data-flow="return">Back to Google Calendar</button>' +
+      br(8, 'BR8: Was "Continue to appointments". Now returns the user to the Google integration card.') + '</span></div></div>';
+  }
+
+  function calLabel(i) { return calendars()[i][0].split('@')[0]; }
+  function confirmModal() {
+    if (state.reassign !== null) {
+      var cals = calendars();
+      var opts = state.linked.filter(function (i) { return i !== state.reassign && cals[i][3]; });
+      return '<div class="dj-modal-backdrop" data-mc-re="cancel"><div class="dj-modal" role="dialog" aria-modal="true" aria-labelledby="reTitle">' +
+        '<div class="dj-modal-head"><h2 id="reTitle">Choose a new write-to calendar</h2><button type="button" data-mc-re="cancel" aria-label="Close">&times;</button></div>' +
+        '<div class="dj-modal-body"><p><b>' + esc(calLabel(state.reassign)) + '</b> is the calendar DripJobs writes to. Pick which of your other calendars should receive new appointments and jobs once it is unlinked.</p>' +
+        '<label for="reSelect">New write-to calendar</label><select id="reSelect" data-mc-re-pick' + (opts.length ? '' : ' disabled') + '>' +
+        (opts.length ? opts.map(function (i) { return '<option value="' + i + '"' + (state.reassignTo === i ? ' selected' : '') + '>' + esc(calLabel(i)) + '</option>'; }).join('') : '<option>No other write-to capable calendars linked</option>') + '</select>' +
+        '<p class="help">Events already synced stay on the unlinked calendar in Google. Events imported from it are removed from DripJobs.</p></div>' +
+        '<div class="dj-modal-foot"><button type="button" class="btn btn-white" data-mc-re="cancel">Cancel</button><button type="button" class="btn btn-red" data-mc-re="yes"' + (opts.length ? '' : ' disabled') + '>Unlink Calendar</button></div></div></div>';
+    }
+    if (state.confirmUnlink === null) return '';
+    var nm = calendars()[state.confirmUnlink][0].split('@')[0];
+    return '<div class="dj-alert-backdrop" data-mc-confirm="cancel"><div class="dj-alert" role="alertdialog" aria-modal="true" aria-labelledby="unlinkTitle">' +
+      '<button type="button" class="dj-alert-x" data-mc-confirm="cancel" aria-label="Close">&times;</button>' +
+      '<div class="dj-alert-ico">!</div><h2 id="unlinkTitle">Unlink "' + esc(nm) + '"?</h2>' +
+      '<p>This is your last linked calendar, so DripJobs will disconnect from Google Calendar entirely.</p>' +
+      '<div class="dj-alert-actions"><button type="button" class="btn btn-danger" data-mc-confirm="yes">Yes, disconnect</button><button type="button" class="btn btn-plain" data-mc-confirm="cancel">Cancel</button></div></div></div>';
+  }
+
+  function startFlow(step) {
+    state.flow = step;
+    if (step === 'link') state.pendingLinks = state.linked.slice();
+    state.mobileTip = false;
+    render();
+    window.scrollTo(0, 0);
+    var f = document.querySelector('.g-acct, .g-btn, .flow-table input, .flow-foot .btn, .flow-title');
+    if (f) f.focus({ preventScroll: true });
+  }
+  function endFlow(connected) {
+    state.flow = null;
+    state.connected = connected;
+    state.view = 'card';   // BR8: land back on the Google card
+    render();
+    window.scrollTo(0, 0);
+    var card = document.getElementById('gcal-card');
+    if (card) { card.scrollIntoView({ block: 'center' }); card.focus({ preventScroll: true }); }
+  }
+  function ensureLinkedDefaults() {
+    // When "Connected" is set from the demo bar, assume the user's own calendar is linked and is the write-to
+    if (state.connected && !state.linked.length) { state.linked = [3]; state.writeTo = 3; state.synced = { 3: '09/22/2026 04:20 PM' }; }
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && state.reassign !== null) { var r0 = state.reassign; state.reassign = null; render(); var rb = document.querySelector('[data-mc-unlink="' + r0 + '"]'); if (rb) rb.focus(); return; }
+    if (e.key === 'Escape' && state.confirmUnlink !== null) { var w0 = state.confirmUnlink; state.confirmUnlink = null; render(); var ub = document.querySelector('[data-mc-unlink="' + w0 + '"]'); if (ub) ub.focus(); return; }
+    if (e.key === 'Escape' && state.mobileTip) { state.mobileTip = false; render(); }
+  });
+
+  /* ---------- Events ---------- */
+  document.addEventListener('click', function (e) {
+    var d = e.target.closest('[data-demo]');
+    if (d) {
+      var k = d.dataset.demo, v = d.dataset.value;
+      if (k === 'role') state.role = v;
+      else if (k === 'connected') state.connected = v === '1';
+      else if (k === 'viewport') state.viewport = v;
+      else if (k === 'view') state.view = v;
+      else if (k === 'br') state.br = !state.br;
+      if (k !== 'br') state.flow = null;
+      if (k === 'connected' && !state.connected) { state.linked = []; state.writeTo = null; }
+      state.mobileTip = false;
+      render();
+      return;
+    }
+    var go = e.target.closest('[data-go]');
+    if (go) { state.flow = null; state.view = go.dataset.go; render(); window.scrollTo(0, 0); return; }
+
+    var g = e.target.closest('[data-gcal]');
+    if (g) {
+      var act = g.dataset.gcal;
+      if (act === 'open') { goToCard(); return; }
+      if (act === 'tip') { state.mobileTip = !state.mobileTip; render(); var ib = document.querySelector('.mobile-info-btn'); if (ib) ib.focus(); return; }
+      if (act === 'signin') { startFlow('choose'); return; }
+    }
+
+    var mcu = e.target.closest('[data-mc-unlink]');
+    if (mcu) {
+      var ui = +mcu.dataset.mcUnlink;
+      if (state.linked.length === 1) {
+        state.confirmUnlink = ui; render();
+        var yb = document.querySelector('[data-mc-confirm="yes"]'); if (yb) yb.focus();
+        return;
+      }
+      if (state.writeTo === ui) {
+        // Unlinking the write-to calendar while others stay linked: pick a replacement first (existing behavior)
+        var cs = calendars();
+        var first = state.linked.filter(function (x) { return x !== ui && cs[x][3]; })[0];
+        state.reassign = ui; state.reassignTo = first === undefined ? null : first;
+        render();
+        var sel = document.getElementById('reSelect'); if (sel) sel.focus({ preventScroll: true });
+        return;
+      }
+      state.linked = state.linked.filter(function (x) { return x !== ui; });
+      render(); return;
+    }
+    var mk = e.target.closest('[data-mc-make]');
+    if (mk) { state.writeTo = +mk.dataset.mcMake; render(); return; }
+    var re = e.target.closest('[data-mc-re]');
+    if (re && !re.disabled) {
+      if (re.dataset.mcRe === 'cancel' && e.target !== re && re.classList.contains('dj-modal-backdrop')) return;
+      var gone = state.reassign;
+      state.reassign = null;
+      if (re.dataset.mcRe === 'yes') {
+        state.linked = state.linked.filter(function (x) { return x !== gone; });
+        delete state.synced[gone];
+        state.writeTo = state.reassignTo;
+      }
+      render();
+      var fb = document.querySelector('[data-mc-unlink="' + (re.dataset.mcRe === 'yes' ? state.writeTo : gone) + '"]'); if (fb) fb.focus();
+      return;
+    }
+    var mcc = e.target.closest('[data-mc-confirm]');
+    if (mcc) {
+      if (mcc.dataset.mcConfirm === 'cancel' && e.target !== mcc && mcc.classList.contains('dj-alert-backdrop')) return;
+      var was = state.confirmUnlink;
+      state.confirmUnlink = null;
+      if (mcc.dataset.mcConfirm === 'yes') {
+        // Last calendar unlinked: DripJobs disconnects from Google entirely (existing behavior)
+        state.connected = false; state.linked = []; state.writeTo = null; state.syncJobs = false; state.synced = {};
+      }
+      render();
+      var back = mcc.dataset.mcConfirm === 'yes' ? document.querySelector('.mc-empty-state .btn') : document.querySelector('[data-mc-unlink="' + was + '"]');
+      if (back) back.focus();
+      return;
+    }
+    var mca = e.target.closest('[data-mc]');
+    if (mca && !mca.disabled) {
+      if (mca.dataset.mc === 'sync') {
+        var d = new Date(), h = d.getHours(), pad = function (x) { return (x < 10 ? '0' : '') + x; };
+        var stamp = pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + '/' + d.getFullYear() + ' ' + pad(h % 12 || 12) + ':' + pad(d.getMinutes()) + ' ' + (h < 12 ? 'AM' : 'PM');
+        state.linked.forEach(function (x) { state.synced[x] = stamp; });
+      } else {
+        state.linked = state.linked.concat(state.mcPending).sort(function (x, y) { return x - y; });
+        state.mcPending = [];
+      }
+      render(); return;
+    }
+    var fl = e.target.closest('[data-flow]');
+    if (fl && !fl.disabled) {
+      var f = fl.dataset.flow;
+      if (f === 'account') startFlow('consent');
+      else if (f === 'cancel') endFlow(false);
+      else if (f === 'allow') startFlow('link');
+      else if (f === 'manage') { ensureLinkedDefaults(); state.mcPending = []; startFlow('manage'); }
+      else if (f === 'more') startFlow('link');
+      else if (f === 'link') {
+        state.linked = state.pendingLinks.slice().sort(function (x, y) { return x - y; });
+        var cals = calendars();
+        if (state.writeTo === null || state.linked.indexOf(state.writeTo) < 0) {
+          var firstCap = state.linked.filter(function (i) { return cals[i][3]; })[0];
+          state.writeTo = firstCap === undefined ? null : firstCap;
+        }
+        startFlow('writeto');
+      }
+      else if (f === 'finish') startFlow('done');
+      else if (f === 'return') endFlow(true);
+      return;
+    }
+    if (state.mobileTip && !e.target.closest('.mobile-gcal')) { state.mobileTip = false; render(); }
+  });
+
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.dataset.flowPick !== undefined) {
+      var i = +t.dataset.flowPick, k = state.pendingLinks.indexOf(i);
+      if (t.checked && k < 0) state.pendingLinks.push(i);
+      if (!t.checked && k > -1) state.pendingLinks.splice(k, 1);
+      render();
+      var el = document.querySelector('[data-flow-pick="' + i + '"]'); if (el) el.focus();
+      return;
+    }
+    if (t.id === 'reSelect') { state.reassignTo = +t.value; return; }
+    if (t.dataset.mcPick !== undefined) {
+      var mi = +t.dataset.mcPick, mk = state.mcPending.indexOf(mi);
+      if (t.checked && mk < 0) state.mcPending.push(mi);
+      if (!t.checked && mk > -1) state.mcPending.splice(mk, 1);
+      render();
+      var me = document.querySelector('[data-mc-pick="' + mi + '"]'); if (me) me.focus();
+      return;
+    }
+    if (t.dataset.flowWrite !== undefined) {
+      state.writeTo = +t.dataset.flowWrite;
+      render();
+      var r = document.querySelector('[data-flow-write="' + state.writeTo + '"]'); if (r) r.focus();
+      return;
+    }
+    if (t.dataset.gcal === 'sync') { state.syncJobs = t.checked; }
+    if (t.dataset.gcal === 'disconnect' && t.checked) {
+      // Disconnect removes both calendar connections; user stays on the card (BR8, BR12)
+      state.connected = false;
+      state.syncJobs = false;
+      state.linked = [];
+      state.writeTo = null;
+      render();
+      focusCard();
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
