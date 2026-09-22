@@ -372,6 +372,28 @@
   .done-body h2 { font-size: 13.5px; font-weight: 700; margin: 0 0 10px; }
   .done-body p { font-size: 11.5px; color: #4C566E; margin: 0 0 14px; }
   .done-body .meta { font-size: 10.5px; color: #80879A; margin: 0; }
+  /* Manage Calendars (existing page, reached from the card) */
+  .mc-section { background: #fff; border-radius: 4px; box-shadow: 0 1px 4px rgba(31,42,61,0.08); padding: 16px 14px 18px; margin-bottom: 18px; }
+  .mc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid #EEEEF2; }
+  .mc-head h2 { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; margin: 0; }
+  .mc-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  .mc-table th { text-align: left; font-size: 10px; font-weight: 700; color: #1F2A3D; padding: 12px 18px; border-bottom: 1px solid #EEEEF2; }
+  .mc-table td { font-size: 10.5px; color: #32415B; padding: 10px 18px; border-bottom: 1px solid #EEEEF2; }
+  .mc-table td.cal-name { font-weight: 700; }
+  .mc-table th.c, .mc-table td.c { text-align: center; }
+  .mc-table th.r, .mc-table td.r { text-align: right; }
+  .wt-badge { background: #6A5AEB; color: #fff; font-size: 8.5px; font-weight: 600; padding: 2px 5px; border-radius: 2px; margin-left: 10px; white-space: nowrap; }
+  .unlink-btn { background: #FEF2F2; border: 1px solid #F6A8A8; color: #DC2626; font-size: 9.5px; font-weight: 600; border-radius: 3px; padding: 3px 7px; cursor: pointer; font-family: inherit; min-height: 22px; }
+  .unlink-btn:hover { background: #FDE2E2; }
+  .mc-help { font-size: 10px; color: #4C566E; margin: 28px 0 10px; }
+  .mc-row { display: flex; align-items: center; gap: 12px; border: 1px solid #DAD8E3; border-radius: 4px; padding: 8px 12px; margin-bottom: 7px; cursor: pointer; }
+  .mc-row.sel { border-color: #8B85EA; box-shadow: 0 0 0 1px #8B85EA; }
+  .mc-row input { width: 13px; height: 13px; accent-color: #6A5AEB; margin: 0; cursor: pointer; }
+  .mc-row .nm { font-size: 10.5px; font-weight: 700; }
+  .mc-row small { display: block; font-size: 9px; color: #80879A; margin-left: 14px; }
+  .mc-row .access-pill { margin-left: auto; font-size: 8.5px; }
+  .mc-foot { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #EEEEF2; margin-top: 12px; padding-top: 12px; font-size: 9.5px; color: #4C566E; }
+  .mc-empty { font-size: 11px; color: #80879A; padding: 14px 18px; }
   .changed-flag { display: inline-block; margin-left: 6px; }
   .integ-foot .flow-link { font-weight: 400; }
 
@@ -507,6 +529,8 @@
     linked: [],          // indexes into calendars()
     pendingLinks: [],
     writeTo: null,
+    mcPending: [],
+    lastSynced: '09/22/2026 04:20 PM',
     arrived: false,
     mobileTip: false
   };
@@ -689,7 +713,7 @@
     if (c) {
       // Existing "Manage Calendars" entry point, relocated here since the header widget is gone
       html += '<div class="integ-foot end"><button type="button" class="flow-link" data-flow="manage">Manage Calendars <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></button>' +
-        br(7, 'BR7: Relocated entry point to the existing calendar linking flow, so connected users can link more calendars or change the write-to calendar without disconnecting.') + '</div>';
+        br(7, 'BR7: Opens the existing Manage Calendars page, unchanged. This entry point used to be the Manage Calendars button in the connected header widget, which the icon replaces (BR1).') + '</div>';
     }
     html += '</div>';
     return html;
@@ -821,7 +845,9 @@
     brBtn.textContent = state.br ? 'Hide BR notes' : 'Show BR notes';
     var note = document.getElementById('demo-note');
     var STEP = { choose: 1, consent: 2, link: 3, writeto: 4, done: 5 };
-    if (state.flow) {
+    if (state.flow === 'manage') {
+      note.textContent = 'Existing Manage Calendars page, unchanged (BR7). Reached from Manage Calendars on the connected Google card, which replaces the Manage Calendars button in the old header widget. Use the sidebar or Go to buttons to leave.';
+    } else if (state.flow) {
       note.textContent = 'Existing Google connect flow, step ' + STEP[state.flow] + ' of 5 (BR7). Screens match production' +
         (state.flow === 'link' ? ', subtitle em dash swapped for a colon' : '') +
         (state.flow === 'done' ? '. Changed here: the final button and helper line now return you to the Google card (BR8)' : '') +
@@ -936,6 +962,30 @@
         '<div class="flow-foot"><button type="button" class="flow-link" data-flow="more">Link more calendars</button>' +
         '<button type="button" class="btn btn-primary" data-flow="finish"' + (state.writeTo === null ? ' disabled' : '') + '>Continue</button></div></div>';
     }
+    if (state.flow === 'manage') {
+      var linkedRows = state.linked.map(function (i) {
+        var c = cals[i], w = state.writeTo === i;
+        return '<tr><td class="cal-name"><span class="cal-swatch" style="background:' + c[1] + '"></span>' + esc(c[0]) + (w ? '<span class="wt-badge">Write-to calendar</span>' : '') + '</td>' +
+          '<td>' + c[2] + '</td><td>' + state.lastSynced + '</td><td class="c">' + (w ? '<span style="color:#34C38F" aria-label="Write-to calendar">&#10003;</span>' : '') + '</td>' +
+          '<td class="r"><button type="button" class="unlink-btn" data-mc-unlink="' + i + '">Unlink</button></td></tr>';
+      }).join('');
+      var others = cals.map(function (c, i) { return i; }).filter(function (i) { return state.linked.indexOf(i) < 0; });
+      var n2 = state.mcPending.length;
+      var otherRows = others.map(function (i) {
+        var c = cals[i], on = state.mcPending.indexOf(i) > -1;
+        return '<label class="mc-row' + (on ? ' sel' : '') + '"><input type="checkbox" data-mc-pick="' + i + '"' + (on ? ' checked' : '') + '>' +
+          '<span><span class="cal-swatch" style="background:' + c[1] + ';margin-right:6px"></span><span class="nm">' + esc(c[0]) + '</span><small>' + c[2] + '</small></span>' + accessPill(c[3]) + '</label>';
+      }).join('');
+      return '<h1 class="flow-title" tabindex="-1">Manage Calendars</h1>' +
+        '<p class="flow-sub wide">Events from every linked calendar appear in DripJobs for reference. DripJobs adds the appointments and jobs it creates to the write-to calendar only.</p>' +
+        '<section class="mc-section"><div class="mc-head"><h2>Linked Calendars</h2><button type="button" class="btn btn-primary btn-sm" data-mc="sync" style="min-height:24px;padding:3px 8px;font-size:10px;border-radius:4px"><i class="fa-solid fa-rotate"></i>Sync now</button></div>' +
+        (linkedRows ? '<div class="flow-table-wrap"><table class="mc-table"><thead><tr><th>Calendar</th><th>Time Zone</th><th>Last Synced</th><th class="c">Write To</th><th class="r">Action</th></tr></thead><tbody>' + linkedRows + '</tbody></table></div>'
+          : '<div class="mc-empty">No calendars linked.</div>') + '</section>' +
+        '<section class="mc-section"><div class="mc-head" style="border-bottom:none;padding-bottom:0"><h2>Link Another Calendar</h2></div>' +
+        '<p class="mc-help">Select the calendars to link. Their events appear in DripJobs for reference.</p>' + otherRows +
+        '<div class="mc-foot"><span>' + (n2 ? n2 + ' calendar' + (n2 > 1 ? 's' : '') + ' selected' : 'None selected') + '</span>' +
+        '<button type="button" class="btn btn-primary btn-sm" data-mc="link" style="border-radius:4px"' + (n2 ? '' : ' disabled') + '>Link Selected Calendars</button></div></section>';
+    }
     // done
     var w = state.writeTo !== null ? cals[state.writeTo][0].split('@')[0] : '';
     return '<h1 class="flow-title">You’re all set</h1>' +
@@ -954,7 +1004,7 @@
     state.mobileTip = false;
     render();
     window.scrollTo(0, 0);
-    var f = document.querySelector('.g-acct, .g-btn, .flow-table input, .flow-foot .btn');
+    var f = document.querySelector('.g-acct, .g-btn, .flow-table input, .flow-foot .btn, .flow-title');
     if (f) f.focus({ preventScroll: true });
   }
   function endFlow(connected) {
@@ -1002,13 +1052,31 @@
       if (act === 'signin') { startFlow('choose'); return; }
     }
 
+    var mcu = e.target.closest('[data-mc-unlink]');
+    if (mcu) {
+      var ui = +mcu.dataset.mcUnlink;
+      state.linked = state.linked.filter(function (x) { return x !== ui; });
+      if (state.writeTo === ui) state.writeTo = null;
+      render(); return;
+    }
+    var mca = e.target.closest('[data-mc]');
+    if (mca && !mca.disabled) {
+      if (mca.dataset.mc === 'sync') {
+        var d = new Date(), h = d.getHours(), pad = function (x) { return (x < 10 ? '0' : '') + x; };
+        state.lastSynced = pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + '/' + d.getFullYear() + ' ' + pad(h % 12 || 12) + ':' + pad(d.getMinutes()) + ' ' + (h < 12 ? 'AM' : 'PM');
+      } else {
+        state.linked = state.linked.concat(state.mcPending).sort(function (x, y) { return x - y; });
+        state.mcPending = [];
+      }
+      render(); return;
+    }
     var fl = e.target.closest('[data-flow]');
     if (fl && !fl.disabled) {
       var f = fl.dataset.flow;
       if (f === 'account') startFlow('consent');
       else if (f === 'cancel') endFlow(false);
       else if (f === 'allow') startFlow('link');
-      else if (f === 'manage') { ensureLinkedDefaults(); startFlow('link'); }
+      else if (f === 'manage') { ensureLinkedDefaults(); state.mcPending = []; startFlow('manage'); }
       else if (f === 'more') startFlow('link');
       else if (f === 'link') {
         state.linked = state.pendingLinks.slice().sort(function (x, y) { return x - y; });
@@ -1034,6 +1102,14 @@
       if (!t.checked && k > -1) state.pendingLinks.splice(k, 1);
       render();
       var el = document.querySelector('[data-flow-pick="' + i + '"]'); if (el) el.focus();
+      return;
+    }
+    if (t.dataset.mcPick !== undefined) {
+      var mi = +t.dataset.mcPick, mk = state.mcPending.indexOf(mi);
+      if (t.checked && mk < 0) state.mcPending.push(mi);
+      if (!t.checked && mk > -1) state.mcPending.splice(mk, 1);
+      render();
+      var me = document.querySelector('[data-mc-pick="' + mi + '"]'); if (me) me.focus();
       return;
     }
     if (t.dataset.flowWrite !== undefined) {
