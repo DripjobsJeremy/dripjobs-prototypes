@@ -394,6 +394,20 @@
   .mc-row .access-pill { margin-left: auto; font-size: 8.5px; }
   .mc-foot { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #EEEEF2; margin-top: 12px; padding-top: 12px; font-size: 9.5px; color: #4C566E; }
   .mc-empty { font-size: 11px; color: #80879A; padding: 14px 18px; }
+  .mc-empty-state { padding: 26px 3px 4px; }
+  .mc-empty-state b { display: block; font-size: 12px; margin-bottom: 8px; }
+  .mc-empty-state p { font-size: 10.5px; color: #80879A; margin: 0 0 14px; max-width: 420px; line-height: 1.6; }
+  /* Existing unlink confirmation (production alert pattern) */
+  .dj-alert-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 900; padding: 16px; }
+  .dj-alert { position: relative; background: #fff; width: 358px; max-width: 100%; padding: 28px 22px 16px; text-align: center; border-radius: 2px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+  .dj-alert-x { position: absolute; top: 6px; right: 6px; width: 32px; height: 32px; border: none; background: none; font-size: 20px; cursor: pointer; color: #1F2A3D; }
+  .dj-alert-ico { width: 58px; height: 58px; border-radius: 50%; border: 2px solid #F8BB86; color: #F8BB86; font-size: 30px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .dj-alert h2 { font-size: 21px; font-weight: 500; margin: 0 0 12px; color: #4C566E; }
+  .dj-alert p { font-size: 12px; color: #4C566E; margin: 0 0 14px; line-height: 1.4; }
+  .dj-alert-actions { display: flex; justify-content: center; gap: 10px; }
+  .btn-danger { background: #F43F5E; color: #fff; border-radius: 2px; }
+  .btn-danger:hover { background: #E11D48; }
+  .btn-plain { background: #fff; border: 1px solid #32415B; color: #32415B; border-radius: 2px; }
   .changed-flag { display: inline-block; margin-left: 6px; }
   .integ-foot .flow-link { font-weight: 400; }
 
@@ -531,6 +545,7 @@
     writeTo: null,
     mcPending: [],
     lastSynced: '09/22/2026 04:20 PM',
+    confirmUnlink: null,
     arrived: false,
     mobileTip: false
   };
@@ -846,7 +861,7 @@
     var note = document.getElementById('demo-note');
     var STEP = { choose: 1, consent: 2, link: 3, writeto: 4, done: 5 };
     if (state.flow === 'manage') {
-      note.textContent = 'Existing Manage Calendars page, unchanged (BR7). Reached from Manage Calendars on the connected Google card, which replaces the Manage Calendars button in the old header widget. Use the sidebar or Go to buttons to leave.';
+      note.textContent = 'Existing Manage Calendars page, unchanged (BR7). Reached from Manage Calendars on the connected Google card, which replaces the Manage Calendars button in the old header widget. Unlinking your last calendar asks to confirm, then disconnects Google entirely and shows the empty state. Use the sidebar, or the Google icon on Appointments or Job Schedule, to leave.';
     } else if (state.flow) {
       note.textContent = 'Existing Google connect flow, step ' + STEP[state.flow] + ' of 5 (BR7). Screens match production' +
         (state.flow === 'link' ? ', subtitle em dash swapped for a colon' : '') +
@@ -978,13 +993,15 @@
       }).join('');
       return '<h1 class="flow-title" tabindex="-1">Manage Calendars</h1>' +
         '<p class="flow-sub wide">Events from every linked calendar appear in DripJobs for reference. DripJobs adds the appointments and jobs it creates to the write-to calendar only.</p>' +
-        '<section class="mc-section"><div class="mc-head"><h2>Linked Calendars</h2><button type="button" class="btn btn-primary btn-sm" data-mc="sync" style="min-height:24px;padding:3px 8px;font-size:10px;border-radius:4px"><i class="fa-solid fa-rotate"></i>Sync now</button></div>' +
-        (linkedRows ? '<div class="flow-table-wrap"><table class="mc-table"><thead><tr><th>Calendar</th><th>Time Zone</th><th>Last Synced</th><th class="c">Write To</th><th class="r">Action</th></tr></thead><tbody>' + linkedRows + '</tbody></table></div>'
-          : '<div class="mc-empty">No calendars linked.</div>') + '</section>' +
+        '<section class="mc-section"><div class="mc-head"' + (state.connected ? '' : ' style="border-bottom:none;padding-bottom:0"') + '><h2>Linked Calendars</h2>' + (state.connected ? '<button type="button" class="btn btn-primary btn-sm" data-mc="sync" style="min-height:24px;padding:3px 8px;font-size:10px;border-radius:4px"><i class="fa-solid fa-rotate"></i>Sync now</button>' : '') + '</div>' +
+        (!state.connected ? '' : linkedRows ? '<div class="flow-table-wrap"><table class="mc-table"><thead><tr><th>Calendar</th><th>Time Zone</th><th>Last Synced</th><th class="c">Write To</th><th class="r">Action</th></tr></thead><tbody>' + linkedRows + '</tbody></table></div>'
+          : '<div class="mc-empty">No calendars linked.</div>') +
+        (!state.connected ? '<div class="mc-empty-state"><b>No Google calendars linked</b><p>Connect your Google account to link calendars. Their events will appear in DripJobs, and you\u2019ll choose which one receives new appointments.</p>' +
+          '<button type="button" class="btn btn-primary" data-gcal="signin">Connect Google Calendar</button></div></section>' + confirmModal() : '</section>' +
         '<section class="mc-section"><div class="mc-head" style="border-bottom:none;padding-bottom:0"><h2>Link Another Calendar</h2></div>' +
         '<p class="mc-help">Select the calendars to link. Their events appear in DripJobs for reference.</p>' + otherRows +
         '<div class="mc-foot"><span>' + (n2 ? n2 + ' calendar' + (n2 > 1 ? 's' : '') + ' selected' : 'None selected') + '</span>' +
-        '<button type="button" class="btn btn-primary btn-sm" data-mc="link" style="border-radius:4px"' + (n2 ? '' : ' disabled') + '>Link Selected Calendars</button></div></section>';
+        '<button type="button" class="btn btn-primary btn-sm" data-mc="link" style="border-radius:4px"' + (n2 ? '' : ' disabled') + '>Link Selected Calendars</button></div></section>' + confirmModal());
     }
     // done
     var w = state.writeTo !== null ? cals[state.writeTo][0].split('@')[0] : '';
@@ -996,6 +1013,16 @@
       '<div class="flow-foot"><button type="button" class="flow-link" data-flow="manage">Manage Calendars</button>' +
       '<span><button type="button" class="btn btn-primary" data-flow="return">Back to Google Calendar</button>' +
       br(8, 'BR8: Was "Continue to appointments". Now returns the user to the Google integration card.') + '</span></div></div>';
+  }
+
+  function confirmModal() {
+    if (state.confirmUnlink === null) return '';
+    var nm = calendars()[state.confirmUnlink][0].split('@')[0];
+    return '<div class="dj-alert-backdrop" data-mc-confirm="cancel"><div class="dj-alert" role="alertdialog" aria-modal="true" aria-labelledby="unlinkTitle">' +
+      '<button type="button" class="dj-alert-x" data-mc-confirm="cancel" aria-label="Close">&times;</button>' +
+      '<div class="dj-alert-ico">!</div><h2 id="unlinkTitle">Unlink "' + esc(nm) + '"?</h2>' +
+      '<p>This is your last linked calendar, so DripJobs will disconnect from Google Calendar entirely.</p>' +
+      '<div class="dj-alert-actions"><button type="button" class="btn btn-danger" data-mc-confirm="yes">Yes, disconnect</button><button type="button" class="btn btn-plain" data-mc-confirm="cancel">Cancel</button></div></div></div>';
   }
 
   function startFlow(step) {
@@ -1022,6 +1049,7 @@
   }
 
   document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && state.confirmUnlink !== null) { var w0 = state.confirmUnlink; state.confirmUnlink = null; render(); var ub = document.querySelector('[data-mc-unlink="' + w0 + '"]'); if (ub) ub.focus(); return; }
     if (e.key === 'Escape' && state.mobileTip) { state.mobileTip = false; render(); }
   });
 
@@ -1055,9 +1083,28 @@
     var mcu = e.target.closest('[data-mc-unlink]');
     if (mcu) {
       var ui = +mcu.dataset.mcUnlink;
+      if (state.linked.length === 1) {
+        state.confirmUnlink = ui; render();
+        var yb = document.querySelector('[data-mc-confirm="yes"]'); if (yb) yb.focus();
+        return;
+      }
       state.linked = state.linked.filter(function (x) { return x !== ui; });
       if (state.writeTo === ui) state.writeTo = null;
       render(); return;
+    }
+    var mcc = e.target.closest('[data-mc-confirm]');
+    if (mcc) {
+      if (mcc.dataset.mcConfirm === 'cancel' && e.target !== mcc && mcc.classList.contains('dj-alert-backdrop')) return;
+      var was = state.confirmUnlink;
+      state.confirmUnlink = null;
+      if (mcc.dataset.mcConfirm === 'yes') {
+        // Last calendar unlinked: DripJobs disconnects from Google entirely (existing behavior)
+        state.connected = false; state.linked = []; state.writeTo = null; state.syncJobs = false;
+      }
+      render();
+      var back = mcc.dataset.mcConfirm === 'yes' ? document.querySelector('.mc-empty-state .btn') : document.querySelector('[data-mc-unlink="' + was + '"]');
+      if (back) back.focus();
+      return;
     }
     var mca = e.target.closest('[data-mc]');
     if (mca && !mca.disabled) {
