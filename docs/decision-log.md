@@ -2,6 +2,17 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-23] Google Calendar Icon: Sync Jobs helper text (ticket 86bc5bcfc)
+
+- Decision: Added the locked Snippet Library copy "GCal Sync Jobs Helper" under the Sync Jobs to Google Calendar toggle: "Adds your scheduled Jobs to your write-to calendar in Google. Changes take effect when you click Save." It uses the same style and alignment as the Disconnect helper, and both helpers are now tied to their toggles with aria-describedby.
+- Fit check (the UX/UI flag): measured in the prototype with no overflow. The non-admin scoped card (348px text column) and the admin Integrations card (326px) both wrap to 2 lines, the same as the Disconnect helper. The gated mobile view (270px) wraps to 3 lines. Fit confirmed.
+- Open question: None. Per the snippet's Use Case, no copy says turning Sync off removes already-synced Jobs.
+
+## [2026-09-23] Google Calendar Icon: Sync Jobs and Disconnect are mutually exclusive (ticket 86bc5bcfc)
+
+- Decision: Per Jeremy, turning "Disconnect Google Calendar" ON automatically turns "Sync Jobs to Google Calendar" OFF, and turning Sync Jobs ON turns Disconnect OFF. Both changes stay staged until Save, like any other toggle change on the card.
+- Assumptions: Turning a toggle OFF doesn't restore the other one. If the user switches Disconnect back off, Sync Jobs stays off until they turn it on again.
+
 ## [2026-09-23] Google Calendar Icon: collapsible linked calendars list (ticket 86bc5bcfc)
 
 - Decision: Per Jeremy, when 2 or more calendars are linked, the "Linked calendars (n)" label on the Google card becomes a collapse/expand control (chevron, keyboard accessible, aria-expanded). Collapsed shows only the label with the full count plus the write-to calendar row. With a single linked calendar there is nothing to collapse, so the label stays plain text.

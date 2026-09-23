@@ -288,7 +288,8 @@
   .gcal-status-line { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; margin-bottom: 14px; }
   .gcal-status-line i { color: #22C55E; font-size: 14px; }
   .settings-toggle-row { display: flex; align-items: center; gap: 10px; min-height: 40px; }
-  .settings-toggle-row + .settings-toggle-row { margin-top: 12px; }
+  .settings-toggle-row + .settings-toggle-row,
+  .settings-toggle-help + .settings-toggle-row { margin-top: 12px; }
   /* Matches the Acorn card's "Add Financing widget option to proposals" label and toggle */
   .settings-toggle-label { font-size: 11.5px; font-weight: 700; cursor: pointer; }
   .dj-switch.sm { width: 34px; height: 19px; }
@@ -799,15 +800,17 @@
         }).join('') + '</ul></div>';
       var syncOn = state.pendingSync === null ? state.syncJobs : state.pendingSync;
       html += '<div class="settings-toggle-row' + (state.pendingSync === true ? ' pending-on' : '') + '">' + '<span class="save-hint" role="tooltip">Click Save at the bottom of the page to apply this change.</span>' +
-        '<label class="dj-switch sm"><input type="checkbox" class="form-check-input switchery" id="syncJobsToggle" data-gcal="sync"' + (syncOn ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
+        '<label class="dj-switch sm"><input type="checkbox" class="form-check-input switchery" id="syncJobsToggle" aria-describedby="syncJobsHelp" data-gcal="sync"' + (syncOn ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
         '<label class="settings-toggle-label" for="syncJobsToggle">Sync Jobs to Google Calendar</label>' +
         br(11, 'BR11: Moved here from My Profile (removed there per BR10). Visible only when connected (BR13).') +
-        br(14, 'BR14 open gap: whether to add a separate Sync Appointments to Google toggle is undecided (Out of Scope / V2).') + '</div>';
+        br(14, 'BR14 open gap: whether to add a separate Sync Appointments to Google toggle is undecided (Out of Scope / V2).') + '</div>' +
+        // Locked copy: Snippet Library "GCal Sync Jobs Helper" (Sep 23, 2026). One-way sync; turning off stops future syncing only.
+        '<div class="settings-toggle-help" id="syncJobsHelp">Adds your scheduled Jobs to your write-to calendar in Google. Changes take effect when you click Save.</div>';
       html += '<div class="settings-toggle-row' + (state.pendingDisconnect ? ' pending-on' : '') + '">' + '<span class="save-hint" role="tooltip">Click Save at the bottom of the page to apply this change.</span>' +
-        '<label class="dj-switch sm"><input type="checkbox" class="form-check-input switchery" id="disconnectToggle" data-gcal="disconnect"' + (state.pendingDisconnect ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
+        '<label class="dj-switch sm"><input type="checkbox" class="form-check-input switchery" id="disconnectToggle" aria-describedby="disconnectHelp" data-gcal="disconnect"' + (state.pendingDisconnect ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
         '<label class="settings-toggle-label" for="disconnectToggle">Disconnect Google Calendar</label>' +
         br(12, 'BR12: Helper text states disconnecting removes both calendar connections. Disconnecting takes effect on Save, then the card returns to Not Connected and the user stays here (BR8).') + '</div>' +
-        '<div class="settings-toggle-help">Disconnecting removes both your Appointments calendar and Job Schedule calendar connections.</div>';
+        '<div class="settings-toggle-help" id="disconnectHelp">Disconnecting removes both your Appointments calendar and Job Schedule calendar connections.</div>';
     }
     html += '</div>';
     // Footer: Manage Calendars on the left (connected only), Help Articles on the right (always), matching sibling cards
@@ -1129,6 +1132,19 @@
       '<div class="dj-alert-actions"><button type="button" class="btn btn-danger" data-mc-confirm="yes">Yes, disconnect</button><button type="button" class="btn btn-plain" data-mc-confirm="cancel">Cancel</button></div></div></div>';
   }
 
+  // Reflect staged toggle values in place (no full re-render, so hover/focus stay put)
+  function syncCardToggles() {
+    var sy = document.getElementById('syncJobsToggle'), dc = document.getElementById('disconnectToggle');
+    if (sy) {
+      sy.checked = state.pendingSync === null ? state.syncJobs : state.pendingSync;
+      sy.closest('.settings-toggle-row').classList.toggle('pending-on', state.pendingSync === true);
+    }
+    if (dc) {
+      dc.checked = state.pendingDisconnect;
+      dc.closest('.settings-toggle-row').classList.toggle('pending-on', state.pendingDisconnect);
+    }
+  }
+
   function clearPending() { state.pendingSync = null; state.pendingDisconnect = false; }
 
   function startFlow(step) {
@@ -1325,14 +1341,17 @@
       var r = document.querySelector('[data-flow-write="' + state.writeTo + '"]'); if (r) r.focus();
       return;
     }
-    // Card toggles are staged until Save; switching one ON shows the save reminder on hover
-    if (t.dataset.gcal === 'sync') {
-      state.pendingSync = t.checked === state.syncJobs ? null : t.checked;
-      t.closest('.settings-toggle-row').classList.toggle('pending-on', state.pendingSync === true);
-    }
-    if (t.dataset.gcal === 'disconnect') {
-      state.pendingDisconnect = t.checked;
-      t.closest('.settings-toggle-row').classList.toggle('pending-on', t.checked);
+    // Card toggles are staged until Save; switching one ON shows the save reminder on hover.
+    // Sync Jobs and Disconnect are mutually exclusive: turning one ON turns the other OFF.
+    if (t.dataset.gcal === 'sync' || t.dataset.gcal === 'disconnect') {
+      if (t.dataset.gcal === 'sync') {
+        state.pendingSync = t.checked === state.syncJobs ? null : t.checked;
+        if (t.checked) state.pendingDisconnect = false;
+      } else {
+        state.pendingDisconnect = t.checked;
+        if (t.checked) state.pendingSync = state.syncJobs ? false : null;
+      }
+      syncCardToggles();
     }
   });
 
