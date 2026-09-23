@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-23] Google Calendar Icon: connect flow "Continue to appointments" button (ticket 86bc5bcfc)
+
+- Decision: Per Jeremy's production screenshot, the "Continue to appointments" button on "Choose your write-to calendar" and "You're all set" now matches production: #6A5AEB fill, 6px radius, 12px bold label, 32px tall. It navigates to the Appointments calendar (in place since the previous revision), with Appointments active in the sidebar.
+- Deviation flag: design-system.md lists hardcoded #6A5AEB as an anti-pattern (in-app pages use #8B85EA). It's used here on purpose because these connect-flow screens are existing, unchanged production UI (BR8), and the button should match what ships today, not the settings-page token.
+- Open question: None.
+
 ## [2026-09-23] Google Calendar Icon: synced to the revised ticket (ticket 86bc5bcfc)
 
 - Decision: Updated the prototype to the revised ClickUp ticket:
