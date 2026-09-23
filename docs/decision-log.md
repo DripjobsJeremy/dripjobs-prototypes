@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-23] Google Calendar Icon: linked calendars list on the card (ticket 86bc5bcfc)
+
+- Decision: New requirement from Jeremy. When connected, the Google card lists every linked calendar under "Linked calendars (n)", between the combined status line and the toggles, with the calendar's color swatch and email. The write-to calendar carries the same "Write-to calendar" badge used on Manage Calendars and is listed first. The list updates after the connect flow, Make write-to, linking and unlinking. It is hidden when Not Connected (BR13 unchanged).
+- Assumptions: Calendars with no email address (e.g. a shared "Production Team" calendar) show their Google calendar name, matching Manage Calendars. Long emails truncate with the full value on hover. No cap on list length.
+
 ## [2026-09-22] Google Calendar Icon: toggles apply on Save (ticket 86bc5bcfc)
 
 - Decision: Per Jeremy, the Google card's Sync Jobs and Disconnect toggles now only stage a change. The card refreshes to its new state (e.g. Not Connected after Disconnect) only when the user clicks Save. Added the existing Company Settings page actions below the Integrations grid, "Save" and "Cancel - Return to Dashboard" plus the copyright line, and a hover/focus tooltip on any toggle switched ON but not yet saved ("Click Save at the bottom of the page to apply this change.").

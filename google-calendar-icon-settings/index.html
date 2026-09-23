@@ -443,6 +443,15 @@
   .save-hint::after { content: ""; position: absolute; top: 100%; left: 14px; border: 6px solid transparent; border-top-color: #32415B; }
   .settings-toggle-row.pending-on:hover .save-hint,
   .settings-toggle-row.pending-on:focus-within .save-hint { opacity: 1; visibility: visible; }
+  /* Linked calendars list on the connected card */
+  .gcal-linked { margin: -4px 0 14px; }
+  .gcal-linked-label { font-size: 11px; font-weight: 700; color: #4C566E; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .gcal-linked ul { list-style: none; margin: 0; padding: 0; border: 1px solid #EEEEF2; border-radius: 8px; }
+  .gcal-linked li { display: flex; align-items: center; gap: 8px; padding: 7px 10px; font-size: 12px; font-weight: 600; color: #1F2A3D; min-width: 0; }
+  .gcal-linked li + li { border-top: 1px solid #EEEEF2; }
+  .gcal-linked li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .gcal-linked li .cal-swatch { flex-shrink: 0; margin-right: 0; }
+  .gcal-linked li .wt-badge { margin-left: auto; flex-shrink: 0; }
   .changed-flag { display: inline-block; margin-left: 6px; }
   .integ-foot .flow-link { font-weight: 400; }
 
@@ -752,6 +761,16 @@
     } else {
       html += '<div class="gcal-status-line"><i class="fa-solid fa-circle-check"></i>Appointments &amp; Job Schedule: Connected' +
         br(9, 'BR9: One combined, account-level status line when connected.') + '</div>';
+      ensureLinkedDefaults();
+      var cals = calendars();
+      var order = state.linked.slice().sort(function (x, y) { return (y === state.writeTo) - (x === state.writeTo) || x - y; });
+      html += '<div class="gcal-linked"><div class="gcal-linked-label">Linked calendars (' + order.length + ')' +
+        br(16, 'New requirement: when connected, the card lists every linked calendar by email (or calendar name when it has no email) and marks the write-to calendar. The write-to calendar is listed first.') + '</div><ul>' +
+        order.map(function (i) {
+          var w = i === state.writeTo;
+          return '<li><span class="cal-swatch" style="background:' + cals[i][1] + '"></span><span class="nm" title="' + esc(cals[i][0]) + '">' + esc(cals[i][0]) + '</span>' +
+            (w ? '<span class="wt-badge">Write-to calendar</span>' : '') + '</li>';
+        }).join('') + '</ul></div>';
       var syncOn = state.pendingSync === null ? state.syncJobs : state.pendingSync;
       html += '<div class="settings-toggle-row' + (state.pendingSync === true ? ' pending-on' : '') + '">' + '<span class="save-hint" role="tooltip">Click Save at the bottom of the page to apply this change.</span>' +
         '<label class="dj-switch"><input type="checkbox" class="form-check-input switchery" id="syncJobsToggle" data-gcal="sync"' + (syncOn ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
