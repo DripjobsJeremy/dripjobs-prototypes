@@ -601,7 +601,7 @@
     view: 'appointments',   // appointments | jobschedule | card
     br: false,
     syncJobs: false,
-    linkedCollapsed: false,  // card's Linked calendars list, collapsible when 2+ calendars
+    linkedCollapsed: true,   // card's Linked calendars list: collapsed by default when 2+ calendars
     pendingSync: null,   // unsaved Sync Jobs value (null = no change)
     pendingDisconnect: false,
     flow: null,          // null | choose | consent | link | writeto | done
@@ -792,7 +792,7 @@
         (canCollapse
           ? '<button type="button" class="gcal-linked-toggle" data-gcal="collapse" aria-expanded="' + !collapsed + '" aria-controls="gcalLinkedList"><span class="chev" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' + labelText + '</button>'
           : labelText) +
-        br(16, 'New requirement: when connected, the card lists every linked calendar by email (or calendar name when it has no email) and marks the write-to calendar. The write-to calendar is listed first. With 2+ calendars the list collapses down to the write-to calendar only.') + '</div><ul id="gcalLinkedList">' +
+        br(16, 'New requirement: when connected, the card lists every linked calendar by email (or calendar name when it has no email) and marks the write-to calendar. The write-to calendar is listed first. With 2+ calendars the list starts collapsed to the write-to calendar only; the chevron expands it.') + '</div><ul id="gcalLinkedList">' +
         shown.map(function (i) {
           var w = i === state.writeTo;
           return '<li><span class="cal-swatch" style="background:' + cals[i][1] + '"></span><span class="nm" title="' + esc(cals[i][0]) + '">' + esc(cals[i][0]) + '</span>' +
@@ -973,6 +973,7 @@
 
   function goToCard() {
     state.view = 'card';
+    state.linkedCollapsed = true;   // each arrival on the card starts collapsed
     state.mobileTip = false;
     state.arrived = true;
     render();
@@ -1159,6 +1160,7 @@
   }
   function endFlow(connected) {
     state.flow = null;
+    state.linkedCollapsed = true;
     state.connected = connected;
     state.view = 'card';   // BR8: land back on the Google card
     render();
