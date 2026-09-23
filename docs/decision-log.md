@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-23] Google Calendar Icon: collapsible linked calendars list (ticket 86bc5bcfc)
+
+- Decision: Per Jeremy, when 2 or more calendars are linked, the "Linked calendars (n)" label on the Google card becomes a collapse/expand control (chevron, keyboard accessible, aria-expanded). Collapsed shows only the label with the full count plus the write-to calendar row. With a single linked calendar there is nothing to collapse, so the label stays plain text.
+- Assumptions: The list starts expanded and remembers its collapsed state while the user moves around the prototype (per session, not saved). Collapsing doesn't touch unsaved toggle changes.
+
 ## [2026-09-23] Google Calendar Icon: card toggle sizing (ticket 86bc5bcfc)
 
 - Decision: Per Jeremy, the Google card's "Sync Jobs to Google Calendar" and "Disconnect Google Calendar" labels and toggles now match the Acorn card's "Add Financing widget option to proposals" row (11.5px bold label, 34x19 toggle), so toggles read consistently across the Integrations grid. The Disconnect helper text is re-aligned under the label.

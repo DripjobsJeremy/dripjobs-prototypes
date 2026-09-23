@@ -450,6 +450,11 @@
   /* Linked calendars list on the connected card */
   .gcal-linked { margin: -4px 0 14px; }
   .gcal-linked-label { font-size: 11px; font-weight: 700; color: #4C566E; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .gcal-linked-toggle { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; padding: 0; min-height: 28px; font: inherit; font-size: 11px; font-weight: 700; color: #4C566E; cursor: pointer; border-radius: 4px; }
+  .gcal-linked-toggle:hover { color: var(--st-color-primary-active); }
+  .gcal-linked-toggle:focus-visible { outline: 3px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .gcal-linked-toggle .chev { display: inline-block; width: 10px; font-size: 10px; transition: transform 0.15s ease; }
+  .gcal-linked-toggle[aria-expanded="true"] .chev { transform: rotate(90deg); }
   .gcal-linked ul { list-style: none; margin: 0; padding: 0; border: 1px solid #EEEEF2; border-radius: 8px; }
   .gcal-linked li { display: flex; align-items: center; gap: 8px; padding: 7px 10px; font-size: 12px; font-weight: 600; color: #1F2A3D; min-width: 0; }
   .gcal-linked li + li { border-top: 1px solid #EEEEF2; }
@@ -590,6 +595,7 @@
     view: 'appointments',   // appointments | jobschedule | card
     br: false,
     syncJobs: false,
+    linkedCollapsed: false,  // card's Linked calendars list, collapsible when 2+ calendars
     pendingSync: null,   // unsaved Sync Jobs value (null = no change)
     pendingDisconnect: false,
     flow: null,          // null | choose | consent | link | writeto | done
@@ -771,9 +777,17 @@
       ensureLinkedDefaults();
       var cals = calendars();
       var order = state.linked.slice().sort(function (x, y) { return (y === state.writeTo) - (x === state.writeTo) || x - y; });
-      html += '<div class="gcal-linked"><div class="gcal-linked-label">Linked calendars (' + order.length + ')' +
-        br(16, 'New requirement: when connected, the card lists every linked calendar by email (or calendar name when it has no email) and marks the write-to calendar. The write-to calendar is listed first.') + '</div><ul>' +
-        order.map(function (i) {
+      // Collapsible when 2+ calendars: collapsed shows only the write-to calendar
+      var canCollapse = order.length > 1;
+      var collapsed = canCollapse && state.linkedCollapsed;
+      var shown = collapsed ? order.slice(0, 1) : order;
+      var labelText = 'Linked calendars (' + order.length + ')';
+      html += '<div class="gcal-linked"><div class="gcal-linked-label">' +
+        (canCollapse
+          ? '<button type="button" class="gcal-linked-toggle" data-gcal="collapse" aria-expanded="' + !collapsed + '" aria-controls="gcalLinkedList"><span class="chev" aria-hidden="true">&#9656;</span>' + labelText + '</button>'
+          : labelText) +
+        br(16, 'New requirement: when connected, the card lists every linked calendar by email (or calendar name when it has no email) and marks the write-to calendar. The write-to calendar is listed first. With 2+ calendars the list collapses down to the write-to calendar only.') + '</div><ul id="gcalLinkedList">' +
+        shown.map(function (i) {
           var w = i === state.writeTo;
           return '<li><span class="cal-swatch" style="background:' + cals[i][1] + '"></span><span class="nm" title="' + esc(cals[i][0]) + '">' + esc(cals[i][0]) + '</span>' +
             (w ? '<span class="wt-badge">Write-to calendar</span>' : '') + '</li>';
@@ -1187,6 +1201,12 @@
       if (act === 'open') { goToCard(); return; }
       if (act === 'tip') { state.mobileTip = !state.mobileTip; render(); var ib = document.querySelector('.mobile-info-btn'); if (ib) ib.focus(); return; }
       if (act === 'signin') { startFlow('choose'); return; }
+      if (act === 'collapse') {
+        state.linkedCollapsed = !state.linkedCollapsed;
+        render();
+        var tb = document.querySelector('.gcal-linked-toggle'); if (tb) tb.focus({ preventScroll: true });
+        return;
+      }
     }
 
     var mcu = e.target.closest('[data-mc-unlink]');
