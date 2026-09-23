@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-23] Google Calendar Icon: card toggle sizing (ticket 86bc5bcfc)
+
+- Decision: Per Jeremy, the Google card's "Sync Jobs to Google Calendar" and "Disconnect Google Calendar" labels and toggles now match the Acorn card's "Add Financing widget option to proposals" row (11.5px bold label, 34x19 toggle), so toggles read consistently across the Integrations grid. The Disconnect helper text is re-aligned under the label.
+- Open question: None.
+
 ## [2026-09-23] Google Calendar Icon: card footer links (ticket 86bc5bcfc)
 
 - Decision: Per Jeremy, the Google card footer now puts "Manage Calendars >" on the left and a new "Help Articles >" link on the right, which opens https://intercom.help/dripjobs/en/?q=google, matching the left/right footer layout of the sibling integration cards.
