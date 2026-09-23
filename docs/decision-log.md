@@ -6,6 +6,7 @@ Append a short entry after any session with a real design or scope decision. New
 
 - Decision: Per Jeremy, when 2 or more calendars are linked, the "Linked calendars (n)" label on the Google card becomes a collapse/expand control (chevron, keyboard accessible, aria-expanded). Collapsed shows only the label with the full count plus the write-to calendar row. With a single linked calendar there is nothing to collapse, so the label stays plain text.
 - Assumptions: The list starts expanded and remembers its collapsed state while the user moves around the prototype (per session, not saved). Collapsing doesn't touch unsaved toggle changes.
+- Follow-up: the expand arrow was too small to read as clickable, so it is now a 12px purple chevron inside a 20px lavender circle (tag-pill colors from the design system), pointing right when collapsed and down when expanded, darkening on hover.
 
 ## [2026-09-23] Google Calendar Icon: card toggle sizing (ticket 86bc5bcfc)
 
