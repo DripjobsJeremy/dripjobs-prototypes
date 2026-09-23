@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-23] Google Calendar Icon: card footer links (ticket 86bc5bcfc)
+
+- Decision: Per Jeremy, the Google card footer now puts "Manage Calendars >" on the left and a new "Help Articles >" link on the right, which opens https://intercom.help/dripjobs/en/?q=google, matching the left/right footer layout of the sibling integration cards.
+- Assumptions: Help Articles shows in both Connected and Not Connected states (sibling cards show help links regardless of status); Manage Calendars stays connected-only. The link opens in a new tab, since it leaves DripJobs.
+
 ## [2026-09-23] Google Calendar Icon: linked calendars list on the card (ticket 86bc5bcfc)
 
 - Decision: New requirement from Jeremy. When connected, the Google card lists every linked calendar under "Linked calendars (n)", between the combined status line and the toggles, with the calendar's color swatch and email. The write-to calendar carries the same "Write-to calendar" badge used on Manage Calendars and is listed first. The list updates after the connect flow, Make write-to, linking and unlinking. It is hidden when Not Connected (BR13 unchanged).

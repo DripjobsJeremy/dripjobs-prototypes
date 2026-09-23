@@ -452,6 +452,9 @@
   .gcal-linked li .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   .gcal-linked li .cal-swatch { flex-shrink: 0; margin-right: 0; }
   .gcal-linked li .wt-badge { margin-left: auto; flex-shrink: 0; }
+  .help-link { color: var(--st-color-primary-active); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-height: 32px; }
+  .help-link:hover { text-decoration: underline; }
+  .help-link:focus-visible { outline: 3px solid var(--st-color-primary-active); outline-offset: 2px; }
   .changed-flag { display: inline-block; margin-left: 6px; }
   .integ-foot .flow-link { font-weight: 400; }
 
@@ -784,11 +787,11 @@
         '<div class="settings-toggle-help">Disconnecting removes both your Appointments calendar and Job Schedule calendar connections.</div>';
     }
     html += '</div>';
-    if (c) {
-      // Existing "Manage Calendars" entry point, relocated here since the header widget is gone
-      html += '<div class="integ-foot end"><button type="button" class="flow-link" data-flow="manage">Manage Calendars <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></button>' +
-        br(7, 'BR7: Opens the existing Manage Calendars page, unchanged. This entry point used to be the Manage Calendars button in the connected header widget, which the icon replaces (BR1).') + '</div>';
-    }
+    // Footer: Manage Calendars on the left (connected only), Help Articles on the right (always), matching sibling cards
+    html += '<div class="integ-foot">' +
+      (c ? '<span><button type="button" class="flow-link" data-flow="manage">Manage Calendars <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></button>' +
+        br(7, 'BR7: Opens the existing Manage Calendars page, unchanged. This entry point used to be the Manage Calendars button in the connected header widget, which the icon replaces (BR1).') + '</span>' : '<span></span>') +
+      '<a class="help-link" href="https://intercom.help/dripjobs/en/?q=google" target="_blank" rel="noopener">Help Articles <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></a></div>';
     html += '</div>';
     return html;
   }
