@@ -2,6 +2,18 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-23] Google Calendar Icon: synced to the revised ticket (ticket 86bc5bcfc)
+
+- Decision: Updated the prototype to the revised ClickUp ticket:
+  - Locked copy: the icon tooltips ("Connect your Google Calendar" / "Manage your Google Calendar connection", no period, also used for the mobile (i)); the Not Connected description ("Connect your Google Calendar to Appointments and Job Schedule."); the Save reminder (no period).
+  - Tooltip behavior: shows on hover and keyboard focus, stays while the pointer is over it, closes with Esc, no timer. The icon's aria-label matches the tooltip.
+  - Save reminder: now fires on any unsaved toggle change (switched on or off), is linked to its toggle via aria-describedby, and shows inline with a polite live region on mobile.
+  - Cancel - Return to Dashboard: now lands on a Sales Pipeline placeholder for both roles.
+  - Mobile: the Connect G / Manage G buttons are named "Connect Google Calendar" / "Manage Google Calendar", and the (i) is named "About Google Calendar connection".
+- Reverted per the ticket's correction (BR8): the connect flow is unchanged production UI. "Choose your write-to calendar" and "You're all set" both say "Continue to appointments", the All set helper again points to the Appointments page, and finishing the flow ends on Appointments, not the card. The link-step subtitle keeps the colon (BR7).
+- Disconnect helper fit check (BR12, closes the Still Open item): the primary copy wrapped to 3 lines on the admin (326px) and non-admin (348px) cards and 4 on mobile (270px), over the 2/3 limit. The fallback "Removes the Google connection from both Appointments and Job Schedule. Changes take effect when you click Save." fits at 2 / 2 / 3 and is now used.
+- Open question: The unchanged All set helper still says calendars are managed "from the Appointments page", which is no longer true once the widget is gone (Manage Calendars now lives on the card). It's out of scope per BR8, but flagging it for a follow-up.
+
 ## [2026-09-23] Google Calendar Icon: Sync Jobs helper text (ticket 86bc5bcfc)
 
 - Decision: Added the locked Snippet Library copy "GCal Sync Jobs Helper" under the Sync Jobs to Google Calendar toggle: "Adds your scheduled Jobs to your write-to calendar in Google. Changes take effect when you click Save." It uses the same style and alignment as the Disconnect helper, and both helpers are now tied to their toggles with aria-describedby.
