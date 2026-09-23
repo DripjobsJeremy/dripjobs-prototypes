@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-23] Google Calendar Icon: connect flow "Continue to appointments" button (ticket 86bc5bcfc)
+
+- Decision: Per Jeremy, the "Continue to appointments" button on "Choose your write-to calendar" and "You're all set" keeps its production label and shape (6px radius, 12px bold label, 32px tall), but uses the design-system color tokens instead of production's hardcoded #6A5AEB: #8B85EA fill, #736BE3 hover, #5C53DC active. It navigates to the Appointments calendar, with Appointments active in the sidebar.
+- Open question: None.
+
 ## [2026-09-23] Google Calendar Icon: synced to the revised ticket (ticket 86bc5bcfc)
 
 - Decision: Updated the prototype to the revised ClickUp ticket:
