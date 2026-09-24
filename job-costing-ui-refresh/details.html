@@ -1,0 +1,2135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Job Costing Details | Job Costing UI Refresh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #F4F5F8;
+    -webkit-font-smoothing: antialiased;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  a { text-decoration: none; color: inherit; }
+  button { font-family: inherit; cursor: pointer; }
+  table { border-collapse: collapse; width: 100%; }
+  .visually-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+
+  /* ===================================================================
+     JOB COSTING DESIGN-SYSTEM REFRESH: scoped wrapper per page (see
+     DripJobs Design System guide, section 1 & 12). This is a distinct
+     page from the Dashboard, so it gets its own wrapper id.
+     =================================================================== */
+  #job-costing-details-page {
+    --st-color-primary:        #8B85EA;
+    --st-color-primary-hover:  #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb:    139, 133, 234;
+
+    --st-color-text:           #32415B;
+    --st-color-text-muted:     #80879A;
+    --st-color-border:         #DAD8E3;
+    --st-color-card-bg:        #FFFFFF;
+
+    color: var(--st-color-text);
+  }
+
+  /* ---------- Shared chrome: reproduced only for click-through context ---------- */
+  .app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar {
+    height: 64px; background: #fff; border-bottom: 1px solid #ECEBF2;
+    display: flex; align-items: center; padding: 0 24px; gap: 24px;
+    position: sticky; top: 0; z-index: 40;
+  }
+  .topbar-logo { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 800; color: #32415B; white-space: nowrap; }
+  .topbar-logo .logo-badge { width: 30px; height: 30px; border-radius: 9px; background: #8B85EA; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .topbar-search { flex: 1; max-width: 420px; height: 40px; border: 1px solid #E4E3EC; border-radius: 8px; display: flex; align-items: center; padding: 0 14px; gap: 10px; color: #9297A8; font-size: 13px; background: #FAFAFC; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+  .topbar-icon-btn { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: #9297A8; }
+  .topbar-icon-btn:focus-visible { outline: 2px solid #8B85EA; outline-offset: 2px; }
+  .topbar-avatar { width: 34px; height: 34px; border-radius: 50%; background: #32415B; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .topbar-user { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #32415B; }
+
+  .body-row { display: flex; flex: 1; min-height: 0; }
+  .sidebar { width: 236px; background: #fff; border-right: 1px solid #ECEBF2; padding: 18px 12px 24px; flex-shrink: 0; overflow-y: auto; }
+  .sidebar nav a, .sidebar .side-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; font-size: 14px; font-weight: 600; color: #4B5468; margin-bottom: 2px; }
+  .sidebar .side-item:focus-visible, .sidebar nav a:focus-visible { outline: 2px solid #8B85EA; outline-offset: 1px; }
+  .sidebar .side-item svg, .sidebar nav a svg { width: 17px; height: 17px; flex-shrink: 0; color: #8991A5; }
+  .sidebar .side-badge { margin-left: auto; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: #8B85EA; color: #fff; }
+  .sidebar .side-badge.teal { background: #0DCECE; }
+  .sidebar-section-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; color: #A6ABB8; margin: 18px 10px 6px; }
+  .side-group-active { color: #5C53DC; }
+  .side-group-active svg { color: #5C53DC; }
+  .nav-group-active { position: relative; margin: 0 -12px; padding: 0 12px; }
+  .nav-group-active::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #8B85EA; }
+  .sidebar .sub-nav { margin-left: 8px; padding-left: 10px; margin-top: 2px; margin-bottom: 6px; }
+  .sidebar .sub-nav a { display: flex; align-items: center; font-size: 13.5px; font-weight: 600; color: #808898; padding: 7px 8px; }
+  .sidebar .sub-nav a.current { color: #5C53DC; font-weight: 700; }
+
+  .main-content { flex: 1; min-width: 0; padding: 28px 32px 60px; max-width: 1240px; }
+
+  /* ---------- Demo banner ---------- */
+  .demo-banner { background: #FFF8E6; border: 1px solid #F3D98B; border-radius: 8px; padding: 12px 16px; margin-bottom: 22px; font-size: 12.5px; color: #6B5A18; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; }
+  .demo-banner strong { color: #4F4008; }
+  .demo-banner svg { flex-shrink: 0; margin-top: 1px; width: 16px; height: 16px; }
+
+  /* ---------- BR annotation chips ---------- */
+  .br-chip { display: inline-flex; align-items: center; justify-content: center; font-size: 9.5px; font-weight: 800; color: #B4650C; background: #FFEDD5; border: 1px solid #FBD59C; border-radius: 5px; padding: 1px 5px; margin-left: 6px; cursor: help; position: relative; vertical-align: middle; letter-spacing: 0.3px; }
+  .br-chip:hover .br-tooltip, .br-chip:focus-visible .br-tooltip { display: block; }
+  .br-chip:focus-visible { outline: 2px solid #8B85EA; outline-offset: 2px; }
+  .br-tooltip { display: none; position: absolute; bottom: calc(100% + 8px); left: 0; transform: none; width: 270px; background: #32415B; color: #fff; font-size: 11.5px; font-weight: 500; line-height: 1.5; padding: 10px 12px; border-radius: 8px; z-index: 50; text-align: left; letter-spacing: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+  /* ---------- Page title + job identity header ---------- */
+  .page-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 22px; }
+  .page-title { font-size: 30px; font-weight: 800; color: #32415B; margin: 4px 0 0; letter-spacing: -0.3px; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: var(--st-color-text-muted); margin-bottom: 10px; }
+  .back-link:hover, .back-link:focus-visible { color: var(--st-color-primary-active); }
+  .back-link:focus-visible { outline: 2px solid var(--st-color-primary); outline-offset: 3px; border-radius: 4px; }
+  .job-identity { text-align: right; }
+  .job-identity .name { font-size: 17px; font-weight: 800; color: var(--st-color-text); margin-bottom: 6px; }
+  .job-identity .meta-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 12.5px; color: var(--st-color-text-muted); font-weight: 600; margin-top: 3px; }
+  .job-identity .meta-row svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+  /* ---------- Section card ---------- */
+  .settings-section { background: var(--st-color-card-bg); border: 1px solid var(--st-color-border); border-radius: 10px; padding: 18px; margin-bottom: 18px; }
+  .settings-section-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .settings-section-title { font-size: 15px; font-weight: 700; margin: 0; color: var(--st-color-text); display: flex; align-items: center; gap: 8px; }
+  .settings-section-title .meta-suffix { font-size: 12.5px; font-weight: 600; color: var(--st-color-text-muted); }
+
+  /* ---------- Buttons ---------- */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 18px; border-radius: 10px; font-size: 14px; font-weight: 700; border: 1px solid transparent; transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
+  .btn-primary { background: var(--st-color-primary); color: #fff; }
+  .btn-primary:hover { background: var(--st-color-primary-hover); }
+  .btn-primary:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .btn-outline-primary { background: #fff; color: var(--st-color-primary-active); border-color: var(--st-color-primary); }
+  .btn-outline-primary:hover { background: rgba(var(--st-color-primary-rgb), 0.08); }
+  .btn-outline-primary:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .btn-sm { height: 34px; padding: 0 14px; font-size: 13px; border-radius: 8px; }
+  .btn-round { border-radius: 999px; }
+
+  /* ---------- Two-column top row ---------- */
+  .top-row { display: grid; grid-template-columns: 1fr; gap: 18px; }
+  @media (min-width: 1020px) { .top-row { grid-template-columns: 1.15fr 1fr; align-items: stretch; } }
+
+  /* ---------- Status card ---------- */
+  .status-field { margin-bottom: 16px; position: relative; }
+  .meta-label { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--st-color-text-muted); text-transform: uppercase; display: block; margin-bottom: 7px; }
+  .status-menu-wrap { position: relative; display: inline-block; }
+  .status-pill-btn {
+    appearance: none; font-family: inherit; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;
+    background: #E6FAF0; color: #1E8E5A; border: 1px solid #C7F0DB; border-radius: 999px;
+    padding: 7px 14px; cursor: pointer;
+  }
+  .status-pill-btn.is-complete { background: #F1F1F5; color: #6B7286; border-color: #E1E0E8; }
+  .status-pill-btn .chev { width: 10px; height: 10px; transition: transform .12s ease; }
+  .status-pill-btn[aria-expanded="true"] .chev { transform: rotate(180deg); }
+  .status-pill-btn:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .status-menu {
+    position: absolute; top: calc(100% + 6px); left: 0; z-index: 20; min-width: 210px;
+    background: #fff; border: 1px solid var(--st-color-border); border-radius: 8px; box-shadow: 0 12px 32px rgba(50,65,91,0.18); padding: 6px; }
+  .status-menu-item { display: block; width: 100%; text-align: left; padding: 9px 12px; font-size: 13.5px; font-weight: 600; color: var(--st-color-text); border: none; background: none; border-radius: 6px; }
+  .status-menu-item:hover { background: #F3F3F8; }
+  .status-menu-item:focus-visible { outline: 2px solid var(--st-color-primary); outline-offset: -2px; }
+
+  .meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 14px 0; border-top: 1px solid var(--st-color-border); border-bottom: 1px solid var(--st-color-border); margin-bottom: 16px; }
+  @media (max-width: 640px) { .meta-grid { grid-template-columns: 1fr; } }
+  .meta-item .meta-value { font-size: 14.5px; font-weight: 700; color: var(--st-color-text); display: flex; align-items: center; gap: 7px; }
+  .mini-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--st-color-primary); color: #fff; font-size: 9.5px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  .contact-name { font-size: 17px; font-weight: 800; color: var(--st-color-text); margin-bottom: 10px; }
+  .contact-row { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--st-color-text-muted); font-weight: 600; margin-bottom: 7px; }
+  .contact-row svg { width: 15px; height: 15px; flex-shrink: 0; color: #A9AFBD; }
+  .contact-row a { color: var(--st-color-text); }
+  .contact-row a:hover, .contact-row a:focus-visible { color: var(--st-color-primary-active); text-decoration: underline; }
+
+  .links-docs { border-top: 1px solid var(--st-color-border); padding-top: 14px; margin-top: 16px; }
+  .links-docs-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .link-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+  .link-pill svg { width: 12px; height: 12px; }
+
+  /* ---------- Donut card (shared visual language with Dashboard) ---------- */
+  .donut-card-inner { display: flex; flex-direction: column; }
+  .donut-title { font-size: 14px; font-weight: 700; text-align: center; margin: 0 0 14px; color: var(--st-color-text); }
+  .donut-wrap { display: flex; align-items: center; justify-content: center; padding: 0 0 18px; }
+  .donut { width: 156px; height: 156px; border-radius: 50%; background: conic-gradient(#5B8DEF 0deg 130.6deg, #F2994A 130.6deg 207.2deg, #34C759 207.2deg 360deg); display: flex; align-items: center; justify-content: center; position: relative; }
+  .donut::after { content: ""; position: absolute; width: 100px; height: 100px; border-radius: 50%; background: #fff; }
+  .donut-center { position: relative; z-index: 1; text-align: center; }
+  .donut-center .d-label { font-size: 11px; font-weight: 600; color: var(--st-color-text-muted); }
+  .donut-center .d-value { font-size: 17px; font-weight: 800; color: var(--st-color-text); }
+
+  .legend-group { border-top: 1px solid var(--st-color-border); padding-top: 12px; margin-top: 4px; }
+  .legend-group:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  .legend-head { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--st-color-text); margin-bottom: 6px; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .legend-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0 3px 17px; font-size: 12.5px; color: var(--st-color-text-muted); }
+  .legend-row .lv { color: var(--st-color-text); font-weight: 600; }
+  .legend-total { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; margin-top: 8px; border-top: 1px solid var(--st-color-border); font-size: 13.5px; font-weight: 700; color: var(--st-color-text); }
+  .pct-pill { font-size: 10.5px; font-weight: 700; background: #EFEFF4; color: var(--st-color-text-muted); border-radius: 999px; padding: 2px 7px; }
+
+  /* ---------- Profit margin + estimated/actual row ---------- */
+  .pm-row { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; }
+  @media (min-width: 780px) { .pm-row { flex-direction: row; align-items: stretch; } }
+  .pm-highlight { background: #F3F3F8; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px 30px; min-width: 160px; border-radius: 8px; text-align: center; }
+  @media (min-width: 780px) { .pm-highlight { border-right: 1px solid var(--st-color-border); border-radius: 8px 0 0 8px; margin: -18px 0 -18px -18px; padding: 18px 32px; } }
+  .pm-highlight .label { font-size: 11px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--st-color-text-muted); }
+  .pm-highlight .value { font-size: 30px; font-weight: 800; color: var(--st-color-text); line-height: 1.15; margin-top: 4px; }
+  .pm-highlight .sub { font-size: 13px; font-weight: 700; color: var(--st-color-text-muted); margin-top: 2px; }
+
+  .compare-table-wrap { flex: 1; overflow-x: auto; padding-top: 18px; }
+  @media (min-width: 780px) { .compare-table-wrap { padding: 4px 6px 4px 28px; } }
+  .compare-table { min-width: 460px; }
+  .compare-table th { text-align: left; font-size: 11.5px; font-weight: 700; color: var(--st-color-text-muted); padding: 0 14px 10px 0; text-transform: none; }
+  .compare-table th:first-child { width: 90px; }
+  .compare-table td { padding: 9px 14px 9px 0; font-size: 13.5px; }
+  .compare-table tr th[scope="row"] { font-weight: 700; color: var(--st-color-text); font-size: 13px; padding-top: 9px; }
+  .compare-table .cell-value { font-weight: 700; color: var(--st-color-text); }
+  .variance-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 700; border-radius: 999px; padding: 2px 7px; margin-left: 6px; }
+  .variance-badge.over { background: #FFF1E6; color: #B4650C; }
+  .variance-badge.under { background: #E6FAF0; color: #1E8E5A; }
+  .variance-badge.even { background: #EFEFF4; color: var(--st-color-text-muted); }
+  .variance-badge svg { width: 9px; height: 9px; }
+
+  /* ---------- Labor / data tables ---------- */
+  .sub-group { margin-bottom: 4px; }
+  .sub-group + .sub-group { margin-top: 18px; }
+  .sub-group-head { display: flex; align-items: center; gap: 8px; background: #FAFAFC; border: 1px solid var(--st-color-border); border-bottom: none; border-radius: 8px 8px 0 0; padding: 10px 14px; font-size: 13.5px; font-weight: 700; color: var(--st-color-text); }
+  .data-table { border: 1px solid var(--st-color-border); border-radius: 0 0 8px 8px; overflow-x: auto; position: relative; }
+  .data-table table { width: 100%; }
+  .data-table th { text-align: left; font-size: 11.5px; font-weight: 700; color: var(--st-color-text-muted); padding: 10px 14px; background: #fff; border-bottom: 1px solid var(--st-color-border); }
+  .data-table td { padding: 12px 14px; font-size: 13.5px; color: var(--st-color-text); border-bottom: 1px solid var(--st-color-border); vertical-align: middle; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .person-cell { display: flex; align-items: center; gap: 9px; font-weight: 700; }
+  .info-icon-btn { display: inline-flex; width: 16px; height: 16px; align-items: center; justify-content: center; color: var(--st-color-text-muted); border: none; background: none; border-radius: 50%; padding: 0; position: relative; cursor: help; }
+  .info-icon-btn:hover .br-tooltip, .info-icon-btn:focus-visible .br-tooltip { display: block; }
+  .info-icon-btn:focus-visible { outline: 2px solid var(--st-color-primary); outline-offset: 2px; }
+  .row-link { color: var(--st-color-primary-active); font-weight: 700; font-size: 12.5px; text-decoration: underline; text-underline-offset: 2px; background: none; border: none; padding: 0; cursor: pointer; }
+  .row-link:hover { color: var(--st-color-primary); }
+  .row-link:focus-visible { outline: 2px solid var(--st-color-primary); outline-offset: 2px; border-radius: 3px; }
+  .row-end { display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
+  .chev-btn { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; border: none; background: none; color: #A9AFBD; padding: 0; }
+  .chev-btn:hover { color: var(--st-color-primary-active); background: rgba(var(--st-color-primary-rgb), 0.08); }
+  .chev-btn:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .chev-btn svg { width: 16px; height: 16px; }
+
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 6px; border: none; background: none; color: #A9AFBD; padding: 0; }
+  .icon-btn:hover { color: var(--st-color-primary-active); background: rgba(var(--st-color-primary-rgb), 0.08); }
+  .icon-btn.danger:hover { color: #C0392B; background: #FEF2F2; }
+  .icon-btn:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .icon-btn svg { width: 15px; height: 15px; }
+  .row-actions { display: flex; align-items: center; gap: 2px; justify-content: flex-end; }
+
+  /* ---------- Empty states ---------- */
+  .empty-state { background: #F7F7FA; border: 1px dashed var(--st-color-border); border-radius: 8px; padding: 28px 20px; text-align: center; }
+  .empty-state p { margin: 0 0 14px; font-size: 13.5px; font-weight: 600; color: var(--st-color-text); }
+
+  /* ---------- Dev notes ---------- */
+  .dev-notes { margin-top: 26px; }
+  .dev-notes h3 { font-size: 13px; font-weight: 700; margin: 0 0 10px; color: var(--st-color-text); }
+  .dev-notes ul { margin: 0; padding-left: 18px; }
+  .dev-notes li { font-size: 12.5px; line-height: 1.6; color: var(--st-color-text-muted); margin-bottom: 6px; }
+  .dev-notes li b { color: var(--st-color-text); }
+
+  /* ---------- Toast ---------- */
+  .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(16px); background: #32415B; color: #fff; font-size: 13px; font-weight: 600; padding: 12px 18px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; z-index: 100; max-width: 320px; text-align: center; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Add Labor Cost modal ---------- */
+  .modal-scrim { position: fixed; inset: 0; background: rgba(50,65,91,0.55); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+  .modal-scrim.open { display: flex; }
+  .modal-card-form { background: #fff; border-radius: 10px; max-width: 460px; width: 100%; padding: 26px 26px 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .modal-card-form-title { font-size: 17px; font-weight: 700; color: var(--st-color-text); margin: 0 0 18px; }
+  .modal-subtitle { font-size: 11px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: var(--st-color-text-muted); margin: 0 0 8px; }
+  .modal-field-row { display: flex; align-items: flex-start; gap: 10px; }
+  .modal-field-row .combo-wrap { flex: 1; }
+  .modal-footer { display: flex; justify-content: flex-end; margin-top: 22px; }
+
+  .combo-wrap { position: relative; }
+  .combo-trigger {
+    width: 100%; height: 40px; padding: 0 34px 0 14px; border: 1px solid var(--st-color-border); border-radius: 8px;
+    font-size: 14px; font-family: inherit; background: #fff; color: var(--st-color-text-muted); text-align: left;
+    display: flex; align-items: center; position: relative;
+  }
+  .combo-trigger.has-value { color: var(--st-color-text); font-weight: 600; }
+  .combo-trigger .chev { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; color: var(--st-color-text-muted); transition: transform .15s ease; }
+  .combo-trigger[aria-expanded="true"] .chev { transform: translateY(-50%) rotate(180deg); }
+  .combo-trigger:focus-visible { outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+
+  .combo-panel {
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 10;
+    background: #fff; border: 1px solid var(--st-color-border); border-radius: 8px; box-shadow: 0 12px 32px rgba(50,65,91,0.18);
+    padding: 8px; max-height: 260px; display: flex; flex-direction: column;
+  }
+  .combo-panel[hidden] { display: none; }
+  .combo-search { height: 36px; border: 1.5px solid var(--st-color-primary); border-radius: 6px; padding: 0 12px; font-size: 14px; font-family: inherit; margin-bottom: 6px; width: 100%; }
+  .combo-search:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+  .combo-listbox { overflow-y: auto; }
+  .combo-group-label { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; color: var(--st-color-text-muted); padding: 8px 8px 4px; }
+  .combo-option { padding: 8px 10px; font-size: 13.5px; color: var(--st-color-text); border-radius: 6px; cursor: pointer; }
+  .combo-option:hover, .combo-option.is-active { background: #F3F3F8; }
+  .combo-option .combo-rate { color: var(--st-color-text-muted); font-weight: 600; }
+  .combo-empty { padding: 14px 10px; font-size: 13px; color: var(--st-color-text-muted); text-align: center; }
+
+  .btn[disabled] { background: #EFEFF4 !important; color: #B4B9C6 !important; border-color: #EFEFF4 !important; cursor: not-allowed; }
+
+  /* ---------- Floating-label fields (Add Subcontractor Cost modal) ---------- */
+  .settings-field { position: relative; display: flex; flex-direction: column; }
+  .settings-field-label { position: absolute; top: -8px; left: 10px; background: var(--st-color-card-bg); padding: 0 6px; font-size: 11px; font-weight: 600; color: var(--st-color-text-muted); z-index: 1; pointer-events: none; letter-spacing: 0.2px; }
+  .settings-field-input { height: 40px; padding: 0 14px; border: 1px solid var(--st-color-border); border-radius: 8px; font-size: 14px; font-family: inherit; background: var(--st-color-card-bg); color: var(--st-color-text); transition: border-color .15s ease, box-shadow .15s ease; width: 100%; }
+  textarea.settings-field-input { height: auto; min-height: 92px; padding: 12px 14px; resize: vertical; line-height: 1.5; }
+  .settings-field-input::placeholder { color: #A9AFBD; }
+  .settings-field-input:focus-visible, .settings-field-input:focus { outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+  .settings-field-group { position: relative; display: flex; align-items: stretch; border: 1px solid var(--st-color-border); border-radius: 8px; background: var(--st-color-card-bg); transition: border-color .15s ease, box-shadow .15s ease; }
+  .settings-field-group:focus-within { border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+  .settings-field-group-prefix { display: flex; align-items: center; padding: 0 12px; font-size: 14px; font-weight: 700; color: var(--st-color-text-muted); background: #FAFAFC; border-right: 1px solid var(--st-color-border); border-radius: 8px 0 0 8px; }
+  .settings-field-group .settings-field-input { border: none; box-shadow: none !important; height: 38px; }
+  .field-error { font-size: 11.5px; font-weight: 700; color: var(--st-color-danger, #DC2626); margin-top: 5px; display: none; }
+  .settings-field.has-error .settings-field-input, .settings-field.has-error .settings-field-group { border-color: var(--st-color-danger, #DC2626); }
+  .settings-field.has-error .field-error { display: block; }
+  .modal-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 420px) { .modal-grid-2 { grid-template-columns: 1fr; } }
+
+  /* ---------- Add Employee Cost wizard ---------- */
+  .aec-emp-line { font-size: 15px; font-weight: 700; color: var(--st-color-text); margin: 14px 0 12px; }
+  .aec-emp-readonly-label { font-size: 12px; font-weight: 600; color: var(--st-color-text-muted); margin-bottom: 6px; display: block; }
+  .aec-emp-readonly { background: #F3F3F8; border: 1px solid var(--st-color-border); border-radius: 8px; padding: 10px 14px; font-size: 14px; color: var(--st-color-text); margin-bottom: 16px; }
+  .aec-divider { border: none; border-top: 1px solid var(--st-color-border); margin: 0 0 16px; }
+  .aec-name-centered { text-align: center; font-size: 16px; font-weight: 700; color: var(--st-color-text); margin: 6px 0 18px; }
+
+  .aec-method-card { display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left; border: 1.5px solid var(--st-color-border); border-radius: 10px; padding: 14px; background: #fff; margin-bottom: 12px; }
+  .aec-method-card:hover { border-color: var(--st-color-primary); }
+  .aec-method-card:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .aec-method-card.selected { border-color: var(--st-color-primary); background: #F5F4FE; }
+  .aec-method-icon { width: 36px; height: 36px; border-radius: 8px; background: #EFEDFC; color: var(--st-color-primary-active); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .aec-method-icon svg { width: 18px; height: 18px; }
+  .aec-method-title { font-size: 14px; font-weight: 700; color: var(--st-color-text); margin-bottom: 2px; }
+  .aec-method-desc { font-size: 12.5px; color: var(--st-color-text-muted); line-height: 1.4; }
+
+  .aec-dates-banner { display: flex; align-items: center; justify-content: space-between; background: #EFEDFC; border: 1px solid #D6D2F5; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 13.5px; font-weight: 700; color: var(--st-color-primary-active); }
+  .aec-dates-banner a { font-weight: 700; text-decoration: underline; text-underline-offset: 2px; color: var(--st-color-primary-active); cursor: pointer; background: none; border: none; font-size: 13px; }
+  .aec-dates-banner a:hover { color: var(--st-color-primary); }
+
+  .aec-calendar { border: 1px solid var(--st-color-border); border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+  .aec-cal-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--st-color-border); }
+  .aec-cal-head .aec-cal-title { font-size: 13.5px; font-weight: 700; color: var(--st-color-text); }
+  .aec-cal-nav { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--st-color-border); background: #fff; display: flex; align-items: center; justify-content: center; color: var(--st-color-text-muted); }
+  .aec-cal-nav:hover { background: #F3F3F8; }
+  .aec-cal-nav:focus-visible { outline: 2px solid var(--st-color-primary); outline-offset: 1px; }
+  .aec-cal-nav svg { width: 13px; height: 13px; }
+  .aec-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 8px; gap: 3px; }
+  .aec-cal-dow { text-align: center; font-size: 10.5px; font-weight: 700; color: var(--st-color-text-muted); padding: 4px 0; }
+  .aec-cal-day { aspect-ratio: 1; border: none; background: none; border-radius: 6px; font-size: 12.5px; color: var(--st-color-text); display: flex; align-items: center; justify-content: center; }
+  .aec-cal-day:hover { background: #F3F3F8; }
+  .aec-cal-day:focus-visible { outline: 2px solid var(--st-color-primary); outline-offset: 1px; }
+  .aec-cal-day.selected { background: var(--st-color-primary); color: #fff; font-weight: 700; }
+  .aec-cal-day.empty { visibility: hidden; }
+
+  .aec-tip { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.5; margin-bottom: 16px; }
+  .aec-tip b { font-weight: 700; }
+
+  .aec-shift-block { border: 1px solid var(--st-color-border); border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+  .aec-shift-head { background: #FAFAFC; padding: 9px 14px; font-size: 12.5px; font-weight: 700; color: var(--st-color-text); border-bottom: 1px solid var(--st-color-border); }
+  .aec-shift-body { padding: 14px; }
+  .aec-time-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .aec-time-row:last-child { margin-bottom: 0; }
+  .aec-time-row-label { width: 36px; font-size: 12.5px; font-weight: 700; color: var(--st-color-text-muted); flex-shrink: 0; }
+  .aec-time-select { height: 36px; border: 1px solid var(--st-color-border); border-radius: 6px; padding: 0 8px; font-size: 13.5px; font-family: inherit; color: var(--st-color-text); background: #fff; }
+  .aec-time-select:focus-visible { outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+  .aec-duration { font-size: 12px; font-weight: 700; color: #B4650C; display: flex; align-items: center; gap: 5px; margin-top: 8px; }
+  .aec-duration svg { width: 13px; height: 13px; }
+
+  .aec-date-row { display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--st-color-border); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
+  .aec-date-row-label { font-size: 13.5px; font-weight: 600; color: var(--st-color-text); }
+  .aec-hours-input { width: 76px; height: 36px; border: 1px solid var(--st-color-border); border-radius: 6px; padding: 0 10px; font-size: 14px; font-family: inherit; text-align: center; }
+  .aec-hours-input:focus-visible { outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+
+  .aec-total-bar { display: flex; align-items: center; justify-content: space-between; background: #EFEDFC; border: 1.5px solid var(--st-color-primary); border-radius: 8px; padding: 12px 16px; margin: 14px 0 4px; }
+  .aec-total-bar .lab { font-size: 13.5px; font-weight: 700; color: var(--st-color-primary-active); }
+  .aec-total-bar .val { font-size: 18px; font-weight: 800; color: var(--st-color-primary-active); }
+
+  /* ---------- Add Material Cost modal ---------- */
+  .modal-close-x { position: absolute; top: 18px; right: 18px; width: 30px; height: 30px; border-radius: 6px; border: none; background: none; color: var(--st-color-text-muted); display: flex; align-items: center; justify-content: center; }
+  .modal-close-x:hover { background: #F3F3F8; color: var(--st-color-text); }
+  .modal-close-x:focus-visible { outline: 2px solid var(--st-color-primary); outline-offset: 2px; }
+  .modal-close-x svg { width: 16px; height: 16px; }
+  .modal-card-form { position: relative; }
+
+  .combo-panel-header { background: var(--st-color-primary); color: #fff; font-size: 13px; font-weight: 700; padding: 9px 12px; border-radius: 6px; margin-bottom: 6px; }
+  .combo-oneoff-action { padding: 9px 10px; font-size: 13.5px; font-weight: 700; color: var(--st-color-primary-active); cursor: pointer; border-radius: 6px; }
+  .combo-oneoff-action:hover { background: #F3F3F8; }
+
+  .settings-field-group-prefix-icon { display: flex; align-items: center; justify-content: center; width: 32px; flex-shrink: 0; color: var(--st-color-text-muted); background: #FAFAFC; border: none; border-right: 1px solid var(--st-color-border); border-radius: 8px 0 0 8px; padding: 0; font: inherit; cursor: pointer; }
+  .settings-field-group-prefix-icon:hover { background: #EFEFF4; }
+  .settings-field-group-prefix-icon:focus-visible { outline: 2px solid var(--st-color-primary); outline-offset: -2px; }
+  .settings-field-group-prefix-icon svg { width: 14px; height: 14px; }
+  .settings-field-group .settings-field-input { padding: 0 8px; }
+  .modal-grid-3-date { display: grid; grid-template-columns: 1.35fr 0.85fr 1fr; gap: 16px; }
+  @media (max-width: 460px) { .modal-grid-3-date { grid-template-columns: 1fr; } }
+
+  /* ---------- Reusable date picker ---------- */
+  .date-picker-panel { position: absolute; top: calc(100% + 6px); left: 0; z-index: 15; background: #fff; border: 1px solid var(--st-color-border); border-radius: 8px; box-shadow: 0 12px 32px rgba(50,65,91,0.18); padding: 12px; width: 260px; }
+  .dp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .dp-head .dp-title { font-size: 13.5px; font-weight: 700; color: var(--st-color-text); }
+  .dp-nav { width: 24px; height: 24px; border-radius: 6px; border: none; background: none; color: var(--st-color-text-muted); display: flex; align-items: center; justify-content: center; }
+  .dp-nav:hover { background: #F3F3F8; }
+  .dp-nav:focus-visible { outline: 2px solid var(--st-color-primary); outline-offset: 1px; }
+  .dp-nav svg { width: 12px; height: 12px; }
+  .dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .dp-dow { text-align: center; font-size: 10px; font-weight: 700; color: var(--st-color-text-muted); padding: 3px 0; }
+  .dp-day { aspect-ratio: 1; border: none; background: none; border-radius: 50%; font-size: 12px; color: var(--st-color-text); display: flex; align-items: center; justify-content: center; }
+  .dp-day:hover { background: #F3F3F8; }
+  .dp-day:focus-visible { outline: 2px solid var(--st-color-primary); outline-offset: 1px; }
+  .dp-day.dp-muted { color: #C2C6D1; }
+  .dp-day.dp-selected { background: #38BDF8; color: #fff; font-weight: 700; }
+
+  /* ---------- Generic delete-confirm alert modal ---------- */
+  .modal-alert-card { background: #fff; border-radius: 10px; max-width: 380px; width: 100%; padding: 34px 28px 28px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .modal-alert-icon { width: 62px; height: 62px; border-radius: 50%; border: 2.5px solid #F2994A; color: #F2994A; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+  .modal-alert-icon svg { width: 26px; height: 26px; }
+  .modal-alert-title { font-size: 21px; font-weight: 700; color: var(--st-color-text); margin: 0 0 8px; }
+  .modal-alert-body { font-size: 14px; color: var(--st-color-text-muted); margin: 0 0 24px; }
+  .modal-alert-actions { display: flex; gap: 10px; justify-content: center; }
+  .modal-alert-actions .btn { flex: 1; }
+
+  /* ---------- Attachments ---------- */
+  .attach-dropzone { border: 2px dashed var(--st-color-border); border-radius: 8px; padding: 50px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; transition: border-color .15s ease, background-color .15s ease; }
+  .attach-dropzone.drag-over { border-color: var(--st-color-primary); background: #F8F7FE; }
+  .attach-dropzone svg { width: 34px; height: 34px; color: #A9AFBD; }
+  .attach-dropzone p { margin: 0; font-size: 14px; color: var(--st-color-text-muted); font-weight: 500; }
+  .attach-dropzone .or-text { font-size: 12px; color: var(--st-color-text-muted); }
+  .attach-cancel-row { display: flex; justify-content: center; margin-top: 16px; }
+
+  .attach-grid { display: flex; flex-wrap: wrap; gap: 18px; }
+  .attach-card { width: 150px; border: 1px solid var(--st-color-border); border-radius: 8px; overflow: hidden; background: #fff; }
+  .attach-thumb { width: 100%; height: 150px; background: #F3F3F8; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .attach-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .attach-thumb svg { width: 32px; height: 32px; color: #A9AFBD; }
+  .attach-meta { padding: 8px 10px 4px; font-size: 10.5px; color: var(--st-color-text-muted); line-height: 1.4; }
+  .attach-filename { padding: 0 10px; font-size: 12px; color: var(--st-color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-top: 1px solid var(--st-color-border); margin-top: 6px; padding-top: 8px; }
+  .attach-edit-row { padding: 8px 10px 10px; }
+  .attach-edit-row .btn { width: 100%; height: 32px; font-size: 12.5px; }
+
+  /* ---------- Hub proto-bar (prototype-only, never part of product UI) ---------- */
+  .proto-bar { background: #fff; border-bottom: 1px solid #DAD8E3; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: 'Nunito', sans-serif; }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .proto-bar-back { font-size: 12px; font-weight: 600; color: #80879A; display: flex; align-items: center; gap: 4px; min-height: 32px; }
+  .proto-bar-back:hover, .proto-bar-back:focus-visible { color: #8B85EA; }
+  .proto-bar-divider { color: #DAD8E3; font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 700; color: #32415B; }
+  .proto-bar-ticket { font-size: 11px; font-weight: 700; color: #5C53DC; padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA; border-radius: 999px; letter-spacing: 0.2px; }
+  .proto-bar-ticket:hover, .proto-bar-ticket:focus-visible { background: #8B85EA; color: #fff; }
+
+  /* ---------- Mobile: Job Costing module chip nav (design system section 6 pattern) ---------- */
+  .jc-module-nav { display: none; margin: 0 0 18px; }
+  .jc-module-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; scroll-padding: 0 2px; scroll-snap-type: x proximity; scrollbar-width: none; }
+  .jc-module-scroll::-webkit-scrollbar { display: none; }
+  .jc-module-link { flex-shrink: 0; scroll-snap-align: start; display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 16px; font-size: 14px; font-weight: 500; color: #32415B; white-space: nowrap; }
+  .jc-module-link:nth-child(1) { background: #E8E6FA; }
+  .jc-module-link:nth-child(2) { background: #FAF0E6; }
+  .jc-module-link:nth-child(3) { background: #E6FAF0; }
+  .jc-module-link:nth-child(4) { background: #E6F3FA; }
+  .jc-module-link:nth-child(5) { background: #FAF7E6; }
+  .jc-module-link.active { box-shadow: inset 0 0 0 2px #8B85EA; font-weight: 600; }
+  .jc-module-link:focus-visible { outline: 2px solid #5C53DC; outline-offset: 2px; }
+  @media (max-width: 860px) {
+    .sidebar, .topbar-search, .topbar-user { display: none !important; }
+    .topbar { padding: 0 16px; }
+    .main-content { padding: 20px 16px 48px !important; }
+    .jc-module-nav { display: block; }
+    .proto-bar { padding: 8px 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<!-- Hub proto-bar -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="proto-bar-back" href="../index.html">&larr; Hub</a>
+    <span class="proto-bar-divider">|</span>
+    <span class="proto-bar-title">Job Costing UI Refresh: Job Costing Details</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86ba1ggxb" target="_blank" rel="noopener">86ba1ggxb</a>
+</div>
+<div id="job-costing-details-page">
+  <div class="app-shell">
+
+    <header class="topbar">
+      <div class="topbar-logo"><span class="logo-badge">●●●</span> dripjobs</div>
+      <div class="topbar-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search leads, contacts, tags…
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-icon-btn" aria-label="Alerts" onclick="jcToast('Alerts: not part of this prototype')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8A33D" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </button>
+        <button class="topbar-icon-btn" aria-label="Notifications" onclick="jcToast('Notifications: not part of this prototype')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <div class="topbar-user"><span class="topbar-avatar">JH</span> Jeremy Harrison
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <div class="body-row">
+      <aside class="sidebar" aria-label="Primary">
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Job Schedule')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Job Schedule</a>
+          <a href="#" onclick="return jcNav(event,'Jobs List')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Jobs List</a>
+          <a href="#" onclick="return jcNav(event,'Jobs Pipeline')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 0 0-1 1v2.34a1 1 0 0 0 .3.7l5.7 5.7V21l4-2v-3.26l5.7-5.7a1 1 0 0 0 .3-.7V8a1 1 0 0 0-1-1z"/></svg>Jobs Pipeline</a>
+          <a href="#" onclick="return jcNav(event,'Work Orders')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>Work Orders</a>
+        </nav>
+        <div class="sidebar-section-label">DAILY OPERATIONS</div>
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Appointments')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Appointments<span class="side-badge">1 new</span></a>
+          <a href="#" onclick="return jcNav(event,'Chat')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</a>
+          <a href="#" onclick="return jcNav(event,'Email')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><polyline points="22,6 12,13 2,6"/></svg>Email<span class="side-badge teal">New</span></a>
+          <a href="#" onclick="return jcNav(event,'Tasks')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Tasks</a>
+        </nav>
+        <div class="sidebar-section-label">DOCUMENTS</div>
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Invoices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Invoices</a>
+          <a href="#" onclick="return jcNav(event,'Proposals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Proposals</a>
+        </nav>
+        <div class="sidebar-section-label">FINANCIALS</div>
+        <div class="nav-group-active">
+        <div class="side-item side-group-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><circle cx="12" cy="13" r="3"/><path d="M6 6V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/></svg>
+          Job Costing
+        </div>
+        <div class="sub-nav">
+          <a href="index.html" class="current" aria-current="page">- Dashboard</a>
+          <a href="time-sheets.html">- Time Sheets</a>
+          <a href="misc-costs.html">- Misc. Costs</a>
+          <a href="reports.html">- Reports</a>
+          <a href="tutorials.html">- Tutorials</a>
+        </div>
+        </div>
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Production Rates')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>Production Rates</a>
+          <a href="#" onclick="return jcNav(event,'Metrics')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Metrics</a>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+
+        <nav class="jc-module-nav" aria-label="Job Costing sections">
+          <div class="jc-module-scroll">
+            <a href="index.html" class="jc-module-link active" aria-current="page">Dashboard</a>
+            <a href="time-sheets.html" class="jc-module-link">Time Sheets</a>
+            <a href="misc-costs.html" class="jc-module-link">Misc. Costs</a>
+            <a href="reports.html" class="jc-module-link">Reports</a>
+            <a href="tutorials.html" class="jc-module-link">Tutorials</a>
+          </div>
+        </nav>
+
+        <div class="demo-banner" role="note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#B4650C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <strong>Prototype: Job Costing Details (per-job breakdown).</strong> One of 8 linked screens for ticket
+            <a href="https://app.clickup.com/t/8633445/86ba1ggxb" target="_blank" rel="noopener" style="color:#B4650C; font-weight:700; text-decoration:underline;">86ba1ggxb</a>.
+            Every Add, Edit and Delete below is live: it changes the rows and recalculates the donut, profit margin, Estimated vs. Actual and section totals. Sample data only; refreshing the page resets it.
+            Orange chips map to the ticket's business rules, hover or tab to them.
+          </div>
+        </div>
+
+        <a href="index.html" class="back-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to Job Costing Dashboard
+        </a>
+
+        <div class="page-head">
+          <h1 class="page-title">Job Costing Details</h1>
+          <div class="job-identity">
+            <div class="name">TJ Bennett</div>
+            <div class="meta-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              678 N Seton Ave, Clearwater, FL, 34461
+            </div>
+            <div class="meta-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              7/13/2026 → 7/15/2026
+            </div>
+          </div>
+        </div>
+
+        <div class="top-row">
+          <!-- Costing Status card -->
+          <section class="settings-section" aria-labelledby="status-card-title">
+            <h2 id="status-card-title" class="visually-hidden">Costing status &amp; contact</h2>
+            <div class="status-field">
+              <span class="meta-label" id="costingStatusLabel">Costing Status</span>
+              <div class="status-menu-wrap" id="statusMenuWrap">
+                <button type="button" class="status-pill-btn" id="statusPillBtn" aria-labelledby="costingStatusLabel statusPillLabel" aria-haspopup="menu" aria-expanded="false" onclick="toggleStatusMenu()">
+                  <span id="statusPillLabel">Costing Active</span>
+                  <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="status-menu" id="statusMenuPanel" role="menu" aria-labelledby="statusPillBtn" hidden>
+                  <button type="button" role="menuitem" class="status-menu-item" id="statusMenuItem" onclick="toggleCostingStatus()">Set as costing complete</button>
+                </div>
+              </div>
+              <span class="br-chip" tabindex="0">BR7<span class="br-tooltip">Costing Status is a two-way transition: Active to Costing Complete, and Costing Complete back to Active, from this same pill menu. There is no one-way lock and no Paused state.</span></span>
+            </div>
+
+            <div class="meta-grid">
+              <div class="meta-item">
+                <span class="meta-label">Job Stage</span>
+                <span class="meta-value">Scheduled</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Salesperson</span>
+                <span class="meta-value"><span class="mini-avatar">JH</span> Jeremy Harrison</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Project Manager</span>
+                <span class="meta-value"><span class="mini-avatar" style="background:#0DCECE;">AB</span> Amanda Bivens</span>
+              </div>
+            </div>
+
+            <div class="contact-name">TJ Bennett</div>
+            <div class="contact-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              678 N Seton Ave, Clearwater, FL, 34461
+            </div>
+            <div class="contact-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <a href="mailto:TJBennett@DJtest.com">TJBennett@DJtest.com</a>
+            </div>
+            <div class="contact-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <a href="tel:8885554433">(888) 555-4433</a>
+            </div>
+
+            <div class="links-docs">
+              <span class="meta-label">Links &amp; Documents</span>
+              <div class="links-docs-row">
+                <button class="btn btn-sm btn-outline-primary btn-round link-pill" onclick="jcToast('Opens Proposal #2920059: outside this prototype')">
+                  Proposal #2920059
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </button>
+                <button class="btn btn-sm btn-outline-primary btn-round link-pill" onclick="jcToast('Opens Invoice #453093: outside this prototype')">
+                  Invoice #453093
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </button>
+                <button class="btn btn-sm btn-outline-primary btn-round link-pill" onclick="jcToast('Opens Job Notes: outside this prototype')">
+                  Job Notes
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Actual Costs Snapshot -->
+          <section class="settings-section donut-card-inner" aria-labelledby="snapshot-title">
+            <h2 id="snapshot-title" class="donut-title">Actual Costs Snapshot</h2>
+            <div class="donut-wrap">
+              <div class="donut" role="img" id="costDonut" aria-label="Donut chart: Labor 36.29 percent, Expenses 21.26 percent, Gross profit 42.45 percent, of $4,103.31 revenue">
+                <div class="donut-center">
+                  <div class="d-label">Revenue</div>
+                  <div class="d-value">$4,103.31</div>
+                </div>
+              </div>
+            </div>
+            <div class="legend-group">
+              <div class="legend-head"><span class="legend-dot" style="background:#5B8DEF;"></span>Labor <span class="pct-pill" id="legendLaborPct" style="margin-left:auto;">36.29%</span></div>
+              <div class="legend-row"><span>Employees</span><span class="lv" id="legendEmployeesVal">$989.00 &nbsp;24.10%</span></div>
+              <div class="legend-row"><span>Subcontractors</span><span class="lv" id="legendSubsVal">$500.00 &nbsp;12.19%</span></div>
+            </div>
+            <div class="legend-group">
+              <div class="legend-head"><span class="legend-dot" style="background:#F2994A;"></span>Expenses <span class="pct-pill" style="margin-left:auto;">21.26%</span></div>
+              <div class="legend-row"><span>Materials</span><span class="lv" id="legendMaterialsVal">$872.52 &nbsp;21.26%</span></div>
+              <div class="legend-row"><span>Miscellaneous</span><span class="lv" id="legendMiscVal">$0.00 &nbsp;0.00%</span></div>
+            </div>
+            <div class="legend-total">
+              <span style="display:flex;align-items:center;gap:8px;"><span class="legend-dot" style="background:#34C759;"></span>Gross Profit <span class="pct-pill" id="legendGPPct">42.45%</span></span>
+              <span id="legendGPVal">$1,741.79</span>
+            </div>
+          </section>
+        </div>
+
+        <!-- Profit margin + estimated/actual -->
+        <section class="settings-section pm-row" aria-labelledby="pm-title">
+          <h2 id="pm-title" class="visually-hidden">Profit margin and cost variance</h2>
+          <div class="pm-highlight">
+            <span class="label">Profit Margin</span>
+            <span class="value" id="pmValue">42%</span>
+            <span class="sub" id="pmSub">$1,741.79</span>
+          </div>
+          <div class="compare-table-wrap">
+            <table class="compare-table">
+              <caption class="visually-hidden">Estimated versus actual labor hours, labor costs and materials</caption>
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">Labor Hours</th>
+                  <th scope="col">Labor Costs</th>
+                  <th scope="col">Materials</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Estimated</th>
+                  <td class="cell-value">18:57</td>
+                  <td class="cell-value">$473.65</td>
+                  <td class="cell-value">$872.49</td>
+                </tr>
+                <tr>
+                  <th scope="row">Actual</th>
+                  <td class="cell-value" id="actualHoursCell">42:00
+                    <span class="variance-badge over"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>122%</span>
+                  </td>
+                  <td class="cell-value" id="actualCostsCell">$1,489.00
+                    <span class="variance-badge over"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>214.37%</span>
+                  </td>
+                  <td class="cell-value" id="actualMaterialsCell">$872.52
+                    <span class="variance-badge even">even 0.00%</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Labor -->
+        <section class="settings-section" aria-labelledby="labor-title">
+          <div class="settings-section-header">
+            <h2 class="settings-section-title" id="labor-title">Labor <span class="meta-suffix" id="laborHeaderMeta">42:00 hours · $1,489.00 · 36%</span></h2>
+            <button class="btn btn-sm btn-outline-primary" onclick="openAddLaborModal()">+ Add Labor Costs</button>
+          </div>
+
+          <div class="sub-group">
+            <div class="sub-group-head">Employees <span class="pct-pill" id="employeesSubheadPct">$989.00 · 24%</span></div>
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Employee</th>
+                    <th scope="col">Total Hours</th>
+                    <th scope="col">Total Cost
+                      <button class="info-icon-btn" aria-label="What's included in Total Cost">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <span class="br-tooltip" style="bottom:auto; top:calc(100% + 8px); left:0;">Total labor cost for this employee at their assigned hourly rate, across all hours logged to this job.</span>
+                      </button>
+                    </th>
+                    <th scope="col">Percentage</th>
+                    <th scope="col" class="visually-hidden">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="employeesTbody">
+                  <tr>
+                    <td><span class="person-cell"><span class="mini-avatar" style="background:#736BE3;">JE</span>Jesus Employee</span></td>
+                    <td>42:00 hrs.</td>
+                    <td>$989.00</td>
+                    <td>100%</td>
+                    <td>
+                      <div class="row-end">
+                        <button class="row-link" onclick="jcToast('Opens add time entry: not wired in this prototype')">+ add time</button>
+                        <button class="chev-btn" aria-label="View Jesus Employee's time entries" onclick="jcToast('Opens time entry detail: not wired in this prototype')">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="sub-group">
+            <div class="sub-group-head">Subcontractors <span class="pct-pill" id="subsSubheadPct">$500.00 · 12%</span></div>
+            <div class="data-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Subcontractor</th>
+                    <th scope="col">Cost</th>
+                    <th scope="col">Percent</th>
+                    <th scope="col" class="visually-hidden">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="subsTbody">
+                  <tr>
+                    <td><span class="person-cell"><span class="mini-avatar" style="background:#F2994A;">JL</span>John Lennon</span></td>
+                    <td>$500.00</td>
+                    <td>100%</td>
+                    <td>
+                      <div class="row-end">
+                        <button class="row-link" onclick="jcToast('Opens add cost entry: not wired in this prototype')">+ add cost</button>
+                        <button class="chev-btn" aria-label="View John Lennon's cost entries" onclick="jcToast('Opens cost entry detail: not wired in this prototype')">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Materials -->
+        <section class="settings-section" aria-labelledby="materials-title">
+          <div class="settings-section-header">
+            <h2 class="settings-section-title" id="materials-title">Materials <span class="meta-suffix" id="materialsHeaderMeta">$872.52 · 21%</span></h2>
+            <button class="btn btn-sm btn-outline-primary" onclick="openAddMaterialModal()">+ Add Material Costs</button>
+          </div>
+          <div class="data-table">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Items</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Price</th>
+                  <th scope="col">Total</th>
+                  <th scope="col" class="visually-hidden">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="materialsTbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Miscellaneous -->
+        <section class="settings-section" aria-labelledby="misc-title">
+          <div class="settings-section-header">
+            <h2 class="settings-section-title" id="misc-title">Miscellaneous <span class="meta-suffix" id="miscHeaderMeta">$0.00 · 0%</span></h2>
+            <button class="btn btn-sm btn-outline-primary" id="miscHeaderAddBtn" style="display:none;" onclick="openAddMiscModal()">+ Add Miscellaneous Costs</button>
+          </div>
+          <div id="miscBody"></div>
+        </section>
+
+        <!-- Attachments -->
+        <section class="settings-section" aria-labelledby="attachments-title">
+          <div class="settings-section-header">
+            <h2 class="settings-section-title" id="attachments-title">Attachments</h2>
+            <button class="btn btn-sm btn-outline-primary" id="attachHeaderAddBtn" style="display:none;" onclick="startAttachmentsUpload()">+ Add Attachments</button>
+          </div>
+          <div id="attachmentsBody"></div>
+        </section>
+
+        <div class="dev-notes">
+          <h3>Dev notes for this screen</h3>
+          <ul>
+            <li><b>BR1 (section cards):</b> status/contact, cost snapshot, profit margin/variance, Labor, Materials, Miscellaneous and Attachments are each a <code>.settings-section</code> card.</li>
+            <li><b>BR2 (floating labels):</b> Add Subcontractor, Add/Edit Material and Add/Edit Miscellaneous modals use <code>.settings-field</code> floating labels; Amount uses the <code>.settings-field-group</code> "$" prefix and Date uses the icon-prefix group.</li>
+            <li><b>BR3 (buttons):</b> every "+ Add" action is <code>btn btn-sm btn-outline-primary</code> (full-size in empty states), Save/Go are <code>btn-primary</code>, delete confirm is <code>btn-danger</code>.</li>
+            <li><b>BR5 / BR6:</b> the Costing Status pill reuses the green status-tag family; all colors come from <code>--st-color-*</code> tokens scoped to <code>#job-costing-details-page</code>.</li>
+            <li><b>BR7 (Costing Status):</b> two-way. The pill menu offers "Set as costing complete" while Active and "Set as costing active" while Complete. No Paused state, no lock.</li>
+            <li><b>BR8 (row Edit):</b> the pencil on Materials and Miscellaneous rows opens the same modal prefilled ("Edit Material Cost" / "Edit Miscellaneous Cost"). Save updates that row in place and recalculates; Delete uses the shared "Are you sure?" confirm. A material that isn't in the catalog reopens in one-off mode with its name filled in.</li>
+            <li><b>Recalculation (AC):</b> adding a labor pick, one-off subcontractor, employee time, material or misc cost (and editing or deleting a material or misc row) re-renders the donut, legend, profit margin, Estimated vs. Actual and every section header total from one revenue-minus-costs model.</li>
+            <li><b>BR10 (Add Employee Cost):</b> the Clock In/Out step carries the same header as Bulk Date Selection: step label, "Name - $Rate" line and the read-only Employee field.</li>
+            <li><b>BR11 ("+ add time"):</b> new hours are costed at the employee's flat rate with no overtime logic. Settings-aware overtime is out of scope (V2).</li>
+            <li><b>Copy fixes:</b> "an one off" to "a one off" (Add Material Cost) and "Desription" to "Description" (Miscellaneous table header).</li>
+            <li><b>Not in scope, toast only:</b> "+ add cost" and the chevrons on labor rows, the attachment card Edit button, and the Proposal / Invoice / Job Notes links.</li>
+            <li><b>Design system gaps (not blocking):</b> variance badge orange, the blue selected-day color in date pickers, and the corner close "&times;" (only Material and Misc modals have it in production) aren't documented tokens or patterns yet.</li>
+            <li><b>Accessibility:</b> semantic tables with <code>scope</code> headers, labelled icon buttons, Escape closes the top-most open layer, focus returns to the trigger on close.</li>
+          </ul>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Add Subcontractor Cost modal -->
+  <div class="modal-scrim" id="subScrim">
+    <div class="modal-card-form" role="dialog" aria-modal="true" aria-labelledby="subModalTitle">
+      <h2 class="modal-card-form-title" id="subModalTitle">Add Subcontractor Cost</h2>
+      <form id="subForm" onsubmit="return saveSubcontractorCost(event)">
+        <div class="settings-field" style="margin-bottom:18px;">
+          <label class="settings-field-label" for="subName">Subcontractor</label>
+          <input class="settings-field-input" id="subName" type="text" placeholder="Enter subcontractor name" required>
+          <span class="field-error">Subcontractor name is required.</span>
+        </div>
+        <div class="modal-grid-2" style="margin-bottom:18px;">
+          <div class="settings-field">
+            <label class="settings-field-label" for="subDate">Date</label>
+            <input class="settings-field-input" id="subDate" type="text" inputmode="numeric" placeholder="MM/DD/YYYY">
+          </div>
+          <div class="settings-field">
+            <label class="settings-field-label" for="subAmount">Amount</label>
+            <div class="settings-field-group">
+              <span class="settings-field-group-prefix" aria-hidden="true">$</span>
+              <input class="settings-field-input" id="subAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+        <div class="settings-field">
+          <label class="settings-field-label" for="subDescription">Description</label>
+          <textarea class="settings-field-input" id="subDescription" rows="4" placeholder="Optional notes about this cost"></textarea>
+        </div>
+      </form>
+      <div class="modal-footer" style="justify-content:flex-end; gap:10px;">
+        <button type="button" class="btn btn-outline-primary" onclick="closeAddSubcontractorModal()">Cancel</button>
+        <button type="submit" form="subForm" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Labor Cost modal -->
+  <div class="modal-scrim" id="laborScrim">
+    <div class="modal-card-form" role="dialog" aria-modal="true" aria-labelledby="laborModalTitle">
+      <h2 class="modal-card-form-title" id="laborModalTitle">Add Labor Cost</h2>
+      <p class="modal-subtitle" id="laborFieldLabel">Employees and Subcontractors</p>
+      <div class="modal-field-row">
+        <div class="combo-wrap" id="laborCombo">
+          <button type="button" class="combo-trigger" id="laborTrigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="laborFieldLabel laborTriggerText" onclick="toggleLaborPanel()">
+            <span id="laborTriggerText">Select to add labor…</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="combo-panel" id="laborPanel" hidden>
+            <input type="text" class="combo-search" id="laborSearch" placeholder="Search…" aria-label="Search employees and subcontractors" oninput="filterLaborOptions(this.value)">
+            <div class="combo-listbox" id="laborListbox" role="listbox" aria-label="Employees and subcontractors">
+              <div role="option" class="combo-option" data-special="oneoff" data-name="+ Add one-off subcontractor" tabindex="-1" onclick="selectOneOffOption()" style="font-weight:700; color:var(--st-color-primary-active);">+ Add one-off subcontractor</div>
+              <div class="combo-group-label" data-group="Employees">Employees</div>
+              <div role="option" class="combo-option" data-group="Employees" data-name="Jerry Huffman" data-rate="90.00" tabindex="-1" onclick="selectLaborOption(this)">Jerry Huffman <span class="combo-rate">- 90.00</span></div>
+              <div role="option" class="combo-option" data-group="Employees" data-name="Will Purdue" data-rate="50.00" tabindex="-1" onclick="selectLaborOption(this)">Will Purdue <span class="combo-rate">- 50.00</span></div>
+              <div role="option" class="combo-option" data-group="Employees" data-name="Employee One" data-rate="25.00" tabindex="-1" onclick="selectLaborOption(this)">Employee One <span class="combo-rate">- 25.00</span></div>
+              <div role="option" class="combo-option" data-group="Employees" data-name="Tony Hawk" data-rate="30.00" tabindex="-1" onclick="selectLaborOption(this)">Tony Hawk <span class="combo-rate">- 30.00</span></div>
+              <div class="combo-group-label" data-group="Subcontractors">Subcontractors</div>
+              <div role="option" class="combo-option" data-group="Subcontractors" data-name="John Lennon" data-rate="500.00" tabindex="-1" onclick="selectLaborOption(this)">John Lennon <span class="combo-rate">- 500.00</span></div>
+              <div role="option" class="combo-option" data-group="Subcontractors" data-name="ABC Roofing Co." data-rate="1200.00" tabindex="-1" onclick="selectLaborOption(this)">ABC Roofing Co. <span class="combo-rate">- 1200.00</span></div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" id="laborGoBtn" disabled onclick="submitAddLabor()">Go</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-primary" onclick="closeAddLaborModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <!-- Add Material Cost modal -->
+  <div class="modal-scrim" id="matScrim">
+    <div class="modal-card-form" role="dialog" aria-modal="true" aria-labelledby="matModalTitle">
+      <button type="button" class="modal-close-x" aria-label="Close" onclick="closeAddMaterialModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <h2 class="modal-card-form-title" id="matModalTitle">Add Material Cost</h2>
+      <form id="matForm" onsubmit="return saveMaterialCost(event)">
+        <label class="aec-emp-readonly-label" id="matNameLabel" for="matTrigger">Name</label>
+        <div class="combo-wrap" id="matCombo" style="margin-bottom:18px;">
+          <button type="button" class="combo-trigger" id="matTrigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="matNameLabel matTriggerText" onclick="toggleMatPanel()">
+            <span id="matTriggerText">Select an option or enter a one off</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="combo-panel" id="matPanel" hidden>
+            <input type="text" class="combo-search" id="matSearch" placeholder="Search or type a one-off name…" aria-label="Search materials or enter a one-off name" oninput="filterMatOptions(this.value)">
+            <div class="combo-panel-header" id="matPanelHeader">Select an option or enter a one off</div>
+            <div class="combo-listbox" id="matListbox" role="listbox" aria-label="Materials">
+              <div class="combo-oneoff-action" tabindex="-1" role="option" onclick="selectMatOneOff()">+ add new one off</div>
+              <div class="combo-group-label" data-group="Materials">Materials</div>
+              <div role="option" class="combo-option" data-group="Materials" data-name="Insl-X (Lead Block)" tabindex="-1" onclick="selectMatOption(this)">Insl-X (Lead Block)</div>
+              <div role="option" class="combo-option" data-group="Materials" data-name="Suprema" tabindex="-1" onclick="selectMatOption(this)">Suprema</div>
+              <div role="option" class="combo-option" data-group="Materials" data-name="Basic Paint" tabindex="-1" onclick="selectMatOption(this)">Basic Paint</div>
+              <div role="option" class="combo-option" data-group="Materials" data-name="PPG Paints Timeless Exterior (Satin)" tabindex="-1" onclick="selectMatOption(this)">PPG Paints Timeless Exterior (Satin)</div>
+              <div role="option" class="combo-option" data-group="Materials" data-name="Sherwin-Williams Duration Exterior (Satin)" tabindex="-1" onclick="selectMatOption(this)">Sherwin-Williams Duration Exterior (Satin)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-grid-3-date" style="margin-bottom:18px;">
+          <div class="settings-field" style="position:relative;">
+            <label class="settings-field-label" for="matDate">Date</label>
+            <div class="settings-field-group">
+              <button type="button" class="settings-field-group-prefix-icon" aria-label="Open calendar" onclick="toggleDatePicker('matDate')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+              <input class="settings-field-input" id="matDate" type="text" inputmode="numeric" placeholder="MM/DD/YYYY" onclick="toggleDatePicker('matDate')" readonly>
+            </div>
+            <div class="date-picker-panel" id="matDateCalendar" hidden></div>
+          </div>
+          <div class="settings-field">
+            <label class="settings-field-label" for="matQuantity">Quantity</label>
+            <input class="settings-field-input" id="matQuantity" type="number" min="0" step="0.01" value="1">
+          </div>
+          <div class="settings-field">
+            <label class="settings-field-label" for="matAmount">Amount</label>
+            <div class="settings-field-group">
+              <span class="settings-field-group-prefix" aria-hidden="true">$</span>
+              <input class="settings-field-input" id="matAmount" type="number" min="0" step="0.01" value="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-field">
+          <label class="settings-field-label" for="matDescription">Description</label>
+          <textarea class="settings-field-input" id="matDescription" rows="4"></textarea>
+        </div>
+      </form>
+      <div class="modal-footer" style="justify-content:flex-end; gap:10px;">
+        <button type="button" class="btn btn-outline-primary" onclick="closeAddMaterialModal()">Cancel</button>
+        <button type="submit" form="matForm" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Miscellaneous Cost modal -->
+  <div class="modal-scrim" id="miscScrim">
+    <div class="modal-card-form" role="dialog" aria-modal="true" aria-labelledby="miscModalTitle">
+      <button type="button" class="modal-close-x" aria-label="Close" onclick="closeAddMiscModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <h2 class="modal-card-form-title" id="miscModalTitle">Add Miscellaneous Cost</h2>
+      <form id="miscCostForm" onsubmit="return saveMiscCost(event)">
+        <div class="settings-field" style="margin-bottom:18px;">
+          <label class="settings-field-label" for="miscCostName">Name</label>
+          <input class="settings-field-input" id="miscCostName" type="text" placeholder="Enter a name" required>
+          <span class="field-error">Name is required.</span>
+        </div>
+        <div class="modal-grid-3-date" style="margin-bottom:18px;">
+          <div class="settings-field" style="position:relative;">
+            <label class="settings-field-label" for="miscCostDate">Date</label>
+            <div class="settings-field-group">
+              <button type="button" class="settings-field-group-prefix-icon" aria-label="Open calendar" onclick="toggleDatePicker('miscCostDate')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+              <input class="settings-field-input" id="miscCostDate" type="text" inputmode="numeric" placeholder="MM/DD/YYYY" onclick="toggleDatePicker('miscCostDate')" readonly>
+            </div>
+            <div class="date-picker-panel" id="miscCostDateCalendar" hidden></div>
+          </div>
+          <div class="settings-field">
+            <label class="settings-field-label" for="miscCostQuantity">Quantity</label>
+            <input class="settings-field-input" id="miscCostQuantity" type="number" min="0" step="0.01" value="1">
+          </div>
+          <div class="settings-field">
+            <label class="settings-field-label" for="miscCostAmount">Amount</label>
+            <div class="settings-field-group">
+              <span class="settings-field-group-prefix" aria-hidden="true">$</span>
+              <input class="settings-field-input" id="miscCostAmount" type="number" min="0" step="0.01" value="0">
+            </div>
+          </div>
+        </div>
+        <div class="settings-field">
+          <label class="settings-field-label" for="miscCostDescription">Description</label>
+          <textarea class="settings-field-input" id="miscCostDescription" rows="4"></textarea>
+        </div>
+      </form>
+      <div class="modal-footer" style="justify-content:flex-end; gap:10px;">
+        <button type="button" class="btn btn-outline-primary" onclick="closeAddMiscModal()">Cancel</button>
+        <button type="submit" form="miscCostForm" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generic delete-confirm modal (Materials & Miscellaneous rows) -->
+  <div class="modal-scrim" id="genericDeleteScrim">
+    <div class="modal-alert-card" role="dialog" aria-modal="true" aria-labelledby="genDelTitle" aria-describedby="genDelBody">
+      <div class="modal-alert-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <h2 class="modal-alert-title" id="genDelTitle">Are you sure?</h2>
+      <p class="modal-alert-body" id="genDelBody">You won't be able to revert this!</p>
+      <div class="modal-alert-actions">
+        <button type="button" class="btn btn-danger" onclick="confirmGenericDelete()">Yes, delete it!</button>
+        <button type="button" class="btn btn-outline-primary" onclick="cancelGenericDelete()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="attachFileInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="handleAttachFiles(this.files)">
+
+  <!-- Add Employee Cost wizard -->
+  <div class="modal-scrim" id="aecScrim">
+    <div class="modal-card-form" style="max-width:420px;" role="dialog" aria-modal="true" aria-labelledby="aecTitle">
+      <h2 class="modal-card-form-title" id="aecTitle" style="margin-bottom:2px;">Add Employee Cost</h2>
+      <p class="modal-subtitle" id="aecStepLabel" style="margin-bottom:0;"></p>
+      <div id="aecBody"></div>
+      <div class="modal-footer" id="aecFooter" style="justify-content:space-between;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="jcToastEl" role="status" aria-live="polite"></div>
+
+<script>
+  function jcToast(msg) {
+    var el = document.getElementById('jcToastEl');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(window.__jcToastTimer);
+    window.__jcToastTimer = setTimeout(function () { el.classList.remove('show'); }, 2600);
+  }
+  function jcNav(e, name) {
+    e.preventDefault();
+    jcToast(name + ': outside the Job Costing prototype');
+    return false;
+  }
+
+  // ---------- Costing Status menu ----------
+  function toggleStatusMenu() {
+    var panel = document.getElementById('statusMenuPanel');
+    var willOpen = panel.hidden;
+    panel.hidden = !willOpen;
+    document.getElementById('statusPillBtn').setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    if (willOpen) {
+      setTimeout(function () {
+        var item = panel.querySelector('.status-menu-item');
+        if (item) item.focus();
+      }, 30);
+    }
+  }
+  function closeStatusMenu() {
+    var panel = document.getElementById('statusMenuPanel');
+    if (panel.hidden) return;
+    panel.hidden = true;
+    document.getElementById('statusPillBtn').setAttribute('aria-expanded', 'false');
+  }
+  var costingComplete = false;
+  function toggleCostingStatus() {
+    closeStatusMenu();
+    costingComplete = !costingComplete;
+    var btn = document.getElementById('statusPillBtn');
+    var label = costingComplete ? 'Costing Complete' : 'Costing Active';
+    document.getElementById('statusPillLabel').textContent = label;
+    btn.classList.toggle('is-complete', costingComplete);
+    document.getElementById('statusMenuItem').textContent = costingComplete ? 'Set as costing active' : 'Set as costing complete';
+    jcToast('Status changed to ' + label);
+    btn.focus();
+  }
+  document.addEventListener('click', function (e) {
+    var wrap = document.getElementById('statusMenuWrap');
+    var panel = document.getElementById('statusMenuPanel');
+    if (!wrap || !panel || panel.hidden) return;
+    var path = e.composedPath ? e.composedPath() : [];
+    var inside = path.length ? (path.indexOf(wrap) !== -1) : wrap.contains(e.target);
+    if (!inside) closeStatusMenu();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeStatusMenu();
+  });
+
+  // ---------- Add Labor Cost modal ----------
+  var laborLastFocused = null;
+  var laborSelected = null;
+
+  function openAddLaborModal() {
+    laborLastFocused = document.activeElement;
+    resetLaborModal();
+    document.getElementById('laborScrim').classList.add('open');
+    document.addEventListener('keydown', laborModalKeydown);
+    setTimeout(function () { document.getElementById('laborTrigger').focus(); }, 50);
+  }
+  function closeAddLaborModal() {
+    document.getElementById('laborScrim').classList.remove('open');
+    closeLaborPanel();
+    document.removeEventListener('keydown', laborModalKeydown);
+    if (laborLastFocused) laborLastFocused.focus();
+  }
+  function laborModalKeydown(e) {
+    if (e.key === 'Escape') {
+      if (!document.getElementById('laborPanel').hidden) { closeLaborPanel(); }
+      else { closeAddLaborModal(); }
+    }
+  }
+  function resetLaborModal() {
+    laborSelected = null;
+    document.getElementById('laborTriggerText').textContent = 'Select to add labor…';
+    document.getElementById('laborTrigger').classList.remove('has-value');
+    document.getElementById('laborGoBtn').disabled = true;
+    document.getElementById('laborSearch').value = '';
+    filterLaborOptions('');
+    closeLaborPanel();
+  }
+  function toggleLaborPanel() {
+    var panel = document.getElementById('laborPanel');
+    if (panel.hidden) { openLaborPanel(); } else { closeLaborPanel(); }
+  }
+  function openLaborPanel() {
+    var panel = document.getElementById('laborPanel');
+    panel.hidden = false;
+    document.getElementById('laborTrigger').setAttribute('aria-expanded', 'true');
+    document.getElementById('laborSearch').value = '';
+    filterLaborOptions('');
+    setTimeout(function () { document.getElementById('laborSearch').focus(); }, 30);
+  }
+  function closeLaborPanel() {
+    document.getElementById('laborPanel').hidden = true;
+    document.getElementById('laborTrigger').setAttribute('aria-expanded', 'false');
+  }
+  function filterLaborOptions(query) {
+    var q = query.trim().toLowerCase();
+    var groups = ['Employees', 'Subcontractors'];
+    var listbox = document.getElementById('laborListbox');
+    var anyVisible = false;
+    groups.forEach(function (g) {
+      var groupLabel = listbox.querySelector('.combo-group-label[data-group="' + g + '"]');
+      var opts = listbox.querySelectorAll('.combo-option[data-group="' + g + '"]');
+      var groupHasVisible = false;
+      opts.forEach(function (opt) {
+        var match = !q || opt.getAttribute('data-name').toLowerCase().indexOf(q) !== -1;
+        opt.style.display = match ? '' : 'none';
+        if (match) { groupHasVisible = true; anyVisible = true; }
+      });
+      groupLabel.style.display = groupHasVisible ? '' : 'none';
+    });
+    var existingEmpty = listbox.querySelector('.combo-empty');
+    if (!anyVisible) {
+      if (!existingEmpty) {
+        var div = document.createElement('div');
+        div.className = 'combo-empty';
+        div.textContent = 'No matches found.';
+        listbox.appendChild(div);
+      }
+    } else if (existingEmpty) {
+      existingEmpty.remove();
+    }
+  }
+  function selectOneOffOption() {
+    laborSelected = { special: 'oneoff', name: '+ Add one-off subcontractor' };
+    document.getElementById('laborTriggerText').textContent = laborSelected.name;
+    document.getElementById('laborTrigger').classList.add('has-value');
+    document.getElementById('laborGoBtn').disabled = false;
+    closeLaborPanel();
+    document.getElementById('laborTrigger').focus();
+  }
+  function selectLaborOption(el) {
+    laborSelected = { name: el.getAttribute('data-name'), rate: el.getAttribute('data-rate'), group: el.getAttribute('data-group') };
+    document.getElementById('laborTriggerText').textContent = laborSelected.name + ' - ' + laborSelected.rate;
+    document.getElementById('laborTrigger').classList.add('has-value');
+    document.getElementById('laborGoBtn').disabled = false;
+    closeLaborPanel();
+    document.getElementById('laborTrigger').focus();
+  }
+  function submitAddLabor() {
+    if (!laborSelected) return;
+    if (laborSelected.special === 'oneoff') {
+      closeAddLaborModal();
+      openAddSubcontractorModal();
+      return;
+    }
+    laborIdCounter++;
+    var entry = { id: 'new-' + laborIdCounter, name: laborSelected.name, initials: initialsFor(laborSelected.name), color: nextAvatarColor() };
+    if (laborSelected.group === 'Employees') {
+      entry.hoursMin = 0;
+      entry.cost = 0;
+      entry.rate = parseFloat(laborSelected.rate) || 0;
+      laborState.employees.push(entry);
+    } else {
+      entry.cost = 0;
+      laborState.subcontractors.push(entry);
+    }
+    renderLaborTables();
+    recalcCosting();
+    jcToast('Added ' + laborSelected.name + ' to Labor: ready to log ' + (laborSelected.group === 'Employees' ? 'time' : 'a cost') + ' for them');
+    closeAddLaborModal();
+  }
+  // ---------- Live costing state & recalculation ----------
+  var REVENUE = 4103.31;
+  var MATERIALS_TOTAL_UNUSED = 872.52; // superseded by totalMaterialsCost(); kept as a named marker only
+  var materialsState = [
+    { id: 'seed-mat-1', name: 'Basic Paint', date: '06/02/2026', qty: 1.00, price: 0.00 },
+    { id: 'seed-mat-2', name: 'PPG Paints Timeless Exterior (Satin)', date: '06/09/2026', qty: 1.00, price: 39.99 },
+    { id: 'seed-mat-3', name: 'Sherwin Williams SuperPaint Interior (Satin)', date: '06/09/2026', qty: 16.36, price: 35.00 },
+    { id: 'seed-mat-4', name: 'Sherwin-Williams Duration Exterior (Satin)', date: '06/09/2026', qty: 6.67, price: 38.97 }
+  ];
+  var materialIdCounter = 0;
+  function totalMaterialsCost() { return materialsState.reduce(function (s, m) { return s + m.qty * m.price; }, 0); }
+  function renderMaterialsTable() {
+    document.getElementById('materialsTbody').innerHTML = materialsState.map(function (m) {
+      var total = m.qty * m.price;
+      return '<tr><td>' + escapeHtml(m.name) + '</td><td>' + m.date + '</td><td>' + m.qty.toFixed(2) + '</td><td>' + fmtMoney(m.price) + '</td><td>' + fmtMoney(total) + '</td>' +
+        '<td><div class="row-actions">' +
+        '<button class="icon-btn" aria-label="Edit ' + escapeHtml(m.name) + '" onclick="openAddMaterialModal(\'' + m.id + '\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+        '<button class="icon-btn danger" aria-label="Delete ' + escapeHtml(m.name) + '" onclick="askDeleteGeneric(\'material\',\'' + m.id + '\',\'' + escapeHtml(m.name).replace(/'/g, "\\'") + '\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>' +
+        '</div></td></tr>';
+    }).join('');
+  }
+  var miscState = [];
+  var miscIdCounter = 0;
+  function totalMiscCost() { return miscState.reduce(function (s, m) { return s + m.qty * m.price; }, 0); }
+  function renderMiscSection() {
+    var body = document.getElementById('miscBody');
+    var headerBtn = document.getElementById('miscHeaderAddBtn');
+    if (miscState.length === 0) {
+      headerBtn.style.display = 'none';
+      body.innerHTML = '<div class="empty-state"><p>There are no miscellaneous cost entered.</p>' +
+        '<button class="btn btn-outline-primary" onclick="openAddMiscModal()">+ Add Miscellaneous Costs</button></div>';
+      return;
+    }
+    headerBtn.style.display = '';
+    var rows = miscState.map(function (m) {
+      var total = m.qty * m.price;
+      return '<tr><td>' + escapeHtml(m.name) + '</td><td>' + escapeHtml(m.description || '-') + '</td><td>' + m.date + '</td><td>' + m.qty.toFixed(2) + '</td><td>' + fmtMoney(m.price) + '</td><td>' + fmtMoney(total) + '</td>' +
+        '<td><div class="row-actions">' +
+        '<button class="icon-btn" aria-label="Edit ' + escapeHtml(m.name) + '" onclick="openAddMiscModal(\'' + m.id + '\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+        '<button class="icon-btn danger" aria-label="Delete ' + escapeHtml(m.name) + '" onclick="askDeleteGeneric(\'misc\',\'' + m.id + '\',\'' + escapeHtml(m.name).replace(/'/g, "\\'") + '\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>' +
+        '</div></td></tr>';
+    }).join('');
+    body.innerHTML = '<div class="data-table"><table><thead><tr>' +
+      '<th scope="col">Items</th><th scope="col">Description</th><th scope="col">Date</th><th scope="col">Quantity</th><th scope="col">Price</th><th scope="col">Total</th><th scope="col" class="visually-hidden">Actions</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+  }
+  var ESTIMATED_HOURS_MIN = 18 * 60 + 57;
+  var ESTIMATED_LABOR_COST = 473.65;
+  var ESTIMATED_MATERIALS_COST = 872.49;
+  var AVATAR_COLORS = ['#34C759', '#5B8DEF', '#E85D75', '#0DCECE', '#B4650C', '#9089EE'];
+  var avatarColorIdx = 0;
+  var laborIdCounter = 0;
+
+  var laborState = {
+    employees: [
+      { id: 'seed-emp', name: 'Jesus Employee', initials: 'JE', color: '#736BE3', hoursMin: 42 * 60, cost: 989.00, rate: 23.00 }
+    ],
+    subcontractors: [
+      { id: 'seed-sub', name: 'John Lennon', initials: 'JL', color: '#F2994A', cost: 500.00 }
+    ]
+  };
+
+  function fmtMoney(n) { return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function fmtPct2(n) { return Number(n).toFixed(2) + '%'; }
+  function minsToHours(mins) { var h = Math.floor(mins / 60), m = mins % 60; return h + ':' + String(m).padStart(2, '0'); }
+  function initialsFor(name) {
+    var parts = name.trim().split(/\s+/);
+    var a = (parts[0] || '')[0] || '';
+    var b = parts[1] ? parts[1][0] : (parts[0] || '')[1] || '';
+    return (a + b).toUpperCase();
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
+  function nextAvatarColor() { var c = AVATAR_COLORS[avatarColorIdx % AVATAR_COLORS.length]; avatarColorIdx++; return c; }
+  function varianceBadge(pct, decimals) {
+    decimals = decimals === undefined ? 2 : decimals;
+    if (Math.abs(pct) < 0.005) return '<span class="variance-badge even">even 0.00%</span>';
+    var cls = pct > 0 ? 'over' : 'under';
+    var arrow = pct > 0
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>';
+    return '<span class="variance-badge ' + cls + '">' + arrow + Math.abs(pct).toFixed(decimals) + '%</span>';
+  }
+  function totalEmployeesCost() { return laborState.employees.reduce(function (s, e) { return s + e.cost; }, 0); }
+  function totalEmployeesMinutes() { return laborState.employees.reduce(function (s, e) { return s + e.hoursMin; }, 0); }
+  function totalSubsCost() { return laborState.subcontractors.reduce(function (s, e) { return s + e.cost; }, 0); }
+
+  function renderLaborTables() {
+    var empTotal = totalEmployeesCost();
+    document.getElementById('employeesTbody').innerHTML = laborState.employees.map(function (e) {
+      var pct = empTotal ? (e.cost / empTotal * 100) : 0;
+      return '<tr><td><span class="person-cell"><span class="mini-avatar" style="background:' + e.color + ';">' + e.initials + '</span>' + escapeHtml(e.name) + '</span></td>' +
+        '<td>' + minsToHours(e.hoursMin) + ' hrs.</td><td>' + fmtMoney(e.cost) + '</td><td>' + Math.round(pct) + '%</td>' +
+        '<td><div class="row-end"><button class="row-link" onclick="openAddEmployeeCost(\'' + e.id + '\')">+ add time</button>' +
+        '<button class="chev-btn" aria-label="View ' + escapeHtml(e.name) + '\u2019s time entries" onclick="jcToast(\'Opens time entry detail: not wired in this prototype\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg></button></div></td></tr>';
+    }).join('');
+
+    var subTotal = totalSubsCost();
+    document.getElementById('subsTbody').innerHTML = laborState.subcontractors.map(function (s) {
+      var pct = subTotal ? (s.cost / subTotal * 100) : 0;
+      return '<tr><td><span class="person-cell"><span class="mini-avatar" style="background:' + s.color + ';">' + s.initials + '</span>' + escapeHtml(s.name) + '</span></td>' +
+        '<td>' + fmtMoney(s.cost) + '</td><td>' + Math.round(pct) + '%</td>' +
+        '<td><div class="row-end"><button class="row-link" onclick="jcToast(\'Opens add cost entry: not wired in this prototype\')">+ add cost</button>' +
+        '<button class="chev-btn" aria-label="View ' + escapeHtml(s.name) + '\u2019s cost entries" onclick="jcToast(\'Opens cost entry detail: not wired in this prototype\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg></button></div></td></tr>';
+    }).join('');
+  }
+
+  function recalcCosting() {
+    var employeesTotal = totalEmployeesCost();
+    var subsTotal = totalSubsCost();
+    var laborTotal = employeesTotal + subsTotal;
+    var materialsTotal = totalMaterialsCost();
+    var miscTotal = totalMiscCost();
+    var expensesTotal = materialsTotal + miscTotal;
+    var grossProfit = REVENUE - laborTotal - expensesTotal;
+    var laborPct = laborTotal / REVENUE * 100;
+    var expensesPct = expensesTotal / REVENUE * 100;
+    var gpPct = grossProfit / REVENUE * 100;
+    var employeesPct = employeesTotal / REVENUE * 100;
+    var subsPct = subsTotal / REVENUE * 100;
+    var materialsPct = materialsTotal / REVENUE * 100;
+    var miscPct = miscTotal / REVENUE * 100;
+
+    var laborDeg = laborPct / 100 * 360;
+    var expensesDeg = expensesPct / 100 * 360;
+    var donut = document.getElementById('costDonut');
+    donut.style.background = 'conic-gradient(#5B8DEF 0deg ' + laborDeg.toFixed(2) + 'deg, #F2994A ' + laborDeg.toFixed(2) + 'deg ' + (laborDeg + expensesDeg).toFixed(2) + 'deg, #34C759 ' + (laborDeg + expensesDeg).toFixed(2) + 'deg 360deg)';
+    donut.setAttribute('aria-label', 'Donut chart: Labor ' + laborPct.toFixed(2) + ' percent, Expenses ' + expensesPct.toFixed(2) + ' percent, Gross profit ' + gpPct.toFixed(2) + ' percent, of $' + REVENUE.toFixed(2) + ' revenue');
+
+    document.getElementById('legendLaborPct').textContent = fmtPct2(laborPct);
+    document.getElementById('legendEmployeesVal').innerHTML = fmtMoney(employeesTotal) + ' &nbsp;' + fmtPct2(employeesPct);
+    document.getElementById('legendSubsVal').innerHTML = fmtMoney(subsTotal) + ' &nbsp;' + fmtPct2(subsPct);
+    document.getElementById('legendMaterialsVal').innerHTML = fmtMoney(materialsTotal) + ' &nbsp;' + fmtPct2(materialsPct);
+    document.getElementById('legendGPPct').textContent = fmtPct2(gpPct);
+    document.getElementById('legendGPVal').textContent = fmtMoney(grossProfit);
+
+    document.getElementById('pmValue').textContent = Math.round(gpPct) + '%';
+    document.getElementById('pmSub').textContent = fmtMoney(grossProfit);
+
+    var actualMinutes = totalEmployeesMinutes();
+    var hoursVariance = (actualMinutes - ESTIMATED_HOURS_MIN) / ESTIMATED_HOURS_MIN * 100;
+    var costVariance = (laborTotal - ESTIMATED_LABOR_COST) / ESTIMATED_LABOR_COST * 100;
+    var materialsVariance = (materialsTotal - ESTIMATED_MATERIALS_COST) / ESTIMATED_MATERIALS_COST * 100;
+    document.getElementById('actualHoursCell').innerHTML = minsToHours(actualMinutes) + ' ' + varianceBadge(hoursVariance, 0);
+    document.getElementById('actualCostsCell').innerHTML = fmtMoney(laborTotal) + ' ' + varianceBadge(costVariance, 2);
+    document.getElementById('actualMaterialsCell').innerHTML = fmtMoney(materialsTotal) + ' ' + varianceBadge(materialsVariance, 2);
+
+    document.getElementById('laborHeaderMeta').textContent = minsToHours(actualMinutes) + ' hours · ' + fmtMoney(laborTotal) + ' · ' + Math.round(laborPct) + '%';
+    document.getElementById('employeesSubheadPct').textContent = fmtMoney(employeesTotal) + ' · ' + Math.round(employeesPct) + '%';
+    document.getElementById('subsSubheadPct').textContent = fmtMoney(subsTotal) + ' · ' + Math.round(subsPct) + '%';
+    document.getElementById('materialsHeaderMeta').textContent = fmtMoney(materialsTotal) + ' · ' + Math.round(materialsPct) + '%';
+    document.getElementById('legendMiscVal').innerHTML = fmtMoney(miscTotal) + ' &nbsp;' + fmtPct2(miscPct);
+    document.getElementById('miscHeaderMeta').textContent = fmtMoney(miscTotal) + ' · ' + Math.round(miscPct) + '%';
+  }
+
+  // ---------- Add Employee Cost wizard ----------
+  var aecEmployee = null;      // { id, name, rate }
+  var aecMethod = null;        // 'clock' | 'bulk'
+  var aecCalendarMonth = new Date(2026, 8, 1); // September 2026, matches this job's timeframe
+  var aecSelectedDate = null;  // 'YYYY-MM-DD' for clock method
+  var aecBulkDates = [];       // array of 'YYYY-MM-DD', sorted
+  var aecBulkHours = {};       // 'YYYY-MM-DD' -> number
+  var aecLastFocused = null;
+
+  var WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var MONTH_LABELS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function dateKey(y, m, d) { return y + '-' + pad2(m + 1) + '-' + pad2(d); }
+  function dateKeyLabel(key) {
+    var parts = key.split('-').map(Number);
+    var d = new Date(parts[0], parts[1] - 1, parts[2]);
+    var dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
+    return dow + ', ' + MONTH_LABELS[d.getMonth()].slice(0, 3) + ' ' + d.getDate() + ', ' + d.getFullYear();
+  }
+  function dateKeyLongLabel(key) {
+    var parts = key.split('-').map(Number);
+    var d = new Date(parts[0], parts[1] - 1, parts[2]);
+    var dow = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()];
+    var day = d.getDate();
+    var suffix = (day % 10 === 1 && day !== 11) ? 'st' : (day % 10 === 2 && day !== 12) ? 'nd' : (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
+    return dow + ', ' + MONTH_LABELS[d.getMonth()] + ' ' + day + suffix + ', ' + d.getFullYear();
+  }
+
+  function openAddEmployeeCost(employeeId) {
+    var emp = laborState.employees.find(function (e) { return e.id === employeeId; });
+    if (!emp) return;
+    aecEmployee = emp;
+    aecMethod = null;
+    aecCalendarMonth = new Date(2026, 8, 1);
+    aecSelectedDate = null;
+    aecBulkDates = [];
+    aecBulkHours = {};
+    aecLastFocused = document.activeElement;
+    renderAECMethodStep();
+    document.getElementById('aecScrim').classList.add('open');
+    document.addEventListener('keydown', aecKeydown);
+  }
+  function closeAddEmployeeCost() {
+    document.getElementById('aecScrim').classList.remove('open');
+    document.removeEventListener('keydown', aecKeydown);
+    if (aecLastFocused) aecLastFocused.focus();
+  }
+  function aecKeydown(e) {
+    if (e.key === 'Escape') closeAddEmployeeCost();
+  }
+
+  function aecEmployeeLine() {
+    return '<div class="aec-emp-line">' + escapeHtml(aecEmployee.name) + ' - $' + Number(aecEmployee.rate).toFixed(2) + '</div>' +
+      '<label class="aec-emp-readonly-label">Employee</label>' +
+      '<div class="aec-emp-readonly">' + escapeHtml(aecEmployee.name) + '</div>' +
+      '<hr class="aec-divider">';
+  }
+
+  // ---- Step 0: choose method ----
+  function renderAECMethodStep() {
+    document.getElementById('aecStepLabel').textContent = 'Choose Entry Method';
+    document.getElementById('aecBody').innerHTML =
+      aecEmployeeLine() +
+      '<p style="font-size:13.5px; font-weight:600; color:var(--st-color-text); margin:0 0 10px;">How would you like to enter hours?</p>' +
+      '<button type="button" class="aec-method-card" onclick="selectAECMethod(\'clock\')">' +
+        '<span class="aec-method-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>' +
+        '<span><span class="aec-method-title">Clock In/Out Times</span><br><span class="aec-method-desc">Enter specific start and end times for a single day</span></span>' +
+      '</button>' +
+      '<button type="button" class="aec-method-card" onclick="selectAECMethod(\'bulk\')">' +
+        '<span class="aec-method-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>' +
+        '<span><span class="aec-method-title">Bulk Date Selection</span><br><span class="aec-method-desc">Select multiple dates and enter hours for each</span></span>' +
+      '</button>';
+    document.getElementById('aecFooter').innerHTML =
+      '<button type="button" class="btn btn-outline-primary" onclick="closeAddEmployeeCost()">Cancel</button><span></span>';
+  }
+  function selectAECMethod(method) {
+    aecMethod = method;
+    if (method === 'clock') { renderAECClockStep(); }
+    else { renderAECBulkStep1(); }
+  }
+
+  // ---- Calendar builder (shared) ----
+  function buildCalendarHtml(monthDate, mode) {
+    var y = monthDate.getFullYear(), m = monthDate.getMonth();
+    var firstDow = new Date(y, m, 1).getDay();
+    var daysInMonth = new Date(y, m + 1, 0).getDate();
+    var html = '<div class="aec-calendar">' +
+      '<div class="aec-cal-head">' +
+        '<button type="button" class="aec-cal-nav" aria-label="Previous month" onclick="aecChangeMonth(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+        '<span class="aec-cal-title">' + MONTH_LABELS[m] + ' ' + y + '</span>' +
+        '<button type="button" class="aec-cal-nav" aria-label="Next month" onclick="aecChangeMonth(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+      '</div><div class="aec-cal-grid">';
+    WEEKDAY_LABELS.forEach(function (d) { html += '<div class="aec-cal-dow">' + d + '</div>'; });
+    for (var i = 0; i < firstDow; i++) { html += '<div class="aec-cal-day empty"></div>'; }
+    for (var d2 = 1; d2 <= daysInMonth; d2++) {
+      var key = dateKey(y, m, d2);
+      var isSelected = mode === 'bulk' ? aecBulkDates.indexOf(key) !== -1 : aecSelectedDate === key;
+      html += '<button type="button" class="aec-cal-day' + (isSelected ? ' selected' : '') + '" data-date="' + key + '" aria-pressed="' + isSelected + '" aria-label="' + dateKeyLabel(key) + (isSelected ? ', selected' : '') + '" onclick="aecPickDate(\'' + key + '\')">' + d2 + '</button>';
+    }
+    html += '</div></div>';
+    return html;
+  }
+  function aecChangeMonth(delta) {
+    aecCalendarMonth = new Date(aecCalendarMonth.getFullYear(), aecCalendarMonth.getMonth() + delta, 1);
+    if (aecMethod === 'clock') { renderAECClockStep(); }
+    else if (Object.keys(aecBulkHours).length === 0) { renderAECBulkStep1(); }
+  }
+  function aecPickDate(key) {
+    if (aecMethod === 'clock') {
+      aecSelectedDate = key;
+      renderAECClockStep();
+      var btn = document.querySelector('.aec-cal-day[data-date="' + key + '"]');
+      if (btn) btn.focus();
+    } else {
+      var idx = aecBulkDates.indexOf(key);
+      if (idx === -1) { aecBulkDates.push(key); aecBulkDates.sort(); }
+      else { aecBulkDates.splice(idx, 1); }
+      renderAECBulkStep1();
+      var btn2 = document.querySelector('.aec-cal-day[data-date="' + key + '"]');
+      if (btn2) btn2.focus();
+    }
+  }
+  function aecClearAllDates() { aecBulkDates = []; renderAECBulkStep1(); }
+
+  // ---- Clock In/Out step ----
+  function renderAECClockStep() {
+    document.getElementById('aecStepLabel').textContent = 'Step 1: Enter Shift Details';
+    var body = aecEmployeeLine() + buildCalendarHtml(aecCalendarMonth, 'clock');
+    if (aecSelectedDate) {
+      body += '<div class="aec-name-centered" style="margin-top:14px; margin-bottom:10px;">' + dateKeyLongLabel(aecSelectedDate) + '</div>' +
+        '<div class="aec-shift-block">' +
+          '<div class="aec-shift-head">New Shift</div>' +
+          '<div class="aec-shift-body">' +
+            '<div class="aec-time-row"><span class="aec-time-row-label">In:</span>' + timeSelects('In') + '</div>' +
+            '<div class="aec-time-row"><span class="aec-time-row-label">Out:</span>' + timeSelects('Out') + '</div>' +
+            '<div class="aec-duration" id="aecDuration"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span></span></div>' +
+          '</div>' +
+        '</div>';
+    }
+    document.getElementById('aecBody').innerHTML = body;
+    if (aecSelectedDate) {
+      ['InHour', 'InMin', 'InAmPm', 'OutHour', 'OutMin', 'OutAmPm'].forEach(function (id) {
+        document.getElementById(id).addEventListener('change', updateAecDuration);
+      });
+      updateAecDuration();
+    }
+    document.getElementById('aecFooter').innerHTML =
+      '<button type="button" class="btn btn-outline-primary" onclick="closeAddEmployeeCost()">Cancel</button>' +
+      '<span style="display:flex; gap:10px;">' +
+        '<button type="button" class="btn btn-outline-primary" onclick="renderAECMethodStep()">Back</button>' +
+        '<button type="button" class="btn btn-primary" id="aecClockSaveBtn"' + (aecSelectedDate ? '' : ' disabled') + ' onclick="saveClockEntry()">Save</button>' +
+      '</span>';
+  }
+  function timeSelects(prefix) {
+    var defaultHour = prefix === 'In' ? 8 : 5;
+    var hourOpts = '', minOpts = '';
+    for (var h = 1; h <= 12; h++) { hourOpts += '<option value="' + h + '"' + (h === defaultHour ? ' selected' : '') + '>' + pad2(h) + '</option>'; }
+    for (var mi = 0; mi <= 59; mi++) { minOpts += '<option value="' + mi + '">' + pad2(mi) + '</option>'; }
+    var defaultAmPm = prefix === 'In' ? 'AM' : 'PM';
+    return '<select class="aec-time-select" id="' + prefix + 'Hour">' + hourOpts + '</select>' +
+      '<select class="aec-time-select" id="' + prefix + 'Min">' + minOpts + '</select>' +
+      '<select class="aec-time-select" id="' + prefix + 'AmPm"><option' + (defaultAmPm === 'AM' ? ' selected' : '') + '>AM</option><option' + (defaultAmPm === 'PM' ? ' selected' : '') + '>PM</option></select>';
+  }
+  function readTimeMinutes(prefix) {
+    var h = parseInt(document.getElementById(prefix + 'Hour').value, 10) % 12;
+    var mi = parseInt(document.getElementById(prefix + 'Min').value, 10);
+    var ampm = document.getElementById(prefix + 'AmPm').value;
+    if (ampm === 'PM') h += 12;
+    return h * 60 + mi;
+  }
+  function updateAecDuration() {
+    var inMin = readTimeMinutes('In');
+    var outMin = readTimeMinutes('Out');
+    var diff = outMin - inMin;
+    if (diff < 0) diff += 24 * 60;
+    var h = Math.floor(diff / 60), m = diff % 60;
+    var el = document.getElementById('aecDuration');
+    el.querySelector('span').textContent = 'Time selected: ' + h + ' hrs. ' + m + ' mins.';
+    el.dataset.minutes = diff;
+    var saveBtn = document.getElementById('aecClockSaveBtn');
+    if (saveBtn) saveBtn.disabled = diff <= 0;
+  }
+  function saveClockEntry() {
+    var mins = parseInt(document.getElementById('aecDuration').dataset.minutes, 10) || 0;
+    if (mins <= 0) return;
+    applyHoursToEmployee(mins);
+    jcToast('Added ' + minsToHours(mins) + ' for ' + aecEmployee.name + ' on ' + dateKeyLabel(aecSelectedDate));
+    closeAddEmployeeCost();
+  }
+
+  // ---- Bulk step 1: select dates ----
+  function renderAECBulkStep1() {
+    document.getElementById('aecStepLabel').textContent = 'Step 1: Select Dates';
+    document.getElementById('aecBody').innerHTML =
+      aecEmployeeLine() +
+      '<div class="aec-dates-banner"><span>' + aecBulkDates.length + ' date' + (aecBulkDates.length === 1 ? '' : 's') + ' selected</span><a href="#" onclick="aecClearAllDates(); return false;">Clear All</a></div>' +
+      buildCalendarHtml(aecCalendarMonth, 'bulk') +
+      '<div class="aec-tip"><b>Tip:</b> Click dates to select or deselect them. You can select multiple dates across different weeks.</div>';
+    document.getElementById('aecFooter').innerHTML =
+      '<button type="button" class="btn btn-outline-primary" onclick="closeAddEmployeeCost()">Cancel</button>' +
+      '<span style="display:flex; gap:10px;">' +
+        '<button type="button" class="btn btn-outline-primary" onclick="renderAECMethodStep()">Back</button>' +
+        '<button type="button" class="btn btn-primary"' + (aecBulkDates.length ? '' : ' disabled') + ' onclick="renderAECBulkStep2()">Next</button>' +
+      '</span>';
+  }
+
+  // ---- Bulk step 2: enter hours per date ----
+  function renderAECBulkStep2() {
+    if (!aecBulkDates.length) return;
+    aecBulkDates.forEach(function (k) { if (aecBulkHours[k] === undefined) aecBulkHours[k] = 8; });
+    document.getElementById('aecStepLabel').textContent = 'Step 2: Enter Hours';
+    var rows = aecBulkDates.map(function (k) {
+      return '<div class="aec-date-row"><span class="aec-date-row-label">' + dateKeyLabel(k) + '</span>' +
+        '<input type="number" class="aec-hours-input" min="0" max="24" step="0.5" value="' + aecBulkHours[k] + '" aria-label="Hours on ' + dateKeyLabel(k) + '" oninput="aecUpdateBulkHours(\'' + k + '\', this.value)"></div>';
+    }).join('');
+    document.getElementById('aecBody').innerHTML =
+      aecEmployeeLine() +
+      '<p style="font-size:13px; font-weight:600; color:var(--st-color-text); margin:0 0 12px;">Enter Hours for Selected Dates</p>' +
+      rows +
+      '<div class="aec-total-bar"><span class="lab">Total Hours</span><span class="val" id="aecTotalHours">' + formatTotalHours() + '</span></div>';
+    document.getElementById('aecFooter').innerHTML =
+      '<button type="button" class="btn btn-outline-primary" onclick="closeAddEmployeeCost()">Cancel</button>' +
+      '<span style="display:flex; gap:10px;">' +
+        '<button type="button" class="btn btn-outline-primary" onclick="renderAECBulkStep1()">Back</button>' +
+        '<button type="button" class="btn btn-primary" onclick="saveBulkEntries()">Save</button>' +
+      '</span>';
+    var firstInput = document.querySelector('.aec-hours-input');
+    if (firstInput) firstInput.focus();
+  }
+  function aecUpdateBulkHours(key, value) {
+    aecBulkHours[key] = parseFloat(value) || 0;
+    document.getElementById('aecTotalHours').textContent = formatTotalHours();
+  }
+  function formatTotalHours() {
+    var total = aecBulkDates.reduce(function (s, k) { return s + (aecBulkHours[k] || 0); }, 0);
+    return (Number.isInteger(total) ? total : total.toFixed(1)) + 'h';
+  }
+  function saveBulkEntries() {
+    var totalHours = aecBulkDates.reduce(function (s, k) { return s + (aecBulkHours[k] || 0); }, 0);
+    var totalMins = Math.round(totalHours * 60);
+    if (totalMins <= 0) return;
+    applyHoursToEmployee(totalMins);
+    jcToast('Added ' + formatTotalHours() + ' across ' + aecBulkDates.length + ' date' + (aecBulkDates.length === 1 ? '' : 's') + ' for ' + aecEmployee.name);
+    closeAddEmployeeCost();
+  }
+
+  // ---- Shared: apply new hours to the employee and recalculate everything ----
+  function applyHoursToEmployee(minutes) {
+    aecEmployee.hoursMin += minutes;
+    aecEmployee.cost += (minutes / 60) * aecEmployee.rate;
+    renderLaborTables();
+    recalcCosting();
+  }
+
+  // ---------- Reusable date picker (used by Add Material Cost & Add Miscellaneous Cost) ----------
+  var DP_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var DP_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var datePickerState = {};
+
+  function parseMMDDYYYY(str) {
+    var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec((str || '').trim());
+    if (!m) return null;
+    var d = new Date(parseInt(m[3], 10), parseInt(m[1], 10) - 1, parseInt(m[2], 10));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function toggleDatePicker(inputId) {
+    if (!datePickerState[inputId]) datePickerState[inputId] = { open: false, month: new Date(2026, 8, 1) };
+    var st = datePickerState[inputId];
+    st.open = !st.open;
+    if (st.open) {
+      var parsed = parseMMDDYYYY(document.getElementById(inputId).value);
+      if (parsed) st.month = new Date(parsed.getFullYear(), parsed.getMonth(), 1);
+    }
+    renderDatePicker(inputId);
+  }
+  function closeDatePicker(inputId) {
+    if (datePickerState[inputId]) datePickerState[inputId].open = false;
+    renderDatePicker(inputId);
+  }
+  function closeAllDatePickers() {
+    Object.keys(datePickerState).forEach(function (id) { datePickerState[id].open = false; });
+    Object.keys(datePickerState).forEach(function (id) { renderDatePicker(id); });
+  }
+  function changeDatePickerMonth(inputId, delta) {
+    var st = datePickerState[inputId];
+    st.month = new Date(st.month.getFullYear(), st.month.getMonth() + delta, 1);
+    renderDatePicker(inputId);
+  }
+  function pickDatePickerDate(inputId, y, m, d) {
+    document.getElementById(inputId).value = pad2(m + 1) + '/' + pad2(d) + '/' + y;
+    datePickerState[inputId].open = false;
+    renderDatePicker(inputId);
+  }
+  function renderDatePicker(inputId) {
+    var panel = document.getElementById(inputId + 'Calendar');
+    if (!panel) return;
+    var st = datePickerState[inputId];
+    if (!st || !st.open) { panel.hidden = true; panel.innerHTML = ''; return; }
+    panel.hidden = false;
+    var y = st.month.getFullYear(), m = st.month.getMonth();
+    var selected = parseMMDDYYYY(document.getElementById(inputId).value);
+    var firstDow = new Date(y, m, 1).getDay();
+    var daysInMonth = new Date(y, m + 1, 0).getDate();
+    var html = '<div class="dp-head">' +
+      '<button type="button" class="dp-nav" aria-label="Previous month" onclick="changeDatePickerMonth(\'' + inputId + '\',-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+      '<span class="dp-title">' + DP_MONTHS[m] + ' ' + y + '</span>' +
+      '<button type="button" class="dp-nav" aria-label="Next month" onclick="changeDatePickerMonth(\'' + inputId + '\',1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+      '</div><div class="dp-grid">';
+    DP_WEEKDAYS.forEach(function (w) { html += '<div class="dp-dow">' + w + '</div>'; });
+    var prevDays = new Date(y, m, 0).getDate();
+    for (var i = firstDow - 1; i >= 0; i--) {
+      html += '<span class="dp-day dp-muted" aria-hidden="true">' + (prevDays - i) + '</span>';
+    }
+    for (var d = 1; d <= daysInMonth; d++) {
+      var isSel = selected && selected.getFullYear() === y && selected.getMonth() === m && selected.getDate() === d;
+      html += '<button type="button" class="dp-day' + (isSel ? ' dp-selected' : '') + '" aria-label="' + DP_MONTHS[m] + ' ' + d + ', ' + y + (isSel ? ', selected' : '') + '" onclick="pickDatePickerDate(\'' + inputId + '\',' + y + ',' + m + ',' + d + ')">' + d + '</button>';
+    }
+    var totalCells = firstDow + daysInMonth;
+    var trailing = (7 - (totalCells % 7)) % 7;
+    for (var t = 1; t <= trailing; t++) { html += '<span class="dp-day dp-muted" aria-hidden="true">' + t + '</span>'; }
+    html += '</div>';
+    panel.innerHTML = html;
+  }
+
+  // ---------- Add Material Cost modal ----------
+  var matLastFocused = null;
+  var matSelectedName = null;
+  var matOneOff = false;
+
+  function matComboDefaultHtml() {
+    return '<button type="button" class="combo-trigger" id="matTrigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="matNameLabel matTriggerText" onclick="toggleMatPanel()">' +
+        '<span id="matTriggerText">Select an option or enter a one off</span>' +
+        '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</button>' +
+      '<div class="combo-panel" id="matPanel" hidden>' +
+        '<input type="text" class="combo-search" id="matSearch" placeholder="Search or type a one-off name…" aria-label="Search materials or enter a one-off name" oninput="filterMatOptions(this.value)">' +
+        '<div class="combo-panel-header" id="matPanelHeader">Select an option or enter a one off</div>' +
+        '<div class="combo-listbox" id="matListbox" role="listbox" aria-label="Materials">' +
+          '<div class="combo-oneoff-action" tabindex="-1" role="option" onclick="selectMatOneOff()">+ add new one off</div>' +
+          '<div class="combo-group-label" data-group="Materials">Materials</div>' +
+          '<div role="option" class="combo-option" data-group="Materials" data-name="Insl-X (Lead Block)" tabindex="-1" onclick="selectMatOption(this)">Insl-X (Lead Block)</div>' +
+          '<div role="option" class="combo-option" data-group="Materials" data-name="Suprema" tabindex="-1" onclick="selectMatOption(this)">Suprema</div>' +
+          '<div role="option" class="combo-option" data-group="Materials" data-name="Basic Paint" tabindex="-1" onclick="selectMatOption(this)">Basic Paint</div>' +
+          '<div role="option" class="combo-option" data-group="Materials" data-name="PPG Paints Timeless Exterior (Satin)" tabindex="-1" onclick="selectMatOption(this)">PPG Paints Timeless Exterior (Satin)</div>' +
+          '<div role="option" class="combo-option" data-group="Materials" data-name="Sherwin-Williams Duration Exterior (Satin)" tabindex="-1" onclick="selectMatOption(this)">Sherwin-Williams Duration Exterior (Satin)</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  var matEditingId = null;
+  function openAddMaterialModal(editId) {
+    matLastFocused = document.activeElement;
+    matSelectedName = null;
+    matOneOff = false;
+    var editing = editId ? materialsState.find(function (m) { return m.id === editId; }) : null;
+    matEditingId = editing ? editing.id : null;
+    document.getElementById('matModalTitle').textContent = editing ? 'Edit Material Cost' : 'Add Material Cost';
+    document.getElementById('matCombo').innerHTML = matComboDefaultHtml();
+    document.getElementById('matForm').reset();
+    var today = new Date();
+    var dateStr = pad2(today.getMonth() + 1) + '/' + pad2(today.getDate()) + '/' + today.getFullYear();
+    document.getElementById('matDate').value = editing ? editing.date : dateStr;
+    document.getElementById('matQuantity').value = editing ? editing.qty : 1;
+    document.getElementById('matAmount').value = editing ? editing.price.toFixed(2) : 0;
+    document.getElementById('matDescription').value = editing ? (editing.description || '') : '';
+    var monthSrc = parseMMDDYYYY(document.getElementById('matDate').value) || today;
+    datePickerState.matDate = { open: false, month: new Date(monthSrc.getFullYear(), monthSrc.getMonth(), 1) };
+    renderDatePicker('matDate');
+    if (editing) {
+      var catalogOpt = document.querySelector('#matListbox .combo-option[data-name="' + editing.name.replace(/"/g, '\\"') + '"]');
+      if (catalogOpt) {
+        matSelectedName = editing.name;
+        document.getElementById('matTriggerText').textContent = editing.name;
+        document.getElementById('matTrigger').classList.add('has-value');
+      } else {
+        matOneOff = true;
+        matSelectedName = editing.name;
+        renderMatOneOffInput();
+      }
+    }
+    document.getElementById('matScrim').classList.add('open');
+    document.addEventListener('keydown', matModalKeydown);
+    setTimeout(function () {
+      var first = document.getElementById('matOneOffInput') || document.getElementById('matTrigger');
+      if (first) first.focus();
+    }, 50);
+  }
+  function closeAddMaterialModal() {
+    document.getElementById('matScrim').classList.remove('open');
+    closeMatPanel();
+    closeDatePicker('matDate');
+    document.removeEventListener('keydown', matModalKeydown);
+    if (matLastFocused) matLastFocused.focus();
+  }
+  function matModalKeydown(e) {
+    var panel = document.getElementById('matPanel');
+    var dp = document.getElementById('matDateCalendar');
+    if (e.key === 'Escape') {
+      if (panel && !panel.hidden) { closeMatPanel(); }
+      else if (dp && !dp.hidden) { closeDatePicker('matDate'); }
+      else { closeAddMaterialModal(); }
+    }
+  }
+  function toggleMatPanel() {
+    var panel = document.getElementById('matPanel');
+    if (!panel) return;
+    if (panel.hidden) { openMatPanel(); } else { closeMatPanel(); }
+  }
+  function openMatPanel() {
+    var panel = document.getElementById('matPanel');
+    if (!panel) return;
+    panel.hidden = false;
+    document.getElementById('matTrigger').setAttribute('aria-expanded', 'true');
+    document.getElementById('matSearch').value = '';
+    filterMatOptions('');
+    setTimeout(function () { document.getElementById('matSearch').focus(); }, 30);
+  }
+  function closeMatPanel() {
+    var panel = document.getElementById('matPanel');
+    var trigger = document.getElementById('matTrigger');
+    if (panel) panel.hidden = true;
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  }
+  function filterMatOptions(query) {
+    var q = query.trim().toLowerCase();
+    var listbox = document.getElementById('matListbox');
+    var opts = listbox.querySelectorAll('.combo-option');
+    var groupLabel = listbox.querySelector('.combo-group-label');
+    var anyVisible = false;
+    opts.forEach(function (opt) {
+      var match = !q || opt.getAttribute('data-name').toLowerCase().indexOf(q) !== -1;
+      opt.style.display = match ? '' : 'none';
+      if (match) anyVisible = true;
+    });
+    groupLabel.style.display = anyVisible ? '' : 'none';
+    var existingEmpty = listbox.querySelector('.combo-empty');
+    if (!anyVisible) {
+      if (!existingEmpty) {
+        var div = document.createElement('div');
+        div.className = 'combo-empty';
+        div.textContent = 'No matches: use "+ add new one off" to enter a custom name.';
+        listbox.appendChild(div);
+      }
+    } else if (existingEmpty) {
+      existingEmpty.remove();
+    }
+  }
+  function selectMatOption(el) {
+    matOneOff = false;
+    matSelectedName = el.getAttribute('data-name');
+    document.getElementById('matTriggerText').textContent = matSelectedName;
+    document.getElementById('matTrigger').classList.add('has-value');
+    closeMatPanel();
+    document.getElementById('matTrigger').focus();
+  }
+  function selectMatOneOff() {
+    var typed = document.getElementById('matSearch').value.trim();
+    matOneOff = true;
+    matSelectedName = typed || null;
+    closeMatPanel();
+    renderMatOneOffInput();
+  }
+  function renderMatOneOffInput() {
+    var wrap = document.getElementById('matCombo');
+    wrap.innerHTML =
+      '<input type="text" class="settings-field-input" id="matOneOffInput" placeholder="Enter one-off material name" value="' + (matSelectedName ? escapeHtml(matSelectedName) : '') + '" oninput="matSelectedName = this.value.trim() || null;">' +
+      '<button type="button" class="row-link" style="margin-top:6px; font-size:12px;" onclick="revertMatToCombo()">\u21A9 Choose from list instead</button>';
+    setTimeout(function () { document.getElementById('matOneOffInput').focus(); }, 30);
+  }
+  function revertMatToCombo() {
+    matOneOff = false;
+    matSelectedName = null;
+    document.getElementById('matCombo').innerHTML = matComboDefaultHtml();
+    document.getElementById('matTrigger').focus();
+  }
+  function saveMaterialCost(e) {
+    e.preventDefault();
+    var name = matOneOff ? (document.getElementById('matOneOffInput') ? document.getElementById('matOneOffInput').value.trim() : matSelectedName) : matSelectedName;
+    if (!name) {
+      jcToast('Enter or select a material name first');
+      var el = matOneOff ? document.getElementById('matOneOffInput') : document.getElementById('matTrigger');
+      if (el) el.focus();
+      return false;
+    }
+    var matData = {
+      name: name,
+      date: document.getElementById('matDate').value || '-',
+      qty: parseFloat(document.getElementById('matQuantity').value) || 0,
+      price: parseFloat(document.getElementById('matAmount').value) || 0,
+      description: document.getElementById('matDescription').value.trim()
+    };
+    if (matEditingId) {
+      var existing = materialsState.find(function (m) { return m.id === matEditingId; });
+      Object.keys(matData).forEach(function (k) { existing[k] = matData[k]; });
+    } else {
+      materialIdCounter++;
+      matData.id = 'new-mat-' + materialIdCounter;
+      materialsState.push(matData);
+    }
+    renderMaterialsTable();
+    recalcCosting();
+    jcToast((matEditingId ? 'Saved material cost: ' : 'Added material cost: ') + name);
+    closeAddMaterialModal();
+    return false;
+  }
+
+  // ---------- Add Miscellaneous Cost modal ----------
+  var miscLastFocused = null;
+  var miscEditingId = null;
+  function openAddMiscModal(editId) {
+    miscLastFocused = document.activeElement;
+    var editing = editId ? miscState.find(function (m) { return m.id === editId; }) : null;
+    miscEditingId = editing ? editing.id : null;
+    document.getElementById('miscModalTitle').textContent = editing ? 'Edit Miscellaneous Cost' : 'Add Miscellaneous Cost';
+    document.getElementById('miscCostForm').reset();
+    document.getElementById('miscCostName').closest('.settings-field').classList.remove('has-error');
+    var today = new Date();
+    document.getElementById('miscCostName').value = editing ? editing.name : '';
+    document.getElementById('miscCostDescription').value = editing ? (editing.description || '') : '';
+    document.getElementById('miscCostDate').value = editing ? editing.date : pad2(today.getMonth() + 1) + '/' + pad2(today.getDate()) + '/' + today.getFullYear();
+    document.getElementById('miscCostQuantity').value = editing ? editing.qty : 1;
+    document.getElementById('miscCostAmount').value = editing ? editing.price.toFixed(2) : 0;
+    var miscMonthSrc = parseMMDDYYYY(document.getElementById('miscCostDate').value) || today;
+    datePickerState.miscCostDate = { open: false, month: new Date(miscMonthSrc.getFullYear(), miscMonthSrc.getMonth(), 1) };
+    renderDatePicker('miscCostDate');
+    document.getElementById('miscScrim').classList.add('open');
+    document.addEventListener('keydown', miscModalKeydown);
+    setTimeout(function () { document.getElementById('miscCostName').focus(); }, 50);
+  }
+  function closeAddMiscModal() {
+    document.getElementById('miscScrim').classList.remove('open');
+    closeDatePicker('miscCostDate');
+    document.removeEventListener('keydown', miscModalKeydown);
+    if (miscLastFocused) miscLastFocused.focus();
+  }
+  function miscModalKeydown(e) {
+    var dp = document.getElementById('miscCostDateCalendar');
+    if (e.key === 'Escape') {
+      if (dp && !dp.hidden) { closeDatePicker('miscCostDate'); }
+      else { closeAddMiscModal(); }
+    }
+  }
+  function saveMiscCost(e) {
+    e.preventDefault();
+    var nameField = document.getElementById('miscCostName');
+    var nameWrap = nameField.closest('.settings-field');
+    if (!nameField.value.trim()) {
+      nameWrap.classList.add('has-error');
+      nameField.focus();
+      return false;
+    }
+    nameWrap.classList.remove('has-error');
+    var miscData = {
+      name: nameField.value.trim(),
+      description: document.getElementById('miscCostDescription').value.trim(),
+      date: document.getElementById('miscCostDate').value || '-',
+      qty: parseFloat(document.getElementById('miscCostQuantity').value) || 0,
+      price: parseFloat(document.getElementById('miscCostAmount').value) || 0
+    };
+    if (miscEditingId) {
+      var existingMisc = miscState.find(function (m) { return m.id === miscEditingId; });
+      Object.keys(miscData).forEach(function (k) { existingMisc[k] = miscData[k]; });
+    } else {
+      miscIdCounter++;
+      miscData.id = 'new-misc-' + miscIdCounter;
+      miscState.push(miscData);
+    }
+    renderMiscSection();
+    recalcCosting();
+    jcToast((miscEditingId ? 'Saved miscellaneous cost: ' : 'Added miscellaneous cost: ') + miscData.name);
+    closeAddMiscModal();
+    return false;
+  }
+
+  // ---------- Generic delete-confirm modal (Materials & Miscellaneous rows) ----------
+  var pendingDelete = null; // { type: 'material' | 'misc', id, label }
+  var genDelLastFocused = null;
+  function askDeleteGeneric(type, id, label) {
+    pendingDelete = { type: type, id: id, label: label };
+    genDelLastFocused = document.activeElement;
+    document.getElementById('genericDeleteScrim').classList.add('open');
+    document.addEventListener('keydown', genDelKeydown);
+    setTimeout(function () { document.querySelector('#genericDeleteScrim .btn-outline-primary').focus(); }, 50);
+  }
+  function genDelKeydown(e) { if (e.key === 'Escape') cancelGenericDelete(); }
+  function confirmGenericDelete() {
+    if (!pendingDelete) return;
+    if (pendingDelete.type === 'material') {
+      materialsState = materialsState.filter(function (m) { return m.id !== pendingDelete.id; });
+      renderMaterialsTable();
+    } else if (pendingDelete.type === 'misc') {
+      miscState = miscState.filter(function (m) { return m.id !== pendingDelete.id; });
+      renderMiscSection();
+    }
+    recalcCosting();
+    jcToast('Deleted "' + pendingDelete.label + '"');
+    closeGenericDeleteModal();
+  }
+  function cancelGenericDelete() { closeGenericDeleteModal(); }
+  function closeGenericDeleteModal() {
+    document.getElementById('genericDeleteScrim').classList.remove('open');
+    document.removeEventListener('keydown', genDelKeydown);
+    pendingDelete = null;
+    if (genDelLastFocused) genDelLastFocused.focus();
+  }
+
+  // ---------- Attachments ----------
+  var attachmentsState = [];
+  var attachIdCounter = 0;
+  var attachUploadMode = false;
+
+  function renderAttachmentsSection() {
+    var body = document.getElementById('attachmentsBody');
+    var headerBtn = document.getElementById('attachHeaderAddBtn');
+    if (attachUploadMode) {
+      headerBtn.style.display = 'none';
+      body.innerHTML =
+        '<div class="attach-dropzone" id="attachDropzone" role="button" tabindex="0" aria-label="Drag and drop files here, or activate to browse files">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 18a4.6 4.4 0 0 1 0-9 5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7h-1"/><polyline points="12 12 12 21"/><polyline points="9 15 12 12 15 15"/></svg>' +
+          '<p>Drag &amp; Drop Files Here</p>' +
+          '<span class="or-text">or</span>' +
+          '<button type="button" class="btn btn-primary" onclick="document.getElementById(\'attachFileInput\').click()">Browse Files</button>' +
+        '</div>' +
+        '<div class="attach-cancel-row"><button type="button" class="btn btn-outline-primary" onclick="cancelAttachmentsUpload()">Cancel</button></div>';
+      wireDropzone();
+      return;
+    }
+    if (attachmentsState.length === 0) {
+      headerBtn.style.display = 'none';
+      body.innerHTML = '<div class="empty-state"><p>There are no attachments.</p>' +
+        '<button class="btn btn-outline-primary" onclick="startAttachmentsUpload()">+ Add Attachments</button></div>';
+      return;
+    }
+    headerBtn.style.display = '';
+    body.innerHTML = '<div class="attach-grid">' + attachmentsState.map(function (a) {
+      var thumb = a.previewUrl
+        ? '<img src="' + a.previewUrl + '" alt="">'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+      return '<div class="attach-card">' +
+        '<div class="attach-thumb">' + thumb + '</div>' +
+        '<div class="attach-meta">Uploaded by ' + escapeHtml(a.uploadedBy) + '<br>' + a.date + '</div>' +
+        '<div class="attach-filename" title="' + escapeHtml(a.name) + '">' + escapeHtml(a.name) + '</div>' +
+        '<div class="attach-edit-row"><button type="button" class="btn btn-primary" onclick="jcToast(\'Attachment edit: not part of this ticket\')">Edit</button></div>' +
+        '</div>';
+    }).join('') + '</div>';
+  }
+
+  function startAttachmentsUpload() { attachUploadMode = true; renderAttachmentsSection(); }
+  function cancelAttachmentsUpload() { attachUploadMode = false; renderAttachmentsSection(); }
+
+  function wireDropzone() {
+    var zone = document.getElementById('attachDropzone');
+    if (!zone) return;
+    zone.addEventListener('click', function () { document.getElementById('attachFileInput').click(); });
+    zone.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); document.getElementById('attachFileInput').click(); }
+    });
+    zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', function () { zone.classList.remove('drag-over'); });
+    zone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      if (e.dataTransfer && e.dataTransfer.files) handleAttachFiles(e.dataTransfer.files);
+    });
+  }
+  function handleAttachFiles(fileList) {
+    var files = Array.prototype.slice.call(fileList || []);
+    if (!files.length) return;
+    var today = new Date();
+    var dateStr = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+    files.forEach(function (file) {
+      attachIdCounter++;
+      var entry = { id: 'attach-' + attachIdCounter, name: file.name, uploadedBy: 'Jeremy Harrison', date: dateStr, previewUrl: null };
+      if (file.type && file.type.indexOf('image/') === 0 && typeof URL !== 'undefined' && URL.createObjectURL) {
+        try { entry.previewUrl = URL.createObjectURL(file); } catch (err) { /* ignore */ }
+      }
+      attachmentsState.push(entry);
+    });
+    attachUploadMode = false;
+    renderAttachmentsSection();
+    jcToast(files.length === 1 ? 'Added attachment: ' + files[0].name : 'Added ' + files.length + ' attachments');
+    document.getElementById('attachFileInput').value = '';
+  }
+
+  document.addEventListener('click', function (e) {
+    var combo = document.getElementById('laborCombo');
+    if (combo && !combo.contains(e.target) && !document.getElementById('laborPanel').hidden) {
+      closeLaborPanel();
+    }
+    var matCombo = document.getElementById('matCombo');
+    var matPanel = document.getElementById('matPanel');
+    if (matCombo && matPanel && !matCombo.contains(e.target) && !matPanel.hidden) {
+      closeMatPanel();
+    }
+    Object.keys(datePickerState).forEach(function (inputId) {
+      var st = datePickerState[inputId];
+      if (!st.open) return;
+      var field = document.getElementById(inputId);
+      var wrap = field ? field.closest('.settings-field') : null;
+      if (!wrap) return;
+      var path = e.composedPath ? e.composedPath() : [];
+      var insideWrap = path.length ? (path.indexOf(wrap) !== -1) : wrap.contains(e.target);
+      if (!insideWrap) { closeDatePicker(inputId); }
+    });
+  });
+
+
+  // ---------- Add Subcontractor Cost modal ----------
+  var subLastFocused = null;
+  function openAddSubcontractorModal() {
+    subLastFocused = document.activeElement;
+    document.getElementById('subForm').reset();
+    document.getElementById('subName').closest('.settings-field').classList.remove('has-error');
+    var today = new Date();
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
+    var dd = String(today.getDate()).padStart(2, '0');
+    document.getElementById('subDate').value = mm + '/' + dd + '/' + today.getFullYear();
+    document.getElementById('subScrim').classList.add('open');
+    document.addEventListener('keydown', subModalKeydown);
+    setTimeout(function () { document.getElementById('subName').focus(); }, 50);
+  }
+  function closeAddSubcontractorModal() {
+    document.getElementById('subScrim').classList.remove('open');
+    document.removeEventListener('keydown', subModalKeydown);
+    if (subLastFocused) subLastFocused.focus();
+  }
+  function subModalKeydown(e) {
+    if (e.key === 'Escape') closeAddSubcontractorModal();
+  }
+  function saveSubcontractorCost(e) {
+    e.preventDefault();
+    var nameField = document.getElementById('subName');
+    var nameWrap = nameField.closest('.settings-field');
+    if (!nameField.value.trim()) {
+      nameWrap.classList.add('has-error');
+      nameField.focus();
+      return false;
+    }
+    nameWrap.classList.remove('has-error');
+    var name = nameField.value.trim();
+    var amount = parseFloat(document.getElementById('subAmount').value) || 0;
+    laborIdCounter++;
+    laborState.subcontractors.push({ id: 'new-' + laborIdCounter, name: name, initials: initialsFor(name), color: nextAvatarColor(), cost: amount });
+    renderLaborTables();
+    recalcCosting();
+    jcToast('Added subcontractor cost for ' + name + ': ' + fmtMoney(amount));
+    closeAddSubcontractorModal();
+    return false;
+  }
+
+  // ---- Initial render: runs last, after every state variable above has been assigned ----
+  renderLaborTables();
+  renderMaterialsTable();
+  renderMiscSection();
+  renderAttachmentsSection();
+  recalcCosting();
+</script>
+</body>
+</html>

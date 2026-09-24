@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Miscellaneous Costs | Job Costing UI Refresh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #F4F5F8;
+    -webkit-font-smoothing: antialiased;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  a { text-decoration: none; color: inherit; }
+  button { font-family: inherit; cursor: pointer; }
+  table { border-collapse: collapse; width: 100%; }
+  .visually-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+
+  #job-costing-misc-page {
+    --st-color-primary:        #8B85EA;
+    --st-color-primary-hover:  #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb:    139, 133, 234;
+    --st-color-text:           #32415B;
+    --st-color-text-muted:     #80879A;
+    --st-color-border:         #DAD8E3;
+    --st-color-card-bg:        #FFFFFF;
+    --st-color-danger:         #DC2626;
+    --st-color-danger-hover:   #B91C1C;
+    --st-color-success:        #16A34A;
+    --st-color-success-hover:  #128038;
+    color: var(--st-color-text);
+  }
+
+  /* ---------- Shared chrome ---------- */
+  .app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar { height: 64px; background: #fff; border-bottom: 1px solid #ECEBF2; display: flex; align-items: center; padding: 0 24px; gap: 24px; position: sticky; top: 0; z-index: 40; }
+  .topbar-logo { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 800; color: #32415B; white-space: nowrap; }
+  .topbar-logo .logo-badge { width: 30px; height: 30px; border-radius: 9px; background: #8B85EA; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .topbar-search { flex: 1; max-width: 420px; height: 40px; border: 1px solid #E4E3EC; border-radius: 8px; display: flex; align-items: center; padding: 0 14px; gap: 10px; color: #9297A8; font-size: 13px; background: #FAFAFC; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+  .topbar-icon-btn { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: #9297A8; }
+  .topbar-icon-btn:focus-visible { outline: 2px solid #8B85EA; outline-offset: 2px; }
+  .topbar-avatar { width: 34px; height: 34px; border-radius: 50%; background: #32415B; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .topbar-user { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #32415B; }
+
+  .body-row { display: flex; flex: 1; min-height: 0; }
+  .sidebar { width: 236px; background: #fff; border-right: 1px solid #ECEBF2; padding: 18px 12px 24px; flex-shrink: 0; overflow-y: auto; }
+  .sidebar nav a, .sidebar .side-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; font-size: 14px; font-weight: 600; color: #4B5468; margin-bottom: 2px; }
+  .sidebar .side-item:focus-visible, .sidebar nav a:focus-visible { outline: 2px solid #8B85EA; outline-offset: 1px; }
+  .sidebar .side-item svg, .sidebar nav a svg { width: 17px; height: 17px; flex-shrink: 0; color: #8991A5; }
+  .sidebar .side-badge { margin-left: auto; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: #8B85EA; color: #fff; }
+  .sidebar .side-badge.teal { background: #0DCECE; }
+  .sidebar-section-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; color: #A6ABB8; margin: 18px 10px 6px; }
+  .side-group-active { color: #5C53DC; }
+  .side-group-active svg { color: #5C53DC; }
+  .nav-group-active { position: relative; margin: 0 -12px; padding: 0 12px; }
+  .nav-group-active::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #8B85EA; }
+  .sidebar .sub-nav { margin-left: 8px; padding-left: 10px; margin-top: 2px; margin-bottom: 6px; }
+  .sidebar .sub-nav a { display: flex; align-items: center; font-size: 13.5px; font-weight: 600; color: #808898; padding: 7px 8px; }
+  .sidebar .sub-nav a.current { color: #5C53DC; font-weight: 700; }
+
+  .main-content { flex: 1; min-width: 0; padding: 28px 32px 60px; max-width: 1360px; position: relative; }
+
+  .demo-banner { background: #FFF8E6; border: 1px solid #F3D98B; border-radius: 8px; padding: 12px 16px; margin-bottom: 22px; font-size: 12.5px; color: #6B5A18; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; }
+  .demo-banner strong { color: #4F4008; }
+  .demo-banner svg { flex-shrink: 0; margin-top: 1px; width: 16px; height: 16px; }
+  .demo-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .demo-controls button { font-size: 11.5px; font-weight: 700; background: #fff; border: 1px solid #F3D98B; color: #6B5A18; border-radius: 6px; padding: 5px 10px; }
+  .demo-controls button:hover { background: #FFF3D1; }
+  .demo-controls button:focus-visible { outline: 2px solid #8B85EA; outline-offset: 2px; }
+
+  .br-chip { display: inline-flex; align-items: center; justify-content: center; font-size: 9.5px; font-weight: 800; color: #B4650C; background: #FFEDD5; border: 1px solid #FBD59C; border-radius: 5px; padding: 1px 5px; margin-left: 6px; cursor: help; position: relative; vertical-align: middle; letter-spacing: 0.3px; }
+  .br-chip:hover .br-tooltip, .br-chip:focus-visible .br-tooltip { display: block; }
+  .br-chip:focus-visible { outline: 2px solid #8B85EA; outline-offset: 2px; }
+  .br-tooltip { display: none; position: absolute; bottom: calc(100% + 8px); left: 0; width: 270px; background: #32415B; color: #fff; font-size: 11.5px; font-weight: 500; line-height: 1.5; padding: 10px 12px; border-radius: 8px; z-index: 50; text-align: left; letter-spacing: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+  .page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+  .page-title { font-size: 32px; font-weight: 800; color: #32415B; margin: 0; letter-spacing: -0.3px; }
+
+  /* ---------- Buttons ---------- */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 42px; padding: 0 18px; border-radius: 10px; font-size: 14px; font-weight: 700; border: 1px solid transparent; transition: background-color .15s ease, color .15s ease, border-color .15s ease; white-space: nowrap; }
+  .btn-primary { background: var(--st-color-primary); color: #fff; }
+  .btn-primary:hover { background: var(--st-color-primary-hover); }
+  .btn-primary:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .btn-outline-primary { background: #fff; color: var(--st-color-primary-active); border-color: var(--st-color-primary); }
+  .btn-outline-primary:hover { background: rgba(var(--st-color-primary-rgb), 0.08); }
+  .btn-outline-primary:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .btn-danger { background: var(--st-color-danger); color: #fff; }
+  .btn-danger:hover { background: var(--st-color-danger-hover); }
+  .btn-danger:focus-visible { outline: 2px solid var(--st-color-danger); outline-offset: 2px; }
+  .btn-success { background: var(--st-color-success); color: #fff; }
+  .btn-success:hover { background: var(--st-color-success-hover); }
+  .btn-success:focus-visible { outline: 2px solid var(--st-color-success); outline-offset: 2px; }
+  .btn svg { width: 15px; height: 15px; }
+
+  /* ---------- Section card ---------- */
+  .settings-section { background: var(--st-color-card-bg); border: 1px solid var(--st-color-border); border-radius: 10px; padding: 18px; }
+  .section-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+
+  /* ---------- Switchery-style toggle ---------- */
+  .settings-toggle-row { display: flex; align-items: center; gap: 10px; }
+  .settings-toggle-label { font-size: 14px; font-weight: 600; color: var(--st-color-text); }
+  .switchery-btn {
+    -webkit-appearance: none; appearance: none; width: 42px; height: 24px; border-radius: 999px;
+    background: #E4E3EC; border: none; position: relative; cursor: pointer; flex-shrink: 0;
+    transition: background-color .15s ease;
+  }
+  .switchery-btn::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform .15s ease;
+  }
+  .switchery-btn[aria-checked="true"] { background: var(--st-color-primary); }
+  .switchery-btn[aria-checked="true"]::after { transform: translateX(18px); }
+  .switchery-btn:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+
+  /* ---------- Table ---------- */
+  .misc-table th { text-align: left; font-size: 12px; font-weight: 700; color: var(--st-color-text); padding: 10px 14px; border-bottom: 1px solid var(--st-color-border); white-space: nowrap; }
+  .misc-table td { padding: 13px 14px; font-size: 13.5px; color: var(--st-color-text); border-bottom: 1px solid var(--st-color-border); vertical-align: middle; }
+  .misc-table tbody tr:last-child td { border-bottom: none; }
+  .misc-table tbody tr:hover td { background: #FAFAFC; }
+  .status-tag { display: inline-flex; align-items: center; font-size: 12px; font-weight: 700; border-radius: 14px; padding: 3px 11px; }
+  .status-tag.active { background: #E6FAF0; color: #1E8E5A; border: 1px solid #C7F0DB; }
+  .status-tag.inactive { background: #F1F1F5; color: #6B7286; border: 1px solid #E1E0E8; }
+  .row-actions { display: flex; align-items: center; gap: 4px; }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 7px; border: none; padding: 0; }
+  .icon-btn svg { width: 15px; height: 15px; }
+  .icon-btn.edit { background: #EFEDFC; color: var(--st-color-primary-active); }
+  .icon-btn.edit:hover { background: #E1DDFA; }
+  .icon-btn.delete { background: none; color: var(--st-color-danger); }
+  .icon-btn.delete:hover { background: #FEF2F2; }
+  .icon-btn:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+
+  .empty-state { text-align: center; padding: 48px 20px; }
+  .empty-state p { margin: 0; font-size: 14px; font-weight: 600; color: var(--st-color-text); }
+
+  /* ---------- Slide-over drawer (Add / Edit) ---------- */
+  .drawer-anchor { position: absolute; top: 0; right: 0; width: min(560px, 100%); z-index: 30; }
+  .drawer {
+    background: var(--st-color-card-bg); border: 1px solid var(--st-color-border); border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(50,65,91,0.18); overflow: hidden;
+    transform: translateY(-8px); opacity: 0; pointer-events: none; transition: transform .18s ease, opacity .18s ease;
+  }
+  .drawer.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .drawer-header { background: #EFEFF3; padding: 16px 20px; font-size: 15px; font-weight: 700; color: var(--st-color-text); }
+  .drawer-body { padding: 22px 20px 6px; }
+  .drawer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 16px; }
+  @media (max-width: 560px) { .drawer-grid { grid-template-columns: 1fr; } }
+  .drawer-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 18px 20px; border-top: 1px solid var(--st-color-border); margin-top: 18px; }
+
+  .settings-field { position: relative; display: flex; flex-direction: column; }
+  .settings-field-label { position: absolute; top: -8px; left: 10px; background: var(--st-color-card-bg); padding: 0 6px; font-size: 11px; font-weight: 600; color: var(--st-color-text-muted); z-index: 1; pointer-events: none; letter-spacing: 0.2px; }
+  .settings-field-input { height: 40px; padding: 0 14px; border: 1px solid var(--st-color-border); border-radius: 8px; font-size: 14px; background: var(--st-color-card-bg); color: var(--st-color-text); transition: border-color .15s ease, box-shadow .15s ease; width: 100%; }
+  select.settings-field-input { appearance: none; padding-right: 34px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2380879A' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+  .settings-field-input::placeholder { color: #A9AFBD; }
+  .settings-field-input:focus-visible, .settings-field-input:focus { outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+
+  .settings-field-group { position: relative; display: flex; align-items: stretch; border: 1px solid var(--st-color-border); border-radius: 8px; background: var(--st-color-card-bg); transition: border-color .15s ease, box-shadow .15s ease; }
+  .settings-field-group:focus-within { border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+  .settings-field-group-prefix { display: flex; align-items: center; padding: 0 12px; font-size: 14px; font-weight: 700; color: var(--st-color-text-muted); background: #FAFAFC; border-right: 1px solid var(--st-color-border); border-radius: 8px 0 0 8px; }
+  .settings-field-group .settings-field-input { border: none; box-shadow: none !important; height: 38px; }
+  .field-error { font-size: 11.5px; font-weight: 700; color: var(--st-color-danger); margin-top: 5px; display: none; }
+  .settings-field.has-error .settings-field-input, .settings-field.has-error .settings-field-group { border-color: var(--st-color-danger); }
+  .settings-field.has-error .field-error { display: block; }
+
+  /* ---------- Modal (SweetAlert-style confirm dialogs) ---------- */
+  .modal-scrim { position: fixed; inset: 0; background: rgba(50,65,91,0.55); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+  .modal-scrim.open { display: flex; }
+  .modal-card { background: #fff; border-radius: 10px; max-width: 380px; width: 100%; padding: 34px 28px 28px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .modal-icon { width: 62px; height: 62px; border-radius: 50%; border: 2.5px solid; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+  .modal-icon svg { width: 26px; height: 26px; }
+  .modal-icon.danger { border-color: #EF4444; color: #EF4444; }
+  .modal-icon.warn { border-color: #F2994A; color: #F2994A; }
+  .modal-title { font-size: 21px; font-weight: 700; color: var(--st-color-text); margin: 0 0 8px; }
+  .modal-body { font-size: 14px; color: var(--st-color-text-muted); margin: 0 0 24px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: center; }
+  .modal-actions .btn { flex: 1; }
+
+  .dev-notes { margin-top: 26px; }
+  .dev-notes h3 { font-size: 13px; font-weight: 700; margin: 0 0 10px; color: var(--st-color-text); }
+  .dev-notes ul { margin: 0; padding-left: 18px; }
+  .dev-notes li { font-size: 12.5px; line-height: 1.6; color: var(--st-color-text-muted); margin-bottom: 6px; }
+  .dev-notes li b { color: var(--st-color-text); }
+
+  .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(16px); background: #32415B; color: #fff; font-size: 13px; font-weight: 600; padding: 12px 18px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; z-index: 300; max-width: 320px; text-align: center; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Hub proto-bar (prototype-only, never part of product UI) ---------- */
+  .proto-bar { background: #fff; border-bottom: 1px solid #DAD8E3; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: 'Nunito', sans-serif; }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .proto-bar-back { font-size: 12px; font-weight: 600; color: #80879A; display: flex; align-items: center; gap: 4px; min-height: 32px; }
+  .proto-bar-back:hover, .proto-bar-back:focus-visible { color: #8B85EA; }
+  .proto-bar-divider { color: #DAD8E3; font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 700; color: #32415B; }
+  .proto-bar-ticket { font-size: 11px; font-weight: 700; color: #5C53DC; padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA; border-radius: 999px; letter-spacing: 0.2px; }
+  .proto-bar-ticket:hover, .proto-bar-ticket:focus-visible { background: #8B85EA; color: #fff; }
+
+  /* ---------- Mobile: Job Costing module chip nav (design system section 6 pattern) ---------- */
+  .jc-module-nav { display: none; margin: 0 0 18px; }
+  .jc-module-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; scroll-padding: 0 2px; scroll-snap-type: x proximity; scrollbar-width: none; }
+  .jc-module-scroll::-webkit-scrollbar { display: none; }
+  .jc-module-link { flex-shrink: 0; scroll-snap-align: start; display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 16px; font-size: 14px; font-weight: 500; color: #32415B; white-space: nowrap; }
+  .jc-module-link:nth-child(1) { background: #E8E6FA; }
+  .jc-module-link:nth-child(2) { background: #FAF0E6; }
+  .jc-module-link:nth-child(3) { background: #E6FAF0; }
+  .jc-module-link:nth-child(4) { background: #E6F3FA; }
+  .jc-module-link:nth-child(5) { background: #FAF7E6; }
+  .jc-module-link.active { box-shadow: inset 0 0 0 2px #8B85EA; font-weight: 600; }
+  .jc-module-link:focus-visible { outline: 2px solid #5C53DC; outline-offset: 2px; }
+  @media (max-width: 860px) {
+    .sidebar, .topbar-search, .topbar-user { display: none !important; }
+    .topbar { padding: 0 16px; }
+    .main-content { padding: 20px 16px 48px !important; }
+    .jc-module-nav { display: block; }
+    .proto-bar { padding: 8px 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<!-- Hub proto-bar -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="proto-bar-back" href="../index.html">&larr; Hub</a>
+    <span class="proto-bar-divider">|</span>
+    <span class="proto-bar-title">Job Costing UI Refresh: Miscellaneous Costs</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86ba1ggxb" target="_blank" rel="noopener">86ba1ggxb</a>
+</div>
+<div id="job-costing-misc-page">
+  <div class="app-shell">
+
+    <header class="topbar">
+      <div class="topbar-logo"><span class="logo-badge">●●●</span> dripjobs</div>
+      <div class="topbar-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search leads, contacts, tags…
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-icon-btn" aria-label="Alerts" onclick="jcToast('Alerts: not part of this prototype')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8A33D" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </button>
+        <button class="topbar-icon-btn" aria-label="Notifications" onclick="jcToast('Notifications: not part of this prototype')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <div class="topbar-user"><span class="topbar-avatar">JH</span> Jeremy Harrison
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <div class="body-row">
+      <aside class="sidebar" aria-label="Primary">
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Job Schedule')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Job Schedule</a>
+          <a href="#" onclick="return jcNav(event,'Jobs List')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Jobs List</a>
+          <a href="#" onclick="return jcNav(event,'Jobs Pipeline')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 0 0-1 1v2.34a1 1 0 0 0 .3.7l5.7 5.7V21l4-2v-3.26l5.7-5.7a1 1 0 0 0 .3-.7V8a1 1 0 0 0-1-1z"/></svg>Jobs Pipeline</a>
+          <a href="#" onclick="return jcNav(event,'Work Orders')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>Work Orders</a>
+        </nav>
+        <div class="sidebar-section-label">DAILY OPERATIONS</div>
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Appointments')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Appointments<span class="side-badge">1 new</span></a>
+          <a href="#" onclick="return jcNav(event,'Chat')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</a>
+          <a href="#" onclick="return jcNav(event,'Email')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><polyline points="22,6 12,13 2,6"/></svg>Email<span class="side-badge teal">New</span></a>
+          <a href="#" onclick="return jcNav(event,'Tasks')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Tasks</a>
+        </nav>
+        <div class="sidebar-section-label">DOCUMENTS</div>
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Invoices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Invoices</a>
+          <a href="#" onclick="return jcNav(event,'Proposals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Proposals</a>
+        </nav>
+        <div class="sidebar-section-label">FINANCIALS</div>
+        <div class="nav-group-active">
+        <div class="side-item side-group-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><circle cx="12" cy="13" r="3"/><path d="M6 6V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/></svg>
+          Job Costing
+        </div>
+        <div class="sub-nav">
+          <a href="index.html">- Dashboard</a>
+          <a href="time-sheets.html">- Time Sheets</a>
+          <a href="misc-costs.html" class="current" aria-current="page">- Misc. Costs</a>
+          <a href="reports.html">- Reports</a>
+          <a href="tutorials.html">- Tutorials</a>
+        </div>
+        </div>
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Production Rates')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>Production Rates</a>
+          <a href="#" onclick="return jcNav(event,'Metrics')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Metrics</a>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+
+        <nav class="jc-module-nav" aria-label="Job Costing sections">
+          <div class="jc-module-scroll">
+            <a href="index.html" class="jc-module-link">Dashboard</a>
+            <a href="time-sheets.html" class="jc-module-link">Time Sheets</a>
+            <a href="misc-costs.html" class="jc-module-link active" aria-current="page">Misc. Costs</a>
+            <a href="reports.html" class="jc-module-link">Reports</a>
+            <a href="tutorials.html" class="jc-module-link">Tutorials</a>
+          </div>
+        </nav>
+
+        <div class="demo-banner" role="note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#B4650C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <strong>Prototype: Miscellaneous Costs.</strong> One of 8 linked screens for ticket
+            <a href="https://app.clickup.com/t/8633445/86ba1ggxb" target="_blank" rel="noopener" style="color:#B4650C; font-weight:700; text-decoration:underline;">86ba1ggxb</a>. Add, Edit and Delete update the table for real (sample data, resets on refresh). Sidebar and top bar are reference chrome, not restyled; the Job Costing sub-nav links all 8 screens. Orange chips map to the ticket's business rules, hover or tab to them. Sample data only.
+            <span class="br-chip" tabindex="0">Copy fix<span class="br-tooltip">The delete-cancelled dialog in production reads "Employee not deleted." Corrected here to "Misc cost not deleted." per the ticket's copy corrections.</span></span>
+            <div class="demo-controls">
+              <button onclick="resetDemo()">Reset to seed data</button>
+              <button onclick="clearAllRows()">Empty the list (see empty state)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="page-head">
+          <h1 class="page-title">Miscellaneous Costs</h1>
+        </div>
+
+        <section class="settings-section">
+          <div class="section-toolbar">
+            <div class="settings-toggle-row">
+              <button type="button" class="switchery-btn switchery" role="switch" aria-checked="false" id="showInactiveToggle" aria-label="Show inactive miscellaneous costs" onclick="toggleShowInactive(this)"></button>
+              <span class="settings-toggle-label">Show Inactive</span>
+            </div>
+            <button class="btn btn-primary" onclick="openDrawer('add')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Misc
+            </button>
+          </div>
+
+          <div id="miscTableWrap" style="position:relative;">
+            <!-- rendered by JS -->
+          </div>
+        </section>
+
+        <div class="dev-notes">
+          <h3>Dev notes for this screen</h3>
+          <ul>
+            <li><b>BR1 (section cards):</b> toolbar and table live in one <code>.settings-section</code>; Add/Edit opens a slide-over drawer.</li>
+            <li><b>BR2 (floating labels):</b> Name, Description, Cost Type and Amount are floating-label fields; Amount uses the "$" prefix field group.</li>
+            <li><b>BR3 (buttons):</b> "Add Misc" and "Save" are <code>btn-primary</code>, "Cancel" is <code>btn-outline-primary</code>, "Yes, delete it!" is <code>btn-danger</code>.</li>
+            <li><b>BR5 (toggles, tags):</b> "Show Inactive" and the drawer's "Active" use the Switchery pattern (<code>.switchery</code> hook kept, <code>#8B85EA</code>); Active/Inactive are status tags.</li>
+            <li><b>Copy fixes:</b> "Desription" to "Description" in the table header, and "Employee not deleted." to "Misc cost not deleted." in the cancelled dialog.</li>
+            <li><b>Seed data:</b> "Dump Fees" is a demo-only inactive row so "Show Inactive" has something to reveal.</li>
+            <li><b>Drawer vs. modal:</b> Add/Edit is a non-dimmed drawer and the delete dialogs use a dimmed backdrop, both matching production. Neither pattern is documented in the design system yet.</li>
+            <li><b>Design system gap (not blocking):</b> <code>btn-danger</code> / <code>btn-success</code> have no documented hex values; a standard red/green pair is used.</li>
+            <li><b>Accessibility:</b> dialogs use <code>role="dialog" aria-modal="true"</code>, Escape closes, focus returns to the triggering row button, and icon buttons name their row.</li>
+          </ul>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Add / Edit drawer -->
+  <div class="drawer-anchor" style="top:132px;">
+    <div class="drawer" id="miscDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <div class="drawer-header" id="drawerTitle">Add Miscellaneous Cost</div>
+      <div class="drawer-body">
+        <form id="miscForm" onsubmit="return saveMisc(event)">
+          <div class="drawer-grid">
+            <div class="settings-field">
+              <label class="settings-field-label" for="miscName">Name</label>
+              <input class="settings-field-input" id="miscName" type="text" placeholder="Enter Name" required>
+              <span class="field-error">Name is required.</span>
+            </div>
+            <div class="settings-field">
+              <label class="settings-field-label" for="miscDesc">Description</label>
+              <input class="settings-field-input" id="miscDesc" type="text" placeholder="Enter Description">
+            </div>
+            <div class="settings-field">
+              <label class="settings-field-label" for="miscType">Cost Type</label>
+              <select class="settings-field-input" id="miscType">
+                <option value="Per Job">Per Job</option>
+                <option value="Fixed">Fixed</option>
+              </select>
+            </div>
+            <div class="settings-field">
+              <label class="settings-field-label" for="miscAmount">Amount</label>
+              <div class="settings-field-group">
+                <span class="settings-field-group-prefix" aria-hidden="true">$</span>
+                <input class="settings-field-input" id="miscAmount" type="number" min="0" step="0.01" inputmode="decimal" value="0">
+              </div>
+            </div>
+            <div class="settings-field" id="activeFieldWrap" style="display:none;">
+              <span class="settings-field-label" style="position:static; background:none; padding:0; display:block; margin-bottom:8px;">Active</span>
+              <button type="button" class="switchery-btn switchery" role="switch" aria-checked="true" id="miscActiveToggle" aria-label="Miscellaneous cost active" onclick="toggleActive(this)"></button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="drawer-footer">
+        <button type="submit" form="miscForm" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-outline-primary" onclick="closeDrawer()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div class="modal-scrim" id="confirmScrim">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmBody">
+      <div class="modal-icon warn" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <h2 class="modal-title" id="confirmTitle">Are you sure?</h2>
+      <p class="modal-body" id="confirmBody">You won't be able to revert this!</p>
+      <div class="modal-actions">
+        <button class="btn btn-danger" onclick="confirmDelete()">Yes, delete it!</button>
+        <button class="btn btn-outline-primary" onclick="cancelDelete()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cancelled acknowledgement modal -->
+  <div class="modal-scrim" id="cancelledScrim">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="cancelledTitle" aria-describedby="cancelledBody">
+      <div class="modal-icon danger" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+      <h2 class="modal-title" id="cancelledTitle">Cancelled</h2>
+      <p class="modal-body" id="cancelledBody">Misc cost not deleted.</p>
+      <div class="modal-actions">
+        <button class="btn btn-success" onclick="closeCancelled()">OK</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="jcToastEl" role="status" aria-live="polite"></div>
+
+<script>
+  var SEED = [
+    { id: 1, name: 'Other Cost', description: '(Other)', costType: 'Per Job', amount: 400.00, active: true },
+    { id: 2, name: 'Dump Fees', description: '(Disposal)', costType: 'Fixed', amount: 75.00, active: false }
+  ];
+  var miscs = JSON.parse(JSON.stringify(SEED));
+  var nextId = 3;
+  var showInactive = false;
+  var editingId = null;
+  var pendingDeleteId = null;
+  var lastFocusedEl = null;
+
+  function jcToast(msg) {
+    var el = document.getElementById('jcToastEl');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(window.__jcToastTimer);
+    window.__jcToastTimer = setTimeout(function () { el.classList.remove('show'); }, 2600);
+  }
+  function jcNav(e, name, isCurrent) {
+    e.preventDefault();
+    if (isCurrent) return false;
+    jcToast(name + ': outside the Job Costing prototype');
+    return false;
+  }
+  function money(n) { return '$' + Number(n).toFixed(2); }
+
+  function render() {
+    var wrap = document.getElementById('miscTableWrap');
+    var visible = miscs.filter(function (m) { return showInactive || m.active; });
+    if (visible.length === 0) {
+      wrap.innerHTML = '<div class="empty-state"><p>No miscs added yet! Click "Add Misc" above to get started!</p></div>';
+      return;
+    }
+    var rows = visible.map(function (m) {
+      return '<tr>' +
+        '<td><span class="status-tag ' + (m.active ? 'active' : 'inactive') + '">' + (m.active ? 'Active' : 'Inactive') + '</span></td>' +
+        '<td>' + escapeHtml(m.name) + '</td>' +
+        '<td>' + (m.description ? escapeHtml(m.description) : '-') + '</td>' +
+        '<td>' + escapeHtml(m.costType) + '</td>' +
+        '<td>' + Number(m.amount).toFixed(2) + '</td>' +
+        '<td><div class="row-actions">' +
+          '<button class="icon-btn edit" aria-label="Edit ' + escapeHtml(m.name) + '" onclick="openDrawer(\'edit\',' + m.id + ')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+          '<button class="icon-btn delete" aria-label="Delete ' + escapeHtml(m.name) + '" onclick="askDelete(' + m.id + ')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+
+    wrap.innerHTML =
+      '<div style="overflow-x:auto; position:relative;"><table class="misc-table"><thead><tr>' +
+      '<th scope="col">Status</th><th scope="col">Name</th><th scope="col">Description</th>' +
+      '<th scope="col">Cost Type</th><th scope="col">Amount</th><th scope="col" class="visually-hidden">Actions</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+
+  function toggleShowInactive(btn) {
+    showInactive = btn.getAttribute('aria-checked') !== 'true';
+    btn.setAttribute('aria-checked', showInactive ? 'true' : 'false');
+    render();
+  }
+
+  function openDrawer(mode, id) {
+    lastFocusedEl = document.activeElement;
+    editingId = mode === 'edit' ? id : null;
+    var drawer = document.getElementById('miscDrawer');
+    var title = document.getElementById('drawerTitle');
+    var activeWrap = document.getElementById('activeFieldWrap');
+    var activeToggle = document.getElementById('miscActiveToggle');
+
+    document.getElementById('miscName').closest('.settings-field').classList.remove('has-error');
+
+    if (mode === 'edit') {
+      var m = miscs.find(function (x) { return x.id === id; });
+      title.textContent = 'Edit Miscellaneous Cost';
+      document.getElementById('miscName').value = m.name;
+      document.getElementById('miscDesc').value = m.description || '';
+      document.getElementById('miscType').value = m.costType;
+      document.getElementById('miscAmount').value = Number(m.amount).toFixed(2);
+      activeWrap.style.display = '';
+      activeToggle.setAttribute('aria-checked', m.active ? 'true' : 'false');
+    } else {
+      title.textContent = 'Add Miscellaneous Cost';
+      document.getElementById('miscName').value = '';
+      document.getElementById('miscDesc').value = '';
+      document.getElementById('miscType').value = 'Per Job';
+      document.getElementById('miscAmount').value = '0';
+      activeWrap.style.display = 'none';
+    }
+    drawer.classList.add('open');
+    document.addEventListener('keydown', drawerKeydown);
+    setTimeout(function () { document.getElementById('miscName').focus(); }, 50);
+  }
+  function closeDrawer() {
+    document.getElementById('miscDrawer').classList.remove('open');
+    document.removeEventListener('keydown', drawerKeydown);
+    if (lastFocusedEl) lastFocusedEl.focus();
+  }
+  function drawerKeydown(e) {
+    if (e.key === 'Escape') closeDrawer();
+  }
+  function toggleActive(btn) {
+    var v = btn.getAttribute('aria-checked') !== 'true';
+    btn.setAttribute('aria-checked', v ? 'true' : 'false');
+  }
+
+  function saveMisc(e) {
+    e.preventDefault();
+    var nameField = document.getElementById('miscName');
+    var nameWrap = nameField.closest('.settings-field');
+    if (!nameField.value.trim()) {
+      nameWrap.classList.add('has-error');
+      nameField.focus();
+      return false;
+    }
+    nameWrap.classList.remove('has-error');
+
+    var data = {
+      name: nameField.value.trim(),
+      description: document.getElementById('miscDesc').value.trim(),
+      costType: document.getElementById('miscType').value,
+      amount: parseFloat(document.getElementById('miscAmount').value) || 0
+    };
+
+    if (editingId) {
+      var m = miscs.find(function (x) { return x.id === editingId; });
+      m.name = data.name; m.description = data.description; m.costType = data.costType; m.amount = data.amount;
+      m.active = document.getElementById('miscActiveToggle').getAttribute('aria-checked') === 'true';
+      jcToast('Saved "' + data.name + '"');
+    } else {
+      data.id = nextId++; data.active = true;
+      miscs.push(data);
+      jcToast('Added "' + data.name + '"');
+    }
+    render();
+    closeDrawer();
+    return false;
+  }
+
+  function askDelete(id) {
+    lastFocusedEl = document.activeElement;
+    pendingDeleteId = id;
+    document.getElementById('confirmScrim').classList.add('open');
+    document.addEventListener('keydown', confirmKeydown);
+    setTimeout(function () { document.querySelector('#confirmScrim .btn-outline-primary').focus(); }, 50);
+  }
+  function confirmKeydown(e) {
+    if (e.key === 'Escape') cancelDelete();
+  }
+  function confirmDelete() {
+    var m = miscs.find(function (x) { return x.id === pendingDeleteId; });
+    miscs = miscs.filter(function (x) { return x.id !== pendingDeleteId; });
+    document.getElementById('confirmScrim').classList.remove('open');
+    document.removeEventListener('keydown', confirmKeydown);
+    pendingDeleteId = null;
+    render();
+    jcToast('Deleted "' + (m ? m.name : 'item') + '"');
+    if (lastFocusedEl) lastFocusedEl.focus();
+  }
+  function cancelDelete() {
+    document.getElementById('confirmScrim').classList.remove('open');
+    document.removeEventListener('keydown', confirmKeydown);
+    pendingDeleteId = null;
+    document.getElementById('cancelledScrim').classList.add('open');
+    document.addEventListener('keydown', cancelledKeydown);
+    setTimeout(function () { document.querySelector('#cancelledScrim .btn-success').focus(); }, 50);
+  }
+  function cancelledKeydown(e) {
+    if (e.key === 'Escape') closeCancelled();
+  }
+  function closeCancelled() {
+    document.getElementById('cancelledScrim').classList.remove('open');
+    document.removeEventListener('keydown', cancelledKeydown);
+    if (lastFocusedEl) lastFocusedEl.focus();
+  }
+
+  function resetDemo() {
+    miscs = JSON.parse(JSON.stringify(SEED));
+    nextId = 3;
+    showInactive = false;
+    document.getElementById('showInactiveToggle').setAttribute('aria-checked', 'false');
+    render();
+    jcToast('Reset to seed data');
+  }
+  function clearAllRows() {
+    miscs = [];
+    render();
+    jcToast('Cleared: showing empty state');
+  }
+
+  render();
+</script>
+</body>
+</html>
