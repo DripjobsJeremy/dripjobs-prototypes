@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
 <script src="../gate.js"></script>
+<script>
+  (function () {
+    try { if (localStorage.getItem('jcCleanView') === '1') document.documentElement.classList.add('jc-clean-view'); } catch (e) {}
+  })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Job Costing Dashboard | Job Costing UI Refresh</title>
@@ -76,6 +81,7 @@
   }
   .sidebar .side-item:focus-visible, .sidebar nav a:focus-visible { outline: 2px solid #8B85EA; outline-offset: 1px; }
   .sidebar .side-item svg, .sidebar nav a svg { width: 17px; height: 17px; flex-shrink: 0; color: #8991A5; }
+  .sidebar .side-chevron { margin-left: auto; width: 13px !important; height: 13px !important; color: #C2C6D1; flex-shrink: 0; }
   .sidebar .side-badge {
     margin-left: auto; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px;
     background: #8B85EA; color: #fff;
@@ -209,7 +215,8 @@
   }
   .metrics-highlight .value { font-size: 30px; font-weight: 800; color: var(--st-color-text); line-height: 1; }
   .metrics-highlight .label { font-size: 12px; font-weight: 600; color: var(--st-color-text-muted); margin-top: 6px; text-align: center; }
-  .metrics-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; padding: 20px 26px; flex: 1; }
+  .metrics-strip { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 14px; padding: 22px 32px; flex: 1; overflow-x: auto; }
+  @media (max-width: 860px) { .metrics-strip { flex-wrap: wrap; justify-content: flex-start; padding: 18px 20px; } }
   .metrics-item { display: flex; flex-direction: column; gap: 3px; }
   .metrics-item .m-label { font-size: 13px; color: var(--st-color-text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
   .metrics-item .m-value { font-size: 18px; font-weight: 700; color: var(--st-color-text); }
@@ -290,6 +297,8 @@
     display: inline-flex; align-items: center; font-size: 12px; font-weight: 600;
     background: #E6FAF0; color: #1E8E5A; border: 1px solid #C7F0DB; border-radius: 14px; padding: 3px 11px;
   }
+  .status-tag.ready { background: #fff; color: var(--st-color-primary-active); border-color: #D6D2F5; }
+  .status-tag.complete { background: #F1F1F5; color: #6B7286; border-color: #E1E0E8; }
 
   .job-card-metric-badge { display: flex; flex-direction: column; align-items: center; justify-content: center;
     background: #F3F3F8; border-radius: 8px; padding: 8px 16px; min-width: 90px; }
@@ -352,6 +361,19 @@
     .jc-module-nav { display: block; }
     .proto-bar { padding: 8px 16px; }
   }
+  /* ---------- Clean-view toggle (prototype-only): hides BR chips, demo banners and dev notes ---------- */
+  html.jc-clean-view .demo-banner,
+  html.jc-clean-view .br-chip,
+  html.jc-clean-view .dev-notes,
+  html.jc-clean-view .demo-controls { display: none !important; }
+  .clean-view-btn {
+    display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; color: #5C53DC; background: #E8E6FA; border: 1px solid #D6D2F5;
+    font-family: 'Nunito', sans-serif; letter-spacing: 0.2px; white-space: nowrap;
+  }
+  .clean-view-btn:hover, .clean-view-btn:focus-visible { background: #8B85EA; color: #fff; }
+  .clean-view-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .proto-bar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; }
   }
@@ -365,7 +387,13 @@
     <span class="proto-bar-divider">|</span>
     <span class="proto-bar-title">Job Costing UI Refresh: Job Costing Dashboard</span>
   </div>
-  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86ba1ggxb" target="_blank" rel="noopener">86ba1ggxb</a>
+  <div class="proto-bar-right">
+    <button type="button" class="clean-view-btn" id="cleanViewBtn" onclick="toggleCleanView()">
+      <svg id="cleanViewIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span id="cleanViewLabel">Hide callouts</span>
+    </button>
+    <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86ba1ggxb" target="_blank" rel="noopener">86ba1ggxb</a>
+  </div>
 </div>
 <div id="job-costing-page">
   <div class="app-shell">
@@ -412,7 +440,7 @@
         <div class="sidebar-section-label">DOCUMENTS</div>
         <nav>
           <a href="#" onclick="return jcNav(event,'Invoices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Invoices</a>
-          <a href="#" onclick="return jcNav(event,'Proposals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Proposals</a>
+          <a href="#" onclick="return jcNav(event,'Proposals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Proposals<svg class="side-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
         </nav>
         <div class="sidebar-section-label">FINANCIALS</div>
         <div class="nav-group-active">
@@ -430,7 +458,18 @@
         </div>
         <nav>
           <a href="#" onclick="return jcNav(event,'Production Rates')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>Production Rates</a>
-          <a href="#" onclick="return jcNav(event,'Metrics')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Metrics</a>
+          <a href="#" onclick="return jcNav(event,'Metrics')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Metrics<svg class="side-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
+        </nav>
+        <div class="sidebar-section-label">MARKETING</div>
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Activity')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Activity</a>
+          <a href="#" onclick="return jcNav(event,'Blast')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>Blast</a>
+          <a href="#" onclick="return jcNav(event,'Drips')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69s-6 7.15-6 11.31a6 6 0 0 0 12 0c0-4.16-6-11.31-6-11.31z"/></svg>Drips</a>
+        </nav>
+        <div class="sidebar-section-label">RESOURCES</div>
+        <nav>
+          <a href="#" onclick="return jcNav(event,'DJ Academy')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>DJ Academy</a>
+          <a href="#" onclick="return jcNav(event,'Automations')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Automations</a>
         </nav>
       </aside>
 
@@ -570,14 +609,14 @@
             <div class="job-list-filters">
               <div class="settings-field field-search">
                 <label class="settings-field-label" for="jobSearch">Job Name</label>
-                <input class="settings-field-input" id="jobSearch" type="text" placeholder="Type job name…">
+                <input class="settings-field-input" id="jobSearch" type="text" placeholder="type job name...">
               </div>
               <div class="settings-field field-select">
                 <label class="settings-field-label" for="jobStatus">Status</label>
                 <select class="settings-field-input" id="jobStatus">
                   <option>Costing Active</option>
+                  <option>Ready for Costing</option>
                   <option>Costing Complete</option>
-                  <option>All Statuses</option>
                 </select>
               </div>
               <div class="settings-field field-select">
@@ -625,8 +664,12 @@
             <li><b>BR5 (tags):</b> "Costing Active" is a status tag pill.</li>
             <li><b>BR6 (tokens):</b> colors come from <code>--st-color-*</code> tokens scoped to <code>#job-costing-page</code>; no legacy purple hex.</li>
             <li><b>BR9 (Custom Dates):</b> choosing "Custom Dates" reveals the start/end range with month/year dropdown calendars. This is existing production functionality carried into the refresh, not a new feature.</li>
+            <li><b>Layout fix (matches current production):</b> the Revenue / Labor / Expenses / Gross Profit strip now sits on one row, evenly spaced, matching Jeremy's screenshots of today's UI. It previously wrapped and left a large gap.</li>
+            <li><b>Status filter (matches current production):</b> corrected to the real three values, Costing Active, Ready for Costing, Costing Complete, confirmed from Jeremy's screenshot of the open dropdown. Added the matching <code>.status-tag.ready</code> / <code>.status-tag.complete</code> pill variants for future job rows in those statuses; the one sample job stays Costing Active, unchanged.</li>
+            <li><b>Sidebar (matches current production):</b> added the Marketing (Activity, Blast, Drips) and Resources (DJ Academy, Automations) sections and the submenu chevrons on Proposals and Metrics, all reference chrome only.</li>
             <li><b>Design system gaps (not blocking):</b> donut segment colors and the blue selected-day color in the date picker are kept as production shows them but aren't documented tokens yet.</li>
             <li><b>Accessibility:</b> the donut has a text alternative via <code>role="img"</code> + <code>aria-label</code>, the job card is a single focusable link, and every control has a visible focus state.</li>
+            <li><b>Clean view (prototype-only):</b> the "Hide callouts" button in the top bar hides the demo banner, orange BR/Flag chips and these dev notes on all 8 screens, for an unobstructed look at what an end user would see. It remembers your choice as you navigate between screens.</li>
           </ul>
         </div>
 
@@ -638,6 +681,20 @@
 <div class="toast" id="jcToastEl" role="status" aria-live="polite"></div>
 
 <script>
+  function toggleCleanView() {
+    var on = document.documentElement.classList.toggle('jc-clean-view');
+    try { localStorage.setItem('jcCleanView', on ? '1' : '0'); } catch (e) {}
+    syncCleanViewButton();
+  }
+  function syncCleanViewButton() {
+    var on = document.documentElement.classList.contains('jc-clean-view');
+    document.getElementById('cleanViewLabel').textContent = on ? 'Show callouts' : 'Hide callouts';
+    document.getElementById('cleanViewIcon').innerHTML = on
+      ? '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.06 21.06 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.06 21.06 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+  syncCleanViewButton();
+
   function jcToast(msg) {
     var el = document.getElementById('jcToastEl');
     el.textContent = msg;
