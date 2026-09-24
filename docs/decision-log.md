@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-24] Job Costing UI Refresh: profit-margin strip spacing correction (ticket 86ba1ggxb)
+- Decision: The prior fix for the wrapping profit-margin strip over-corrected: `justify-content: space-between` spread the items edge to edge with a big gap in the middle, unlike production's tightly-packed row. Changed to `justify-content: flex-start` with a modest fixed gap, gave the metrics card a fixed-width donut column instead of a proportional split so it has the room it needs, and added a tablet-width fallback so the row wraps onto two lines instead of clipping below the two-column breakpoint.
+- Why: Jeremy compared the two side by side against a production screenshot and flagged the dead space.
+- Open question: None.
+
 ## [2026-09-24] Job Costing UI Refresh: dashboard layout fix, real dropdown values, clean-view toggle (ticket 86ba1ggxb)
 - Decision: Fixed the Dashboard's profit-margin strip, which was wrapping onto two lines with a large gap instead of one evenly-spaced row, against Jeremy's screenshots of today's production UI. Corrected the Status filter dropdown to the real three values (Costing Active, Ready for Costing, Costing Complete) confirmed from those screenshots, replacing an invented "All Statuses" option. Added the Marketing and Resources sidebar sections and submenu chevrons for sidebar fidelity (reference chrome only). Added a "Hide callouts" toggle in the proto-bar on all 8 screens that hides the demo banner, orange BR/Flag chips and dev notes, persisted across navigation, so Jeremy can view an unobstructed end-user look.
 - Why: Jeremy provided current production screenshots showing the real layout and real dropdown values; the prototype needed to match those rather than the earlier assumption-based build. The clean-view toggle was requested directly so callouts don't have to be mentally filtered out when evaluating the actual visual.
