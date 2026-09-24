@@ -6,7 +6,7 @@ Append a short entry after any session with a real design or scope decision. New
 - Decision: Consolidated the 8 per-screen Claude artifacts into one linked prototype in `job-costing-ui-refresh/`, with a single shared sidebar so every sub-nav link, job row, report link and breadcrumb is a real relative link. Updated Job Costing Details to the final ticket rules: Costing Status is now two-way (BR7, was one-way in the artifact) and Materials/Misc row Edit reopens the prefilled modal and recalculates (BR8, was toast-only).
 - Why: The artifacts predated BR7/BR8 and cross-linked through claude.ai URLs; the ticket's AC requires working navigation across all 8 screens. Also fixed the Payroll report breadcrumb (read "Employee Timesheets") and a broken onclick on the Tutorials thumbnails.
 - Pattern deviation: below 860px the reference sidebar is hidden and a Job Costing chip nav (design system tab-chip pattern) takes its place, so the module stays navigable on mobile. Prototype chrome only, not a production nav proposal.
-- Open question: Time Sheet Entries is built as a full page; production screenshots didn't show whether it's a page or a modal.
+- Resolved: Jeremy confirmed Time Sheet Entries is built as a full page today in production and doesn't need to function in this prototype, click-to-view only, no open question. Also confirmed dropping the duplicated "and" in the Tutorials caption ("Job Costing Settings &amp; Overview"), removed the flag chip.
 
 ## [2026-09-23] Google Calendar Icon: connect flow "Continue to appointments" button (ticket 86bc5bcfc)
 
