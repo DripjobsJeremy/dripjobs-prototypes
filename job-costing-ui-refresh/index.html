@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Job Costing Dashboard | Job Costing UI Refresh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #F4F5F8;
+    -webkit-font-smoothing: antialiased;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  a { text-decoration: none; color: inherit; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ===================================================================
+     JOB COSTING DESIGN-SYSTEM REFRESH
+     Scoped wrapper per DripJobs Design System guide, section 1 & 12.
+     =================================================================== */
+  #job-costing-page {
+    --st-color-primary:        #8B85EA;
+    --st-color-primary-hover:  #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb:    139, 133, 234;
+
+    --st-color-text:           #32415B;
+    --st-color-text-muted:     #80879A;
+    --st-color-border:         #DAD8E3;
+    --st-color-card-bg:        #FFFFFF;
+
+    color: var(--st-color-text);
+  }
+
+  /* ---------- Shared chrome (top bar + sidebar): outside this ticket's
+       scope, reproduced only for click-through context. Not restyled. ---------- */
+  .app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+  .topbar {
+    height: 64px; background: #fff; border-bottom: 1px solid #ECEBF2;
+    display: flex; align-items: center; padding: 0 24px; gap: 24px;
+    position: sticky; top: 0; z-index: 40;
+  }
+  .topbar-logo { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 800; color: #32415B; white-space: nowrap; }
+  .topbar-logo .logo-badge {
+    width: 30px; height: 30px; border-radius: 9px; background: #8B85EA; color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 13px;
+  }
+  .topbar-search {
+    flex: 1; max-width: 420px; height: 40px; border: 1px solid #E4E3EC; border-radius: 8px;
+    display: flex; align-items: center; padding: 0 14px; gap: 10px; color: #9297A8; font-size: 13px; background: #FAFAFC;
+  }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+  .topbar-icon-btn { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: transparent; border: none; color: #9297A8; position: relative; }
+  .topbar-icon-btn:focus-visible { outline: 2px solid #8B85EA; outline-offset: 2px; }
+  .topbar-avatar { width: 34px; height: 34px; border-radius: 50%; background: #32415B; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .topbar-user { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #32415B; }
+
+  .body-row { display: flex; flex: 1; min-height: 0; }
+  .sidebar {
+    width: 236px; background: #fff; border-right: 1px solid #ECEBF2; padding: 18px 12px 24px;
+    flex-shrink: 0; overflow-y: auto;
+  }
+  .sidebar nav a, .sidebar .side-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px;
+    font-size: 14px; font-weight: 600; color: #4B5468; margin-bottom: 2px;
+  }
+  .sidebar .side-item:focus-visible, .sidebar nav a:focus-visible { outline: 2px solid #8B85EA; outline-offset: 1px; }
+  .sidebar .side-item svg, .sidebar nav a svg { width: 17px; height: 17px; flex-shrink: 0; color: #8991A5; }
+  .sidebar .side-badge {
+    margin-left: auto; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px;
+    background: #8B85EA; color: #fff;
+  }
+  .sidebar .side-badge.teal { background: #0DCECE; }
+  .sidebar-section-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px; color: #A6ABB8; margin: 18px 10px 6px; }
+  .side-group-active { color: #5C53DC; }
+  .side-group-active svg { color: #5C53DC; }
+  .nav-group-active { position: relative; margin: 0 -12px; padding: 0 12px; }
+  .nav-group-active::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #8B85EA; }
+  .sidebar .sub-nav { margin-left: 8px; padding-left: 10px; margin-top: 2px; margin-bottom: 6px; }
+  .sidebar .sub-nav a { display: flex; align-items: center; font-size: 13.5px; font-weight: 600; color: #808898; padding: 7px 8px; }
+  .sidebar .sub-nav a.current { color: #5C53DC; font-weight: 700; }
+
+  .main-content { flex: 1; min-width: 0; padding: 28px 32px 60px; max-width: 1360px; }
+
+  /* ---------- Demo control banner (prototype-only, never part of product UI) ---------- */
+  .demo-banner {
+    background: #FFF8E6; border: 1px solid #F3D98B; border-radius: 8px;
+    padding: 12px 16px; margin-bottom: 22px; font-size: 12.5px; color: #6B5A18; line-height: 1.5;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .demo-banner strong { color: #4F4008; }
+  .demo-banner svg { flex-shrink: 0; margin-top: 1px; width: 16px; height: 16px; }
+
+  /* ---------- BR annotation chips ---------- */
+  .br-chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 9.5px; font-weight: 800; color: #B4650C; background: #FFEDD5; border: 1px solid #FBD59C;
+    border-radius: 5px; padding: 1px 5px; margin-left: 6px; cursor: help; position: relative; vertical-align: middle;
+    letter-spacing: 0.3px;
+  }
+  .br-chip:hover .br-tooltip, .br-chip:focus-visible .br-tooltip { display: block; }
+  .br-chip:focus-visible { outline: 2px solid #8B85EA; outline-offset: 2px; }
+  .br-tooltip {
+    display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    width: 260px; background: #32415B; color: #fff; font-size: 11.5px; font-weight: 500; line-height: 1.5;
+    padding: 10px 12px; border-radius: 8px; z-index: 50; text-align: left; letter-spacing: 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  }
+  .br-tooltip::after {
+    content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: #32415B;
+  }
+
+  /* ---------- Page title ---------- */
+  .page-title { font-size: 34px; font-weight: 800; color: #32415B; margin: 4px 0 22px; letter-spacing: -0.3px; }
+
+  /* ---------- Sentence-style filter row ---------- */
+  .filter-row {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+    justify-content: flex-end; font-size: 14px; color: var(--st-color-text); margin-bottom: 22px;
+  }
+  .filter-row .filter-label { color: var(--st-color-text-muted); font-weight: 500; }
+  .jc-inline-select {
+    height: 40px; padding: 0 34px 0 14px; border: 1px solid var(--st-color-border); border-radius: 8px;
+    font-size: 14px; font-weight: 600; color: var(--st-color-text); background: var(--st-color-card-bg);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2380879A' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    min-width: 150px;
+  }
+  .jc-inline-select:focus-visible {
+    outline: none; border-color: var(--st-color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18);
+  }
+
+  /* ---------- Custom date range ---------- */
+  .custom-date-range { display: none; align-items: center; gap: 10px; }
+  .custom-date-range.show { display: flex; }
+  .date-field-wrap { position: relative; }
+  .date-field-group { display: flex; align-items: stretch; border: 1px solid var(--st-color-border); border-radius: 8px; background: var(--st-color-card-bg); height: 40px; overflow: hidden; }
+  .date-field-group:focus-within { border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18); }
+  .date-field-icon-btn { width: 34px; flex-shrink: 0; border: none; background: #FAFAFC; color: var(--st-color-text-muted); display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--st-color-border); cursor: pointer; padding: 0; }
+  .date-field-icon-btn:hover { background: #F0F0F5; }
+  .date-field-icon-btn svg { width: 14px; height: 14px; }
+  .date-field-input { border: none; padding: 0 10px; font-size: 14px; font-weight: 600; color: var(--st-color-text); width: 118px; background: transparent; }
+  .date-field-input:focus { outline: none; }
+
+  .dp-panel { position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; background: #fff; border: 1px solid var(--st-color-border); border-radius: 8px; box-shadow: 0 12px 32px rgba(50,65,91,0.18); padding: 12px; width: 250px; }
+  .dp-head { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px; }
+  .dp-nav { width: 22px; height: 22px; border-radius: 6px; border: none; background: none; color: var(--st-color-text-muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .dp-nav:hover { background: #F3F3F8; }
+  .dp-nav:focus-visible { outline: 2px solid var(--st-color-primary); outline-offset: 1px; }
+  .dp-nav svg { width: 11px; height: 11px; }
+  .dp-month-select, .dp-year-select {
+    height: 26px; border: 1px solid var(--st-color-border); border-radius: 6px; font-size: 12.5px; font-weight: 700; color: var(--st-color-text);
+    padding: 0 6px; appearance: none; background: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2380879A' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 5px center; padding-right: 18px;
+  }
+  .dp-month-select:focus-visible, .dp-year-select:focus-visible { outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 2px rgba(var(--st-color-primary-rgb), 0.18); }
+  .dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .dp-dow { text-align: center; font-size: 10px; font-weight: 700; color: var(--st-color-text-muted); padding: 3px 0; }
+  .dp-day { aspect-ratio: 1; border: none; background: none; border-radius: 50%; font-size: 12px; color: var(--st-color-text); display: flex; align-items: center; justify-content: center; }
+  .dp-day:hover { background: #F3F3F8; }
+  .dp-day:focus-visible { outline: 2px solid var(--st-color-primary); outline-offset: 1px; }
+  .dp-day.dp-muted { color: #C2C6D1; }
+  .dp-day.dp-selected { background: #38BDF8; color: #fff; font-weight: 700; }
+
+  /* ---------- Buttons (Business Rule 3: standard Bootstrap-style classes) ---------- */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    height: 40px; padding: 0 18px; border-radius: 10px; font-size: 14px; font-weight: 700;
+    border: 1px solid transparent; transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
+  .btn-primary { background: var(--st-color-primary); color: #fff; }
+  .btn-primary:hover { background: var(--st-color-primary-hover); }
+  .btn-primary:active { background: var(--st-color-primary-active); }
+  .btn-primary:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+  .btn-outline-primary { background: #fff; color: var(--st-color-primary-active); border-color: var(--st-color-primary); }
+  .btn-outline-primary:hover { background: rgba(var(--st-color-primary-rgb), 0.08); }
+
+  /* ---------- Section card (Business Rule 1) ---------- */
+  .settings-section {
+    background: var(--st-color-card-bg);
+    border: 1px solid var(--st-color-border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .settings-section-title { font-size: 14px; font-weight: 700; margin: 0 0 4px 0; color: var(--st-color-text); }
+  .settings-section-subtitle { font-size: 12px; color: var(--st-color-text-muted); margin: 0 0 14px 0; }
+
+  .metrics-row { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 18px; }
+  @media (min-width: 1080px) { .metrics-row { grid-template-columns: 1.55fr 1fr; align-items: stretch; } }
+
+  /* ---------- Left metrics summary card ---------- */
+  .metrics-card { display: flex; align-items: stretch; padding: 0; overflow: hidden; }
+  .metrics-highlight {
+    background: #F3F3F8; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px 30px; min-width: 150px; border-right: 1px solid var(--st-color-border);
+  }
+  .metrics-highlight .value { font-size: 30px; font-weight: 800; color: var(--st-color-text); line-height: 1; }
+  .metrics-highlight .label { font-size: 12px; font-weight: 600; color: var(--st-color-text-muted); margin-top: 6px; text-align: center; }
+  .metrics-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; padding: 20px 26px; flex: 1; }
+  .metrics-item { display: flex; flex-direction: column; gap: 3px; }
+  .metrics-item .m-label { font-size: 13px; color: var(--st-color-text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .metrics-item .m-value { font-size: 18px; font-weight: 700; color: var(--st-color-text); }
+  .metrics-item.total .m-value { color: #1E8E5A; }
+  .metrics-op { font-size: 18px; color: var(--st-color-text-muted); font-weight: 600; }
+  .pct-pill { font-size: 10.5px; font-weight: 700; background: #EFEFF4; color: var(--st-color-text-muted); border-radius: 999px; padding: 2px 7px; }
+
+  /* ---------- Right donut breakdown card ---------- */
+  .donut-card { display: flex; flex-direction: column; }
+  .donut-wrap { display: flex; align-items: center; justify-content: center; padding: 6px 0 18px; }
+  .donut {
+    width: 168px; height: 168px; border-radius: 50%;
+    background: conic-gradient(#5B8DEF 0deg 129.6deg, #F2994A 129.6deg 205.2deg, #34C759 205.2deg 360deg);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .donut::after {
+    content: ""; position: absolute; width: 108px; height: 108px; border-radius: 50%; background: #fff;
+  }
+  .donut-center { position: relative; z-index: 1; text-align: center; }
+  .donut-center .d-label { font-size: 11px; font-weight: 600; color: var(--st-color-text-muted); }
+  .donut-center .d-value { font-size: 19px; font-weight: 800; color: var(--st-color-text); }
+
+  .legend-group { border-top: 1px solid var(--st-color-border); padding-top: 12px; margin-top: 4px; }
+  .legend-group:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  .legend-head { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--st-color-text); margin-bottom: 6px; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .legend-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0 3px 17px; font-size: 12.5px; color: var(--st-color-text-muted); }
+  .legend-row .lv { color: var(--st-color-text); font-weight: 600; }
+  .legend-total { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; margin-top: 8px; border-top: 1px solid var(--st-color-border); font-size: 13.5px; font-weight: 700; color: var(--st-color-text); }
+
+  /* ---------- Job list section ---------- */
+  .job-list-section { margin-bottom: 18px; }
+  .job-list-header { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; justify-content: space-between; margin-bottom: 18px; }
+  .job-list-count { font-size: 16px; font-weight: 700; color: var(--st-color-text); margin: 0; }
+  .job-list-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+
+  .settings-field { position: relative; display: flex; flex-direction: column; }
+  .settings-field-label {
+    position: absolute; top: -8px; left: 10px; background: var(--st-color-card-bg); padding: 0 6px;
+    font-size: 11px; font-weight: 600; color: var(--st-color-text-muted); z-index: 1; pointer-events: none; letter-spacing: 0.2px;
+  }
+  .settings-field-input {
+    height: 40px; padding: 0 14px; border: 1px solid var(--st-color-border); border-radius: 8px;
+    font-size: 14px; background: var(--st-color-card-bg); color: var(--st-color-text);
+    transition: border-color .15s ease, box-shadow .15s ease; width: 100%;
+  }
+  select.settings-field-input {
+    appearance: none; padding-right: 34px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2380879A' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
+  .settings-field-input::placeholder { color: #A9AFBD; }
+  .settings-field-input:focus-visible, .settings-field-input:focus {
+    outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18);
+  }
+  .field-search { width: 220px; }
+  .field-select { width: 190px; }
+
+  .job-cards { display: flex; flex-direction: column; gap: 12px; }
+  .job-card {
+    display: flex; align-items: center; gap: 18px; text-align: left; width: 100%;
+    background: var(--st-color-card-bg); border: 1px solid var(--st-color-border); border-radius: 10px;
+    padding: 16px 18px 16px 16px; position: relative; overflow: hidden;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .job-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #34C759; }
+  .job-card:hover { border-color: var(--st-color-primary); box-shadow: 0 2px 10px rgba(var(--st-color-primary-rgb), 0.12); }
+  .job-card:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+
+  .job-card-main { flex: 1.4; min-width: 190px; }
+  .job-card-id { font-size: 14.5px; font-weight: 700; color: var(--st-color-text); margin-bottom: 3px; }
+  .job-card-meta { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--st-color-text-muted); font-weight: 600; margin-bottom: 8px; }
+  .job-card-meta .edit-icon { width: 13px; height: 13px; color: #A9AFBD; }
+  .job-card-meta .edit-icon:hover { color: var(--st-color-primary); }
+
+  .status-tag {
+    display: inline-flex; align-items: center; font-size: 12px; font-weight: 600;
+    background: #E6FAF0; color: #1E8E5A; border: 1px solid #C7F0DB; border-radius: 14px; padding: 3px 11px;
+  }
+
+  .job-card-metric-badge { display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #F3F3F8; border-radius: 8px; padding: 8px 16px; min-width: 90px; }
+  .job-card-metric-badge .val { font-size: 16px; font-weight: 800; color: var(--st-color-text); }
+  .job-card-metric-badge .lab { font-size: 10.5px; font-weight: 600; color: var(--st-color-text-muted); margin-top: 1px; }
+
+  .job-card-stat { display: flex; flex-direction: column; gap: 3px; min-width: 84px; }
+  .job-card-stat .s-label { font-size: 12px; font-weight: 600; color: var(--st-color-text-muted); display: flex; align-items: center; gap: 5px; }
+  .job-card-stat .s-value { font-size: 15px; font-weight: 700; color: var(--st-color-text); }
+
+  .job-card-chevron { color: #A9AFBD; width: 18px; height: 18px; flex-shrink: 0; margin-left: 4px; }
+
+  @media (max-width: 900px) {
+    .job-card { flex-wrap: wrap; row-gap: 12px; }
+    .job-card-main { width: 100%; flex: 1 1 100%; }
+  }
+
+  /* ---------- Dev notes / open items panel ---------- */
+  .dev-notes { margin-top: 26px; }
+  .dev-notes h3 { font-size: 13px; font-weight: 700; margin: 0 0 10px; color: var(--st-color-text); }
+  .dev-notes ul { margin: 0; padding-left: 18px; }
+  .dev-notes li { font-size: 12.5px; line-height: 1.6; color: var(--st-color-text-muted); margin-bottom: 6px; }
+  .dev-notes li b { color: var(--st-color-text); }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(16px);
+    background: #32415B; color: #fff; font-size: 13px; font-weight: 600; padding: 12px 18px; border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25); opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease;
+    z-index: 100; max-width: 320px; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Hub proto-bar (prototype-only, never part of product UI) ---------- */
+  .proto-bar { background: #fff; border-bottom: 1px solid #DAD8E3; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: 'Nunito', sans-serif; }
+  .proto-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .proto-bar-back { font-size: 12px; font-weight: 600; color: #80879A; display: flex; align-items: center; gap: 4px; min-height: 32px; }
+  .proto-bar-back:hover, .proto-bar-back:focus-visible { color: #8B85EA; }
+  .proto-bar-divider { color: #DAD8E3; font-size: 16px; }
+  .proto-bar-title { font-size: 14px; font-weight: 700; color: #32415B; }
+  .proto-bar-ticket { font-size: 11px; font-weight: 700; color: #5C53DC; padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA; border-radius: 999px; letter-spacing: 0.2px; }
+  .proto-bar-ticket:hover, .proto-bar-ticket:focus-visible { background: #8B85EA; color: #fff; }
+
+  /* ---------- Mobile: Job Costing module chip nav (design system section 6 pattern) ---------- */
+  .jc-module-nav { display: none; margin: 0 0 18px; }
+  .jc-module-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; scroll-padding: 0 2px; scroll-snap-type: x proximity; scrollbar-width: none; }
+  .jc-module-scroll::-webkit-scrollbar { display: none; }
+  .jc-module-link { flex-shrink: 0; scroll-snap-align: start; display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 16px; font-size: 14px; font-weight: 500; color: #32415B; white-space: nowrap; }
+  .jc-module-link:nth-child(1) { background: #E8E6FA; }
+  .jc-module-link:nth-child(2) { background: #FAF0E6; }
+  .jc-module-link:nth-child(3) { background: #E6FAF0; }
+  .jc-module-link:nth-child(4) { background: #E6F3FA; }
+  .jc-module-link:nth-child(5) { background: #FAF7E6; }
+  .jc-module-link.active { box-shadow: inset 0 0 0 2px #8B85EA; font-weight: 600; }
+  .jc-module-link:focus-visible { outline: 2px solid #5C53DC; outline-offset: 2px; }
+  @media (max-width: 860px) {
+    .sidebar, .topbar-search, .topbar-user { display: none !important; }
+    .topbar { padding: 0 16px; }
+    .main-content { padding: 20px 16px 48px !important; }
+    .jc-module-nav { display: block; }
+    .proto-bar { padding: 8px 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<!-- Hub proto-bar -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="proto-bar-back" href="../index.html">&larr; Hub</a>
+    <span class="proto-bar-divider">|</span>
+    <span class="proto-bar-title">Job Costing UI Refresh: Job Costing Dashboard</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86ba1ggxb" target="_blank" rel="noopener">86ba1ggxb</a>
+</div>
+<div id="job-costing-page">
+  <div class="app-shell">
+
+    <!-- Shared top bar (reproduced for context only: outside ticket scope) -->
+    <header class="topbar">
+      <div class="topbar-logo">
+        <span class="logo-badge">●●●</span> dripjobs
+      </div>
+      <div class="topbar-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search leads, contacts, tags…
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-icon-btn" aria-label="Alerts" onclick="jcToast('Alerts: not part of this prototype')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8A33D" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </button>
+        <button class="topbar-icon-btn" aria-label="Notifications" onclick="jcToast('Notifications: not part of this prototype')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <div class="topbar-user">
+          <span class="topbar-avatar">JH</span> Jeremy Harrison
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <div class="body-row">
+      <!-- Shared sidebar (reproduced for context / navigation only: outside ticket scope) -->
+      <aside class="sidebar" aria-label="Primary">
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Job Schedule')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Job Schedule</a>
+          <a href="#" onclick="return jcNav(event,'Jobs List')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Jobs List</a>
+          <a href="#" onclick="return jcNav(event,'Jobs Pipeline')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a1 1 0 0 0-1 1v2.34a1 1 0 0 0 .3.7l5.7 5.7V21l4-2v-3.26l5.7-5.7a1 1 0 0 0 .3-.7V8a1 1 0 0 0-1-1z"/></svg>Jobs Pipeline</a>
+          <a href="#" onclick="return jcNav(event,'Work Orders')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>Work Orders</a>
+        </nav>
+        <div class="sidebar-section-label">DAILY OPERATIONS</div>
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Appointments')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Appointments<span class="side-badge">1 new</span></a>
+          <a href="#" onclick="return jcNav(event,'Chat')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</a>
+          <a href="#" onclick="return jcNav(event,'Email')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><polyline points="22,6 12,13 2,6"/></svg>Email<span class="side-badge teal">New</span></a>
+          <a href="#" onclick="return jcNav(event,'Tasks')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Tasks</a>
+        </nav>
+        <div class="sidebar-section-label">DOCUMENTS</div>
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Invoices')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Invoices</a>
+          <a href="#" onclick="return jcNav(event,'Proposals')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Proposals</a>
+        </nav>
+        <div class="sidebar-section-label">FINANCIALS</div>
+        <div class="nav-group-active">
+        <div class="side-item side-group-active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="2"/><circle cx="12" cy="13" r="3"/><path d="M6 6V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/></svg>
+          Job Costing
+        </div>
+        <div class="sub-nav">
+          <a href="index.html" class="current" aria-current="page">- Dashboard</a>
+          <a href="time-sheets.html">- Time Sheets</a>
+          <a href="misc-costs.html">- Misc. Costs</a>
+          <a href="reports.html">- Reports</a>
+          <a href="tutorials.html">- Tutorials</a>
+        </div>
+        </div>
+        <nav>
+          <a href="#" onclick="return jcNav(event,'Production Rates')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>Production Rates</a>
+          <a href="#" onclick="return jcNav(event,'Metrics')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Metrics</a>
+        </nav>
+      </aside>
+
+      <!-- ===================== REFRESHED CONTENT STARTS HERE ===================== -->
+      <main class="main-content">
+
+        <nav class="jc-module-nav" aria-label="Job Costing sections">
+          <div class="jc-module-scroll">
+            <a href="index.html" class="jc-module-link active" aria-current="page">Dashboard</a>
+            <a href="time-sheets.html" class="jc-module-link">Time Sheets</a>
+            <a href="misc-costs.html" class="jc-module-link">Misc. Costs</a>
+            <a href="reports.html" class="jc-module-link">Reports</a>
+            <a href="tutorials.html" class="jc-module-link">Tutorials</a>
+          </div>
+        </nav>
+
+        <div class="demo-banner" role="note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#B4650C" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <strong>Prototype: Job Costing Dashboard.</strong> One of 8 linked screens for ticket
+            <a href="https://app.clickup.com/t/8633445/86ba1ggxb" target="_blank" rel="noopener" style="color:#B4650C; font-weight:700; text-decoration:underline;">86ba1ggxb</a>. Sidebar and top bar are reference chrome, not restyled; the Job Costing sub-nav links all 8 screens. Orange chips map to the ticket's business rules, hover or tab to them. Sample data only. Click the job card to open Job Costing Details.
+          </div>
+        </div>
+
+        <h1 class="page-title">Job Costing Dashboard</h1>
+
+        <!-- Sentence-style top filter -->
+        <div class="filter-row">
+          <span class="filter-label">Showing jobs where</span>
+          <select class="jc-inline-select" aria-label="Filter by date field">
+            <option>Date Accepted</option>
+            <option>Date Completed</option>
+            <option>Date Created</option>
+          </select>
+          <span class="filter-label">is within</span>
+          <select class="jc-inline-select" id="dateRangeSelect" aria-label="Filter date range" onchange="toggleCustomDateRange(this)">
+            <option>Anytime</option>
+            <option>This Month</option>
+            <option>Last 30 Days</option>
+            <option>This Quarter</option>
+            <option>This Year</option>
+            <option>Custom Dates</option>
+          </select>
+          <div class="custom-date-range" id="customDateRange">
+            <div class="date-field-wrap">
+              <div class="date-field-group">
+                <button type="button" class="date-field-icon-btn" aria-label="Open calendar for start date" onclick="toggleDpPanel('dashStartDate')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                <input type="text" class="date-field-input" id="dashStartDate" value="09/22/2026" readonly aria-label="Start date" onclick="toggleDpPanel('dashStartDate')">
+              </div>
+              <div class="dp-panel" id="dashStartDateCalendar" hidden></div>
+            </div>
+            <span class="filter-label">to</span>
+            <div class="date-field-wrap">
+              <div class="date-field-group">
+                <button type="button" class="date-field-icon-btn" aria-label="Open calendar for end date" onclick="toggleDpPanel('dashEndDate')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+                <input type="text" class="date-field-input" id="dashEndDate" value="09/23/2026" readonly aria-label="End date" onclick="toggleDpPanel('dashEndDate')">
+              </div>
+              <div class="dp-panel" id="dashEndDateCalendar" hidden></div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="jcFilterGo(this)">Go</button>
+          <span class="br-chip" tabindex="0">BR2 exception
+            <span class="br-tooltip">Confirmed BR2 exception: this sentence-style filter stays inline rather than becoming a labeled field group. It has no legacy label to replace: applied the standard input border/radius/focus tokens but kept it inline rather than adding floating labels, which would break the sentence pattern.</span>
+          </span>
+          <span class="br-chip" tabindex="0">BR9
+            <span class="br-tooltip">Custom Dates is existing production functionality carried into the refreshed Dashboard, not new. Design system gap: the selected-day highlight in this date picker (and the matching one on Job Costing Details) uses a blue (#38BDF8) that's distinct from the app's primary purple: kept as production shows it, but it isn't a documented design-system token yet.</span>
+          </span>
+        </div>
+
+        <div class="metrics-row">
+          <!-- Left: profit margin summary strip -->
+          <section class="settings-section metrics-card" aria-labelledby="metrics-summary-title">
+            <h2 id="metrics-summary-title" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Job costing summary</h2>
+            <div class="metrics-highlight">
+              <div class="value">44%</div>
+              <div class="label">Profit Margin</div>
+            </div>
+            <div class="metrics-strip">
+              <div class="metrics-item">
+                <span class="m-label">Revenue</span>
+                <span class="m-value">$4,103</span>
+              </div>
+              <span class="metrics-op" aria-hidden="true">&minus;</span>
+              <div class="metrics-item">
+                <span class="m-label">Labor <span class="pct-pill">36%</span></span>
+                <span class="m-value">$1,489</span>
+              </div>
+              <span class="metrics-op" aria-hidden="true">&minus;</span>
+              <div class="metrics-item">
+                <span class="m-label">Expenses <span class="pct-pill">21%</span></span>
+                <span class="m-value">$873</span>
+              </div>
+              <span class="metrics-op" aria-hidden="true">=</span>
+              <div class="metrics-item total">
+                <span class="m-label">Gross Profit <span class="pct-pill">44%</span></span>
+                <span class="m-value">$1,811</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Right: donut breakdown -->
+          <section class="settings-section donut-card" aria-labelledby="donut-title">
+            <h2 id="donut-title" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Revenue breakdown</h2>
+            <div class="donut-wrap">
+              <div class="donut" role="img" aria-label="Donut chart: Labor 36 percent, Expenses 21 percent, Gross profit 44 percent, of $4,103 revenue">
+                <div class="donut-center">
+                  <div class="d-label">Revenue</div>
+                  <div class="d-value">$4,103</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="legend-group">
+              <div class="legend-head"><span class="legend-dot" style="background:#5B8DEF;"></span>Labor <span class="pct-pill" style="margin-left:auto;">36%</span></div>
+              <div class="legend-row"><span>Employees</span><span class="lv">$989 &nbsp;24%</span></div>
+              <div class="legend-row"><span>Subcontractors</span><span class="lv">$500 &nbsp;12%</span></div>
+            </div>
+            <div class="legend-group">
+              <div class="legend-head"><span class="legend-dot" style="background:#F2994A;"></span>Expenses <span class="pct-pill" style="margin-left:auto;">21%</span></div>
+              <div class="legend-row"><span>Materials</span><span class="lv">$873 &nbsp;21%</span></div>
+              <div class="legend-row"><span>Miscellaneous</span><span class="lv">$0 &nbsp;0%</span></div>
+            </div>
+            <div class="legend-total">
+              <span style="display:flex;align-items:center;gap:8px;"><span class="legend-dot" style="background:#34C759;"></span>Gross Profit <span class="pct-pill">44%</span></span>
+              <span>$1,811</span>
+            </div>
+            <span class="br-chip" tabindex="0" style="margin-top:12px; align-self:flex-start;">Flag
+              <span class="br-tooltip">Donut segment colors (blue/orange/green) are carried over from production as-is. The design system doesn't currently define a data-visualization palette. Recommend adding chart colors to the design system doc so future dashboards stay consistent.</span>
+            </span>
+          </section>
+        </div>
+
+        <!-- Job list -->
+        <section class="settings-section job-list-section" aria-labelledby="job-list-title">
+          <div class="job-list-header">
+            <h2 id="job-list-title" class="job-list-count">1 Jobs</h2>
+            <div class="job-list-filters">
+              <div class="settings-field field-search">
+                <label class="settings-field-label" for="jobSearch">Job Name</label>
+                <input class="settings-field-input" id="jobSearch" type="text" placeholder="Type job name…">
+              </div>
+              <div class="settings-field field-select">
+                <label class="settings-field-label" for="jobStatus">Status</label>
+                <select class="settings-field-input" id="jobStatus">
+                  <option>Costing Active</option>
+                  <option>Costing Complete</option>
+                  <option>All Statuses</option>
+                </select>
+              </div>
+              <div class="settings-field field-select">
+                <label class="settings-field-label" for="jobSort">Sort By</label>
+                <select class="settings-field-input" id="jobSort">
+                  <option>Profit Margin (highest first)</option>
+                  <option>Profit Margin (lowest first)</option>
+                  <option>Revenue (highest first)</option>
+                  <option>Date Accepted</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="jcFilterGo(this)">Go</button>
+            </div>
+          </div>
+
+          <div class="job-cards">
+            <a class="job-card" href="details.html">
+              <div class="job-card-main">
+                <div class="job-card-id">#2920059 - TJ Bennett</div>
+                <div class="job-card-meta">
+                  Jun 2026
+                  <svg class="edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <span class="status-tag">Costing Active</span>
+              </div>
+              <div class="job-card-metric-badge">
+                <span class="val">42%</span>
+                <span class="lab">Profit Margin</span>
+              </div>
+              <div class="job-card-stat"><span class="s-label">Revenue</span><span class="s-value">$4,103</span></div>
+              <div class="job-card-stat"><span class="s-label">Labor <span class="pct-pill">36%</span></span><span class="s-value">$1,489</span></div>
+              <div class="job-card-stat"><span class="s-label">Expenses <span class="pct-pill">21%</span></span><span class="s-value">$873</span></div>
+              <div class="job-card-stat"><span class="s-label">Profit</span><span class="s-value">$1,742</span></div>
+              <svg class="job-card-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
+        </section>
+
+        <div class="dev-notes">
+          <h3>Dev notes for this screen</h3>
+          <ul>
+            <li><b>BR1 (section cards):</b> the profit-margin strip, donut breakdown and job list are each a <code>.settings-section</code> card.</li>
+            <li><b>BR2 (floating labels):</b> Job Name, Status and Sort By use floating labels. The sentence-style "Showing jobs where [X] is within [Y]" filter stays inline, the confirmed BR2 exception.</li>
+            <li><b>BR3 (buttons):</b> both "Go" buttons are <code>btn btn-primary</code>.</li>
+            <li><b>BR5 (tags):</b> "Costing Active" is a status tag pill.</li>
+            <li><b>BR6 (tokens):</b> colors come from <code>--st-color-*</code> tokens scoped to <code>#job-costing-page</code>; no legacy purple hex.</li>
+            <li><b>BR9 (Custom Dates):</b> choosing "Custom Dates" reveals the start/end range with month/year dropdown calendars. This is existing production functionality carried into the refresh, not a new feature.</li>
+            <li><b>Design system gaps (not blocking):</b> donut segment colors and the blue selected-day color in the date picker are kept as production shows them but aren't documented tokens yet.</li>
+            <li><b>Accessibility:</b> the donut has a text alternative via <code>role="img"</code> + <code>aria-label</code>, the job card is a single focusable link, and every control has a visible focus state.</li>
+          </ul>
+        </div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="jcToastEl" role="status" aria-live="polite"></div>
+
+<script>
+  function jcToast(msg) {
+    var el = document.getElementById('jcToastEl');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(window.__jcToastTimer);
+    window.__jcToastTimer = setTimeout(function () { el.classList.remove('show'); }, 2600);
+  }
+  function jcNav(e, name, isCurrent) {
+    e.preventDefault();
+    if (isCurrent) return false;
+    jcToast(name + ': outside the Job Costing prototype');
+    return false;
+  }
+  function jcFilterGo(btn) {
+    var original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '…';
+    setTimeout(function () {
+      btn.disabled = false;
+      btn.textContent = original;
+      jcToast('Filter applied (same sample data, no live calculation in this prototype)');
+    }, 450);
+  }
+
+  // ---------- Custom date range ----------
+  function toggleCustomDateRange(select) {
+    var show = select.value === 'Custom Dates';
+    document.getElementById('customDateRange').classList.toggle('show', show);
+    if (!show) {
+      closeDpPanel('dashStartDate');
+      closeDpPanel('dashEndDate');
+    }
+  }
+
+  // ---------- Reusable date picker (month & year dropdowns, per production screenshot) ----------
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  var DP_MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var dpState = {};
+
+  function parseMMDDYYYY(str) {
+    var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec((str || '').trim());
+    if (!m) return null;
+    var d = new Date(parseInt(m[3], 10), parseInt(m[1], 10) - 1, parseInt(m[2], 10));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function toggleDpPanel(inputId) {
+    if (!dpState[inputId]) dpState[inputId] = { open: false, year: 2026, month: 8 };
+    var st = dpState[inputId];
+    st.open = !st.open;
+    if (st.open) {
+      var parsed = parseMMDDYYYY(document.getElementById(inputId).value);
+      if (parsed) { st.year = parsed.getFullYear(); st.month = parsed.getMonth(); }
+    }
+    renderDpPanel(inputId);
+  }
+  function closeDpPanel(inputId) {
+    if (dpState[inputId]) dpState[inputId].open = false;
+    renderDpPanel(inputId);
+  }
+  function changeDpMonth(inputId, delta) {
+    var st = dpState[inputId];
+    var d = new Date(st.year, st.month + delta, 1);
+    st.year = d.getFullYear(); st.month = d.getMonth();
+    renderDpPanel(inputId);
+  }
+  function setDpMonth(inputId, monthIdx) { dpState[inputId].month = parseInt(monthIdx, 10); renderDpPanel(inputId); }
+  function setDpYear(inputId, year) { dpState[inputId].year = parseInt(year, 10); renderDpPanel(inputId); }
+  function pickDpDate(inputId, y, m, d) {
+    document.getElementById(inputId).value = pad2(m + 1) + '/' + pad2(d) + '/' + y;
+    dpState[inputId].open = false;
+    renderDpPanel(inputId);
+  }
+  function renderDpPanel(inputId) {
+    var panel = document.getElementById(inputId + 'Calendar');
+    if (!panel) return;
+    var st = dpState[inputId];
+    if (!st || !st.open) { panel.hidden = true; panel.innerHTML = ''; return; }
+    panel.hidden = false;
+    var y = st.year, m = st.month;
+    var selected = parseMMDDYYYY(document.getElementById(inputId).value);
+    var firstDow = new Date(y, m, 1).getDay();
+    var daysInMonth = new Date(y, m + 1, 0).getDate();
+    var monthOpts = DP_MONTHS_SHORT.map(function (name, i) { return '<option value="' + i + '"' + (i === m ? ' selected' : '') + '>' + name + '</option>'; }).join('');
+    var yearOpts = '';
+    for (var yy = y - 6; yy <= y + 6; yy++) { yearOpts += '<option value="' + yy + '"' + (yy === y ? ' selected' : '') + '>' + yy + '</option>'; }
+    var html = '<div class="dp-head">' +
+      '<button type="button" class="dp-nav" aria-label="Previous month" onclick="changeDpMonth(\'' + inputId + '\',-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="15 18 9 12 15 6"/></svg></button>' +
+      '<select class="dp-month-select" aria-label="Month" onchange="setDpMonth(\'' + inputId + '\', this.value)">' + monthOpts + '</select>' +
+      '<select class="dp-year-select" aria-label="Year" onchange="setDpYear(\'' + inputId + '\', this.value)">' + yearOpts + '</select>' +
+      '<button type="button" class="dp-nav" aria-label="Next month" onclick="changeDpMonth(\'' + inputId + '\',1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="9 18 15 12 9 6"/></svg></button>' +
+      '</div><div class="dp-grid">';
+    ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].forEach(function (w) { html += '<div class="dp-dow">' + w + '</div>'; });
+    var prevDays = new Date(y, m, 0).getDate();
+    for (var i = firstDow - 1; i >= 0; i--) { html += '<span class="dp-day dp-muted" aria-hidden="true">' + (prevDays - i) + '</span>'; }
+    for (var d = 1; d <= daysInMonth; d++) {
+      var isSel = selected && selected.getFullYear() === y && selected.getMonth() === m && selected.getDate() === d;
+      html += '<button type="button" class="dp-day' + (isSel ? ' dp-selected' : '') + '" aria-label="' + DP_MONTHS_SHORT[m] + ' ' + d + ', ' + y + (isSel ? ', selected' : '') + '" onclick="pickDpDate(\'' + inputId + '\',' + y + ',' + m + ',' + d + ')">' + d + '</button>';
+    }
+    var totalCells = firstDow + daysInMonth;
+    var trailing = (7 - (totalCells % 7)) % 7;
+    for (var t = 1; t <= trailing; t++) { html += '<span class="dp-day dp-muted" aria-hidden="true">' + t + '</span>'; }
+    html += '</div>';
+    panel.innerHTML = html;
+  }
+
+  document.addEventListener('click', function (e) {
+    Object.keys(dpState).forEach(function (inputId) {
+      var st = dpState[inputId];
+      if (!st.open) return;
+      var field = document.getElementById(inputId);
+      var wrap = field ? field.closest('.date-field-wrap') : null;
+      if (!wrap) return;
+      var path = e.composedPath ? e.composedPath() : [];
+      var insideWrap = path.length ? (path.indexOf(wrap) !== -1) : wrap.contains(e.target);
+      if (!insideWrap) { closeDpPanel(inputId); }
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    Object.keys(dpState).forEach(function (inputId) {
+      if (dpState[inputId].open) closeDpPanel(inputId);
+    });
+  });
+</script>
+</body>
+</html>
