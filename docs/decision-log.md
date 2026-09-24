@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-24] Job Costing UI Refresh: profit-margin card oversized, not stretched to donut height (ticket 86ba1ggxb)
+- Decision: The metrics-row grid used `align-items: stretch`, carried over from the original mockup, which force-stretched the compact profit-margin card to match the donut card's full height (taller, since it holds a chart plus a legend). That left a large empty white area below the card's single content row, most visible at wider screens where the whole row is more prominent. Changed to `align-items: start` so each card sizes to its own content; the profit-margin card is now a compact bar and the donut card stands taller beside it, matching the proportions in Jeremy's production screenshots.
+- Why: Jeremy flagged the box as still oversized and throwing off the page after the spacing fix. Checked at wider desktop widths (1920px) where the empty space was most obvious, confirmed the row heights aren't equal in production, and fixed the actual cause (forced equal-height stretch) rather than tuning padding further.
+- Open question: None.
+
 ## [2026-09-24] Job Costing UI Refresh: full-screen layout audit (ticket 86ba1ggxb)
 - Decision: Checked all 8 screens at desktop (1360px), tablet (900px) and mobile (390px) widths after the Dashboard spacing bug, since it was the second layout issue found on this build. Found one more: the Tutorials header used absolute positioning to keep its title centered, which let the "View Job Costing Help Documents" button overlap the title text at tablet widths. Replaced with a plain flex header (title left, button right, wraps when tight). The other 6 screens (Details, Reports index, both reports, Time Sheets, Misc. Costs) checked out clean at all three widths; their wide data tables scroll horizontally within their own contained region by design, which is correct and doesn't affect the page.
 - Why: Proactive check after two rounds of Jeremy catching layout issues on the Dashboard; better to sweep the rest of the prototype than wait for each one to surface individually.
