@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-24] Job Costing UI Refresh: full-screen layout audit (ticket 86ba1ggxb)
+- Decision: Checked all 8 screens at desktop (1360px), tablet (900px) and mobile (390px) widths after the Dashboard spacing bug, since it was the second layout issue found on this build. Found one more: the Tutorials header used absolute positioning to keep its title centered, which let the "View Job Costing Help Documents" button overlap the title text at tablet widths. Replaced with a plain flex header (title left, button right, wraps when tight). The other 6 screens (Details, Reports index, both reports, Time Sheets, Misc. Costs) checked out clean at all three widths; their wide data tables scroll horizontally within their own contained region by design, which is correct and doesn't affect the page.
+- Why: Proactive check after two rounds of Jeremy catching layout issues on the Dashboard; better to sweep the rest of the prototype than wait for each one to surface individually.
+- Open question: None.
+
 ## [2026-09-24] Job Costing UI Refresh: profit-margin strip spacing correction (ticket 86ba1ggxb)
 - Decision: The prior fix for the wrapping profit-margin strip over-corrected: `justify-content: space-between` spread the items edge to edge with a big gap in the middle, unlike production's tightly-packed row. Changed to `justify-content: flex-start` with a modest fixed gap, gave the metrics card a fixed-width donut column instead of a proportional split so it has the room it needs, and added a tablet-width fallback so the row wraps onto two lines instead of clipping below the two-column breakpoint.
 - Why: Jeremy compared the two side by side against a production screenshot and flagged the dead space.
