@@ -53,6 +53,29 @@ Append a short entry after any session with a real design or scope decision. New
 - Pattern deviation: below 860px the reference sidebar is hidden and a Job Costing chip nav (design system tab-chip pattern) takes its place, so the module stays navigable on mobile. Prototype chrome only, not a production nav proposal.
 - Resolved: Jeremy confirmed Time Sheet Entries is built as a full page today in production and doesn't need to function in this prototype, click-to-view only, no open question. Also confirmed dropping the duplicated "and" in the Tutorials caption ("Job Costing Settings &amp; Overview"), removed the flag chip.
 
+## [2026-09-25] Google Calendar Icon: reworked for the My Profile direction (ticket 86bc5bcfc)
+
+- Decision: Reworked the prototype and hub card for the ticket's new direction, "Google Calendar Integration Icon and My Profile Relocation":
+  - The icon now sends every user to a Google Calendar section at the top of My Profile. My Profile is rebuilt from Jeremy's two production screenshots.
+  - The old bottom-of-page Google section is removed, since it moved to the top.
+  - The non-admin card-only view is gone.
+  - Company Settings > Integrations keeps an admin-only, read-only Google card (pill, status line, linked calendars; no toggles or sign-in) whose Manage Calendars link goes to My Profile.
+  - The connect flow is unchanged: consent Cancel returns to My Profile, and finishing ends on Appointments.
+  - My Profile's Save and Cancel apply, with Cancel going to the Sales Pipeline.
+  - Added the existing account-menu "My Profile" entry and made the admin Settings nav clickable, so the pages can be reached.
+- Why this position (Laws of UX): the section sits first, directly under the Actions button and above Account, as BR5 requires.
+  - Serial Position Effect: primacy makes it the first thing seen.
+  - Goal-Gradient Effect: arriving from the icon lands on the goal with no scrolling.
+  - Von Restorff Effect: a brief highlight on arrival confirms the target.
+  - Law of Common Region: the section's own bordered block keeps its toggles grouped apart from unrelated profile settings.
+  - Within the full-width section, content is capped at 560px (readable line length), and the status pill sits beside the title rather than across the page (Law of Proximity).
+- Fit check (BR15/16 Still Open item): the primary Disconnect copy fits 2 lines on desktop (516px) but wraps to 4 on mobile (240px), over the 3-line limit, so the fallback copy stays. It fits 2 desktop / 3 mobile.
+- Open questions:
+  - Production My Profile labels its buttons "Cancel" and "Save", but BR11 says "Cancel - Return to Dashboard". The prototype uses the production "Cancel"; confirm which ships.
+  - With the section at the top and Save at the very bottom of a long page, Save is far from the toggles (Fitts's Law). The locked reminder covers it, but a sticky Save bar may be worth considering.
+  - The read-only Integrations card shows only the pill when not connected, and its Manage Calendars link shows in both states (BR20 doesn't say). Confirm.
+  - Ticket cross-references (BR12, BR13, BR14) don't match the rendered numbering (18, 19, 20); prototype BR notes follow the rendered numbers.
+
 ## [2026-09-23] Google Calendar Icon: connect flow "Continue to appointments" button (ticket 86bc5bcfc)
 
 - Decision: Per Jeremy, the "Continue to appointments" button on "Choose your write-to calendar" and "You're all set" keeps its production label and shape (6px radius, 12px bold label, 32px tall), but uses the design-system color tokens instead of production's hardcoded #6A5AEB: #8B85EA fill, #736BE3 hover, #5C53DC active. It navigates to the Appointments calendar, with Appointments active in the sidebar.

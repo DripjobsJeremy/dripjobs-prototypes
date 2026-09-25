@@ -4,7 +4,7 @@
 <script src="../gate.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DripJobs: Google Calendar Icon and Scoped Settings, Ticket 86bc5bcfc Prototype</title>
+<title>DripJobs: Google Calendar Icon and My Profile Relocation, Ticket 86bc5bcfc Prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -285,8 +285,8 @@
   .qb-btn { background: #2CA01C; color: #fff; border-radius: 4px; display: flex; justify-content: center; align-items: center; gap: 8px; height: 34px; font-weight: 700; font-size: 12px; margin-top: 8px; }
   .qb-acc { border: 1px solid #DAD8E3; border-radius: 4px; padding: 7px 8px; font-size: 10.5px; font-weight: 600; margin-top: 8px; display: flex; justify-content: space-between; }
 
-  /* ============ NEW: GOOGLE CALENDAR CARD (BR7 to BR13) ============ */
-  .integ-card.gcal-arrived { box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.55), 0 1px 4px rgba(31,42,61,0.10); }
+  /* ============ NEW: GOOGLE CALENDAR SECTION / CARD CONTENT ============ */
+  .integ-card.gcal-arrived, .gcal-section.gcal-arrived { box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.55), 0 1px 4px rgba(31,42,61,0.10); }
   .gcal-name { font-size: 15px; font-weight: 700; color: #1F2A3D; }
   .gcal-desc { font-size: 12px; color: var(--st-color-text-muted); margin: 0 0 12px; }
   .gcal-status-line { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; margin-bottom: 14px; }
@@ -483,6 +483,53 @@
   .btn-flow:hover { background: var(--st-color-primary-hover); }
   .btn-flow:active { background: var(--st-color-primary-active); }
   .btn-flow:disabled { opacity: 0.45; }
+
+  /* ============ MY PROFILE (existing page, matched to production screenshots) ============ */
+  .profile-actions-top { padding: 0 12px 12px; }
+  .btn-actions { background: #6A5AEB; color: #fff; border-radius: 3px; font-size: 11.5px; font-weight: 700; padding: 6px 12px; min-height: 30px; }
+  .prof-section { background: #fff; border: 1px solid #DAD8E3; border-radius: 6px; padding: 16px 16px 18px; margin: 0 12px 14px; }
+  .prof-title { font-size: 13px; font-weight: 500; color: #32415B; margin: 0; }
+  .prof-sub { font-size: 11px; color: #4C566E; margin: 4px 0 12px; }
+  .prof-meta-label { font-size: 9.5px; font-weight: 600; letter-spacing: 0.5px; color: #80879A; text-transform: uppercase; margin-top: 8px; }
+  .prof-meta-value { font-size: 13px; font-weight: 700; margin: 2px 0 14px; }
+  .prof-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 12px; margin-top: 10px; }
+  .prof-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .prof-grid .full { grid-column: 1 / -1; }
+  .prof-grid .half { grid-column: span 1; }
+  @media (max-width: 760px) { .prof-grid, .prof-grid.two { grid-template-columns: 1fr; } }
+  .settings-field { position: relative; display: flex; flex-direction: column; }
+  .settings-field-label { position: absolute; top: -7px; left: 8px; background: #fff; padding: 0 4px; font-size: 9.5px; font-weight: 600; color: #4C566E; z-index: 1; pointer-events: none; letter-spacing: 0.2px; }
+  .settings-field-label.is-required::after { content: " *"; color: #DC2626; }
+  .settings-field-input { height: 30px; padding: 0 10px; border: 1px solid #DAD8E3; border-radius: 4px; font-size: 11.5px; color: #1F2A3D; background: #fff; display: flex; align-items: center; justify-content: space-between; }
+  .settings-field-input.placeholder { color: #80879A; }
+  .settings-checkbox-row { display: inline-flex; align-items: center; gap: 8px; background: #F3F4F8; border-radius: 6px; padding: 6px 10px; font-size: 11px; }
+  .settings-checkbox-row input { accent-color: #8B85EA; }
+  .prof-toggle-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; }
+  .prof-toggle-row b { display: block; font-size: 11.5px; }
+  .prof-toggle-row small { font-size: 10px; color: #4C566E; }
+  .ck-bar { border: 1px solid #DAD8E3; border-bottom: none; background: #F7F7F9; height: 26px; margin-top: 10px; font-size: 9.5px; color: #80879A; display: flex; align-items: center; padding: 0 8px; gap: 14px; }
+  .ck-area { border: 1px solid #DAD8E3; height: 70px; }
+  .profile-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 4px 12px 20px; }
+  .profile-actions .btn { min-height: 30px; padding: 5px 12px; font-size: 11.5px; border-radius: 6px; }
+
+  /* NEW: Google Calendar section, first on My Profile (BR5) */
+  .gcal-section { transition: box-shadow 0.4s ease; }
+  .gcal-section.gcal-arrived { box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.55); }
+  .gcal-section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .gcal-section-head .status-pill { margin-left: 2px; }   /* next to the title (Law of Proximity) on the full-width section */
+  .gcal-section:focus { outline: none; }
+  .gcal-section-body { max-width: 560px; }
+  .gcal-section .gcal-desc { font-size: 11.5px; color: #4C566E; }
+  .gcal-section .btn-google { min-height: 36px; }
+  .gcal-section-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid #EEEEF2; margin: 16px -16px -18px; padding: 10px 16px; font-size: 11.5px; min-height: 42px; }
+
+  /* Account menu (existing) */
+  .user-wrap { position: relative; }
+  .top-user { cursor: pointer; background: none; border: none; font-family: inherit; }
+  .user-menu { position: absolute; top: calc(100% + 8px); right: 0; background: #fff; border: 1px solid #DAD8E3; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); min-width: 160px; padding: 6px; z-index: 80; }
+  .user-menu button { display: block; width: 100%; text-align: left; background: none; border: none; font: inherit; font-size: 12.5px; padding: 8px 10px; border-radius: 6px; cursor: pointer; color: #32415B; }
+  .user-menu button:hover { background: #F5F4FE; }
+  .settings-bar { cursor: pointer; }
   .changed-flag { display: inline-block; margin-left: 6px; }
   .integ-foot .flow-link { font-weight: 400; }
 
@@ -552,7 +599,7 @@
   <div class="proto-bar-left">
     <a class="back-link" href="../index.html">&larr; Hub</a>
     <span class="divider">|</span>
-    <span class="proto-bar-title">Google Calendar Icon and Scoped Settings Access</span>
+    <span class="proto-bar-title">Google Calendar Icon and My Profile Relocation</span>
   </div>
   <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bc5bcfc" target="_blank">86bc5bcfc</a>
 </div>
@@ -579,6 +626,8 @@
     <span>Go to:</span>
     <button data-demo="view" data-value="appointments">Appointments</button>
     <button data-demo="view" data-value="jobschedule">Job Schedule</button>
+    <button data-demo="view" data-value="profile">My Profile</button>
+    <button data-demo="view" data-value="card" id="demoIntegrations">Settings &gt; Integrations</button>
   </div>
   <div class="demo-group">
     <button data-demo="br" id="brToggle">Show BR notes</button>
@@ -607,9 +656,9 @@
     off: { hover: 'Connect your Google Calendar', tap: 'Connect your Google Calendar' },
     on:  { hover: 'Manage your Google Calendar connection', tap: 'Manage your Google Calendar connection' }
   };
-  // Disconnect helper (BR12). Fit check: the primary copy ("Disconnecting removes your Google Calendar connection for both
-  // Appointments and Job Schedule. Changes take effect when you click Save.") wraps to 3 lines on the admin and scoped cards
-  // and 4 on mobile, over the 2/3 limit, so the ticket's fallback copy is used.
+  // Disconnect helper (BR15/16). Fit check on My Profile: the primary copy ("Disconnecting removes your Google Calendar connection
+  // for both Appointments and Job Schedule. Changes take effect when you click Save.") fits 2 lines on desktop (516px) but wraps
+  // to 4 on mobile (240px), over the 3-line limit, so the ticket's fallback copy is used.
   var DISCONNECT_HELP = 'Removes the Google connection from both Appointments and Job Schedule. Changes take effect when you click Save.';
   var SAVE_REMINDER = 'Click Save at the bottom of the page to apply this change';   // locked "GCal Save Reminder", no period
 
@@ -620,6 +669,7 @@
     view: 'appointments',   // appointments | jobschedule | card
     br: false,
     syncJobs: false,
+    userMenu: false,
     linkedCollapsed: true,   // card's Linked calendars list: collapsed by default when 2+ calendars
     pendingSync: null,   // unsaved Sync Jobs value (null = no change)
     pendingDisconnect: false,
@@ -662,7 +712,8 @@
       '<a class="logo" href="#" onclick="return false"><span class="logo-mark">&bull;&bull;</span><span class="logo-text">dripjobs</span></a>' +
       '<div class="top-search"><i class="fa-solid fa-magnifying-glass"></i>Search leads, contacts, tags...<i class="fa-solid fa-arrow-right"></i></div>' +
       '<div class="top-right"><i class="fa-solid fa-circle-exclamation"></i><i class="fa-regular fa-bell"></i>' +
-      '<div class="top-user"><span class="avatar">' + u.initials + '</span><span class="name">' + u.name + '</span><i class="fa-solid fa-chevron-down" style="font-size:9px"></i></div></div>' +
+      '<div class="user-wrap"><button type="button" class="top-user" data-usermenu aria-haspopup="true" aria-expanded="' + state.userMenu + '"><span class="avatar">' + u.initials + '</span><span class="name">' + u.name + '</span><i class="fa-solid fa-chevron-down" style="font-size:9px"></i></button>' +
+        (state.userMenu ? '<div class="user-menu" role="menu"><button type="button" role="menuitem" data-go="profile">My Profile</button></div>' : '') + '</div></div>' +
       '</div>';
   }
 
@@ -685,7 +736,7 @@
       html += '</div>';
     });
     if (state.role === 'admin') {
-      html += '<div class="settings-bar' + (state.view === 'card' ? ' active' : '') + '"><i class="fa-solid fa-gear"></i>Settings<i class="fa-solid fa-chevron-up"></i></div>';
+      html += '<div class="settings-bar' + (state.view === 'card' ? ' active' : '') + '" data-go="card" role="button" tabindex="0"><i class="fa-solid fa-gear"></i>Settings<i class="fa-solid fa-chevron-up"></i></div>';
     }
     return html + '</nav>';
   }
@@ -702,7 +753,7 @@
       (state.connected
         ? br(3, 'BR3: Connected tooltip, locked: Manage your Google Calendar connection. Shows on hover and keyboard focus, closes with Esc, stays while the pointer is over it, no timer. aria-label matches.')
         : br(2, 'BR2: Not connected tooltip, locked: Connect your Google Calendar. Shows on hover and keyboard focus, closes with Esc, stays while the pointer is over it, no timer. aria-label matches.')) +
-      br(4, 'BR4: Clicking the icon goes to the Google integration card. Admins: full Integrations page (BR5). Non-admins: scoped card-only view (BR6).') +
+      br(4, 'BR4: Clicking the icon takes every user, admin or non-admin, to the Google Calendar section at the top of My Profile. No permission changes.') +
       '</div>';
   }
 
@@ -786,68 +837,93 @@
       '<div class="pipeline-placeholder">Sales Pipeline, the Dashboard route. Shown here only as the Cancel destination; not part of this prototype.</div>';
   }
 
-  /* ---------- NEW Google integration card ---------- */
-  function googleCard() {
+  /* ---------- Shared Google Calendar pieces ---------- */
+  function statusPill() {
+    return '<span class="status-pill' + (state.connected ? ' connected' : '') + '">' + (state.connected ? 'Connected' : 'Not Connected') + '</span>';
+  }
+
+  // Linked calendars list (BR18): same rules on My Profile and the Integrations card
+  function linkedList(idSuffix) {
+    ensureLinkedDefaults();
+    var cals = calendars();
+    var order = state.linked.slice().sort(function (x, y) { return (y === state.writeTo) - (x === state.writeTo) || x - y; });
+    var canCollapse = order.length > 1;
+    var collapsed = canCollapse && state.linkedCollapsed;
+    var shown = collapsed ? order.slice(0, 1) : order;
+    var labelText = 'Linked calendars (' + order.length + ')';
+    var listId = 'gcalLinkedList' + idSuffix;
+    return '<div class="gcal-linked"><div class="gcal-linked-label">' +
+      (canCollapse
+        ? '<button type="button" class="gcal-linked-toggle" data-gcal="collapse" aria-expanded="' + !collapsed + '" aria-controls="' + listId + '"><span class="chev" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' + labelText + '</button>'
+        : labelText) +
+      br(18, 'BR18: Every linked calendar by email (or calendar name when it has no email), write-to calendar first with its badge. 2+ calendars: collapsed by default on each page load; expanding lasts for the page visit. 1 calendar: plain label. Same rules on My Profile and the Integrations card.') + '</div><ul id="' + listId + '">' +
+      shown.map(function (i) {
+        var w = i === state.writeTo;
+        return '<li><span class="cal-swatch" style="background:' + cals[i][1] + '"></span><span class="nm" title="' + esc(cals[i][0]) + '">' + esc(cals[i][0]) + '</span>' +
+          (w ? '<span class="wt-badge">Write-to calendar</span>' : '') + '</li>';
+      }).join('') + '</ul></div>';
+  }
+
+  function statusLine() {
+    return '<div class="gcal-status-line"><i class="fa-solid fa-circle-check"></i>Appointments &amp; Job Schedule: Connected' +
+      br(6, 'BR6: Locked combined, account-level status line when connected.') + '</div>';
+  }
+
+  var HELP_LINK = '<a class="help-link" href="https://intercom.help/dripjobs/en/?q=google" target="_blank" rel="noopener">Help Articles <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></a>';
+
+  /* ---------- NEW: Google Calendar section, first on My Profile (BR5, BR6) ---------- */
+  function googleProfileSection() {
     var c = state.connected;
-    var html = '<div class="integ-card' + (state.arrived ? ' gcal-arrived' : '') + '" id="gcal-card" tabindex="-1" aria-label="Google Calendar integration">';
-    html += '<div class="integ-head">' + G_SVG.replace('class="g-logo"', 'class="g-logo" style="width:26px;height:26px"') +
-      '<span class="gcal-name">Google Calendar</span>' +
-      '<div class="head-right"><span class="status-pill' + (c ? ' connected' : '') + '">' + (c ? 'Connected' : 'Not Connected') + '</span>' +
-      br(9, 'BR9: Header status pill is account level. When Not Connected it is the only status indicator, no per-calendar line.') + '</div></div>';
-    html += '<div class="integ-body">';
+    var html = '<section class="prof-section gcal-section' + (state.arrived ? ' gcal-arrived' : '') + '" id="gcal-section" tabindex="-1" aria-labelledby="gcalSectionTitle">';
+    html += '<div class="gcal-section-head">' + G_SVG.replace('class="g-logo"', 'class="g-logo" style="width:20px;height:20px"') +
+      '<h2 class="prof-title" id="gcalSectionTitle">Google Calendar</h2>' +
+      br(5, 'BR5: Moved to the top of My Profile, above every other section, so it is the first thing a user sees when the icon brings them here.') +
+      statusPill() + '</div><div class="gcal-section-body">';
     if (!c) {
       html += '<p class="gcal-desc">Connect your Google Calendar to Appointments and Job Schedule.</p>' +
-        '<button type="button" class="btn btn-google" data-gcal="signin" style="width:100%">' + G_SVG + 'Sign in with Google</button>' +
-        '<div style="margin-top:8px">' + br(7, 'BR7: Launches the existing Google sign-in and calendar selection flow (account, consent, link calendars, write-to calendar, all set). The flow itself is unchanged (BR8).') +
-        br(13, 'BR13: Not Connected shows only the sign-in action. Sync Jobs and Disconnect are hidden.') +
-        br(17, 'BR17: After saving a toggle change (Sync Jobs, Disconnect), the user stays on this card.') + '</div>';
+        '<button type="button" class="btn btn-google" data-gcal="signin">' + G_SVG + 'Sign in with Google</button>' +
+        '<div style="margin-top:8px">' + br(7, 'BR7: Launches the existing, unchanged five-step connect flow. Cancel on the Google consent screen returns here, still Not Connected; finishing ends on Appointments.') +
+        br(8, 'BR8: Not Connected shows only the sign-in action. Sync Jobs and Disconnect are hidden.') + '</div>';
     } else {
-      html += '<div class="gcal-status-line"><i class="fa-solid fa-circle-check"></i>Appointments &amp; Job Schedule: Connected' +
-        br(9, 'BR9: One combined, account-level status line when connected.') + '</div>';
-      ensureLinkedDefaults();
-      var cals = calendars();
-      var order = state.linked.slice().sort(function (x, y) { return (y === state.writeTo) - (x === state.writeTo) || x - y; });
-      // Collapsible when 2+ calendars: collapsed shows only the write-to calendar
-      var canCollapse = order.length > 1;
-      var collapsed = canCollapse && state.linkedCollapsed;
-      var shown = collapsed ? order.slice(0, 1) : order;
-      var labelText = 'Linked calendars (' + order.length + ')';
-      html += '<div class="gcal-linked"><div class="gcal-linked-label">' +
-        (canCollapse
-          ? '<button type="button" class="gcal-linked-toggle" data-gcal="collapse" aria-expanded="' + !collapsed + '" aria-controls="gcalLinkedList"><span class="chev" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' + labelText + '</button>'
-          : labelText) +
-        br(18, 'BR18: When connected, the card lists every linked calendar by email (or calendar name when it has no email) and marks the write-to calendar. The write-to calendar is listed first. With 2+ calendars the list starts collapsed to the write-to calendar only; the chevron expands it.') + '</div><ul id="gcalLinkedList">' +
-        shown.map(function (i) {
-          var w = i === state.writeTo;
-          return '<li><span class="cal-swatch" style="background:' + cals[i][1] + '"></span><span class="nm" title="' + esc(cals[i][0]) + '">' + esc(cals[i][0]) + '</span>' +
-            (w ? '<span class="wt-badge">Write-to calendar</span>' : '') + '</li>';
-        }).join('') + '</ul></div>';
+      html += statusLine() + linkedList('P');
       var syncOn = state.pendingSync === null ? state.syncJobs : state.pendingSync;
       var syncDirty = state.pendingSync !== null, discDirty = state.pendingDisconnect;
-      var inline = state.viewport === 'mobile';   // mobile has no hover: reminder shows inline (BR17 mobile note)
+      var inline = state.viewport === 'mobile';   // mobile has no hover: reminder shows inline
       html += '<div class="settings-toggle-row' + (syncDirty ? ' pending-on' : '') + '">' + '<span class="save-hint" id="syncSaveHint" role="tooltip">' + SAVE_REMINDER + '</span>' +
         '<label class="dj-switch sm"><input type="checkbox" class="form-check-input switchery" id="syncJobsToggle" aria-describedby="' + describedBy('syncJobsHelp', 'syncSaveHint', syncDirty) + '" data-gcal="sync"' + (syncOn ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
         '<label class="settings-toggle-label" for="syncJobsToggle">Sync Jobs to Google Calendar</label>' +
-        br(11, 'BR11: Moved here from My Profile (removed there per BR10). Visible only when connected (BR13).') +
-        br(14, 'BR14 open question: whether a Sync Appointments to Google toggle is needed at all. Not decided as V1 or V2.') + '</div>' +
+        br(11, 'BR11: Changes stage until Save. Sync Jobs and Disconnect are mutually exclusive; turning one on turns the other off.') +
+        br(9, 'BR9 open question: whether a Sync Appointments to Google toggle is needed at all. Not decided as V1 or V2.') + '</div>' +
         // Locked copy: Snippet Library "GCal Sync Jobs Helper" (Sep 23, 2026). One-way sync; turning off stops future syncing only.
         '<div class="settings-toggle-help" id="syncJobsHelp">Adds your scheduled Jobs to your write-to calendar in Google. Changes take effect when you click Save.</div>' +
         (inline ? '<div class="save-inline" id="syncSaveInline" aria-live="polite">' + (syncDirty ? SAVE_REMINDER : '') + '</div>' : '');
       html += '<div class="settings-toggle-row' + (discDirty ? ' pending-on' : '') + '">' + '<span class="save-hint" id="discSaveHint" role="tooltip">' + SAVE_REMINDER + '</span>' +
         '<label class="dj-switch sm"><input type="checkbox" class="form-check-input switchery" id="disconnectToggle" aria-describedby="' + describedBy('disconnectHelp', 'discSaveHint', discDirty) + '" data-gcal="disconnect"' + (discDirty ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
         '<label class="settings-toggle-label" for="disconnectToggle">Disconnect Google Calendar</label>' +
-        br(12, 'BR12: States disconnecting removes the connection for both Appointments and Job Schedule. Already-synced events stay in Google; only future creates and updates stop. Takes effect on Save (BR17).') + '</div>' +
+        br(15, 'BR15/16: Disconnect helper. Already-synced events stay in Google; only future creates and updates stop. Takes effect on Save.') + '</div>' +
         '<div class="settings-toggle-help" id="disconnectHelp">' + DISCONNECT_HELP + '</div>' +
         (inline ? '<div class="save-inline" id="discSaveInline" aria-live="polite">' + (discDirty ? SAVE_REMINDER : '') + '</div>' : '');
     }
     html += '</div>';
-    // Footer: Manage Calendars on the left (connected only), Help Articles on the right (always), matching sibling cards
-    html += '<div class="integ-foot">' +
+    html += '<div class="gcal-section-foot">' +
       (c ? '<span><button type="button" class="flow-link" data-flow="manage">Manage Calendars <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></button>' +
-        br(16, 'BR16: Opens the existing Manage Calendars page, unchanged. Now its only entry point, since the connected header widget it lived in is replaced by the icon (BR1). Help Articles shows in both states.') + '</span>' : '<span></span>') +
-      '<a class="help-link" href="https://intercom.help/dripjobs/en/?q=google" target="_blank" rel="noopener">Help Articles <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></a></div>';
-    html += '</div>';
-    return html;
+        br(19, 'BR19: Manage Calendars (connected only) opens the existing standalone Manage Calendars page, unchanged. Help Articles shows in both states.') + '</span>' : '<span></span>') +
+      HELP_LINK + '</div>';
+    return html + '</section>';
+  }
+
+  /* ---------- NEW: read-only Google Calendar card on Company Settings > Integrations (BR20, admin only) ---------- */
+  function googleCard() {
+    var c = state.connected;
+    var html = '<div class="integ-card" id="gcal-card" aria-label="Google Calendar integration">';
+    html += '<div class="integ-head">' + G_SVG.replace('class="g-logo"', 'class="g-logo" style="width:26px;height:26px"') +
+      '<span class="gcal-name">Google Calendar</span>' +
+      '<div class="head-right">' + statusPill() +
+      br(20, 'BR20: Read-only, admin only like every other integration card. Shows the viewing admin\'s own connection. No toggles and no Sign in with Google; managing happens on My Profile.') + '</div></div>';
+    html += '<div class="integ-body">' + (c ? statusLine() + linkedList('I') : '') + '</div>';
+    html += '<div class="integ-foot"><span><button type="button" class="flow-link" data-go="profile">Manage Calendars <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></button>' +
+      br(20, 'BR20: Manage Calendars here navigates to My Profile, not the standalone Manage Calendars page. Help Articles uses the same link as My Profile.') + '</span>' + HELP_LINK + '</div>';
+    return html + '</div>';
   }
 
   /* ---------- Existing sibling cards (context, unchanged) ---------- */
@@ -901,25 +977,66 @@
   function settingsActions() {
     return '<div class="settings-actions"><button type="button" class="btn btn-primary" data-settings="save">Save</button>' +
       '<button type="button" class="btn btn-outline-primary" data-settings="cancel">Cancel - Return to Dashboard</button>' +
-      br(17, 'BR17: Toggle changes only apply on Save; hovering or focusing any changed toggle shows the locked Save reminder. Cancel returns admins and non-admins to the Sales Pipeline. Leaving any other way discards changes silently.') + '</div>' +
+'' + '</div>' +
       '<div class="settings-copyright">Copyright &copy; 2026 Dripjobs</div>';
   }
 
   // BR5: admin lands on full Company Settings > Integrations, at the Google card
   function adminIntegrationsPage(mobile) {
     return settingsTabs() +
-      '<div class="integrations-wrap"><h2 class="integrations-title">Application Integrations' +
-      br(5, 'BR5: Admins land on the full Company Settings Integrations page, scrolled to and highlighted at their Google card.') + '</h2>' +
+      '<div class="integrations-wrap"><h2 class="integrations-title">Application Integrations</h2>' +
       '<p class="integrations-sub">Connect DripJobs to the third-party services you already use.</p>' +
       '<div class="integrations-grid">' + googleCard() + (mobile ? '' : siblingCards()) + '</div>' +
       (mobile ? '<div class="m-rest-note">Remaining integration cards continue below, unchanged.</div>' : '') + '</div>' + settingsActions();
   }
 
-  // BR6: non-admin scoped view, Google card only
-  function scopedPage() {
-    return '<div class="page-header" style="padding:0"><h1 class="page-title" style="margin-bottom:14px">Google Calendar' +
-      br(6, 'BR6: Non-admins see only the Google integration card. No Settings tabs, other cards, or Settings navigation. Their normal sidebar (which never had Settings) is unchanged.') + '</h1></div>' +
-      '<div class="scoped-col" style="padding:0">' + googleCard() + '</div>' + settingsActions();
+  /* ---------- My Profile (existing page; Google Calendar section moved to the top) ---------- */
+  function profileField(label, value, cls, req) {
+    return '<div class="settings-field ' + (cls || '') + '"><span class="settings-field-label' + (req ? ' is-required' : '') + '">' + label + '</span>' +
+      '<div class="settings-field-input' + (value ? '' : ' placeholder') + '">' + (value || '&nbsp;') + '</div></div>';
+  }
+  function profileSelect(label, value) {
+    return '<div class="settings-field"><span class="settings-field-label">' + label + '</span><div class="settings-field-input">' + value + '<i class="fa-solid fa-caret-down" style="font-size:9px;color:#80879A"></i></div></div>';
+  }
+  function profileToggle(on, title, help) {
+    return '<div class="prof-toggle-row"><label class="dj-switch sm"><input type="checkbox"' + (on ? ' checked' : '') + ' disabled><span class="track"></span><span class="thumb"></span></label><span><b>' + title + '</b><small>' + help + '</small></span></div>';
+  }
+  function otherProfileSections() {
+    var u = USERS[state.role], first = u.name.split(' ')[0], last = u.name.split(' ')[1];
+    return '' +
+      '<section class="prof-section"><h2 class="prof-title">Account</h2><p class="prof-sub">Your account identifier and sign-in email.</p>' +
+        '<div class="prof-meta-label">Account Number</div><div class="prof-meta-value">#7662</div>' +
+        '<div class="prof-grid two"><div class="half">' + profileField('Email', u.email, '', true) + '</div></div></section>' +
+      '<section class="prof-section"><h2 class="prof-title">Your Details</h2><div class="prof-grid">' +
+        profileField('First Name', first) + profileField('Last Name', last) + profileField('Phone', '(727) 555-0142') + '</div></section>' +
+      '<section class="prof-section"><h2 class="prof-title">Physical Address</h2><div class="prof-grid">' +
+        '<div class="full">' + profileField('Street Address', '<span style="color:#80879A">Enter a location</span>') + '</div>' +
+        profileField('City', '') + profileField('State', '') + profileField('Zip', '') + '</div></section>' +
+      '<section class="prof-section"><h2 class="prof-title">Billing Address</h2><p class="prof-sub">Leave this ticked if your billing address matches your physical address.</p>' +
+        '<label class="settings-checkbox-row"><input type="checkbox" checked disabled> Same as physical address</label>' +
+        '<div class="prof-meta-label" style="margin-left:8px">Billing To</div><div style="font-size:11.5px;margin:2px 0 0 8px">No physical address entered yet</div></section>' +
+      '<section class="prof-section"><h2 class="prof-title">Calendar Preferences</h2><div class="prof-grid two">' +
+        profileSelect('Default Calendar', 'Month') + profileSelect('Holiday Calendar', 'United States &amp; Canada') + '</div></section>' +
+      '<section class="prof-section"><h2 class="prof-title">Messages &amp; Notifications</h2><p class="prof-sub">Choose how you hear about new activity on your account.</p>' +
+        profileToggle(true, 'Email notifications', 'Send me an email when there is new activity.') +
+        profileToggle(true, 'Text notifications', 'Send me a text message when there is new activity.') + '</section>' +
+      '<section class="prof-section"><h2 class="prof-title">Security</h2>' +
+        profileToggle(true, 'Two-factor authentication', 'Adds a second verification step when signing in, for increased account security.') +
+        '<p style="font-size:11px;margin:12px 0 0">Password last updated on: <span style="color:#5C53DC">05/11/2026</span> <small style="color:#80879A">(click to edit)</small></p></section>' +
+      '<section class="prof-section"><h2 class="prof-title">Email Signature</h2><p class="prof-sub">Appended to emails you send from DripJobs.</p>' +
+        '<div class="ck-bar">Styles &#9662; &nbsp; Format &#9662; &nbsp; Font &#9662; &nbsp; Size &#9662; &nbsp; B I U S</div><div class="ck-area ckeditor"></div></section>' +
+      '<!-- The old Google Calendar section that sat here (Not connected alert + Sign in with Google) moved to the top (BR5) -->';
+  }
+  function profileActions() {
+    return '<div class="profile-actions"><button type="button" class="btn btn-outline-primary" data-settings="cancel">Cancel</button>' +
+      '<button type="button" class="btn btn-primary" data-settings="save">Save</button>' +
+      br(11, 'BR11: My Profile\'s existing Save and Cancel apply to the Google section. Toggle changes only apply on Save; Cancel returns every user to the Sales Pipeline; leaving any other way discards changes silently.') + '</div>';
+  }
+  function myProfilePage(mobile) {
+    return '<div class="profile-actions-top"><button type="button" class="btn btn-actions">Actions <i class="fa-solid fa-chevron-down" style="font-size:8px"></i></button></div>' +
+      googleProfileSection() +
+      (mobile ? '<div class="m-rest-note" style="margin:0 12px 14px">Account, Your Details, Address, Calendar Preferences, Notifications, Security and Email Signature continue below, unchanged.</div>' : otherProfileSections()) +
+      profileActions();
   }
 
   /* ---------- Mobile (BR15) ---------- */
@@ -934,8 +1051,10 @@
   function mobilePage() {
     var u = USERS[state.role];
     var screen = '<div class="m-top"><i class="fa-solid fa-bars"></i><span class="logo-text">dripjobs</span><span class="avatar">' + u.initials + '</span></div><div class="m-page">';
-    if (state.view === 'card') {
-      screen += state.role === 'admin' ? adminIntegrationsPage(true) : scopedPage();
+    if (state.view === 'profile') {
+      screen += myProfilePage(true);
+    } else if (state.view === 'card') {
+      screen += adminIntegrationsPage(true);
     } else if (state.view === 'salespipeline') {
       screen += salesPipelinePage();
     } else {
@@ -950,14 +1069,16 @@
     }
     screen += '</div>';
     return '<div class="mobile-stage">' +
-      '<div class="gate-alert"><i class="fa-solid fa-triangle-exclamation" style="margin-top:2px"></i><div><b>Mobile is gated' + br(15, 'BR15: Connect G / Manage G buttons (accessible names Connect Google Calendar / Manage Google Calendar) plus a separate 48px (i) named About Google Calendar connection, showing the same locked tooltip text. Unsaved toggle changes show the Save reminder inline, announced politely. Original note: message.') + '</b>' +
-      'Ships only after the Google Calendar OAuth mobile issue is resolved. Tap the Google button to open the card, or the (i) to see the tooltip.</div></div>' +
+      '<div class="gate-alert"><i class="fa-solid fa-triangle-exclamation" style="margin-top:2px"></i><div><b>Mobile is gated' + br(10, 'BR10: Connect G / Manage G buttons navigate to My Profile. Accessible names (accessible names Connect Google Calendar / Manage Google Calendar) plus a separate 48px (i) named About Google Calendar connection, showing the same locked tooltip text. Unsaved toggle changes show the Save reminder inline, announced politely. Original note: message.') + '</b>' +
+      'Ships only after the Google Calendar OAuth mobile issue is resolved. Tap the Google button to open My Profile, or the (i) to see the tooltip.</div></div>' +
       '<div class="phone"><div class="phone-screen">' + screen + '</div></div></div>';
   }
 
   /* ---------- Render ---------- */
   function render() {
     document.body.classList.toggle('show-br', state.br);
+    // Company Settings is admin only; non-admins never reach Integrations
+    if (state.view === 'card' && state.role !== 'admin') state.view = 'profile';
     var app = document.getElementById('app');
     if (state.flow === 'choose' || state.flow === 'consent') {
       app.innerHTML = googlePage();
@@ -967,7 +1088,8 @@
       app.innerHTML = mobilePage();
     } else {
       var content;
-      if (state.view === 'card') content = state.role === 'admin' ? adminIntegrationsPage(false) : scopedPage();
+      if (state.view === 'profile') content = myProfilePage(false);
+      else if (state.view === 'card') content = adminIntegrationsPage(false);
       else if (state.view === 'salespipeline') content = salesPipelinePage();
       else content = calendarPage(state.view);
       app.innerHTML = topHeader() + '<div class="shell">' + sidebar() + '<main class="main">' + content + '</main></div>' +
@@ -993,44 +1115,44 @@
     var note = document.getElementById('demo-note');
     var STEP = { choose: 1, consent: 2, link: 3, writeto: 4, done: 5 };
     if (state.flow === 'manage') {
-      note.textContent = 'Existing Manage Calendars page, unchanged (BR7). Reached from Manage Calendars on the connected Google card, which replaces the Manage Calendars button in the old header widget. Unlinking the write-to calendar asks you to pick a new one first; unlinking your last calendar asks to confirm, then disconnects Google entirely. Use the sidebar, or the Google icon on Appointments or Job Schedule, to leave.';
+      note.textContent = 'Existing standalone Manage Calendars page, unchanged. Reached from Manage Calendars in the My Profile Google section (BR19). Unlinking the write-to calendar asks you to pick a new one first; unlinking your last calendar asks to confirm, then disconnects Google entirely. Use the sidebar, the account menu, or the Google icon to leave.';
     } else if (state.flow) {
       note.textContent = 'Existing Google connect flow, step ' + STEP[state.flow] + ' of 5 (BR7). Screens match production' +
         (state.flow === 'link' ? ', with the subtitle colon per BR7' : '') +
         (state.flow === 'done' ? '. Unchanged (BR8): Continue to appointments ends the flow on Appointments' : '') + '.';
     } else if (state.view === 'salespipeline') {
-      note.textContent = 'Cancel - Return to Dashboard landed here, the Sales Pipeline, for both admins and non-admins (BR17). Unsaved card changes were discarded.';
+      note.textContent = 'Cancel landed here, the Sales Pipeline, for both admins and non-admins (BR11). Unsaved Google Calendar changes were discarded.';
+    } else if (state.view === 'profile') {
+      note.textContent = 'My Profile (every user). The Google Calendar section is now first on the page (BR5). Toggle changes apply only after Save at the bottom of the page (hover or focus any changed toggle for the reminder). Cancel goes to the Sales Pipeline.';
     } else if (state.view === 'card') {
-      note.textContent = state.role === 'admin'
-        ? 'Admin landed on Company Settings > Integrations at the Google card. Toggle changes apply only after Save (hover or focus any changed toggle for the reminder). Save keeps you on this card; Cancel goes to the Sales Pipeline.'
-        : 'Non-admin landed on the scoped view: the Google card only, no other Settings content. Toggle changes apply only after Save. Cancel goes to the Sales Pipeline; the Google icon on Appointments or Job Schedule is the only way back.';
+      note.textContent = 'Company Settings > Integrations (admin only). The Google Calendar card is read-only and shows your own connection; Manage Calendars takes you to My Profile (BR20).';
     } else {
-      note.textContent = (state.viewport === 'desktop' ? 'Hover' : 'Tap the (i) next to') + ' the Google icon to see the ' + (state.connected ? 'manage' : 'connect') + ' tooltip, then ' + (state.viewport === 'desktop' ? 'click' : 'tap') + ' it to open the Google integration card as ' + (state.role === 'admin' ? 'an admin.' : 'a non-admin.') + ' Sync Jobs and Disconnect are no longer on My Profile (BR10, not shown here).';
+      note.textContent = (state.viewport === 'desktop' ? 'Hover' : 'Tap the (i) next to') + ' the Google icon to see the ' + (state.connected ? 'manage' : 'connect') + ' tooltip, then ' + (state.viewport === 'desktop' ? 'click' : 'tap') + ' it: every user lands on the Google Calendar section at the top of My Profile (BR4).';
     }
+    var di = document.getElementById('demoIntegrations');
+    if (di) di.style.display = state.role === 'admin' ? '' : 'none';
   }
 
-  function goToCard() {
-    state.view = 'card';
-    state.linkedCollapsed = true;   // each arrival on the card starts collapsed
+  function goToProfile() {
+    state.view = 'profile';
+    state.flow = null;
+    state.linkedCollapsed = true;   // each page load starts collapsed (BR18)
     state.mobileTip = false;
     state.arrived = true;
     render();
     window.scrollTo(0, 0);
-    var card = document.getElementById('gcal-card');
-    if (card) {
-      card.scrollIntoView({ block: 'center', behavior: 'smooth' });
-      card.focus({ preventScroll: true });
-    }
+    var sec = document.getElementById('gcal-section');
+    if (sec) sec.focus({ preventScroll: true });
     setTimeout(function () {
       state.arrived = false;
-      var el = document.getElementById('gcal-card');
+      var el = document.getElementById('gcal-section');
       if (el) el.classList.remove('gcal-arrived');
     }, 1800);
   }
 
   function focusCard() {
-    var card = document.getElementById('gcal-card');
-    if (card) card.focus({ preventScroll: true });
+    var el = document.getElementById('gcal-section') || document.getElementById('gcal-card');
+    if (el && el.hasAttribute('tabindex')) el.focus({ preventScroll: true });
   }
 
   /* ---------- Existing connect flow (BR7) ---------- */
@@ -1174,7 +1296,7 @@
   // Reflect staged toggle values in place (no full re-render, so hover/focus stay put)
   function syncCardToggles() {
     var sy = document.getElementById('syncJobsToggle'), dc = document.getElementById('disconnectToggle');
-    // Save reminder fires on any unsaved toggle change, switched on or off (BR17)
+    // Save reminder fires on any unsaved toggle change, switched on or off (BR12)
     var syncDirty = state.pendingSync !== null, discDirty = state.pendingDisconnect;
     if (sy) {
       sy.checked = state.pendingSync === null ? state.syncJobs : state.pendingSync;
@@ -1209,7 +1331,7 @@
     state.flow = null;
     state.linkedCollapsed = true;
     state.connected = connected;
-    state.view = dest || 'card';   // consent Cancel returns to the card (BR7); finishing ends on Appointments (BR8)
+    state.view = dest || 'profile';   // consent Cancel returns to My Profile (BR7); finishing ends on Appointments
     render();
     window.scrollTo(0, 0);
     var card = document.getElementById('gcal-card');
@@ -1243,7 +1365,11 @@
       render();
       return;
     }
+    var um = e.target.closest('[data-usermenu]');
     var go = e.target.closest('[data-go]');
+    if (um && !go) { state.userMenu = !state.userMenu; render(); return; }
+    if (state.userMenu) state.userMenu = false;
+    if (go && go.dataset.go === 'profile') { clearPending(); goToProfile(); return; }
     if (go) { state.flow = null; clearPending(); state.view = go.dataset.go; render(); window.scrollTo(0, 0); return; }
 
     var sv = e.target.closest('[data-settings]');
@@ -1251,14 +1377,14 @@
       if (sv.dataset.settings === 'save') {
         if (state.pendingSync !== null) state.syncJobs = state.pendingSync;
         if (state.pendingDisconnect) {
-          // Disconnect removes both calendar connections; user stays on the card (BR8, BR12)
+          // Disconnect removes both calendar connections; user stays on My Profile (BR11)
           state.connected = false; state.syncJobs = false; state.linked = []; state.writeTo = null; state.synced = {};
         }
         clearPending();
         render();
         focusCard();
       } else {
-        // Cancel discards unsaved changes and returns admins and non-admins to the Sales Pipeline (BR17)
+        // Cancel discards unsaved changes and returns admins and non-admins to the Sales Pipeline (BR11)
         clearPending();
         state.view = 'salespipeline';
         render();
@@ -1269,7 +1395,7 @@
     var g = e.target.closest('[data-gcal]');
     if (g) {
       var act = g.dataset.gcal;
-      if (act === 'open') { goToCard(); return; }
+      if (act === 'open') { goToProfile(); return; }
       if (act === 'tip') { state.mobileTip = !state.mobileTip; render(); var ib = document.querySelector('.mobile-info-btn'); if (ib) ib.focus(); return; }
       if (act === 'signin') { startFlow('choose'); return; }
       if (act === 'collapse') {
