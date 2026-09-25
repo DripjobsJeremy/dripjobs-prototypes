@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-25] Weekly Product Update + Product Roadmap refreshed for Sep 21-25, 2026
+
+- Decision: Rebuilt `weekly-product-update/index.html` and `Weekly_Product_Update.md` with the 3 tickets pushed to production this week (2 on Sep 21, 1 on Sep 23), grouped into Integrations (Multiple Google Calendars linking, Google Calendar reauthorization fix) and Admin Tools (My Profile design refresh). Rebuilt `dripjobs-product-roadmap/index.html` from a fresh workspace-wide pull of the bare 🎯 tag: 26 in-flight tickets, now spanning 11 of the 13 pipeline stages (Triage and On Hold/Parked both emptied out this week, two tickets reached Branch Ready), 0 on hold/parked. Updated both Release Notes cards on the hub to the new dates.
+- Why: Routine weekly refresh per Jeremy's instruction, sourced directly from ClickUp. Continued using the workspace-wide bare "🎯" tag scoping (not the Active Triage list, not "🎯 focus") per the 2026-09-04 decision.
+
 ## [2026-09-25] Job Costing: Subcontractor Paid Indicator built as a standalone clickable prototype (ticket 86b0v2qjg)
 - Decision: Built `job-costing-subcontractor-paid/index.html` directly from the UX/UI Project's handoff `prototype.html`, which the package's README already marks "Ready" / matched to a production screenshot, plus the hub's standard proto-bar for navigation. Kept its current-production Inter-based styling as-is rather than pulling in the Job Costing UI Refresh ticket's (86ba1ggxb) design-token look, per the README's own instruction that those two only combine if shipping together. Added a "New" hub card; didn't touch the existing `job-costing-ui-refresh` or `job-costing-proposal` prototypes.
 - Why: The handoff package explicitly separates this ticket's scope (Subcontractors band payment status only) from the design-refresh ticket, and states the prototype already matches current prod, so reproducing it as its own page kept scope tight instead of merging it into the larger UI-refresh build.
