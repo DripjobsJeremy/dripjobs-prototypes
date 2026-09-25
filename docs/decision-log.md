@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-25] Employee Timesheets & Payroll Reports reconciled with the Job Costing Details crew update (ticket 86ba1ggxb)
+- Decision: Reduced Jesus Employee's timesheet from 5 days (42:00 hrs, 2:00 OT, $989.00) to 3 days (24:00 hrs, no OT, $552.00), added Jerry Huffman's row (24:00 hrs, $576.00) to both the Employee Timesheets Report (as a selectable employee) and the Employee Payroll Report (which rolls up all employees), and renamed "John Lennon" to "John Johnson" in the Timesheets filter. Totals on both reports now match the Job Costing Details crew exactly ($1,128.00 combined employee cost).
+- Why: Jeremy asked to check the Employee Timesheets Report after the previous session's Details data update flagged it as a known, unreconciled gap; the Payroll Report was reconciled alongside it since it directly rolls up the same per-employee data and would otherwise have been left newly inconsistent.
+- Open question: None.
+
 ## [2026-09-25] Job Costing Details: renamed subcontractor, reworked sample data to a profitable crew of 3 (ticket 86ba1ggxb)
 - Decision: Renamed "John Lennon" to "John Johnson" everywhere he appears (Details subcontractor row and combobox, Employee Timesheets Report filter). Reworked the Costing Active job's sample data to a crew of 3 (2 employees, Jesus Employee and a newly-seeded Jerry Huffman, both ~$23-24/hr; 1 subcontractor, John Johnson) sized and priced like a typical large residential repaint: Revenue $10,200, Labor $2,778 (27%), Materials $2,773.18 (27%), Gross Profit $4,648.82 (46% margin). Also fixed Jerry Huffman's placeholder $90/hr combobox rate, a leftover bug distinct from a real employee wage. Estimated vs. Actual now shows small single-digit overages instead of the prior 100%+ variances. Updated the Dashboard's job card and summary strip to match, since it's the same job on both screens.
 - Why: Jeremy asked for the rename and for the Costing Active job's numbers to read as a profitable, typical large residential project with that specific crew composition.
