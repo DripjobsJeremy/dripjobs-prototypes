@@ -8,9 +8,11 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     :root {
-      --dj: #6366f1;
-      --dj-dark: #4f46e5;
-      --dj-soft: #eef2ff;
+      --st-color-primary: #8B85EA;
+      --st-color-primary-hover: #736BE3;
+      --st-color-primary-active: #5C53DC;
+      --st-color-primary-rgb: 139, 133, 234;
+      --st-color-primary-soft: #EEF2FF;
       --ink: #111827;
       --muted: #6b7280;
       --border: #e5e7eb;
@@ -22,6 +24,38 @@
     }
     body { background: var(--bg); color: var(--ink); font-size: .925rem; }
     .page-wrap { max-width: 1100px; }
+
+    /* ── Scoped Bootstrap button override (design-system.md §4) ── */
+    #jc-proposal-page .btn { border-radius: 10px; }
+    #jc-proposal-page .btn-sm { border-radius: 8px; }
+    #jc-proposal-page .btn-primary {
+      background: var(--st-color-primary); border-color: var(--st-color-primary);
+    }
+    #jc-proposal-page .btn-primary:hover,
+    #jc-proposal-page .btn-primary:focus {
+      background: var(--st-color-primary-hover); border-color: var(--st-color-primary-hover);
+    }
+    #jc-proposal-page .btn-primary:active {
+      background: var(--st-color-primary-active) !important; border-color: var(--st-color-primary-active) !important;
+    }
+    #jc-proposal-page .btn-outline-primary {
+      color: var(--st-color-primary); border-color: var(--st-color-primary);
+    }
+    #jc-proposal-page .btn-outline-primary:hover,
+    #jc-proposal-page .btn-outline-primary:focus {
+      background: var(--st-color-primary); border-color: var(--st-color-primary); color: #fff;
+    }
+
+    /* ── Hub proto-bar (prototype-only, never part of product UI) ── */
+    .proto-bar { background: #fff; border-bottom: 1px solid #DAD8E3; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: 'Nunito', sans-serif; }
+    .proto-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .proto-bar-back { font-size: 12px; font-weight: 600; color: #80879A; text-decoration: none; display: flex; align-items: center; gap: 4px; min-height: 32px; }
+    .proto-bar-back:hover, .proto-bar-back:focus-visible { color: #8B85EA; }
+    .proto-bar-divider { color: #DAD8E3; font-size: 16px; }
+    .proto-bar-title { font-size: 14px; font-weight: 700; color: #32415B; }
+    .proto-bar-ticket { font-size: 11px; font-weight: 700; color: #5C53DC; padding: 4px 10px; border: 1px solid #D6D2F5; background: #E8E6FA; border-radius: 999px; letter-spacing: 0.2px; text-decoration: none; }
+    .proto-bar-ticket:hover, .proto-bar-ticket:focus-visible { background: #8B85EA; color: #fff; }
+    @media (max-width: 575px) { .proto-bar { padding: 8px 16px; } }
     @media (max-width: 575px) {
       .container { padding-left: .75rem; padding-right: .75rem; }
       .tab-panel { padding: 1rem .875rem; }
@@ -63,7 +97,7 @@
       border: 1.5px solid var(--amber); color: var(--amber);
       border-radius: 20px; padding: .2rem .75rem; font-weight: 600; font-size: .8rem;
     }
-    .add-display { color: var(--dj); font-size: .8rem; cursor: pointer; }
+    .add-display { color: var(--st-color-primary); font-size: .8rem; cursor: pointer; }
     .action-btn {
       border: 1px solid var(--border); background: #fff; border-radius: 8px;
       padding: .35rem .85rem; font-size: .85rem; font-weight: 500; color: var(--ink);
@@ -108,10 +142,10 @@
     }
     .section-header h2 { font-size: 1.1rem; font-weight: 700; margin: 0; }
     .btn-add-item {
-      background: var(--dj); color: #fff; border: none; border-radius: 8px;
+      background: var(--st-color-primary); color: #fff; border: none; border-radius: 8px;
       padding: .35rem .9rem; font-size: .85rem; font-weight: 600; cursor: pointer;
     }
-    .btn-add-item:hover { background: var(--dj-dark); }
+    .btn-add-item:hover { background: var(--st-color-primary-hover); }
     .btn-add-opt {
       border: 1px solid var(--border); background: #fff; border-radius: 8px;
       padding: .35rem .9rem; font-size: .85rem; font-weight: 500; cursor: pointer;
@@ -130,7 +164,7 @@
     }
     .proposal-table tbody tr:last-child td { border-bottom: none; }
     .proposal-table tbody tr:hover td { background: #fafafa; }
-    .item-name { color: var(--dj); font-weight: 500; cursor: pointer; }
+    .item-name { color: var(--st-color-primary); font-weight: 500; cursor: pointer; }
     .item-name:hover { text-decoration: underline; }
     .drag-handle { color: #d1d5db; margin-right: .5rem; cursor: grab; }
     .icon-btn { color: #9ca3af; cursor: pointer; font-size: .85rem; }
@@ -139,7 +173,7 @@
       padding: .75rem 1.5rem; font-weight: 700;
       border-top: 2px solid var(--border); background: #fafafa;
     }
-    .total-highlight { color: var(--dj); font-size: 1rem; }
+    .total-highlight { color: var(--st-color-primary); font-size: 1rem; }
     .num { font-variant-numeric: tabular-nums; text-align: right; }
 
     /* ── Tab strip ── */
@@ -163,10 +197,10 @@
       white-space: nowrap; cursor: pointer; transition: .15s;
       line-height: 1.4; flex-shrink: 0;
     }
-    .tab-btn:hover { border-color: var(--dj); color: var(--dj); }
+    .tab-btn:hover { border-color: var(--st-color-primary); color: var(--st-color-primary); }
     .tab-btn.active {
-      background: var(--dj); color: #fff;
-      border-color: var(--dj); font-weight: 600;
+      background: var(--st-color-primary); color: #fff;
+      border-color: var(--st-color-primary); font-weight: 600;
     }
     /* Scroll arrow buttons */
     .tab-scroll-btn {
@@ -178,7 +212,7 @@
       font-size: .8rem; box-shadow: 0 1px 4px rgba(0,0,0,.1);
       transition: .15s; opacity: 0; pointer-events: none;
     }
-    .tab-scroll-btn:hover { border-color: var(--dj); color: var(--dj); }
+    .tab-scroll-btn:hover { border-color: var(--st-color-primary); color: var(--st-color-primary); }
     .tab-scroll-btn.visible { opacity: 1; pointer-events: auto; }
     .tab-scroll-btn.scroll-left  { left:  .4rem; }
     .tab-scroll-btn.scroll-right { right: .4rem; }
@@ -220,7 +254,7 @@
     }
     .step-badge {
       width: 28px; height: 28px; border-radius: 50%;
-      background: var(--dj); color: #fff;
+      background: var(--st-color-primary); color: #fff;
       display: inline-flex; align-items: center; justify-content: center;
       font-weight: 700; font-size: .85rem; flex-shrink: 0;
     }
@@ -231,7 +265,7 @@
       font-weight: 600; font-size: .875rem; color: var(--muted);
       border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; transition: .15s;
     }
-    .mode-tab.active { color: var(--dj); border-bottom-color: var(--dj); }
+    .mode-tab.active { color: var(--st-color-primary); border-bottom-color: var(--st-color-primary); }
     .mode-tab:hover:not(.active) { color: var(--ink); }
     .suggested-banner {
       background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 8px;
@@ -264,8 +298,8 @@
     .profit-pos { color: var(--green); }
     .profit-neg { color: var(--red); }
     .price-card { border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: .15s; }
-    .price-card.selected-tier { border-color: var(--dj); background: var(--dj-soft); }
-    .price-card:hover { border-color: var(--dj); background: var(--dj-soft); }
+    .price-card.selected-tier { border-color: var(--st-color-primary); background: var(--st-color-primary-soft); }
+    .price-card:hover { border-color: var(--st-color-primary); background: var(--st-color-primary-soft); }
     .price-card .price { font-size: 1.4rem; font-weight: 800; font-variant-numeric: tabular-nums; }
     .hint { color: var(--muted); font-size: .8rem; }
     .hrs-ok   { color: var(--green); font-weight: 600; }
@@ -273,7 +307,7 @@
     .hrs-over { color: var(--red);  font-weight: 600; }
     .source-badge {
       display: inline-flex; align-items: center; gap: .3rem;
-      background: #eef2ff; color: var(--dj); border: 1px solid #c7d2fe;
+      background: #eef2ff; color: var(--st-color-primary); border: 1px solid #c7d2fe;
       border-radius: 6px; padding: .2rem .55rem; font-size: .75rem; font-weight: 600;
     }
     /* Before/After tax toggle */
@@ -282,11 +316,11 @@
       padding: .25rem .65rem; font-size: .78rem; font-weight: 600; color: var(--muted);
       cursor: pointer; transition: .15s; white-space: nowrap;
     }
-    .profit-toggle-btn.active { background: #fff; color: var(--dj); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
-    /* Price tier cards — ensure text fits */
+    .profit-toggle-btn.active { background: #fff; color: var(--st-color-primary); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+    /* Price tier cards: ensure text fits */
     .price-card { border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: .15s; overflow: hidden; }
-    .price-card.selected-tier { border-color: var(--dj); background: var(--dj-soft); }
-    .price-card:hover { border-color: var(--dj); background: var(--dj-soft); }
+    .price-card.selected-tier { border-color: var(--st-color-primary); background: var(--st-color-primary-soft); }
+    .price-card:hover { border-color: var(--st-color-primary); background: var(--st-color-primary-soft); }
     .price-card .price { font-size: 1.1rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.2; }
     @media (max-width: 575px) {
       .price-card { border-radius: 8px; }
@@ -296,7 +330,7 @@
     }
     .price-card .tier-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
     .price-card .tier-profit { font-size: .72rem; }
-    .price-card .tier-selected { font-size: .65rem; font-weight: 700; color: var(--dj); text-transform: uppercase; letter-spacing: .04em; }
+    .price-card .tier-selected { font-size: .65rem; font-weight: 700; color: var(--st-color-primary); text-transform: uppercase; letter-spacing: .04em; }
 
     /* ── Mobile: summary sticky only on xl+ ── */
     .jc-summary-sticky { position: sticky; top: 1rem; }
@@ -332,24 +366,33 @@
       .proposal-table tfoot td:last-child { display: table-cell !important; }
       .proposal-table tbody td:not(:first-child):not(:last-child) { display: none; }
       .proposal-table tfoot td:not(:first-child):not(:last-child) { display: none; }
-      /* Tfoot total row — keep label + total only */
+      /* Tfoot total row: keep label + total only */
       .tfoot-row td:first-child { display: table-cell; }
     }
 
-    /* ── Selling price input — full-width on mobile ── */
+    /* ── Selling price input: full-width on mobile ── */
     .jc-sell-input { max-width: 220px; }
     @media (max-width: 575px) { .jc-sell-input { max-width: 100%; } }
 
     /* ── Phase 6: Materials tax tooltip ── */
+    /* Visual stand-in for Switchery; .switchery class kept on the input as the real JS hook */
+    .dj-switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; cursor: pointer; }
+    .dj-switch input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+    .dj-switch .track { position: absolute; inset: 0; border-radius: 999px; background: #fff; border: 1px solid var(--border); transition: background 0.15s ease, border-color 0.15s ease; }
+    .dj-switch .thumb { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform 0.15s ease; }
+    .dj-switch input:checked + .track { background: var(--st-color-primary); border-color: var(--st-color-primary); }
+    .dj-switch input:checked ~ .thumb { transform: translateX(18px); }
+    .dj-switch input:focus-visible + .track { box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.35); }
+
     .jc-tax-tooltip {
       display: inline-flex; align-items: center; justify-content: center;
       width: 18px; height: 18px; border-radius: 50%;
-      background: #e0e7ff; color: var(--dj);
+      background: #e0e7ff; color: var(--st-color-primary);
       font-size: .78rem; font-weight: 700; cursor: pointer;
       border: 1px solid #c7d2fe; flex-shrink: 0; user-select: none;
       transition: .15s;
     }
-    .jc-tax-tooltip:hover { background: var(--dj); color: #fff; }
+    .jc-tax-tooltip:hover { background: var(--st-color-primary); color: #fff; }
     .jc-tax-tip-box {
       display: none; margin-top: .5rem;
       background: #f0fafa; border-left: 4px solid #0DCECE;
@@ -390,23 +433,25 @@
     }
 
     /* ── Stale data banner ── */
+    /* Stale banner uses the design-system alert `--warn` palette (§5) */
     .stale-banner {
       display: none;
-      background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px;
+      background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px;
       padding: .75rem 1rem; margin-bottom: 1rem;
       gap: .75rem; align-items: flex-start;
     }
     .stale-banner.visible { display: flex; }
-    .stale-banner-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .05rem; }
+    .stale-banner-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .05rem; color: #92400E; }
     .stale-banner-body { flex: 1; }
-    .stale-banner-title { font-weight: 700; color: #92400e; font-size: .875rem; }
-    .stale-banner-text { color: #78350f; font-size: .8rem; margin-top: .15rem; }
+    .stale-banner-title { font-weight: 700; color: #92400E; font-size: .875rem; }
+    .stale-banner-text { color: #92400E; font-size: .8rem; margin-top: .15rem; }
     .stale-banner-action {
-      background: #f59e0b; color: #fff; border: none; border-radius: 6px;
+      background: transparent; color: var(--st-color-primary);
+      border: 1.5px solid var(--st-color-primary); border-radius: 8px;
       padding: .3rem .75rem; font-size: .8rem; font-weight: 600; cursor: pointer;
-      white-space: nowrap; flex-shrink: 0; align-self: center;
+      white-space: nowrap; flex-shrink: 0; align-self: center; transition: .15s;
     }
-    .stale-banner-action:hover { background: #d97706; }
+    .stale-banner-action:hover { background: var(--st-color-primary); color: #fff; }
 
     /* ── Sync bar (button + badge) ── */
     .jc-sync-bar {
@@ -421,14 +466,11 @@
     }
     .btn-sync {
       display: inline-flex; align-items: center; gap: .4rem;
-      background: var(--dj); color: #fff; border: none; border-radius: 8px;
-      padding: 0 .9rem; font-size: .85rem; font-weight: 600; cursor: pointer;
-      transition: .15s; height: 36px;
+      padding: 0 .9rem; font-size: .85rem; height: 36px;
     }
-    .btn-sync:hover { background: var(--dj-dark); }
     .sync-badge {
       display: inline-flex; align-items: center; gap: .3rem;
-      background: #eef2ff; color: var(--dj); border: 1px solid #c7d2fe;
+      background: #eef2ff; color: var(--st-color-primary); border: 1px solid #c7d2fe;
       border-radius: 8px; padding: 0 .75rem; font-size: .85rem; font-weight: 600;
       height: 36px;
     }
@@ -520,7 +562,7 @@
     .diff-radio-btn:hover:not(.sel-add):not(.sel-overwrite):not(.sel-skip) {
       border-color: var(--muted); color: var(--ink);
     }
-    /* Selected states — filled backgrounds, white text, checkmark */
+    /* Selected states: filled backgrounds, white text, checkmark */
     .diff-radio-btn.sel-add::before      { content: "✓ "; }
     .diff-radio-btn.sel-overwrite::before { content: "✓ "; }
     .diff-radio-btn.sel-skip::before     { content: "✓ "; }
@@ -528,7 +570,7 @@
       border-color: #15803d; background: #16a34a; color: #fff;
     }
     .diff-radio-btn.sel-overwrite {
-      border-color: var(--dj-dark); background: var(--dj); color: #fff;
+      border-color: var(--st-color-primary-hover); background: var(--st-color-primary); color: #fff;
     }
     .diff-radio-btn.sel-skip {
       border-color: #4b5563; background: #6b7280; color: #fff;
@@ -537,17 +579,13 @@
     /* Confirm / Cancel buttons (Phase 7: 44px min-height, footer space-between) */
     .sync-modal-footer { justify-content: space-between; }
     .btn-confirm-sync {
-      background: var(--dj); color: #fff; border: none; border-radius: 8px;
-      padding: .6rem 1.4rem; font-weight: 700; font-size: .9rem; cursor: pointer;
+      padding: .6rem 1.4rem; font-weight: 700; font-size: .9rem;
       min-height: 44px; display: inline-flex; align-items: center;
     }
-    .btn-confirm-sync:hover { background: var(--dj-dark); }
     .btn-cancel-sync {
-      background: #fff; color: var(--ink); border: 1.5px solid var(--border); border-radius: 8px;
-      padding: .6rem 1.2rem; font-weight: 600; font-size: .9rem; cursor: pointer;
+      padding: .6rem 1.2rem; font-weight: 600; font-size: .9rem;
       min-height: 44px; display: inline-flex; align-items: center;
     }
-    .btn-cancel-sync:hover { background: #f3f4f6; }
 
     /* Demo trigger for stale state */
     .demo-bar {
@@ -574,6 +612,16 @@
   </style>
 </head>
 <body>
+<!-- Hub proto-bar -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="proto-bar-back" href="../index.html">&larr; Hub</a>
+    <span class="proto-bar-divider">|</span>
+    <span class="proto-bar-title">Job Costing: Proposal-Linked Profitability Workbench</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bac35kk" target="_blank" rel="noopener">86bac35kk</a>
+</div>
+<div id="jc-proposal-page">
 <div class="container page-wrap py-4">
 
   <!-- ═══════════════════════════════════════
@@ -619,7 +667,7 @@
     </div>
     <div class="meta-bar">
       <span>CREATED <strong>5/29/2026</strong></span>
-      <span>EXP. DATE <strong>—</strong></span>
+      <span>EXP. DATE <strong>N/A</strong></span>
       <span>SALESPERSON <strong>Laura Cuadros</strong></span>
       <span>FINANCING <span class="financing-badge">NOT INITIATED</span></span>
     </div>
@@ -864,8 +912,8 @@
           <!-- populated by JS -->
         </div>
         <div class="sync-modal-footer" id="syncModalFooter">
-          <button class="btn-cancel-sync" id="syncCancelBtn">Cancel</button>
-          <button class="btn-confirm-sync" id="syncConfirmBtn">Apply Selected Changes</button>
+          <button class="btn btn-outline-primary btn-cancel-sync" id="syncCancelBtn">Cancel</button>
+          <button class="btn btn-primary btn-confirm-sync" id="syncConfirmBtn">Apply Selected Changes</button>
         </div>
       </div>
     </div>
@@ -885,7 +933,7 @@
         </div>
         <!-- Sync bar: button + last-sync badge -->
         <div class="jc-sync-bar">
-          <button class="btn-sync" id="jcSyncBtn">⟳ Sync</button>
+          <button class="btn btn-primary btn-sync" id="jcSyncBtn">⟳ Sync</button>
           <span class="sync-badge" id="jcSyncBadge">
             Synced from proposal · <span class="sync-ts" id="jcSyncTs">Today, 9:14 AM</span>
           </span>
@@ -918,7 +966,7 @@
                   <span class="input-group-text">$</span>
                   <input type="number" class="form-control" id="jc-sellPrice" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
                 </div>
-                <p class="hint mb-0">Your proposal total. Edit to model a different price — this never changes the proposal.</p>
+                <p class="hint mb-0">Your proposal total. Edit to model a different price. This never changes the proposal.</p>
               </div>
             </div>
           </div>
@@ -935,7 +983,7 @@
               <div id="jc-suggestedBanner" class="suggested-banner" style="display:none;">
                 <div class="d-flex align-items-center gap-3 flex-wrap">
                   <div class="d-flex align-items-center gap-2">
-                    <span class="fw-semibold" style="color:var(--dj);">Job Report estimate:</span>
+                    <span class="fw-semibold" style="color:var(--st-color-primary);">Job Report estimate:</span>
                     <input type="number" id="jc-suggestedHrs" class="form-control form-control-sm d-inline-block"
                            style="width:80px;" min="0" step="0.25" inputmode="decimal">
                   </div>
@@ -997,10 +1045,12 @@
               <!-- Tax (Phase 6: explained + sourced from company rate) -->
               <div class="mt-3 pt-3 border-top">
                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                  <label class="form-check-label d-flex align-items-center gap-2" for="jc-taxToggle">
-                    <input class="form-check-input mt-0" type="checkbox" id="jc-taxToggle">
-                    <span>Apply sales tax to materials</span>
+                  <label class="dj-switch" for="jc-taxToggle">
+                    <input type="checkbox" class="form-check-input switchery" id="jc-taxToggle">
+                    <span class="track"></span>
+                    <span class="thumb"></span>
                   </label>
+                  <label class="fw-semibold" style="font-size:.875rem; cursor:pointer;" for="jc-taxToggle">Apply sales tax to materials</label>
                   <span class="jc-tax-tooltip" id="jc-taxTooltipBtn" tabindex="0" aria-label="About material tax" title="">&#9432;</span>
                   <div class="col-auto" id="jc-taxWrap" style="display:none;">
                     <div class="input-group input-group-sm" style="width:130px;">
@@ -1011,7 +1061,7 @@
                 </div>
                 <!-- Tooltip popover -->
                 <div class="jc-tax-tip-box" id="jc-taxTipBox" role="tooltip">
-                  <strong>What is this?</strong> Your local sales tax rate on paint and materials — separate from the tax collected on this proposal. Pre-filled from your Company Tax Rate (5%). This is a <em>cost</em> input only and never affects the proposal.
+                  <strong>What is this?</strong> Your local sales tax rate on paint and materials, separate from the tax collected on this proposal. Pre-filled from your Company Tax Rate (5%). This is a <em>cost</em> input only and never affects the proposal.
                 </div>
                 <p class="hint mt-1 mb-0" id="jc-taxHint" style="display:none;">
                   Pre-filled from your Company Tax Rate · adjust if your supplier applies a different rate
@@ -1050,7 +1100,7 @@
                   <span class="summary-num fw-bold" id="jc-sumTotalCost">$0.00</span>
                 </div>
 
-                <!-- Before / After tax toggle — hidden when no taxes -->
+                <!-- Before / After tax toggle: hidden when no taxes -->
                 <div id="jc-taxToggleWrap" class="d-flex align-items-center gap-2 mt-3 mb-2">
                   <span class="small fw-semibold text-secondary">View profit:</span>
                   <div class="d-flex" style="background:#f3f4f6;border-radius:8px;padding:3px;gap:3px;">
@@ -1082,7 +1132,7 @@
                     <span class="profit-display-label">Profit</span>
                     <div class="d-flex align-items-baseline gap-2 flex-wrap justify-content-end">
                       <span class="profit-amount profit-pos" id="jc-sumProfit">$0.00</span>
-                      <span class="margin-badge mb-none" id="jc-sumMargin">—</span>
+                      <span class="margin-badge mb-none" id="jc-sumMargin">N/A</span>
                     </div>
                   </div>
                 </div>
@@ -1119,6 +1169,7 @@
 
   </div><!-- /tab-strip-wrap -->
 </div><!-- /page-wrap -->
+</div><!-- /jc-proposal-page -->
 
 <script>
 (function () {
@@ -1205,7 +1256,7 @@
 
   /* ─── Build team options ──────────────────────────────────── */
   function buildTeamOpts() {
-    var h = '<option value="">— Select —</option>';
+    var h = '<option value="">Select</option>';
     h += '<optgroup label="Employees">';
     TEAM.filter(function (t) { return t.type === 'employee'; }).forEach(function (t) {
       h += '<option value="' + t.id + '" data-rate="' + t.rate + '">' + t.name + ' ($' + t.rate.toFixed(2) + '/hr)</option>';
@@ -1225,17 +1276,17 @@
     row.dataset.type = 'labor';
     row.dataset.manualHours = '0'; // track if user has manually overridden
     row.innerHTML =
-      // Person selector — full width on mobile, 4-col on sm+
+      // Person selector: full width on mobile, 4-col on sm+
       '<div class="col-12 col-sm-4">'
         + '<div class="labor-field-label">Employee / Subcontractor</div>'
         + '<select class="form-select form-select-sm" data-f="person">' + buildTeamOpts() + '</select>'
       + '</div>'
-      // Hours — labeled on mobile, col-5 on mobile / col-3 on sm+
+      // Hours: labeled on mobile, col-5 on mobile / col-3 on sm+
       + '<div class="col-6 col-sm-3">'
         + '<div class="labor-field-label">Hours</div>'
         + '<input type="number" class="form-control form-control-sm" placeholder="0" min="0" step="0.25" inputmode="decimal" data-f="hours">'
       + '</div>'
-      // Rate — labeled on mobile
+      // Rate: labeled on mobile
       + '<div class="col-6 col-sm-3">'
         + '<div class="labor-field-label">Rate / hr</div>'
         + '<div class="input-group input-group-sm">'
@@ -1243,7 +1294,7 @@
           + '<input type="number" class="form-control" placeholder="0.00" min="0" step="0.01" inputmode="decimal" data-f="rate">'
         + '</div>'
       + '</div>'
-      // Cost + remove — on mobile sits in its own labeled row; on sm+ stays in col-2
+      // Cost + remove: on mobile sits in its own labeled row; on sm+ stays in col-2
       + '<div class="col-12 col-sm-2 labor-cost-row">'
         + '<span class="labor-field-label">Cost</span>'
         + '<div class="d-flex align-items-center justify-content-between justify-content-sm-end gap-1 w-100">'
@@ -1306,13 +1357,13 @@
       block.dataset.type = 'liblock';
 
       if (!item.isProduct) {
-        // Service — no materials
+        // Service: no materials
         block.innerHTML =
           '<div class="d-flex align-items-center gap-2">'
             + '<span class="fw-semibold">' + item.name + '</span>'
             + '<span class="service-tag">Service</span>'
           + '</div>'
-          + '<p class="hint mb-0 mt-1">No material cost — service item.</p>';
+          + '<p class="hint mb-0 mt-1">This is a service item with no material cost.</p>';
         block.dataset.matCost = '0';
       } else {
         // Product with coverage
@@ -1344,7 +1395,7 @@
     });
     document.getElementById('jc-panelPR').classList.toggle('d-none', mode !== 'production');
     document.getElementById('jc-panelLI').classList.toggle('d-none', mode !== 'lineitems');
-    // Phase 8: hours tracker visibility is NOT tied to materials mode —
+    // Phase 8: hours tracker visibility is not tied to materials mode;
     // it stays visible in the Labor card regardless of which mode is active.
     jcRecalc();
   }
@@ -1434,7 +1485,7 @@
 
     var marginEl = document.getElementById('jc-sumMargin');
     if (margin === null) {
-      marginEl.textContent = '—';
+      marginEl.textContent = 'N/A';
       marginEl.className = 'margin-badge mb-none';
     } else {
       marginEl.textContent = margin.toFixed(1) + '%';
@@ -1517,7 +1568,7 @@
     }
   });
 
-  // Input changes — mark manual hours override
+  // Input changes: mark manual hours override
   document.body.addEventListener('input', function (e) {
     var t = e.target;
     // If user manually edits hours, mark that row as overridden
@@ -1585,7 +1636,7 @@
     // stays visible regardless of which materials mode is active.
     document.getElementById('jc-suggestedBanner').style.display = '';
 
-    // Add one labor row — hours auto-distributed to full suggested amount
+    // Add one labor row: hours auto-distributed to full suggested amount
     addLaborRow();
 
     // Set default profit mode to before-tax
@@ -1691,7 +1742,7 @@
     if (matAdded.length) {
       diff.push({
         key: 'matAdded', label: 'Materials Added', type: 'added',
-        detail: matAdded.map(function (r) { return { text: r.name + ' — ' + r.gallons + ' gal @ ' + fmt(r.costEach) + '/gal' }; }),
+        detail: matAdded.map(function (r) { return { text: r.name + ' · ' + r.gallons + ' gal @ ' + fmt(r.costEach) + '/gal' }; }),
         actions: ['add', 'skip']
       });
     }
@@ -1733,7 +1784,7 @@
           + '<div class="sync-uptodate-title">Workbench is up to date</div>'
           + '<p class="text-secondary" style="font-size:.875rem;">No changes detected in the proposal since your last sync.</p>'
         + '</div>';
-      footer.innerHTML = '<button class="btn-cancel-sync" id="syncCancelBtn">Close</button>';
+      footer.innerHTML = '<button class="btn btn-outline-primary btn-cancel-sync" id="syncCancelBtn">Close</button>';
     } else {
       var html = '<p class="text-secondary mb-3" style="font-size:.85rem;">Choose how to handle each changed category. Manually entered labor rows and rates are always preserved.</p>';
       diff.forEach(function (cat) {
@@ -1769,8 +1820,8 @@
       });
       body.innerHTML = html;
       footer.innerHTML =
-        '<button class="btn-cancel-sync" id="syncCancelBtn">Cancel</button>'
-        + '<button class="btn-confirm-sync" id="syncConfirmBtn">Apply Selected Changes</button>';
+        '<button class="btn btn-outline-primary btn-cancel-sync" id="syncCancelBtn">Cancel</button>'
+        + '<button class="btn btn-primary btn-confirm-sync" id="syncConfirmBtn">Apply Selected Changes</button>';
 
       // Action button selection
       body.addEventListener('click', function (e) {

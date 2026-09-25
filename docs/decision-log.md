@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-25] Job Costing: Proposal-Linked Profitability Workbench brought onto the design system (ticket 86bac35kk)
+- Decision: Reviewed job-costing-proposal (already built for this ticket) against docs/design-system.md. Swapped the hardcoded `#6366f1` purple for the `--st-color-primary` token set, converted custom-colored buttons (Sync, Cancel/Apply, action-btn equivalents) to Bootstrap `.btn-primary`/`.btn-outline-primary` under a scoped override, converted the "Apply sales tax to materials" checkbox to a Switchery-style toggle (`.switchery` hook preserved), aligned the Stale Data Banner to the `.settings-alert--warn` palette, removed every em dash from copy and code comments, and added the missing hub proto-bar (this file had none).
+- Why: The outer proposal-page chrome (client card, Line Items/Areas tables, top-level tab strip) mirrors the real production Proposal page's own existing look, which is out of scope here; only the new Profitability tab content built for this ticket needed to be brought onto the design system, since it had drifted from the token/component conventions the sibling job-costing-ui-refresh prototype already follows.
+- Open question: None.
+
 ## [2026-09-25] Employee Timesheets & Payroll Reports reconciled with the Job Costing Details crew update (ticket 86ba1ggxb)
 - Decision: Reduced Jesus Employee's timesheet from 5 days (42:00 hrs, 2:00 OT, $989.00) to 3 days (24:00 hrs, no OT, $552.00), added Jerry Huffman's row (24:00 hrs, $576.00) to both the Employee Timesheets Report (as a selectable employee) and the Employee Payroll Report (which rolls up all employees), and renamed "John Lennon" to "John Johnson" in the Timesheets filter. Totals on both reports now match the Job Costing Details crew exactly ($1,128.00 combined employee cost).
 - Why: Jeremy asked to check the Employee Timesheets Report after the previous session's Details data update flagged it as a known, unreconciled gap; the Payroll Report was reconciled alongside it since it directly rolls up the same per-employee data and would otherwise have been left newly inconsistent.
