@@ -70,8 +70,8 @@ Append a short entry after any session with a real design or scope decision. New
   - Law of Proximity: the two sync toggles stay together.
   - Serial Position and error prevention: the destructive Disconnect sits last, in its own region (Law of Common Region), less likely to be hit by mistake.
 - Fit check (Still Open item 3): the primary Sync Appointments helper fits 2 lines on desktop (516px) and 3 on mobile (240px), within limits, so the primary copy can be locked. The fallback isn't needed.
-- Assumption, flagged (Still Open item 5, not decided): the prototype has Sync Appointments join the existing mutual exclusion. Turning Disconnect on stages both sync toggles off, and turning either sync on stages Disconnect off. This avoids a contradictory "disconnect but keep syncing" state; confirm or change.
-- Open question: the "to" vs "with" naming convention (Still Open item 7) isn't added to docs/design-system.md yet. It's a product decision where it lives; happy to add it once decided.
+- Confirmed by Jeremy (Still Open item 5): Sync Appointments joins the existing mutual exclusion. Turning Disconnect on stages both sync toggles off, and turning either sync on stages Disconnect off. Turning a toggle off doesn't restore the other.
+- Confirmed by Jeremy (Still Open item 7): the label uses "with" ("Sync Appointments with Google Calendar") to signal two-way sync, while one-way Sync Jobs keeps "to". The "to" vs "with" convention is documented in the ticket (BR21) only, not added to docs/design-system.md.
 
 ## [2026-09-25] Google Calendar Icon: reworked for the My Profile direction (ticket 86bc5bcfc)
 

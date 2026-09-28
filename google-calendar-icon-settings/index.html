@@ -905,13 +905,13 @@
       html += '<div class="settings-toggle-row' + (apptDirty ? ' pending-on' : '') + '">' + '<span class="save-hint" id="apptSaveHint" role="tooltip">' + SAVE_REMINDER + '</span>' +
         '<label class="dj-switch sm"><input type="checkbox" class="form-check-input switchery" id="syncApptToggle" aria-describedby="' + describedBy('syncApptHelp', 'apptSaveHint', apptDirty) + '" data-gcal="appt"' + (apptOn ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
         '<label class="settings-toggle-label" for="syncApptToggle">Sync Appointments with Google Calendar</label>' +
-        br(21, 'BR21: Two-way sync (with). Defaults ON for new and existing connections, so nothing changes unless a user turns it off. OFF stops both directions going forward; already-synced appointments stay in DripJobs, frozen. Placed first to match the status line order.') + '</div>' +
+        br(21, 'BR21: Two-way sync, so the label says with (confirmed; one-way Sync Jobs keeps to). Defaults ON for new and existing connections, so nothing changes unless a user turns it off. OFF stops both directions going forward; already-synced appointments stay in DripJobs, frozen. Placed first to match the status line order.') + '</div>' +
         '<div class="settings-toggle-help" id="syncApptHelp">' + APPT_HELP + '</div>' +
         (inline ? '<div class="save-inline" id="apptSaveInline" aria-live="polite">' + (apptDirty ? SAVE_REMINDER : '') + '</div>' : '');
       html += '<div class="settings-toggle-row' + (syncDirty ? ' pending-on' : '') + '">' + '<span class="save-hint" id="syncSaveHint" role="tooltip">' + SAVE_REMINDER + '</span>' +
         '<label class="dj-switch sm"><input type="checkbox" class="form-check-input switchery" id="syncJobsToggle" aria-describedby="' + describedBy('syncJobsHelp', 'syncSaveHint', syncDirty) + '" data-gcal="sync"' + (syncOn ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
         '<label class="settings-toggle-label" for="syncJobsToggle">Sync Jobs to Google Calendar</label>' +
-        br(11, 'BR11: Changes stage until Save. Sync Jobs and Disconnect are mutually exclusive. Prototype assumption (BR21 open item): Sync Appointments follows the same rule, so turning Disconnect on turns both syncs off.') +
+        br(11, 'BR11: Changes stage until Save. Sync Jobs and Disconnect are mutually exclusive. Confirmed (Sep 28): Sync Appointments follows the same rule, so turning Disconnect on turns both syncs off, and turning either sync on turns Disconnect off.') +
         br(14, 'BR14: One-way sync (to), DripJobs to Google, onto the write-to calendar. Turning it off stops future syncing only.') + '</div>' +
         // Locked copy: Snippet Library "GCal Sync Jobs Helper" (Sep 23, 2026). One-way sync; turning off stops future syncing only.
         '<div class="settings-toggle-help" id="syncJobsHelp">Adds your scheduled Jobs to your write-to calendar in Google. Changes take effect when you click Save.</div>' +
@@ -1548,7 +1548,7 @@
     }
     // Card toggles are staged until Save; switching one ON shows the save reminder on hover.
     // Sync Jobs and Disconnect are mutually exclusive: turning one ON turns the other OFF.
-    // Prototype assumption (BR21 open item): Sync Appointments joins the same rule, so Disconnect ON turns both syncs OFF.
+    // Confirmed (Sep 28): Sync Appointments joins the same rule, so Disconnect ON turns both syncs OFF and either sync ON turns Disconnect OFF.
     if (t.dataset.gcal === 'sync' || t.dataset.gcal === 'appt' || t.dataset.gcal === 'disconnect') {
       if (t.dataset.gcal === 'sync') {
         state.pendingSync = t.checked === state.syncJobs ? null : t.checked;
