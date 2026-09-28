@@ -58,6 +58,21 @@ Append a short entry after any session with a real design or scope decision. New
 - Pattern deviation: below 860px the reference sidebar is hidden and a Job Costing chip nav (design system tab-chip pattern) takes its place, so the module stays navigable on mobile. Prototype chrome only, not a production nav proposal.
 - Resolved: Jeremy confirmed Time Sheet Entries is built as a full page today in production and doesn't need to function in this prototype, click-to-view only, no open question. Also confirmed dropping the duplicated "and" in the Tutorials caption ("Job Costing Settings &amp; Overview"), removed the flag chip.
 
+## [2026-09-28] Google Calendar Icon: Sync Appointments toggle + Copywriter updates (ticket 86bc5bcfc)
+
+- Decision: Applied the Sep 28 ticket updates.
+  - New BR21 toggle, "Sync Appointments with Google Calendar", in the My Profile Google section. It defaults ON for new and existing connections, and reconnecting resets it to ON. It uses the locked helper text and the same Save staging, Save reminder, aria-describedby and mobile inline reminder as the other toggles.
+  - The Integrations card's Not Connected state now shows the locked "Connect your Google Calendar from My Profile."
+  - The card's footer link is renamed "Manage in My Profile" (both states).
+  - The My Profile Cancel label stays "Cancel", now confirmed in BR11.
+- Open UX item resolved, placement: the order is Sync Appointments, Sync Jobs, then Disconnect, with a divider setting Disconnect apart.
+  - Jakob's Law / consistency: it mirrors the combined status line "Appointments & Job Schedule: Connected" the user just read.
+  - Law of Proximity: the two sync toggles stay together.
+  - Serial Position and error prevention: the destructive Disconnect sits last, in its own region (Law of Common Region), less likely to be hit by mistake.
+- Fit check (Still Open item 3): the primary Sync Appointments helper fits 2 lines on desktop (516px) and 3 on mobile (240px), within limits, so the primary copy can be locked. The fallback isn't needed.
+- Assumption, flagged (Still Open item 5, not decided): the prototype has Sync Appointments join the existing mutual exclusion. Turning Disconnect on stages both sync toggles off, and turning either sync on stages Disconnect off. This avoids a contradictory "disconnect but keep syncing" state; confirm or change.
+- Open question: the "to" vs "with" naming convention (Still Open item 7) isn't added to docs/design-system.md yet. It's a product decision where it lives; happy to add it once decided.
+
 ## [2026-09-25] Google Calendar Icon: reworked for the My Profile direction (ticket 86bc5bcfc)
 
 - Decision: Reworked the prototype and hub card for the ticket's new direction, "Google Calendar Integration Icon and My Profile Relocation":

@@ -518,6 +518,9 @@
   .gcal-section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
   .gcal-section-head .status-pill { margin-left: 2px; }   /* next to the title (Law of Proximity) on the full-width section */
   .gcal-section:focus { outline: none; }
+  .gcal-toggle-group { margin-top: 4px; }
+  .gcal-toggle-group .settings-toggle-row:first-child { margin-top: 0; }
+  .gcal-toggle-danger { border-top: 1px solid #EEEEF2; margin-top: 14px; padding-top: 12px; }   /* destructive action set apart */
   .gcal-section-body { max-width: 560px; }
   .gcal-section .gcal-desc { font-size: 11.5px; color: #4C566E; }
   .gcal-section .btn-google { min-height: 36px; }
@@ -660,6 +663,9 @@
   // for both Appointments and Job Schedule. Changes take effect when you click Save.") fits 2 lines on desktop (516px) but wraps
   // to 4 on mobile (240px), over the 3-line limit, so the ticket's fallback copy is used.
   var DISCONNECT_HELP = 'Removes the Google connection from both Appointments and Job Schedule. Changes take effect when you click Save.';
+  // Sync Appointments helper (BR21). Fit check on My Profile: the primary copy fits 2 lines on desktop (516px) and 3 on mobile (240px),
+  // within the limits, so the primary copy is used (fallback: "Syncs your Appointments both ways with Google. Changes take effect when you click Save.").
+  var APPT_HELP = 'Keeps your Appointments in sync both ways between DripJobs and Google. Changes take effect when you click Save.';
   var SAVE_REMINDER = 'Click Save at the bottom of the page to apply this change';   // locked "GCal Save Reminder", no period
 
   var state = {
@@ -673,6 +679,8 @@
     linkedCollapsed: true,   // card's Linked calendars list: collapsed by default when 2+ calendars
     pendingSync: null,   // unsaved Sync Jobs value (null = no change)
     pendingDisconnect: false,
+    syncAppt: true,      // Sync Appointments with Google Calendar: defaults ON for new and existing connections (BR21)
+    pendingAppt: null,
     flow: null,          // null | choose | consent | link | writeto | done
     linked: [],          // indexes into calendars()
     pendingLinks: [],
@@ -883,26 +891,37 @@
       html += '<p class="gcal-desc">Connect your Google Calendar to Appointments and Job Schedule.</p>' +
         '<button type="button" class="btn btn-google" data-gcal="signin">' + G_SVG + 'Sign in with Google</button>' +
         '<div style="margin-top:8px">' + br(7, 'BR7: Launches the existing, unchanged five-step connect flow. Cancel on the Google consent screen returns here, still Not Connected; finishing ends on Appointments.') +
-        br(8, 'BR8: Not Connected shows only the sign-in action. Sync Jobs and Disconnect are hidden.') + '</div>';
+        br(8, 'BR8: Not Connected shows only the sign-in action. All three toggles are hidden.') + '</div>';
     } else {
       html += statusLine() + linkedList('P');
+      var apptOn = state.pendingAppt === null ? state.syncAppt : state.pendingAppt;
+      var apptDirty = state.pendingAppt !== null;
       var syncOn = state.pendingSync === null ? state.syncJobs : state.pendingSync;
       var syncDirty = state.pendingSync !== null, discDirty = state.pendingDisconnect;
       var inline = state.viewport === 'mobile';   // mobile has no hover: reminder shows inline
+      // Order (UX decision): Sync Appointments, Sync Jobs, then Disconnect. Matches "Appointments & Job Schedule: Connected",
+      // keeps the two sync toggles together, and puts the destructive action last, set apart.
+      html += '<div class="gcal-toggle-group">';
+      html += '<div class="settings-toggle-row' + (apptDirty ? ' pending-on' : '') + '">' + '<span class="save-hint" id="apptSaveHint" role="tooltip">' + SAVE_REMINDER + '</span>' +
+        '<label class="dj-switch sm"><input type="checkbox" class="form-check-input switchery" id="syncApptToggle" aria-describedby="' + describedBy('syncApptHelp', 'apptSaveHint', apptDirty) + '" data-gcal="appt"' + (apptOn ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
+        '<label class="settings-toggle-label" for="syncApptToggle">Sync Appointments with Google Calendar</label>' +
+        br(21, 'BR21: Two-way sync (with). Defaults ON for new and existing connections, so nothing changes unless a user turns it off. OFF stops both directions going forward; already-synced appointments stay in DripJobs, frozen. Placed first to match the status line order.') + '</div>' +
+        '<div class="settings-toggle-help" id="syncApptHelp">' + APPT_HELP + '</div>' +
+        (inline ? '<div class="save-inline" id="apptSaveInline" aria-live="polite">' + (apptDirty ? SAVE_REMINDER : '') + '</div>' : '');
       html += '<div class="settings-toggle-row' + (syncDirty ? ' pending-on' : '') + '">' + '<span class="save-hint" id="syncSaveHint" role="tooltip">' + SAVE_REMINDER + '</span>' +
         '<label class="dj-switch sm"><input type="checkbox" class="form-check-input switchery" id="syncJobsToggle" aria-describedby="' + describedBy('syncJobsHelp', 'syncSaveHint', syncDirty) + '" data-gcal="sync"' + (syncOn ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
         '<label class="settings-toggle-label" for="syncJobsToggle">Sync Jobs to Google Calendar</label>' +
-        br(11, 'BR11: Changes stage until Save. Sync Jobs and Disconnect are mutually exclusive; turning one on turns the other off.') +
-        br(9, 'BR9 open question: whether a Sync Appointments to Google toggle is needed at all. Not decided as V1 or V2.') + '</div>' +
+        br(11, 'BR11: Changes stage until Save. Sync Jobs and Disconnect are mutually exclusive. Prototype assumption (BR21 open item): Sync Appointments follows the same rule, so turning Disconnect on turns both syncs off.') +
+        br(14, 'BR14: One-way sync (to), DripJobs to Google, onto the write-to calendar. Turning it off stops future syncing only.') + '</div>' +
         // Locked copy: Snippet Library "GCal Sync Jobs Helper" (Sep 23, 2026). One-way sync; turning off stops future syncing only.
         '<div class="settings-toggle-help" id="syncJobsHelp">Adds your scheduled Jobs to your write-to calendar in Google. Changes take effect when you click Save.</div>' +
-        (inline ? '<div class="save-inline" id="syncSaveInline" aria-live="polite">' + (syncDirty ? SAVE_REMINDER : '') + '</div>' : '');
-      html += '<div class="settings-toggle-row' + (discDirty ? ' pending-on' : '') + '">' + '<span class="save-hint" id="discSaveHint" role="tooltip">' + SAVE_REMINDER + '</span>' +
+        (inline ? '<div class="save-inline" id="syncSaveInline" aria-live="polite">' + (syncDirty ? SAVE_REMINDER : '') + '</div>' : '') + '</div>';
+      html += '<div class="gcal-toggle-group gcal-toggle-danger"><div class="settings-toggle-row' + (discDirty ? ' pending-on' : '') + '">' + '<span class="save-hint" id="discSaveHint" role="tooltip">' + SAVE_REMINDER + '</span>' +
         '<label class="dj-switch sm"><input type="checkbox" class="form-check-input switchery" id="disconnectToggle" aria-describedby="' + describedBy('disconnectHelp', 'discSaveHint', discDirty) + '" data-gcal="disconnect"' + (discDirty ? ' checked' : '') + '><span class="track"></span><span class="thumb"></span></label>' +
         '<label class="settings-toggle-label" for="disconnectToggle">Disconnect Google Calendar</label>' +
         br(15, 'BR15/16: Disconnect helper. Already-synced events stay in Google; only future creates and updates stop. Takes effect on Save.') + '</div>' +
         '<div class="settings-toggle-help" id="disconnectHelp">' + DISCONNECT_HELP + '</div>' +
-        (inline ? '<div class="save-inline" id="discSaveInline" aria-live="polite">' + (discDirty ? SAVE_REMINDER : '') + '</div>' : '');
+        (inline ? '<div class="save-inline" id="discSaveInline" aria-live="polite">' + (discDirty ? SAVE_REMINDER : '') + '</div>' : '') + '</div>';
     }
     html += '</div>';
     html += '<div class="gcal-section-foot">' +
@@ -920,9 +939,10 @@
       '<span class="gcal-name">Google Calendar</span>' +
       '<div class="head-right">' + statusPill() +
       br(20, 'BR20: Read-only, admin only like every other integration card. Shows the viewing admin\'s own connection. No toggles and no Sign in with Google; managing happens on My Profile.') + '</div></div>';
-    html += '<div class="integ-body">' + (c ? statusLine() + linkedList('I') : '') + '</div>';
-    html += '<div class="integ-foot"><span><button type="button" class="flow-link" data-go="profile">Manage Calendars <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></button>' +
-      br(20, 'BR20: Manage Calendars here navigates to My Profile, not the standalone Manage Calendars page. Help Articles uses the same link as My Profile.') + '</span>' + HELP_LINK + '</div>';
+    // Locked (Snippet Library "GCal Integrations Card, Not Connected Description", Sep 28, 2026)
+    html += '<div class="integ-body">' + (c ? statusLine() + linkedList('I') : '<p class="gcal-desc">Connect your Google Calendar from My Profile.</p>') + '</div>';
+    html += '<div class="integ-foot"><span><button type="button" class="flow-link" data-go="profile">Manage in My Profile <i class="fa-solid fa-chevron-right" style="font-size:8px"></i></button>' +
+      br(20, 'BR20: Footer shows in both states. Labeled Manage in My Profile (not Manage Calendars) because it opens My Profile, while My Profile\'s Manage Calendars opens the standalone page. Help Articles uses the same link as My Profile.') + '</span>' + HELP_LINK + '</div>';
     return html + '</div>';
   }
 
@@ -1125,7 +1145,7 @@
     } else if (state.view === 'profile') {
       note.textContent = 'My Profile (every user). The Google Calendar section is now first on the page (BR5). Toggle changes apply only after Save at the bottom of the page (hover or focus any changed toggle for the reminder). Cancel goes to the Sales Pipeline.';
     } else if (state.view === 'card') {
-      note.textContent = 'Company Settings > Integrations (admin only). The Google Calendar card is read-only and shows your own connection; Manage Calendars takes you to My Profile (BR20).';
+      note.textContent = 'Company Settings > Integrations (admin only). The Google Calendar card is read-only and shows your own connection; Manage in My Profile takes you there (BR20).';
     } else {
       note.textContent = (state.viewport === 'desktop' ? 'Hover' : 'Tap the (i) next to') + ' the Google icon to see the ' + (state.connected ? 'manage' : 'connect') + ' tooltip, then ' + (state.viewport === 'desktop' ? 'click' : 'tap') + ' it: every user lands on the Google Calendar section at the top of My Profile (BR4).';
     }
@@ -1308,6 +1328,13 @@
       dc.closest('.settings-toggle-row').classList.toggle('pending-on', discDirty);
       dc.setAttribute('aria-describedby', describedBy('disconnectHelp', 'discSaveHint', discDirty));
     }
+    var ap = document.getElementById('syncApptToggle'), apptDirty = state.pendingAppt !== null;
+    if (ap) {
+      ap.checked = state.pendingAppt === null ? state.syncAppt : state.pendingAppt;
+      ap.closest('.settings-toggle-row').classList.toggle('pending-on', apptDirty);
+      ap.setAttribute('aria-describedby', describedBy('syncApptHelp', 'apptSaveHint', apptDirty));
+    }
+    var ai = document.getElementById('apptSaveInline'); if (ai) ai.textContent = apptDirty ? SAVE_REMINDER : '';
     var si = document.getElementById('syncSaveInline'), di = document.getElementById('discSaveInline');
     if (si) si.textContent = syncDirty ? SAVE_REMINDER : '';
     if (di) di.textContent = discDirty ? SAVE_REMINDER : '';
@@ -1315,7 +1342,7 @@
 
   function describedBy(helpId, hintId, dirty) { return helpId + (dirty ? ' ' + hintId : ''); }
 
-  function clearPending() { state.pendingSync = null; state.pendingDisconnect = false; }
+  function clearPending() { state.pendingSync = null; state.pendingDisconnect = false; state.pendingAppt = null; }
 
   function startFlow(step) {
     clearPending();
@@ -1329,6 +1356,7 @@
   }
   function endFlow(connected, dest) {
     state.flow = null;
+    if (connected && !state.connected) state.syncAppt = true;   // new connections default Sync Appointments ON (BR21)
     state.linkedCollapsed = true;
     state.connected = connected;
     state.view = dest || 'profile';   // consent Cancel returns to My Profile (BR7); finishing ends on Appointments
@@ -1355,7 +1383,7 @@
     if (d) {
       var k = d.dataset.demo, v = d.dataset.value;
       if (k === 'role') state.role = v;
-      else if (k === 'connected') state.connected = v === '1';
+      else if (k === 'connected') { state.connected = v === '1'; state.syncAppt = true; }
       else if (k === 'viewport') state.viewport = v;
       else if (k === 'view') state.view = v;
       else if (k === 'br') state.br = !state.br;
@@ -1376,9 +1404,10 @@
     if (sv) {
       if (sv.dataset.settings === 'save') {
         if (state.pendingSync !== null) state.syncJobs = state.pendingSync;
+        if (state.pendingAppt !== null) state.syncAppt = state.pendingAppt;
         if (state.pendingDisconnect) {
           // Disconnect removes both calendar connections; user stays on My Profile (BR11)
-          state.connected = false; state.syncJobs = false; state.linked = []; state.writeTo = null; state.synced = {};
+          state.connected = false; state.syncJobs = false; state.syncAppt = true; state.linked = []; state.writeTo = null; state.synced = {};
         }
         clearPending();
         render();
@@ -1449,7 +1478,7 @@
       state.confirmUnlink = null;
       if (mcc.dataset.mcConfirm === 'yes') {
         // Last calendar unlinked: DripJobs disconnects from Google entirely (existing behavior)
-        state.connected = false; state.linked = []; state.writeTo = null; state.syncJobs = false; state.synced = {};
+        state.connected = false; state.linked = []; state.writeTo = null; state.syncJobs = false; state.syncAppt = true; state.synced = {};
       }
       render();
       var back = mcc.dataset.mcConfirm === 'yes' ? document.querySelector('.mc-empty-state .btn') : document.querySelector('[data-mc-unlink="' + was + '"]');
@@ -1519,13 +1548,20 @@
     }
     // Card toggles are staged until Save; switching one ON shows the save reminder on hover.
     // Sync Jobs and Disconnect are mutually exclusive: turning one ON turns the other OFF.
-    if (t.dataset.gcal === 'sync' || t.dataset.gcal === 'disconnect') {
+    // Prototype assumption (BR21 open item): Sync Appointments joins the same rule, so Disconnect ON turns both syncs OFF.
+    if (t.dataset.gcal === 'sync' || t.dataset.gcal === 'appt' || t.dataset.gcal === 'disconnect') {
       if (t.dataset.gcal === 'sync') {
         state.pendingSync = t.checked === state.syncJobs ? null : t.checked;
         if (t.checked) state.pendingDisconnect = false;
+      } else if (t.dataset.gcal === 'appt') {
+        state.pendingAppt = t.checked === state.syncAppt ? null : t.checked;
+        if (t.checked) state.pendingDisconnect = false;
       } else {
         state.pendingDisconnect = t.checked;
-        if (t.checked) state.pendingSync = state.syncJobs ? false : null;
+        if (t.checked) {
+          state.pendingSync = state.syncJobs ? false : null;
+          state.pendingAppt = state.syncAppt ? false : null;
+        }
       }
       syncCardToggles();
     }
