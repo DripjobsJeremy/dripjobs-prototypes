@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-30] Document Language: ticket gaps resolved (ticket 86bc6vwzh)
+- Decision: (1) Work Order dates follow BR18 based on the language the Work Order is showing, including a crew-selected language. (2) In the original language, dates display exactly as today, including zero-padding (invoice Change Order tag stays 09/30/2026); BR18 formats apply only when translated. (3) Quantities, hours and dimensions stay as entered; unit labels may translate. (4) Portal Documents section and category labels may translate; file names stay as entered; files never translate. (5) Keep the Switch to English (original) button in the BR31 notice, which sets the customer's language to the original (BR5 to BR7).
+- Why: Jeremy answered the five gaps raised while building the prototype; wording is going back to the ticket in the PM project.
+- Open question: None.
+
 ## [2026-09-30] Document Language: single entry point on the Proposal view (ticket 86bc6vwzh)
 - Decision: The per-proposal Language control stays only on the Proposal view. It is not added to the Proposal Builder Settings tab (Proposal Display section), which was considered.
 - Why: Accepted proposals cannot be edited in the Builder, but BR30 lets any user who can view a proposal change its language, so the Proposal view needs the control regardless. A second entry point for the same function in the Builder would duplicate it, which the team avoids.
