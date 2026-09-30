@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-30] Document Language: single entry point on the Proposal view (ticket 86bc6vwzh)
+- Decision: The per-proposal Language control stays only on the Proposal view. It is not added to the Proposal Builder Settings tab (Proposal Display section), which was considered.
+- Why: Accepted proposals cannot be edited in the Builder, but BR30 lets any user who can view a proposal change its language, so the Proposal view needs the control regardless. A second entry point for the same function in the Builder would duplicate it, which the team avoids.
+- Open question: None.
+
 ## [2026-09-30] Customer Portal settings tab: match production styling (ticket 86bc6vwzh)
 - Decision: Restyled the prototype's Company Settings > Customer Portal tab to the production screenshot: top bar (search, alert, bell, user menu), Upload Image button with icon, helper text placement, Create Your Cover Photo promo, white-color warning, and the full Section Order card (Restore default, info bar, icon rows, Fixed tag). The new Document Language section was left as designed and now sits in a matching card.
 - Why: Jeremy flagged formatting gaps against the real UI; reviewers should see the new section in the context it will ship in.
