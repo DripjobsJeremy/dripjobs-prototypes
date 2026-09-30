@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-09-30] Customer Portal: Document Language (ticket 86bc6vwzh)
+- Decision: Rebuilt the earlier project prototype on the production screenshots (Company Settings, accepted Proposal with pending Change Order, Invoice, Portal Change Order). The Change Order has no admin screen of its own here: it renders inside the Proposal page as in production, with a BR24 chip instead of a Language control. Portal has three switchable documents (Change Order, pending Proposal, Invoice). Only Spanish and French are simulated; other languages show original text.
+- Why: Jeremy supplied production screenshots as ground truth and the ticket's Handoff to UX removes PDF screens and PDF wording. The Switch to English (original) button in the BR31 download notice is a UX recommendation, flagged with a REC chip.
+- Open question: Work Order, Proposal PDF and standalone Change Order screens are still to come from Jeremy. All notice copy (BR19, BR31, lock note, helper text) is placeholder pending Copywriter and legal.
+
 ## [2026-09-25] Weekly Product Update + Product Roadmap refreshed for Sep 21-25, 2026
 
 - Decision: Rebuilt `weekly-product-update/index.html` and `Weekly_Product_Update.md` with the 3 tickets pushed to production this week (2 on Sep 21, 1 on Sep 23), grouped into Integrations (Multiple Google Calendars linking, Google Calendar reauthorization fix) and Admin Tools (My Profile design refresh). Rebuilt `dripjobs-product-roadmap/index.html` from a fresh workspace-wide pull of the bare 🎯 tag: 26 in-flight tickets, now spanning 11 of the 13 pipeline stages (Triage and On Hold/Parked both emptied out this week, two tickets reached Branch Ready), 0 on hold/parked. Updated both Release Notes cards on the hub to the new dates.
