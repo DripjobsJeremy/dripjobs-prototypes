@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-10-01] Hub: synced #protoGrid statuses and tags to ClickUp (before September release notes)
+- Decision: Pulled all 32 ClickUp tickets linked from the Prototypes tab and updated badges to match: 20 unchanged, 12 status changes (5 now Pushed to Production, 2 In Progress, 2 In QA Testing, 1 QA Kickback, 1 Ready for Dev, 1 new In Review), plus status fixes for Needs Design vs Needs PM Analysis. Added a new In Review badge (`status-inreview`) and filter option, since ClickUp has an "in review" status with no matching bucket. Synced the 🎯 badge: added to 8 cards, removed from 2 (Package Templates, Proposal Expiration) whose tickets no longer carry the tag.
+- Why: Direct request, done before building the September release notes so the hub is current.
+- Open question: 5 cards are now Pushed to Production (Link Multiple Google Calendars, Deal Stage Read-Only, Holiday Calendar Company-Wide, AI Drip Message Writing, Address Line 2) and are left in place; removal needs the "Sync hub:" trigger. 4 cards have no ClickUp link and were not checked.
+
 ## [2026-09-30] Document Language: ticket gaps resolved (ticket 86bc6vwzh)
 - Decision: (1) Work Order dates follow BR18 based on the language the Work Order is showing, including a crew-selected language. (2) In the original language, dates display exactly as today, including zero-padding (invoice Change Order tag stays 09/30/2026); BR18 formats apply only when translated. (3) Quantities, hours and dimensions stay as entered; unit labels may translate. (4) Portal Documents section and category labels may translate; file names stay as entered; files never translate. (5) Keep the Switch to English (original) button in the BR31 notice, which sets the customer's language to the original (BR5 to BR7).
 - Why: Jeremy answered the five gaps raised while building the prototype; wording is going back to the ticket in the PM project.
