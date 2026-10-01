@@ -1485,3 +1485,8 @@ Format:
 - Decision: Replaced `invoice-reminders/index.html` with the updated UX design (BR-1 to BR-26). Changes: Pause/Resume lives in each invoice row's View menu (Reminders state is manual Pause only, None covers no due date, Paid, Voided, or no enabled rows), Bulk Send Reminder removed (out of scope), bulk Void skips invoices with payments and asks once about job costing, QBO chip shows Synced / Not Synced / Failed. Demo bar adds BR notes and Job Costing toggles.
 - Assumption: Voided invoices show a $0 balance. Em dashes in the supplied file were replaced per repo rules. Hub card description updated to drop Send Reminder.
 - Open question: What sets the QBO Failed state (TJ). Copywriter review of default email subjects (hyphen separator).
+
+## [2026-10-01] Invoice Reminders (86b32d4gr): bulk actions moved to page header
+- Decision: On the Invoices tab, checking one or more rows now swaps the header buttons (New Invoice, Actions) for "N selected" plus Mark as Paid, Export, Void, matching the Sales List pattern. Replaces the floating bottom bar. Added a text Clear link since there is no other one-click way to drop the selection.
+- Assumption: Mark as Paid and Export use the primary button style and Void uses the danger style (Sales List shows Blast, Export CSV, Archive).
+- Open question: None.
