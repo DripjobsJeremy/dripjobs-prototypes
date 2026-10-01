@@ -2,11 +2,16 @@
 
 **Period:** September 1 – September 30, 2026
 **Releases:** 7 deployments
-**Improvements:** 25 updates
+**Improvements:** 27 updates
 
 ---
 
-## 📄 Proposals & Proposal Builder (1 update)
+## 📄 Proposals & Proposal Builder (2 updates)
+
+### Downloaded Proposals Now Include Images and Attachments (Sep 8)
+**What changed:** Fixed an issue where a downloaded proposal with "Include images" set to Yes could leave out line item images and the files in the attachments section. Both now come through in the download, whether you download from the internal view or the customer view.
+**Why it matters:** Customers get the complete proposal, with your photos and attachments, in the file you send them.
+**Action needed:** None
 
 ### Job Report Margin and Profit Now Include Material Cost (Sep 3)
 **What changed:** The Job Report summary on a proposal now includes material cost in Total Price, Total Cost, Profit, and Margin. Previously these figures reflected labor only. The Product Report and the per-substrate rows are unchanged.
@@ -82,12 +87,17 @@
 
 ---
 
-## 💬 Messaging & Notifications (1 update)
+## 💬 Messaging & Notifications (2 updates)
 
 ### New: AI-Assisted Drip Message Writing (Sep 28)
 **What changed:** A "Generate with AI" button in the drip step editor, for email and text steps in both the Sales and Jobs pipelines, now writes a message for that step. You set the timing, describe what you want to say, and pick a tone and message type, and it fills in the message body for you to edit. Nothing goes out until you save, and the subject line and send delay stay yours to set.
 **Why it matters:** You can start from a well-written draft instead of a blank field, with fewer typos and less time spent writing every follow-up.
 **Action needed:** None, look for the Generate with AI button when editing a drip step.
+
+### Support Panel No Longer Covers the Command Center Chat Message Box (Sep 3)
+**What changed:** Improved the Command Center chat layout so the DripJobs Support panel no longer sits over the message compose box, which could block typing on a tablet.
+**Why it matters:** You can type and send customer replies from a tablet without the panel getting in the way.
+**Action needed:** None
 
 ---
 
