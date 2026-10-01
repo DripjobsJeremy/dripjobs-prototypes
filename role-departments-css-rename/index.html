@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Role Departments and CSS Rename - DripJobs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#8B85EA; --primary-strong:#5C53DC; --primary-rgb:139,133,234; --btn:#6A5BE2;
+  --text:#32415B; --muted:#5B6478; --border:#E3E1EC; --lav:#F1EFFC; --lav2:#E8E6FA; --bg:#F7F7FA;
+  --warn-bg:#FFFBEB; --warn-bd:#FDE68A; --warn-tx:#92400E;
+  --info-bg:#EFF6FF; --info-bd:#BFDBFE; --info-tx:#1E40AF;
+  --danger-bg:#FEF2F2; --danger-bd:#FECACA; --danger-tx:#991B1B;
+  --green:#15803D;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);font-size:14px;background:#fff;line-height:1.45}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--primary-strong);outline-offset:2px}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* hub proto bar */
+.proto-bar{background:#fff;border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:"DM Sans",sans-serif}
+.proto-bar-left{display:flex;align-items:center;gap:10px}
+.back-link{font-size:12px;font-weight:500;color:#80879A;text-decoration:none}
+.back-link:hover{color:var(--primary)}
+.divider{color:var(--border);font-size:16px}
+.proto-bar-title{font-size:14px;font-weight:600}
+.proto-bar-ticket{font-size:11px;font-weight:600;color:var(--primary);text-decoration:none;padding:4px 10px;border:1px solid #D6D2F5;background:#E8E6FA;border-radius:999px;letter-spacing:.2px}
+.proto-bar-ticket:hover{background:var(--primary);color:#fff}
+
+/* demo controls (not product UI) */
+.demo{position:sticky;top:0;z-index:50;background:#FEF3C7;border-bottom:2px solid #D97706;padding:8px 16px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:13px;color:#78350F}
+.demo .grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.demo button{border:1px solid #D97706;background:#fff;color:#78350F;border-radius:8px;padding:6px 10px;min-height:36px;cursor:pointer}
+.demo button[aria-pressed="true"]{background:#92400E;color:#fff;border-color:#92400E}
+.demo .status{font-size:12px;flex-basis:100%}
+.br{display:inline-flex;align-items:center;background:#F97316;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px;margin-left:6px;cursor:help;vertical-align:middle;white-space:nowrap}
+body.hide-br .br{display:none}
+
+/* app shell */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:10px 28px;border-bottom:1px solid var(--border);background:#fff}
+.logo{font-weight:700;font-size:24px;color:var(--primary-strong);letter-spacing:-.5px}
+.search{display:flex;align-items:center;gap:10px;width:390px;max-width:100%;border:1px solid var(--border);border-radius:999px;padding:10px 18px;color:var(--muted);font-size:14px}
+.user{display:flex;align-items:center;gap:12px;font-weight:600}
+.avatar{width:34px;height:34px;border-radius:50%;background:#32415B;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+.shell{display:flex;min-height:calc(100vh - 160px)}
+.side{width:230px;flex:none;border-right:1px solid var(--border);padding:12px;font-size:14px;background:#fff}
+.side .lbl{font-size:11px;letter-spacing:.5px;color:var(--muted);margin:16px 8px 6px;text-transform:uppercase}
+.side a{display:block;padding:11px 10px;border-radius:8px;text-decoration:none;color:var(--text);min-height:44px}
+.side a.on{background:var(--primary);color:#fff;font-weight:600}
+.main{flex:1;min-width:0;padding:20px 24px 60px;background:#FAFAFC}
+.screen{display:none}.screen.active{display:block}
+
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:18px}
+.page-h{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.page-h h1{font-size:28px;font-weight:600;margin:0}
+.tag-sa{background:var(--lav2);color:var(--primary-strong);font-size:11px;font-weight:600;letter-spacing:.5px;border-radius:6px;padding:4px 9px}
+.page-sub{margin:6px 0 14px;color:var(--muted)}
+.alert{display:flex;gap:10px;border-radius:8px;border:1px solid;padding:10px 14px;font-size:13px}
+.alert.warn{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-tx)}
+.alert.info{background:var(--info-bg);border-color:var(--info-bd);color:var(--info-tx)}
+.alert.danger{background:var(--danger-bg);border-color:var(--danger-bd);color:var(--danger-tx)}
+
+.sec-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.sec-ic{width:42px;height:42px;border-radius:10px;background:#F1F1F5;display:grid;place-items:center;color:var(--muted);flex:none}
+.sec-head h2{font-size:18px;margin:0;font-weight:600;display:flex;align-items:center;gap:8px}
+.sec-head .sub{font-size:13px;color:var(--muted)}
+.count{background:#F1F1F5;color:var(--muted);font-size:12px;font-weight:500;border-radius:6px;padding:2px 8px}
+.sec-tools{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid transparent;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
+.btn-p{background:var(--btn);color:#fff}
+.btn-p:hover{background:var(--primary-strong)}
+.btn-s{background:#fff;border-color:var(--border);color:var(--text)}
+.btn-s:hover{border-color:var(--primary)}
+.btn-o{background:#fff;border-color:var(--btn);color:var(--btn)}
+.btn-d{background:#DC2626;color:#fff}
+.btn-d:hover{background:#B91C1C}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.ctl{height:44px;border:1px solid var(--border);border-radius:8px;padding:0 12px;background:#fff;min-width:150px}
+.ctl:focus{outline:none;border-color:var(--primary-strong);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.3)}
+
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:left;padding:10px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:12px 8px;border-bottom:1px solid #F0EFF5;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.mem{display:flex;align-items:center;gap:12px;font-weight:600}
+.av{position:relative;width:40px;height:40px;border-radius:50%;background:var(--lav2);color:var(--primary-strong);display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+.av i{position:absolute;right:0;bottom:0;width:10px;height:10px;border-radius:50%;background:#10B981;border:2px solid #fff}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.pill{display:inline-block;background:var(--lav2);color:var(--primary-strong);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;margin:2px 4px 2px 0}
+.st{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:500;font-size:13px}
+.st::before{content:"";width:7px;height:7px;border-radius:50%;background:#10B981}
+.icon-btn{width:44px;height:44px;border:0;background:none;border-radius:8px;cursor:pointer;color:var(--muted);display:inline-grid;place-items:center}
+.icon-btn:hover{background:var(--lav);color:var(--primary-strong)}
+.sortable{cursor:pointer;user-select:none}
+.sortable:hover{color:var(--primary-strong)}
+.sortable[aria-sort="ascending"]::after{content:" \25B2";color:var(--primary-strong);font-size:9px}
+.sortable[aria-sort="descending"]::after{content:" \25BC";color:var(--primary-strong);font-size:9px}
+
+.role-row{display:flex;align-items:center;gap:14px;padding:14px 4px;border-bottom:1px solid #F0EFF5;flex-wrap:wrap}
+.role-row:last-child{border-bottom:0}
+.rbadge{width:44px;height:44px;border-radius:10px;background:#F1F1F5;color:var(--muted);display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.rbadge.used{background:var(--lav2);color:var(--primary-strong)}
+.role-main{flex:1;min-width:200px}
+.role-main b{font-size:15px}
+.role-main small{display:block;color:var(--muted);font-size:13px}
+.unused{background:#F1F1F5;color:var(--muted);font-size:10px;font-weight:700;border-radius:6px;padding:2px 7px;margin-left:8px;letter-spacing:.4px}
+.dept{font-size:12px;font-weight:600;border-radius:6px;padding:4px 10px;background:#F1F1F5;color:var(--muted);white-space:nowrap}
+.dept.cs{background:#DCFCE7;color:#166534}
+
+/* Finder */
+.f-title{font-size:26px;font-weight:600;margin:0}
+.f-sub{color:var(--muted);margin:2px 0 16px}
+.filters{display:flex;flex-wrap:wrap;gap:16px}
+.f-grp{display:flex;flex-direction:column;gap:4px}
+.f-lbl{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.f-grp .ctl{min-width:200px;height:46px}
+.f-grp.css-f .ctl{min-width:290px}
+.acc-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.acc-top h2{font-size:17px;margin:0}
+.acc-top small{display:block;color:var(--muted);font-size:12.5px;font-weight:400}
+.acc-top .sec-tools{align-items:flex-end}
+.show-l{font-size:11px;color:var(--muted);display:block}
+.fin{table-layout:fixed;font-size:13px}
+.fin th{padding:10px 6px;font-size:10.5px;white-space:normal}
+.fin td{padding:11px 6px;overflow-wrap:anywhere}
+.fin .co b{display:block;font-size:13.5px}
+.fin .co small{color:var(--muted)}
+.fin tr.row td:first-child{border-left:3px solid var(--primary)}
+.age{color:var(--muted);font-size:12px;margin-left:4px}
+.plan,.a2p{white-space:nowrap}
+.tier{display:inline-block;border-radius:999px;padding:3px 8px;font-weight:600;font-size:12px}
+.tier.ok{background:#DCFCE7;color:#166534}
+.tier.na{background:#FEF3C7;color:#92400E}
+.tier.risk{background:#FEE2E2;color:#991B1B}
+.plan{display:inline-block;background:#FEF3C7;color:#92400E;border-radius:999px;padding:3px 8px;font-weight:600;font-size:12px}
+.plan.pro{background:#EEE;color:#555}
+.a2p{display:inline-block;border-radius:999px;padding:3px 8px;font-weight:600;font-size:12px;background:#FEE2E2;color:#991B1B}
+.a2p.act{background:#DCFCE7;color:#166534}.a2p.pen{background:#FEF3C7;color:#92400E}
+.css-cell{font-weight:500}
+.css-cell.un{color:var(--muted);font-weight:400}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+
+/* Company settings */
+.chips{display:flex;gap:10px;flex-wrap:wrap;padding:4px 4px 14px;margin-bottom:10px}
+.chip{border:0;border-radius:999px;padding:10px 20px;min-height:44px;font-weight:500;cursor:default}
+.chip.on{box-shadow:0 0 0 2px var(--primary-strong);font-weight:600}
+.cs-h{font-size:16px;font-weight:600;margin:0 0 12px}
+.meta-k{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 14px}
+.field{position:relative;display:flex;flex-direction:column}
+.field>label{position:absolute;top:-8px;left:10px;background:#fff;padding:0 6px;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.2px;z-index:1}
+.field .in{height:48px;padding:0 14px;border:1px solid var(--border);border-radius:8px;background:#fff;width:100%}
+.field select.in{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2332415B' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:38px;cursor:pointer}
+.field .in:focus{outline:none;border-color:var(--primary-strong);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.3)}
+.field .in.err{border-color:#DC2626}
+.field .req::after{content:" *";color:#DC2626}
+.field .ro{background:#FAFAFC}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.err-t{font-size:12px;color:#B91C1C;margin-top:6px}
+.banner{display:flex;gap:12px;align-items:flex-start;border-radius:8px;padding:12px 16px;margin-bottom:12px}
+.banner.blue{background:#EAF2FD;color:#1E40AF}
+.banner.green{background:#E7F8EE;color:#166534}
+.tg{width:52px;height:30px;border-radius:999px;background:var(--primary);position:relative;display:inline-block;flex:none}
+.tg::after{content:"";position:absolute;top:3px;left:25px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+
+/* modals */
+.ov{position:fixed;inset:0;background:rgba(30,35,50,.55);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.ov.top{z-index:110}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:520px;box-shadow:0 20px 60px rgba(0,0,0,.25);margin:auto}
+.modal.wide{max-width:680px}
+.m-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 24px 14px;background:#FAFAFC;border-radius:16px 16px 0 0;border-bottom:1px solid var(--border)}
+.m-h h2{margin:0;font-size:19px}
+.m-h p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.m-b{padding:22px 24px}
+.m-f{display:flex;justify-content:space-between;gap:10px;padding:14px 24px 20px;flex-wrap:wrap}
+.m-f.end{justify-content:flex-end}
+.x{width:44px;height:44px;margin:-8px -10px 0 0;border:0;background:none;font-size:22px;color:var(--muted);cursor:pointer;border-radius:8px}
+.x:hover{background:var(--lav)}
+.m-grid{display:grid;grid-template-columns:150px 1fr;gap:22px}
+.big-av{width:150px;height:150px;border-radius:14px;background:linear-gradient(135deg,#EDE9FE,#C4B5FD);color:var(--primary-strong);display:grid;place-items:center;font-size:44px;font-weight:700}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stack>*+*{margin-top:18px}
+.roles-box{border:1px solid var(--border);border-radius:8px;max-height:230px;overflow:auto;padding:4px}
+.roles-box label{display:flex;align-items:center;gap:12px;padding:8px 10px;min-height:44px;border-radius:6px;cursor:pointer}
+.roles-box label:hover{background:var(--lav)}
+.roles-box input{width:18px;height:18px;accent-color:var(--primary-strong);flex:none}
+.roles-box .dept{margin-left:auto}
+.linkbtn{background:none;border:0;color:var(--primary-strong);font-weight:600;cursor:pointer;padding:12px 4px;min-height:44px}
+.opt{border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:10px}
+.opt.sel{border-color:var(--primary-strong);background:#FBFAFF}
+.opt label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-weight:600}
+.opt input[type=radio]{margin-top:3px;width:18px;height:18px;accent-color:var(--primary-strong);flex:none}
+.opt .ctl{margin-top:10px;width:100%;margin-left:0}
+.opt small{display:block;font-weight:400;color:var(--muted)}
+.names{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.names li{background:var(--lav2);color:var(--primary-strong);border-radius:999px;padding:4px 12px;font-weight:600;font-size:13px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#32415B;color:#fff;border-radius:10px;padding:12px 18px;font-size:13px;z-index:200;max-width:90vw}
+
+@media (max-width:900px){
+  .side{display:none}.main{padding:16px 12px 50px}.grid3,.two,.m-grid{grid-template-columns:1fr}.big-av{width:80px;height:80px;font-size:26px}
+  .search{display:none}.topbar{padding:10px 14px}
+  .card{overflow-x:auto}
+  .fin{min-width:980px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Role Departments, Multiple Roles, and CSS Rename</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bcaf2hu" target="_blank">86bcaf2hu</a>
+</div>
+
+<!-- DEMO CONTROLS (not product UI) -->
+<div class="demo" role="region" aria-label="Prototype demo controls">
+  <strong>PROTOTYPE</strong>
+  <div class="grp" role="group" aria-label="Screen">
+    <button data-screen="admin" aria-pressed="true">1 · Admin Settings</button>
+    <button data-screen="finder" aria-pressed="false">2 · At Risk Accounts</button>
+    <button data-screen="company" aria-pressed="false">3 · Company Settings</button>
+  </div>
+  <button id="brToggle" aria-pressed="true">BR chips</button>
+  <button id="scenOne">Scenario: OBCSS is the only Customer Success Role</button>
+  <button id="resetData">Reset data</button>
+  <span class="status" id="demoStatus" aria-live="polite">Post-release state. Try: edit the OBCSS Role Department, edit Dripjobs Harrison (Product Manager, assigned to The Nest), then check the Finder and Company Settings.</span>
+</div>
+
+<header class="topbar">
+  <span class="logo">dripjobs</span>
+  <span class="search" aria-hidden="true">Search leads, contacts, tags…</span>
+  <span class="user"><span class="avatar" aria-hidden="true">JH</span>Jeremy Harrison <span aria-hidden="true">⌄</span></span>
+</header>
+
+<div class="shell">
+  <nav class="side" id="side" aria-label="Main"></nav>
+  <main class="main">
+
+  <!-- ============ 1. ADMIN SETTINGS ============ -->
+  <section class="screen active" id="scr-admin" aria-labelledby="h-admin">
+    <div class="card">
+      <div class="page-h"><h1 id="h-admin">Admin Settings</h1><span class="tag-sa">SUPER ADMIN</span></div>
+      <p class="page-sub">Centralized configuration for admin-only settings that affect DripJobs globally.</p>
+      <div class="alert warn"><span aria-hidden="true">ⓘ</span><div>Changes made here affect live production data across DripJobs, including Company Settings dropdowns and menu navigation links. All destructive or impactful changes require confirmation.</div></div>
+    </div>
+
+    <div class="card" id="membersCard">
+      <div class="sec-head">
+        <span class="sec-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M16 4.5a3.5 3.5 0 010 7M18 14c2.2.6 3.5 2.6 3.5 5"/></svg></span>
+        <div>
+          <h2>Members <span class="count" id="memCount"></span></h2>
+          <div class="sub">Source of truth for the CSS Representative dropdown in Company Settings<span class="br" title="Assumption: this subtitle read 'OBCSS dropdown' today. Updated to match the BR7 rename. Confirm with Copywriter.">Copy</span></div>
+        </div>
+        <div class="sec-tools">
+          <select class="ctl" id="memStatus" aria-label="Status"><option value="active">Status: Active</option><option value="all">Status: All</option></select>
+          <input class="ctl" id="memSearch" placeholder="Search members…" aria-label="Search members">
+          <button class="btn btn-p" id="addMember">+ Add Member</button>
+        </div>
+      </div>
+      <table id="memTable">
+        <thead><tr><th>Member</th><th>Email</th><th>Roles<span class="br" title="BR3: A member can hold one or more Roles. Admin Settings shows all of them.">BR3</span></th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card" id="rolesCard">
+      <div class="sec-head">
+        <span class="sec-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg></span>
+        <div>
+          <h2>Roles <span class="count" id="roleCount"></span></h2>
+          <div class="sub">Roles that members can be assigned. Every Role belongs to one Department; Roles in Customer Success feed the CSS Representative dropdown and the Finder.<span class="br" title="BR1/BR2: Department is required. There is no on/off toggle: a Role is Customer Success or not based only on its Department.">BR1 · BR2</span></div>
+        </div>
+        <div class="sec-tools"><button class="btn btn-p" id="addRole">+ Add Role</button></div>
+      </div>
+      <div id="roleList"></div>
+    </div>
+  </section>
+
+  <!-- ============ 2. AT RISK ACCOUNTS ============ -->
+  <section class="screen" id="scr-finder" aria-labelledby="h-finder">
+    <h1 class="f-title" id="h-finder">At Risk Accounts</h1>
+    <p class="f-sub">Accounts at risk of churning, with the primary contact for direct outreach.</p>
+    <div class="card">
+      <div class="filters">
+        <div class="f-grp"><span class="f-lbl">Health Tier</span><select class="ctl" aria-label="Health tier"><option>All tiers</option></select></div>
+        <div class="f-grp"><span class="f-lbl">Plan</span><select class="ctl" aria-label="Plan"><option>All plans</option></select></div>
+        <div class="f-grp css-f"><span class="f-lbl">CSS<span class="br" title="BR10: filter label renamed from OBCSS to CSS. BR9/BR11: lists every member assigned to at least one account (Customer Success or not), shown as Name, Role.">BR9-11</span></span><select class="ctl" id="cssFilter" aria-label="CSS"></select></div>
+        <div class="f-grp"><span class="f-lbl">Signup Date</span><select class="ctl" aria-label="Signup date"><option>All time</option></select></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="acc-top">
+        <h2>Accounts<small id="accSummary"></small></h2>
+        <div class="sec-tools"><button class="btn btn-o" id="clearFilters">Clear All Filters</button><div><span class="show-l">Show</span><select class="ctl" style="min-width:80px" aria-label="Rows to show"><option>25</option></select></div></div>
+      </div>
+      <table class="fin" id="finTable">
+        <colgroup><col style="width:14%"><col style="width:8%"><col style="width:9%"><col style="width:9%"><col style="width:7%"><col style="width:8%"><col style="width:14%"><col style="width:9%"><col style="width:14%"><col style="width:8%"></colgroup>
+        <thead><tr>
+          <th class="sortable" data-sort="company" tabindex="0">Company Name</th>
+          <th class="sortable" data-sort="date" tabindex="0">Signup Date</th>
+          <th>Health Tier</th><th>Plan</th><th>Total Sales</th><th>A2P Status</th>
+          <th class="sortable" data-sort="css" tabindex="0">CSS<span class="br" title="BR10/BR17: column renamed to CSS. Sorting orders rows by member name, not Role. Cells wrap so there is no horizontal scroll.">BR10 · 17</span></th>
+          <th>Contact Name</th><th>Email</th><th>Phone</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 3. COMPANY SETTINGS ============ -->
+  <section class="screen" id="scr-company" aria-labelledby="h-company">
+    <h1 class="sr-only" id="h-company">Company Settings: Company Information</h1>
+    <div class="chips" role="tablist" aria-label="Company settings">
+      <button class="chip on" role="tab" aria-selected="true">Company Information</button>
+      <button class="chip" role="tab" style="background:#FAF0E6">Brand</button>
+      <button class="chip" role="tab" style="background:#E6FAF0">Email Settings</button>
+      <button class="chip" role="tab" style="background:#E6F3FA">App Settings</button>
+      <button class="chip" role="tab" style="background:#FAF7E6">Calendar</button>
+      <button class="chip" role="tab" style="background:#FAE6E6">Templates</button>
+      <button class="chip" role="tab" style="background:#F0FAE6">Notifications</button>
+      <button class="chip" role="tab" style="background:#E6FAFA">Payments</button>
+      <button class="chip" role="tab" style="background:#FAEAE6">Integrations</button>
+      <button class="chip" role="tab" style="background:#EFEFF3">Customer Portal</button>
+      <button class="chip" role="tab" style="background:#FAE6F0">Add-Ons</button>
+    </div>
+    <div class="card">
+      <h2 class="cs-h">Account Status</h2>
+      <div style="display:flex;gap:40px;flex-wrap:wrap;margin-bottom:14px">
+        <div><div class="meta-k">Account</div><b style="font-size:18px">#11265</b></div>
+        <div><div class="meta-k">Plan</div><b style="font-size:18px">DripJobs Advanced - $147/mo</b></div>
+      </div>
+      <div class="banner blue"><span aria-hidden="true">▣</span><div><b>Next Billing Date</b><br><b>October 14, 2026</b></div></div>
+      <div class="banner green"><span aria-hidden="true">▤</span><div><b>Coupon Applied (PARTNER8322)</b><br>Gives a 100% lifetime discount (automatically applied each billing cycle).<br>Applied on September 14, 2026</div></div>
+    </div>
+    <div class="card">
+      <h2 class="cs-h">Admin Controls</h2>
+      <div class="grid3">
+        <div class="field"><label>Plan</label><select class="in" disabled><option>DripJobs Advanced</option></select></div>
+        <div class="field"><label>Subscription ID</label><input class="in ro" value="AzZfGBUTpYIKC3aY2" readonly></div>
+        <div class="field">
+          <label for="cssRep">CSS Representative<span class="br" title="BR7: label renamed from OBCSS Representative. BR6/BR8: lists only members holding a Customer Success Role, shown as Name, Role. BR12: an existing non-Customer Success assignee stays as the selected value but cannot be newly selected.">BR6-8 · 12</span></label>
+          <select class="in" id="cssRep"></select>
+          <div class="hint" id="cssChanged"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:20px"><span class="tg" aria-hidden="true"></span><b>Active Company</b><span class="hint" style="margin:0">(allow all users to log in)</span></div>
+    </div>
+    <div class="card">
+      <h2 class="cs-h">Company Details</h2>
+      <div class="grid3">
+        <div class="field"><label class="req">Company Name</label><input class="in ro" value="Sparrow's Nest Painting" readonly></div>
+        <div class="field"><label class="req">Short Name</label><input class="in ro" value="The Nest" readonly></div>
+        <div class="field"><label>Business Type</label><input class="in ro" value="Painting" readonly></div>
+        <div class="field"><label class="req">Time Zone</label><input class="in ro" value="Eastern Standard Time" readonly></div>
+        <div class="field"><label>License Number</label><input class="in ro" value="L987616" readonly></div>
+        <div class="field"><label>Phone</label><input class="in ro" value="(555) 555-5555" readonly></div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<!-- ============ MODALS ============ -->
+<!-- Add/Edit Role -->
+<div class="ov" id="ov-role" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="roleTitle">
+    <div class="m-h"><div><h2 id="roleTitle">Add Role</h2><p>Roles are available when assigning a member.</p></div><button class="x" data-close="ov-role" aria-label="Close">×</button></div>
+    <div class="m-b stack">
+      <div class="field"><label class="req" for="roleName">Role Name</label><input class="in" id="roleName" placeholder="e.g. CSS"><div class="err-t" id="roleNameErr" hidden>Enter a Role name.</div></div>
+      <div class="field"><label class="req" for="roleDept">Department<span class="br" title="BR1: required. Fixed list of 11 Departments managed by DripJobs (assumption: Super Admins cannot add, rename, or remove Departments). Label copy goes to Copywriter.">BR1</span></label>
+        <select class="in" id="roleDept"></select>
+        <div class="err-t" id="roleDeptErr" hidden>Choose a Department.</div>
+        <div class="hint">Roles in Customer Success appear in the CSS Representative dropdown and the Finder.</div>
+      </div>
+    </div>
+    <div class="m-f"><button class="btn btn-s" data-close="ov-role">Cancel</button><button class="btn btn-p" id="saveRole">Add Role</button></div>
+  </div>
+</div>
+
+<!-- Add/Edit Member -->
+<div class="ov" id="ov-member" hidden>
+  <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="memTitle">
+    <div class="m-h"><div><h2 id="memTitle">Edit Member</h2><p id="memSubT">Changes will update this member's name and email in the CSS Representative dropdown.</p></div><button class="x" data-close="ov-member" aria-label="Close">×</button></div>
+    <div class="m-b">
+      <div class="m-grid">
+        <div><div class="big-av" id="memBig">DL</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:14px;border:1px solid var(--border);border-radius:10px;padding:10px 12px"><span class="st" style="font-weight:600">Active</span><span class="tg" style="margin-left:auto;transform:scale(.8)" aria-hidden="true"></span></div>
+        </div>
+        <div class="stack">
+          <div class="two">
+            <div class="field"><label class="req" for="mFirst">First Name</label><input class="in" id="mFirst"><div class="err-t" id="mFirstErr" hidden>Required.</div></div>
+            <div class="field"><label class="req" for="mLast">Last Name</label><input class="in" id="mLast"><div class="err-t" id="mLastErr" hidden>Required.</div></div>
+          </div>
+          <div class="field"><label class="req" for="mEmail">Email Address</label><input class="in" id="mEmail" type="email"><div class="err-t" id="mEmailErr" hidden>Required.</div></div>
+          <div>
+            <div class="meta-k" style="margin-bottom:6px">Roles<span class="br" title="BR3: choose one or more Roles. BR15: a member with no Role is allowed, displays by name only, and does not count as Customer Success.">BR3 · BR15</span></div>
+            <div class="roles-box" id="mRoles" role="group" aria-label="Roles"></div>
+            <button class="linkbtn" id="mAddRole" type="button">+ Add new role</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="m-f"><button class="btn btn-s" data-close="ov-member">Cancel</button><button class="btn btn-p" id="saveMember">Save Changes</button></div>
+  </div>
+</div>
+
+<!-- Replacement prompt (member edit 13.1 and member removal) -->
+<div class="ov top" id="ov-repl" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="replTitle">
+    <div class="m-h"><div><h2 id="replTitle">Assigned accounts</h2><p id="replSub"></p></div><button class="x" data-close="ov-repl" aria-label="Close">×</button></div>
+    <div class="m-b" id="replBody"></div>
+    <div class="m-f"><button class="btn btn-s" data-close="ov-repl">Cancel</button><button class="btn btn-p" id="replOk">Confirm</button></div>
+  </div>
+</div>
+
+<!-- Department change prompt (13.2) -->
+<div class="ov top" id="ov-dept" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="deptTitle">
+    <div class="m-h"><div><h2 id="deptTitle">Change Department?</h2><p id="deptSub"></p></div><button class="x" data-close="ov-dept" aria-label="Close">×</button></div>
+    <div class="m-b" id="deptBody"></div>
+    <div class="m-f"><button class="btn btn-s" data-close="ov-dept">Cancel</button><button class="btn btn-p" id="deptOk">Confirm</button></div>
+  </div>
+</div>
+
+<!-- Generic confirmation -->
+<div class="ov top" id="ov-conf" hidden>
+  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confTitle">
+    <div class="m-h"><div><h2 id="confTitle">Are you sure?</h2></div><button class="x" data-close="ov-conf" aria-label="Close">×</button></div>
+    <div class="m-b" id="confBody"></div>
+    <div class="m-f"><button class="btn btn-s" data-close="ov-conf">Cancel</button><button class="btn btn-d" id="confOk">Confirm</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function(){
+'use strict';
+var CS = 'Customer Success';
+var DEPTS = ['Customer Success','Development','Operations','Partnerships','Sales & Marketing','Billing','Product Management','Project Management','Human Resources','Accounting','External Team'];
+var TODAY = new Date(2026,9,1);
+var ICON_EDIT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20l4-1 11-11-3-3L5 16zM14 6l3 3"/></svg>';
+var ICON_DEL = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>';
+
+var db;
+function seed(){
+  var roles = [
+    {id:'css', name:'CSS', dept:CS},
+    {id:'cer', name:'Customer Experience Role (not active)', dept:CS},
+    {id:'obcss', name:'OBCSS', dept:CS},
+    {id:'pm', name:'Product Manager', dept:'Product Management'},
+    {id:'rout', name:'Routemize', dept:'External Team'}
+  ];
+  function M(id,first,last,rs,email){return {id:id,first:first,last:last,email:email||(first+'.'+last).toLowerCase().replace(/ /g,'')+'@dripjobs.com',roles:rs,active:true};}
+  var members = [
+    M('m1','Daniel','Lee',['obcss'],'daniel.lee@dripjobs.com'),
+    M('m2','Dripjobs','Harrison',['pm'],'jeremy@dripjobs.com'),
+    M('m3','Leonardo','Motta',['obcss'],'leo.motta@dripjobs.com'),
+    M('m4','Matt','Fournier',['obcss'],'matt.fournier@dripjobs.com'),
+    M('m5','Nemesis','Pena',['obcss'],'nemesis.pena@dripjobs.com'),
+    M('m6','Seth','Brown',['obcss'],'seth.brown@dripjobs.com'),
+    M('m7','Ximena','Jimenez',['obcss'],'ximena.jimenez@dripjobs.com'),
+    M('m8','Yoselin','Bressan',['obcss'],'yoselin.bressan@dripjobs.com'),
+    M('m9','Bennah Marie','Eliseo',['css'],'bennah.eliseo@dripjobs.com'),
+    M('m10','David','Cerro',['obcss','css'],'david.cerro@dripjobs.com'),
+    M('m11','David','Arteaga',['css'],'david.arteaga@dripjobs.com'),
+    M('m12','Juan','Solano Quintero',['css'],'juan.solano@dripjobs.com'),
+    M('m13','Ana','Fernandez',['css'],'ana.fernandez@dripjobs.com'),
+    M('m14','Lasonia','Brady',['css'],'lasonia.brady@dripjobs.com')
+  ];
+  function A(co,acct,d,tier,plan,sales,a2p,css,contact,email,phone){return {co:co,acct:acct,date:d,tier:tier,plan:plan,sales:sales,a2p:a2p,css:css,contact:contact,email:email,phone:phone||'',changed:'09/30/2026 08:30 PM'};}
+  var accounts = [
+    A('Harmony Painting Denver',18327,'2026-10-01','ok','Advanced',0,'None',null,'Julie Shakula','julie@harmonypaintingdenver.com'),
+    A('BCB Custom Finishes LLC',18326,'2026-09-30','ok','Advanced',0,'None',null,'Matt Bresset','BCBcustomfinishes@gmail.com'),
+    A("Wilson's Fine Finishes",18325,'2026-09-30','ok','Advanced',0,'None',null,'Ed Wilson','wilsonsfinefinishes@gmail.com','(815) 354-0120'),
+    A('Truestone Development Group',18324,'2026-09-30','ok','Advanced',1228.5,'None',null,'Paul Epps','info@tdgdevelops.com'),
+    A('Top Gutter',18323,'2026-09-30','ok','Advanced',0,'Active','m7','Sam Wood','Topgutterusa@gmail.com'),
+    A('Modern Gutter Solutions',18322,'2026-09-30','ok','Advanced',0,'Pending',null,'Lucas Schrock','lucas@moderngutters.org'),
+    A('Aybar Painting LLC',18321,'2026-09-30','ok','Advanced',0,'None','m10','Will Aybar','willaybar14@gmail.com'),
+    A('SOAZ Gutter Guys',18320,'2026-09-30','ok','Advanced',0,'Pending',null,'Jerl Morgan','soazgutterguy@yahoo.com'),
+    A('Blue Eagle Painting',18319,'2026-09-29','na','Advanced',0,'Pending','m6','Dan Larson','dan@blueeaglepainting.com'),
+    A('Affordable Pros',18318,'2026-09-29','ok','Advanced',0,'None',null,'James King','2022kingjames@gmail.com'),
+    A('CSM South Seamless Guttering',18317,'2026-09-28','ok','Pro',0,'None',null,'Leo Hohmann','carolinasheetmetal@gmail.com'),
+    A('How we roll painting',18316,'2026-09-28','ok','Advanced',0,'None',null,'Brian Placko','howerollpaintingar@gmail.com'),
+    A('Alliance Pro Renovation LLC',18315,'2026-09-28','ok','Advanced',0,'None','m5','Sam Da Silva','info@allianceprorenovationllc.com'),
+    A('Summit Ridge Painters',18311,'2026-09-26','risk','Pro',420,'Active','m1','Tara Nguyen','tara@summitridgepainters.com','(303) 555-0142'),
+    A('Lakeview Exteriors',18304,'2026-09-24','na','Advanced',0,'None','m3','Corey Platt','corey@lakeviewexteriors.com'),
+    A('Brush & Roller Co',18298,'2026-09-22','risk','Pro',95,'Pending','m8','Mina Okafor','mina@brushandroller.co'),
+    A('Pinnacle Coatings',18290,'2026-09-20','ok','Advanced',3100,'Active','m10','Dale Hutch','dale@pinnaclecoatings.com'),
+    A('Greenway Home Pros',18281,'2026-09-18','na','Pro',0,'None','m4','Rosa Alvarez','rosa@greenwayhomepros.com'),
+    A('Oak & Ash Finishing',18270,'2026-09-16','risk','Advanced',0,'None','m1','Ben Carter','ben@oakandash.com'),
+    A("Sparrow's Nest Painting",11265,'2026-09-14','na','Advanced',0,'Active','m2','Jeremy Harrison','jeremy+1@dripjobs.com','(555) 555-5555')
+  ];
+  return {roles:roles, members:members, accounts:accounts, nextId:100};
+}
+db = seed();
+var ui = {screen:'admin', sort:{key:'date',dir:'desc'}, filter:'', editRole:null, editMember:null, finderOpts:[]};
+
+/* ---------- helpers ---------- */
+function $(s,r){return (r||document).querySelector(s);}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function role(id){return db.roles.filter(function(r){return r.id===id;})[0];}
+function member(id){return db.members.filter(function(m){return m.id===id;})[0];}
+function fullName(m){return m.first+' '+m.last;}
+function isCSRole(id){var r=role(id);return !!r && r.dept===CS;}
+function isCSMember(m){return m.roles.some(isCSRole);}
+function assigned(m){return db.accounts.filter(function(a){return a.css===m.id;});}
+/* BR14: only Customer Success Roles; all Roles if none are Customer Success; BR15: none */
+function roleText(m){
+  var cs=m.roles.filter(isCSRole), list=cs.length?cs:m.roles;
+  return list.map(function(id){return role(id).name;}).join(', ');
+}
+function display(m){var t=roleText(m);return fullName(m)+(t?', '+t:'');}
+function csMembers(){return db.members.filter(isCSMember);}
+function csRoles(except){return db.roles.filter(function(r){return r.dept===CS && r.id!==except;});}
+function nowStamp(){
+  var d=new Date(),h=d.getHours(),ap=h>=12?'PM':'AM';h=h%12||12;
+  var mi=('0'+d.getMinutes()).slice(-2);
+  return '10/01/2026 '+('0'+h).slice(-2)+':'+mi+' '+ap;
+}
+function plural(n,w){return n+' '+w+(n===1?'':'s');}
+var toastT;
+function toast(msg){var t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},4200);}
+function show(id){$('#'+id).hidden=false;var f=$('#'+id+' input, #'+id+' select, #'+id+' button.btn');if(f)f.focus();}
+function hide(id){$('#'+id).hidden=true;}
+function status(msg){$('#demoStatus').textContent=msg;}
+
+/* ---------- nav ---------- */
+function renderNav(){
+  var s=ui.screen, h='';
+  if(s==='company'){
+    h+='<div class="lbl">Sales</div><a href="#">Contacts</a><a href="#">Sales Pipeline</a><div class="lbl">Jobs</div><a href="#">Jobs List</a><a href="#">Work Orders</a><div class="lbl">Settings</div><a href="#" class="on" data-go="company">Company Settings</a><a href="#">Users</a>';
+  } else {
+    h+='<a href="#">Invoices</a><a href="#">Proposals</a><div class="lbl">Financials</div><a href="#">Job Costing</a><a href="#">Metrics</a><div class="lbl">Marketing</div><a href="#">Blast</a><a href="#">Drips</a><div class="lbl">Super Admin</div><a href="#">CMS</a>'
+     +'<a href="#" data-go="admin"'+(s==='admin'?' class="on"':'')+'>Admin Settings</a><a href="#">Promo Codes</a><a href="#">Tenants</a>'
+     +'<a href="#" data-go="finder"'+(s==='finder'?' class="on"':'')+'>At Risk Accounts</a><a href="#">Twilio Management</a>';
+  }
+  $('#side').innerHTML=h;
+}
+
+/* ---------- Admin Settings ---------- */
+function renderAdmin(){
+  var q=$('#memSearch').value.toLowerCase(), st=$('#memStatus').value;
+  var rows=db.members.filter(function(m){
+    return (st==='all'||m.active) && (!q || (fullName(m)+' '+m.email).toLowerCase().indexOf(q)>-1);
+  }).sort(function(a,b){return fullName(a).localeCompare(fullName(b));});
+  $('#memCount').textContent=plural(db.members.length,'member');
+  $('#memTable tbody').innerHTML=rows.map(function(m){
+    var pills=m.roles.length?m.roles.map(function(id){return '<span class="pill">'+esc(role(id).name)+'</span>';}).join(''):'<span class="hint" style="margin:0">No Role</span>';
+    return '<tr><td><div class="mem"><span class="av">'+esc(m.first[0]+m.last[0])+'<i></i></span>'+esc(fullName(m))+'</div></td>'
+      +'<td class="mono">'+esc(m.email)+'</td><td>'+pills+'</td><td><span class="st">Active</span></td>'
+      +'<td style="text-align:right;white-space:nowrap"><button class="icon-btn" data-edit-m="'+m.id+'" aria-label="Edit '+esc(fullName(m))+'">'+ICON_EDIT+'</button><button class="icon-btn" data-del-m="'+m.id+'" aria-label="Remove '+esc(fullName(m))+'">'+ICON_DEL+'</button></td></tr>';
+  }).join('') || '<tr><td colspan="5" class="empty">No members match.</td></tr>';
+
+  $('#roleCount').textContent=plural(db.roles.length,'role');
+  $('#roleList').innerHTML=db.roles.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).map(function(r){
+    var n=db.members.filter(function(m){return m.roles.indexOf(r.id)>-1;}).length;
+    return '<div class="role-row"><span class="rbadge'+(n?' used':'')+'">'+esc(r.name.slice(0,2).toUpperCase())+'</span>'
+      +'<div class="role-main"><b>'+esc(r.name)+'</b>'+(n?'':'<span class="unused">UNUSED</span>')+'<small>'+plural(n,'member')+' assigned</small></div>'
+      +'<span class="dept'+(r.dept===CS?' cs':'')+'" title="Department">'+esc(r.dept)+'</span>'
+      +'<button class="icon-btn" data-edit-r="'+r.id+'" aria-label="Edit '+esc(r.name)+'">'+ICON_EDIT+'</button><button class="icon-btn" data-del-r="'+r.id+'" aria-label="Delete '+esc(r.name)+'">'+ICON_DEL+'</button></div>';
+  }).join('');
+}
+
+/* Role modal */
+function openRole(id){
+  ui.editRole=id||null;
+  var r=id?role(id):null;
+  $('#roleTitle').textContent=r?'Edit Role':'Add Role';
+  $('#saveRole').textContent=r?'Save Changes':'Add Role';
+  $('#roleName').value=r?r.name:'';
+  $('#roleDept').innerHTML='<option value="">Select department</option>'+DEPTS.map(function(d){return '<option>'+esc(d)+'</option>';}).join('');
+  $('#roleDept').value=r?r.dept:'';
+  ['roleNameErr','roleDeptErr'].forEach(function(i){$('#'+i).hidden=true;});
+  $('#roleName').classList.remove('err');$('#roleDept').classList.remove('err');
+  show('ov-role');
+}
+function saveRole(){
+  var name=$('#roleName').value.trim(), dept=$('#roleDept').value, bad=false;
+  $('#roleNameErr').hidden=!!name; $('#roleName').classList.toggle('err',!name);
+  $('#roleDeptErr').hidden=!!dept; $('#roleDept').classList.toggle('err',!dept);
+  if(!name||!dept) return;
+  var r=ui.editRole?role(ui.editRole):null;
+  if(!r){
+    var nr={id:'r'+(db.nextId++),name:name,dept:dept};
+    db.roles.push(nr); hide('ov-role');
+    if(ui.pendingMemberRoleAdd){ui.pendingMemberRoleAdd(nr);}
+    toast('Role added in '+dept+'.'); renderAll(); return;
+  }
+  if(r.dept===CS && dept!==CS){
+    var affected=db.members.filter(function(m){return m.roles.indexOf(r.id)>-1 && !m.roles.some(function(id){return id!==r.id && isCSRole(id);});});
+    if(affected.length){ openDeptPrompt(r,name,dept,affected); return; }
+  }
+  r.name=name; r.dept=dept; hide('ov-role'); toast('Role saved.'); renderAll();
+}
+function openDeptPrompt(r,name,dept,affected){
+  var others=csRoles(r.id), cnt=0;
+  affected.forEach(function(m){cnt+=assigned(m).length;});
+  $('#deptTitle').textContent='Members will lose Customer Success status';
+  $('#deptSub').textContent='Moving '+r.name+' from Customer Success to '+dept+'.';
+  var names='<ul class="names">'+affected.map(function(m){return '<li>'+esc(fullName(m))+'</li>';}).join('')+'</ul>';
+  var body='<p style="margin:0">These members hold <b>'+esc(r.name)+'</b> and no other Customer Success Role:</p>'+names;
+  if(others.length){
+    body+='<div class="opt sel" style="margin-top:16px"><label for="deptTarget" style="font-weight:600">Reassign all of them to another Customer Success Role</label><small style="color:var(--muted);margin-top:4px">They are moved off '+esc(r.name)+' and keep their Customer Success status. Their account assignments do not change.</small>'
+      +'<select class="ctl" id="deptTarget">'+others.map(function(o){return '<option value="'+o.id+'">'+esc(o.name)+'</option>';}).join('')+'</select></div>'
+      +'<p class="hint">To keep '+esc(r.name)+' in '+esc(dept)+' for these members instead, cancel and create a new Role in that Department.</p>';
+    $('#deptOk').textContent='Reassign and save'; $('#deptOk').className='btn btn-p';
+    $('#deptOk').onclick=function(){
+      var t=$('#deptTarget').value;
+      affected.forEach(function(m){m.roles=m.roles.filter(function(id){return id!==r.id;}); if(m.roles.indexOf(t)<0)m.roles.push(t);});
+      r.name=name; r.dept=dept; hide('ov-dept'); hide('ov-role');
+      toast('Reassigned '+plural(affected.length,'member')+' to '+role(t).name+'. Department saved. No notification sent.'); renderAll();
+    };
+  } else {
+    body+='<div class="alert warn" style="margin-top:16px"><span aria-hidden="true">⚠</span><div>No other Customer Success Role exists. If you continue, '+esc(r.name)+' moves to '+esc(dept)+' with these members on it, and '+plural(cnt,'account')+' assigned to them will be left unassigned.</div></div>'
+      +'<p class="hint">To keep these members in Customer Success, cancel and create another Customer Success Role first.</p>';
+    $('#deptOk').textContent='Transfer and leave accounts unassigned'; $('#deptOk').className='btn btn-d';
+    $('#deptOk').onclick=function(){
+      openConfirm('Are you sure?',
+        '<p style="margin:0">Are you sure? This can\'t be undone. All accounts assigned to these members will be left without an assigned CSS.<span class="br" title="BR13.2: second confirmation. Copy is the draft intent for Copywriter.">BR13.2</span></p>'+names+'<p class="hint">You can cancel and keep everything as it is.</p>',
+        'Yes, transfer',
+        function(){
+          var stamp=nowStamp();
+          affected.forEach(function(m){assigned(m).forEach(function(a){a.css=null;a.changed=stamp;});});
+          r.name=name; r.dept=dept; hide('ov-conf'); hide('ov-dept'); hide('ov-role');
+          toast('Department saved. '+plural(cnt,'account')+' left unassigned. No notification sent.'); renderAll();
+        });
+    };
+  }
+  $('#deptBody').innerHTML=body;
+  show('ov-dept');
+}
+function openConfirm(title,body,ok,fn){
+  $('#confTitle').textContent=title; $('#confBody').innerHTML=body; $('#confOk').textContent=ok;
+  $('#confOk').onclick=fn; show('ov-conf');
+}
+
+/* Member modal */
+function openMember(id){
+  ui.editMember=id||null;
+  var m=id?member(id):null;
+  $('#memTitle').textContent=m?'Edit Member':'Add Member';
+  $('#memSubT').textContent=m?"Changes will update this member's name and email in the CSS Representative dropdown.":'New members appear in the CSS Representative dropdown once they hold a Customer Success Role.';
+  $('#saveMember').textContent=m?'Save Changes':'Add Member';
+  $('#mFirst').value=m?m.first:''; $('#mLast').value=m?m.last:''; $('#mEmail').value=m?m.email:'';
+  $('#memBig').textContent=m?(m.first[0]+m.last[0]):'+';
+  renderRoleBox(m?m.roles:[]);
+  ['mFirstErr','mLastErr','mEmailErr'].forEach(function(i){$('#'+i).hidden=true;});
+  show('ov-member');
+}
+function renderRoleBox(checked){
+  $('#mRoles').innerHTML=db.roles.slice().sort(function(a,b){return a.name.localeCompare(b.name);}).map(function(r){
+    return '<label><input type="checkbox" value="'+r.id+'"'+(checked.indexOf(r.id)>-1?' checked':'')+'><span>'+esc(r.name)+'</span><span class="dept'+(r.dept===CS?' cs':'')+'">'+esc(r.dept)+'</span></label>';
+  }).join('');
+}
+function checkedRoles(){return $$('#mRoles input:checked').map(function(i){return i.value;});}
+function saveMember(){
+  var f=$('#mFirst').value.trim(), l=$('#mLast').value.trim(), e=$('#mEmail').value.trim();
+  $('#mFirstErr').hidden=!!f; $('#mLastErr').hidden=!!l; $('#mEmailErr').hidden=!!e;
+  if(!f||!l||!e) return;
+  var roles=checkedRoles(), m=ui.editMember?member(ui.editMember):null;
+  var draft={first:f,last:l,email:e,roles:roles};
+  if(m && assigned(m).length && !roles.some(isCSRole)){ openReplacement(m,draft,'edit'); return; }
+  commitMember(m,draft);
+}
+function commitMember(m,d){
+  if(m){m.first=d.first;m.last=d.last;m.email=d.email;m.roles=d.roles;toast('Member saved.');}
+  else{db.members.push({id:'m'+(db.nextId++),first:d.first,last:d.last,email:d.email,roles:d.roles,active:true});toast('Member added.');}
+  hide('ov-member'); renderAll();
+}
+
+/* Replacement prompt: BR13.1 (edit) and existing removal prompt */
+function openReplacement(m,draft,mode){
+  var accts=assigned(m), n=accts.length, nm=fullName(m);
+  var reps=csMembers().filter(function(x){return x.id!==m.id;});
+  var csr=csRoles();
+  var canAdd=mode==='edit' && csr.length>0;
+  $('#replTitle').textContent=mode==='edit'?'This member has assigned accounts':'Remove member with assigned accounts';
+  $('#replSub').textContent=mode==='edit'
+    ?nm+' is assigned to '+plural(n,'account')+' and would no longer hold a Customer Success Role.'
+    :nm+' is assigned to '+plural(n,'account')+'.';
+  var h='<p style="margin:0 0 4px">Choose what happens to those accounts.<span class="br" title="'+(mode==='edit'?'BR13.1: existing replacement prompt, reused on the edit path with Leave unassigned (assumption) and Add a Customer Success Role.':'Edge case 6: existing removal prompt, unchanged by this ticket.')+'">'+(mode==='edit'?'BR13.1':'Edge 6')+'</span></p>';
+  h+='<div class="opt sel" data-opt="rep"><label><input type="radio" name="replOpt" value="rep" checked><span>Select a replacement<small>All '+plural(n,'account')+' move to the member you choose.</small></span></label>'
+    +'<select class="ctl" id="replSel" aria-label="Replacement member">'+reps.map(function(x){return '<option value="'+x.id+'">'+esc(display(x))+'</option>';}).join('')+'</select></div>';
+  h+='<div class="opt" data-opt="none"><label><input type="radio" name="replOpt" value="none"><span>Leave the accounts unassigned<small>The accounts show Unassigned until someone is chosen.</small></span></label></div>';
+  if(mode==='edit'){
+    h+='<div class="opt" data-opt="add"><label><input type="radio" name="replOpt" value="add"'+(canAdd?'':' disabled')+'><span>Add a Customer Success Role to '+esc(nm)+'<small>'+(canAdd?'Keeps the accounts assigned to them.':'No Customer Success Role exists. Create one first.')+'</small></span></label>'
+      +(canAdd?'<select class="ctl" id="replRole" aria-label="Customer Success Role" disabled>'+csr.map(function(r){return '<option value="'+r.id+'">'+esc(r.name)+'</option>';}).join('')+'</select>':'')+'</div>';
+  }
+  h+='<div class="hint">No notification is sent to the new or previous representative.</div>';
+  $('#replBody').innerHTML=h;
+  var rs=$('#replSel'); if(!reps.length){rs.disabled=true;$('input[value=rep]',$('#replBody')).disabled=true;$('input[value=none]',$('#replBody')).checked=true;}
+  function sync(){
+    var v=$('input[name=replOpt]:checked',$('#replBody')).value;
+    $$('.opt',$('#replBody')).forEach(function(o){o.classList.toggle('sel',o.getAttribute('data-opt')===v);});
+    rs.disabled=(v!=='rep'); var rr=$('#replRole'); if(rr)rr.disabled=(v!=='add');
+  }
+  $$('input[name=replOpt]',$('#replBody')).forEach(function(i){i.onchange=sync;}); sync();
+  $('#replOk').textContent=mode==='edit'?'Confirm and save':'Confirm and remove';
+  $('#replOk').onclick=function(){
+    var v=$('input[name=replOpt]:checked',$('#replBody')).value, stamp=nowStamp();
+    if(v==='rep'){var to=$('#replSel').value;accts.forEach(function(a){a.css=to;a.changed=stamp;});}
+    else if(v==='none'){accts.forEach(function(a){a.css=null;a.changed=stamp;});}
+    else if(v==='add'){var rid=$('#replRole').value; if(draft.roles.indexOf(rid)<0)draft.roles.push(rid);}
+    hide('ov-repl');
+    if(mode==='edit'){commitMember(m,draft);}
+    else{db.members=db.members.filter(function(x){return x.id!==m.id;});toast('Member removed.');renderAll();}
+  };
+  show('ov-repl');
+}
+function removeMember(id){
+  var m=member(id);
+  if(assigned(m).length){openReplacement(m,null,'remove');return;}
+  openConfirm('Remove '+fullName(m)+'?','<p style="margin:0">This member will be removed from Admin Settings and from the CSS Representative dropdown.</p>','Remove',function(){
+    db.members=db.members.filter(function(x){return x.id!==id;}); hide('ov-conf'); toast('Member removed.'); renderAll();
+  });
+}
+
+/* ---------- Finder ---------- */
+function finderLoad(){
+  var ids={}; db.accounts.forEach(function(a){if(a.css)ids[a.css]=1;});
+  ui.finderOpts=db.members.filter(function(m){return ids[m.id];}).sort(function(a,b){return fullName(a).localeCompare(fullName(b))||display(a).localeCompare(display(b));}).map(function(m){return m.id;});
+  /* Edge case 4: a selection that dropped out of the options clears on refresh */
+  if(ui.filter && !ui.finderOpts.indexOf(ui.filter)>-1) ui.filter='';
+}
+function renderFinder(){
+  var sel=$('#cssFilter');
+  sel.innerHTML='<option value="">All team members</option>'+ui.finderOpts.map(member).filter(Boolean).map(function(m){return '<option value="'+m.id+'"'+(ui.filter===m.id?' selected':'')+'>'+esc(display(m))+'</option>';}).join('');
+  sel.value=ui.filter;
+  var rows=db.accounts.filter(function(a){return !ui.filter||a.css===ui.filter;});
+  var s=ui.sort, dir=s.dir==='asc'?1:-1;
+  rows.sort(function(a,b){
+    var x,y;
+    if(s.key==='company'){x=a.co.toLowerCase();y=b.co.toLowerCase();}
+    else if(s.key==='css'){x=a.css?fullName(member(a.css)).toLowerCase():'￿';y=b.css?fullName(member(b.css)).toLowerCase():'￿';}
+    else{x=a.date;y=b.date;}
+    return (x<y?-1:x>y?1:0)*dir;
+  });
+  $$('#finTable th.sortable').forEach(function(th){th.setAttribute('aria-sort',th.getAttribute('data-sort')===s.key?(s.dir==='asc'?'ascending':'descending'):'none');});
+  var risk=db.accounts.filter(function(a){return a.tier==='risk';}).length, na=db.accounts.filter(function(a){return a.tier==='na';}).length, ok=db.accounts.length-risk-na;
+  $('#accSummary').textContent='Showing '+rows.length+' of '+db.accounts.length+' accounts · '+risk+' at risk, '+na+' needs attention, '+ok+' on track';
+  var tierL={ok:'On Track',na:'Needs Attention',risk:'At Risk'};
+  $('#finTable tbody').innerHTML=rows.map(function(a){
+    var d=new Date(a.date+'T00:00:00'), age=Math.round((TODAY-d)/86400000);
+    var ds=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    var c=a.css?display(member(a.css)):'Unassigned';
+    return '<tr class="row"><td class="co"><b>'+esc(a.co)+'</b><small>Account #'+a.acct+'</small></td>'
+      +'<td>'+ds+'<span class="age">'+age+'d</span></td>'
+      +'<td><span class="tier '+a.tier+'">'+tierL[a.tier]+'</span></td>'
+      +'<td><span class="plan'+(a.plan==='Pro'?' pro':'')+'">'+a.plan+(a.plan==='Advanced'?' ★':'')+'</span></td>'
+      +'<td>$'+a.sales.toLocaleString('en-US',{minimumFractionDigits:a.sales%1?2:0})+'</td>'
+      +'<td><span class="a2p '+(a.a2p==='Active'?'act':a.a2p==='Pending'?'pen':'')+'">'+a.a2p+'</span></td>'
+      +'<td class="css-cell'+(a.css?'':' un')+'">'+esc(c)+'</td>'
+      +'<td>'+esc(a.contact)+'</td><td>'+esc(a.email)+'</td><td>'+(a.phone?esc(a.phone):'–')+'</td></tr>';
+  }).join('') || '<tr><td colspan="10" class="empty">No accounts match.</td></tr>';
+}
+
+/* ---------- Company Settings ---------- */
+function nest(){return db.accounts.filter(function(a){return a.acct===11265;})[0];}
+function renderCompany(){
+  var a=nest(), cur=a.css?member(a.css):null, sel=$('#cssRep');
+  var opts=['<option value="">Unassigned</option>'];
+  var list=csMembers().slice();
+  /* BR12: existing non-Customer Success assignee stays as the selected value only */
+  if(cur && list.indexOf(cur)<0) list.push(cur);
+  list.sort(function(x,y){return fullName(x).localeCompare(fullName(y));});
+  list.forEach(function(m){opts.push('<option value="'+m.id+'">'+esc(display(m))+'</option>');});
+  sel.innerHTML=opts.join(''); sel.value=a.css||'';
+  $('#cssChanged').textContent='Last changed: '+a.changed;
+}
+
+/* ---------- render / wiring ---------- */
+function renderAll(){
+  renderNav(); renderAdmin(); renderCompany();
+  if(ui.screen==='finder'){finderLoad();} renderFinder();
+}
+function go(s){
+  ui.screen=s;
+  $$('.screen').forEach(function(x){x.classList.toggle('active',x.id==='scr-'+s);});
+  $$('.demo [data-screen]').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-screen')===s));});
+  if(s==='finder'){finderLoad();} /* navigating to the Finder is a page load */
+  renderNav(); renderFinder(); renderCompany(); window.scrollTo(0,0);
+}
+
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-screen],[data-go],[data-close],[data-edit-m],[data-del-m],[data-edit-r],[data-del-r],[data-sort]');
+  if(!t) return;
+  if(t.hasAttribute('data-screen')){go(t.getAttribute('data-screen'));}
+  else if(t.hasAttribute('data-go')){e.preventDefault();go(t.getAttribute('data-go'));}
+  else if(t.hasAttribute('data-close')){hide(t.getAttribute('data-close'));}
+  else if(t.hasAttribute('data-edit-m')){openMember(t.getAttribute('data-edit-m'));}
+  else if(t.hasAttribute('data-del-m')){removeMember(t.getAttribute('data-del-m'));}
+  else if(t.hasAttribute('data-edit-r')){openRole(t.getAttribute('data-edit-r'));}
+  else if(t.hasAttribute('data-del-r')){toast('Deleting a Role is not part of this ticket.');}
+  else if(t.hasAttribute('data-sort')){
+    var k=t.getAttribute('data-sort');
+    ui.sort=ui.sort.key===k?{key:k,dir:ui.sort.dir==='asc'?'desc':'asc'}:{key:k,dir:k==='date'?'desc':'asc'};
+    renderFinder();
+  }
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    var open=$$('.ov').filter(function(o){return !o.hidden;}).pop(); if(open)open.hidden=true;
+  }
+  if((e.key==='Enter'||e.key===' ') && e.target.matches && e.target.matches('th.sortable')){e.preventDefault();e.target.click();}
+});
+$('#addMember').onclick=function(){openMember(null);};
+$('#addRole').onclick=function(){ui.pendingMemberRoleAdd=null;openRole(null);};
+$('#saveRole').onclick=saveRole;
+$('#saveMember').onclick=saveMember;
+$('#mAddRole').onclick=function(){
+  var keep=checkedRoles();
+  ui.pendingMemberRoleAdd=function(nr){renderRoleBox(keep.concat(nr.id));ui.pendingMemberRoleAdd=null;};
+  ui.editRole=null; openRole(null);
+  $('#ov-role').classList.add('top');
+};
+$('#ov-role').addEventListener('click',function(){});
+['ov-role'].forEach(function(id){var o=$('#'+id);new MutationObserver(function(){if(o.hidden)o.classList.remove('top');}).observe(o,{attributes:true,attributeFilter:['hidden']});});
+$('#memSearch').oninput=renderAdmin; $('#memStatus').onchange=renderAdmin;
+$('#cssFilter').onchange=function(){ui.filter=this.value;renderFinder();};
+$('#clearFilters').onclick=function(){ui.filter='';renderFinder();};
+$('#cssRep').onchange=function(){
+  var a=nest(); a.css=this.value||null; a.changed=nowStamp();
+  $('#cssChanged').textContent='Last changed: '+a.changed;
+  toast('CSS Representative updated. No notification is sent.'); renderAdmin();
+};
+$('#brToggle').onclick=function(){var on=this.getAttribute('aria-pressed')!=='true';this.setAttribute('aria-pressed',String(on));document.body.classList.toggle('hide-br',!on);};
+$('#resetData').onclick=function(){db=seed();ui.filter='';ui.sort={key:'date',dir:'desc'};renderAll();status('Data reset to the post-release state.');};
+$('#scenOne').onclick=function(){
+  db=seed(); ui.filter='';
+  db.roles=db.roles.filter(function(r){return r.id!=='css'&&r.id!=='cer';});
+  db.members.forEach(function(m){if(m.roles.indexOf('css')>-1){m.roles=m.roles.filter(function(id){return id!=='css';}); if(!m.roles.length)m.roles=['obcss'];}});
+  renderAll();
+  status('Scenario loaded: CSS and Customer Experience Roles removed (their holders moved to OBCSS). Edit the OBCSS Department to see Transfer and its second confirmation.');
+};
+
+go('admin'); renderAll();
+})();
+</script>
+</body>
+</html>

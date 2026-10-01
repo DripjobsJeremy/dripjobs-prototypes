@@ -1463,3 +1463,9 @@ Format:
 - Decision: Example, chose a 3-step wizard instead of 5 for the X flow.
 - Why: Hick's Law, original 5-step version front-loaded too many decisions before showing value.
 - Open question: None.
+
+## [2026-10-01] Role Departments, Multiple Roles, CSS Rename (86bcaf2hu): first clickable prototype
+- Decision: One page, `role-departments-css-rename/`, with three screens (Admin Settings, At Risk Accounts, Company Settings > Company Information) driven by one shared in-memory data model, so a Role, Department, or member change in Admin Settings flows into the Finder filter/column and the CSS Representative dropdown. Built to the 2026-09-30 ticket body including BR13.1 and BR13.2. Demo bar has a "Scenario: OBCSS is the only Customer Success Role" button, since the Transfer path only appears when no other Customer Success Role exists.
+- Decision: Navigating to the Finder counts as a page load, so a filter selection for a member who dropped out of the options clears there (Edge Case 4). Seed data models the post-release state (six Customer Support Specialists hold CSS, David Cerro holds OBCSS and CSS). The Nest (#11265) is assigned to Dripjobs Harrison (Product Manager) to show the BR12 outside-Customer-Success case.
+- Assumption: Placeholder emails for the six Customer Support Specialists (ticket gap, real details still needed). The Company Settings empty option is labeled "Unassigned" (current label unknown). The Admin Settings Members subtitle and the member modal title were changed from "OBCSS" wording to "CSS" and "Edit Member" to match BR7 and multiple Roles; confirm with Copywriter. Deleting a Role and the Health Tier, Plan, and Signup Date Finder filters are not wired (out of scope).
+
