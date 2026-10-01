@@ -3,7 +3,8 @@
 <head>
 <script src="../gate.js"></script>
 <meta charset="UTF-8">
-<title>Invoice Reminders — Combined Prototype</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoice Reminders: Combined Prototype (Rev. Oct 1, 2026)</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -17,12 +18,14 @@
     --st-color-primary-rgb: 139, 133, 234;
     --st-color-text: #32415B;
     --st-color-text-muted: #80879A;
+    /* A11y: AA-compliant muted for small text (#80879A = 3.59:1 on white). Flagged for design system. */
+    --st-color-text-muted-aa: #5E6578;
     --st-color-border: #DAD8E3;
     --st-color-card-bg: #FFFFFF;
     font-family: 'Nunito', sans-serif;
     color: var(--st-color-text);
     min-height: calc(100vh - 46px);
-    padding: 28px 32px 80px;
+    padding: 28px 32px 110px;
     display: none;
 }
 #reminders-page.active, #invoices-page.active { display: block; }
@@ -30,541 +33,465 @@
 #invoices-page  { background: #F7F7FB; }
 
 #reminders-page .btn-primary,
-#invoices-page  .btn-primary { background-color: var(--st-color-primary); border-color: var(--st-color-primary); }
+#invoices-page  .btn-primary,
+.page-modal .btn-primary { background-color: #8B85EA; border-color: #8B85EA; }
 #reminders-page .btn-primary:hover,
-#invoices-page  .btn-primary:hover { background-color: var(--st-color-primary-hover); border-color: var(--st-color-primary-hover); }
+#invoices-page  .btn-primary:hover,
+.page-modal .btn-primary:hover { background-color: #736BE3; border-color: #736BE3; }
 #reminders-page .btn-outline-primary,
-#invoices-page  .btn-outline-primary { color: var(--st-color-primary); border-color: var(--st-color-primary); }
+#invoices-page  .btn-outline-primary,
+.page-modal .btn-outline-primary { color: #5C53DC; border-color: #8B85EA; }
 #reminders-page .btn-outline-primary:hover,
-#invoices-page  .btn-outline-primary:hover { background-color: var(--st-color-primary); border-color: var(--st-color-primary); color: #fff; }
-#reminders-page .btn,
-#invoices-page  .btn { border-radius: 10px; font-weight: 600; font-size: 13px; }
-#reminders-page .btn-sm,
-#invoices-page  .btn-sm { border-radius: 8px; padding: 4px 16px; }
+#invoices-page  .btn-outline-primary:hover,
+.page-modal .btn-outline-primary:hover { background-color: #8B85EA; border-color: #8B85EA; color: #fff; }
+#reminders-page .btn, #invoices-page .btn, .page-modal .btn { border-radius: 10px; font-weight: 600; font-size: 13px; }
+#reminders-page .btn-sm, #invoices-page .btn-sm, .page-modal .btn-sm { border-radius: 8px; padding: 4px 16px; }
+
+/* Visible focus (A11y) */
+#reminders-page :focus-visible, #invoices-page :focus-visible, .page-modal :focus-visible,
+.bulk-action-bar :focus-visible, .demo-banner :focus-visible {
+    outline: 2px solid #5C53DC; outline-offset: 2px; box-shadow: none;
+}
+.sr-only { position:absolute!important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
 /* ---- Demo banner ---- */
 .demo-banner {
     position: sticky; top: 0; z-index: 50;
     background: #2A2440; color: #fff;
-    padding: 0 32px;
-    font-size: 12px;
-    display: flex; align-items: stretch; gap: 0;
-    height: 46px;
+    padding: 0 32px; font-size: 12px;
+    display: flex; align-items: stretch; gap: 0; height: 46px;
 }
-.demo-banner-left {
-    display: flex; align-items: center; gap: 10px;
-    padding-right: 20px;
-    border-right: 1px solid rgba(255,255,255,0.12);
-}
+.demo-banner-left { display: flex; align-items: center; gap: 10px; padding-right: 20px; border-right: 1px solid rgba(255,255,255,0.12); }
 .demo-banner-left strong { color: #C9C4FF; }
-.demo-nav {
-    display: flex; align-items: stretch; gap: 0;
-    flex: 1;
-    padding-left: 4px;
-}
+.demo-nav { display: flex; align-items: stretch; gap: 0; flex: 1; padding-left: 4px; }
 .demo-nav-btn {
-    background: transparent; border: none;
-    color: rgba(255,255,255,0.55);
-    font-family: 'Nunito', sans-serif;
-    font-size: 12px; font-weight: 600;
-    padding: 0 18px;
-    cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
+    background: transparent; border: none; color: rgba(255,255,255,0.7);
+    font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 600;
+    padding: 0 18px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s;
 }
-.demo-nav-btn:hover { color: rgba(255,255,255,0.85); }
+.demo-nav-btn:hover { color: #fff; }
 .demo-nav-btn.active { color: #fff; border-bottom-color: #8B85EA; }
 .demo-nav-btn i { font-size: 13px; }
+.demo-controls { display: flex; align-items: center; gap: 18px; padding-left: 20px; border-left: 1px solid rgba(255,255,255,0.12); }
+.demo-control { display: flex; align-items: center; gap: 8px; background: none; border: none; color: #fff; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; padding: 6px 0; }
+.demo-switch { width: 32px; height: 18px; border-radius: 999px; background: rgba(255,255,255,0.25); position: relative; transition: background .15s; }
+.demo-switch::after { content:''; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:#fff; transition: transform .15s; }
+.demo-control[aria-checked="true"] .demo-switch { background: #8B85EA; }
+.demo-control[aria-checked="true"] .demo-switch::after { transform: translateX(14px); }
+
 .br-chip {
     display: inline-flex; align-items: center; gap: 4px;
-    background: #FFF1E0; color: #9A5B0A;
-    border: 1px solid #FFD9A8; border-radius: 999px;
-    padding: 1px 9px 1px 7px; font-size: 10.5px; font-weight: 700;
-    cursor: help; position: relative;
+    background: #FFF1E0; color: #9A5B0A; border: 1px solid #FFD9A8; border-radius: 999px;
+    padding: 1px 9px 1px 7px; font-size: 10.5px; font-weight: 700; cursor: help; position: relative;
+    text-transform: none; letter-spacing: 0; vertical-align: middle;
 }
-.br-chip:hover .br-tooltip { display: block; }
+.br-chip:hover .br-tooltip, .br-chip:focus .br-tooltip { display: block; }
 .br-tooltip {
     display: none; position: absolute; bottom: 130%; left: 0;
-    background: #2A2440; color: #fff; font-weight: 400;
-    font-size: 11.5px; line-height: 1.4; padding: 8px 10px;
-    border-radius: 6px; width: 260px; z-index: 60;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    background: #2A2440; color: #fff; font-weight: 400; font-size: 11.5px; line-height: 1.4;
+    padding: 8px 10px; border-radius: 6px; width: 260px; z-index: 60;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25); white-space: normal; text-align: left;
 }
+.br-tooltip.below { bottom: auto; top: 130%; }
+body.hide-br .br-chip.br-annot { display: none; }
 
 /* ============================
    REMINDERS PAGE STYLES
    ============================ */
 .page-title { font-size: 22px; font-weight: 800; margin-bottom: 18px; }
 .reminders-section { margin-bottom: 6px; }
-.section-header {
-    background: #F2F2F2; padding: 9px 14px;
-    font-size: 12.5px; font-weight: 700; color: var(--st-color-text);
-    display: flex; align-items: center; gap: 8px;
-}
+.section-header { background: #F2F2F2; padding: 9px 14px; font-size: 12.5px; font-weight: 700; color: var(--st-color-text); display: flex; align-items: center; gap: 8px; margin: 0; }
 .section-header.is-new { background: #F4F3FD; }
-.new-tag {
-    background: var(--st-color-primary); color: #fff;
-    font-size: 9.5px; font-weight: 700; letter-spacing: 0.3px;
-    text-transform: uppercase; padding: 2px 7px; border-radius: 999px;
-}
+.new-tag { background: #5C53DC; color: #fff; font-size: 9.5px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; }
 .delivery-block { padding: 14px 14px 4px; }
 .delivery-title { font-size: 12.5px; font-weight: 700; margin-bottom: 4px; }
-.reminder-row {
-    display: flex; align-items: center;
-    padding: 9px 0; border-bottom: 1px solid #F0EFF5;
-    font-size: 13px; gap: 16px;
-}
+.reminder-row { display: flex; align-items: center; padding: 9px 0; border-bottom: 1px solid #F0EFF5; font-size: 13px; gap: 16px; }
 .reminder-label { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
 .reminder-label b { font-weight: 700; }
-.custom-tag {
-    background: #EFEFEF; color: var(--st-color-text-muted);
-    font-size: 10px; font-weight: 600; padding: 1px 7px;
-    border-radius: 999px; display: inline-flex; align-items: center; gap: 3px;
-}
-.new-row-tag {
-    background: #E6F3FA; color: #1A6FA8;
-    font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px;
-}
-.status-pill {
-    width: 110px; text-align: center;
-    font-size: 11.5px; font-weight: 600;
-    padding: 3px 10px; border-radius: 6px;
-}
-.status-pill.enabled  { background: #E1F5E5; color: #1F9D55; }
-.status-pill.disabled { background: #FBE3E3; color: #C94B4B; }
-.queue-count { width: 90px; color: var(--st-color-text-muted); font-size: 13px; }
-.edit-btn {
-    background: var(--st-color-primary); color: #fff; border: none;
-    font-size: 12.5px; font-weight: 600; padding: 5px 18px;
-    border-radius: 8px; cursor: pointer;
-}
+.custom-tag { background: #EFEFEF; color: var(--st-color-text-muted-aa); font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 999px; display: inline-flex; align-items: center; gap: 3px; }
+.new-row-tag { background: #E6F3FA; color: #1A6FA8; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+.status-pill { width: 110px; text-align: center; font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 6px; }
+/* A11y: pill text darkened to meet 4.5:1 (was #1F9D55 3.06:1 / #C94B4B 3.75:1) */
+.status-pill.enabled  { background: #E1F5E5; color: #166534; }
+.status-pill.disabled { background: #FBE3E3; color: #9F2F2F; }
+.queue-count { width: 90px; color: var(--st-color-text-muted-aa); font-size: 13px; }
+.edit-btn { background: var(--st-color-primary); color: #fff; border: none; font-size: 12.5px; font-weight: 600; padding: 5px 18px; border-radius: 8px; cursor: pointer; min-height: 30px; }
 .edit-btn:hover { background: var(--st-color-primary-hover); }
-.add-reminder-row { padding: 10px 0 16px; }
+.add-reminder-row { padding: 10px 0 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .add-reminder-btn {
-    background: transparent; border: 1px dashed var(--st-color-border);
-    color: var(--st-color-primary); font-size: 12.5px; font-weight: 600;
-    padding: 7px 16px; border-radius: 8px; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 6px;
+    background: transparent; border: 1px dashed var(--st-color-border); color: #5C53DC;
+    font-size: 12.5px; font-weight: 600; padding: 7px 16px; border-radius: 8px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; min-height: 40px;
 }
-.add-reminder-btn:hover { background: #F8F7FF; border-color: var(--st-color-primary); }
+.add-reminder-btn:hover:not([aria-disabled="true"]) { background: #F8F7FF; border-color: var(--st-color-primary); }
+.add-reminder-btn[aria-disabled="true"] { color: #6B7180; background: #F5F5F8; border-style: solid; cursor: not-allowed; }
+.add-reminder-helper { font-size: 12px; color: var(--st-color-text-muted-aa); }
+.add-reminder-helper.at-limit { color: #92400E; font-weight: 600; }
 
-/* Edit modal */
-.modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(20,15,50,0.35); z-index: 200;
-    align-items: center; justify-content: center;
-}
+/* Modal (shared) */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(20,15,50,0.35); z-index: 200; align-items: center; justify-content: center; }
 .modal-overlay.is-open { display: flex; }
-.edit-modal {
-    background: #fff; border-radius: 12px;
-    width: 560px; max-width: 96vw; max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 50px rgba(20,15,50,0.25);
-}
+.edit-modal { background: #fff; border-radius: 12px; width: 560px; max-width: 96vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(20,15,50,0.25); font-family: 'Nunito', sans-serif; color: #32415B; }
 .edit-modal.is-email { width: 600px; }
-.edit-modal-header { padding: 16px 20px; border-bottom: 1px solid var(--st-color-border); display: flex; align-items: center; justify-content: space-between; }
-.edit-modal-header h5 { margin: 0; font-size: 15px; font-weight: 700; }
-.modal-close-btn { background: none; border: none; font-size: 16px; color: var(--st-color-text-muted); cursor: pointer; }
+.edit-modal-header { padding: 16px 20px; border-bottom: 1px solid #DAD8E3; display: flex; align-items: center; justify-content: space-between; }
+.edit-modal-header h2 { margin: 0; font-size: 15px; font-weight: 700; }
+.modal-close-btn { background: none; border: none; font-size: 18px; color: #5E6578; cursor: pointer; width: 40px; height: 40px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; }
+.modal-close-btn:hover { background: #F2F1FA; }
 .edit-modal-body { padding: 18px 20px; }
-.edit-modal-footer { padding: 12px 20px; border-top: 1px solid var(--st-color-border); display: flex; justify-content: flex-end; gap: 10px; }
+.edit-modal-footer { padding: 12px 20px; border-top: 1px solid #DAD8E3; display: flex; justify-content: flex-end; gap: 10px; }
+.edit-modal-footer .btn { min-height: 36px; }
 
-/* Enable row */
 .modal-enable-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-.modal-enable-row span { font-size: 13px; font-weight: 700; }
-
-/* Reminder timing block */
+.modal-enable-row label { font-size: 13px; font-weight: 700; margin: 0; cursor: pointer; }
 .modal-section-label { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
-.modal-timing-wrap {
-    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    margin-bottom: 18px; padding: 12px 14px;
-    background: #FAFAFC; border: 1px solid var(--st-color-border); border-radius: 8px;
-}
+.modal-timing-wrap { margin-bottom: 18px; padding: 12px 14px; background: #FAFAFC; border: 1px solid #DAD8E3; border-radius: 8px; }
+.modal-timing-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .modal-send-label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.timing-helper { font-size: 12px; color: #5E6578; margin: 10px 0 0; display: flex; gap: 6px; align-items: flex-start; }
+.timing-helper i { font-size: 14px; margin-top: 1px; }
+.field-error { font-size: 12px; color: #991B1B; font-weight: 600; margin: 8px 0 0; display: none; }
+.field-error.show { display: flex; gap: 6px; align-items: center; }
+.interval-number[aria-invalid="true"] { border-color: #991B1B; }
 
-/* Template sections */
 .modal-template-section { margin-bottom: 16px; }
-.modal-template-header {
-    display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
-}
-.modal-template-header span { font-size: 13px; font-weight: 700; }
-.modal-restore-link { font-size: 12px; color: var(--st-color-primary); text-decoration: none; font-weight: 600; }
-.modal-restore-link:hover { text-decoration: underline; color: var(--st-color-primary-hover); }
-.modal-textarea {
-    width: 100%; border: 1px solid var(--st-color-border); border-radius: 6px;
-    font-size: 13px; font-family: 'Nunito', sans-serif; color: var(--st-color-text);
-    padding: 10px 12px; resize: vertical; line-height: 1.5;
-}
-.modal-textarea:focus { outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb),0.15); }
+.modal-template-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.modal-template-header label, .modal-template-header .tpl-label { font-size: 13px; font-weight: 700; margin: 0; }
+.modal-restore-link { font-size: 12px; color: #5C53DC; background: none; border: none; padding: 4px 2px; font-weight: 600; cursor: pointer; font-family: 'Nunito', sans-serif; }
+.modal-restore-link:hover { text-decoration: underline; }
+.modal-textarea { width: 100%; border: 1px solid #DAD8E3; border-radius: 6px; font-size: 13px; font-family: 'Nunito', sans-serif; color: #32415B; padding: 10px 12px; resize: vertical; line-height: 1.5; }
+.modal-textarea:focus { outline: none; border-color: #8B85EA; box-shadow: 0 0 0 3px rgba(139,133,234,0.15); }
 .modal-subject-textarea { min-height: 42px; max-height: 42px; }
-.modal-body-textarea   { min-height: 160px; }
-.modal-sms-textarea    { min-height: 100px; }
-
-/* Editor toolbar (email body) */
-.editor-toolbar {
-    display: flex; align-items: center; gap: 2px; flex-wrap: wrap;
-    padding: 6px 8px;
-    border: 1px solid var(--st-color-border); border-bottom: none;
-    border-radius: 6px 6px 0 0; background: #F7F7FA;
-}
-.editor-toolbar button {
-    background: transparent; border: none; cursor: pointer;
-    color: var(--st-color-text-muted); font-size: 12px;
-    padding: 3px 6px; border-radius: 4px; font-weight: 700;
-    min-width: 26px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
-}
-.editor-toolbar button:hover { background: #EEEDFB; color: var(--st-color-primary); }
-.editor-toolbar .tb-sep { width: 1px; height: 18px; background: var(--st-color-border); margin: 0 4px; }
-.editor-body-area {
-    width: 100%; min-height: 160px;
-    border: 1px solid var(--st-color-border); border-radius: 0 0 6px 6px;
-    padding: 10px 12px; font-size: 13px; font-family: 'Nunito', sans-serif;
-    color: var(--st-color-text); line-height: 1.6;
-    outline: none;
-}
-.editor-body-area:focus { border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb),0.15); }
-
-/* Keywords box */
-.keywords-box {
-    background: #F0FAFA; border-left: 3px solid #0DCECE;
-    border-radius: 4px; padding: 10px 12px;
-    font-size: 12px; color: var(--st-color-text); margin-bottom: 10px; line-height: 1.6;
-}
-.keywords-box strong { color: var(--st-color-text); }
-.keywords-note { font-size: 12px; color: var(--st-color-text-muted); line-height: 1.5; margin-bottom: 0; }
-.field-label {
-    font-size: 11px; font-weight: 600; color: var(--st-color-text-muted);
-    text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; display: block;
-}
-.timing-toggle {
-    display: flex; background: #F2F2F5; border-radius: 8px; padding: 3px; margin-bottom: 18px;
-}
-.timing-toggle button {
-    flex: 1; background: transparent; border: none;
-    font-size: 12.5px; font-weight: 600; color: var(--st-color-text-muted);
-    padding: 7px 4px; border-radius: 6px; cursor: pointer;
-}
-.timing-toggle button.active {
-    background: #fff; color: var(--st-color-primary-active);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-.interval-row { display: flex; gap: 10px; margin-bottom: 18px; }
+.modal-sms-textarea { min-height: 100px; }
+.editor-toolbar { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; padding: 6px 8px; border: 1px solid #DAD8E3; border-bottom: none; border-radius: 6px 6px 0 0; background: #F7F7FA; }
+.editor-toolbar button { background: transparent; border: none; cursor: pointer; color: #5E6578; font-size: 12px; padding: 3px 6px; border-radius: 4px; font-weight: 700; min-width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; }
+.editor-toolbar button:hover { background: #EEEDFB; color: #5C53DC; }
+.editor-toolbar select { height: 24px; font-size: 11px; border: 1px solid #DAD8E3; border-radius: 4px; padding: 0 4px; background: #fff; margin-right: 4px; }
+.editor-toolbar .tb-sep { width: 1px; height: 18px; background: #DAD8E3; margin: 0 4px; }
+.editor-body-area { width: 100%; min-height: 160px; border: 1px solid #DAD8E3; border-radius: 0 0 6px 6px; padding: 10px 12px; font-size: 13px; font-family: 'Nunito', sans-serif; color: #32415B; line-height: 1.6; outline: none; white-space: pre-wrap; }
+.editor-body-area:focus { border-color: #8B85EA; box-shadow: 0 0 0 3px rgba(139,133,234,0.15); }
+.keywords-box { background: #F0FAFA; border-left: 3px solid #0DCECE; border-radius: 4px; padding: 10px 12px; font-size: 12px; color: #32415B; margin-bottom: 10px; line-height: 1.6; }
+.keywords-note { font-size: 12px; color: #5E6578; line-height: 1.5; margin-bottom: 0; }
+.timing-toggle { display: flex; background: #F2F2F5; border-radius: 8px; padding: 3px; }
+.timing-toggle button { flex: 1; background: transparent; border: none; font-size: 12.5px; font-weight: 600; color: #5E6578; padding: 7px 12px; border-radius: 6px; cursor: pointer; min-height: 34px; font-family: 'Nunito', sans-serif; }
+.timing-toggle button[aria-pressed="true"] { background: #fff; color: #5C53DC; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+.interval-row { display: flex; gap: 10px; }
 .interval-row.is-hidden { display: none; }
-.interval-number {
-    width: 80px; height: 40px;
-    border: 1px solid var(--st-color-border); border-radius: 8px;
-    font-size: 14px; text-align: center; padding: 0 8px;
-}
-.interval-unit {
-    flex: 1; height: 40px;
-    border: 1px solid var(--st-color-border); border-radius: 8px;
-    font-size: 14px; padding: 0 12px; background: #fff;
-}
-.interval-static-note {
-    background: #F4F3FD; color: var(--st-color-primary-active);
-    font-size: 12.5px; font-weight: 600; padding: 10px 14px;
-    border-radius: 8px; margin-bottom: 18px;
-}
-.interval-number:focus, .interval-unit:focus {
-    outline: none; border-color: var(--st-color-primary);
-    box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), 0.18);
-}
-.toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-.toggle-row span { font-size: 13px; font-weight: 600; }
-.switch {
-    position: relative; width: 40px; height: 22px;
-    background: #DAD8E3; border-radius: 999px; cursor: pointer;
-    transition: background 0.15s ease; flex-shrink: 0;
-}
-.switch::after {
-    content: ''; position: absolute; top: 2px; left: 2px;
-    width: 18px; height: 18px; border-radius: 50%;
-    background: #fff; transition: transform 0.15s ease;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
-.switch.on { background: var(--st-color-primary); }
-.switch.on::after { transform: translateX(18px); }
+.interval-number { width: 80px; height: 40px; border: 1px solid #DAD8E3; border-radius: 8px; font-size: 14px; text-align: center; padding: 0 8px; }
+.interval-unit { flex: 1; min-width: 120px; height: 40px; border: 1px solid #DAD8E3; border-radius: 8px; font-size: 14px; padding: 0 12px; background: #fff; }
+.interval-static-note { background: #F4F3FD; color: #5C53DC; font-size: 12.5px; font-weight: 600; padding: 10px 14px; border-radius: 8px; }
+.interval-number:focus, .interval-unit:focus { outline: none; border-color: #8B85EA; box-shadow: 0 0 0 3px rgba(139,133,234,0.18); }
+.switch { position: relative; width: 40px; height: 22px; background: #B9B6C6; border-radius: 999px; cursor: pointer; transition: background 0.15s ease; flex-shrink: 0; border: none; padding: 0; }
+.switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform 0.15s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.switch[aria-checked="true"] { background: var(--st-color-primary, #8B85EA); }
+.switch[aria-checked="true"]::after { transform: translateX(18px); }
+.switch-state { font-size: 12px; color: #5E6578; font-weight: 600; }
+
+/* Alerts (design system §5) */
+.settings-alert { display: flex; gap: 10px; align-items: flex-start; border: 1px solid; border-radius: 8px; padding: 10px 12px; font-size: 12.5px; line-height: 1.5; margin-bottom: 14px; }
+.settings-alert i { font-size: 16px; margin-top: 1px; }
+.settings-alert-title { font-weight: 700; }
+.settings-alert--warn   { background: #FFFBEB; border-color: #FDE68A; color: #92400E; }
+.settings-alert--danger { background: #FEF2F2; border-color: #FECACA; color: #991B1B; }
+.settings-alert--info   { background: #EFF6FF; border-color: #BFDBFE; color: #1E40AF; }
+
+/* Void modal form */
+.void-summary { font-size: 13px; line-height: 1.55; margin-bottom: 14px; }
+.void-field-label { font-size: 13px; font-weight: 700; margin-bottom: 6px; display: block; }
+.void-field-label .opt { font-weight: 500; color: #5E6578; }
+.void-fieldset { border: 1px solid #DAD8E3; border-radius: 8px; padding: 12px 14px; margin: 16px 0 0; }
+.void-fieldset legend { font-size: 13px; font-weight: 700; width: auto; padding: 0 6px; margin: 0 0 0 -6px; }
+.void-fieldset .help { font-size: 12px; color: #5E6578; margin: 0 0 8px; }
+.radio-row { display: flex; align-items: center; gap: 10px; min-height: 36px; font-size: 13px; cursor: pointer; margin: 0; }
+.radio-row input { width: 18px; height: 18px; accent-color: #5C53DC; margin: 0; }
+.skipped-list { margin: 4px 0 0; padding-left: 18px; }
+.btn-danger { background: #B42318; border-color: #B42318; color: #fff; }
+.page-modal *, #reminders-page *, #invoices-page *, .bulk-action-bar * { box-sizing: border-box; }
+.btn-danger:hover { background: #912018; border-color: #912018; }
+.btn[disabled] { opacity: .55; cursor: not-allowed; }
 
 /* ============================
    INVOICES PAGE STYLES
    ============================ */
 .invoices-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-.invoices-title { font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
-.invoices-count-badge {
-    background: #E8E6FA; color: #5C53DC;
-    font-size: 13px; font-weight: 700; border-radius: 999px; padding: 2px 11px;
-}
+.invoices-title { font-size: 22px; font-weight: 800; display: flex; align-items: center; gap: 10px; margin: 0; }
+.invoices-count-badge { background: #E8E6FA; color: #5C53DC; font-size: 13px; font-weight: 700; border-radius: 999px; padding: 2px 11px; }
 .header-actions { display: flex; gap: 10px; }
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 18px; }
 .stat-card { background: #fff; border: 1px solid var(--st-color-border); border-radius: 10px; padding: 16px 18px; }
-.stat-label { font-size: 11px; font-weight: 600; color: var(--st-color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.stat-label { font-size: 11px; font-weight: 600; color: var(--st-color-text-muted-aa); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
 .stat-value { font-size: 22px; font-weight: 700; }
-.stat-value.warn    { color: #E8830C; }
-.stat-value.success { color: #1F9D55; }
-.filter-bar {
-    background: #fff; border: 1px solid var(--st-color-border);
-    border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
-    display: flex; align-items: center; gap: 10px;
-}
-.search-input-wrap { position: relative; flex: 1; max-width: 320px; }
-.search-input-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--st-color-text-muted); font-size: 13px; }
+.stat-value.warn    { color: #B45309; } /* A11y: was #E8830C (2.73:1) */
+.stat-value.success { color: #1A7A45; }
+.stats-scope { font-size: 12px; color: var(--st-color-text-muted-aa); margin: -10px 0 14px; }
+.filter-bar { background: #fff; border: 1px solid var(--st-color-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.search-input-wrap { position: relative; flex: 1; max-width: 320px; min-width: 200px; }
+.search-input-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--st-color-text-muted-aa); font-size: 13px; }
 .search-input-wrap input { width: 100%; height: 36px; padding: 0 12px 0 32px; border: 1px solid var(--st-color-border); border-radius: 8px; font-size: 13px; }
-.filter-bar select, .filter-bar .amount-input { height: 36px; border: 1px solid var(--st-color-border); border-radius: 8px; font-size: 13px; padding: 0 10px; }
+.filter-bar select, .filter-bar .amount-input { height: 36px; border: 1px solid var(--st-color-border); border-radius: 8px; font-size: 13px; padding: 0 10px; background: #fff; }
 .filter-bar .amount-input { width: 90px; }
 .filter-bar .spacer { flex: 1; }
-.table-card { background: #fff; border: 1px solid var(--st-color-border); border-radius: 10px; overflow: hidden; }
+.table-card { background: #fff; border: 1px solid var(--st-color-border); border-radius: 10px; overflow-x: auto; }
 table.invoices-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-table.invoices-table thead th {
-    text-align: left; font-size: 11px; font-weight: 700; color: var(--st-color-text-muted);
-    text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 14px;
-    border-bottom: 1px solid var(--st-color-border); white-space: nowrap; background: #FAFAFC;
-}
-table.invoices-table thead th i.sort-icon { font-size: 12px; margin-left: 3px; color: #C2C5D6; }
+table.invoices-table thead th { text-align: left; font-size: 11px; font-weight: 700; color: var(--st-color-text-muted-aa); text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 14px; border-bottom: 1px solid var(--st-color-border); white-space: nowrap; background: #FAFAFC; }
 table.invoices-table tbody td { padding: 12px 14px; border-bottom: 1px solid #F0EFF5; vertical-align: middle; }
 table.invoices-table tbody tr:hover { background: #FAFAFD; }
 table.invoices-table tbody tr.row-selected { background: #F4F3FD; }
+table.invoices-table tbody tr.row-voided td { color: #5E6578; }
 .checkbox-cell { width: 38px; }
-.row-checkbox, .header-checkbox { width: 17px; height: 17px; cursor: pointer; accent-color: var(--st-color-primary); }
-.status-chip { display: inline-block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 3px 9px; border-radius: 999px; background: #EFEFF3; color: #5B6275; }
+.row-checkbox, .header-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: #5C53DC; }
+.status-chip { display: inline-block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
 .status-chip.open    { background: #EFEFF3; color: #5B6275; }
 .status-chip.partial { background: #E6F3FA; color: #1A6FA8; }
-.sync-chip { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.3px; padding: 3px 9px; border-radius: 999px; margin-left: 6px; }
-.sync-chip.synced     { background: #E6FAF0; color: #1F9D55; }
-.sync-chip.not-synced { background: #FFF7DD; color: #B8860B; }
+.status-chip.paid    { background: #F0FDF4; color: #166534; }
+.status-chip.voided  { background: #FEF2F2; color: #991B1B; }
+.sync-chip { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; letter-spacing: 0.3px; padding: 3px 9px; border-radius: 999px; margin-left: 6px; white-space: nowrap; }
+/* A11y: sync chip text darkened (was 3.21:1 / 3.04:1) */
+.sync-chip.synced     { background: #E6FAF0; color: #1A7A45; }
+.sync-chip.not-synced { background: #FFF7DD; color: #7A5300; }
+.sync-chip.failed     { background: #FEF2F2; color: #991B1B; }
+.sync-chip i { font-size: 11px; }
 .customer-cell { display: flex; align-items: center; gap: 8px; }
 .avatar-dot { width: 22px; height: 22px; border-radius: 50%; background: #E8E6FA; color: #5C53DC; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .invoice-no { font-weight: 600; }
-.proposal-link { color: var(--st-color-text-muted); }
-.balance-amt { color: #1F9D55; font-weight: 600; }
-.row-actions-cell { text-align: right; }
+.invoice-cell { white-space: nowrap; }
+.proposal-link { color: var(--st-color-text-muted-aa); }
+.balance-amt { color: #1A7A45; font-weight: 600; }
+.row-actions-cell { text-align: right; position: relative; }
 .totals-row td { font-weight: 700; border-top: 2px solid var(--st-color-border); border-bottom: none; background: #FAFAFC; }
 
-/* Sortable column headers */
-table.invoices-table thead th.sortable { cursor: pointer; user-select: none; }
-table.invoices-table thead th.sortable:hover { background: #F2F1FA; color: var(--st-color-primary); }
-table.invoices-table thead th.sort-active { color: var(--st-color-primary-active); background: #EEEDFB; }
-table.invoices-table thead th.sort-active .sort-icon { color: var(--st-color-primary); }
+/* Sortable headers: real buttons for keyboard access */
+.sort-btn { background: none; border: none; padding: 0; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; min-height: 24px; }
+.sort-btn:hover { color: #5C53DC; }
+th[aria-sort="ascending"], th[aria-sort="descending"] { color: #5C53DC !important; background: #EEEDFB !important; }
+.sort-icon { font-size: 12px; color: #9AA0B0; }
+th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { color: #5C53DC; }
 
-/* Bulk action bar */
+/* Row action menu */
+.row-menu { display: none; position: absolute; right: 14px; top: calc(100% - 6px); background: #fff; border: 1px solid #DAD8E3; border-radius: 10px; box-shadow: 0 10px 28px rgba(20,15,50,0.16); min-width: 230px; padding: 6px; z-index: 40; text-align: left; }
+.row-menu.open { display: block; }
+.row-menu.open-up { top: auto; bottom: calc(100% - 6px); }
+.row-menu [role="menuitem"] { display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: none; text-align: left; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600; color: #32415B; padding: 0 10px; min-height: 40px; border-radius: 6px; cursor: pointer; }
+.row-menu [role="menuitem"]:hover:not([aria-disabled="true"]), .row-menu [role="menuitem"]:focus { background: #F4F3FD; color: #5C53DC; outline: none; }
+.row-menu [role="menuitem"][aria-disabled="true"] { color: #6B7180; cursor: not-allowed; }
+.row-menu .menu-sub { display: block; font-size: 11.5px; font-weight: 500; color: #5E6578; }
+.row-menu .menu-sep { height: 1px; background: #F0EFF5; margin: 4px 2px; }
+.row-menu .menu-group-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #5E6578; padding: 6px 10px 2px; }
+
+/* Bulk action bar: raised above the fixed prototype footer so it is never obscured */
 .bulk-action-bar {
-    position: fixed; left: 50%; bottom: 24px;
-    transform: translateX(-50%) translateY(120%); opacity: 0;
-    transition: transform 0.22s ease, opacity 0.22s ease;
-    background: #25213A; color: #fff; border-radius: 14px;
-    padding: 12px 16px 12px 20px; display: flex; align-items: center; gap: 14px;
-    box-shadow: 0 10px 30px rgba(20,15,50,0.28); z-index: 100; pointer-events: none;
+    position: fixed; left: 50%; bottom: 56px; transform: translateX(-50%) translateY(140%); opacity: 0; visibility: hidden;
+    transition: transform 0.22s ease, opacity 0.22s ease, visibility 0s linear .22s;
+    background: #25213A; color: #fff; border-radius: 14px; padding: 8px 12px 8px 20px;
+    display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(20,15,50,0.28); z-index: 100; font-family: 'Nunito', sans-serif;
 }
-.bulk-action-bar.is-visible { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+.bulk-action-bar.is-visible { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; transition: transform 0.22s ease, opacity 0.22s ease; }
 .bulk-count { font-size: 13px; font-weight: 700; white-space: nowrap; padding-right: 14px; border-right: 1px solid rgba(255,255,255,0.18); }
-.bulk-btn { background: transparent; border: none; color: #D8D5F5; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap; min-height: 40px; }
+.bulk-btn { background: transparent; border: none; color: #D8D5F5; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 8px; cursor: pointer; white-space: nowrap; min-height: 48px; font-family: 'Nunito', sans-serif; }
 .bulk-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.bulk-sep { width: 1px; height: 26px; background: rgba(255,255,255,0.18); margin: 0 4px; }
 .bulk-btn.danger { color: #FF9A9A; }
-.bulk-btn.danger:hover { background: rgba(255,90,90,0.12); color: #FF6B6B; }
-.bulk-close { background: rgba(255,255,255,0.08); border: none; color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 4px; }
+.bulk-btn.danger:hover { background: rgba(255,90,90,0.12); color: #FFB4B4; }
+.bulk-close { background: rgba(255,255,255,0.08); border: none; color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 4px; }
 .bulk-close:hover { background: rgba(255,255,255,0.18); }
+.bulk-action-bar :focus-visible { outline-color: #C9C4FF; }
 
 /* Toast */
-.proto-toast {
-    position: fixed; top: 60px; right: 32px;
-    background: #25213A; color: #fff; padding: 12px 18px;
-    border-radius: 10px; font-size: 13px; font-weight: 600;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    transform: translateX(20px); opacity: 0;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-    z-index: 300; pointer-events: none;
-}
+.proto-toast { position: fixed; top: 60px; right: 32px; background: #25213A; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translateX(20px); opacity: 0; transition: transform 0.2s ease, opacity 0.2s ease; z-index: 300; pointer-events: none; max-width: 380px; font-family: 'Nunito', sans-serif; display: flex; gap: 8px; align-items: flex-start; }
 .proto-toast.show { transform: translateX(0); opacity: 1; }
+.proto-toast i { font-size: 16px; color: #8EE3B5; }
+
 /* Reminder status chip (per invoice row) */
-.reminder-status-chip {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 10.5px; font-weight: 700; padding: 3px 9px;
-    border-radius: 999px; white-space: nowrap;
-}
-.reminder-status-chip.active  { background: #E6FAF0; color: #1A7A45; }
-.reminder-status-chip.paused  { background: #FFF7DD; color: #9A6B00; }
-.reminder-status-chip.none    { background: #EFEFF3; color: #80879A; }
-.reminder-status-chip i       { font-size: 11px; }
+.reminder-status-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.reminder-status-chip.active { background: #E6FAF0; color: #1A7A45; }
+.reminder-status-chip.paused { background: #FFF7DD; color: #7A5300; } /* A11y: was #9A6B00 (4.38:1) */
+.reminder-status-chip.none   { background: #EFEFF3; color: #5B6275; } /* A11y: was #80879A (3.13:1) */
+.reminder-status-chip i { font-size: 11px; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
 </style>
 </head>
 <body>
 
-<!-- Demo banner with page switcher -->
+<!-- Demo banner with page switcher (demo-only chrome) -->
 <div class="demo-banner">
     <div class="demo-banner-left">
         <strong>PROTOTYPE</strong>
-        <span class="br-chip">86b32d4gr <i class="ti ti-info-circle"></i>
-            <span class="br-tooltip">Ticket 86b32d4gr: Invoice Reminders — Reminders page extensions + Invoices page bulk actions.</span>
+        <span class="br-chip" tabindex="0">86b32d4gr <i class="ti ti-info-circle" aria-hidden="true"></i>
+            <span class="br-tooltip below">Ticket 86b32d4gr: Invoice Reminders. Revised to requirements current as of Oct 1, 2026 (BR-1 to BR-26).</span>
         </span>
     </div>
-    <nav class="demo-nav">
-        <button class="demo-nav-btn active" data-page="reminders-page" onclick="switchPage('reminders-page')">
-            <i class="ti ti-bell"></i> Reminders Settings
+    <nav class="demo-nav" aria-label="Prototype screens">
+        <button class="demo-nav-btn active" data-page="reminders-page" aria-current="page" onclick="switchPage('reminders-page')">
+            <i class="ti ti-bell" aria-hidden="true"></i> Reminders Settings
         </button>
         <button class="demo-nav-btn" data-page="invoices-page" onclick="switchPage('invoices-page')">
-            <i class="ti ti-file-invoice"></i> Invoices
+            <i class="ti ti-file-invoice" aria-hidden="true"></i> Invoices
         </button>
     </nav>
+    <div class="demo-controls">
+        <button class="demo-control" role="switch" aria-checked="true" id="demoJobCosting" onclick="toggleDemo(this)">
+            <span class="demo-switch" aria-hidden="true"></span>Job Costing on
+        </button>
+        <button class="demo-control" role="switch" aria-checked="true" id="demoBr" onclick="toggleDemo(this); document.body.classList.toggle('hide-br', this.getAttribute('aria-checked') !== 'true');">
+            <span class="demo-switch" aria-hidden="true"></span>BR notes
+        </button>
+    </div>
 </div>
 
 <!-- =====================
      REMINDERS PAGE
      ===================== -->
-<div id="reminders-page" class="active">
-    <div class="page-title">Reminders</div>
+<main id="reminders-page" class="active">
+    <h1 class="page-title">Reminders</h1>
 
-    <!-- For Appointments -->
-    <div class="reminders-section">
-        <div class="section-header">For Appointments</div>
+    <!-- For Appointments (unchanged) -->
+    <section class="reminders-section" aria-labelledby="hdr-appt">
+        <h2 class="section-header" id="hdr-appt">For Appointments</h2>
         <div class="delivery-block">
-            <div class="delivery-title">Email Delivery</div>
+            <h3 class="delivery-title">Email Delivery</h3>
             <div class="reminder-row"><div class="reminder-label">Send <b>1 Week(s)</b> before appointment</div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
             <div class="reminder-row"><div class="reminder-label">Send <b>1 Day(s)</b> before appointment</div><div class="status-pill disabled">Disabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
             <div class="reminder-row"><div class="reminder-label">Send <b>1 Hour(s)</b> before appointment</div><div class="status-pill disabled">Disabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
-            <div class="reminder-row"><div class="reminder-label">Send <b>30 Minutes</b> before appointment <span class="custom-tag">custom <i class="ti ti-info-circle"></i></span></div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
+            <div class="reminder-row"><div class="reminder-label">Send <b>30 Minutes</b> before appointment <span class="custom-tag">custom <i class="ti ti-info-circle" aria-hidden="true"></i></span></div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
         </div>
         <div class="delivery-block">
-            <div class="delivery-title">SMS Delivery</div>
+            <h3 class="delivery-title">SMS Delivery</h3>
             <div class="reminder-row"><div class="reminder-label">Send <b>1 Week(s)</b> before appointment</div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
             <div class="reminder-row"><div class="reminder-label">Send <b>1 Day(s)</b> before appointment</div><div class="status-pill disabled">Disabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
             <div class="reminder-row"><div class="reminder-label">Send <b>1 Hour(s)</b> before appointment</div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
-            <div class="reminder-row"><div class="reminder-label">Send <b>30 Minutes</b> before appointment <span class="custom-tag">custom <i class="ti ti-info-circle"></i></span></div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
+            <div class="reminder-row"><div class="reminder-label">Send <b>30 Minutes</b> before appointment <span class="custom-tag">custom <i class="ti ti-info-circle" aria-hidden="true"></i></span></div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
         </div>
-    </div>
+    </section>
 
-    <!-- For Jobs -->
-    <div class="reminders-section">
-        <div class="section-header">For Jobs</div>
+    <!-- For Jobs (unchanged) -->
+    <section class="reminders-section" aria-labelledby="hdr-jobs">
+        <h2 class="section-header" id="hdr-jobs">For Jobs</h2>
         <div class="delivery-block">
-            <div class="delivery-title">Email Delivery</div>
+            <h3 class="delivery-title">Email Delivery</h3>
             <div class="reminder-row"><div class="reminder-label">Send <b>1 Week(s)</b> before job</div><div class="status-pill disabled">Disabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
             <div class="reminder-row"><div class="reminder-label">Send <b>1 Day(s)</b> before job</div><div class="status-pill disabled">Disabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
             <div class="reminder-row"><div class="reminder-label">Send <b>1 Hour(s)</b> before job</div><div class="status-pill disabled">Disabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
-            <div class="reminder-row"><div class="reminder-label">Send <b>30 Minutes</b> before job <span class="custom-tag">custom <i class="ti ti-info-circle"></i></span></div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
+            <div class="reminder-row"><div class="reminder-label">Send <b>30 Minutes</b> before job <span class="custom-tag">custom <i class="ti ti-info-circle" aria-hidden="true"></i></span></div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
         </div>
         <div class="delivery-block">
-            <div class="delivery-title">SMS Delivery</div>
+            <h3 class="delivery-title">SMS Delivery</h3>
             <div class="reminder-row"><div class="reminder-label">Send <b>1 Week(s)</b> before job</div><div class="status-pill disabled">Disabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
             <div class="reminder-row"><div class="reminder-label">Send <b>1 Day(s)</b> before job</div><div class="status-pill disabled">Disabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
             <div class="reminder-row"><div class="reminder-label">Send <b>1 Hour(s)</b> before job</div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
-            <div class="reminder-row"><div class="reminder-label">Send <b>30 Minutes</b> before job <span class="custom-tag">custom <i class="ti ti-info-circle"></i></span></div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
+            <div class="reminder-row"><div class="reminder-label">Send <b>30 Minutes</b> before job <span class="custom-tag">custom <i class="ti ti-info-circle" aria-hidden="true"></i></span></div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn">Edit</button></div>
         </div>
-    </div>
+    </section>
 
-    <!-- For Invoices (NEW) -->
-    <div class="reminders-section">
-        <div class="section-header is-new">For Invoices <span class="new-tag">New</span></div>
+    <!-- For Invoices (NEW): rows rendered from state -->
+    <section class="reminders-section" aria-labelledby="hdr-inv">
+        <h2 class="section-header is-new" id="hdr-inv">For Invoices <span class="new-tag">New</span>
+            <span class="br-chip br-annot" tabindex="0">BR-1 · BR-2 · BR-7 <span class="br-tooltip">BR-1: section sits below For Jobs, same row pattern. BR-2: Admin only (Settings). BR-7: default rows on first use, created independently of Appointment/Job defaults.</span></span>
+        </h2>
         <div class="delivery-block">
-            <div class="delivery-title">Email Delivery</div>
-            <div class="reminder-row"><div class="reminder-label">Send <b>3 Day(s)</b> before due date <span class="new-row-tag">before</span></div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn" onclick="openEditModal('email','before',3,'Day(s)')">Edit</button></div>
-            <div class="reminder-row"><div class="reminder-label">Send <b>on due date</b> <span class="new-row-tag">on</span></div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn" onclick="openEditModal('email','on',null,null)">Edit</button></div>
-            <div class="reminder-row"><div class="reminder-label">Send <b>3 Day(s)</b> after due date <span class="new-row-tag">after</span></div><div class="status-pill enabled">Enabled</div><div class="queue-count">0 in queue</div><button class="edit-btn" onclick="openEditModal('email','after',3,'Day(s)')">Edit</button></div>
-            <div class="reminder-row"><div class="reminder-label">Send <b>1 Month(s)</b> after due date <span class="new-row-tag">after</span> <span class="custom-tag">custom <i class="ti ti-info-circle"></i></span></div><div class="status-pill disabled">Disabled</div><div class="queue-count">0 in queue</div><button class="edit-btn" onclick="openEditModal('email','after',1,'Month(s)')">Edit</button></div>
-            <div class="add-reminder-row"><button class="add-reminder-btn" onclick="openEditModal('email','before',1,'Day(s)')"><i class="ti ti-plus"></i>Add Reminder</button></div>
+            <h3 class="delivery-title">Email Delivery</h3>
+            <div id="rows-email"></div>
+            <div class="add-reminder-row" id="add-email"></div>
         </div>
         <div class="delivery-block">
-            <div class="delivery-title">SMS Delivery</div>
-            <div class="reminder-row"><div class="reminder-label">Send <b>3 Day(s)</b> before due date <span class="new-row-tag">before</span></div><div class="status-pill disabled">Disabled</div><div class="queue-count">0 in queue</div><button class="edit-btn" onclick="openEditModal('sms','before',3,'Day(s)')">Edit</button></div>
-            <div class="reminder-row"><div class="reminder-label">Send <b>on due date</b> <span class="new-row-tag">on</span></div><div class="status-pill disabled">Disabled</div><div class="queue-count">0 in queue</div><button class="edit-btn" onclick="openEditModal('sms','on',null,null)">Edit</button></div>
-            <div class="add-reminder-row"><button class="add-reminder-btn" onclick="openEditModal('sms','before',1,'Day(s)')"><i class="ti ti-plus"></i>Add Reminder</button></div>
+            <h3 class="delivery-title">SMS Delivery</h3>
+            <div id="rows-sms"></div>
+            <div class="add-reminder-row" id="add-sms"></div>
         </div>
-    </div>
+    </section>
+</main>
 
-    <!-- Edit modal (inside reminders-page for CSS var inheritance) -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="edit-modal" id="editModalCard">
-            <div class="edit-modal-header">
-                <h5 id="modalTitle">Edit Email Reminder for Invoice</h5>
-                <button class="modal-close-btn" onclick="closeEditModal()"><i class="ti ti-x"></i></button>
+<!-- Edit / Add reminder modal -->
+<div class="modal-overlay page-modal" id="modalOverlay">
+    <div class="edit-modal" id="editModalCard" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="edit-modal-header">
+            <h2 id="modalTitle">Edit Email Reminder for Invoice</h2>
+            <button class="modal-close-btn" onclick="closeEditModal()" aria-label="Close"><i class="ti ti-x" aria-hidden="true"></i></button>
+        </div>
+        <div class="edit-modal-body">
+            <div class="modal-enable-row">
+                <label id="enableLbl" for="enabledSwitch">Enable</label>
+                <button type="button" class="switch" id="enabledSwitch" role="switch" aria-checked="true" aria-labelledby="enableLbl" onclick="toggleSwitch(this)"></button>
+                <span class="switch-state" id="enabledState" aria-hidden="true">On</span>
             </div>
-            <div class="edit-modal-body">
 
-                <!-- Enable -->
-                <div class="modal-enable-row">
-                    <span>Enable</span>
-                    <div class="switch on" id="enabledSwitch" onclick="this.classList.toggle('on')"></div>
-                </div>
-
-                <!-- Reminder timing -->
-                <div class="modal-section-label">Reminder</div>
-                <div class="modal-timing-wrap">
-                    <span class="modal-send-label">Send</span>
-                    <div class="timing-toggle" id="timingToggle">
-                        <button data-mode="before" onclick="setMode('before')">Before</button>
-                        <button data-mode="on" onclick="setMode('on')">On Due Date</button>
-                        <button data-mode="after" onclick="setMode('after')">After</button>
+            <div class="modal-section-label" id="timingLbl">Reminder
+                <span class="br-chip br-annot" tabindex="0">BR-3 · BR-4 · BR-5 · BR-9 <span class="br-tooltip">BR-3: Before / On Due Date / After, calculated from Due Date. BR-4: On Due Date has no interval. BR-5: sends at Default Job Start Time (8 AM fallback), company timezone. BR-9: switching direction loads that direction's default copy.</span></span>
+            </div>
+            <div class="modal-timing-wrap" role="group" aria-labelledby="timingLbl">
+                <div class="modal-timing-line">
+                    <span class="modal-send-label" id="sendLbl">Send</span>
+                    <div class="timing-toggle" id="timingToggle" role="group" aria-labelledby="sendLbl">
+                        <button type="button" data-mode="before" aria-pressed="false" onclick="setMode('before', true)">Before</button>
+                        <button type="button" data-mode="on" aria-pressed="false" onclick="setMode('on', true)">On Due Date</button>
+                        <button type="button" data-mode="after" aria-pressed="false" onclick="setMode('after', true)">After</button>
                     </div>
-                    <div id="intervalRow" class="interval-row" style="margin-bottom:0;">
-                        <input type="number" min="1" class="interval-number" id="intervalNumber" value="3">
+                    <div id="intervalRow" class="interval-row">
+                        <label for="intervalNumber" class="sr-only">Interval amount</label>
+                        <input type="number" min="1" step="1" inputmode="numeric" class="interval-number" id="intervalNumber" value="3" aria-describedby="intervalError">
+                        <label for="intervalUnit" class="sr-only">Interval unit</label>
                         <select class="interval-unit" id="intervalUnit">
                             <option>Day(s)</option>
                             <option>Week(s)</option>
                             <option>Month(s)</option>
                         </select>
                     </div>
-                    <div id="onDueNote" class="interval-static-note" style="display:none;margin-bottom:0;">Sends on the invoice's due date.</div>
+                    <div id="onDueNote" class="interval-static-note" style="display:none;">Sends on the invoice's due date.</div>
                 </div>
-
-                <!-- Subject Template (email only) -->
-                <div class="modal-template-section" id="subjectSection">
-                    <div class="modal-template-header">
-                        <span>Subject Template</span>
-                        <a href="#" class="modal-restore-link" onclick="restoreDefault('subject');return false;">Restore Default</a>
-                    </div>
-                    <textarea class="modal-textarea modal-subject-textarea" id="subjectTemplate" rows="1">Reminder - Invoice #{invoice-number} from {company-name}</textarea>
-                </div>
-
-                <!-- Body Template (email) -->
-                <div class="modal-template-section" id="emailBodySection">
-                    <div class="modal-template-header">
-                        <span>Body Template</span>
-                        <a href="#" class="modal-restore-link" onclick="restoreDefault('emailBody');return false;">Restore Default</a>
-                    </div>
-                    <div class="editor-toolbar">
-                        <select style="height:22px;font-size:11px;border:1px solid #DAD8E3;border-radius:4px;padding:0 4px;background:#fff;">
-                            <option>Styles</option>
-                        </select>
-                        <select style="height:22px;font-size:11px;border:1px solid #DAD8E3;border-radius:4px;padding:0 4px;background:#fff;margin-left:4px;">
-                            <option>Font</option>
-                        </select>
-                        <select style="height:22px;font-size:11px;border:1px solid #DAD8E3;border-radius:4px;padding:0 4px;background:#fff;margin-left:4px;">
-                            <option>Size</option>
-                        </select>
-                        <div class="tb-sep"></div>
-                        <button onclick="document.execCommand('bold');return false;" title="Bold"><b>B</b></button>
-                        <button onclick="document.execCommand('italic');return false;" title="Italic"><i>I</i></button>
-                        <button onclick="document.execCommand('underline');return false;" title="Underline"><u>U</u></button>
-                        <button title="Strikethrough" style="text-decoration:line-through;">S</button>
-                        <div class="tb-sep"></div>
-                        <button title="Ordered list"><i class="ti ti-list-numbers"></i></button>
-                        <button title="Unordered list"><i class="ti ti-list"></i></button>
-                        <div class="tb-sep"></div>
-                        <button title="Align left"><i class="ti ti-align-left"></i></button>
-                        <button title="Align center"><i class="ti ti-align-center"></i></button>
-                        <button title="Align right"><i class="ti ti-align-right"></i></button>
-                    </div>
-                    <div class="editor-body-area" id="emailBodyArea" contenteditable="true"></div>
-                </div>
-
-                <!-- Message Template (SMS) -->
-                <div class="modal-template-section" id="smsBodySection" style="display:none;">
-                    <div class="modal-template-header">
-                        <span>Message Template</span>
-                        <a href="#" class="modal-restore-link" onclick="restoreDefault('smsBody');return false;">Restore Default</a>
-                    </div>
-                    <textarea class="modal-textarea modal-sms-textarea" id="smsBodyArea"></textarea>
-                </div>
-
-                <!-- Keywords -->
-                <div class="keywords-box">
-                    <strong>Keywords:</strong> {company-name} {company-phone} {company-website} {first-name} {last-name} {invoice-number} {invoice-amount} {balance-due} {due-date} {invoice-link} {salesperson-name} {project-manager-name} {project-manager-phone} {project-manager-email}
-                </div>
-                <p class="keywords-note">Keywords like <strong>{project-manager-name}</strong> will be replaced with actual data if available. If the data doesn't exist (e.g., no Project Manager assigned yet), the keyword will appear as written.</p>
-
+                <p class="field-error" id="intervalError" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>Enter a whole number of 1 or more.</span></p>
+                <p class="timing-helper"><i class="ti ti-clock" aria-hidden="true"></i><span>Sends at your company's Default Job Start Time (8:00 AM if not set), in your company's timezone. Only invoices with a due date that are Open or Partially Paid receive reminders.</span></p>
             </div>
-            <div class="edit-modal-footer">
-                <button class="btn btn-primary btn-sm" onclick="saveEditModal()">Save</button>
-                <button class="btn btn-outline-primary btn-sm" onclick="closeEditModal()">Close</button>
+
+            <div class="modal-template-section" id="subjectSection">
+                <div class="modal-template-header">
+                    <label for="subjectTemplate">Subject Template</label>
+                    <button type="button" class="modal-restore-link" onclick="restoreDefault('subject')" aria-label="Restore default subject template">Restore Default</button>
+                </div>
+                <textarea class="modal-textarea modal-subject-textarea" id="subjectTemplate" rows="1"></textarea>
             </div>
+
+            <div class="modal-template-section" id="emailBodySection">
+                <div class="modal-template-header">
+                    <span class="tpl-label" id="bodyLbl">Body Template</span>
+                    <button type="button" class="modal-restore-link" onclick="restoreDefault('emailBody')" aria-label="Restore default body template">Restore Default</button>
+                </div>
+                <div class="editor-toolbar" role="toolbar" aria-label="Formatting">
+                    <select aria-label="Styles"><option>Styles</option></select>
+                    <select aria-label="Font"><option>Font</option></select>
+                    <select aria-label="Size"><option>Size</option></select>
+                    <div class="tb-sep" aria-hidden="true"></div>
+                    <button type="button" onmousedown="event.preventDefault()" onclick="document.execCommand('bold')" aria-label="Bold"><b aria-hidden="true">B</b></button>
+                    <button type="button" onmousedown="event.preventDefault()" onclick="document.execCommand('italic')" aria-label="Italic"><i aria-hidden="true">I</i></button>
+                    <button type="button" onmousedown="event.preventDefault()" onclick="document.execCommand('underline')" aria-label="Underline"><u aria-hidden="true">U</u></button>
+                    <button type="button" aria-label="Strikethrough" style="text-decoration:line-through;"><span aria-hidden="true">S</span></button>
+                    <div class="tb-sep" aria-hidden="true"></div>
+                    <button type="button" aria-label="Numbered list"><i class="ti ti-list-numbers" aria-hidden="true"></i></button>
+                    <button type="button" aria-label="Bulleted list"><i class="ti ti-list" aria-hidden="true"></i></button>
+                    <div class="tb-sep" aria-hidden="true"></div>
+                    <button type="button" aria-label="Align left"><i class="ti ti-align-left" aria-hidden="true"></i></button>
+                    <button type="button" aria-label="Align center"><i class="ti ti-align-center" aria-hidden="true"></i></button>
+                    <button type="button" aria-label="Align right"><i class="ti ti-align-right" aria-hidden="true"></i></button>
+                </div>
+                <div class="editor-body-area" id="emailBodyArea" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="bodyLbl"></div>
+            </div>
+
+            <div class="modal-template-section" id="smsBodySection" style="display:none;">
+                <div class="modal-template-header">
+                    <label for="smsBodyArea">Message Template</label>
+                    <button type="button" class="modal-restore-link" onclick="restoreDefault('smsBody')" aria-label="Restore default message template">Restore Default</button>
+                </div>
+                <textarea class="modal-textarea modal-sms-textarea" id="smsBodyArea"></textarea>
+            </div>
+
+            <div class="keywords-box">
+                <strong>Keywords:</strong> {company-name} {company-phone} {company-website} {first-name} {last-name} {invoice-number} {invoice-amount} {balance-due} {due-date} {invoice-link} {salesperson-name} {project-manager-name} {project-manager-phone} {project-manager-email}
+                <span class="br-chip br-annot" tabindex="0">BR-10 · BR-11 <span class="br-tooltip">BR-10: supported keywords. BR-11: keywords with no data render as written, not blank.</span></span>
+            </div>
+            <p class="keywords-note">Keywords like <strong>{project-manager-name}</strong> will be replaced with actual data if available. If the data doesn't exist (e.g., no Project Manager assigned yet), the keyword will appear as written.</p>
+        </div>
+        <div class="edit-modal-footer">
+            <button class="btn btn-primary btn-sm" id="modalSaveBtn" onclick="saveEditModal()">Save</button>
+            <button class="btn btn-outline-primary btn-sm" onclick="closeEditModal()">Close</button>
         </div>
     </div>
 </div>
@@ -572,104 +499,246 @@ table.invoices-table thead th.sort-active .sort-icon { color: var(--st-color-pri
 <!-- =====================
      INVOICES PAGE
      ===================== -->
-<div id="invoices-page">
+<main id="invoices-page">
     <div class="invoices-header">
-        <div class="invoices-title">Invoices <span class="invoices-count-badge">337</span></div>
+        <h1 class="invoices-title">Invoices <span class="invoices-count-badge" id="countBadge" aria-label="invoices shown">0</span>
+            <span class="br-chip br-annot" tabindex="0">BR-19 <span class="br-tooltip below">BR-19: The Invoices page, including bulk actions, is Admin only.</span></span>
+        </h1>
         <div class="header-actions">
-            <button class="btn btn-primary"><i class="ti ti-plus" style="margin-right:4px;"></i>New Invoice</button>
-            <button class="btn btn-outline-primary">Actions <i class="ti ti-chevron-down" style="margin-left:4px;"></i></button>
+            <button class="btn btn-primary"><i class="ti ti-plus" style="margin-right:4px;" aria-hidden="true"></i>New Invoice</button>
+            <button class="btn btn-outline-primary">Actions <i class="ti ti-chevron-down" style="margin-left:4px;" aria-hidden="true"></i></button>
         </div>
     </div>
     <div class="stats-row">
-        <div class="stat-card"><div class="stat-label">Total Invoices</div><div class="stat-value">337</div></div>
-        <div class="stat-card"><div class="stat-label">Unpaid</div><div class="stat-value warn">249</div></div>
-        <div class="stat-card"><div class="stat-label">Total Amount</div><div class="stat-value">$1,487,228.90</div></div>
-        <div class="stat-card"><div class="stat-label">Outstanding Balance</div><div class="stat-value success">$1,237,799.94</div></div>
+        <div class="stat-card"><div class="stat-label">Total Invoices</div><div class="stat-value" id="statTotal">0</div></div>
+        <div class="stat-card"><div class="stat-label">Unpaid</div><div class="stat-value warn" id="statUnpaid">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Amount</div><div class="stat-value" id="statAmount">$0.00</div></div>
+        <div class="stat-card"><div class="stat-label">Outstanding Balance</div><div class="stat-value success" id="statBalance">$0.00</div></div>
     </div>
-    <div class="filter-bar">
-        <div class="search-input-wrap"><i class="ti ti-search"></i><input type="text" id="filterSearch" placeholder="Search invoices..." oninput="applyFilters()"></div>
+    <p class="stats-scope" id="statsScope">Showing all invoices. Unpaid includes Open and Partially Paid.
+        <span class="br-chip br-annot" tabindex="0">BR-20 <span class="br-tooltip">BR-20: four stat cards; values update with filters. Unpaid = Open + Partially Paid.</span></span>
+    </p>
+    <div class="filter-bar" role="search" aria-label="Filter invoices">
+        <div class="search-input-wrap"><i class="ti ti-search" aria-hidden="true"></i>
+            <label for="filterSearch" class="sr-only">Search by customer, invoice number, or proposal number</label>
+            <input type="text" id="filterSearch" placeholder="Search invoices..." oninput="applyFilters()"></div>
+        <label for="filterStatus" class="sr-only">Status</label>
         <select id="filterStatus" onchange="applyFilters()">
             <option value="">All Statuses</option>
             <option value="OPEN">Open</option>
             <option value="PARTIAL">Partially Paid</option>
             <option value="PAID">Paid</option>
+            <option value="VOIDED">Voided</option>
         </select>
+        <label for="filterType" class="sr-only">Amount field</label>
         <select id="filterType" onchange="applyFilters()">
             <option value="">Type</option>
             <option value="amount">Amount</option>
             <option value="paid">Paid</option>
             <option value="balance">Balance</option>
         </select>
+        <label for="filterOp" class="sr-only">Comparison</label>
         <select id="filterOp" onchange="applyFilters()">
             <option value="eq">=</option>
             <option value="lt">&lt;</option>
             <option value="gt">&gt;</option>
         </select>
-        <input type="text" inputmode="numeric" id="filterAmount" class="amount-input" placeholder="Amount" oninput="this.value=this.value.replace(/[^0-9.]/g,'');applyFilters()">
+        <label for="filterAmount" class="sr-only">Amount value</label>
+        <input type="text" inputmode="decimal" id="filterAmount" class="amount-input" placeholder="Amount" oninput="this.value=this.value.replace(/[^0-9.]/g,'');applyFilters()">
         <button class="btn btn-primary btn-sm" onclick="applyFilters()">Search</button>
+        <span class="br-chip br-annot" tabindex="0">BR-21 <span class="br-tooltip">BR-21: text search (customer, invoice #, proposal #), Status incl. Voided, Type + operator + amount.</span></span>
         <div class="spacer"></div>
         <button class="btn btn-outline-primary btn-sm" onclick="clearFilters()">Clear</button>
     </div>
     <div class="table-card">
         <table class="invoices-table">
+            <caption class="sr-only">Invoices. Amount, Paid, Balance and Date columns are sortable.</caption>
             <thead>
                 <tr>
-                    <th class="checkbox-cell"><input type="checkbox" class="header-checkbox" id="headerCheckbox" title="Select all on this page"></th>
-                    <th>Status</th>
-                    <th>Customer</th>
-                    <th>Proposal</th>
-                    <th>Invoice</th>
-                    <th class="sortable" data-sort="amountN" onclick="sortBy('amountN')">Amount <i class="ti ti-arrows-sort sort-icon"></i></th>
-                    <th class="sortable" data-sort="paidN"   onclick="sortBy('paidN')">Paid <i class="ti ti-arrows-sort sort-icon"></i></th>
-                    <th class="sortable" data-sort="balanceN" onclick="sortBy('balanceN')">Balance <i class="ti ti-arrows-sort sort-icon"></i></th>
-                    <th class="sortable" data-sort="date"    onclick="sortBy('date')">Date <i class="ti ti-arrow-down sort-icon"></i></th>
-                    <th>Reminders</th>
-                    <th class="row-actions-cell">Actions</th>
+                    <th class="checkbox-cell" scope="col"><input type="checkbox" class="header-checkbox" id="headerCheckbox" aria-label="Select all invoices shown"></th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Proposal</th>
+                    <th scope="col">Invoice <span class="br-chip br-annot" tabindex="0">BR-26 <span class="br-tooltip below">BR-26: QBO indicator shows Synced, Not Synced, or Failed. Open gap: what sets Failed (TJ).</span></span></th>
+                    <th scope="col" data-sort="amountN" aria-sort="none"><button class="sort-btn" onclick="sortBy('amountN')">Amount <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
+                    <th scope="col" data-sort="paidN" aria-sort="none"><button class="sort-btn" onclick="sortBy('paidN')">Paid <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
+                    <th scope="col" data-sort="balanceN" aria-sort="none"><button class="sort-btn" onclick="sortBy('balanceN')">Balance <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
+                    <th scope="col" data-sort="date" aria-sort="descending"><button class="sort-btn" onclick="sortBy('date')">Date <i class="ti ti-arrow-down sort-icon" aria-hidden="true"></i></button></th>
+                    <th scope="col">Reminders <span class="br-chip br-annot" tabindex="0">BR-14 · BR-15 · BR-24 <span class="br-tooltip below">BR-24: chip per row. BR-15: Active / Paused (manual only) / None (no enabled rows apply, no due date, or Paid/Voided). Pause and Resume live in the row's View menu.</span></span></th>
+                    <th scope="col" class="row-actions-cell">Actions</th>
                 </tr>
             </thead>
             <tbody id="invoiceRows"></tbody>
             <tfoot>
                 <tr class="totals-row">
-                    <td colspan="5"></td>
-                    <td id="totalAmount">$1,487,228.90</td>
-                    <td id="totalPaid">$249,428.96</td>
-                    <td id="totalBalance">$1,237,799.94</td>
+                    <td colspan="5"><span class="sr-only">Totals for invoices shown</span></td>
+                    <td id="totalAmount">$0.00</td>
+                    <td id="totalPaid">$0.00</td>
+                    <td id="totalBalance">$0.00</td>
                     <td colspan="3"></td>
                 </tr>
             </tfoot>
         </table>
     </div>
-</div>
+</main>
 
-<!-- Bulk action bar (global, not inside page div) -->
-<div class="bulk-action-bar" id="bulkBar">
+<!-- Bulk action bar -->
+<div class="bulk-action-bar" id="bulkBar" role="region" aria-label="Bulk actions">
     <div class="bulk-count" id="bulkCount">0 selected</div>
-    <button class="bulk-btn" onclick="bulkAction('Reminder sent')"><i class="ti ti-bell-ringing"></i>Send Reminder</button>
-    <button class="bulk-btn" onclick="bulkAction('Marked as paid')"><i class="ti ti-circle-check"></i>Mark as Paid</button>
-    <button class="bulk-btn" onclick="bulkAction('Exported')"><i class="ti ti-download"></i>Export</button>
-    <button class="bulk-btn danger" onclick="bulkAction('Voided', true)"><i class="ti ti-ban"></i>Void</button>
-    <button class="bulk-close" onclick="clearSelection()" title="Clear selection"><i class="ti ti-x"></i></button>
+    <button class="bulk-btn" onclick="bulkMarkPaid()"><i class="ti ti-circle-check" aria-hidden="true"></i>Mark as Paid</button>
+    <button class="bulk-btn" onclick="bulkExport()"><i class="ti ti-download" aria-hidden="true"></i>Export</button>
+    <span class="bulk-sep" aria-hidden="true"></span>
+    <button class="bulk-btn danger" onclick="openVoidModal()"><i class="ti ti-ban" aria-hidden="true"></i>Void</button>
+    <span class="br-chip br-annot" tabindex="0">BR-25 <span class="br-tooltip">BR-25: Mark as Paid, Export, Void. Bulk Send Reminder removed (Out of Scope, Section 11).</span></span>
+    <button class="bulk-close" onclick="clearSelection(true)" aria-label="Clear selection"><i class="ti ti-x" aria-hidden="true"></i></button>
 </div>
 
-<div class="proto-toast" id="toast"></div>
+<!-- Bulk Void confirm modal -->
+<div class="modal-overlay page-modal" id="voidOverlay">
+    <div class="edit-modal" id="voidModalCard" role="dialog" aria-modal="true" aria-labelledby="voidTitle" aria-describedby="voidSummary">
+        <div class="edit-modal-header">
+            <h2 id="voidTitle">Void Invoices</h2>
+            <button class="modal-close-btn" onclick="closeVoidModal()" aria-label="Close"><i class="ti ti-x" aria-hidden="true"></i></button>
+        </div>
+        <div class="edit-modal-body">
+            <p class="void-summary" id="voidSummary"></p>
+            <div id="voidSkipped"></div>
+            <div id="voidFields">
+                <label class="void-field-label" for="voidReason">Reason <span class="opt">(optional)</span></label>
+                <textarea class="modal-textarea" id="voidReason" rows="3" placeholder="e.g. Duplicate invoice"></textarea>
+                <fieldset class="void-fieldset" id="voidJobCosting">
+                    <legend>Job costing records</legend>
+                    <p class="help">Applies to every invoice in this batch.</p>
+                    <label class="radio-row"><input type="radio" name="jcRecords" value="keep" checked> Keep job costing records</label>
+                    <label class="radio-row"><input type="radio" name="jcRecords" value="delete"> Delete job costing records</label>
+                </fieldset>
+            </div>
+            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">BR-25 <span class="br-tooltip">BR-25 Bulk Void: existing Void confirm + optional reason; invoices with payments logged are skipped with a count; with Job Costing on, ask once per batch, default Keep.</span></span>
+        </div>
+        <div class="edit-modal-footer">
+            <button class="btn btn-outline-primary btn-sm" onclick="closeVoidModal()">Cancel</button>
+            <button class="btn btn-danger btn-sm" id="voidConfirmBtn" onclick="confirmVoid()">Void Invoices</button>
+        </div>
+    </div>
+</div>
+
+<div class="proto-toast" id="toast" role="status" aria-live="polite"><i class="ti ti-circle-check" aria-hidden="true"></i><span id="toastMsg"></span></div>
+<div class="sr-only" id="srLive" aria-live="polite"></div>
 
 <script>
-// ---- Page switcher ----
-function switchPage(pageId) {
-    document.querySelectorAll('#reminders-page, #invoices-page').forEach(function(p) {
-        p.classList.remove('active');
-    });
-    document.getElementById(pageId).classList.add('active');
-    document.querySelectorAll('.demo-nav-btn').forEach(function(b) {
-        b.classList.toggle('active', b.dataset.page === pageId);
-    });
-    // hide bulk bar when leaving invoices
-    if (pageId !== 'invoices-page') {
-        document.getElementById('bulkBar').classList.remove('is-visible');
-    }
+// ---------- Utilities ----------
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function announce(msg) { var l = $('srLive'); l.textContent = ''; setTimeout(function(){ l.textContent = msg; }, 30); }
+function fmt(n) { return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+var toastTimer;
+function showToast(msg) {
+    var t = $('toast'); $('toastMsg').textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 4000);
 }
 
-// ---- Reminders modal ----
+// ---------- Demo controls ----------
+function toggleDemo(btn) { btn.setAttribute('aria-checked', btn.getAttribute('aria-checked') === 'true' ? 'false' : 'true'); }
+function jobCostingOn() { return $('demoJobCosting').getAttribute('aria-checked') === 'true'; }
+
+function switchPage(pageId) {
+    document.querySelectorAll('#reminders-page, #invoices-page').forEach(function(p) { p.classList.remove('active'); });
+    $(pageId).classList.add('active');
+    document.querySelectorAll('.demo-nav-btn').forEach(function(b) {
+        var on = b.dataset.page === pageId;
+        b.classList.toggle('active', on);
+        if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    if (pageId !== 'invoices-page') $('bulkBar').classList.remove('is-visible');
+    else updateBulkBar();
+    if (pageId === 'invoices-page') renderAll();
+}
+
+// ---------- Modal focus management ----------
+var lastFocus = null;
+function focusables(root) {
+    return Array.prototype.filter.call(root.querySelectorAll('button, [href], input, select, textarea, [contenteditable="true"], [tabindex]:not([tabindex="-1"])'),
+        function(el){ return !el.disabled && el.offsetParent !== null; });
+}
+function openOverlay(overlay, firstEl) {
+    lastFocus = document.activeElement;
+    overlay.classList.add('is-open');
+    setTimeout(function(){ (firstEl || focusables(overlay)[0]).focus(); }, 20);
+}
+function closeOverlay(overlay) {
+    overlay.classList.remove('is-open');
+    if (lastFocus && document.body.contains(lastFocus)) lastFocus.focus();
+}
+document.addEventListener('keydown', function(e) {
+    var open = document.querySelector('.modal-overlay.is-open');
+    if (!open) return;
+    if (e.key === 'Escape') { e.preventDefault(); open.id === 'voidOverlay' ? closeVoidModal() : closeEditModal(); return; }
+    if (e.key === 'Tab') {
+        var f = focusables(open); if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+});
+
+// =====================================================
+// REMINDERS PAGE: invoice reminder rows (BR-1..BR-9)
+// =====================================================
+var MAX_ROWS = 5; // BR-6, per delivery type
+var nextRowId = 100;
+var invoiceReminders = {
+    // BR-7 defaults + one custom row (demonstrates Month(s) and the 5-row cap)
+    email: [
+        { id: 1, mode: 'before', n: 3, unit: 'Day(s)',   enabled: true,  custom: false },
+        { id: 2, mode: 'on',     n: null, unit: null,     enabled: true,  custom: false },
+        { id: 3, mode: 'after',  n: 3, unit: 'Day(s)',   enabled: true,  custom: false },
+        { id: 4, mode: 'after',  n: 1, unit: 'Month(s)', enabled: false, custom: true }
+    ],
+    sms: [
+        { id: 5, mode: 'before', n: 3, unit: 'Day(s)', enabled: false, custom: false },
+        { id: 6, mode: 'on',     n: null, unit: null,   enabled: false, custom: false }
+    ]
+};
+var TYPE_LABEL = { email: 'email', sms: 'SMS' };
+
+function rowText(r) {
+    if (r.mode === 'on') return 'Send <b>on due date</b>';
+    return 'Send <b>' + r.n + ' ' + esc(r.unit) + '</b> ' + r.mode + ' due date';
+}
+function rowPlain(r) {
+    if (r.mode === 'on') return 'on due date';
+    return r.n + ' ' + r.unit + ' ' + r.mode + ' due date';
+}
+
+function renderReminderRows(type) {
+    var list = invoiceReminders[type];
+    var html = list.map(function(r) {
+        return '<div class="reminder-row">'
+            + '<div class="reminder-label">' + rowText(r)
+            + ' <span class="new-row-tag">' + r.mode + '</span>'
+            + (r.custom ? ' <span class="custom-tag">custom <i class="ti ti-info-circle" aria-hidden="true"></i></span>' : '')
+            + '</div>'
+            + '<div class="status-pill ' + (r.enabled ? 'enabled' : 'disabled') + '">' + (r.enabled ? 'Enabled' : 'Disabled') + '</div>'
+            + '<div class="queue-count">0 in queue</div>'
+            + '<button class="edit-btn" aria-label="Edit ' + TYPE_LABEL[type] + ' reminder: ' + esc(rowPlain(r)) + '" onclick="openEditModal(\'' + type + '\',' + r.id + ', this)">Edit</button>'
+            + '</div>';
+    }).join('');
+    $('rows-' + type).innerHTML = html;
+
+    var atLimit = list.length >= MAX_ROWS;
+    var left = MAX_ROWS - list.length;
+    var helperId = 'add-help-' + type;
+    var helper = atLimit
+        ? 'Maximum of ' + MAX_ROWS + ' ' + TYPE_LABEL[type] + ' reminders reached. Edit or disable an existing reminder to change your schedule.'
+        : list.length + ' of ' + MAX_ROWS + ' ' + TYPE_LABEL[type] + ' reminders used. You can add ' + left + ' more.';
+    $('add-' + type).innerHTML =
+        '<button class="add-reminder-btn" aria-describedby="' + helperId + '"' + (atLimit ? ' aria-disabled="true"' : '')
+        + ' onclick="addReminder(\'' + type + '\', this)"><i class="ti ti-plus" aria-hidden="true"></i>Add Reminder</button>'
+        + '<span class="add-reminder-helper' + (atLimit ? ' at-limit' : '') + '" id="' + helperId + '">' + helper + '</span>'
+        + (type === 'email' ? ' <span class="br-chip br-annot" tabindex="0">BR-6 <span class="br-tooltip">BR-6: up to 5 rows per delivery type (Email and SMS counted independently). At the limit the button stays focusable but is unavailable, with the reason stated.</span></span>' : '');
+}
+
+// ---------- Edit / Add modal ----------
 var EMAIL_DEFAULTS = {
     before: {
         subject: 'Reminder - Invoice #{invoice-number} from {company-name}',
@@ -684,295 +753,499 @@ var EMAIL_DEFAULTS = {
         body: 'Hi, {first-name}!\n\nThis is a reminder that invoice #{invoice-number} from {company-name} is now past due.\n\nBalance Due: {balance-due}\n\nPlease pay at your earliest convenience:\n{invoice-link}\n\nIf you have any questions, please text or call {company-phone}. Thank you!'
     }
 };
-
 var SMS_DEFAULTS = {
     before: 'Hi, {first-name}! Reminder: Invoice #{invoice-number} for {balance-due} from {company-name} is due on {due-date}. Pay here: {invoice-link}. Questions? Call {company-phone}.',
     on:     'Hi, {first-name}! Your invoice #{invoice-number} for {balance-due} from {company-name} is due today. Pay here: {invoice-link}. Questions? Call {company-phone}.',
     after:  'Hi, {first-name}! Your invoice #{invoice-number} for {balance-due} from {company-name} is past due. Please pay at your earliest convenience: {invoice-link}. Questions? Call {company-phone}.'
 };
+var MODE_LABEL = { before: 'Before due date', on: 'On due date', after: 'After due date' };
 
 var currentDeliveryType = 'email';
-var currentTimingMode   = 'before';
+var currentTimingMode = 'before';
+var editingRowId = null; // null = adding
 
-function setMode(mode) {
-    currentTimingMode = mode;
-    document.querySelectorAll('#timingToggle button').forEach(function(b) {
-        b.classList.toggle('active', b.dataset.mode === mode);
-    });
-    var ir = document.getElementById('intervalRow');
-    var on = document.getElementById('onDueNote');
-    if (mode === 'on') { ir.classList.add('is-hidden'); on.style.display = 'block'; }
-    else               { ir.classList.remove('is-hidden'); on.style.display = 'none'; }
+function toggleSwitch(sw) {
+    var on = sw.getAttribute('aria-checked') !== 'true';
+    sw.setAttribute('aria-checked', on ? 'true' : 'false');
+    $('enabledState').textContent = on ? 'On' : 'Off';
+}
 
-    // Update template copy to match the new timing mode
+function loadTemplates(mode) {
     if (currentDeliveryType === 'email') {
-        document.getElementById('subjectTemplate').value  = EMAIL_DEFAULTS[mode].subject;
-        document.getElementById('emailBodyArea').innerText = EMAIL_DEFAULTS[mode].body;
+        $('subjectTemplate').value = EMAIL_DEFAULTS[mode].subject;
+        $('emailBodyArea').innerText = EMAIL_DEFAULTS[mode].body;
     } else {
-        document.getElementById('smsBodyArea').value = SMS_DEFAULTS[mode];
+        $('smsBodyArea').value = SMS_DEFAULTS[mode];
     }
 }
 
-function openEditModal(deliveryType, mode, number, unit) {
-    currentDeliveryType = deliveryType;
-    var isEmail = deliveryType === 'email';
+function setMode(mode, userInitiated) {
+    var changed = mode !== currentTimingMode;
+    currentTimingMode = mode;
+    document.querySelectorAll('#timingToggle button').forEach(function(b) {
+        b.setAttribute('aria-pressed', b.dataset.mode === mode ? 'true' : 'false');
+    });
+    var ir = $('intervalRow'), on = $('onDueNote');
+    if (mode === 'on') { ir.classList.add('is-hidden'); on.style.display = 'block'; hideIntervalError(); }
+    else { ir.classList.remove('is-hidden'); on.style.display = 'none'; }
+    loadTemplates(mode); // BR-9
+    if (userInitiated && changed) announce('Templates updated to ' + MODE_LABEL[mode] + ' default copy.');
+}
 
-    // Title
-    document.getElementById('modalTitle').textContent =
-        (isEmail ? 'Edit Email Reminder for Invoice' : 'Edit SMS Reminder for Invoice');
+function configureModal(type) {
+    currentDeliveryType = type;
+    var isEmail = type === 'email';
+    $('editModalCard').classList.toggle('is-email', isEmail);
+    $('subjectSection').style.display = isEmail ? '' : 'none';
+    $('emailBodySection').style.display = isEmail ? '' : 'none';
+    $('smsBodySection').style.display = isEmail ? 'none' : '';
+}
 
-    // Modal width
-    var card = document.getElementById('editModalCard');
-    card.classList.toggle('is-email', isEmail);
+function openEditModal(type, rowId) {
+    var r = invoiceReminders[type].filter(function(x){ return x.id === rowId; })[0];
+    editingRowId = rowId;
+    configureModal(type);
+    $('modalTitle').textContent = type === 'email' ? 'Edit Email Reminder for Invoice' : 'Edit SMS Reminder for Invoice';
+    var sw = $('enabledSwitch');
+    sw.setAttribute('aria-checked', r.enabled ? 'true' : 'false');
+    $('enabledState').textContent = r.enabled ? 'On' : 'Off';
+    currentTimingMode = null;
+    setMode(r.mode, false);
+    $('intervalNumber').value = r.n != null ? r.n : 1;
+    $('intervalUnit').value = r.unit || 'Day(s)';
+    hideIntervalError();
+    openOverlay($('modalOverlay'), $('enabledSwitch'));
+}
 
-    // Show/hide sections
-    document.getElementById('subjectSection').style.display   = isEmail ? '' : 'none';
-    document.getElementById('emailBodySection').style.display = isEmail ? '' : 'none';
-    document.getElementById('smsBodySection').style.display   = isEmail ? 'none' : '';
-
-    // Timing
-    document.getElementById('modalOverlay').classList.add('is-open');
-    setMode(mode || 'before');
-    if (number != null) document.getElementById('intervalNumber').value = number;
-    if (unit)           document.getElementById('intervalUnit').value = unit;
-
-    // Populate default copy
-    var m = mode || 'before';
-    if (isEmail) {
-        document.getElementById('subjectTemplate').value = EMAIL_DEFAULTS[m].subject;
-        document.getElementById('emailBodyArea').innerText = EMAIL_DEFAULTS[m].body;
-    } else {
-        document.getElementById('smsBodyArea').value = SMS_DEFAULTS[m];
+function addReminder(type) {
+    if (invoiceReminders[type].length >= MAX_ROWS) {
+        announce('Maximum of ' + MAX_ROWS + ' ' + TYPE_LABEL[type] + ' reminders reached.');
+        return;
     }
+    editingRowId = null;
+    configureModal(type);
+    $('modalTitle').textContent = type === 'email' ? 'Add Email Reminder for Invoice' : 'Add SMS Reminder for Invoice';
+    $('enabledSwitch').setAttribute('aria-checked', 'true');
+    $('enabledState').textContent = 'On';
+    currentTimingMode = null;
+    setMode('before', false);
+    $('intervalNumber').value = 1;
+    $('intervalUnit').value = 'Day(s)';
+    hideIntervalError();
+    openOverlay($('modalOverlay'), $('enabledSwitch'));
 }
 
 function restoreDefault(field) {
     var m = currentTimingMode;
-    if (field === 'subject')   document.getElementById('subjectTemplate').value  = EMAIL_DEFAULTS[m].subject;
-    if (field === 'emailBody') document.getElementById('emailBodyArea').innerText = EMAIL_DEFAULTS[m].body;
-    if (field === 'smsBody')   document.getElementById('smsBodyArea').value       = SMS_DEFAULTS[m];
+    if (field === 'subject')   $('subjectTemplate').value = EMAIL_DEFAULTS[m].subject;
+    if (field === 'emailBody') $('emailBodyArea').innerText = EMAIL_DEFAULTS[m].body;
+    if (field === 'smsBody')   $('smsBodyArea').value = SMS_DEFAULTS[m];
+    announce('Default copy restored.');
 }
 
-function closeEditModal() {
-    document.getElementById('modalOverlay').classList.remove('is-open');
-}
+function hideIntervalError() { $('intervalError').classList.remove('show'); $('intervalNumber').removeAttribute('aria-invalid'); }
+
+function closeEditModal() { closeOverlay($('modalOverlay')); }
+
 function saveEditModal() {
-    closeEditModal();
-    showToast('Reminder saved (prototype only)');
+    var mode = currentTimingMode;
+    var n = null, unit = null;
+    if (mode !== 'on') {
+        var raw = $('intervalNumber').value.trim();
+        n = Number(raw);
+        if (raw === '' || !Number.isInteger(n) || n < 1) {
+            $('intervalError').classList.add('show');
+            $('intervalNumber').setAttribute('aria-invalid', 'true');
+            $('intervalNumber').focus();
+            return;
+        }
+        unit = $('intervalUnit').value;
+    }
+    var enabled = $('enabledSwitch').getAttribute('aria-checked') === 'true';
+    var list = invoiceReminders[currentDeliveryType];
+    var wasAdd = editingRowId === null;
+    var row;
+    if (wasAdd) {
+        row = { id: nextRowId++, mode: mode, n: n, unit: unit, enabled: enabled, custom: true };
+        list.push(row);
+    } else {
+        row = list.filter(function(x){ return x.id === editingRowId; })[0];
+        row.mode = mode; row.n = n; row.unit = unit; row.enabled = enabled;
+    }
+    renderReminderRows(currentDeliveryType);
+    closeOverlay($('modalOverlay'));
+    // Return focus to the row's Edit button (or Add button if at limit) so keyboard users keep their place
+    var btns = $('rows-' + currentDeliveryType).querySelectorAll('.edit-btn');
+    var idx = list.indexOf(row);
+    if (btns[idx]) btns[idx].focus();
+    showToast((wasAdd ? 'Reminder added: ' : 'Reminder saved: ') + TYPE_LABEL[currentDeliveryType] + ', ' + rowPlain(row) + ' (' + (enabled ? 'Enabled' : 'Disabled') + ').');
 }
-document.getElementById('modalOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeEditModal();
+
+$('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeEditModal(); });
+
+// Give legacy Appointment/Job Edit buttons distinguishable accessible names
+document.querySelectorAll('#reminders-page section:not([aria-labelledby="hdr-inv"]) .reminder-row').forEach(function(row) {
+    var label = row.querySelector('.reminder-label').textContent.replace(/custom/,'').trim();
+    var block = row.closest('.delivery-block').querySelector('.delivery-title').textContent;
+    row.querySelector('.edit-btn').setAttribute('aria-label', 'Edit ' + block + ' reminder: ' + label);
 });
 
-// ---- Invoices table ----
-var invoices = [
-    {initials:'DH', customer:'Dripjobs Harrison', proposal:'Invoice Only',        invoiceNo:'#469276', statusTag:'OPEN',    sync:'synced',     amount:'$545.50',     paid:'$0.00',    balance:'$545.50',     date:'6/26/2026', amountN:545.50,     paidN:0,      balanceN:545.50,    reminder:'active'},
-    {initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2977254',   invoiceNo:'#464186', statusTag:'PARTIAL', sync:'synced',     amount:'$2,631.81',   paid:'$100.00',  balance:'$2,531.81',   date:'6/18/2026', amountN:2631.81,    paidN:100,    balanceN:2531.81,   reminder:'active'},
-    {initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2901988',   invoiceNo:'#456981', statusTag:'OPEN',    sync:'synced',     amount:'$87,026.12',  paid:'$0.00',    balance:'$87,026.12',  date:'6/8/2026',  amountN:87026.12,   paidN:0,      balanceN:87026.12,  reminder:'none'},
-    {initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920059',   invoiceNo:'#453093', statusTag:'OPEN',    sync:'not-synced', amount:'$4,103.31',   paid:'$0.00',    balance:'$4,103.31',   date:'6/2/2026',  amountN:4103.31,    paidN:0,      balanceN:4103.31,   reminder:'active'},
-    {initials:'TB', customer:'TJ Bennett',        proposal:'Invoice Only',        invoiceNo:'#453092', statusTag:'OPEN',    sync:'not-synced', amount:'$327.30',     paid:'$0.00',    balance:'$327.30',     date:'6/2/2026',  amountN:327.30,     paidN:0,      balanceN:327.30,    reminder:'paused'},
-    {initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920038',   invoiceNo:'#453090', statusTag:'OPEN',    sync:'not-synced', amount:'$3,273.00',   paid:'$0.00',    balance:'$3,273.00',   date:'6/2/2026',  amountN:3273.00,    paidN:0,      balanceN:3273.00,   reminder:'active'},
-    {initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2919942',   invoiceNo:'#453085', statusTag:'OPEN',    sync:'not-synced', amount:'$3,000.00',   paid:'$0.00',    balance:'$3,000.00',   date:'6/2/2026',  amountN:3000.00,    paidN:0,      balanceN:3000.00,   reminder:'none'},
-    {initials:'AS', customer:'Arya Stark',        proposal:'2575454',             invoiceNo:'#429554', statusTag:'OPEN',    sync:'not-synced', amount:'$9,566.99',   paid:'$0.00',    balance:'$9,566.99',   date:'4/28/2026', amountN:9566.99,    paidN:0,      balanceN:9566.99,   reminder:'active'},
-    {initials:'DH', customer:'Dripjobs Harrison', proposal:'2663851',             invoiceNo:'#423060', statusTag:'OPEN',    sync:'not-synced', amount:'$901.00',     paid:'$0.00',    balance:'$901.00',     date:'4/20/2026', amountN:901.00,     paidN:0,      balanceN:901.00,    reminder:'paused'},
-    {initials:'AB', customer:'Aaron Blankfields', proposal:'2679536',             invoiceNo:'#419330', statusTag:'OPEN',    sync:'synced',     amount:'$21.00',      paid:'$0.00',    balance:'$21.00',      date:'4/14/2026', amountN:21.00,      paidN:0,      balanceN:21.00,     reminder:'none'},
-    {initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2700220',   invoiceNo:'#417520', statusTag:'OPEN',    sync:'not-synced', amount:'$2,000.00',   paid:'$0.00',    balance:'$2,000.00',   date:'4/10/2026', amountN:2000.00,    paidN:0,      balanceN:2000.00,   reminder:'active'},
-    {initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2700136',   invoiceNo:'#417501', statusTag:'OPEN',    sync:'not-synced', amount:'$2,500.00',   paid:'$0.00',    balance:'$2,500.00',   date:'4/10/2026', amountN:2500.00,    paidN:0,      balanceN:2500.00,   reminder:'active'},
-    {initials:'DS', customer:'Dana Scully',       proposal:'2544066',             invoiceNo:'#414859', statusTag:'OPEN',    sync:'not-synced', amount:'$2,000.00',   paid:'$0.00',    balance:'$2,000.00',   date:'4/7/2026',  amountN:2000.00,    paidN:0,      balanceN:2000.00,   reminder:'none'},
-    {initials:'AB', customer:'Al Bundy',          proposal:'Invoice Only',        invoiceNo:'#414852', statusTag:'OPEN',    sync:'not-synced', amount:'$5,000.00',   paid:'$0.00',    balance:'$5,000.00',   date:'4/7/2026',  amountN:5000.00,    paidN:0,      balanceN:5000.00,   reminder:'paused'},
-    {initials:'JB', customer:'James Bond',        proposal:'2679119',             invoiceNo:'#007',    statusTag:'OPEN',    sync:'not-synced', amount:'$4,387.39',   paid:'$0.00',    balance:'$4,387.39',   date:'4/6/2026',  amountN:4387.39,    paidN:0,      balanceN:4387.39,   reminder:'active'}
-];
-
-var tbody = document.getElementById('invoiceRows');
-
-var reminderChipMap = {
-    active: '<span class="reminder-status-chip active"><i class="ti ti-bell-ringing"></i>Active</span>',
-    paused: '<span class="reminder-status-chip paused"><i class="ti ti-bell-off"></i>Paused</span>',
-    none:   '<span class="reminder-status-chip none"><i class="ti ti-bell-x"></i>None</span>'
+// =====================================================
+// INVOICES PAGE (BR-19..BR-26, per-invoice controls BR-15)
+// =====================================================
+var STATUS = {
+    OPEN:    { label: 'Open',           cls: 'open' },
+    PARTIAL: { label: 'Partially Paid', cls: 'partial' },
+    PAID:    { label: 'Paid',           cls: 'paid' },
+    VOIDED:  { label: 'Voided',         cls: 'voided' }
+};
+var SYNC = {
+    'synced':     { label: 'SYNCED',     icon: 'ti-check' },
+    'not-synced': { label: 'NOT SYNCED', icon: 'ti-clock' },
+    'failed':     { label: 'FAILED',     icon: 'ti-alert-triangle' }
 };
 
-function fmt(n) {
-    return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+var invoices = [
+    {id:1,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Invoice Only',      invoiceNo:'#469276', status:'OPEN',    sync:'synced',     amountN:545.50,   paidN:0,      date:'6/26/2026', dueDate:'7/26/2026', paused:false},
+    {id:2,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2977254', invoiceNo:'#464186', status:'PARTIAL', sync:'synced',     amountN:2631.81,  paidN:100,    date:'6/18/2026', dueDate:'7/18/2026', paused:false},
+    {id:3,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2901988', invoiceNo:'#456981', status:'OPEN',    sync:'synced',     amountN:87026.12, paidN:0,      date:'6/8/2026',  dueDate:null,        paused:false},
+    {id:4,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920059', invoiceNo:'#453093', status:'OPEN',    sync:'not-synced', amountN:4103.31,  paidN:0,      date:'6/2/2026',  dueDate:'7/2/2026',  paused:false},
+    {id:5,  initials:'TB', customer:'TJ Bennett',        proposal:'Invoice Only',      invoiceNo:'#453092', status:'OPEN',    sync:'not-synced', amountN:327.30,   paidN:0,      date:'6/2/2026',  dueDate:'7/2/2026',  paused:true},
+    {id:6,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920038', invoiceNo:'#453090', status:'OPEN',    sync:'failed',     amountN:3273.00,  paidN:0,      date:'6/2/2026',  dueDate:'7/2/2026',  paused:false},
+    {id:7,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2919942', invoiceNo:'#453085', status:'PAID',    sync:'synced',     amountN:3000.00,  paidN:3000,   date:'6/2/2026',  dueDate:'7/2/2026',  paused:false},
+    {id:8,  initials:'AS', customer:'Arya Stark',        proposal:'Proposal #2575454', invoiceNo:'#429554', status:'OPEN',    sync:'not-synced', amountN:9566.99,  paidN:0,      date:'4/28/2026', dueDate:'5/28/2026', paused:false},
+    {id:9,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2663851', invoiceNo:'#423060', status:'OPEN',    sync:'not-synced', amountN:901.00,   paidN:0,      date:'4/20/2026', dueDate:'5/20/2026', paused:true},
+    {id:10, initials:'AB', customer:'Aaron Blankfields', proposal:'Proposal #2679536', invoiceNo:'#419330', status:'OPEN',    sync:'synced',     amountN:21.00,    paidN:0,      date:'4/14/2026', dueDate:null,        paused:false},
+    {id:11, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2700220', invoiceNo:'#417520', status:'PARTIAL', sync:'failed',     amountN:2000.00,  paidN:500,    date:'4/10/2026', dueDate:'5/10/2026', paused:false},
+    {id:12, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2700136', invoiceNo:'#417501', status:'OPEN',    sync:'not-synced', amountN:2500.00,  paidN:0,      date:'4/10/2026', dueDate:'5/10/2026', paused:false},
+    {id:13, initials:'DS', customer:'Dana Scully',       proposal:'Proposal #2544066', invoiceNo:'#414859', status:'VOIDED',  sync:'not-synced', amountN:2000.00,  paidN:0,      date:'4/7/2026',  dueDate:'5/7/2026',  paused:false},
+    {id:14, initials:'AB', customer:'Al Bundy',          proposal:'Invoice Only',      invoiceNo:'#414852', status:'OPEN',    sync:'not-synced', amountN:5000.00,  paidN:0,      date:'4/7/2026',  dueDate:'5/7/2026',  paused:true},
+    {id:15, initials:'JB', customer:'James Bond',        proposal:'Proposal #2679119', invoiceNo:'#007',    status:'OPEN',    sync:'not-synced', amountN:4387.39,  paidN:0,      date:'4/6/2026',  dueDate:'5/6/2026',  paused:false}
+];
+// Balance is derived; voided invoices carry $0 balance (prototype assumption, flagged)
+function balanceOf(inv) { return inv.status === 'VOIDED' ? 0 : Math.max(0, inv.amountN - inv.paidN); }
+function byId(id) { return invoices.filter(function(i){ return i.id === id; })[0]; }
+
+// BR-12/14/15: reminder state
+function anyEnabledRows() {
+    return invoiceReminders.email.some(function(r){ return r.enabled; }) || invoiceReminders.sms.some(function(r){ return r.enabled; });
+}
+function reminderState(inv) {
+    if (inv.status === 'PAID')   return { s: 'none', why: 'Invoice is paid' };
+    if (inv.status === 'VOIDED') return { s: 'none', why: 'Invoice is voided' };
+    if (!inv.dueDate)            return { s: 'none', why: 'No due date' };
+    if (!anyEnabledRows())       return { s: 'none', why: 'No invoice reminders are enabled' };
+    if (inv.paused)              return { s: 'paused', why: 'Paused manually' };
+    return { s: 'active', why: 'Due ' + inv.dueDate };
+}
+function reminderChip(inv) {
+    var st = reminderState(inv);
+    var map = {
+        active: '<span class="reminder-status-chip active"><i class="ti ti-bell-ringing" aria-hidden="true"></i>Active</span>',
+        paused: '<span class="reminder-status-chip paused"><i class="ti ti-bell-pause" aria-hidden="true"></i>Paused</span>',
+        none:   '<span class="reminder-status-chip none" title="' + esc(st.why) + '"><i class="ti ti-bell-x" aria-hidden="true"></i>None<span class="sr-only">: ' + esc(st.why) + '</span></span>'
+    };
+    return map[st.s];
+}
+
+var tbody = $('invoiceRows');
+var selected = {}; // id -> true
+var visible = [];
+
+function menuHtml(inv) {
+    var st = reminderState(inv);
+    var item;
+    if (st.s === 'active') {
+        item = '<button role="menuitem" tabindex="-1" onclick="setPaused(' + inv.id + ', true)"><i class="ti ti-player-pause" aria-hidden="true"></i><span>Pause Reminders<span class="menu-sub">Stops scheduled sends for this invoice</span></span></button>';
+    } else if (st.s === 'paused') {
+        item = '<button role="menuitem" tabindex="-1" onclick="setPaused(' + inv.id + ', false)"><i class="ti ti-player-play" aria-hidden="true"></i><span>Resume Reminders<span class="menu-sub">Future sends follow the reminder schedule</span></span></button>';
+    } else {
+        item = '<button role="menuitem" tabindex="-1" aria-disabled="true"><i class="ti ti-bell-off" aria-hidden="true"></i><span>Reminders Unavailable<span class="menu-sub">' + esc(st.why) + '</span></span></button>';
+    }
+    return '<div class="row-menu" role="menu" id="menu-' + inv.id + '" aria-label="Actions for invoice ' + esc(inv.invoiceNo) + '">'
+        + '<button role="menuitem" tabindex="-1" onclick="closeMenus(); showToast(\'Opens invoice ' + esc(inv.invoiceNo) + ' (prototype only)\')"><i class="ti ti-eye" aria-hidden="true"></i>View Invoice</button>'
+        + '<div class="menu-sep" role="separator"></div>'
+        + '<div class="menu-group-label" aria-hidden="true">Reminders</div>'
+        + item + '</div>';
 }
 
 function buildRow(inv) {
-    var isPartial = inv.statusTag === 'PARTIAL';
+    var s = STATUS[inv.status], sy = SYNC[inv.sync], bal = balanceOf(inv);
+    var chip = '<span class="status-chip ' + s.cls + '">' + s.label + '</span>';
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td class="checkbox-cell"><input type="checkbox" class="row-checkbox" onchange="onRowToggle(this)"></td>'
-        + '<td><span class="status-chip ' + (isPartial ? 'partial' : 'open') + '">' + inv.statusTag + '</span></td>'
-        + '<td><div class="customer-cell"><div class="avatar-dot">' + inv.initials + '</div>' + inv.customer + '</div></td>'
-        + '<td class="proposal-link">' + inv.proposal + '</td>'
-        + '<td><span class="invoice-no">' + inv.invoiceNo + '</span>'
-        + '<span class="status-chip ' + (isPartial ? 'partial' : 'open') + '" style="margin-left:6px;">' + inv.statusTag + '</span>'
-        + '<span class="sync-chip ' + inv.sync + '">' + (inv.sync === 'synced' ? 'SYNCED' : 'NOT SYNCED') + '</span></td>'
-        + '<td>' + inv.amount + '</td>'
-        + '<td>' + inv.paid + '</td>'
-        + '<td class="balance-amt">' + inv.balance + '</td>'
+    if (selected[inv.id]) tr.classList.add('row-selected');
+    if (inv.status === 'VOIDED') tr.classList.add('row-voided');
+    tr.innerHTML = '<td class="checkbox-cell"><input type="checkbox" class="row-checkbox" data-id="' + inv.id + '" ' + (selected[inv.id] ? 'checked' : '') + ' aria-label="Select invoice ' + esc(inv.invoiceNo) + ', ' + esc(inv.customer) + '" onchange="onRowToggle(this)"></td>'
+        + '<td>' + chip + '</td>'
+        + '<td><div class="customer-cell"><div class="avatar-dot" aria-hidden="true">' + inv.initials + '</div>' + esc(inv.customer) + '</div></td>'
+        + '<td class="proposal-link">' + esc(inv.proposal) + '</td>'
+        + '<td class="invoice-cell"><span class="invoice-no">' + esc(inv.invoiceNo) + '</span> '
+        + '<span class="status-chip ' + s.cls + '" style="margin-left:6px;">' + s.label + '</span>'
+        + '<span class="sync-chip ' + inv.sync + '"><i class="ti ' + sy.icon + '" aria-hidden="true"></i><span class="sr-only">QuickBooks: </span>' + sy.label + '</span></td>'
+        + '<td>' + fmt(inv.amountN) + '</td>'
+        + '<td>' + fmt(inv.paidN) + '</td>'
+        + '<td class="balance-amt">' + fmt(bal) + '</td>'
         + '<td>' + inv.date + '</td>'
-        + '<td>' + (reminderChipMap[inv.reminder] || reminderChipMap.none) + '</td>'
-        + '<td class="row-actions-cell"><button class="btn btn-outline-primary btn-sm">View <i class="ti ti-chevron-down" style="margin-left:3px;"></i></button></td>';
+        + '<td>' + reminderChip(inv) + '</td>'
+        + '<td class="row-actions-cell"><button class="btn btn-outline-primary btn-sm" id="menubtn-' + inv.id + '" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-' + inv.id + '" onclick="toggleMenu(' + inv.id + ', event)" onkeydown="menuBtnKey(' + inv.id + ', event)">View <i class="ti ti-chevron-down" style="margin-left:3px;" aria-hidden="true"></i><span class="sr-only"> actions for invoice ' + esc(inv.invoiceNo) + '</span></button>'
+        + menuHtml(inv) + '</td>';
     return tr;
 }
 
-function renderRows(list) {
-    tbody.innerHTML = '';
-    if (list.length === 0) {
-        var empty = document.createElement('tr');
-        empty.innerHTML = '<td colspan="11" style="text-align:center;padding:28px;color:#80879A;font-size:13px;">No invoices match the current filters.</td>';
-        tbody.appendChild(empty);
-    } else {
-        list.forEach(function(inv) { tbody.appendChild(buildRow(inv)); });
-    }
+// ---- Row action menu (keyboard: Enter/Space/ArrowDown open, arrows move, Esc closes) ----
+var openMenuId = null;
+function closeMenus(returnFocus) {
+    if (openMenuId == null) return;
+    var m = $('menu-' + openMenuId), b = $('menubtn-' + openMenuId);
+    if (m) m.classList.remove('open', 'open-up');
+    if (b) { b.setAttribute('aria-expanded', 'false'); if (returnFocus) b.focus(); }
+    openMenuId = null;
+}
+function openMenu(id, focusIdx) {
+    closeMenus();
+    var m = $('menu-' + id), b = $('menubtn-' + id);
+    m.classList.add('open');
+    var rect = m.getBoundingClientRect();
+    if (rect.bottom > window.innerHeight - 60) m.classList.add('open-up');
+    b.setAttribute('aria-expanded', 'true');
+    openMenuId = id;
+    var items = m.querySelectorAll('[role="menuitem"]');
+    items[focusIdx === -1 ? items.length - 1 : 0].focus();
+}
+function toggleMenu(id, e) { e.stopPropagation(); if (openMenuId === id) closeMenus(true); else openMenu(id, 0); }
+function menuBtnKey(id, e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); openMenu(id, 0); }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); openMenu(id, -1); }
+}
+document.addEventListener('keydown', function(e) {
+    if (openMenuId == null) return;
+    var m = $('menu-' + openMenuId);
+    var items = Array.prototype.slice.call(m.querySelectorAll('[role="menuitem"]'));
+    var i = items.indexOf(document.activeElement);
+    if (e.key === 'Escape') { e.preventDefault(); closeMenus(true); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    else if (e.key === 'Home') { e.preventDefault(); items[0].focus(); }
+    else if (e.key === 'End')  { e.preventDefault(); items[items.length - 1].focus(); }
+    else if (e.key === 'Tab')  { closeMenus(false); }
+});
+document.addEventListener('click', function(e) { if (openMenuId != null && !e.target.closest('.row-menu')) closeMenus(false); });
 
-    // Update badge count
-    var badge = document.querySelector('.invoices-count-badge');
-    if (badge) badge.textContent = list.length;
-
-    // Recalculate totals row
-    var sumAmt = 0, sumPaid = 0, sumBal = 0;
-    list.forEach(function(inv) { sumAmt += inv.amountN; sumPaid += inv.paidN; sumBal += inv.balanceN; });
-    document.getElementById('totalAmount').textContent  = fmt(sumAmt);
-    document.getElementById('totalPaid').textContent    = fmt(sumPaid);
-    document.getElementById('totalBalance').textContent = fmt(sumBal);
-
-    clearSelection();
+// BR-15: manual Pause / Resume per invoice
+function setPaused(id, paused) {
+    var inv = byId(id);
+    inv.paused = paused;
+    closeMenus(false);
+    renderAll();
+    var b = $('menubtn-' + id); if (b) b.focus();
+    showToast(paused
+        ? 'Reminders paused for invoice ' + inv.invoiceNo + '. No reminders will send until you resume.'
+        : 'Reminders resumed for invoice ' + inv.invoiceNo + '. Future reminders follow the schedule.');
 }
 
-// ---- Sort state ----
-var currentSortKey = 'date';
-var currentSortDir = 'desc'; // default: newest first (matches screenshot)
-
+// ---- Sort ----
+var currentSortKey = 'date', currentSortDir = 'desc';
+function sortVal(inv, key) {
+    if (key === 'date') return new Date(inv.date).getTime();
+    if (key === 'balanceN') return balanceOf(inv);
+    return inv[key];
+}
 function sortList(list) {
-    var key = currentSortKey;
-    var dir = currentSortDir;
     return list.slice().sort(function(a, b) {
-        var av = key === 'date' ? new Date(a.date) : a[key];
-        var bv = key === 'date' ? new Date(b.date) : b[key];
-        if (av < bv) return dir === 'asc' ? -1 :  1;
-        if (av > bv) return dir === 'asc' ?  1 : -1;
-        return 0;
+        var av = sortVal(a, currentSortKey), bv = sortVal(b, currentSortKey);
+        if (av < bv) return currentSortDir === 'asc' ? -1 : 1;
+        if (av > bv) return currentSortDir === 'asc' ? 1 : -1;
+        return b.id < a.id ? 1 : -1;
     });
 }
-
 function sortBy(key) {
-    if (currentSortKey === key) {
-        currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
-    } else {
-        currentSortKey = key;
-        currentSortDir = 'asc';
-    }
-    // Update header visuals
-    document.querySelectorAll('.invoices-table thead th.sortable').forEach(function(th) {
-        var isActive = th.dataset.sort === key;
-        th.classList.toggle('sort-active', isActive);
-        var icon = th.querySelector('.sort-icon');
-        if (icon) {
-            if (isActive) {
-                icon.className = 'sort-icon ' + (currentSortDir === 'asc' ? 'ti ti-arrow-up' : 'ti ti-arrow-down');
-            } else {
-                icon.className = 'sort-icon ti ti-arrows-sort';
-            }
-        }
+    if (currentSortKey === key) currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+    else { currentSortKey = key; currentSortDir = 'asc'; }
+    document.querySelectorAll('.invoices-table thead th[data-sort]').forEach(function(th) {
+        var on = th.dataset.sort === key;
+        th.setAttribute('aria-sort', on ? (currentSortDir === 'asc' ? 'ascending' : 'descending') : 'none');
+        th.querySelector('.sort-icon').className = 'sort-icon ti ' + (on ? (currentSortDir === 'asc' ? 'ti-arrow-up' : 'ti-arrow-down') : 'ti-arrows-sort');
     });
-    applyFilters();
+    renderAll();
 }
 
-// Initialise header visuals to match default sort (Date desc)
-function initSortHeaders() {
-    var dateTh = document.querySelector('.invoices-table thead th[data-sort="date"]');
-    if (dateTh) {
-        dateTh.classList.add('sort-active');
-        var icon = dateTh.querySelector('.sort-icon');
-        if (icon) icon.className = 'sort-icon ti ti-arrow-down';
-    }
-}
-
-function applyFilters() {
-    var search  = document.getElementById('filterSearch').value.trim().toLowerCase();
-    var status  = document.getElementById('filterStatus').value;
-    var type    = document.getElementById('filterType').value;
-    var op      = document.getElementById('filterOp').value;
-    var amtRaw  = document.getElementById('filterAmount').value.trim();
-    var amtVal  = amtRaw !== '' ? parseFloat(amtRaw) : NaN;
-
-    var filtered = invoices.filter(function(inv) {
-        if (search && !(
-            inv.customer.toLowerCase().includes(search) ||
-            inv.invoiceNo.toLowerCase().includes(search) ||
-            inv.proposal.toLowerCase().includes(search)
-        )) return false;
-        if (status && inv.statusTag !== status) return false;
+// ---- Filters ----
+function filterList() {
+    var search = $('filterSearch').value.trim().toLowerCase();
+    var status = $('filterStatus').value, type = $('filterType').value, op = $('filterOp').value;
+    var amtRaw = $('filterAmount').value.trim(), amtVal = amtRaw !== '' ? parseFloat(amtRaw) : NaN;
+    return invoices.filter(function(inv) {
+        if (search && !(inv.customer.toLowerCase().indexOf(search) > -1 || inv.invoiceNo.toLowerCase().indexOf(search) > -1 || inv.proposal.toLowerCase().indexOf(search) > -1)) return false;
+        if (status && inv.status !== status) return false;
         if (type && !isNaN(amtVal)) {
-            var fieldVal = type === 'amount' ? inv.amountN : type === 'paid' ? inv.paidN : inv.balanceN;
-            if (op === 'eq' && fieldVal !== amtVal) return false;
-            if (op === 'lt' && fieldVal >= amtVal)  return false;
-            if (op === 'gt' && fieldVal <= amtVal)  return false;
+            var v = type === 'amount' ? inv.amountN : type === 'paid' ? inv.paidN : balanceOf(inv);
+            if (op === 'eq' && Math.abs(v - amtVal) > 0.004) return false;
+            if (op === 'lt' && v >= amtVal) return false;
+            if (op === 'gt' && v <= amtVal) return false;
         }
         return true;
     });
-
-    renderRows(sortList(filtered));
 }
-
+function filtersActive() {
+    return $('filterSearch').value.trim() !== '' || $('filterStatus').value !== '' || ($('filterType').value !== '' && $('filterAmount').value.trim() !== '');
+}
+function applyFilters() { renderAll(); }
 function clearFilters() {
-    document.getElementById('filterSearch').value  = '';
-    document.getElementById('filterStatus').value  = '';
-    document.getElementById('filterType').value    = '';
-    document.getElementById('filterOp').value      = 'eq';
-    document.getElementById('filterAmount').value  = '';
-    renderRows(sortList(invoices));
+    $('filterSearch').value = ''; $('filterStatus').value = ''; $('filterType').value = '';
+    $('filterOp').value = 'eq'; $('filterAmount').value = '';
+    renderAll();
 }
 
-// Initial render
-initSortHeaders();
-renderRows(sortList(invoices));
+// ---- Render (table, stats BR-20, totals BR-23) ----
+function renderAll() {
+    closeMenus(false);
+    visible = sortList(filterList());
+    // Drop selections that are no longer visible
+    var visIds = {}; visible.forEach(function(i){ visIds[i.id] = true; });
+    Object.keys(selected).forEach(function(k){ if (!visIds[k]) delete selected[k]; });
 
-var bulkBar        = document.getElementById('bulkBar');
-var bulkCountEl    = document.getElementById('bulkCount');
-var headerCheckbox = document.getElementById('headerCheckbox');
+    tbody.innerHTML = '';
+    if (!visible.length) {
+        var empty = document.createElement('tr');
+        empty.innerHTML = '<td colspan="11" style="text-align:center;padding:28px;color:#5E6578;font-size:13px;"><strong style="display:block;color:#32415B;margin-bottom:4px;">No invoices match these filters</strong>Try a different search term or status, or select Clear to show all invoices.</td>';
+        tbody.appendChild(empty);
+    } else {
+        visible.forEach(function(inv){ tbody.appendChild(buildRow(inv)); });
+    }
 
-function updateBulkBar() {
-    var checked = document.querySelectorAll('.row-checkbox:checked');
-    var n = checked.length;
-    bulkCountEl.textContent = n === 1 ? '1 selected' : n + ' selected';
-    bulkBar.classList.toggle('is-visible', n > 0);
-    document.querySelectorAll('.row-checkbox').forEach(function(cb) {
-        cb.closest('tr').classList.toggle('row-selected', cb.checked);
+    var sumAmt = 0, sumPaid = 0, sumBal = 0, unpaid = 0, outstanding = 0;
+    visible.forEach(function(inv) {
+        var b = balanceOf(inv);
+        sumAmt += inv.amountN; sumPaid += inv.paidN; sumBal += b;
+        if (inv.status === 'OPEN' || inv.status === 'PARTIAL') { unpaid++; outstanding += b; }
     });
-    var all = document.querySelectorAll('.row-checkbox');
-    headerCheckbox.checked       = n > 0 && n === all.length;
-    headerCheckbox.indeterminate = n > 0 && n < all.length;
+    $('countBadge').textContent = visible.length;
+    $('statTotal').textContent = visible.length;
+    $('statUnpaid').textContent = unpaid;
+    $('statAmount').textContent = fmt(sumAmt);
+    $('statBalance').textContent = fmt(outstanding);
+    $('totalAmount').textContent = fmt(sumAmt);
+    $('totalPaid').textContent = fmt(sumPaid);
+    $('totalBalance').textContent = fmt(sumBal);
+    var scope = $('statsScope');
+    scope.firstChild.nodeValue = (filtersActive() ? 'Totals reflect the current filters. ' : 'Showing all invoices. ') + 'Unpaid includes Open and Partially Paid. ';
+    updateBulkBar();
 }
-function onRowToggle() { updateBulkBar(); }
+
+// ---- Selection + bulk bar (BR-25) ----
+var headerCheckbox = $('headerCheckbox');
+function selectedInvoices() { return invoices.filter(function(i){ return selected[i.id]; }); }
+function updateBulkBar() {
+    var n = selectedInvoices().length;
+    $('bulkCount').textContent = n + ' selected';
+    var show = n > 0 && $('invoices-page').classList.contains('active');
+    $('bulkBar').classList.toggle('is-visible', show);
+    document.querySelectorAll('.row-checkbox').forEach(function(cb) { cb.closest('tr').classList.toggle('row-selected', cb.checked); });
+    var total = visible.length;
+    headerCheckbox.checked = n > 0 && n === total;
+    headerCheckbox.indeterminate = n > 0 && n < total;
+}
+function onRowToggle(cb) {
+    var id = Number(cb.dataset.id);
+    if (cb.checked) selected[id] = true; else delete selected[id];
+    updateBulkBar();
+    announce(selectedInvoices().length + ' selected. Bulk actions available at the bottom of the page.');
+}
 headerCheckbox.addEventListener('change', function() {
-    document.querySelectorAll('.row-checkbox').forEach(function(cb) { cb.checked = headerCheckbox.checked; });
+    selected = {};
+    if (headerCheckbox.checked) visible.forEach(function(i){ selected[i.id] = true; });
+    document.querySelectorAll('.row-checkbox').forEach(function(cb){ cb.checked = headerCheckbox.checked; });
     updateBulkBar();
+    announce(selectedInvoices().length + ' selected.');
 });
-function clearSelection() {
-    document.querySelectorAll('.row-checkbox').forEach(function(cb) { cb.checked = false; });
+function clearSelection(returnFocus) {
+    selected = {};
+    document.querySelectorAll('.row-checkbox').forEach(function(cb){ cb.checked = false; });
     updateBulkBar();
+    if (returnFocus) { headerCheckbox.focus(); announce('Selection cleared.'); }
 }
-function bulkAction(label) {
-    var n = document.querySelectorAll('.row-checkbox:checked').length;
-    showToast(label + ': ' + n + ' invoice' + (n === 1 ? '' : 's') + ' (prototype only)');
+function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
+
+function bulkMarkPaid() {
+    var sel = selectedInvoices();
+    var eligible = sel.filter(function(i){ return i.status === 'OPEN' || i.status === 'PARTIAL'; });
+    var skipped = sel.length - eligible.length;
+    eligible.forEach(function(i){ i.paidN = i.amountN; i.status = 'PAID'; });
+    clearSelection(false);
+    renderAll();
+    headerCheckbox.focus();
+    showToast('Marked ' + plural(eligible.length, 'invoice') + ' as paid.' + (skipped ? ' ' + skipped + ' skipped (already Paid or Voided).' : '') + ' Reminders stop for paid invoices.');
+}
+function bulkExport() {
+    showToast('Exporting ' + plural(selectedInvoices().length, 'invoice') + ' (prototype only).');
 }
 
-// ---- Shared toast ----
-function showToast(msg) {
-    var toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(function() { toast.classList.remove('show'); }, 2200);
+// ---- Bulk Void (BR-25) ----
+var voidEligible = [];
+function openVoidModal() {
+    var sel = selectedInvoices();
+    var withPayments = sel.filter(function(i){ return i.status !== 'VOIDED' && i.paidN > 0; });
+    var alreadyVoided = sel.filter(function(i){ return i.status === 'VOIDED'; });
+    voidEligible = sel.filter(function(i){ return i.status !== 'VOIDED' && i.paidN === 0; });
+    var n = voidEligible.length;
+
+    $('voidTitle').textContent = n ? 'Void ' + plural(n, 'Invoice') + '?' : 'Can\u2019t Void Selected Invoices';
+    $('voidSummary').innerHTML = n
+        ? 'Voiding marks ' + (n === 1 ? 'this invoice' : 'these ' + n + ' invoices') + ' as Voided and stops any scheduled reminders.'
+        : 'None of the ' + plural(sel.length, 'selected invoice') + ' can be voided. Nothing has been changed.';
+
+    var skipHtml = '';
+    if (withPayments.length) {
+        skipHtml += '<div class="settings-alert settings-alert--' + (n ? 'warn' : 'danger') + '"><i class="ti ti-alert-triangle" aria-hidden="true"></i><div>'
+            + '<div class="settings-alert-title">' + plural(withPayments.length, 'invoice') + ' will be skipped</div>'
+            + '<div>' + (withPayments.length === 1 ? 'It has' : 'They have') + ' payments logged, and invoices with payments can\u2019t be voided:</div>'
+            + '<ul class="skipped-list">' + withPayments.map(function(i){ return '<li>' + esc(i.invoiceNo) + ', ' + esc(i.customer) + ' (' + fmt(i.paidN) + ' paid)</li>'; }).join('') + '</ul></div></div>';
+    }
+    if (alreadyVoided.length) {
+        skipHtml += '<div class="settings-alert settings-alert--info"><i class="ti ti-info-circle" aria-hidden="true"></i><div>'
+            + plural(alreadyVoided.length, 'invoice') + ' already voided and will be left as is.</div></div>';
+    }
+    $('voidSkipped').innerHTML = skipHtml;
+
+    $('voidFields').style.display = n ? '' : 'none';
+    $('voidJobCosting').style.display = jobCostingOn() ? '' : 'none';
+    $('voidReason').value = '';
+    document.querySelector('input[name="jcRecords"][value="keep"]').checked = true; // default: keep
+    var btn = $('voidConfirmBtn');
+    btn.style.display = n ? '' : 'none';
+    btn.textContent = 'Void ' + plural(n, 'Invoice');
+    btn.previousElementSibling.textContent = n ? 'Cancel' : 'Close';
+    openOverlay($('voidOverlay'), n ? $('voidReason') : btn.previousElementSibling);
 }
+function closeVoidModal() { closeOverlay($('voidOverlay')); }
+function confirmVoid() {
+    var sel = selectedInvoices();
+    var skippedPayments = sel.filter(function(i){ return i.status !== 'VOIDED' && i.paidN > 0; }).length;
+    var jc = jobCostingOn() ? document.querySelector('input[name="jcRecords"]:checked').value : null;
+    voidEligible.forEach(function(i){ i.status = 'VOIDED'; });
+    var n = voidEligible.length;
+    $('voidOverlay').classList.remove('is-open');
+    clearSelection(false);
+    renderAll();
+    headerCheckbox.focus();
+    showToast('Voided ' + plural(n, 'invoice') + '.'
+        + (skippedPayments ? ' ' + skippedPayments + ' skipped because payments are logged.' : '')
+        + (jc ? (jc === 'keep' ? ' Job costing records kept.' : ' Job costing records deleted.') : ''));
+}
+$('voidOverlay').addEventListener('click', function(e) { if (e.target === this) closeVoidModal(); });
+
+// ---------- Init ----------
+renderReminderRows('email');
+renderReminderRows('sms');
+renderAll();
 </script>
-
 
 <!-- Proto Bar -->
 <div style="position:fixed;bottom:0;left:0;right:0;background:#2A2440;color:#fff;font-size:12px;padding:8px 20px;display:flex;align-items:center;gap:16px;z-index:9999;font-family:'Nunito',sans-serif;">
   <strong style="color:#C9C4FF;">PROTOTYPE</strong>
-  <span>Invoice Reminders &#8212; Reminders Page + Invoices Page</span>
-  <a href="https://app.clickup.com/t/86b32d4gr" target="_blank" style="color:#C9C4FF;font-weight:700;">86b32d4gr</a>
-  <span style="margin-left:auto;opacity:0.5;">dripjobsjeremy.github.io/dripjobs-prototypes</span>
+  <span>Invoice Reminders: Reminders Page + Invoices Page &#183; Rev. Oct 1, 2026</span>
+  <a href="https://app.clickup.com/t/86b32d4gr" target="_blank" rel="noopener" style="color:#C9C4FF;font-weight:700;">86b32d4gr</a>
+  <span style="margin-left:auto;opacity:0.75;">dripjobsjeremy.github.io/dripjobs-prototypes</span>
   <a href="../index.html" style="color:#C9C4FF;font-weight:700;text-decoration:none;">&#8592; Hub</a>
 </div>
 </body>

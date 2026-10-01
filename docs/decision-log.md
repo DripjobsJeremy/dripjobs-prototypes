@@ -1480,3 +1480,8 @@ Format:
 - Decision: Navigating to the Finder counts as a page load, so a filter selection for a member who dropped out of the options clears there (Edge Case 4). Seed data models the post-release state (six Customer Support Specialists hold CSS, David Cerro holds OBCSS and CSS). The Nest (#11265) is assigned to Dripjobs Harrison (Product Manager) to show the BR12 outside-Customer-Success case.
 - Assumption: Placeholder emails for the six Customer Support Specialists (ticket gap, real details still needed). The Company Settings empty option is labeled "Unassigned" (current label unknown). The Admin Settings Members subtitle and the member modal title were changed from "OBCSS" wording to "CSS" and "Edit Member" to match BR7 and multiple Roles; confirm with Copywriter. Deleting a Role and the Health Tier, Plan, and Signup Date Finder filters are not wired (out of scope).
 
+
+## [2026-10-01] Invoice Reminders (86b32d4gr): prototype updated to Oct 1 requirements
+- Decision: Replaced `invoice-reminders/index.html` with the updated UX design (BR-1 to BR-26). Changes: Pause/Resume lives in each invoice row's View menu (Reminders state is manual Pause only, None covers no due date, Paid, Voided, or no enabled rows), Bulk Send Reminder removed (out of scope), bulk Void skips invoices with payments and asks once about job costing, QBO chip shows Synced / Not Synced / Failed. Demo bar adds BR notes and Job Costing toggles.
+- Assumption: Voided invoices show a $0 balance. Em dashes in the supplied file were replaced per repo rules. Hub card description updated to drop Send Reminder.
+- Open question: What sets the QBO Failed state (TJ). Copywriter review of default email subjects (hyphen separator).
