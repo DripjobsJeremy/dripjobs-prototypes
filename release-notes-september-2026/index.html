@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DripJobs Release Notes: September 2026</title>
+<style>
+  :root{
+    --purple-deep:#5B1A96;
+    --purple:#6B21A8;
+    --purple-med:#9333EA;
+    --purple-light:#DDD6FE;
+    --purple-wash:#F6F1FC;
+    --ink:#1E1530;
+    --ink-soft:#5B5468;
+    --line:#E7DFF5;
+    --amber:#B45309;
+    --amber-wash:#FEF3E2;
+    --green:#15803D;
+    --green-wash:#EAFBF1;
+    --white:#FFFFFF;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Inter","Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
+    color:var(--ink);
+    background:var(--white);
+    line-height:1.55;
+  }
+  a{color:var(--purple-med);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:linear-gradient(135deg,var(--purple-deep) 0%,var(--purple) 55%,var(--purple-med) 100%);
+    color:#fff;
+    padding:64px 24px 56px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:-120px; right:-120px;
+    width:380px; height:380px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.08);
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    bottom:-160px; left:-80px;
+    width:320px; height:320px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.06);
+  }
+  .hero-inner{
+    max-width:780px;
+    margin:0 auto;
+    position:relative;
+    z-index:2;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(255,255,255,0.16);
+    border:1px solid rgba(255,255,255,0.28);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:22px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:#fff;display:inline-block;}
+  .hero h1{
+    font-size:44px;
+    line-height:1.1;
+    margin:0 0 14px;
+    font-weight:800;
+    letter-spacing:-0.02em;
+  }
+  .hero p.sub{
+    font-size:17px;
+    color:rgba(255,255,255,0.86);
+    max-width:560px;
+    margin:0 0 30px;
+  }
+  .hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+    border-top:1px solid rgba(255,255,255,0.22);
+    padding-top:22px;
+  }
+  .hero-meta .stat-label{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:rgba(255,255,255,0.65);
+    margin-bottom:4px;
+  }
+  .hero-meta .stat-value{
+    font-size:16px;
+    font-weight:700;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{max-width:780px;margin:0 auto;padding:0 24px;}
+  .toc-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:center;
+    padding:28px 0 8px;
+  }
+  .toc{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .toc a{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--purple);
+    background:var(--purple-wash);
+    border:1px solid var(--purple-light);
+    padding:7px 14px;
+    border-radius:999px;
+    text-decoration:none;
+    transition:background .15s ease;
+  }
+  .toc a:hover{background:var(--purple-light);}
+  .toggle-all-btn{
+    flex-shrink:0;
+    margin-left:auto;
+    font-size:13.5px;
+    font-weight:700;
+    color:#fff;
+    background:var(--purple-med);
+    border:1px solid var(--purple-med);
+    padding:7px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s ease;
+    font-family:inherit;
+  }
+  .toggle-all-btn:hover{background:var(--purple-deep);border-color:var(--purple-deep);}
+
+  .section{padding:46px 0 8px;}
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    margin-bottom:22px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .section-head:hover h2{color:var(--purple-med);}
+  .section-head .icon{
+    font-size:20px;
+  }
+  .section-head h2{
+    font-size:22px;
+    font-weight:800;
+    margin:0;
+    color:var(--purple-deep);
+    letter-spacing:-0.01em;
+    transition:color .15s ease;
+  }
+  .section-head .count{
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    background:var(--purple-wash);
+    padding:3px 10px;
+    border-radius:999px;
+  }
+  .section-head .chevron{
+    margin-left:auto;
+    width:20px;
+    height:20px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--purple-med);
+    transition:transform .2s ease;
+  }
+  .section.collapsed .chevron{transform:rotate(-90deg);}
+  .section-body{
+    overflow:hidden;
+    max-height:none;
+  }
+  .section.collapsed .section-body{
+    display:none;
+  }
+  .section.collapsed{padding-bottom:46px;}
+
+  /* ---------- FEATURE CARD ---------- */
+  .card{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px 24px;
+    margin-bottom:16px;
+    background:#fff;
+    transition:box-shadow .15s ease, border-color .15s ease;
+  }
+  .card:hover{
+    border-color:var(--purple-light);
+    box-shadow:0 4px 18px rgba(107,33,168,0.08);
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .card-title{
+    font-size:16.5px;
+    font-weight:700;
+    color:var(--ink);
+    margin:0;
+  }
+  .badge{
+    flex-shrink:0;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .badge.released{color:var(--ink-soft);background:#F2F0F6;}
+
+  .field{
+    display:grid;
+    grid-template-columns:128px 1fr;
+    gap:6px 14px;
+    padding:10px 0;
+    border-top:1px solid #F1ECFA;
+    font-size:14.5px;
+  }
+  .field:first-of-type{border-top:none;padding-top:0;}
+  .field .label{
+    font-weight:700;
+    font-size:12.5px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    padding-top:2px;
+  }
+  .field.what .label{color:var(--purple);}
+  .field.why .label{color:var(--amber);}
+  .field.action .label{color:var(--green);}
+  .field .value{color:var(--ink-soft);}
+  .field.action .value.none{color:var(--green);font-weight:600;}
+
+  @media (max-width:560px){
+    .field{grid-template-columns:1fr;}
+    .field .label{padding-top:0;}
+  }
+
+  /* ---------- UPCOMING / OTHER (always-visible detail) ---------- */
+  .future-card{
+    border:1px solid var(--purple-light);
+    background:var(--purple-wash);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    margin-bottom:14px;
+  }
+  .future-card.alt{
+    border-color:#E9E1F7;
+    background:#FBF9FE;
+  }
+  .future-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:8px;
+  }
+  .future-title{
+    font-size:16px;
+    font-weight:700;
+    color:var(--purple-deep);
+    margin:0;
+  }
+  .future-desc{
+    font-size:14.5px;
+    color:var(--ink-soft);
+    margin:0 0 12px;
+  }
+  .future-link{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--purple-med);
+    text-decoration:none;
+  }
+  .future-link:hover{text-decoration:underline;}
+  .pill{
+    flex-shrink:0;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:999px;
+    background:#fff;
+    border:1px solid var(--purple-light);
+    color:var(--purple);
+    white-space:nowrap;
+  }
+
+  /* ---------- BACK TO TOP ---------- */
+  .back-to-top{
+    position:fixed;
+    right:24px;
+    bottom:24px;
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    background:var(--purple-med);
+    border:none;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow:0 6px 18px rgba(107,33,168,0.32);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(10px);
+    transition:opacity .2s ease, transform .2s ease, background .15s ease;
+    z-index:20;
+  }
+  .back-to-top.visible{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+  }
+  .back-to-top:hover{background:var(--purple-deep);}
+
+  /* ---------- FOOTER ---------- */
+  .footer{
+    margin-top:54px;
+    padding:36px 0 56px;
+    border-top:1px solid var(--line);
+    text-align:center;
+  }
+  .footer p{
+    color:var(--ink-soft);
+    font-size:14px;
+    margin:0 0 6px;
+  }
+  .footer .gear{
+    width:34px;height:34px;
+    margin-bottom:14px;
+  }
+  .back-bar{
+    max-width:780px;
+    margin:0 auto;
+    padding:16px 24px 0;
+  }
+  .back-link{
+    color:var(--purple);
+    font-weight:700;
+    font-size:13.5px;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    min-height:44px;
+  }
+  .back-link:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+  <div class="back-bar">
+    <a class="back-link" href="../index.html#release-notes">&larr; Product Release Notes</a>
+  </div>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow"><span class="dot"></span>Product Release Notes</span>
+      <h1>What's new in DripJobs</h1>
+      <p class="sub">Your monthly recap of everything shipped, fixed, and on the way, written for the way you actually use DripJobs day to day.</p>
+      <div class="hero-meta">
+        <div>
+          <div class="stat-label">Period</div>
+          <div class="stat-value">September 1 – September 30, 2026</div>
+        </div>
+        <div>
+          <div class="stat-label">Releases</div>
+          <div class="stat-value">7 deployments</div>
+        </div>
+        <div>
+          <div class="stat-label">Improvements</div>
+          <div class="stat-value">27 updates</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="toc-row">
+      <div class="toc">
+        <a href="#proposals">Proposals &amp; Proposal Builder</a>
+        <a href="#portal">Customer Portal &amp; Invoicing</a>
+        <a href="#booking">Booking Forms</a>
+        <a href="#pipeline">Pipeline &amp; Mobile</a>
+        <a href="#messaging">Messaging &amp; Notifications</a>
+        <a href="#integrations">Integrations</a>
+        <a href="#settings">Settings</a>
+        <a href="#upcoming">Upcoming</a>
+        <a href="#soon">Coming Soon</a>
+      </div>
+      <button class="toggle-all-btn" id="toggleAllBtn" type="button">Collapse All</button>
+    </div>
+
+    <!-- PROPOSALS & PROPOSAL BUILDER -->
+    <div class="section" id="proposals">
+      <div class="section-head"><span class="icon">📄</span><h2>Proposals &amp; Proposal Builder</h2><span class="count">2 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Downloaded Proposals Now Include Images and Attachments</h3><span class="badge released">Sep 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where a downloaded proposal with "Include images" set to Yes could leave out line item images and the files in the attachments section. Both now come through in the download, whether you download from the internal view or the customer view.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Customers get the complete proposal, with your photos and attachments, in the file you send them.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Job Report Margin and Profit Now Include Material Cost</h3><span class="badge released">Sep 3</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The Job Report summary on a proposal now includes material cost in Total Price, Total Cost, Profit, and Margin. Previously these figures reflected labor only. The Product Report and the per-substrate rows are unchanged.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">The profit and margin you see on a proposal now reflect the whole job, not just the labor side of it.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, expect margin figures on existing proposals to read lower than before because material cost is now counted.</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER PORTAL & INVOICING -->
+    <div class="section" id="portal">
+      <div class="section-head"><span class="icon">💳</span><h2>Customer Portal &amp; Invoicing</h2><span class="count">2 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Financed Payments No Longer Wrongly Flagged as "Not Funded"</h3><span class="badge released">Sep 30</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where a payment request for a financed payment could show a false "financing has not yet been funded" warning even when the financing was already marked Funded on the invoice and in the proposal. Funded status is now recognized consistently across the proposal, invoice, and payment request, and the warning still appears when financing is genuinely unfunded.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can collect financed payments without being blocked by an incorrect error.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Voided Invoices Now Clearly Show as Voided in the Customer Portal</h3><span class="badge released">Sep 17</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Voided invoices in the Customer Portal no longer present their balance due as payable and no longer show the "Pay with Other" button. The banner is also styled differently from an active invoice so the status is obvious.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Customers won't try to pay an invoice you already voided, which avoids payment mix-ups.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- BOOKING FORMS -->
+    <div class="section" id="booking">
+      <div class="section-head"><span class="icon">📝</span><h2>Booking Forms</h2><span class="count">1 update</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Customer Email Now Shown on Booking Requests and Appointment Details</h3><span class="badge released">Sep 30</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The customer's email address now appears in the Customer Request section of the View Request modal on the Requests tab, and in the Contact Info section of the Appointment Details modal. It shows whenever the email was submitted on the booking form or is on the contact record, and stays visible after a request is accepted and scheduled.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can email a customer straight from the request or appointment without opening their contact record first.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- PIPELINE & MOBILE -->
+    <div class="section" id="pipeline">
+      <div class="section-head"><span class="icon">📱</span><h2>Pipeline &amp; Mobile</h2><span class="count">8 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Company-Wide Holiday Region with a Per-Calendar Hide Holidays Toggle</h3><span class="badge released">Sep 30</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Holiday Region (None, United States, Canada, or both) is now a company-wide setting in Company Settings, along with a company default for whether holidays are shown. Each user can hide or show holidays separately on the Appointments calendar and the Job Schedule calendar. New companies start with a region based on their currency, and existing companies were set the same way with holidays shown. If an admin later changes the region or the default, everyone's toggles reset to the new default.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Your whole team sees the right holidays without each person having to set up their own region.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, Company Admins can review the Holiday Region and default visibility in Company Settings.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Deal Stage and Status Are Now Read-Only in Edit Deal and Job Details</h3><span class="badge released">Sep 28</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The Stage and Status fields in the Edit Deal and Edit Job Details window are now read-only, labeled Deal Stage and Deal/Proposal Status (Job Stage and Job Status on jobs), with short helper text explaining they are set automatically. Changes made in those dropdowns never saved, so the controls were removed. When a deal is moved off Proposal(s) Rejected, its status now updates to match the new stage instead of staying on Rejected.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">The fields now show you what is really on the deal instead of looking editable when they weren't, and a moved deal no longer keeps a stale Rejected status.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, move a deal to a new stage by dragging it on the pipeline board as you do today.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Job Schedule Event Labels Now Readable on Every Calendar Color</h3><span class="badge released">Sep 28</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Event label text on the Job Schedule calendar now adjusts to stay readable on every calendar color, for example dark text on light colors like yellow, in all views.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Your crew can read job names at a glance, including on a phone in the field.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Appointments Not Linked to a Deal Can Now Be Deleted</h3><span class="badge released">Sep 28</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where an appointment that was no longer tied to a deal, for example because the deal was deleted first, could not be deleted. You now get a confirmation prompt and the appointment is removed from the calendar, customer, and list views. Other contacts, deals, and jobs are not affected.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can clean up leftover appointments instead of being stuck with orphaned ones on your calendar.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Custom Pipeline Stages Can Be Deleted Once They Are Empty</h3><span class="badge released">Sep 17</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where a custom Sales Pipeline stage could not be deleted because old, stale deal links made the system think deals were still on it. The delete check, and the error message and downloadable list shown when deletion is blocked, now include only deals that are currently on the stage. Deal history and reporting are preserved.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can tidy up your pipeline without being blocked by deals that are no longer there.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, if a custom stage was previously undeletable, try deleting it again.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Duplicate Checks and Search Now Cover Secondary Emails and Phones</h3><span class="badge released">Sep 17</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Duplicate email and phone checks now include a contact's secondary emails and phone numbers, both when creating and editing, and promoting a secondary value to Primary no longer bypasses the check. Contacts list search and global search also find contacts by any secondary email or phone. A new address entered on a new lead, proposal, or on-site estimate for an existing contact is now saved to that contact without creating duplicates, and a stray question-mark hover indicator in Stores was removed.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Contact records stay cleaner, are easier to find, and reuse addresses automatically.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, existing duplicates may now block a save until they are corrected.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Command Center Tabs No Longer Cut Off</h3><span class="badge released">Sep 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where the Tasks tab in the Command Center could be clipped when Jobi AI and QUO are both enabled. When tabs run out of room, there is now a clickable way to reach them instead of relying on horizontal scrolling.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Every Command Center tab is reachable with a mouse, not just with a trackpad swipe.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Streamlined Archive and Delete for Contacts</h3><span class="badge released">Sep 3</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">After you archive a contact you now stay on that contact's record, and a separate prompt asks whether you also want to delete the customer. Archiving a contact with deals, proposals, or invoices warns that they will be archived too, and deleting a contact with dependent records warns that the deletion is permanent and removes its deals, proposals, and invoices.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Archiving and then deleting a contact takes fewer steps and has clearer safeguards before anything is removed.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- MESSAGING & NOTIFICATIONS -->
+    <div class="section" id="messaging">
+      <div class="section-head"><span class="icon">💬</span><h2>Messaging &amp; Notifications</h2><span class="count">2 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: AI-Assisted Drip Message Writing</h3><span class="badge released">Sep 28</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A "Generate with AI" button in the drip step editor, for email and text steps in both the Sales and Jobs pipelines, now writes a message for that step. You set the timing, describe what you want to say, and pick a tone and message type, and it fills in the message body for you to edit. Nothing goes out until you save, and the subject line and send delay stay yours to set.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can start from a well-written draft instead of a blank field, with fewer typos and less time spent writing every follow-up.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, look for the Generate with AI button when editing a drip step.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Support Panel No Longer Covers the Command Center Chat Message Box</h3><span class="badge released">Sep 3</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Improved the Command Center chat layout so the DripJobs Support panel no longer sits over the message compose box, which could block typing on a tablet.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can type and send customer replies from a tablet without the panel getting in the way.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- INTEGRATIONS -->
+    <div class="section" id="integrations">
+      <div class="section-head"><span class="icon">🔌</span><h2>Integrations</h2><span class="count">7 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Routemize Appointments Now Switch the Deal to the Right Drip</h3><span class="badge released">Sep 28</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where, when Routemize scheduled an appointment and moved a deal from Estimate Requested to Estimate Scheduled, the deal could stay on the Estimate Requested drip. The deal now switches to the drip set for Estimate Scheduled, with no duplicate deals or duplicate sends, and messages already sent stay in the deal history.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Customers who book through Routemize get the right follow-up messages instead of stale "request received" ones.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, confirm your Estimate Scheduled drip is set up the way you want.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Link More Than One Google Calendar</h3><span class="badge released">Sep 21</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">You can now link more than one Google Calendar to DripJobs. Events from every linked calendar show in DripJobs for reference only and do not affect scheduling availability, and you choose exactly one linked calendar as the one DripJobs writes new events to. You can change that choice at any time for future events, and unlinking the current write-to calendar asks you to pick a new one first. Each linked calendar's events show in its own color and name.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can see everything on your schedule while keeping DripJobs events organized on a single calendar.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, link your calendars from the Google Calendar connection screen.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Send Marketing Agency Info from the Zapier Card</h3><span class="badge released">Sep 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The Zapier card in Company Settings &gt; Integrations now has a "Send Marketing Agency Info" button. It opens an editable email template for your marketing agency, pre-filled with your Zapier API key, your name, company name, and phone, with a Copy button for the subject and body. Nothing is sent from DripJobs, and the button is disabled until a Zapier API key exists.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can hand your agency exactly what it needs to send leads into your pipeline in one copy and paste.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, generate a Zapier API key first if you haven't, and fill in your agency contact's name before copying.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Zapier "New Payment Received" Trigger Now Covers Stripe Payments</h3><span class="badge released">Sep 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The Zapier "New Payment Received" trigger now also fires for Stripe payments made at proposal acceptance, including deposits, and for recurring invoice payments, alongside the manual payments it already supported.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can automate follow-ups the moment a customer pays by Stripe.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Routemize Appointments Now Respect Your Communication Setting</h3><span class="badge released">Sep 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where appointments created through Routemize still sent a confirmation even when On-Site Estimate Communication was turned off. Routemize appointments now follow that setting, and scheduling through Calendly, Zapier, or manually works as before.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Customers no longer get appointment confirmations you turned off.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, check On-Site Estimate Communication under Company Settings &gt; App Settings &gt; Estimate Settings if you want to adjust it.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Google Calendar Sync Now Only Adds Appointments Assigned to You</h3><span class="badge released">Sep 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Appointments now sync only to the Google Calendar of the user they are assigned to, so admins who can see other users' appointments in DripJobs no longer get copies on their own Google Calendar. This covers new, reassigned, updated, and canceled appointments.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Your Google Calendar shows your own appointments instead of duplicates of everyone else's.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, admins may want to delete leftover duplicate events created before this fix.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Future DripJobs Events Now Sync to Your Connected Google Calendar</h3><span class="badge released">Sep 3</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">When you connect Google Calendar and choose a calendar, every future DripJobs event, including appointments, scheduled jobs, and estimates, is now created on it, and new events you create afterward keep syncing. Disconnecting or changing the calendar stops syncing to the old one.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Your upcoming schedule shows up in Google Calendar without re-entering anything.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, reconnect or confirm your calendar selection if events seem to be missing.</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="section" id="settings">
+      <div class="section-head"><span class="icon">⚙️</span><h2>Settings</h2><span class="count">5 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Address Line 2 Across Company Settings, Jobs, Appointments, and Documents</h3><span class="badge released">Sep 30</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Company Settings &gt; Company Information now has an optional Address Line 2 for both the physical and billing address, and New Proposal, New On-Site Estimate, other appointment types, New Lead, and the public Booking Form each have an optional Address Line 2 for the job or appointment address. Where present it now appears in the Command Center contact card, appointment modals, PDF documents, the {job-location} and {appointment-location} keywords, and Zapier. Choosing an existing contact also fills in their Primary Address automatically, and editing an on-file address saves it as a new address instead of overwriting the original.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Suite, unit, and floor details no longer get lost depending on which screen or document you are looking at.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Refreshed User Profile Page</h3><span class="badge released">Sep 21</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The user profile page has been updated to match the current DripJobs design, and the password line now reads "Password last updated on: [date] (click to edit)".</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">The profile page is cleaner and the password label is clearer.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Production Rates Demo Button Opens the Current Booking Page</h3><span class="badge released">Sep 17</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The "Schedule demo" button in the Production Rates section now opens the current Production Rates Overview booking page instead of an outdated link.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">If you want a Production Rates walkthrough, you land on the right page to book it.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Company Logo Upload Now Shows Accepted File Formats Up Front</h3><span class="badge released">Sep 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The Company Logo upload on the Brand settings page now shows "Accepted formats: JPG, JPEG, PNG, GIF, BMP, ICO, SVG" before you choose a file.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You know which logo files will work before you try to upload one.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Settings Tab Bar Can Now Be Dragged or Scrolled to Reach Hidden Tabs</h3><span class="badge released">Sep 8</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The Company Settings tab bar can now be dragged or scrolled with a mouse or trackpad to reveal hidden tabs. On narrow windows, including Mac Safari, the scroll control stays visible and the Add-Ons tab no longer flickers in and out.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can reach every settings tab, including Add-Ons, on smaller screens and laptops.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- UPCOMING RELEASES -->
+    <div class="section" id="upcoming">
+      <div class="section-head"><span class="icon">🚀</span><h2>Upcoming Releases</h2><span class="count">4 in progress</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="future-card">
+        <div class="future-top">
+          <h3 class="future-title">Business Entity Records</h3>
+          <span class="pill">In QA</span>
+        </div>
+        <p class="future-desc">Commercial accounts will be able to track a Business as its own record, with several Contacts associated to it and one marked Primary. A new Businesses item in the Sales menu leads to a tabbed Business profile that brings together its deals, proposals, change orders, appointments, invoices, and payments in one place, and Business can be chosen when creating a lead, appointment, proposal, or invoice.</p>
+      </div>
+
+      <div class="future-card">
+        <div class="future-top">
+          <h3 class="future-title">Google Calendar Icon and My Profile Connection</h3>
+          <span class="pill">In QA</span>
+        </div>
+        <p class="future-desc">The Google Calendar widget on Appointments and Job Schedule is becoming a compact icon that takes every user to a Google Calendar section at the top of My Profile. From there you can connect, choose whether to sync appointments and jobs, and disconnect, all in one place.</p>
+      </div>
+
+      <div class="future-card">
+        <div class="future-top">
+          <h3 class="future-title">Per-Package Discounts</h3>
+          <span class="pill">In QA</span>
+        </div>
+        <p class="future-desc">Every package on a proposal will get its own discount action, flat or percentage, calculated against that package's subtotal and added as a discount line inside the package. Each package's discount stays independent of the others.</p>
+      </div>
+
+      <div class="future-card">
+        <div class="future-top">
+          <h3 class="future-title">Event Banner Settings Moving to the Calendar Tab</h3>
+          <span class="pill">PR in review</span>
+        </div>
+        <p class="future-desc">The "Add crew name to event banner" and "Add job total to event banner" toggles are moving from Estimate Settings to Company Settings &gt; Calendar, keeping every company's current choice. New accounts will also have the job total shown on event banners by default.</p>
+      </div>
+      </div>
+    </div>
+
+    <!-- OTHER EXCITING UPDATES COMING SOON -->
+    <div class="section" id="soon">
+      <div class="section-head"><span class="icon">✨</span><h2>Other Exciting Updates Coming Soon</h2><span class="count">3 planned</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="future-card alt">
+        <div class="future-top">
+          <h3 class="future-title">Customer Portal Document Language</h3>
+          <span class="pill">Planned</span>
+        </div>
+        <p class="future-desc">Admins will be able to set a default viewing language for the proposals, invoices, and change orders customers open in the Customer Portal, adjust it on an individual proposal or invoice, and let customers pick their own language from a selector in the portal header. Translation applies to the portal pages you see on screen, and downloaded PDFs stay in the original language.</p>
+      </div>
+
+      <div class="future-card alt">
+        <div class="future-top">
+          <h3 class="future-title">Direct Thumbtack Integration</h3>
+          <span class="pill">In progress</span>
+        </div>
+        <p class="future-desc">A direct Thumbtack integration is in the works. Once live, new Thumbtack leads will flow straight into DripJobs as contacts and deals, tagged with Thumbtack as the lead source, and dropped automatically into your Sales Pipeline and drip sequences, no manual entry required.</p>
+      </div>
+
+      <div class="future-card alt">
+        <div class="future-top">
+          <h3 class="future-title">Invoice Reminders</h3>
+          <span class="pill">Planned</span>
+        </div>
+        <p class="future-desc">Automatic, configurable reminders for outstanding invoices are on the way, sent by email or text before the due date, on the due date, or after, on a schedule you control. The Invoices page is also getting summary stats, more filters, a reminder status for every invoice, and bulk actions like Send Reminder, Mark as Paid, and Export.</p>
+      </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p><strong>Questions about anything above?</strong></p>
+      <p>Visit <a href="https://help.dripjobs.com" target="_blank" rel="noopener">help.dripjobs.com</a> or reach out to your DripJobs support team.</p>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="backToTop" type="button" aria-label="Back to top">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+  </button>
+
+  <script>
+    document.querySelectorAll('.section-head').forEach(function(head){
+      head.addEventListener('click', function(){
+        head.closest('.section').classList.toggle('collapsed');
+      });
+    });
+
+    var toggleAllBtn = document.getElementById('toggleAllBtn');
+    var allCollapsed = false;
+    toggleAllBtn.addEventListener('click', function(){
+      allCollapsed = !allCollapsed;
+      document.querySelectorAll('.section').forEach(function(section){
+        section.classList.toggle('collapsed', allCollapsed);
+      });
+      toggleAllBtn.textContent = allCollapsed ? 'Expand All' : 'Collapse All';
+    });
+
+    var backToTopBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll', function(){
+      backToTopBtn.classList.toggle('visible', window.scrollY > 500);
+    });
+    backToTopBtn.addEventListener('click', function(){
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+  </script>
+</body>
+</html>
