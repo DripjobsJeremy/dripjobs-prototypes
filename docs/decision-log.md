@@ -1490,3 +1490,9 @@ Format:
 - Decision: On the Invoices tab, checking one or more rows now swaps the header buttons (New Invoice, Actions) for "N selected" plus Mark as Paid, Export, Void, matching the Sales List pattern. Replaces the floating bottom bar. Added a text Clear link since there is no other one-click way to drop the selection.
 - Assumption: Mark as Paid and Export use the primary button style and Void uses the danger style (Sales List shows Blast, Export CSV, Archive).
 - Open question: None.
+
+## [2026-10-01] Invoice Reminders (86b32d4gr): Send Invoice and Request Payment reminder toggle
+- Decision: Added Send Invoice and Request Payment modals, opened from each invoice row's View menu, each with an "Invoice Reminders" on/off toggle (same control in both). The toggle is disabled with the reason when the invoice has no due date, is Paid or Voided, or no invoice reminders are enabled. Cancel Payment Request is a View menu item on invoices with a pending request.
+- Assumption: Toggle Off sets the invoice to Paused and On sets it Active, default On when eligible. Cancelling a payment request disables reminders (Paused) rather than showing None, since None is system derived. Closing a modal without sending changes nothing. Confirm all three.
+- Confirmed by Jeremy: voided invoices show a $0 balance, and Bulk Void with no eligible invoices shows a "can't void" message with the skipped list and no confirm button.
+- Open question: Does "cancelling the Payment Request" mean this explicit cancel action, or also closing the modal unsent?

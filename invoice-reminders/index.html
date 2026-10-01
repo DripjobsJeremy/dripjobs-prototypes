@@ -299,6 +299,30 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
 .reminder-status-chip.none   { background: #EFEFF3; color: #5B6275; } /* A11y: was #80879A (3.13:1) */
 .reminder-status-chip i { font-size: 11px; }
 
+
+/* Send Invoice / Request Payment modal (Item 3) */
+.edit-modal.is-comm { width: 640px; }
+.comm-card { border: 1px solid #DAD8E3; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+.comm-card-title { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; margin: 0 0 14px; }
+.comm-card-icon { width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; }
+.comm-card-icon.sms { background: #E6FAF0; color: #1A7A45; }
+.comm-card-icon.mail { background: #E8E6FA; color: #5C53DC; }
+.comm-card-icon.bell { background: #FFF7DD; color: #7A5300; }
+.fl-field { position: relative; margin-bottom: 16px; }
+.fl-field:last-child { margin-bottom: 0; }
+.fl-field > label { position: absolute; top: -8px; left: 10px; background: #fff; padding: 0 6px; font-size: 11px; font-weight: 500; color: #5E6578; letter-spacing: .2px; z-index: 1; }
+.fl-field input[type="text"], .fl-field select, .fl-field textarea, .fl-field input[type="datetime-local"] { width: 100%; min-height: 40px; border: 1px solid #DAD8E3; border-radius: 8px; font-size: 14px; padding: 0 14px; background: #fff; font-family: 'Nunito', sans-serif; color: #32415B; }
+.fl-field textarea { padding: 10px 14px; min-height: 110px; line-height: 1.5; resize: vertical; }
+.fl-field input:read-only { background: #F2F2F7; color: #5E6578; }
+.fl-field input:focus, .fl-field select:focus, .fl-field textarea:focus { outline: none; border-color: #8B85EA; box-shadow: 0 0 0 3px rgba(139,133,234,.18); }
+.copy-me-row { display: flex; justify-content: flex-end; margin: -6px 0 16px; }
+.comm-body-wrap .editor-body-area { min-height: 150px; }
+.reminder-toggle-row { display: flex; align-items: center; gap: 10px; }
+.reminder-toggle-row label { font-size: 13px; font-weight: 700; margin: 0; cursor: pointer; }
+.reminder-toggle-row .switch[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+.reminder-toggle-help { font-size: 12px; color: #5E6578; margin: 10px 0 0; line-height: 1.5; }
+.reminder-toggle-help.is-unavailable { color: #92400E; font-weight: 600; }
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
 </style>
 </head>
@@ -610,6 +634,76 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
     </div>
 </div>
 
+<!-- Send Invoice / Request Payment modal -->
+<div class="modal-overlay page-modal" id="commOverlay">
+    <div class="edit-modal is-comm" id="commModalCard" role="dialog" aria-modal="true" aria-labelledby="commTitle">
+        <div class="edit-modal-header">
+            <h2 id="commTitle">Send Invoice</h2>
+            <button class="modal-close-btn" onclick="closeCommModal()" aria-label="Close"><i class="ti ti-x" aria-hidden="true"></i></button>
+        </div>
+        <div class="edit-modal-body">
+            <div class="comm-card">
+                <div class="fl-field">
+                    <label for="commChannel" id="commChannelLbl">Choose additional ways to communicate this invoice</label>
+                    <select id="commChannel" onchange="applyCommChannel()">
+                        <option value="both">Both Email and Text</option>
+                        <option value="email">Email Only</option>
+                        <option value="sms">Text Only</option>
+                    </select>
+                </div>
+            </div>
+            <div class="comm-card" id="commSmsCard">
+                <h3 class="comm-card-title"><span class="comm-card-icon sms"><i class="ti ti-message-circle" aria-hidden="true"></i></span>Text Message</h3>
+                <div class="fl-field"><label for="commSmsTo">To</label><input type="text" id="commSmsTo" value="(700) 555-0077" readonly></div>
+                <div class="fl-field"><label for="commSmsBody">Text Message Body</label><textarea id="commSmsBody"></textarea></div>
+            </div>
+            <div class="comm-card" id="commEmailCard">
+                <h3 class="comm-card-title"><span class="comm-card-icon mail"><i class="ti ti-mail" aria-hidden="true"></i></span>Email</h3>
+                <div class="fl-field"><label for="commEmailTo">To</label><input type="text" id="commEmailTo" readonly></div>
+                <div class="fl-field"><label for="commCc">Cc</label><input type="text" id="commCc" placeholder="Add Cc recipients..."></div>
+                <div class="copy-me-row"><button type="button" class="btn btn-outline-primary btn-sm" onclick="$('commCc').value='jeremy@dripjobs.com'">Copy Me</button></div>
+                <div class="fl-field"><label for="commSubject">Subject</label><input type="text" id="commSubject"></div>
+                <div class="comm-body-wrap">
+                    <div class="editor-toolbar" role="toolbar" aria-label="Formatting">
+                        <button type="button" onmousedown="event.preventDefault()" onclick="document.execCommand('bold')" aria-label="Bold"><b aria-hidden="true">B</b></button>
+                        <button type="button" onmousedown="event.preventDefault()" onclick="document.execCommand('italic')" aria-label="Italic"><i aria-hidden="true">I</i></button>
+                        <button type="button" onmousedown="event.preventDefault()" onclick="document.execCommand('underline')" aria-label="Underline"><u aria-hidden="true">U</u></button>
+                        <div class="tb-sep" aria-hidden="true"></div>
+                        <button type="button" aria-label="Bulleted list"><i class="ti ti-list" aria-hidden="true"></i></button>
+                        <button type="button" aria-label="Link"><i class="ti ti-link" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="editor-body-area" id="commEmailBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Email Body"></div>
+                </div>
+            </div>
+            <div class="comm-card" id="commReminderCard">
+                <h3 class="comm-card-title"><span class="comm-card-icon bell"><i class="ti ti-bell-ringing" aria-hidden="true"></i></span>Invoice Reminders
+                    <span class="br-chip br-annot" tabindex="0">Item 3 <span class="br-tooltip">Item 3: Toggle to enable or disable Invoice Reminders for this invoice. Same control in Send Invoice and Request Payment. Assumption: Off sets the invoice to Paused (manual), On sets it to Active. Default is On when the invoice is eligible (BR-12, BR-14, BR-15).</span></span>
+                </h3>
+                <div class="reminder-toggle-row">
+                    <button type="button" class="switch" id="commReminderSwitch" role="switch" aria-checked="true" aria-labelledby="commReminderLbl" aria-describedby="commReminderHelp" onclick="toggleCommReminder(this)"></button>
+                    <label id="commReminderLbl" onclick="toggleCommReminder($('commReminderSwitch'))">Send automatic reminders for this invoice</label>
+                    <span class="switch-state" id="commReminderState" aria-hidden="true">On</span>
+                </div>
+                <p class="reminder-toggle-help" id="commReminderHelp"></p>
+            </div>
+            <div class="comm-card" id="commSendOnCard">
+                <div class="fl-field">
+                    <label for="commSendOn">Send On</label>
+                    <select id="commSendOn" onchange="$('commSendLaterWrap').style.display = this.value === 'later' ? '' : 'none'">
+                        <option value="now">Now</option>
+                        <option value="later">Schedule for later</option>
+                    </select>
+                </div>
+                <div class="fl-field" id="commSendLaterWrap" style="display:none; margin-top:16px;"><label for="commSendLater">Date and time</label><input type="datetime-local" id="commSendLater"></div>
+            </div>
+        </div>
+        <div class="edit-modal-footer">
+            <button class="btn btn-primary" id="commSendBtn" onclick="submitComm()">Send</button>
+            <button class="btn btn-outline-primary" onclick="closeCommModal()">Close</button>
+        </div>
+    </div>
+</div>
+
 <div class="proto-toast" id="toast" role="status" aria-live="polite"><i class="ti ti-circle-check" aria-hidden="true"></i><span id="toastMsg"></span></div>
 <div class="sr-only" id="srLive" aria-live="polite"></div>
 
@@ -659,7 +753,7 @@ function closeOverlay(overlay) {
 document.addEventListener('keydown', function(e) {
     var open = document.querySelector('.modal-overlay.is-open');
     if (!open) return;
-    if (e.key === 'Escape') { e.preventDefault(); open.id === 'voidOverlay' ? closeVoidModal() : closeEditModal(); return; }
+    if (e.key === 'Escape') { e.preventDefault(); if (open.id === 'voidOverlay') closeVoidModal(); else if (open.id === 'commOverlay') closeCommModal(); else closeEditModal(); return; }
     if (e.key === 'Tab') {
         var f = focusables(open); if (!f.length) return;
         var first = f[0], last = f[f.length - 1];
@@ -893,10 +987,10 @@ var SYNC = {
 };
 
 var invoices = [
-    {id:1,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Invoice Only',      invoiceNo:'#469276', status:'OPEN',    sync:'synced',     amountN:545.50,   paidN:0,      date:'6/26/2026', dueDate:'7/26/2026', paused:false},
+    {id:1,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Invoice Only',      invoiceNo:'#469276', status:'OPEN',    sync:'synced',     amountN:545.50,   paidN:0,      date:'6/26/2026', dueDate:'7/26/2026', paused:false, paymentRequest:true},
     {id:2,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2977254', invoiceNo:'#464186', status:'PARTIAL', sync:'synced',     amountN:2631.81,  paidN:100,    date:'6/18/2026', dueDate:'7/18/2026', paused:false},
     {id:3,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2901988', invoiceNo:'#456981', status:'OPEN',    sync:'synced',     amountN:87026.12, paidN:0,      date:'6/8/2026',  dueDate:null,        paused:false},
-    {id:4,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920059', invoiceNo:'#453093', status:'OPEN',    sync:'not-synced', amountN:4103.31,  paidN:0,      date:'6/2/2026',  dueDate:'7/2/2026',  paused:false},
+    {id:4,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920059', invoiceNo:'#453093', status:'OPEN',    sync:'not-synced', amountN:4103.31,  paidN:0,      date:'6/2/2026',  dueDate:'7/2/2026',  paused:false, paymentRequest:true},
     {id:5,  initials:'TB', customer:'TJ Bennett',        proposal:'Invoice Only',      invoiceNo:'#453092', status:'OPEN',    sync:'not-synced', amountN:327.30,   paidN:0,      date:'6/2/2026',  dueDate:'7/2/2026',  paused:true},
     {id:6,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920038', invoiceNo:'#453090', status:'OPEN',    sync:'failed',     amountN:3273.00,  paidN:0,      date:'6/2/2026',  dueDate:'7/2/2026',  paused:false},
     {id:7,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2919942', invoiceNo:'#453085', status:'PAID',    sync:'synced',     amountN:3000.00,  paidN:3000,   date:'6/2/2026',  dueDate:'7/2/2026',  paused:false},
@@ -951,6 +1045,7 @@ function menuHtml(inv) {
     }
     return '<div class="row-menu" role="menu" id="menu-' + inv.id + '" aria-label="Actions for invoice ' + esc(inv.invoiceNo) + '">'
         + '<button role="menuitem" tabindex="-1" onclick="closeMenus(); showToast(\'Opens invoice ' + esc(inv.invoiceNo) + ' (prototype only)\')"><i class="ti ti-eye" aria-hidden="true"></i>View Invoice</button>'
+        + commMenuItems(inv)
         + '<div class="menu-sep" role="separator"></div>'
         + '<div class="menu-group-label" aria-hidden="true">Reminders</div>'
         + item + '</div>';
@@ -1221,6 +1316,111 @@ function confirmVoid() {
         + (jc ? (jc === 'keep' ? ' Job costing records kept.' : ' Job costing records deleted.') : ''));
 }
 $('voidOverlay').addEventListener('click', function(e) { if (e.target === this) closeVoidModal(); });
+
+
+// ---- Send Invoice / Request Payment modal (Item 3) ----
+function isUnpaid(inv) { return inv.status === 'OPEN' || inv.status === 'PARTIAL'; }
+function commMenuItems(inv) {
+    if (inv.status === 'VOIDED') return '';
+    var out = '<div class="menu-sep" role="separator"></div><div class="menu-group-label" aria-hidden="true">Invoice</div>'
+        + '<button role="menuitem" tabindex="-1" onclick="openComm(' + inv.id + ', \'send\')"><i class="ti ti-send" aria-hidden="true"></i>Send Invoice</button>';
+    if (isUnpaid(inv)) {
+        out += '<button role="menuitem" tabindex="-1" onclick="openComm(' + inv.id + ', \'request\')"><i class="ti ti-cash" aria-hidden="true"></i>Request Payment</button>';
+        if (inv.paymentRequest) {
+            out += '<button role="menuitem" tabindex="-1" onclick="cancelPaymentRequest(' + inv.id + ')"><i class="ti ti-circle-x" aria-hidden="true"></i><span>Cancel Payment Request<span class="menu-sub">Also disables reminders for this invoice</span></span></button>';
+        }
+    }
+    return out;
+}
+function reminderEligibility(inv) {
+    if (inv.status === 'PAID')   return 'This invoice is paid, so no reminders will send.';
+    if (inv.status === 'VOIDED') return 'This invoice is voided, so no reminders will send.';
+    if (!inv.dueDate)            return 'This invoice has no due date, so no reminders will send.';
+    if (!anyEnabledRows())       return 'No invoice reminders are enabled in Settings > Reminders.';
+    return null;
+}
+function scheduleSummary() {
+    function part(list) { return list.filter(function(r){ return r.enabled; }).map(rowPlain).join(', '); }
+    var e = part(invoiceReminders.email), t = part(invoiceReminders.sms), bits = [];
+    if (e) bits.push('Email: ' + e);
+    if (t) bits.push('Text: ' + t);
+    return bits.join('. ');
+}
+var commInvoiceId = null, commMode = 'send';
+function toggleCommReminder(sw) {
+    if (sw.getAttribute('aria-disabled') === 'true') return;
+    var on = sw.getAttribute('aria-checked') !== 'true';
+    sw.setAttribute('aria-checked', on ? 'true' : 'false');
+    $('commReminderState').textContent = on ? 'On' : 'Off';
+}
+function applyCommChannel() {
+    var v = $('commChannel').value;
+    $('commSmsCard').style.display = v === 'email' ? 'none' : '';
+    $('commEmailCard').style.display = v === 'sms' ? 'none' : '';
+}
+function openComm(id, mode) {
+    var inv = byId(id);
+    commInvoiceId = id; commMode = mode;
+    closeMenus(false);
+    var mb = $('menubtn-' + id); if (mb) mb.focus();
+    var first = inv.customer.split(' ')[0], bal = fmt(balanceOf(inv)), num = inv.invoiceNo.replace('#','');
+    var isReq = mode === 'request';
+    $('commTitle').textContent = (isReq ? 'Request Payment for Invoice ' : 'Send Invoice ') + inv.invoiceNo;
+    $('commChannelLbl').textContent = 'Choose additional ways to communicate this ' + (isReq ? 'payment request' : 'invoice');
+    $('commChannel').value = 'both';
+    $('commEmailTo').value = inv.customer + ' (' + inv.customer.toLowerCase().replace(/[^a-z]/g,'') + '@example.com)';
+    $('commCc').value = '';
+    if (isReq) {
+        $('commSmsBody').value = 'Hi!\n\nThis is a request for a progress payment on your project with Sparrow\'s Nest Painting. Please make a progress payment in the amount of: ' + bal + '. You can view your invoice here: https://app.example.com/pay/' + num;
+        $('commSubject').value = 'Progress Payment Request - Sparrow\'s Nest Painting';
+        $('commEmailBody').innerText = 'Hi, ' + first + '!\n\nThis is a request for a progress payment on our project.\n\nPlease make a progress payment in the amount of: ' + bal + ' by clicking the button below.\n\n{online-payment-button}\n\nIf you have any questions regarding this progress payment request, please call our office: (555) 555-5555.\n\nThank you!';
+    } else {
+        $('commSmsBody').value = 'Please review invoice ' + num + ' from Sparrow\'s Nest Painting: https://app.example.com/pay/' + num;
+        $('commSubject').value = 'Sparrow\'s Nest Painting Invoice ' + inv.invoiceNo;
+        $('commEmailBody').innerText = 'Hi ' + first + ',\n\nThank you for your business. Please see the attached invoice for ' + fmt(inv.amountN) + ' and let us know if you have any questions!\n\n{online-payment-button}\n\nThanks,\n\nJeremy Harrison';
+    }
+    $('commSendOnCard').style.display = isReq ? 'none' : '';
+    $('commSendOn').value = 'now'; $('commSendLaterWrap').style.display = 'none';
+    $('commSendBtn').textContent = 'Send';
+    // Reminder toggle
+    var sw = $('commReminderSwitch'), why = reminderEligibility(inv), help = $('commReminderHelp');
+    if (why) {
+        sw.setAttribute('aria-checked', 'false'); sw.setAttribute('aria-disabled', 'true');
+        $('commReminderState').textContent = 'Off';
+        help.textContent = why; help.className = 'reminder-toggle-help is-unavailable';
+    } else {
+        var on = !inv.paused;
+        sw.setAttribute('aria-checked', on ? 'true' : 'false'); sw.removeAttribute('aria-disabled');
+        $('commReminderState').textContent = on ? 'On' : 'Off';
+        help.textContent = 'Reminders send on the schedule from Settings > Reminders, based on the due date (' + inv.dueDate + '). ' + scheduleSummary() + '.';
+        help.className = 'reminder-toggle-help';
+    }
+    applyCommChannel();
+    $('commModalCard').querySelector('.edit-modal-body').scrollTop = 0;
+    openOverlay($('commOverlay'), $('commChannel'));
+}
+function closeCommModal() { closeOverlay($('commOverlay')); }
+function submitComm() {
+    var inv = byId(commInvoiceId), sw = $('commReminderSwitch');
+    var eligible = !reminderEligibility(inv), on = sw.getAttribute('aria-checked') === 'true';
+    if (eligible) inv.paused = !on;
+    if (commMode === 'request') inv.paymentRequest = true;
+    closeCommModal();
+    renderAll();
+    var b = $('menubtn-' + inv.id); if (b) b.focus();
+    showToast((commMode === 'request' ? 'Payment request sent for invoice ' : 'Invoice ' ) + inv.invoiceNo + (commMode === 'request' ? '.' : ' sent.')
+        + (eligible ? (on ? ' Reminders are on.' : ' Reminders are off.') : ''));
+}
+function cancelPaymentRequest(id) {
+    var inv = byId(id);
+    inv.paymentRequest = false;
+    if (!reminderEligibility(inv)) inv.paused = true;
+    closeMenus(false);
+    renderAll();
+    var b = $('menubtn-' + id); if (b) b.focus();
+    showToast('Payment request cancelled for invoice ' + inv.invoiceNo + '. Reminders disabled for this invoice.');
+}
+$('commOverlay').addEventListener('click', function(e) { if (e.target === this) closeCommModal(); });
 
 // ---------- Init ----------
 renderReminderRows('email');
