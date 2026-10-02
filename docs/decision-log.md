@@ -1501,3 +1501,9 @@ Format:
 - Assumption: Toggle Off sets the invoice to Paused and On sets it Active, default On when eligible. Cancelling a payment request disables reminders (Paused) rather than showing None, since None is system derived. Closing a modal without sending changes nothing. Confirm all three.
 - Confirmed by Jeremy: voided invoices show a $0 balance, and Bulk Void with no eligible invoices shows a "can't void" message with the skipped list and no confirm button.
 - Open question: Does "cancelling the Payment Request" mean this explicit cancel action, or also closing the modal unsent?
+
+## [2026-10-02] Invoice Reminders (86b32d4gr): simplified to a send-based cadence (BR-27 to BR-33)
+- Decision: Removed Pause/Resume, the View menu Reminders group, the Reminders column and Active/Paused/None chip, and the toggle's disabled and reason states. Sending an Invoice or Payment Request now starts a cadence (latest send wins, toggle Off ends it). Cancelling the request that started the cadence ends it and the toast says reminders have stopped. Paid or Voided ends it by rule, and the bulk Mark as Paid and Void code was not touched.
+- Decision: The modal toggle is shown (default ON) only when at least one Email or SMS row is enabled on the Reminders page, reading the existing `invoiceReminders` state. Otherwise the card is hidden so it is out of the tab order. Per Jeremy, BR-14 still applies, so the toggle is also hidden for invoices with no due date.
+- Assumption: The toggle still shows for Paid invoices (no ineligible state per the new rules). The Edit modal helper text about due dates and statuses was left as is. Deleting a payment request has no UI and was not added.
+- Open question: What a send-based cadence's Before / On / After offsets are measured from.
