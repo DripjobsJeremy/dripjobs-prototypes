@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-10-02] Roadmap: Invoice Reminders (86b32d4gr) manually placed in In Review
+
+- Decision: Moved the "Invoice Reminders" card from Needs PM Analysis to In Review on `dripjobs-product-roadmap/index.html`, per Jeremy's direct instruction, even though ClickUp shows this ticket as Needs Design. This is a one-off manual override, not a re-pull from ClickUp, so this one card is out of sync with its live ClickUp status until Jeremy updates ClickUp to match or the next weekly refresh reconciles it.
+- Why: Direct request from Jeremy to reflect where the ticket actually is, ahead of ClickUp being updated to match.
+
 ## [2026-10-02] Weekly Product Update + Product Roadmap refreshed for Sep 28-Oct 2, 2026
 
 - Decision: Rebuilt `weekly-product-update/index.html` and `Weekly_Product_Update.md` with the 10 tickets pushed to production this week (5 on Sep 28, 5 on Sep 30), grouped into Deals, Appointments (2), Job Schedule, Invoicing, Communications (2), Integrations, and Admin Tools (2). Generalized two account-specific ticket titles (standalone appointment delete, Routemize drip sequence) into customer-facing wording, matching the convention used for prior weeks and the Release Notes builds. Rebuilt `dripjobs-product-roadmap/index.html` from a fresh workspace-wide pull of the bare 🎯 tag: 25 in-flight tickets across 8 of the 13 pipeline stages, 1 on hold/parked (Per Package Discount Action moved to qa kickback). Updated both Release Notes cards on the hub to the new dates.
