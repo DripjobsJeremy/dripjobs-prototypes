@@ -4,14 +4,14 @@
 <script src="../gate.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Invoice Reminders: Combined Prototype (Rev. Oct 2, 2026)</title>
+<title>Invoice Reminders: Combined Prototype (Rev. Oct 5, 2026)</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/dist/tabler-icons.min.css">
 <style>
 /* ---- Shared tokens (applied to both page wrappers) ---- */
-#reminders-page, #invoices-page {
+#reminders-page, #invoices-page , #command-center-page {
     --st-color-primary: #8B85EA;
     --st-color-primary-hover: #736BE3;
     --st-color-primary-active: #5C53DC;
@@ -28,27 +28,27 @@
     padding: 28px 32px 110px;
     display: none;
 }
-#reminders-page.active, #invoices-page.active { display: block; }
+#reminders-page.active, #invoices-page.active , #command-center-page.active { display: block; }
 #reminders-page { background: #fff; }
-#invoices-page  { background: #F7F7FB; }
+#invoices-page  , #command-center-page  { background: #F7F7FB; }
 
 #reminders-page .btn-primary,
-#invoices-page  .btn-primary,
+#invoices-page  .btn-primary, #command-center-page  .btn-primary,
 .page-modal .btn-primary { background-color: #8B85EA; border-color: #8B85EA; }
 #reminders-page .btn-primary:hover,
-#invoices-page  .btn-primary:hover,
+#invoices-page  .btn-primary:hover, #command-center-page  .btn-primary:hover,
 .page-modal .btn-primary:hover { background-color: #736BE3; border-color: #736BE3; }
 #reminders-page .btn-outline-primary,
-#invoices-page  .btn-outline-primary,
+#invoices-page  .btn-outline-primary, #command-center-page  .btn-outline-primary,
 .page-modal .btn-outline-primary { color: #5C53DC; border-color: #8B85EA; }
 #reminders-page .btn-outline-primary:hover,
-#invoices-page  .btn-outline-primary:hover,
+#invoices-page  .btn-outline-primary:hover, #command-center-page  .btn-outline-primary:hover,
 .page-modal .btn-outline-primary:hover { background-color: #8B85EA; border-color: #8B85EA; color: #fff; }
-#reminders-page .btn, #invoices-page .btn, .page-modal .btn { border-radius: 10px; font-weight: 600; font-size: 13px; }
-#reminders-page .btn-sm, #invoices-page .btn-sm, .page-modal .btn-sm { border-radius: 8px; padding: 4px 16px; }
+#reminders-page .btn, #invoices-page .btn, #command-center-page .btn, .page-modal .btn { border-radius: 10px; font-weight: 600; font-size: 13px; }
+#reminders-page .btn-sm, #invoices-page .btn-sm, #command-center-page .btn-sm, .page-modal .btn-sm { border-radius: 8px; padding: 4px 16px; }
 
 /* Visible focus (A11y) */
-#reminders-page :focus-visible, #invoices-page :focus-visible, .page-modal :focus-visible,
+#reminders-page :focus-visible, #invoices-page :focus-visible, #command-center-page :focus-visible, .page-modal :focus-visible,
 .demo-banner :focus-visible {
     outline: 2px solid #5C53DC; outline-offset: 2px; box-shadow: none;
 }
@@ -206,7 +206,7 @@ body.hide-br .br-chip.br-annot { display: none; }
 .radio-row input { width: 18px; height: 18px; accent-color: #5C53DC; margin: 0; }
 .skipped-list { margin: 4px 0 0; padding-left: 18px; }
 .btn-danger { background: #B42318; border-color: #B42318; color: #fff; }
-.page-modal *, #reminders-page *, #invoices-page * { box-sizing: border-box; }
+.page-modal *, #reminders-page *, #invoices-page * , #command-center-page * { box-sizing: border-box; }
 .btn-danger:hover { background: #912018; border-color: #912018; }
 .btn[disabled] { opacity: .55; cursor: not-allowed; }
 
@@ -319,6 +319,92 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
 .reminder-switch[aria-checked="true"] .switch-track { background: var(--st-color-primary, #8B85EA); }
 .reminder-switch[aria-checked="true"] .switch-track::after { transform: translateX(18px); }
 
+
+/* ---- Oct 5 rev: setup empty state, section helper ---- */
+.section-helper { font-size: 12px; color: var(--st-color-text-muted-aa); margin: 10px 14px 0; line-height: 1.5; }
+.reminders-setup { padding: 22px 14px 26px; max-width: 560px; }
+.setup-title { font-size: 15px; font-weight: 800; margin: 0 0 6px; }
+.reminders-setup p { font-size: 13px; margin: 0 0 10px; line-height: 1.5; }
+.setup-steps { font-size: 13px; line-height: 1.6; margin: 0 0 16px; padding-left: 20px; }
+.setup-btn { min-height: 48px; padding: 0 28px; }
+.setup-foot { font-size: 12px; color: var(--st-color-text-muted-aa); margin: 12px 0 0 !important; }
+
+/* ---- Info tooltip (button + tooltip, hover and focus, Esc closes). Not .br-annot so BR notes toggle does not hide it ---- */
+.info-tip-wrap { position: relative; display: inline-flex; vertical-align: middle; text-transform: none; letter-spacing: 0; font-weight: 400; }
+.info-tip-btn { width: 24px; height: 24px; min-height: 24px; padding: 0; border: none; background: none; color: #5E6578; border-radius: 50%; cursor: help; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+.info-tip-btn:hover { color: #5C53DC; }
+.info-tooltip { display: none; position: absolute; top: 120%; left: 0; background: #2A2440; color: #fff; font-weight: 400; font-size: 11.5px; line-height: 1.4; padding: 8px 10px; border-radius: 6px; width: 240px; z-index: 60; box-shadow: 0 4px 14px rgba(0,0,0,0.25); white-space: normal; text-align: left; text-transform: none; letter-spacing: 0; }
+.info-tip-wrap.tip-right .info-tooltip { left: auto; right: 0; }
+.info-tip-wrap:hover .info-tooltip, .info-tip-wrap:focus-within .info-tooltip { display: block; }
+.info-tip-wrap.tip-dismissed .info-tooltip { display: none !important; }
+
+/* ---- Reminders column state ---- */
+.reminder-state-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; background: #E6FAF0; color: #1A7A45; }
+.reminder-state-chip i { font-size: 11px; }
+.reminder-off { font-size: 12.5px; font-weight: 600; color: #5E6578; }
+
+/* ---- No results ---- */
+.no-results { text-align: center; padding: 28px; color: #5E6578; font-size: 13px; }
+.no-results strong { display: block; color: #32415B; margin-bottom: 4px; }
+.no-results .btn { margin-top: 12px; min-height: 48px; padding: 0 22px; }
+
+/* ---- Reminder toggle (Send Invoice / Request Payment) ---- */
+.reminder-toggle-help { font-size: 12px; color: #5E6578; margin: 4px 0 0; line-height: 1.5; }
+#commNotice, #commKeepRow .notice-slot { margin-top: 10px; }
+#commReminderCard .settings-alert { margin: 10px 0 0; }
+.settings-alert-action { margin-left: auto; align-self: center; flex-shrink: 0; }
+.alert-action-btn { min-height: 48px; padding: 0 18px; }
+
+/* ---- Command Center (production Deal modal frame) ---- */
+#command-center-page { background: linear-gradient(rgba(20,15,50,0.35), rgba(20,15,50,0.35)), #fff; padding-top: 24px; }
+.cc-modal { background: #fff; border-radius: 12px; max-width: 1120px; margin: 0 auto; box-shadow: 0 20px 50px rgba(20,15,50,0.25); overflow: hidden; }
+.cc-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid #DAD8E3; }
+.cc-head h1 { font-size: 16px; font-weight: 700; margin: 0; }
+.cc-grid { display: grid; grid-template-columns: 280px 1fr; min-height: 520px; }
+.cc-left { border-right: 1px solid #DAD8E3; padding: 16px; overflow-y: auto; max-height: 640px; font-size: 13px; background: #FAFAFC; }
+.cc-left h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #5E6578; margin: 16px 0 6px; }
+.cc-left .cc-label-link { color: #5C53DC; font-size: 12px; font-weight: 600; }
+.cc-left .cc-title { font-size: 15px; font-weight: 800; margin: 6px 0 2px; }
+.cc-left .cc-muted { color: #5E6578; font-size: 12px; }
+.cc-btn-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.cc-fake-btn { display: inline-block; border: 1px solid #8B85EA; color: #5C53DC; background: #fff; border-radius: 8px; font-size: 12px; font-weight: 600; padding: 5px 10px; }
+.cc-fake-btn.primary { background: #8B85EA; color: #fff; }
+.cc-info-card { background: #fff; border: 1px solid #DAD8E3; border-radius: 8px; padding: 10px 12px; line-height: 1.6; }
+.cc-info-card b { font-weight: 700; }
+.cc-kv { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; }
+.cc-kv span:first-child { color: #5E6578; }
+.cc-chip { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: #EFEFF3; color: #5B6275; }
+.cc-right { padding: 16px 20px 24px; min-width: 0; }
+.cc-stage-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px; margin-bottom: 12px; }
+.cc-stage-row .cc-div { width: 1px; height: 22px; background: #DAD8E3; }
+.cc-pill { display: inline-block; border: 1px solid #DAD8E3; border-radius: 999px; font-size: 12px; font-weight: 600; padding: 3px 12px; color: #32415B; background: #fff; }
+.cc-updated { margin-left: auto; font-size: 12px; color: #5E6578; }
+.cc-drips { display: flex; align-items: center; justify-content: space-between; background: #E8E6FA; border-radius: 8px; padding: 10px 14px; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
+.cc-fake-switch { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 12px; }
+.cc-fake-switch i { width: 34px; height: 18px; background: #B9B6C6; border-radius: 999px; position: relative; display: inline-block; }
+.cc-fake-switch i::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+.cc-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; margin-bottom: 8px; }
+.cc-tab { border: none; border-radius: 16px; padding: 8px 16px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 500; color: #32415B; white-space: nowrap; cursor: default; min-height: 40px; }
+.cc-tab[aria-disabled="true"] { opacity: .85; }
+.cc-tab.is-active { font-weight: 700; box-shadow: inset 0 0 0 2px #8B85EA; cursor: default; }
+.cc-tab .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #3B82F6; margin-left: 6px; vertical-align: middle; }
+.cc-inv-card { background: #fff; border: 1px solid #DAD8E3; border-radius: 8px; padding: 16px 18px; margin-bottom: 14px; }
+.cc-inv-main { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; gap: 12px; }
+.cc-inv-amt { font-size: 24px; font-weight: 800; }
+.cc-inv-sub { font-size: 13px; color: #5E6578; margin-top: 2px; }
+.cc-link { text-decoration: underline; color: #5C53DC; font-weight: 600; }
+.cc-inv-ref { text-align: center; font-size: 13px; color: #5E6578; }
+.cc-inv-right { text-align: right; font-size: 13px; color: #5E6578; }
+.cc-inv-card .settings-alert { margin: 14px 0 0; align-items: center; }
+.cc-hist-btn { margin-top: 10px; background: none; border: none; color: #5C53DC; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; min-height: 48px; padding: 0 4px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 8px; }
+.cc-hist-btn i { transition: transform .15s ease; }
+.cc-hist-btn[aria-expanded="true"] i { transform: rotate(180deg); }
+.cc-hist-list { list-style: none; margin: 0 0 4px; padding: 0 4px; font-size: 13px; }
+.cc-hist-list li { padding: 5px 0; border-top: 1px solid #F0EFF5; }
+.cc-foot { background: #F2F2F7; border-top: 1px solid #DAD8E3; padding: 12px 20px; display: flex; justify-content: flex-end; }
+.cc-foot .btn { min-height: 48px; padding: 0 24px; }
+@media (max-width: 860px) { .cc-grid { grid-template-columns: 1fr; } .cc-left { max-height: none; border-right: none; border-bottom: 1px solid #DAD8E3; } .cc-inv-main { grid-template-columns: 1fr; } .cc-inv-ref, .cc-inv-right { text-align: left; } }
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
 </style>
 </head>
@@ -329,7 +415,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
     <div class="demo-banner-left">
         <strong>PROTOTYPE</strong>
         <span class="br-chip" tabindex="0">86b32d4gr <i class="ti ti-info-circle" aria-hidden="true"></i>
-            <span class="br-tooltip below">Ticket 86b32d4gr: Invoice Reminders. Revised to requirements current as of Oct 2, 2026 (BR-1 to BR-33).</span>
+            <span class="br-tooltip below">Ticket 86b32d4gr: Invoice Reminders. Revised to requirements current as of Oct 5, 2026 (BR-1 to BR-37).</span>
         </span>
     </div>
     <nav class="demo-nav" aria-label="Prototype screens">
@@ -339,10 +425,16 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
         <button class="demo-nav-btn" data-page="invoices-page" onclick="switchPage('invoices-page')">
             <i class="ti ti-file-invoice" aria-hidden="true"></i> Invoices
         </button>
+        <button class="demo-nav-btn" data-page="command-center-page" onclick="switchPage('command-center-page')">
+            <i class="ti ti-layout-dashboard" aria-hidden="true"></i> Command Center
+        </button>
     </nav>
     <div class="demo-controls">
         <button class="demo-control" role="switch" aria-checked="true" id="demoJobCosting" onclick="toggleDemo(this)">
             <span class="demo-switch" aria-hidden="true"></span>Job Costing on
+        </button>
+        <button class="demo-control" role="switch" aria-checked="true" id="demoSetUp" onclick="toggleDemo(this); setInvoiceRemindersSetUp(this.getAttribute('aria-checked') === 'true')">
+            <span class="demo-switch" aria-hidden="true"></span>Invoice reminders set up
         </button>
         <button class="demo-control" role="switch" aria-checked="true" id="demoBr" onclick="toggleDemo(this); document.body.classList.toggle('hide-br', this.getAttribute('aria-checked') !== 'true');">
             <span class="demo-switch" aria-hidden="true"></span>BR notes
@@ -399,6 +491,19 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
         <h2 class="section-header is-new" id="hdr-inv">For Invoices <span class="new-tag">New</span>
             <span class="br-chip br-annot" tabindex="0">BR-1 · BR-2 · BR-7 <span class="br-tooltip">BR-1: section sits below For Jobs, same row pattern. BR-2: Admin only (Settings). BR-7: default rows on first use, created independently of Appointment/Job defaults.</span></span>
         </h2>
+        <p class="section-helper" id="invHelper">Reminders send based on each invoice's due date, at your Default Job Start Time (8 AM if not set). Invoices without a due date don't get reminders.</p>
+        <div class="reminders-setup" id="invSetup" hidden>
+            <h3 class="setup-title">Invoice reminders are off</h3>
+            <p>Send automatic email and SMS reminders so customers pay on time.</p>
+            <ol class="setup-steps">
+                <li>Click Enable Reminders to add the default schedule.</li>
+                <li>Edit any reminder to change its timing or wording.</li>
+                <li>When you send an invoice, leave Invoice Reminders turned on.</li>
+            </ol>
+            <button type="button" class="btn btn-primary setup-btn" onclick="enableInvoiceReminders()">Enable Reminders</button>
+            <p class="setup-foot">You can change this anytime in Settings &gt; Reminders.</p>
+        </div>
+        <div id="invBlocks">
         <div class="delivery-block">
             <h3 class="delivery-title">Email Delivery</h3>
             <div id="rows-email"></div>
@@ -408,6 +513,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
             <h3 class="delivery-title">SMS Delivery</h3>
             <div id="rows-sms"></div>
             <div class="add-reminder-row" id="add-sms"></div>
+        </div>
         </div>
     </section>
 </main>
@@ -447,10 +553,10 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                             <option>Month(s)</option>
                         </select>
                     </div>
-                    <div id="onDueNote" class="interval-static-note" style="display:none;">Sends on the invoice's due date.</div>
+                    <div id="onDueNote" class="interval-static-note" style="display:none;">Sends on the invoice due date.</div>
                 </div>
                 <p class="field-error" id="intervalError" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>Enter a whole number of 1 or more.</span></p>
-                <p class="timing-helper"><i class="ti ti-clock" aria-hidden="true"></i><span>Sends at your company's Default Job Start Time (8:00 AM if not set), in your company's timezone. Only invoices with a due date that are Open or Partially Paid receive reminders.</span></p>
+                <p class="timing-helper"><i class="ti ti-clock" aria-hidden="true"></i><span>Reminders send based on each invoice's due date, at your Default Job Start Time (8 AM if not set). Invoices without a due date don't get reminders.</span></p>
             </div>
 
             <div class="modal-template-section" id="subjectSection">
@@ -458,7 +564,8 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                     <label for="subjectTemplate">Subject Template</label>
                     <button type="button" class="modal-restore-link" onclick="restoreDefault('subject')" aria-label="Restore default subject template">Restore Default</button>
                 </div>
-                <textarea class="modal-textarea modal-subject-textarea" id="subjectTemplate" rows="1"></textarea>
+                <textarea class="modal-textarea modal-subject-textarea" id="subjectTemplate" rows="1" aria-describedby="subjectError"></textarea>
+                <p class="field-error" id="subjectError" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>Add a message before saving.</span></p>
             </div>
 
             <div class="modal-template-section" id="emailBodySection">
@@ -483,7 +590,8 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                     <button type="button" aria-label="Align center"><i class="ti ti-align-center" aria-hidden="true"></i></button>
                     <button type="button" aria-label="Align right"><i class="ti ti-align-right" aria-hidden="true"></i></button>
                 </div>
-                <div class="editor-body-area" id="emailBodyArea" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="bodyLbl"></div>
+                <div class="editor-body-area" id="emailBodyArea" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="bodyLbl" aria-describedby="bodyError"></div>
+                <p class="field-error" id="bodyError" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>Add a message before saving.</span></p>
             </div>
 
             <div class="modal-template-section" id="smsBodySection" style="display:none;">
@@ -491,14 +599,15 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                     <label for="smsBodyArea">Message Template</label>
                     <button type="button" class="modal-restore-link" onclick="restoreDefault('smsBody')" aria-label="Restore default message template">Restore Default</button>
                 </div>
-                <textarea class="modal-textarea modal-sms-textarea" id="smsBodyArea"></textarea>
+                <textarea class="modal-textarea modal-sms-textarea" id="smsBodyArea" aria-describedby="smsError"></textarea>
+                <p class="field-error" id="smsError" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>Add a message before saving.</span></p>
             </div>
 
             <div class="keywords-box">
                 <strong>Keywords:</strong> {company-name} {company-phone} {company-website} {first-name} {last-name} {invoice-number} {invoice-amount} {balance-due} {due-date} {invoice-link} {salesperson-name} {project-manager-name} {project-manager-phone} {project-manager-email}
-                <span class="br-chip br-annot" tabindex="0">BR-10 · BR-11 <span class="br-tooltip">BR-10: supported keywords. BR-11: keywords with no data render as written, not blank.</span></span>
+                <span class="br-chip br-annot" tabindex="0">BR-10 · BR-11 <span class="br-tooltip">BR-10: supported keywords. BR-11: when an invoice has no project manager or salesperson, those keywords fall back to the company name, phone, and email.</span></span>
             </div>
-            <p class="keywords-note">Keywords like <strong>{project-manager-name}</strong> will be replaced with actual data if available. If the data doesn't exist (e.g., no Project Manager assigned yet), the keyword will appear as written.</p>
+            <p class="keywords-note">If an invoice has no project manager or salesperson assigned, those keywords use your company name, phone, and email instead.</p>
         </div>
         <div class="edit-modal-footer">
             <button class="btn btn-primary btn-sm" id="modalSaveBtn" onclick="saveEditModal()">Save</button>
@@ -521,16 +630,16 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
         </div>
         <div class="header-bulk" id="headerBulk" role="region" aria-label="Bulk actions" hidden>
             <span class="bulk-count" id="bulkCount">0 selected</span>
-            <button class="btn btn-primary" onclick="bulkMarkPaid()"><i class="ti ti-circle-check" style="margin-right:4px;" aria-hidden="true"></i>Mark as Paid</button>
             <button class="btn btn-primary" onclick="bulkExport()"><i class="ti ti-download" style="margin-right:4px;" aria-hidden="true"></i>Export</button>
+            <button class="btn btn-primary" onclick="openDisable('bulk', selectedIds(), 'bulk')"><i class="ti ti-bell-off" style="margin-right:4px;" aria-hidden="true"></i>Disable Reminders</button>
             <button class="btn btn-danger" onclick="openVoidModal()"><i class="ti ti-ban" style="margin-right:4px;" aria-hidden="true"></i>Void</button>
             <button class="bulk-clear" onclick="clearSelection(true)">Clear</button>
-            <span class="br-chip br-annot" tabindex="0">BR-25 <span class="br-tooltip below">BR-25: Mark as Paid, Export, Void. Bulk Send Reminder removed (Out of Scope, Section 11). Buttons replace the header actions once one or more rows are checked, with the selected count (same pattern as Sales List).</span></span>
+            <span class="br-chip br-annot" tabindex="0">BR-25 <span class="br-tooltip below">BR-25: Export, Disable Reminders, Void (Mark as Paid and Bulk Send Reminder are not bulk actions). Buttons replace the header actions once one or more rows are checked, with the selected count (same pattern as Sales List).</span></span>
         </div>
     </div>
     <div class="stats-row">
         <div class="stat-card"><div class="stat-label">Total Invoices</div><div class="stat-value" id="statTotal">0</div></div>
-        <div class="stat-card"><div class="stat-label">Unpaid</div><div class="stat-value warn" id="statUnpaid">0</div></div>
+        <div class="stat-card"><div class="stat-label">Unpaid <span class="info-tip-wrap"><button type="button" class="info-tip-btn" aria-label="More info: Unpaid" aria-describedby="tip-unpaid"><i class="ti ti-info-circle" aria-hidden="true"></i></button><span class="info-tooltip" role="tooltip" id="tip-unpaid">Open and partially paid invoices</span></span></div><div class="stat-value warn" id="statUnpaid">0</div></div>
         <div class="stat-card"><div class="stat-label">Total Amount</div><div class="stat-value" id="statAmount">$0.00</div></div>
         <div class="stat-card"><div class="stat-label">Outstanding Balance</div><div class="stat-value success" id="statBalance">$0.00</div></div>
     </div>
@@ -540,7 +649,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
     <div class="filter-bar" role="search" aria-label="Filter invoices">
         <div class="search-input-wrap"><i class="ti ti-search" aria-hidden="true"></i>
             <label for="filterSearch" class="sr-only">Search by customer, invoice number, or proposal number</label>
-            <input type="text" id="filterSearch" placeholder="Search invoices..." oninput="applyFilters()"></div>
+            <input type="text" id="filterSearch" placeholder="Search by customer, invoice #, or proposal #" oninput="applyFilters()"></div>
         <label for="filterStatus" class="sr-only">Status</label>
         <select id="filterStatus" onchange="applyFilters()">
             <option value="">All Statuses</option>
@@ -551,7 +660,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
         </select>
         <label for="filterType" class="sr-only">Amount field</label>
         <select id="filterType" onchange="applyFilters()">
-            <option value="">Type</option>
+            <option value="">Filter by</option>
             <option value="amount">Amount</option>
             <option value="paid">Paid</option>
             <option value="balance">Balance</option>
@@ -563,7 +672,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
             <option value="gt">&gt;</option>
         </select>
         <label for="filterAmount" class="sr-only">Amount value</label>
-        <input type="text" inputmode="decimal" id="filterAmount" class="amount-input" placeholder="Amount" oninput="this.value=this.value.replace(/[^0-9.]/g,'');applyFilters()">
+        <input type="text" inputmode="decimal" id="filterAmount" class="amount-input" placeholder="0.00" oninput="this.value=this.value.replace(/[^0-9.]/g,'');applyFilters()">
         <button class="btn btn-primary btn-sm" onclick="applyFilters()">Search</button>
         <span class="br-chip br-annot" tabindex="0">BR-21 <span class="br-tooltip">BR-21: text search (customer, invoice #, proposal #), Status incl. Voided, Type + operator + amount.</span></span>
         <div class="spacer"></div>
@@ -578,25 +687,85 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                     <th scope="col">Status</th>
                     <th scope="col">Customer</th>
                     <th scope="col">Proposal</th>
-                    <th scope="col">Invoice <span class="br-chip br-annot" tabindex="0">BR-26 <span class="br-tooltip below">BR-26: QBO indicator shows Synced, Not Synced, or Failed. Open gap: what sets Failed (TJ).</span></span></th>
+                    <th scope="col">Invoice <span class="br-chip br-annot" tabindex="0">BR-26 <span class="br-tooltip below">BR-26: QBO indicator shows Synced, Not synced, or Sync failed. Open gap: what sets Failed (TJ).</span></span></th>
                     <th scope="col" data-sort="amountN" aria-sort="none"><button class="sort-btn" onclick="sortBy('amountN')">Amount <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
                     <th scope="col" data-sort="paidN" aria-sort="none"><button class="sort-btn" onclick="sortBy('paidN')">Paid <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
                     <th scope="col" data-sort="balanceN" aria-sort="none"><button class="sort-btn" onclick="sortBy('balanceN')">Balance <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
                     <th scope="col" data-sort="date" aria-sort="descending"><button class="sort-btn" onclick="sortBy('date')">Date <i class="ti ti-arrow-down sort-icon" aria-hidden="true"></i></button></th>
+                    <th scope="col">Reminders <span class="info-tip-wrap tip-right"><button type="button" class="info-tip-btn" aria-label="More info: Reminders" aria-describedby="tip-reminders"><i class="ti ti-info-circle" aria-hidden="true"></i></button><span class="info-tooltip" role="tooltip" id="tip-reminders">On means a reminder is still scheduled. Off means none are left to send.</span></span> <span class="br-chip br-annot" tabindex="0">BR-22 · BR-35 <span class="br-tooltip below">BR-22: Reminders column sits between Date and Actions and is not sortable. BR-35: On when a reminder is still scheduled, Off when none are left to send. Global Off (no enabled invoice reminder rows) shows every invoice as Off.</span></span></th>
                     <th scope="col" class="row-actions-cell">Actions</th>
                 </tr>
             </thead>
             <tbody id="invoiceRows"></tbody>
             <tfoot>
                 <tr class="totals-row">
-                    <td colspan="5"><span class="sr-only">Totals for invoices shown</span></td>
+                    <td colspan="5">Totals</td>
                     <td id="totalAmount">$0.00</td>
                     <td id="totalPaid">$0.00</td>
                     <td id="totalBalance">$0.00</td>
-                    <td colspan="2"></td>
+                    <td colspan="3"></td>
                 </tr>
             </tfoot>
         </table>
+    </div>
+</main>
+
+
+<!-- =====================
+     COMMAND CENTER (production Deal modal frame)
+     ===================== -->
+<main id="command-center-page" aria-label="Command Center">
+    <div class="cc-modal" role="group" aria-labelledby="ccTitle">
+        <div class="cc-head">
+            <h1 id="ccTitle">Harrison Project</h1>
+            <button class="modal-close-btn" onclick="switchPage('invoices-page')" aria-label="Close Command Center"><i class="ti ti-x" aria-hidden="true"></i></button>
+        </div>
+        <div class="cc-grid">
+            <div class="cc-left">
+                <div class="cc-label-link">+ add label</div>
+                <div class="cc-title">Harrison Project</div>
+                <div class="cc-muted">Proposal #3330640</div>
+                <div class="cc-muted">Created 24d ago</div>
+                <div class="cc-btn-row"><span class="cc-fake-btn">New Proposal</span><span class="cc-fake-btn">New Appt</span><span class="cc-fake-btn">Schedule Job</span></div>
+                <h2>Contact Information</h2>
+                <div class="cc-info-card">
+                    <b>Dripjobs Harrison</b><br>Special Event<br>jeremy+1@dripjobs.com (Primary)<br>(700) 555-0077 (Primary)<br>221 N Nashville Ave, Hernando, FL 34442
+                </div>
+                <div class="cc-btn-row"><span class="cc-fake-btn primary">Send Email</span><span class="cc-fake-btn">Request Review</span></div>
+                <div class="cc-kv"><span>Salesperson</span><span>Jeremy Harrison</span></div>
+                <div class="cc-kv"><span>Project Manager</span><span>Billy Loomis</span></div>
+                <h2>Job Info</h2>
+                <div class="cc-kv"><span>Crew Name</span><span>Johnny &amp; Sarah</span></div>
+                <div class="cc-kv"><span>Job Start Date</span><span>Not assigned</span></div>
+                <div class="cc-kv"><span>Job End Date</span><span>Not assigned</span></div>
+                <div class="cc-label-link" style="margin-top:6px;">View Work Order</div>
+                <h2>Financials</h2>
+                <div class="cc-kv"><span>Invoice Total</span><span>$6,389.54</span></div>
+                <div class="cc-kv"><span>Total Payments</span><span>$638.95</span></div>
+                <div class="cc-kv"><span>Amount Due</span><span>$5,750.59</span></div>
+                <div class="cc-kv"><span>Financing Status</span><span class="cc-chip">NOT INITIATED</span></div>
+            </div>
+            <div class="cc-right">
+                <div class="cc-stage-row">
+                    <span>Current Stage: <b>Project Accepted</b></span> <span class="cc-pill">Move</span>
+                    <span class="cc-div" aria-hidden="true"></span>
+                    <span>Current Sequence: <b>Proposal Accepted Sequence</b></span> <span class="cc-pill">Change</span>
+                    <span class="cc-updated">Updated 2d ago</span>
+                </div>
+                <div class="cc-drips"><span>No Drips Left</span><span class="cc-fake-switch">Disable drips <i aria-hidden="true"></i></span></div>
+                <div class="cc-tabs" role="tablist" aria-label="Deal sections">
+                    <button type="button" role="tab" class="cc-tab" style="background:#E8E6FA;" aria-selected="false" aria-disabled="true" tabindex="-1">Chat</button>
+                    <button type="button" role="tab" class="cc-tab" style="background:#E6F3FA;" aria-selected="false" aria-disabled="true" tabindex="-1">Jobi AI<span class="dot" aria-hidden="true"></span></button>
+                    <button type="button" role="tab" class="cc-tab" style="background:#E6FAF0;" aria-selected="false" aria-disabled="true" tabindex="-1">Proposals / Jobs</button>
+                    <button type="button" role="tab" class="cc-tab is-active" style="background:#FAF0E6;" id="cc-tab-inv" aria-selected="true" aria-controls="cc-panel-inv">Invoices / Payments</button>
+                    <button type="button" role="tab" class="cc-tab" style="background:#FAE6F0;" aria-selected="false" aria-disabled="true" tabindex="-1">Notes</button>
+                    <button type="button" role="tab" class="cc-tab" style="background:#FAF7E6;" aria-selected="false" aria-disabled="true" tabindex="-1">Attachments</button>
+                    <button type="button" role="tab" class="cc-tab" style="background:#F0FAE6;" aria-selected="false" aria-disabled="true" tabindex="-1">Tasks</button>
+                </div>
+                <div role="tabpanel" id="cc-panel-inv" aria-labelledby="cc-tab-inv"></div>
+            </div>
+        </div>
+        <div class="cc-foot"><button class="btn btn-outline-primary" onclick="switchPage('invoices-page')">Close</button></div>
     </div>
 </main>
 
@@ -614,10 +783,9 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                 <label class="void-field-label" for="voidReason">Reason <span class="opt">(optional)</span></label>
                 <textarea class="modal-textarea" id="voidReason" rows="3" placeholder="e.g. Duplicate invoice"></textarea>
                 <fieldset class="void-fieldset" id="voidJobCosting">
-                    <legend>Job costing records</legend>
-                    <p class="help">Applies to every invoice in this batch.</p>
-                    <label class="radio-row"><input type="radio" name="jcRecords" value="keep" checked> Keep job costing records</label>
-                    <label class="radio-row"><input type="radio" name="jcRecords" value="delete"> Delete job costing records</label>
+                    <legend>Job costing records for these invoices</legend>
+                    <label class="radio-row"><input type="radio" name="jcRecords" value="keep" checked> Keep records</label>
+                    <label class="radio-row"><input type="radio" name="jcRecords" value="delete"> Delete records</label>
                 </fieldset>
             </div>
             <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">BR-25 <span class="br-tooltip">BR-25 Bulk Void: existing Void confirm + optional reason; invoices with payments logged are skipped with a count; with Job Costing on, ask once per batch, default Keep.</span></span>
@@ -625,6 +793,43 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
         <div class="edit-modal-footer">
             <button class="btn btn-outline-primary btn-sm" onclick="closeVoidModal()">Cancel</button>
             <button class="btn btn-danger btn-sm" id="voidConfirmBtn" onclick="confirmVoid()">Void Invoices</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Global off confirm (last enabled invoice reminder) -->
+<div class="modal-overlay page-modal" id="offOverlay">
+    <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="offTitle" aria-describedby="offBody">
+        <div class="edit-modal-header">
+            <h2 id="offTitle">Turn off invoice reminders?</h2>
+            <button class="modal-close-btn" onclick="closeOffModal()" aria-label="Close"><i class="ti ti-x" aria-hidden="true"></i></button>
+        </div>
+        <div class="edit-modal-body">
+            <div class="settings-alert settings-alert--warn" style="margin-bottom:0;"><i class="ti ti-alert-triangle" aria-hidden="true"></i><div id="offBody">Turning off every invoice reminder stops scheduled reminders on all invoices. To start them again, send each invoice with Invoice Reminders turned on.</div></div>
+            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">BR-27 <span class="br-tooltip">BR-27: when the last enabled invoice reminder is turned off, invoice reminders are off for every invoice. Wording pending TJ: behavior when reminders are turned back on.</span></span>
+        </div>
+        <div class="edit-modal-footer">
+            <button class="btn btn-outline-primary btn-sm" id="offCancelBtn" onclick="closeOffModal()">Cancel</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmOff()">Turn Off Reminders</button>
+        </div>
+    </div>
+</div>
+
+<!-- Disable Reminders confirm (single and bulk) -->
+<div class="modal-overlay page-modal" id="disableOverlay">
+    <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="disableTitle" aria-describedby="disableBody">
+        <div class="edit-modal-header">
+            <h2 id="disableTitle">Disable reminders on this invoice?</h2>
+            <button class="modal-close-btn" onclick="closeDisableModal()" aria-label="Close"><i class="ti ti-x" aria-hidden="true"></i></button>
+        </div>
+        <div class="edit-modal-body">
+            <p class="void-summary" id="disableBody"></p>
+            <span class="br-chip br-annot" tabindex="0">BR-36 · BR-37 <span class="br-tooltip">BR-36: Disable Reminders ends the cadence on the invoice (row View menu) or on each selected invoice that has reminders on (bulk). BR-37: the same single-invoice action is available from the Command Center.</span></span>
+        </div>
+        <div class="edit-modal-footer">
+            <button class="btn btn-outline-primary btn-sm" id="disableCancelBtn" onclick="closeDisableModal()">Cancel</button>
+            <button class="btn btn-danger btn-sm" id="disableConfirmBtn" onclick="confirmDisable()">Disable Reminders</button>
         </div>
     </div>
 </div>
@@ -671,19 +876,34 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                 </div>
             </div>
             <div class="comm-card" id="commReminderCard" hidden>
-                <div class="reminder-toggle-row">
-                    <button type="button" class="reminder-switch" id="commReminderSwitch" role="switch" aria-checked="true" onclick="toggleCommReminder(this)">
-                        <span class="switch-track" aria-hidden="true"></span>
-                        <span>Invoice Reminders</span>
-                        <span class="switch-state" id="commReminderState" aria-hidden="true">On</span>
-                    </button>
-                    <span class="br-chip br-annot" tabindex="0">BR-27 to BR-33 <span class="br-tooltip">BR-27: Invoice Reminders is ON when at least one Email or SMS row is enabled in Settings > Reminders. BR-28: sending an Invoice or Payment Request starts a reminder cadence. BR-29: one toggle covers Email and SMS; shown and ON by default only when Invoice Reminders is ON, otherwise not shown; closing without sending changes nothing. BR-14 still applies: no due date, no toggle. The toggle is also not shown for Paid invoices. BR-30: latest send replaces the cadence; sending with the toggle OFF ends it. BR-31: cancelling or deleting the request that started the cadence ends it. BR-32: Paid or Voided ends it. BR-33: no other per-invoice reminder controls.</span></span>
+                <div id="commStartRow">
+                    <div class="reminder-toggle-row">
+                        <button type="button" class="reminder-switch" id="commReminderSwitch" role="switch" aria-checked="true" aria-describedby="commStartHelp" onclick="toggleCommReminder(this)">
+                            <span class="switch-track" aria-hidden="true"></span>
+                            <span>Invoice Reminders</span>
+                            <span class="switch-state" aria-hidden="true">On</span>
+                        </button>
+                        <span class="br-chip br-annot" tabindex="0">BR-28 to BR-30 · BR-34 <span class="br-tooltip">BR-28: sending an Invoice or Payment Request starts a reminder cadence; a scheduled send leaves reminders unchanged until it sends. BR-29: one toggle covers Email and SMS; shown (ON) only when invoice reminders are set up and enabled, the invoice has a due date (BR-14), and it is not Paid; closing without sending changes nothing. BR-30: latest send replaces the cadence; sending with the toggle OFF ends it. BR-34: Request Payment never replaces a cadence; with reminders already running it offers Keep invoice reminders instead.</span></span>
+                    </div>
+                    <p class="reminder-toggle-help" id="commStartHelp">Send automatic reminders based on this invoice's due date.</p>
+                </div>
+                <div id="commNotice" aria-live="polite"></div>
+                <div id="commKeepRow" hidden>
+                    <div class="settings-alert settings-alert--info" style="margin:0 0 6px;"><i class="ti ti-info-circle" aria-hidden="true"></i><div id="commKeepAlertText"></div></div>
+                    <div class="reminder-toggle-row">
+                        <button type="button" class="reminder-switch" id="commKeepSwitch" role="switch" aria-checked="true" aria-describedby="commKeepHelp" onclick="toggleCommReminder(this)">
+                            <span class="switch-track" aria-hidden="true"></span>
+                            <span>Keep invoice reminders</span>
+                            <span class="switch-state" aria-hidden="true">On</span>
+                        </button>
+                    </div>
+                    <p class="reminder-toggle-help" id="commKeepHelp" aria-live="polite"></p>
                 </div>
             </div>
             <div class="comm-card" id="commSendOnCard">
                 <div class="fl-field">
                     <label for="commSendOn">Send On</label>
-                    <select id="commSendOn">
+                    <select id="commSendOn" onchange="updateCommNotice()">
                         <option value="now">Now</option>
                         <option value="t9">Tomorrow at 9:00 AM</option>
                         <option value="t11">Tomorrow at 11:00 AM</option>
@@ -719,7 +939,7 @@ function toggleDemo(btn) { btn.setAttribute('aria-checked', btn.getAttribute('ar
 function jobCostingOn() { return $('demoJobCosting').getAttribute('aria-checked') === 'true'; }
 
 function switchPage(pageId) {
-    document.querySelectorAll('#reminders-page, #invoices-page').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('#reminders-page, #invoices-page, #command-center-page').forEach(function(p) { p.classList.remove('active'); });
     $(pageId).classList.add('active');
     document.querySelectorAll('.demo-nav-btn').forEach(function(b) {
         var on = b.dataset.page === pageId;
@@ -731,24 +951,27 @@ function switchPage(pageId) {
 }
 
 // ---------- Modal focus management ----------
-var lastFocus = null;
+var focusStack = [];
 function focusables(root) {
     return Array.prototype.filter.call(root.querySelectorAll('button, [href], input, select, textarea, [contenteditable="true"], [tabindex]:not([tabindex="-1"])'),
-        function(el){ return !el.disabled && el.offsetParent !== null; });
+        function(el){ return !el.disabled && el.getAttribute('aria-disabled') !== 'true' && el.offsetParent !== null; });
 }
 function openOverlay(overlay, firstEl) {
-    lastFocus = document.activeElement;
+    focusStack.push(document.activeElement);
     overlay.classList.add('is-open');
     setTimeout(function(){ (firstEl || focusables(overlay)[0]).focus(); }, 20);
 }
-function closeOverlay(overlay) {
+function closeOverlay(overlay, skipFocus) {
     overlay.classList.remove('is-open');
-    if (lastFocus && document.body.contains(lastFocus)) lastFocus.focus();
+    var f = focusStack.pop();
+    if (!skipFocus && f && document.body.contains(f)) f.focus();
 }
+var OVERLAY_CLOSERS = { voidOverlay: 'closeVoidModal', commOverlay: 'closeCommModal', disableOverlay: 'closeDisableModal', offOverlay: 'closeOffModal', modalOverlay: 'closeEditModal' };
 document.addEventListener('keydown', function(e) {
-    var open = document.querySelector('.modal-overlay.is-open');
-    if (!open) return;
-    if (e.key === 'Escape') { e.preventDefault(); if (open.id === 'voidOverlay') closeVoidModal(); else if (open.id === 'commOverlay') closeCommModal(); else closeEditModal(); return; }
+    var openList = document.querySelectorAll('.modal-overlay.is-open');
+    if (!openList.length) return;
+    var open = openList[openList.length - 1]; // topmost (later in DOM)
+    if (e.key === 'Escape') { e.preventDefault(); window[OVERLAY_CLOSERS[open.id]](); return; }
     if (e.key === 'Tab') {
         var f = focusables(open); if (!f.length) return;
         var first = f[0], last = f[f.length - 1];
@@ -756,25 +979,37 @@ document.addEventListener('keydown', function(e) {
         else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
 });
+// Info tooltips: Esc dismisses until the pointer or focus leaves
+document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Escape') return;
+    var w = (document.activeElement && document.activeElement.closest('.info-tip-wrap')) || document.querySelector('.info-tip-wrap:hover');
+    if (w) w.classList.add('tip-dismissed');
+});
+function clearTipDismissed() { document.querySelectorAll('.info-tip-wrap.tip-dismissed').forEach(function(w){ if (!w.matches(':hover') && !w.contains(document.activeElement)) w.classList.remove('tip-dismissed'); }); }
+document.addEventListener('mouseout', clearTipDismissed);
+document.addEventListener('focusout', function() { setTimeout(clearTipDismissed, 0); });
 
 // =====================================================
 // REMINDERS PAGE: invoice reminder rows (BR-1..BR-9)
 // =====================================================
 var MAX_ROWS = 5; // BR-6, per delivery type
 var nextRowId = 100;
-var invoiceReminders = {
-    // BR-7 defaults + one custom row (demonstrates Month(s) and the 5-row cap)
-    email: [
-        { id: 1, mode: 'before', n: 3, unit: 'Day(s)',   enabled: true,  custom: false },
-        { id: 2, mode: 'on',     n: null, unit: null,     enabled: true,  custom: false },
-        { id: 3, mode: 'after',  n: 3, unit: 'Day(s)',   enabled: true,  custom: false },
-        { id: 4, mode: 'after',  n: 1, unit: 'Month(s)', enabled: false, custom: true }
-    ],
-    sms: [
-        { id: 5, mode: 'before', n: 3, unit: 'Day(s)', enabled: false, custom: false },
-        { id: 6, mode: 'on',     n: null, unit: null,   enabled: false, custom: false }
-    ]
-};
+var invoiceRemindersSetUp = true; // BR-7: opt-in setup; demo switch resets to the empty state
+function defaultReminders() {
+    // BR-7 defaults
+    return {
+        email: [
+            { id: 1, mode: 'before', n: 3,    unit: 'Day(s)', enabled: true,  custom: false },
+            { id: 2, mode: 'on',     n: null, unit: null,     enabled: true,  custom: false },
+            { id: 3, mode: 'after',  n: 3,    unit: 'Day(s)', enabled: true,  custom: false }
+        ],
+        sms: [
+            { id: 5, mode: 'before', n: 3,    unit: 'Day(s)', enabled: false, custom: false },
+            { id: 6, mode: 'on',     n: null, unit: null,     enabled: false, custom: false }
+        ]
+    };
+}
+var invoiceReminders = defaultReminders();
 var TYPE_LABEL = { email: 'email', sms: 'SMS' };
 
 function rowText(r) {
@@ -802,39 +1037,60 @@ function renderReminderRows(type) {
     $('rows-' + type).innerHTML = html;
 
     var atLimit = list.length >= MAX_ROWS;
-    var left = MAX_ROWS - list.length;
     var helperId = 'add-help-' + type;
-    var helper = atLimit
-        ? 'Maximum of ' + MAX_ROWS + ' ' + TYPE_LABEL[type] + ' reminders reached. Edit or disable an existing reminder to change your schedule.'
-        : list.length + ' of ' + MAX_ROWS + ' ' + TYPE_LABEL[type] + ' reminders used. You can add ' + left + ' more.';
     $('add-' + type).innerHTML =
-        '<button class="add-reminder-btn" aria-describedby="' + helperId + '"' + (atLimit ? ' aria-disabled="true"' : '')
+        '<button class="add-reminder-btn"' + (atLimit ? ' aria-describedby="' + helperId + '" aria-disabled="true"' : '')
         + ' onclick="addReminder(\'' + type + '\', this)"><i class="ti ti-plus" aria-hidden="true"></i>Add Reminder</button>'
-        + '<span class="add-reminder-helper' + (atLimit ? ' at-limit' : '') + '" id="' + helperId + '">' + helper + '</span>'
+        + (atLimit ? '<span class="add-reminder-helper at-limit" id="' + helperId + '">You can add up to ' + MAX_ROWS + ' ' + TYPE_LABEL[type] + ' reminders.</span>' : '')
         + (type === 'email' ? ' <span class="br-chip br-annot" tabindex="0">BR-6 <span class="br-tooltip">BR-6: up to 5 rows per delivery type (Email and SMS counted independently). At the limit the button stays focusable but is unavailable, with the reason stated.</span></span>' : '');
+}
+
+// BR-7: setup empty state vs rows
+function renderInvoiceSection() {
+    $('invSetup').hidden = invoiceRemindersSetUp;
+    $('invBlocks').hidden = !invoiceRemindersSetUp;
+    $('invHelper').hidden = !invoiceRemindersSetUp;
+    renderReminderRows('email');
+    renderReminderRows('sms');
+}
+function enableInvoiceReminders() {
+    invoiceReminders = defaultReminders();
+    invoiceRemindersSetUp = true;
+    $('demoSetUp').setAttribute('aria-checked', 'true');
+    renderInvoiceSection();
+    renderAll();
+    var first = $('rows-email').querySelector('.edit-btn'); if (first) first.focus();
+    showToast('Invoice reminders enabled with the default schedule.');
+}
+function setInvoiceRemindersSetUp(on) {
+    if (on) invoiceReminders = defaultReminders();
+    invoiceRemindersSetUp = on;
+    renderInvoiceSection();
+    renderAll();
 }
 
 // ---------- Edit / Add modal ----------
 var EMAIL_DEFAULTS = {
     before: {
         subject: 'Reminder - Invoice #{invoice-number} from {company-name}',
-        body: 'Hi, {first-name}!\n\nThis is a friendly reminder that invoice #{invoice-number} from {company-name} is due on {due-date}.\n\nPlease find the details below:\n\nInvoice Amount: {invoice-amount}\nBalance Due: {balance-due}\n\nYou can view and pay your invoice online here:\n{invoice-link}\n\nIf you have any questions, please text or call {company-phone}. Thank you!'
+        body: "Hi, {first-name}!\n\nThis is a friendly reminder that invoice #{invoice-number} from {company-name} is due on {due-date}.\n\nInvoice Amount: {invoice-amount}\nBalance Due: {balance-due}\n\nYou can view and pay your invoice online here: {invoice-link}\n\nIf you've already paid this balance, please disregard this reminder. Questions? Text or call {company-phone}.\n\nThank you!"
     },
     on: {
-        subject: 'Your Invoice #{invoice-number} Is Due Today',
-        body: 'Hi, {first-name}!\n\nJust a quick note that invoice #{invoice-number} from {company-name} is due today.\n\nBalance Due: {balance-due}\n\nPay now at your convenience:\n{invoice-link}\n\nQuestions? Text or call {company-phone}. Thank you!'
+        subject: 'Invoice #{invoice-number} from {company-name} is due today',
+        body: "Hi, {first-name}!\n\nJust a quick note that invoice #{invoice-number} from {company-name} is due today.\n\nBalance Due: {balance-due}\n\nPay now at your convenience: {invoice-link}\n\nIf you've already paid this balance, please disregard this reminder. Questions? Text or call {company-phone}.\n\nThank you!"
     },
     after: {
         subject: 'Past Due - Invoice #{invoice-number} from {company-name}',
-        body: 'Hi, {first-name}!\n\nThis is a reminder that invoice #{invoice-number} from {company-name} is now past due.\n\nBalance Due: {balance-due}\n\nPlease pay at your earliest convenience:\n{invoice-link}\n\nIf you have any questions, please text or call {company-phone}. Thank you!'
+        body: "Hi, {first-name}!\n\nThis is a reminder that invoice #{invoice-number} from {company-name} is now past due.\n\nBalance Due: {balance-due}\n\nPlease pay at your earliest convenience: {invoice-link}\n\nIf you've already paid this balance, please disregard this reminder. Questions? Text or call {company-phone}.\n\nThank you!"
     }
 };
 var SMS_DEFAULTS = {
-    before: 'Hi, {first-name}! Reminder: Invoice #{invoice-number} for {balance-due} from {company-name} is due on {due-date}. Pay here: {invoice-link}. Questions? Call {company-phone}.',
-    on:     'Hi, {first-name}! Your invoice #{invoice-number} for {balance-due} from {company-name} is due today. Pay here: {invoice-link}. Questions? Call {company-phone}.',
-    after:  'Hi, {first-name}! Your invoice #{invoice-number} for {balance-due} from {company-name} is past due. Please pay at your earliest convenience: {invoice-link}. Questions? Call {company-phone}.'
+    before: "Hi, {first-name}! Reminder: invoice #{invoice-number} for {balance-due} from {company-name} is due on {due-date}. Pay here: {invoice-link} Already paid this balance? Please disregard. Questions? Call {company-phone}.",
+    on:     "Hi, {first-name}! Your invoice #{invoice-number} for {balance-due} from {company-name} is due today. Pay here: {invoice-link} Already paid this balance? Please disregard. Questions? Call {company-phone}.",
+    after:  "Hi, {first-name}! Your invoice #{invoice-number} for {balance-due} from {company-name} is past due. Please pay here: {invoice-link} Already paid this balance? Please disregard. Questions? Call {company-phone}."
 };
 var MODE_LABEL = { before: 'Before due date', on: 'On due date', after: 'After due date' };
+
 
 var currentDeliveryType = 'email';
 var currentTimingMode = 'before';
@@ -919,25 +1175,58 @@ function restoreDefault(field) {
     announce('Default copy restored.');
 }
 
-function hideIntervalError() { $('intervalError').classList.remove('show'); $('intervalNumber').removeAttribute('aria-invalid'); }
+function hideIntervalError() {
+    $('intervalError').classList.remove('show'); $('intervalNumber').removeAttribute('aria-invalid');
+    ['subjectError', 'bodyError', 'smsError'].forEach(function(id){ $(id).classList.remove('show'); });
+    ['subjectTemplate', 'emailBodyArea', 'smsBodyArea'].forEach(function(id){ $(id).removeAttribute('aria-invalid'); });
+}
+// A3: blank template fields block the save with an inline error
+function templateErrors() {
+    var fields = currentDeliveryType === 'email'
+        ? [['subjectTemplate', 'subjectError', function(){ return $('subjectTemplate').value; }], ['emailBodyArea', 'bodyError', function(){ return $('emailBodyArea').innerText; }]]
+        : [['smsBodyArea', 'smsError', function(){ return $('smsBodyArea').value; }]];
+    var bad = [];
+    fields.forEach(function(f) {
+        var blank = f[2]().trim() === '';
+        $(f[1]).classList.toggle('show', blank);
+        if (blank) { $(f[0]).setAttribute('aria-invalid', 'true'); bad.push($(f[0])); } else $(f[0]).removeAttribute('aria-invalid');
+    });
+    return bad;
+}
+['subjectTemplate', 'smsBodyArea'].forEach(function(id){ $(id).addEventListener('input', function(){ this.removeAttribute('aria-invalid'); $(id === 'subjectTemplate' ? 'subjectError' : 'smsError').classList.remove('show'); }); });
+$('emailBodyArea').addEventListener('input', function(){ this.removeAttribute('aria-invalid'); $('bodyError').classList.remove('show'); });
 
 function closeEditModal() { closeOverlay($('modalOverlay')); }
 
+var pendingSave = null;
+function enabledCountAfter(p) {
+    var total = invoiceReminders.email.concat(invoiceReminders.sms).filter(function(r){ return r.enabled; }).length;
+    if (editingRowId === null) return total + (p.enabled ? 1 : 0);
+    var row = invoiceReminders[currentDeliveryType].filter(function(x){ return x.id === editingRowId; })[0];
+    return total - (row.enabled ? 1 : 0) + (p.enabled ? 1 : 0);
+}
 function saveEditModal() {
-    var mode = currentTimingMode;
-    var n = null, unit = null;
+    var mode = currentTimingMode, n = null, unit = null, bad = [];
     if (mode !== 'on') {
         var raw = $('intervalNumber').value.trim();
         n = Number(raw);
         if (raw === '' || !Number.isInteger(n) || n < 1) {
             $('intervalError').classList.add('show');
             $('intervalNumber').setAttribute('aria-invalid', 'true');
-            $('intervalNumber').focus();
-            return;
-        }
-        unit = $('intervalUnit').value;
+            bad.push($('intervalNumber'));
+        } else { unit = $('intervalUnit').value; }
     }
-    var enabled = $('enabledSwitch').getAttribute('aria-checked') === 'true';
+    bad = bad.concat(templateErrors());
+    if (bad.length) { bad[0].focus(); return; }
+    pendingSave = { mode: mode, n: n, unit: unit, enabled: $('enabledSwitch').getAttribute('aria-checked') === 'true' };
+    // A2 (BR-27): saving would turn off the last enabled invoice reminder
+    if (anyEnabledRows() && enabledCountAfter(pendingSave) === 0) { openOverlay($('offOverlay'), $('offCancelBtn')); return; }
+    commitSave();
+}
+function closeOffModal() { closeOverlay($('offOverlay')); }
+function confirmOff() { closeOverlay($('offOverlay'), true); commitSave(); }
+function commitSave() {
+    var p = pendingSave, mode = p.mode, n = p.n, unit = p.unit, enabled = p.enabled;
     var list = invoiceReminders[currentDeliveryType];
     var wasAdd = editingRowId === null;
     var row;
@@ -949,11 +1238,12 @@ function saveEditModal() {
         row.mode = mode; row.n = n; row.unit = unit; row.enabled = enabled;
     }
     renderReminderRows(currentDeliveryType);
-    closeOverlay($('modalOverlay'));
-    // Return focus to the row's Edit button (or Add button if at limit) so keyboard users keep their place
+    closeOverlay($('modalOverlay'), true);
+    // Return focus to the row's Edit button so keyboard users keep their place
     var btns = $('rows-' + currentDeliveryType).querySelectorAll('.edit-btn');
     var idx = list.indexOf(row);
     if (btns[idx]) btns[idx].focus();
+    renderAll();
     showToast((wasAdd ? 'Reminder added: ' : 'Reminder saved: ') + TYPE_LABEL[currentDeliveryType] + ', ' + rowPlain(row) + ' (' + (enabled ? 'Enabled' : 'Disabled') + ').');
 }
 
@@ -976,27 +1266,28 @@ var STATUS = {
     VOIDED:  { label: 'Voided',         cls: 'voided' }
 };
 var SYNC = {
-    'synced':     { label: 'SYNCED',     icon: 'ti-check' },
-    'not-synced': { label: 'NOT SYNCED', icon: 'ti-clock' },
-    'failed':     { label: 'FAILED',     icon: 'ti-alert-triangle' }
+    'synced':     { label: 'Synced',      icon: 'ti-check',          tip: 'Synced to QuickBooks' },
+    'not-synced': { label: 'Not synced',  icon: 'ti-clock',          tip: 'Not synced to QuickBooks yet' },
+    'failed':     { label: 'Sync failed', icon: 'ti-alert-triangle', tip: 'Couldn\'t sync to QuickBooks' }
 };
 
 var invoices = [
-    {id:1,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Invoice Only',      invoiceNo:'#469276', status:'OPEN',    sync:'synced',     amountN:545.50,   paidN:0,      date:'6/26/2026', dueDate:'7/26/2026', paymentRequest:true, cadence:'request'},
-    {id:2,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2977254', invoiceNo:'#464186', status:'PARTIAL', sync:'synced',     amountN:2631.81,  paidN:100,    date:'6/18/2026', dueDate:'7/18/2026'},
-    {id:3,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2901988', invoiceNo:'#456981', status:'OPEN',    sync:'synced',     amountN:87026.12, paidN:0,      date:'6/8/2026',  dueDate:null},
-    {id:4,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920059', invoiceNo:'#453093', status:'OPEN',    sync:'not-synced', amountN:4103.31,  paidN:0,      date:'6/2/2026',  dueDate:'7/2/2026', paymentRequest:true, cadence:'request'},
-    {id:5,  initials:'TB', customer:'TJ Bennett',        proposal:'Invoice Only',      invoiceNo:'#453092', status:'OPEN',    sync:'not-synced', amountN:327.30,   paidN:0,      date:'6/2/2026',  dueDate:'7/2/2026'},
-    {id:6,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920038', invoiceNo:'#453090', status:'OPEN',    sync:'failed',     amountN:3273.00,  paidN:0,      date:'6/2/2026',  dueDate:'7/2/2026'},
-    {id:7,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2919942', invoiceNo:'#453085', status:'PAID',    sync:'synced',     amountN:3000.00,  paidN:3000,   date:'6/2/2026',  dueDate:'7/2/2026'},
-    {id:8,  initials:'AS', customer:'Arya Stark',        proposal:'Proposal #2575454', invoiceNo:'#429554', status:'OPEN',    sync:'not-synced', amountN:9566.99,  paidN:0,      date:'4/28/2026', dueDate:'5/28/2026'},
-    {id:9,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2663851', invoiceNo:'#423060', status:'OPEN',    sync:'not-synced', amountN:901.00,   paidN:0,      date:'4/20/2026', dueDate:'5/20/2026'},
-    {id:10, initials:'AB', customer:'Aaron Blankfields', proposal:'Proposal #2679536', invoiceNo:'#419330', status:'OPEN',    sync:'synced',     amountN:21.00,    paidN:0,      date:'4/14/2026', dueDate:null},
-    {id:11, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2700220', invoiceNo:'#417520', status:'PARTIAL', sync:'failed',     amountN:2000.00,  paidN:500,    date:'4/10/2026', dueDate:'5/10/2026'},
-    {id:12, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2700136', invoiceNo:'#417501', status:'OPEN',    sync:'not-synced', amountN:2500.00,  paidN:0,      date:'4/10/2026', dueDate:'5/10/2026'},
-    {id:13, initials:'DS', customer:'Dana Scully',       proposal:'Proposal #2544066', invoiceNo:'#414859', status:'VOIDED',  sync:'not-synced', amountN:2000.00,  paidN:0,      date:'4/7/2026',  dueDate:'5/7/2026'},
-    {id:14, initials:'AB', customer:'Al Bundy',          proposal:'Invoice Only',      invoiceNo:'#414852', status:'OPEN',    sync:'not-synced', amountN:5000.00,  paidN:0,      date:'4/7/2026',  dueDate:'5/7/2026'},
-    {id:15, initials:'JB', customer:'James Bond',        proposal:'Proposal #2679119', invoiceNo:'#007',    status:'OPEN',    sync:'not-synced', amountN:4387.39,  paidN:0,      date:'4/6/2026',  dueDate:'5/6/2026'}
+    {id:1,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Invoice Only',      invoiceNo:'#469276', status:'OPEN',    sync:'synced',     amountN:545.50,   paidN:0,      date:'6/26/2026', dueDate:'10/26/2026', paymentRequest:true,  cadence:{source:'request', next:{date:'Oct 14, 2026', channel:'SMS'}}, history:[]},
+    {id:2,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2977254', invoiceNo:'#464186', status:'PARTIAL', sync:'synced',     amountN:2631.81,  paidN:100,    date:'6/18/2026', dueDate:'10/30/2026', paymentRequest:false, cadence:{source:'send', next:{date:'Oct 19, 2026', channel:'email and SMS'}}, history:[{date:'Sep 29, 2026', time:'8:00 AM', channel:'email'},{date:'Oct 2, 2026', time:'8:00 AM', channel:'SMS'}]},
+    {id:3,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2901988', invoiceNo:'#456981', status:'OPEN',    sync:'synced',     amountN:87026.12, paidN:0,      date:'6/8/2026',  dueDate:null,         paymentRequest:false, cadence:null, history:[]},
+    {id:4,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920059', invoiceNo:'#453093', status:'OPEN',    sync:'not-synced', amountN:4103.31,  paidN:0,      date:'6/2/2026',  dueDate:'11/2/2026',  paymentRequest:true,  cadence:{source:'request', next:{date:'Oct 22, 2026', channel:'email'}}, history:[{date:'Oct 1, 2026', time:'8:00 AM', channel:'email'}]},
+    {id:5,  initials:'TB', customer:'TJ Bennett',        proposal:'Invoice Only',      invoiceNo:'#453092', status:'OPEN',    sync:'not-synced', amountN:327.30,   paidN:0,      date:'6/2/2026',  dueDate:'7/2/2026',   paymentRequest:false, cadence:null, history:[]},
+    {id:6,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920038', invoiceNo:'#453090', status:'OPEN',    sync:'failed',     amountN:3273.00,  paidN:0,      date:'6/2/2026',  dueDate:'11/9/2026',  paymentRequest:false, cadence:{source:'send', next:{date:'Nov 2, 2026', channel:'SMS'}}, history:[{date:'Sep 30, 2026', time:'8:00 AM', channel:'SMS'}]},
+    {id:7,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2919942', invoiceNo:'#453085', status:'PAID',    sync:'synced',     amountN:3000.00,  paidN:3000,   date:'6/2/2026',  dueDate:'7/2/2026',   paymentRequest:false, cadence:null, history:[]},
+    {id:8,  initials:'AS', customer:'Arya Stark',        proposal:'Proposal #2575454', invoiceNo:'#429554', status:'OPEN',    sync:'not-synced', amountN:9566.99,  paidN:0,      date:'4/28/2026', dueDate:'5/28/2026',  paymentRequest:false, cadence:null, history:[]},
+    {id:9,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2663851', invoiceNo:'#423060', status:'OPEN',    sync:'not-synced', amountN:901.00,   paidN:0,      date:'4/20/2026', dueDate:'5/20/2026',  paymentRequest:false, cadence:null, history:[]},
+    {id:10, initials:'AB', customer:'Aaron Blankfields', proposal:'Proposal #2679536', invoiceNo:'#419330', status:'OPEN',    sync:'synced',     amountN:21.00,    paidN:0,      date:'4/14/2026', dueDate:null,         paymentRequest:false, cadence:null, history:[]},
+    {id:11, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2700220', invoiceNo:'#417520', status:'PARTIAL', sync:'failed',     amountN:2000.00,  paidN:500,    date:'4/10/2026', dueDate:'5/10/2026',  paymentRequest:false, cadence:null, history:[]},
+    {id:12, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2700136', invoiceNo:'#417501', status:'OPEN',    sync:'not-synced', amountN:2500.00,  paidN:0,      date:'4/10/2026', dueDate:'11/15/2026', paymentRequest:false, cadence:null, history:[]},
+    {id:13, initials:'DS', customer:'Dana Scully',       proposal:'Proposal #2544066', invoiceNo:'#414859', status:'VOIDED',  sync:'not-synced', amountN:2000.00,  paidN:0,      date:'4/7/2026',  dueDate:'5/7/2026',   paymentRequest:false, cadence:null, history:[]},
+    {id:14, initials:'AB', customer:'Al Bundy',          proposal:'Invoice Only',      invoiceNo:'#414852', status:'OPEN',    sync:'not-synced', amountN:5000.00,  paidN:0,      date:'4/7/2026',  dueDate:'5/7/2026',   paymentRequest:false, cadence:null, history:[]},
+    {id:15, initials:'JB', customer:'James Bond',        proposal:'Proposal #2679119', invoiceNo:'#007',    status:'OPEN',    sync:'not-synced', amountN:4387.39,  paidN:0,      date:'4/6/2026',  dueDate:'5/6/2026',   paymentRequest:false, cadence:null, history:[]},
+    {id:16, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #3330640', invoiceNo:'#531224', status:'PARTIAL', sync:'synced',     amountN:6389.54,  paidN:638.95, date:'10/3/2026', dueDate:'11/3/2026',  paymentRequest:false, cadence:{source:'send', next:{date:'Oct 12, 2026', channel:'email'}}, history:[{date:'Oct 12, 2026', time:'8:00 AM', channel:'email'}]}
 ];
 // Balance is derived; voided invoices carry $0 balance (prototype assumption, flagged)
 function balanceOf(inv) { return inv.status === 'VOIDED' ? 0 : Math.max(0, inv.amountN - inv.paidN); }
@@ -1005,6 +1296,17 @@ function byId(id) { return invoices.filter(function(i){ return i.id === id; })[0
 // BR-27: Invoice Reminders is ON when at least one Email or SMS row is enabled in Settings > Reminders
 function anyEnabledRows() {
     return invoiceReminders.email.some(function(r){ return r.enabled; }) || invoiceReminders.sms.some(function(r){ return r.enabled; });
+}
+
+// BR-35: Reminders column state. Global OFF (or not set up) shows every invoice as Off (BR-27)
+function hasActiveCadence(inv) {
+    return !!inv.cadence && anyEnabledRows() && invoiceRemindersSetUp;
+}
+function selectedIds() { return selectedInvoices().map(function(i){ return i.id; }); }
+function reminderCell(inv) {
+    return hasActiveCadence(inv)
+        ? '<span class="reminder-state-chip"><i class="ti ti-bell" aria-hidden="true"></i>On</span>'
+        : '<span class="reminder-off">Off</span>';
 }
 
 var tbody = $('invoiceRows');
@@ -1029,11 +1331,12 @@ function buildRow(inv) {
         + '<td class="proposal-link">' + esc(inv.proposal) + '</td>'
         + '<td class="invoice-cell"><span class="invoice-no">' + esc(inv.invoiceNo) + '</span> '
         + '<span class="status-chip ' + s.cls + '" style="margin-left:6px;">' + s.label + '</span>'
-        + '<span class="sync-chip ' + inv.sync + '"><i class="ti ' + sy.icon + '" aria-hidden="true"></i><span class="sr-only">QuickBooks: </span>' + sy.label + '</span></td>'
+        + '<span class="sync-chip ' + inv.sync + '" title="' + esc(sy.tip) + '"><i class="ti ' + sy.icon + '" aria-hidden="true"></i>' + sy.label + '<span class="sr-only">. ' + esc(sy.tip) + '</span></span></td>'
         + '<td>' + fmt(inv.amountN) + '</td>'
         + '<td>' + fmt(inv.paidN) + '</td>'
         + '<td class="balance-amt">' + fmt(bal) + '</td>'
         + '<td>' + inv.date + '</td>'
+        + '<td>' + reminderCell(inv) + '</td>'
         + '<td class="row-actions-cell"><button class="btn btn-outline-primary btn-sm" id="menubtn-' + inv.id + '" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-' + inv.id + '" onclick="toggleMenu(' + inv.id + ', event)" onkeydown="menuBtnKey(' + inv.id + ', event)">View <i class="ti ti-chevron-down" style="margin-left:3px;" aria-hidden="true"></i><span class="sr-only"> actions for invoice ' + esc(inv.invoiceNo) + '</span></button>'
         + menuHtml(inv) + '</td>';
     return tr;
@@ -1142,7 +1445,7 @@ function renderAll() {
     tbody.innerHTML = '';
     if (!visible.length) {
         var empty = document.createElement('tr');
-        empty.innerHTML = '<td colspan="10" style="text-align:center;padding:28px;color:#5E6578;font-size:13px;"><strong style="display:block;color:#32415B;margin-bottom:4px;">No invoices match these filters</strong>Try a different search term or status, or select Clear to show all invoices.</td>';
+        empty.innerHTML = '<td colspan="11"><div class="no-results"><strong>No invoices match these filters</strong>Try a different search or status.<br><button type="button" class="btn btn-outline-primary" onclick="clearFilters(); $(\'filterSearch\').focus()">Clear Filters</button></div></td>';
         tbody.appendChild(empty);
     } else {
         visible.forEach(function(inv){ tbody.appendChild(buildRow(inv)); });
@@ -1165,6 +1468,7 @@ function renderAll() {
     var scope = $('statsScope');
     scope.firstChild.nodeValue = (filtersActive() ? 'Totals reflect the current filters. ' : 'Showing all invoices. ') + 'Unpaid includes Open and Partially Paid. ';
     updateBulkBar();
+    renderCommandCenter();
 }
 
 // ---- Selection + bulk bar (BR-25) ----
@@ -1202,16 +1506,6 @@ function clearSelection(returnFocus) {
 }
 function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
 
-function bulkMarkPaid() {
-    var sel = selectedInvoices();
-    var eligible = sel.filter(function(i){ return i.status === 'OPEN' || i.status === 'PARTIAL'; });
-    var skipped = sel.length - eligible.length;
-    eligible.forEach(function(i){ i.paidN = i.amountN; i.status = 'PAID'; });
-    clearSelection(false);
-    renderAll();
-    headerCheckbox.focus();
-    showToast('Marked ' + plural(eligible.length, 'invoice') + ' as paid.' + (skipped ? ' ' + skipped + ' skipped (already Paid or Voided).' : '') + ' Reminders stop for paid invoices.');
-}
 function bulkExport() {
     showToast('Exporting ' + plural(selectedInvoices().length, 'invoice') + ' (prototype only).');
 }
@@ -1225,16 +1519,15 @@ function openVoidModal() {
     voidEligible = sel.filter(function(i){ return i.status !== 'VOIDED' && i.paidN === 0; });
     var n = voidEligible.length;
 
-    $('voidTitle').textContent = n ? 'Void ' + plural(n, 'Invoice') + '?' : 'Can\u2019t Void Selected Invoices';
+    $('voidTitle').textContent = n ? 'Void ' + plural(n, 'Invoice') + '?' : 'These invoices can\u2019t be voided';
     $('voidSummary').innerHTML = n
         ? 'Voiding marks ' + (n === 1 ? 'this invoice' : 'these ' + n + ' invoices') + ' as Voided and stops any scheduled reminders.'
-        : 'None of the ' + plural(sel.length, 'selected invoice') + ' can be voided. Nothing has been changed.';
+        : (withPayments.length ? 'Invoices with payments logged can\u2019t be voided:' : 'These invoices are already voided.');
 
     var skipHtml = '';
     if (withPayments.length) {
         skipHtml += '<div class="settings-alert settings-alert--' + (n ? 'warn' : 'danger') + '"><i class="ti ti-alert-triangle" aria-hidden="true"></i><div>'
-            + '<div class="settings-alert-title">' + plural(withPayments.length, 'invoice') + ' will be skipped</div>'
-            + '<div>' + (withPayments.length === 1 ? 'It has' : 'They have') + ' payments logged, and invoices with payments can\u2019t be voided:</div>'
+            + (n ? '<div>' + withPayments.length + ' of these invoices have payments logged and can\u2019t be voided. They\u2019ll be skipped.</div>' : '')
             + '<ul class="skipped-list">' + withPayments.map(function(i){ return '<li>' + esc(i.invoiceNo) + ', ' + esc(i.customer) + ' (' + fmt(i.paidN) + ' paid)</li>'; }).join('') + '</ul></div></div>';
     }
     if (alreadyVoided.length) {
@@ -1260,7 +1553,7 @@ function confirmVoid() {
     var jc = jobCostingOn() ? document.querySelector('input[name="jcRecords"]:checked').value : null;
     voidEligible.forEach(function(i){ i.status = 'VOIDED'; });
     var n = voidEligible.length;
-    $('voidOverlay').classList.remove('is-open');
+    closeOverlay($('voidOverlay'), true);
     clearSelection(false);
     renderAll();
     headerCheckbox.focus();
@@ -1270,6 +1563,40 @@ function confirmVoid() {
 }
 $('voidOverlay').addEventListener('click', function(e) { if (e.target === this) closeVoidModal(); });
 
+
+// ---- Disable Reminders (BR-36, BR-37) ----
+var disableCtx = null;
+function plural1(n) { return n === 1 ? '1 invoice' : n + ' invoices'; }
+function openDisable(mode, ids, source) {
+    var on = ids.map(byId).filter(hasActiveCadence), n = on.length;
+    disableCtx = { mode: mode, ids: ids, source: source, on: on };
+    if (source === 'row') { closeMenus(false); var mb = $('menubtn-' + ids[0]); if (mb) mb.focus(); }
+    var title, body;
+    if (mode === 'bulk' && n === 0) { title = 'No reminders to disable'; body = 'None of the selected invoices have reminders on.'; }
+    else if (mode === 'bulk') {
+        title = 'Disable reminders on ' + plural1(n) + '?';
+        body = 'Upcoming reminders on these invoices will stop. Invoices that already have reminders off won’t change. To start reminders again, send the invoice or a payment request with Invoice Reminders turned on.';
+    } else {
+        title = 'Disable reminders on this invoice?';
+        body = 'Upcoming reminders on this invoice will stop. To start reminders again, send the invoice or a payment request with Invoice Reminders turned on.';
+    }
+    $('disableTitle').textContent = title; $('disableBody').textContent = body;
+    $('disableConfirmBtn').style.display = n ? '' : 'none';
+    $('disableCancelBtn').textContent = n ? 'Cancel' : 'Close';
+    openOverlay($('disableOverlay'), $('disableCancelBtn'));
+}
+function closeDisableModal() { closeOverlay($('disableOverlay')); }
+function confirmDisable() {
+    var c = disableCtx, n = c.on.length;
+    c.on.forEach(function(i){ i.cadence = null; }); // BR-36: history of sent reminders is kept
+    closeOverlay($('disableOverlay'), true);
+    if (c.mode === 'bulk') clearSelection(false);
+    renderAll();
+    showToast('Reminders disabled on ' + plural1(n) + '.');
+    if (c.mode === 'bulk') headerCheckbox.focus();
+    else if (c.source === 'row') { var b = $('menubtn-' + c.ids[0]); if (b) b.focus(); }
+    else { var h = $('cc-hist-' + c.ids[0]); if (h) h.focus(); }
+}
 
 // ---- Send Invoice / Request Payment modal (Item 3) ----
 // Company Settings > App Settings > Schedule Defaults > Custom Invoice Send Time (sample value in this prototype)
@@ -1282,16 +1609,49 @@ function commMenuItems(inv) {
     if (isUnpaid(inv)) {
         out += '<button role="menuitem" tabindex="-1" onclick="openComm(' + inv.id + ', \'request\')"><i class="ti ti-cash" aria-hidden="true"></i>Request Payment</button>';
         if (inv.paymentRequest) {
-            out += '<button role="menuitem" tabindex="-1" onclick="cancelPaymentRequest(' + inv.id + ')"><i class="ti ti-circle-x" aria-hidden="true"></i><span>Cancel Payment Request' + (inv.cadence === 'request' ? '<span class="menu-sub">Reminders for this invoice will stop</span>' : '') + '</span></button>';
+            out += '<button role="menuitem" tabindex="-1" onclick="cancelPaymentRequest(' + inv.id + ')"><i class="ti ti-circle-x" aria-hidden="true"></i>Cancel Payment Request</button>';
         }
+    }
+    if (hasActiveCadence(inv)) {
+        out += '<div class="menu-sep" role="separator"></div><div class="menu-group-label" aria-hidden="true">Reminders</div>'
+            + '<button role="menuitem" tabindex="-1" onclick="openDisable(\'single\', [' + inv.id + '], \'row\')"><i class="ti ti-bell-off" aria-hidden="true"></i>Disable Reminders</button>';
     }
     return out;
 }
 var commInvoiceId = null, commMode = 'send';
+function channelLabel() {
+    function en(r) { return r.enabled; }
+    var e = invoiceReminders.email.some(en), t = invoiceReminders.sms.some(en);
+    return e && t ? 'email and SMS' : (t ? 'SMS' : 'email');
+}
+// Sample next-reminder date: the prototype does not compute real schedules
+function newCadence(source) { return { source: source, next: { date: 'Oct 12, 2026', channel: channelLabel() } }; }
+function nextText(inv) { return 'Invoice reminders are on. Next reminder: ' + inv.cadence.next.date + ' by ' + inv.cadence.next.channel + '.'; }
+function alertHtml(kind, icon, text) {
+    return '<div class="settings-alert settings-alert--' + kind + '"><i class="ti ' + icon + '" aria-hidden="true"></i><div>' + text + '</div></div>';
+}
 function toggleCommReminder(sw) {
     var on = sw.getAttribute('aria-checked') !== 'true';
     sw.setAttribute('aria-checked', on ? 'true' : 'false');
-    $('commReminderState').textContent = on ? 'On' : 'Off';
+    sw.querySelector('.switch-state').textContent = on ? 'On' : 'Off';
+    updateCommNotice();
+}
+// BR-30 (Send) and BR-34 (Request, Keep) notices; both live regions announce on change
+function updateCommNotice() {
+    var inv = byId(commInvoiceId), html = '';
+    if (commMode === 'send' && !$('commStartRow').hidden && hasActiveCadence(inv)) {
+        var on = $('commReminderSwitch').getAttribute('aria-checked') === 'true', later = $('commSendOn').value !== 'now';
+        html = on
+            ? alertHtml('info', 'ti-info-circle', 'This invoice already has reminders scheduled. Sending restarts them from this send.' + (later ? ' Reminders restart when the invoice sends.' : ''))
+            : alertHtml('warn', 'ti-alert-triangle', 'Reminders already scheduled for this invoice will stop.');
+    }
+    $('commNotice').innerHTML = html;
+    if (!$('commKeepRow').hidden) {
+        var keep = $('commKeepSwitch').getAttribute('aria-checked') === 'true';
+        $('commKeepHelp').textContent = keep
+            ? 'Reminders keep their current schedule and ask for the full balance due, not this request\'s amount.'
+            : 'Upcoming reminders for this invoice stop when you send this request.';
+    }
 }
 function applyCommChannel() {
     var v = $('commChannel').value;
@@ -1323,51 +1683,103 @@ function openComm(id, mode) {
     $('commSendOnCustom').textContent = 'Tomorrow at ' + CUSTOM_INVOICE_SEND_TIME;
     $('commSendOn').value = 'now';
     $('commSendBtn').textContent = 'Send';
-    // BR-27 / BR-29 (with BR-14): toggle exists only when a reminder row is enabled and the invoice has a due date and is not Paid
-    var showToggle = anyEnabledRows() && !!inv.dueDate && inv.status !== 'PAID';
+    // BR-27 / BR-29 (with BR-14): toggle exists only when reminders are set up and enabled, the invoice has a due date, and it is not Paid
+    var showToggle = anyEnabledRows() && invoiceRemindersSetUp && !!inv.dueDate && inv.status !== 'PAID';
+    var keepMode = showToggle && isReq && hasActiveCadence(inv); // BR-34
     $('commReminderCard').hidden = !showToggle;
-    $('commReminderSwitch').setAttribute('aria-checked', 'true');
-    $('commReminderState').textContent = 'On';
+    $('commStartRow').hidden = keepMode;
+    $('commKeepRow').hidden = !keepMode;
+    [$('commReminderSwitch'), $('commKeepSwitch')].forEach(function(sw) { sw.setAttribute('aria-checked', 'true'); sw.querySelector('.switch-state').textContent = 'On'; });
+    if (keepMode) $('commKeepAlertText').textContent = nextText(inv);
+    updateCommNotice();
     applyCommChannel();
     $('commModalCard').querySelector('.edit-modal-body').scrollTop = 0;
     openOverlay($('commOverlay'), $('commChannel'));
 }
 function closeCommModal() { closeOverlay($('commOverlay')); }
 function submitComm() {
-    var inv = byId(commInvoiceId);
-    var shown = !$('commReminderCard').hidden, on = $('commReminderSwitch').getAttribute('aria-checked') === 'true';
-    // BR-28 / BR-30: a send starts a cadence and replaces any existing one; OFF (or no toggle) ends it
-    inv.cadence = shown && on ? (commMode === 'request' ? 'request' : 'send') : null;
-    if (commMode === 'request') inv.paymentRequest = true;
+    var inv = byId(commInvoiceId), isReq = commMode === 'request';
+    var shown = !$('commReminderCard').hidden, keepMode = !$('commKeepRow').hidden;
+    var startOn = $('commReminderSwitch').getAttribute('aria-checked') === 'true';
+    var keepOn = $('commKeepSwitch').getAttribute('aria-checked') === 'true';
+    var sendSel = $('commSendOn'), later = !isReq && sendSel.value !== 'now';
+    var when = later ? sendSel.options[sendSel.selectedIndex].text.replace('Tomorrow', 'tomorrow') : '';
+    var note = '';
+    if (isReq) {
+        // BR-34: a Request Payment never replaces a cadence
+        if (keepMode) { if (!keepOn) { inv.cadence = null; note = ' Reminders for this invoice have stopped.'; } }
+        else if (shown) { if (startOn) inv.cadence = newCadence('request'); note = startOn ? ' Reminders are on.' : ' Reminders are off.'; }
+        inv.paymentRequest = true;
+    } else if (!later) {
+        // BR-28 / BR-30: a send starts a cadence and replaces any existing one; OFF (or no toggle) ends it
+        inv.cadence = shown && startOn ? newCadence('send') : null;
+        if (shown) note = startOn ? ' Reminders are on.' : ' Reminders are off.';
+    } // a scheduled send leaves the cadence unchanged until it sends (BR-28)
     closeCommModal();
     renderAll();
     var b = $('menubtn-' + inv.id); if (b) b.focus();
-    var sendSel = $('commSendOn'), when = sendSel.value === 'now' ? '' : sendSel.options[sendSel.selectedIndex].text.replace('Tomorrow', 'tomorrow');
-    showToast((commMode === 'request' ? 'Payment request sent for invoice ' : 'Invoice ' ) + inv.invoiceNo + (commMode === 'request' ? '.' : (when ? ' scheduled to send ' + when + '.' : ' sent.'))
-        + (shown ? (on ? ' Reminders are on.' : ' Reminders are off.') : ''));
+    showToast(isReq ? 'Payment request sent for invoice ' + inv.invoiceNo + '.' + note
+        : (later ? 'Invoice ' + inv.invoiceNo + ' scheduled to send ' + when + '. Reminders update when it sends.' : 'Invoice ' + inv.invoiceNo + ' sent.' + note));
 }
 function cancelPaymentRequest(id) {
     var inv = byId(id);
-    var endsCadence = inv.cadence === 'request'; // BR-31: only the request that started the current cadence ends it
-    inv.paymentRequest = false;
-    if (endsCadence) inv.cadence = null;
+    inv.paymentRequest = false; // BR-34: cancelling a request does not touch reminders
     closeMenus(false);
     renderAll();
     var b = $('menubtn-' + id); if (b) b.focus();
-    showToast('Payment request cancelled for invoice ' + inv.invoiceNo + '.' + (endsCadence ? ' Reminders for this invoice have stopped.' : ''));
+    showToast('Payment request cancelled for invoice ' + inv.invoiceNo + '.');
 }
+$('disableOverlay').addEventListener('click', function(e) { if (e.target === this) closeDisableModal(); });
+$('offOverlay').addEventListener('click', function(e) { if (e.target === this) closeOffModal(); });
 $('commOverlay').addEventListener('click', function(e) { if (e.target === this) closeCommModal(); });
 
+// ---- Command Center (BR-37, BR-16): shares state with the Invoices page ----
+var CC_INVOICE_IDS = [16, 12];
+var ccOpen = {};
+function fmtHist(h) { return (h.channel === 'SMS' ? 'SMS' : 'Email') + ' reminder sent: ' + h.date + ' at ' + h.time; }
+function ccCard(inv) {
+    var s = STATUS[inv.status], active = hasActiveCadence(inv), id = inv.id;
+    var html = '<article class="cc-inv-card" aria-label="Invoice ' + esc(inv.invoiceNo) + '"><div class="cc-inv-main">'
+        + '<div><div class="cc-inv-amt">' + fmt(inv.paidN) + '</div><div class="cc-inv-sub">' + s.label + (inv.paidN > 0 ? ' &#183; <span class="cc-link">Deposit #627234</span>' : '') + '</div></div>'
+        + '<div class="cc-inv-ref">Reference #N/A</div>'
+        + '<div class="cc-inv-right">of ' + fmt(inv.amountN) + '<br><span class="cc-link">Invoice ' + esc(inv.invoiceNo) + '</span></div></div>';
+    if (active) {
+        html += '<div class="settings-alert settings-alert--info"><i class="ti ti-bell-ringing" aria-hidden="true"></i><div>' + esc(nextText(inv))
+            + ' <span class="br-chip br-annot" tabindex="0">BR-37 <span class="br-tooltip">BR-37: the Command Center shows the next reminder and a Disable Reminders action per invoice card. Same confirm and same shared state as the Invoices page.</span></span>'
+            + ' <span class="br-chip br-annot" tabindex="0">Assumption: action is per invoice card <span class="br-tooltip">Assumption: Disable Reminders acts on one invoice card, not on the whole deal.</span></span></div>'
+            + '<button type="button" class="btn btn-outline-primary alert-action-btn settings-alert-action" onclick="openDisable(\'single\', [' + id + '], \'cc\')">Disable Reminders</button></div>';
+    }
+    if (inv.dueDate) {
+        var open = !!ccOpen[id];
+        html += '<button type="button" class="cc-hist-btn" id="cc-hist-' + id + '" aria-expanded="' + open + '" aria-controls="cc-hist-list-' + id + '" onclick="toggleCcHist(' + id + ')">Reminder history <i class="ti ti-chevron-down" aria-hidden="true"></i></button>'
+            + ' <span class="br-chip br-annot" tabindex="0">BR-16 <span class="br-tooltip">BR-16: each reminder send is logged (date, time, channel) and shown on the invoice record.</span></span>'
+            + '<ul class="cc-hist-list" id="cc-hist-list-' + id + '"' + (open ? '' : ' hidden') + '>'
+            + (inv.history.length ? inv.history.map(function(h){ return '<li>' + esc(fmtHist(h)) + '</li>'; }).join('') : '<li>No reminders have been sent for this invoice.</li>')
+            + '</ul>';
+    }
+    return html + '</article>';
+}
+function toggleCcHist(id) {
+    ccOpen[id] = !ccOpen[id];
+    var b = $('cc-hist-' + id), l = $('cc-hist-list-' + id);
+    b.setAttribute('aria-expanded', ccOpen[id] ? 'true' : 'false'); l.hidden = !ccOpen[id];
+}
+function renderCommandCenter() {
+    var panel = $('cc-panel-inv'); if (!panel) return;
+    var focusId = document.activeElement && document.activeElement.id;
+    panel.innerHTML = CC_INVOICE_IDS.map(function(id){ return ccCard(byId(id)); }).join('');
+    if (focusId && $(focusId) && panel.contains($(focusId))) $(focusId).focus();
+}
+
 // ---------- Init ----------
-renderReminderRows('email');
-renderReminderRows('sms');
+renderInvoiceSection();
 renderAll();
 </script>
 
 <!-- Proto Bar -->
 <div style="position:fixed;bottom:0;left:0;right:0;background:#2A2440;color:#fff;font-size:12px;padding:8px 20px;display:flex;align-items:center;gap:16px;z-index:9999;font-family:'Nunito',sans-serif;">
   <strong style="color:#C9C4FF;">PROTOTYPE</strong>
-  <span>Invoice Reminders: Reminders Page + Invoices Page &#183; Rev. Oct 2, 2026</span>
+  <span>Invoice Reminders: Reminders Page + Invoices Page + Command Center &#183; Rev. Oct 5, 2026</span>
   <a href="https://app.clickup.com/t/86b32d4gr" target="_blank" rel="noopener" style="color:#C9C4FF;font-weight:700;">86b32d4gr</a>
   <span style="margin-left:auto;opacity:0.75;">dripjobsjeremy.github.io/dripjobs-prototypes</span>
   <a href="../index.html" style="color:#C9C4FF;font-weight:700;text-decoration:none;">&#8592; Hub</a>
