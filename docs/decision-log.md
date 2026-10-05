@@ -1512,3 +1512,15 @@ Format:
 - Decision: The modal toggle is shown (default ON) only when at least one Email or SMS row is enabled on the Reminders page, reading the existing `invoiceReminders` state. Otherwise the card is hidden so it is out of the tab order. Per Jeremy, BR-14 still applies, so the toggle is also hidden for invoices with no due date.
 - Assumption: The toggle still shows for Paid invoices (no ineligible state per the new rules). The Edit modal helper text about due dates and statuses was left as is. Deleting a payment request has no UI and was not added.
 - Open question: What a send-based cadence's Before / On / After offsets are measured from.
+
+## [2026-10-05] Invoice Reminders (86b32d4gr): answers to open questions
+- Decision: Send Invoice "Send On" now matches the product: Now, Tomorrow at 9:00 AM, Tomorrow at 11:00 AM, and Tomorrow at the Custom Invoice Send Time (Company Settings > App Settings > Schedule Defaults). Replaces the "Schedule for later" date picker I had added without being asked. The custom time is a sample value (01:00 PM) in the prototype. Request Payment still has no Send On.
+- Decision: The Invoice Reminders toggle is also hidden for Paid invoices (reminders not needed). Hidden still means out of the tab order.
+- Confirmed by Jeremy: the Send Invoice and Request Payment modals open from the invoice itself, so non-Admins reach them via Jobs Pipeline > Deal Card > Command Center, Jobs List, Job Schedule (View Deal, or Actions > View Job / View Invoice), and Contact Record > Invoices. The prototype only shows them from the Admin Invoices page and does not build those other entry points. There is no delete action for payment requests: Cancel removes the request, so BR-31 "deleting" is not prototyped. Default email subjects with a hyphen are acceptable.
+- Assumption: A scheduled Send Invoice starts its cadence from the actual send time, not when it is scheduled. Not specified, confirm.
+- Open question: Jeremy answered that cadence offsets are measured from the send date. The Reminders settings rows and Edit modal still say "before / on / after due date" and were left unchanged (out of scope). Need to confirm what Before, On Due Date and After mean once offsets run from the send date. Still open on the ticket: QBO Failed trigger (TJ), Zapier epic link.
+
+## [2026-10-05] Invoice Reminders (86b32d4gr): offsets and scheduled sends settled
+- Decision (amends the entry above): Jeremy withdrew the "offsets measured from the send date" answer. Offsets stay measured from the invoice due date (BR-3). When a cadence starts, any reminder whose date has already passed is skipped and the cadence picks up with the next scheduled send. The Reminders settings rows and Edit modal wording ("before / on / after due date") is therefore correct as is, no prototype change.
+- Confirmed by Jeremy: a scheduled Send Invoice starts its cadence at the actual send time, not when it is scheduled.
+- Open question: QBO Failed trigger (TJ) and the Zapier epic link, left open on purpose.

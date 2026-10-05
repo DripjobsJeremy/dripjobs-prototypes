@@ -677,18 +677,19 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                         <span>Invoice Reminders</span>
                         <span class="switch-state" id="commReminderState" aria-hidden="true">On</span>
                     </button>
-                    <span class="br-chip br-annot" tabindex="0">BR-27 to BR-33 <span class="br-tooltip">BR-27: Invoice Reminders is ON when at least one Email or SMS row is enabled in Settings > Reminders. BR-28: sending an Invoice or Payment Request starts a reminder cadence. BR-29: one toggle covers Email and SMS; shown and ON by default only when Invoice Reminders is ON, otherwise not shown; closing without sending changes nothing. BR-14 still applies: no due date, no toggle. BR-30: latest send replaces the cadence; sending with the toggle OFF ends it. BR-31: cancelling or deleting the request that started the cadence ends it. BR-32: Paid or Voided ends it. BR-33: no other per-invoice reminder controls.</span></span>
+                    <span class="br-chip br-annot" tabindex="0">BR-27 to BR-33 <span class="br-tooltip">BR-27: Invoice Reminders is ON when at least one Email or SMS row is enabled in Settings > Reminders. BR-28: sending an Invoice or Payment Request starts a reminder cadence. BR-29: one toggle covers Email and SMS; shown and ON by default only when Invoice Reminders is ON, otherwise not shown; closing without sending changes nothing. BR-14 still applies: no due date, no toggle. The toggle is also not shown for Paid invoices. BR-30: latest send replaces the cadence; sending with the toggle OFF ends it. BR-31: cancelling or deleting the request that started the cadence ends it. BR-32: Paid or Voided ends it. BR-33: no other per-invoice reminder controls.</span></span>
                 </div>
             </div>
             <div class="comm-card" id="commSendOnCard">
                 <div class="fl-field">
                     <label for="commSendOn">Send On</label>
-                    <select id="commSendOn" onchange="$('commSendLaterWrap').style.display = this.value === 'later' ? '' : 'none'">
+                    <select id="commSendOn">
                         <option value="now">Now</option>
-                        <option value="later">Schedule for later</option>
+                        <option value="t9">Tomorrow at 9:00 AM</option>
+                        <option value="t11">Tomorrow at 11:00 AM</option>
+                        <option value="tc" id="commSendOnCustom">Tomorrow at 01:00 PM</option>
                     </select>
                 </div>
-                <div class="fl-field" id="commSendLaterWrap" style="display:none; margin-top:16px;"><label for="commSendLater">Date and time</label><input type="datetime-local" id="commSendLater"></div>
             </div>
         </div>
         <div class="edit-modal-footer">
@@ -1271,6 +1272,8 @@ $('voidOverlay').addEventListener('click', function(e) { if (e.target === this) 
 
 
 // ---- Send Invoice / Request Payment modal (Item 3) ----
+// Company Settings > App Settings > Schedule Defaults > Custom Invoice Send Time (sample value in this prototype)
+var CUSTOM_INVOICE_SEND_TIME = '01:00 PM';
 function isUnpaid(inv) { return inv.status === 'OPEN' || inv.status === 'PARTIAL'; }
 function commMenuItems(inv) {
     if (inv.status === 'VOIDED') return '';
@@ -1317,10 +1320,11 @@ function openComm(id, mode) {
         $('commEmailBody').innerText = 'Hi ' + first + ',\n\nThank you for your business. Please see the attached invoice for ' + fmt(inv.amountN) + ' and let us know if you have any questions!\n\n{online-payment-button}\n\nThanks,\n\nJeremy Harrison';
     }
     $('commSendOnCard').style.display = isReq ? 'none' : '';
-    $('commSendOn').value = 'now'; $('commSendLaterWrap').style.display = 'none';
+    $('commSendOnCustom').textContent = 'Tomorrow at ' + CUSTOM_INVOICE_SEND_TIME;
+    $('commSendOn').value = 'now';
     $('commSendBtn').textContent = 'Send';
-    // BR-27 / BR-29 (with BR-14): toggle exists only when a reminder row is enabled and the invoice has a due date
-    var showToggle = anyEnabledRows() && !!inv.dueDate;
+    // BR-27 / BR-29 (with BR-14): toggle exists only when a reminder row is enabled and the invoice has a due date and is not Paid
+    var showToggle = anyEnabledRows() && !!inv.dueDate && inv.status !== 'PAID';
     $('commReminderCard').hidden = !showToggle;
     $('commReminderSwitch').setAttribute('aria-checked', 'true');
     $('commReminderState').textContent = 'On';
@@ -1338,7 +1342,8 @@ function submitComm() {
     closeCommModal();
     renderAll();
     var b = $('menubtn-' + inv.id); if (b) b.focus();
-    showToast((commMode === 'request' ? 'Payment request sent for invoice ' : 'Invoice ' ) + inv.invoiceNo + (commMode === 'request' ? '.' : ' sent.')
+    var sendSel = $('commSendOn'), when = sendSel.value === 'now' ? '' : sendSel.options[sendSel.selectedIndex].text.replace('Tomorrow', 'tomorrow');
+    showToast((commMode === 'request' ? 'Payment request sent for invoice ' : 'Invoice ' ) + inv.invoiceNo + (commMode === 'request' ? '.' : (when ? ' scheduled to send ' + when + '.' : ' sent.'))
         + (shown ? (on ? ' Reminders are on.' : ' Reminders are off.') : ''));
 }
 function cancelPaymentRequest(id) {
