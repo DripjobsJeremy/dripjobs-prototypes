@@ -565,7 +565,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                     <button type="button" class="modal-restore-link" onclick="restoreDefault('subject')" aria-label="Restore default subject template">Restore Default</button>
                 </div>
                 <textarea class="modal-textarea modal-subject-textarea" id="subjectTemplate" rows="1" aria-describedby="subjectError"></textarea>
-                <p class="field-error" id="subjectError" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>Add a message before saving.</span></p>
+                <p class="field-error" id="subjectError" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>Add a subject before saving.</span></p>
             </div>
 
             <div class="modal-template-section" id="emailBodySection">
@@ -605,9 +605,9 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
 
             <div class="keywords-box">
                 <strong>Keywords:</strong> {company-name} {company-phone} {company-website} {first-name} {last-name} {invoice-number} {invoice-amount} {balance-due} {due-date} {invoice-link} {salesperson-name} {project-manager-name} {project-manager-phone} {project-manager-email}
-                <span class="br-chip br-annot" tabindex="0">BR-10 · BR-11 <span class="br-tooltip">BR-10: supported keywords. BR-11: when an invoice has no project manager or salesperson, those keywords fall back to the company name, phone, and email.</span></span>
+                <span class="br-chip br-annot" tabindex="0">BR-10 · BR-11 <span class="br-tooltip">BR-10: supported keywords. BR-11: when an invoice has no project manager or salesperson, those keywords fall back to the company name, phone, and email, and a missing website is left out.</span></span>
             </div>
-            <p class="keywords-note">If an invoice has no project manager or salesperson assigned, those keywords use your company name, phone, and email instead.</p>
+            <p class="keywords-note">If an invoice has no project manager or salesperson assigned, those keywords use your company name, phone, and email instead. Your website is left out if none is on file.</p>
         </div>
         <div class="edit-modal-footer">
             <button class="btn btn-primary btn-sm" id="modalSaveBtn" onclick="saveEditModal()">Save</button>
@@ -825,6 +825,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
         </div>
         <div class="edit-modal-body">
             <p class="void-summary" id="disableBody"></p>
+            <div id="disableAlert" aria-live="polite"></div>
             <span class="br-chip br-annot" tabindex="0">BR-36 · BR-37 <span class="br-tooltip">BR-36: Disable Reminders ends the cadence on the invoice (row View menu) or on each selected invoice that has reminders on (bulk). BR-37: the same single-invoice action is available from the Command Center.</span></span>
         </div>
         <div class="edit-modal-footer">
@@ -1060,7 +1061,7 @@ function enableInvoiceReminders() {
     renderInvoiceSection();
     renderAll();
     var first = $('rows-email').querySelector('.edit-btn'); if (first) first.focus();
-    showToast('Invoice reminders enabled with the default schedule.');
+    showToast('Invoice reminders enabled. Email reminders are on, and SMS reminders are ready when you turn them on.');
 }
 function setInvoiceRemindersSetUp(on) {
     if (on) invoiceReminders = defaultReminders();
@@ -1515,24 +1516,21 @@ var voidEligible = [];
 function openVoidModal() {
     var sel = selectedInvoices();
     var withPayments = sel.filter(function(i){ return i.status !== 'VOIDED' && i.paidN > 0; });
-    var alreadyVoided = sel.filter(function(i){ return i.status === 'VOIDED'; });
     voidEligible = sel.filter(function(i){ return i.status !== 'VOIDED' && i.paidN === 0; });
     var n = voidEligible.length;
 
-    $('voidTitle').textContent = n ? 'Void ' + plural(n, 'Invoice') + '?' : 'These invoices can\u2019t be voided';
+    // Already-voided invoices are skipped silently. The "already voided" state shows only when every selected invoice is Voided.
+    var allVoided = sel.length > 0 && sel.every(function(i){ return i.status === 'VOIDED'; });
+    $('voidTitle').textContent = n ? 'Void ' + plural1(n) + '?' : (allVoided ? 'These invoices are already voided' : 'These invoices can\u2019t be voided');
     $('voidSummary').innerHTML = n
         ? 'Voiding marks ' + (n === 1 ? 'this invoice' : 'these ' + n + ' invoices') + ' as Voided and stops any scheduled reminders.'
-        : (withPayments.length ? 'Invoices with payments logged can\u2019t be voided:' : 'These invoices are already voided.');
+        : (allVoided ? 'There\u2019s nothing to void. Select open or partially paid invoices instead.' : 'Invoices with payments logged can\u2019t be voided:');
 
     var skipHtml = '';
     if (withPayments.length) {
         skipHtml += '<div class="settings-alert settings-alert--' + (n ? 'warn' : 'danger') + '"><i class="ti ti-alert-triangle" aria-hidden="true"></i><div>'
             + (n ? '<div>' + withPayments.length + ' of these invoices have payments logged and can\u2019t be voided. They\u2019ll be skipped.</div>' : '')
             + '<ul class="skipped-list">' + withPayments.map(function(i){ return '<li>' + esc(i.invoiceNo) + ', ' + esc(i.customer) + ' (' + fmt(i.paidN) + ' paid)</li>'; }).join('') + '</ul></div></div>';
-    }
-    if (alreadyVoided.length) {
-        skipHtml += '<div class="settings-alert settings-alert--info"><i class="ti ti-info-circle" aria-hidden="true"></i><div>'
-            + plural(alreadyVoided.length, 'invoice') + ' already voided and will be left as is.</div></div>';
     }
     $('voidSkipped').innerHTML = skipHtml;
 
@@ -1575,12 +1573,16 @@ function openDisable(mode, ids, source) {
     if (mode === 'bulk' && n === 0) { title = 'No reminders to disable'; body = 'None of the selected invoices have reminders on.'; }
     else if (mode === 'bulk') {
         title = 'Disable reminders on ' + plural1(n) + '?';
-        body = 'Upcoming reminders on these invoices will stop. Invoices that already have reminders off won’t change. To start reminders again, send the invoice or a payment request with Invoice Reminders turned on.';
+        body = 'Upcoming reminders on these invoices will stop. To start reminders again, send the invoice or a payment request with Invoice Reminders turned on.';
     } else {
         title = 'Disable reminders on this invoice?';
-        body = 'Upcoming reminders on this invoice will stop. To start reminders again, send the invoice or a payment request with Invoice Reminders turned on.';
+        body = 'Upcoming reminders on this invoice will stop. To start them again, send the invoice or a payment request with Invoice Reminders turned on.';
     }
     $('disableTitle').textContent = title; $('disableBody').textContent = body;
+    var x = ids.length - n; // selected invoices that already have reminders off
+    $('disableAlert').innerHTML = (mode === 'bulk' && n > 0 && x > 0)
+        ? alertHtml('info', 'ti-info-circle', x === 1 ? '1 of the selected invoices already has reminders off and won\u2019t change.' : x + ' of the selected invoices already have reminders off and won\u2019t change.')
+        : '';
     $('disableConfirmBtn').style.display = n ? '' : 'none';
     $('disableCancelBtn').textContent = n ? 'Cancel' : 'Close';
     openOverlay($('disableOverlay'), $('disableCancelBtn'));
@@ -1592,7 +1594,7 @@ function confirmDisable() {
     closeOverlay($('disableOverlay'), true);
     if (c.mode === 'bulk') clearSelection(false);
     renderAll();
-    showToast('Reminders disabled on ' + plural1(n) + '.');
+    showToast(c.mode === 'bulk' ? 'Reminders disabled on ' + plural1(n) + '.' : 'Reminders disabled on this invoice.');
     if (c.mode === 'bulk') headerCheckbox.focus();
     else if (c.source === 'row') { var b = $('menubtn-' + c.ids[0]); if (b) b.focus(); }
     else { var h = $('cc-hist-' + c.ids[0]); if (h) h.focus(); }
@@ -1642,7 +1644,9 @@ function updateCommNotice() {
     if (commMode === 'send' && !$('commStartRow').hidden && hasActiveCadence(inv)) {
         var on = $('commReminderSwitch').getAttribute('aria-checked') === 'true', later = $('commSendOn').value !== 'now';
         html = on
-            ? alertHtml('info', 'ti-info-circle', 'This invoice already has reminders scheduled. Sending restarts them from this send.' + (later ? ' Reminders restart when the invoice sends.' : ''))
+            ? alertHtml('info', 'ti-info-circle', later
+                ? 'This invoice already has reminders scheduled. They keep running until this invoice sends, then restart from that send.'
+                : 'This invoice already has reminders scheduled. Sending restarts them from this send.')
             : alertHtml('warn', 'ti-alert-triangle', 'Reminders already scheduled for this invoice will stop.');
     }
     $('commNotice').innerHTML = html;
@@ -1754,7 +1758,7 @@ function ccCard(inv) {
         html += '<button type="button" class="cc-hist-btn" id="cc-hist-' + id + '" aria-expanded="' + open + '" aria-controls="cc-hist-list-' + id + '" onclick="toggleCcHist(' + id + ')">Reminder history <i class="ti ti-chevron-down" aria-hidden="true"></i></button>'
             + ' <span class="br-chip br-annot" tabindex="0">BR-16 <span class="br-tooltip">BR-16: each reminder send is logged (date, time, channel) and shown on the invoice record.</span></span>'
             + '<ul class="cc-hist-list" id="cc-hist-list-' + id + '"' + (open ? '' : ' hidden') + '>'
-            + (inv.history.length ? inv.history.map(function(h){ return '<li>' + esc(fmtHist(h)) + '</li>'; }).join('') : '<li>No reminders have been sent for this invoice.</li>')
+            + (inv.history.length ? inv.history.map(function(h){ return '<li>' + esc(fmtHist(h)) + '</li>'; }).join('') : '<li>No reminders sent yet.</li>')
             + '</ul>';
     }
     return html + '</article>';
