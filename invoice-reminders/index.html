@@ -4,7 +4,7 @@
 <script src="../gate.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Invoice Reminders: Combined Prototype (Rev. Oct 5, 2026)</title>
+<title>Invoice Reminders: Combined Prototype (Rev. Oct 6, 2026, codebase review)</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -405,6 +405,71 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
 .cc-foot .btn { min-height: 48px; padding: 0 24px; }
 @media (max-width: 860px) { .cc-grid { grid-template-columns: 1fr; } .cc-left { max-height: none; border-right: none; border-bottom: 1px solid #DAD8E3; } .cc-inv-main { grid-template-columns: 1fr; } .cc-inv-ref, .cc-inv-right { text-align: left; } }
 
+
+/* ---- Oct 6 codebase review ---- */
+.missing-copy { outline: 1px dashed #D97706; outline-offset: 1px; color: #92400E; background: #FFFBEB; font-weight: 600; border-radius: 3px; padding: 0 3px; }
+.demo-settings-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; color: #fff; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; padding: 0 6px; min-height: 40px; }
+.demo-panel { position: absolute; top: 46px; right: 12px; width: 330px; max-height: calc(100vh - 110px); overflow-y: auto; background: #2A2440; color: #fff; border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 10px 14px; box-shadow: 0 10px 28px rgba(0,0,0,0.35); z-index: 55; }
+.demo-panel[hidden] { display: none; }
+.demo-panel .demo-control { width: 100%; padding: 8px 0; min-height: 40px; }
+.demo-fs { border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; padding: 6px 10px 8px; margin: 8px 0 0; }
+.demo-fs legend { font-size: 11px; font-weight: 700; color: #C9C4FF; width: auto; padding: 0 6px; margin: 0; }
+.demo-fs label { display: flex; align-items: center; gap: 8px; font-size: 12px; margin: 0; min-height: 30px; cursor: pointer; }
+.demo-fs input { accent-color: #8B85EA; }
+.retry-link { background: none; border: none; padding: 0 2px; margin-left: 6px; min-height: 24px; color: #5C53DC; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.back-link { background: none; border: none; padding: 0; min-height: 40px; color: #5C53DC; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.back-link:hover { text-decoration: underline; }
+#invoice-record h1 { font-size: 22px; font-weight: 800; margin: 6px 0 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+#invoice-record h1:focus { outline: none; }
+.rec-meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+.rec-placeholder { border: 1px dashed #B9B6C6; border-radius: 10px; padding: 26px; text-align: center; color: #5E6578; font-size: 13px; background: #fff; margin-bottom: 16px; }
+.rec-section { background: #fff; border: 1px solid var(--st-color-border); border-radius: 10px; padding: 16px 18px; }
+.rec-section h2 { font-size: 15px; font-weight: 800; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hist-list { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+.hist-list li { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-top: 1px solid #F0EFF5; }
+.hist-list li:first-child { border-top: none; }
+.hist-list li i { font-size: 15px; margin-top: 1px; color: #5E6578; }
+.hist-list li.hist-skipped { color: #5E6578; }
+.req-money { display: flex; align-items: center; gap: 6px; border: 1px solid #DAD8E3; border-radius: 8px; padding: 0 12px; max-width: 220px; min-height: 40px; }
+.req-money input { border: none; outline: none; flex: 1; min-height: 38px; font-size: 14px; font-family: 'Nunito', sans-serif; min-width: 0; }
+.req-money:focus-within { border-color: #8B85EA; box-shadow: 0 0 0 3px rgba(139,133,234,.18); }
+@media (max-width: 860px) { .rec-meta { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---- Phone width (BR-28): real viewport at 480px or less, and the Phone preview frame ---- */
+body.phone-preview { --ph-w: 380px; --ph-h: 800px; }
+@media (max-width: 480px) { :root { --ph-w: 100vw; --ph-h: 100dvh; } }
+@media (max-width: 480px) {
+#commOverlay .edit-modal, #reqOverlay .edit-modal { width: var(--ph-w); max-width: var(--ph-w); height: var(--ph-h); max-height: var(--ph-h); border-radius: 0; display: flex; flex-direction: column; overflow: hidden; }
+#commOverlay .edit-modal-header, #reqOverlay .edit-modal-header { flex: none; }
+#commOverlay .edit-modal-body, #reqOverlay .edit-modal-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scroll-padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+#commOverlay .edit-modal-footer, #reqOverlay .edit-modal-footer { flex: none; flex-direction: column; align-items: stretch; gap: 8px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+#commOverlay .edit-modal-footer .btn, #reqOverlay .edit-modal-footer .btn { width: 100%; min-height: 48px; }
+#commOverlay .reminder-toggle-row, #commOverlay .reminder-switch, #commOverlay .settings-alert, #commOverlay #commSendOn, #commOverlay .reminder-toggle-help { width: 100%; max-width: 100%; }
+#commOverlay .reminder-switch { white-space: normal; }
+#commOverlay .br-chip, #reqOverlay .br-chip { white-space: normal; max-width: 100%; flex-wrap: wrap; }
+#commOverlay .br-tooltip, #reqOverlay .br-tooltip { width: auto; max-width: calc(var(--ph-w) - 48px); position: static; display: none; margin-top: 4px; }
+#commOverlay .br-chip:hover .br-tooltip, #commOverlay .br-chip:focus .br-tooltip, #reqOverlay .br-chip:hover .br-tooltip, #reqOverlay .br-chip:focus .br-tooltip { display: block; }
+#commOverlay *, #reqOverlay * { text-overflow: clip; }
+}
+body.phone-preview #commOverlay .edit-modal, body.phone-preview #reqOverlay .edit-modal { width: var(--ph-w); max-width: var(--ph-w); height: var(--ph-h); max-height: var(--ph-h); border-radius: 0; display: flex; flex-direction: column; overflow: hidden; }
+body.phone-preview #commOverlay .edit-modal-header, body.phone-preview #reqOverlay .edit-modal-header { flex: none; }
+body.phone-preview #commOverlay .edit-modal-body, body.phone-preview #reqOverlay .edit-modal-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scroll-padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+body.phone-preview #commOverlay .edit-modal-footer, body.phone-preview #reqOverlay .edit-modal-footer { flex: none; flex-direction: column; align-items: stretch; gap: 8px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+body.phone-preview #commOverlay .edit-modal-footer .btn, body.phone-preview #reqOverlay .edit-modal-footer .btn { width: 100%; min-height: 48px; }
+body.phone-preview #commOverlay .reminder-toggle-row, body.phone-preview #commOverlay .reminder-switch, body.phone-preview #commOverlay .settings-alert, body.phone-preview #commOverlay #commSendOn, body.phone-preview #commOverlay .reminder-toggle-help { width: 100%; max-width: 100%; }
+body.phone-preview #commOverlay .reminder-switch { white-space: normal; }
+body.phone-preview #commOverlay .br-chip, body.phone-preview #reqOverlay .br-chip { white-space: normal; max-width: 100%; flex-wrap: wrap; }
+body.phone-preview #commOverlay .br-tooltip, body.phone-preview #reqOverlay .br-tooltip { width: auto; max-width: calc(var(--ph-w) - 48px); position: static; display: none; margin-top: 4px; }
+body.phone-preview #commOverlay .br-chip:hover .br-tooltip, body.phone-preview #commOverlay .br-chip:focus .br-tooltip, body.phone-preview #reqOverlay .br-chip:hover .br-tooltip, body.phone-preview #reqOverlay .br-chip:focus .br-tooltip { display: block; }
+body.phone-preview #commOverlay *, body.phone-preview #reqOverlay * { text-overflow: clip; }
+@media (max-width: 480px) {
+    .cc-inv-card .settings-alert { flex-wrap: wrap; }
+    .cc-inv-card .settings-alert-action { width: 100%; margin-left: 0; }
+    .cc-inv-card .settings-alert .br-chip { white-space: normal; max-width: 100%; }
+    .demo-panel { right: 4px; width: calc(100vw - 8px); }
+}
+body.phone-preview #commOverlay.is-open, body.phone-preview #reqOverlay.is-open { align-items: center; justify-content: center; }
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
 </style>
 </head>
@@ -415,7 +480,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
     <div class="demo-banner-left">
         <strong>PROTOTYPE</strong>
         <span class="br-chip" tabindex="0">86b32d4gr <i class="ti ti-info-circle" aria-hidden="true"></i>
-            <span class="br-tooltip below">Ticket 86b32d4gr: Invoice Reminders. Revised to requirements current as of Oct 5, 2026 (BR-1 to BR-37).</span>
+            <span class="br-tooltip below">Ticket 86b32d4gr: Invoice Reminders. Revised to requirements current as of Oct 6, 2026 (BR-1 to BR-38).</span>
         </span>
     </div>
     <nav class="demo-nav" aria-label="Prototype screens">
@@ -430,6 +495,11 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
         </button>
     </nav>
     <div class="demo-controls">
+        <button type="button" class="demo-settings-btn" id="demoPanelBtn" aria-expanded="false" aria-controls="demoPanel" onclick="toggleDemoPanel()">
+            <i class="ti ti-adjustments" aria-hidden="true"></i> Demo settings
+        </button>
+    </div>
+    <div id="demoPanel" class="demo-panel" role="group" aria-label="Demo settings" hidden>
         <button class="demo-control" role="switch" aria-checked="true" id="demoJobCosting" onclick="toggleDemo(this)">
             <span class="demo-switch" aria-hidden="true"></span>Job Costing on
         </button>
@@ -439,6 +509,21 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
         <button class="demo-control" role="switch" aria-checked="true" id="demoBr" onclick="toggleDemo(this); document.body.classList.toggle('hide-br', this.getAttribute('aria-checked') !== 'true');">
             <span class="demo-switch" aria-hidden="true"></span>BR notes
         </button>
+        <button class="demo-control" role="switch" aria-checked="false" id="demoPhone" onclick="toggleDemo(this); document.body.classList.toggle('phone-preview', this.getAttribute('aria-checked') === 'true');">
+            <span class="demo-switch" aria-hidden="true"></span>Phone preview
+        </button>
+        <fieldset class="demo-fs"><legend>Access group</legend>
+            <label><input type="radio" name="demoAccess" value="in" checked onchange="demo.access = this.value; renderAll()"> In access group</label>
+            <label><input type="radio" name="demoAccess" value="out" onchange="demo.access = this.value; renderAll()"> Outside access group</label>
+        </fieldset>
+        <fieldset class="demo-fs"><legend>Global off body (Pending TJ)</legend>
+            <label><input type="radio" name="demoOffBody" value="dont" checked onchange="demo.offBody = this.value"> Don't resume</label>
+            <label><input type="radio" name="demoOffBody" value="resume" onchange="demo.offBody = this.value"> Resume</label>
+        </fieldset>
+        <fieldset class="demo-fs"><legend>Send Request entry (Question)</legend>
+            <label><input type="radio" name="demoSendReq" value="menu" checked onchange="demo.sendReq = this.value; renderAll()"> Menu item</label>
+            <label><input type="radio" name="demoSendReq" value="after" onchange="demo.sendReq = this.value; renderAll()"> Opens after create</label>
+        </fieldset>
     </div>
 </div>
 
@@ -501,8 +586,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                 <li>When you send an invoice, leave Invoice Reminders turned on.</li>
             </ol>
             <button type="button" class="btn btn-primary setup-btn" onclick="enableInvoiceReminders()">Enable Reminders</button>
-            <p class="setup-foot">You can change this anytime in Settings &gt; Reminders.</p>
-        </div>
+                    </div>
         <div id="invBlocks">
         <div class="delivery-block">
             <h3 class="delivery-title">Email Delivery</h3>
@@ -533,7 +617,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
             </div>
 
             <div class="modal-section-label" id="timingLbl">Reminder
-                <span class="br-chip br-annot" tabindex="0">BR-3 · BR-4 · BR-5 · BR-9 <span class="br-tooltip">BR-3: Before / On Due Date / After, calculated from Due Date. BR-4: On Due Date has no interval. BR-5: sends at Default Job Start Time (8 AM fallback), company timezone. BR-9: switching direction loads that direction's default copy.</span></span>
+                <span class="br-chip br-annot" tabindex="0">BR-3 · BR-4 · BR-5 · BR-9 <span class="br-tooltip">BR-3: Before / On Due Date / After, calculated from Due Date. Interval is a whole number: Days 1 to 6, Weeks 1 to 8, Months 1 to 3. Checked on Save, when leaving the field, and when the unit changes; the value is never adjusted for you. BR-4: On Due Date has no interval. BR-5: sends at Default Job Start Time (8 AM fallback), company timezone. BR-9: switching direction loads that direction's default copy.</span></span>
             </div>
             <div class="modal-timing-wrap" role="group" aria-labelledby="timingLbl">
                 <div class="modal-timing-line">
@@ -555,7 +639,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                     </div>
                     <div id="onDueNote" class="interval-static-note" style="display:none;">Sends on the invoice due date.</div>
                 </div>
-                <p class="field-error" id="intervalError" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>Enter a whole number of 1 or more.</span></p>
+                <p class="field-error" id="intervalError" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span id="intervalErrorText">Enter a whole number from 1 to 6.</span></p>
                 <p class="timing-helper"><i class="ti ti-clock" aria-hidden="true"></i><span>Reminders send based on each invoice's due date, at your Default Job Start Time (8 AM if not set). Invoices without a due date don't get reminders.</span></p>
             </div>
 
@@ -607,6 +691,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                 <strong>Keywords:</strong> {company-name} {company-phone} {company-website} {first-name} {last-name} {invoice-number} {invoice-amount} {balance-due} {due-date} {invoice-link} {salesperson-name} {project-manager-name} {project-manager-phone} {project-manager-email}
                 <span class="br-chip br-annot" tabindex="0">BR-10 · BR-11 <span class="br-tooltip">BR-10: supported keywords. BR-11: when an invoice has no project manager or salesperson, those keywords fall back to the company name, phone, and email, and a missing website is left out.</span></span>
             </div>
+            <span class="br-chip br-annot" tabindex="0">BR-11 <span class="br-tooltip">Pending TJ: greeting fallback.</span></span>
             <p class="keywords-note">If an invoice has no project manager or salesperson assigned, those keywords use your company name, phone, and email instead. Your website is left out if none is on file.</p>
         </div>
         <div class="edit-modal-footer">
@@ -620,6 +705,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
      INVOICES PAGE
      ===================== -->
 <main id="invoices-page">
+<div id="invoices-list-view">
     <div class="invoices-header">
         <h1 class="invoices-title">Invoices <span class="invoices-count-badge" id="countBadge" aria-label="invoices shown">0</span>
             <span class="br-chip br-annot" tabindex="0">BR-19 <span class="br-tooltip below">BR-19: The Invoices page, including bulk actions, is Admin only.</span></span>
@@ -638,13 +724,14 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
         </div>
     </div>
     <div class="stats-row">
-        <div class="stat-card"><div class="stat-label">Total Invoices</div><div class="stat-value" id="statTotal">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Invoices <span class="info-tip-wrap"><button type="button" class="info-tip-btn" aria-label="More info: Total Invoices" aria-describedby="tip-total"><i class="ti ti-info-circle" aria-hidden="true"></i></button><span class="info-tooltip" role="tooltip" id="tip-total">Voided invoices aren't included. Use the Voided filter to see them.</span></span></div><div class="stat-value" id="statTotal">0</div></div>
         <div class="stat-card"><div class="stat-label">Unpaid <span class="info-tip-wrap"><button type="button" class="info-tip-btn" aria-label="More info: Unpaid" aria-describedby="tip-unpaid"><i class="ti ti-info-circle" aria-hidden="true"></i></button><span class="info-tooltip" role="tooltip" id="tip-unpaid">Open and partially paid invoices</span></span></div><div class="stat-value warn" id="statUnpaid">0</div></div>
         <div class="stat-card"><div class="stat-label">Total Amount</div><div class="stat-value" id="statAmount">$0.00</div></div>
         <div class="stat-card"><div class="stat-label">Outstanding Balance</div><div class="stat-value success" id="statBalance">$0.00</div></div>
     </div>
     <p class="stats-scope" id="statsScope">Showing all invoices. Unpaid includes Open and Partially Paid.
         <span class="br-chip br-annot" tabindex="0">BR-20 <span class="br-tooltip">BR-20: four stat cards; values update with filters. Unpaid = Open + Partially Paid.</span></span>
+        <span class="br-chip br-annot" tabindex="0">BR-20 · Q2 <span class="br-tooltip">BR-20: voided invoices never count, so the Voided filter shows $0.00 totals. Question for Jeremy.</span></span>
     </p>
     <div class="filter-bar" role="search" aria-label="Filter invoices">
         <div class="search-input-wrap"><i class="ti ti-search" aria-hidden="true"></i>
@@ -658,6 +745,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
             <option value="PAID">Paid</option>
             <option value="VOIDED">Voided</option>
         </select>
+        <span class="br-chip br-annot" tabindex="0">BR-12 <span class="br-tooltip">Pending: Sent status handling.</span></span>
         <label for="filterType" class="sr-only">Amount field</label>
         <select id="filterType" onchange="applyFilters()">
             <option value="">Filter by</option>
@@ -674,7 +762,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
         <label for="filterAmount" class="sr-only">Amount value</label>
         <input type="text" inputmode="decimal" id="filterAmount" class="amount-input" placeholder="0.00" oninput="this.value=this.value.replace(/[^0-9.]/g,'');applyFilters()">
         <button class="btn btn-primary btn-sm" onclick="applyFilters()">Search</button>
-        <span class="br-chip br-annot" tabindex="0">BR-21 <span class="br-tooltip">BR-21: text search (customer, invoice #, proposal #), Status incl. Voided, Type + operator + amount.</span></span>
+        <span class="br-chip br-annot" tabindex="0">BR-21 <span class="br-tooltip">BR-21: text search (customer, invoice #, proposal #), Status incl. Voided, Filter by + operator + amount. All excludes voided invoices; Voided shows voided rows at a $0 balance.</span></span>
         <div class="spacer"></div>
         <button class="btn btn-outline-primary btn-sm" onclick="clearFilters()">Clear</button>
     </div>
@@ -687,7 +775,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                     <th scope="col">Status</th>
                     <th scope="col">Customer</th>
                     <th scope="col">Proposal</th>
-                    <th scope="col">Invoice <span class="br-chip br-annot" tabindex="0">BR-26 <span class="br-tooltip below">BR-26: QBO indicator shows Synced, Not synced, or Sync failed. Open gap: what sets Failed (TJ).</span></span></th>
+                    <th scope="col">Invoice <span class="br-chip br-annot" tabindex="0">BR-26 <span class="br-tooltip below">BR-26: QBO indicator shows Synced, Not synced, or Sync failed. Retry beside Sync failed: existing behavior, unchanged. Open gap: what sets Failed (TJ).</span></span></th>
                     <th scope="col" data-sort="amountN" aria-sort="none"><button class="sort-btn" onclick="sortBy('amountN')">Amount <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
                     <th scope="col" data-sort="paidN" aria-sort="none"><button class="sort-btn" onclick="sortBy('paidN')">Paid <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
                     <th scope="col" data-sort="balanceN" aria-sort="none"><button class="sort-btn" onclick="sortBy('balanceN')">Balance <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
@@ -708,6 +796,8 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
             </tfoot>
         </table>
     </div>
+</div>
+<section id="invoice-record" hidden aria-label="Invoice record"></section>
 </main>
 
 
@@ -807,7 +897,7 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
         </div>
         <div class="edit-modal-body">
             <div class="settings-alert settings-alert--warn" style="margin-bottom:0;"><i class="ti ti-alert-triangle" aria-hidden="true"></i><div id="offBody">Turning off every invoice reminder stops scheduled reminders on all invoices. To start them again, send each invoice with Invoice Reminders turned on.</div></div>
-            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">BR-27 <span class="br-tooltip">BR-27: when the last enabled invoice reminder is turned off, invoice reminders are off for every invoice. Wording pending TJ: behavior when reminders are turned back on.</span></span>
+            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">BR-27 <span class="br-tooltip">BR-27: body pending TJ (turning reminders back on).</span></span>
         </div>
         <div class="edit-modal-footer">
             <button class="btn btn-outline-primary btn-sm" id="offCancelBtn" onclick="closeOffModal()">Cancel</button>
@@ -835,7 +925,34 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
     </div>
 </div>
 
-<!-- Send Invoice / Request Payment modal -->
+<!-- Request Payment: create only (BR-28), low-fidelity -->
+<div class="modal-overlay page-modal" id="reqOverlay">
+    <div class="edit-modal" id="reqModalCard" role="dialog" aria-modal="true" aria-labelledby="reqTitle">
+        <div class="edit-modal-header">
+            <h2 id="reqTitle"><span class="missing-copy" title="Request Payment title">[MISSING: production string]</span></h2>
+            <button class="modal-close-btn" onclick="closeRequestModal()" aria-label="Close"><i class="ti ti-x" aria-hidden="true"></i></button>
+        </div>
+        <div class="edit-modal-body">
+            <fieldset class="void-fieldset" style="margin-top:0;">
+                <legend><span class="missing-copy" title="amount legend">[MISSING: production string]</span></legend>
+                <div id="reqOptions"></div>
+                <div id="reqCustomWrap" hidden style="margin-top:8px;">
+                    <label class="sr-only" for="reqCustom">Custom amount in dollars</label>
+                    <div class="req-money"><span aria-hidden="true">$</span><input type="text" inputmode="decimal" id="reqCustom" aria-describedby="reqCustomError" oninput="this.value=this.value.replace(/[^0-9.]/g,'')"></div>
+                    <p class="field-error" id="reqCustomError" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span><span class="missing-copy" title="custom amount error">[MISSING: production string]</span></span></p>
+                </div>
+            </fieldset>
+            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">BR-28 <span class="br-tooltip">BR-28: creating a request sends nothing and never touches reminders.</span></span>
+            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">Low-fi: awaiting production screenshot <span class="br-tooltip">Low-fi: awaiting production screenshot (Q6).</span></span>
+        </div>
+        <div class="edit-modal-footer">
+            <button class="btn btn-primary" id="reqCreateBtn" onclick="submitRequest()"><span class="missing-copy" title="create button">[MISSING: production string]</span></button>
+            <button class="btn btn-outline-primary" onclick="closeRequestModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Send Invoice / Send Request modal -->
 <div class="modal-overlay page-modal" id="commOverlay">
     <div class="edit-modal is-comm" id="commModalCard" role="dialog" aria-modal="true" aria-labelledby="commTitle">
         <div class="edit-modal-header">
@@ -884,9 +1001,13 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
                             <span>Invoice Reminders</span>
                             <span class="switch-state" aria-hidden="true">On</span>
                         </button>
-                        <span class="br-chip br-annot" tabindex="0">BR-28 to BR-30 · BR-34 <span class="br-tooltip">BR-28: sending an Invoice or Payment Request starts a reminder cadence; a scheduled send leaves reminders unchanged until it sends. BR-29: one toggle covers Email and SMS; shown (ON) only when invoice reminders are set up and enabled, the invoice has a due date (BR-14), and it is not Paid; closing without sending changes nothing. BR-30: latest send replaces the cadence; sending with the toggle OFF ends it. BR-34: Request Payment never replaces a cadence; with reminders already running it offers Keep invoice reminders instead.</span></span>
+                        <span class="br-chip br-annot" tabindex="0">BR-28 to BR-30 · BR-34 <span class="br-tooltip">BR-28: sending an Invoice, or a Send Request with no schedule running, starts a reminder cadence; creating a request never does, and a scheduled send leaves reminders unchanged until it sends. BR-29: one toggle covers Email and SMS; shown (ON) only for the access group when reminders are set up and enabled, the invoice has a due date (BR-14), and it is not Paid; others see a read-only notice; closing without sending changes nothing. BR-30: latest send replaces the cadence; sending with the toggle OFF ends it; a Send Request never replaces a cadence. BR-34: reminder dates that have passed when a cadence starts are skipped. On phones (480px or less) this modal is full screen.</span></span>
                     </div>
                     <p class="reminder-toggle-help" id="commStartHelp">Send automatic reminders based on this invoice's due date.</p>
+                </div>
+                <div id="commReadOnly" hidden>
+                    <div class="settings-alert settings-alert--info" style="margin:0;"><i class="ti ti-info-circle" aria-hidden="true"></i><div id="commReadOnlyText"></div></div>
+                    <span class="br-chip br-annot" tabindex="0" style="margin-top:8px;">BR-29 · Q5 <span class="br-tooltip">BR-29: simulates a non-Admin, non-assignee opening Send Invoice from Job Schedule or Contact Record. The Invoices page itself is Admin only (QUESTION Q5).</span></span>
                 </div>
                 <div id="commNotice" aria-live="polite"></div>
                 <div id="commKeepRow" hidden>
@@ -930,13 +1051,30 @@ function esc(s) { return String(s).replace(/[&<>"]/g, function(c){ return {'&':'
 function announce(msg) { var l = $('srLive'); l.textContent = ''; setTimeout(function(){ l.textContent = msg; }, 30); }
 function fmt(n) { return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 var toastTimer;
-function showToast(msg) {
-    var t = $('toast'); $('toastMsg').textContent = msg; t.classList.add('show');
+function showToast(msg, key) {
+    var t = $('toast'); $('toastMsg').textContent = msg; $('toastMsg').title = key || ''; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 4000);
 }
 
 // ---------- Demo controls ----------
 function toggleDemo(btn) { btn.setAttribute('aria-checked', btn.getAttribute('aria-checked') === 'true' ? 'false' : 'true'); }
+var demo = { access: 'in', offBody: 'dont', sendReq: 'menu' };
+function inAccessGroup() { return demo.access === 'in'; }
+var OFF_BODY = {
+    dont: 'Turning off every invoice reminder stops scheduled reminders on all invoices. To start them again, send each invoice with Invoice Reminders turned on.',
+    resume: 'Turning off every invoice reminder pauses scheduled reminders on all invoices. If you turn reminders back on, upcoming reminders will send again, and any dates that passed while they were off are skipped.'
+};
+function miss(key) { return '<span class="missing-copy" title="' + esc(key) + '">[MISSING: production string]</span>'; }
+function toggleDemoPanel(force) {
+    var panel = $('demoPanel'), btn = $('demoPanelBtn');
+    var open = typeof force === 'boolean' ? force : panel.hidden;
+    panel.hidden = !open; btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !$('demoPanel').hidden && !document.querySelector('.modal-overlay.is-open')) {
+        e.preventDefault(); toggleDemoPanel(false); $('demoPanelBtn').focus();
+    }
+});
 function jobCostingOn() { return $('demoJobCosting').getAttribute('aria-checked') === 'true'; }
 
 function switchPage(pageId) {
@@ -967,7 +1105,7 @@ function closeOverlay(overlay, skipFocus) {
     var f = focusStack.pop();
     if (!skipFocus && f && document.body.contains(f)) f.focus();
 }
-var OVERLAY_CLOSERS = { voidOverlay: 'closeVoidModal', commOverlay: 'closeCommModal', disableOverlay: 'closeDisableModal', offOverlay: 'closeOffModal', modalOverlay: 'closeEditModal' };
+var OVERLAY_CLOSERS = { voidOverlay: 'closeVoidModal', commOverlay: 'closeCommModal', disableOverlay: 'closeDisableModal', offOverlay: 'closeOffModal', modalOverlay: 'closeEditModal', reqOverlay: 'closeRequestModal' };
 document.addEventListener('keydown', function(e) {
     var openList = document.querySelectorAll('.modal-overlay.is-open');
     if (!openList.length) return;
@@ -1014,7 +1152,7 @@ var invoiceReminders = defaultReminders();
 var TYPE_LABEL = { email: 'email', sms: 'SMS' };
 
 function rowText(r) {
-    if (r.mode === 'on') return 'Send <b>on due date</b>';
+    if (r.mode === 'on') return 'Send on due date';
     return 'Send <b>' + r.n + ' ' + esc(r.unit) + '</b> ' + r.mode + ' due date';
 }
 function rowPlain(r) {
@@ -1146,6 +1284,7 @@ function openEditModal(type, rowId) {
     setMode(r.mode, false);
     $('intervalNumber').value = r.n != null ? r.n : 1;
     $('intervalUnit').value = r.unit || 'Day(s)';
+    applyUnitRange();
     hideIntervalError();
     openOverlay($('modalOverlay'), $('enabledSwitch'));
 }
@@ -1164,6 +1303,7 @@ function addReminder(type) {
     setMode('before', false);
     $('intervalNumber').value = 1;
     $('intervalUnit').value = 'Day(s)';
+    applyUnitRange();
     hideIntervalError();
     openOverlay($('modalOverlay'), $('enabledSwitch'));
 }
@@ -1176,6 +1316,25 @@ function restoreDefault(field) {
     announce('Default copy restored.');
 }
 
+// A5 (BR-3): per-unit ranges, whole numbers only
+var INTERVAL_RANGES = {
+    'Day(s)':   { min: 1, max: 6, msg: 'Enter a whole number from 1 to 6.' },
+    'Week(s)':  { min: 1, max: 8, msg: 'Enter a whole number from 1 to 8.' },
+    'Month(s)': { min: 1, max: 3, msg: 'Enter a whole number from 1 to 3.' }
+};
+function applyUnitRange() { var r = INTERVAL_RANGES[$('intervalUnit').value]; $('intervalNumber').min = r.min; $('intervalNumber').max = r.max; }
+function validateInterval() {
+    if (currentTimingMode === 'on') return true;
+    var r = INTERVAL_RANGES[$('intervalUnit').value], raw = $('intervalNumber').value.trim(), n = Number(raw);
+    var bad = raw === '' || !Number.isInteger(n) || n < r.min || n > r.max;
+    $('intervalErrorText').textContent = r.msg;
+    $('intervalError').classList.toggle('show', bad);
+    if (bad) $('intervalNumber').setAttribute('aria-invalid', 'true'); else $('intervalNumber').removeAttribute('aria-invalid');
+    return !bad;
+}
+$('intervalNumber').addEventListener('blur', validateInterval);
+$('intervalNumber').addEventListener('input', function() { if ($('intervalError').classList.contains('show')) validateInterval(); });
+$('intervalUnit').addEventListener('change', function() { applyUnitRange(); validateInterval(); }); // never adjusts the value
 function hideIntervalError() {
     $('intervalError').classList.remove('show'); $('intervalNumber').removeAttribute('aria-invalid');
     ['subjectError', 'bodyError', 'smsError'].forEach(function(id){ $(id).classList.remove('show'); });
@@ -1209,19 +1368,14 @@ function enabledCountAfter(p) {
 function saveEditModal() {
     var mode = currentTimingMode, n = null, unit = null, bad = [];
     if (mode !== 'on') {
-        var raw = $('intervalNumber').value.trim();
-        n = Number(raw);
-        if (raw === '' || !Number.isInteger(n) || n < 1) {
-            $('intervalError').classList.add('show');
-            $('intervalNumber').setAttribute('aria-invalid', 'true');
-            bad.push($('intervalNumber'));
-        } else { unit = $('intervalUnit').value; }
+        if (!validateInterval()) bad.push($('intervalNumber'));
+        else { n = Number($('intervalNumber').value.trim()); unit = $('intervalUnit').value; }
     }
     bad = bad.concat(templateErrors());
     if (bad.length) { bad[0].focus(); return; }
     pendingSave = { mode: mode, n: n, unit: unit, enabled: $('enabledSwitch').getAttribute('aria-checked') === 'true' };
     // A2 (BR-27): saving would turn off the last enabled invoice reminder
-    if (anyEnabledRows() && enabledCountAfter(pendingSave) === 0) { openOverlay($('offOverlay'), $('offCancelBtn')); return; }
+    if (anyEnabledRows() && enabledCountAfter(pendingSave) === 0) { $('offBody').textContent = OFF_BODY[demo.offBody]; openOverlay($('offOverlay'), $('offCancelBtn')); return; }
     commitSave();
 }
 function closeOffModal() { closeOverlay($('offOverlay')); }
@@ -1272,23 +1426,26 @@ var SYNC = {
     'failed':     { label: 'Sync failed', icon: 'ti-alert-triangle', tip: 'Couldn\'t sync to QuickBooks' }
 };
 
+// Reminder history entries (BR-16, BR-38). Per BR-34, reminders dropped at cadence start for dates already behind us are never recorded.
+function snt(date, time, channel) { return { type: 'sent', date: date, time: time, channel: channel }; }
+function skp(date, time, channel, reason) { return { type: 'skipped', date: date, time: time, channel: channel, reason: reason }; }
 var invoices = [
-    {id:1,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Invoice Only',      invoiceNo:'#469276', status:'OPEN',    sync:'synced',     amountN:545.50,   paidN:0,      date:'6/26/2026', dueDate:'10/26/2026', paymentRequest:true,  cadence:{source:'request', next:{date:'Oct 14, 2026', channel:'SMS'}}, history:[]},
-    {id:2,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2977254', invoiceNo:'#464186', status:'PARTIAL', sync:'synced',     amountN:2631.81,  paidN:100,    date:'6/18/2026', dueDate:'10/30/2026', paymentRequest:false, cadence:{source:'send', next:{date:'Oct 19, 2026', channel:'email and SMS'}}, history:[{date:'Sep 29, 2026', time:'8:00 AM', channel:'email'},{date:'Oct 2, 2026', time:'8:00 AM', channel:'SMS'}]},
-    {id:3,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2901988', invoiceNo:'#456981', status:'OPEN',    sync:'synced',     amountN:87026.12, paidN:0,      date:'6/8/2026',  dueDate:null,         paymentRequest:false, cadence:null, history:[]},
-    {id:4,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920059', invoiceNo:'#453093', status:'OPEN',    sync:'not-synced', amountN:4103.31,  paidN:0,      date:'6/2/2026',  dueDate:'11/2/2026',  paymentRequest:true,  cadence:{source:'request', next:{date:'Oct 22, 2026', channel:'email'}}, history:[{date:'Oct 1, 2026', time:'8:00 AM', channel:'email'}]},
-    {id:5,  initials:'TB', customer:'TJ Bennett',        proposal:'Invoice Only',      invoiceNo:'#453092', status:'OPEN',    sync:'not-synced', amountN:327.30,   paidN:0,      date:'6/2/2026',  dueDate:'7/2/2026',   paymentRequest:false, cadence:null, history:[]},
-    {id:6,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2920038', invoiceNo:'#453090', status:'OPEN',    sync:'failed',     amountN:3273.00,  paidN:0,      date:'6/2/2026',  dueDate:'11/9/2026',  paymentRequest:false, cadence:{source:'send', next:{date:'Nov 2, 2026', channel:'SMS'}}, history:[{date:'Sep 30, 2026', time:'8:00 AM', channel:'SMS'}]},
-    {id:7,  initials:'TB', customer:'TJ Bennett',        proposal:'Proposal #2919942', invoiceNo:'#453085', status:'PAID',    sync:'synced',     amountN:3000.00,  paidN:3000,   date:'6/2/2026',  dueDate:'7/2/2026',   paymentRequest:false, cadence:null, history:[]},
-    {id:8,  initials:'AS', customer:'Arya Stark',        proposal:'Proposal #2575454', invoiceNo:'#429554', status:'OPEN',    sync:'not-synced', amountN:9566.99,  paidN:0,      date:'4/28/2026', dueDate:'5/28/2026',  paymentRequest:false, cadence:null, history:[]},
-    {id:9,  initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2663851', invoiceNo:'#423060', status:'OPEN',    sync:'not-synced', amountN:901.00,   paidN:0,      date:'4/20/2026', dueDate:'5/20/2026',  paymentRequest:false, cadence:null, history:[]},
-    {id:10, initials:'AB', customer:'Aaron Blankfields', proposal:'Proposal #2679536', invoiceNo:'#419330', status:'OPEN',    sync:'synced',     amountN:21.00,    paidN:0,      date:'4/14/2026', dueDate:null,         paymentRequest:false, cadence:null, history:[]},
-    {id:11, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2700220', invoiceNo:'#417520', status:'PARTIAL', sync:'failed',     amountN:2000.00,  paidN:500,    date:'4/10/2026', dueDate:'5/10/2026',  paymentRequest:false, cadence:null, history:[]},
-    {id:12, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2700136', invoiceNo:'#417501', status:'OPEN',    sync:'not-synced', amountN:2500.00,  paidN:0,      date:'4/10/2026', dueDate:'11/15/2026', paymentRequest:false, cadence:null, history:[]},
-    {id:13, initials:'DS', customer:'Dana Scully',       proposal:'Proposal #2544066', invoiceNo:'#414859', status:'VOIDED',  sync:'not-synced', amountN:2000.00,  paidN:0,      date:'4/7/2026',  dueDate:'5/7/2026',   paymentRequest:false, cadence:null, history:[]},
-    {id:14, initials:'AB', customer:'Al Bundy',          proposal:'Invoice Only',      invoiceNo:'#414852', status:'OPEN',    sync:'not-synced', amountN:5000.00,  paidN:0,      date:'4/7/2026',  dueDate:'5/7/2026',   paymentRequest:false, cadence:null, history:[]},
-    {id:15, initials:'JB', customer:'James Bond',        proposal:'Proposal #2679119', invoiceNo:'#007',    status:'OPEN',    sync:'not-synced', amountN:4387.39,  paidN:0,      date:'4/6/2026',  dueDate:'5/6/2026',   paymentRequest:false, cadence:null, history:[]},
-    {id:16, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #3330640', invoiceNo:'#531224', status:'PARTIAL', sync:'synced',     amountN:6389.54,  paidN:638.95, date:'10/3/2026', dueDate:'11/3/2026',  paymentRequest:false, cadence:{source:'send', next:{date:'Oct 12, 2026', channel:'email'}}, history:[{date:'Oct 12, 2026', time:'8:00 AM', channel:'email'}]}
+    {id:1, initials:'DH', customer:'Dripjobs Harrison', proposal:'Invoice Only', invoiceNo:'#469276', status:'OPEN', sync:'synced', amountN:545.50, paidN:0, date:'6/26/2026', dueDate:'10/26/2026', paymentRequest:{amount:272.75, unpaid:true, sent:true}, cadence:{source:'request', next:{date:'Oct 14, 2026', channel:'SMS'}}, remindersDisabled:false, history:[]},
+    {id:2, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2977254', invoiceNo:'#464186', status:'PARTIAL', sync:'synced', amountN:2631.81, paidN:100, date:'6/18/2026', dueDate:'10/30/2026', paymentRequest:null, cadence:{source:'send', next:{date:'Oct 19, 2026', channel:'email and SMS'}}, remindersDisabled:false, history:[snt('Sep 29, 2026','8:00 AM','email'), snt('Oct 2, 2026','8:00 AM','SMS'), skp('Oct 5, 2026','8:00 AM','email','optout-emails')]},
+    {id:3, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2901988', invoiceNo:'#456981', status:'OPEN', sync:'synced', amountN:87026.12, paidN:0, date:'6/8/2026', dueDate:null, paymentRequest:null, cadence:null, remindersDisabled:false, history:[]},
+    {id:4, initials:'TB', customer:'TJ Bennett', proposal:'Proposal #2920059', invoiceNo:'#453093', status:'OPEN', sync:'not-synced', amountN:4103.31, paidN:0, date:'6/2/2026', dueDate:'11/2/2026', paymentRequest:{amount:2051.66, unpaid:true, sent:true}, cadence:{source:'request', next:{date:'Oct 22, 2026', channel:'email'}}, remindersDisabled:false, history:[snt('Oct 1, 2026','8:00 AM','email'), skp('Oct 4, 2026','8:00 AM','SMS','optout-sms')]},
+    {id:5, initials:'TB', customer:'TJ Bennett', proposal:'Invoice Only', invoiceNo:'#453092', status:'OPEN', sync:'not-synced', amountN:327.30, paidN:0, date:'6/2/2026', dueDate:'7/2/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[]},
+    {id:6, initials:'TB', customer:'TJ Bennett', proposal:'Proposal #2920038', invoiceNo:'#453090', status:'OPEN', sync:'failed', amountN:3273.00, paidN:0, date:'6/2/2026', dueDate:'11/9/2026', paymentRequest:null, cadence:{source:'send', next:{date:'Nov 2, 2026', channel:'SMS'}}, remindersDisabled:false, history:[skp('Sep 30, 2026','8:00 AM','SMS','optout-reminders')]},
+    {id:7, initials:'TB', customer:'TJ Bennett', proposal:'Proposal #2919942', invoiceNo:'#453085', status:'PAID', sync:'synced', amountN:3000.00, paidN:3000, date:'6/2/2026', dueDate:'7/2/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[snt('Sep 15, 2026','8:00 AM','email'), skp('Sep 29, 2026','8:00 AM','email','paid')]},
+    {id:8, initials:'AS', customer:'Arya Stark', proposal:'Proposal #2575454', invoiceNo:'#429554', status:'OPEN', sync:'not-synced', amountN:9566.99, paidN:0, date:'4/28/2026', dueDate:'5/28/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[skp('Sep 25, 2026','8:00 AM','email','inactive')]},
+    {id:9, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2663851', invoiceNo:'#423060', status:'OPEN', sync:'not-synced', amountN:901.00, paidN:0, date:'4/20/2026', dueDate:'5/20/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[]},
+    {id:10, initials:'AB', customer:'Aaron Blankfields', proposal:'Proposal #2679536', invoiceNo:'#419330', status:'OPEN', sync:'synced', amountN:21.00, paidN:0, date:'4/14/2026', dueDate:null, paymentRequest:null, cadence:null, remindersDisabled:false, history:[]},
+    {id:11, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2700220', invoiceNo:'#417520', status:'PARTIAL', sync:'failed', amountN:2000.00, paidN:500, date:'4/10/2026', dueDate:'5/10/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[]},
+    {id:12, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #2700136', invoiceNo:'#417501', status:'OPEN', sync:'not-synced', amountN:2500.00, paidN:0, date:'4/10/2026', dueDate:'11/15/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[]},
+    {id:13, initials:'DS', customer:'Dana Scully', proposal:'Proposal #2544066', invoiceNo:'#414859', status:'VOIDED', sync:'not-synced', amountN:2000.00, paidN:0, date:'4/7/2026', dueDate:'5/7/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[snt('Sep 20, 2026','8:00 AM','email'), skp('Oct 1, 2026','8:00 AM','email','voided')]},
+    {id:14, initials:'AB', customer:'Al Bundy', proposal:'Invoice Only', invoiceNo:'#414852', status:'OPEN', sync:'not-synced', amountN:5000.00, paidN:0, date:'4/7/2026', dueDate:'5/7/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[skp('Oct 3, 2026','8:00 AM','SMS','offline')]},
+    {id:15, initials:'JB', customer:'James Bond', proposal:'Proposal #2679119', invoiceNo:'#007', status:'OPEN', sync:'not-synced', amountN:4387.39, paidN:0, date:'4/6/2026', dueDate:'5/6/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[]},
+    {id:16, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #3330640', invoiceNo:'#531224', status:'PARTIAL', sync:'synced', amountN:6389.54, paidN:638.95, date:'10/3/2026', dueDate:'11/3/2026', paymentRequest:null, cadence:{source:'send', next:{date:'Oct 12, 2026', channel:'email'}}, remindersDisabled:false, history:[snt('Sep 28, 2026','8:00 AM','email'), snt('Oct 2, 2026','8:00 AM','SMS'), skp('Oct 5, 2026','8:00 AM','email','bounced')]}
 ];
 // Balance is derived; voided invoices carry $0 balance (prototype assumption, flagged)
 function balanceOf(inv) { return inv.status === 'VOIDED' ? 0 : Math.max(0, inv.amountN - inv.paidN); }
@@ -1316,7 +1473,7 @@ var visible = [];
 
 function menuHtml(inv) {
     return '<div class="row-menu" role="menu" id="menu-' + inv.id + '" aria-label="Actions for invoice ' + esc(inv.invoiceNo) + '">'
-        + '<button role="menuitem" tabindex="-1" onclick="closeMenus(); showToast(\'Opens invoice ' + esc(inv.invoiceNo) + ' (prototype only)\')"><i class="ti ti-eye" aria-hidden="true"></i>View Invoice</button>'
+        + '<button role="menuitem" tabindex="-1" onclick="closeMenus(); openInvoiceRecord(' + inv.id + ')"><i class="ti ti-eye" aria-hidden="true"></i>View Invoice</button>'
         + commMenuItems(inv) + '</div>';
 }
 
@@ -1332,7 +1489,7 @@ function buildRow(inv) {
         + '<td class="proposal-link">' + esc(inv.proposal) + '</td>'
         + '<td class="invoice-cell"><span class="invoice-no">' + esc(inv.invoiceNo) + '</span> '
         + '<span class="status-chip ' + s.cls + '" style="margin-left:6px;">' + s.label + '</span>'
-        + '<span class="sync-chip ' + inv.sync + '" title="' + esc(sy.tip) + '"><i class="ti ' + sy.icon + '" aria-hidden="true"></i>' + sy.label + '<span class="sr-only">. ' + esc(sy.tip) + '</span></span></td>'
+        + '<span class="sync-chip ' + inv.sync + '" title="' + esc(sy.tip) + '"><i class="ti ' + sy.icon + '" aria-hidden="true"></i>' + sy.label + '<span class="sr-only">. ' + esc(sy.tip) + '</span></span>' + (inv.sync === 'failed' ? '<button type="button" class="retry-link" aria-label="Retry QuickBooks sync for invoice ' + esc(inv.invoiceNo) + '">Retry</button>' : '') + '</td>'
         + '<td>' + fmt(inv.amountN) + '</td>'
         + '<td>' + fmt(inv.paidN) + '</td>'
         + '<td class="balance-amt">' + fmt(bal) + '</td>'
@@ -1415,7 +1572,7 @@ function filterList() {
     var amtRaw = $('filterAmount').value.trim(), amtVal = amtRaw !== '' ? parseFloat(amtRaw) : NaN;
     return invoices.filter(function(inv) {
         if (search && !(inv.customer.toLowerCase().indexOf(search) > -1 || inv.invoiceNo.toLowerCase().indexOf(search) > -1 || inv.proposal.toLowerCase().indexOf(search) > -1)) return false;
-        if (status && inv.status !== status) return false;
+        if (status ? inv.status !== status : inv.status === 'VOIDED') return false; // BR-21: All excludes voided
         if (type && !isNaN(amtVal)) {
             var v = type === 'amount' ? inv.amountN : type === 'paid' ? inv.paidN : balanceOf(inv);
             if (op === 'eq' && Math.abs(v - amtVal) > 0.004) return false;
@@ -1453,13 +1610,14 @@ function renderAll() {
     }
 
     var sumAmt = 0, sumPaid = 0, sumBal = 0, unpaid = 0, outstanding = 0;
-    visible.forEach(function(inv) {
+    var counted = visible.filter(function(i){ return i.status !== 'VOIDED'; }); // BR-20 / BR-23: voided invoices never count
+    counted.forEach(function(inv) {
         var b = balanceOf(inv);
         sumAmt += inv.amountN; sumPaid += inv.paidN; sumBal += b;
         if (inv.status === 'OPEN' || inv.status === 'PARTIAL') { unpaid++; outstanding += b; }
     });
     $('countBadge').textContent = visible.length;
-    $('statTotal').textContent = visible.length;
+    $('statTotal').textContent = counted.length;
     $('statUnpaid').textContent = unpaid;
     $('statAmount').textContent = fmt(sumAmt);
     $('statBalance').textContent = fmt(outstanding);
@@ -1470,6 +1628,7 @@ function renderAll() {
     scope.firstChild.nodeValue = (filtersActive() ? 'Totals reflect the current filters. ' : 'Showing all invoices. ') + 'Unpaid includes Open and Partially Paid. ';
     updateBulkBar();
     renderCommandCenter();
+    renderInvoiceRecord();
 }
 
 // ---- Selection + bulk bar (BR-25) ----
@@ -1590,27 +1749,29 @@ function openDisable(mode, ids, source) {
 function closeDisableModal() { closeOverlay($('disableOverlay')); }
 function confirmDisable() {
     var c = disableCtx, n = c.on.length;
-    c.on.forEach(function(i){ i.cadence = null; }); // BR-36: history of sent reminders is kept
+    c.on.forEach(function(i){ i.cadence = null; i.remindersDisabled = true; }); // BR-36: history is kept; BR-37: the card says reminders are off
     closeOverlay($('disableOverlay'), true);
     if (c.mode === 'bulk') clearSelection(false);
     renderAll();
     showToast(c.mode === 'bulk' ? 'Reminders disabled on ' + plural1(n) + '.' : 'Reminders disabled on this invoice.');
     if (c.mode === 'bulk') headerCheckbox.focus();
     else if (c.source === 'row') { var b = $('menubtn-' + c.ids[0]); if (b) b.focus(); }
-    else { var h = $('cc-hist-' + c.ids[0]); if (h) h.focus(); }
+    else { var h = $('cc-off-' + c.ids[0]); if (h) h.focus(); }
 }
 
-// ---- Send Invoice / Request Payment modal (Item 3) ----
-// Company Settings > App Settings > Schedule Defaults > Custom Invoice Send Time (sample value in this prototype)
+// ---- Request Payment (create only), Send Invoice, Send Request ----
 var CUSTOM_INVOICE_SEND_TIME = '01:00 PM';
 function isUnpaid(inv) { return inv.status === 'OPEN' || inv.status === 'PARTIAL'; }
+function hasUnpaidRequest(inv) { return !!(inv.paymentRequest && inv.paymentRequest.unpaid); }
 function commMenuItems(inv) {
     if (inv.status === 'VOIDED') return '';
     var out = '<div class="menu-sep" role="separator"></div><div class="menu-group-label" aria-hidden="true">Invoice</div>'
         + '<button role="menuitem" tabindex="-1" onclick="openComm(' + inv.id + ', \'send\')"><i class="ti ti-send" aria-hidden="true"></i>Send Invoice</button>';
     if (isUnpaid(inv)) {
-        out += '<button role="menuitem" tabindex="-1" onclick="openComm(' + inv.id + ', \'request\')"><i class="ti ti-cash" aria-hidden="true"></i>Request Payment</button>';
-        if (inv.paymentRequest) {
+        if (!hasUnpaidRequest(inv)) {
+            out += '<button role="menuitem" tabindex="-1" onclick="openRequest(' + inv.id + ')"><i class="ti ti-cash" aria-hidden="true"></i>Request Payment</button>';
+        } else {
+            if (demo.sendReq === 'menu') out += '<button role="menuitem" tabindex="-1" onclick="openComm(' + inv.id + ', \'sendrequest\')"><i class="ti ti-mail-forward" aria-hidden="true"></i>' + miss('Send Request menu label') + '</button>';
             out += '<button role="menuitem" tabindex="-1" onclick="cancelPaymentRequest(' + inv.id + ')"><i class="ti ti-circle-x" aria-hidden="true"></i>Cancel Payment Request</button>';
         }
     }
@@ -1620,6 +1781,45 @@ function commMenuItems(inv) {
     }
     return out;
 }
+
+// -- Request Payment: creates the request only. No reminder UI (BR-28). --
+var reqInvoiceId = null;
+function onReqChange() {
+    var custom = document.querySelector('input[name="reqAmt"]:checked').value === 'custom';
+    $('reqCustomWrap').hidden = !custom;
+    $('reqCustomError').classList.remove('show'); $('reqCustom').removeAttribute('aria-invalid');
+}
+function openRequest(id) {
+    var inv = byId(id); reqInvoiceId = id;
+    closeMenus(false); var mb = $('menubtn-' + id); if (mb) mb.focus();
+    var bal = balanceOf(inv);
+    $('reqOptions').innerHTML = [25, 50, 75, 100].map(function(pct) {
+        var amt = Math.round(bal * pct) / 100;
+        return '<label class="radio-row"><input type="radio" name="reqAmt" value="' + pct + '" data-amt="' + amt + '"' + (pct === 100 ? ' checked' : '') + ' onchange="onReqChange()"> ' + pct + '% (' + fmt(amt) + ')</label>';
+    }).join('') + '<label class="radio-row"><input type="radio" name="reqAmt" value="custom" onchange="onReqChange()"> Custom</label>';
+    $('reqCustom').value = '';
+    onReqChange();
+    openOverlay($('reqOverlay'), document.querySelector('input[name="reqAmt"]:checked'));
+}
+function closeRequestModal() { closeOverlay($('reqOverlay')); }
+function submitRequest() {
+    var inv = byId(reqInvoiceId), sel = document.querySelector('input[name="reqAmt"]:checked'), amount;
+    if (sel.value === 'custom') {
+        var v = parseFloat($('reqCustom').value.trim());
+        if (!(v > 0) || v > balanceOf(inv) + 0.001) {
+            $('reqCustomError').classList.add('show'); $('reqCustom').setAttribute('aria-invalid', 'true'); $('reqCustom').focus(); return;
+        }
+        amount = Math.round(v * 100) / 100;
+    } else { amount = Number(sel.dataset.amt); }
+    inv.paymentRequest = { amount: amount, unpaid: true, sent: false }; // sends nothing, never touches reminders
+    closeOverlay($('reqOverlay'));
+    renderAll();
+    showToast('[MISSING: production string]', 'request created toast');
+    if (demo.sendReq === 'after') openComm(inv.id, 'sendrequest');
+}
+$('reqOverlay').addEventListener('click', function(e) { if (e.target === this) closeRequestModal(); });
+
+// -- Send Invoice (mode 'send') and Send Request (mode 'sendrequest') --
 var commInvoiceId = null, commMode = 'send';
 function channelLabel() {
     function en(r) { return r.enabled; }
@@ -1628,6 +1828,7 @@ function channelLabel() {
 }
 // Sample next-reminder date: the prototype does not compute real schedules
 function newCadence(source) { return { source: source, next: { date: 'Oct 12, 2026', channel: channelLabel() } }; }
+function startCadence(inv, source) { inv.cadence = newCadence(source); inv.remindersDisabled = false; } // a new cadence clears the Command Center "off" message
 function nextText(inv) { return 'Invoice reminders are on. Next reminder: ' + inv.cadence.next.date + ' by ' + inv.cadence.next.channel + '.'; }
 function alertHtml(kind, icon, text) {
     return '<div class="settings-alert settings-alert--' + kind + '"><i class="ti ' + icon + '" aria-hidden="true"></i><div>' + text + '</div></div>';
@@ -1638,22 +1839,21 @@ function toggleCommReminder(sw) {
     sw.querySelector('.switch-state').textContent = on ? 'On' : 'Off';
     updateCommNotice();
 }
-// BR-30 (Send) and BR-34 (Request, Keep) notices; both live regions announce on change
 function updateCommNotice() {
     var inv = byId(commInvoiceId), html = '';
     if (commMode === 'send' && !$('commStartRow').hidden && hasActiveCadence(inv)) {
         var on = $('commReminderSwitch').getAttribute('aria-checked') === 'true', later = $('commSendOn').value !== 'now';
         html = on
             ? alertHtml('info', 'ti-info-circle', later
-                ? 'This invoice already has reminders scheduled. They keep running until this invoice sends, then restart from that send.'
-                : 'This invoice already has reminders scheduled. Sending restarts them from this send.')
+                ? 'Current reminders keep running until this invoice sends, then restart.'
+                : 'Sending restarts this invoice’s reminders.')
             : alertHtml('warn', 'ti-alert-triangle', 'Reminders already scheduled for this invoice will stop.');
     }
     $('commNotice').innerHTML = html;
     if (!$('commKeepRow').hidden) {
         var keep = $('commKeepSwitch').getAttribute('aria-checked') === 'true';
         $('commKeepHelp').textContent = keep
-            ? 'Reminders keep their current schedule and ask for the full balance due, not this request\'s amount.'
+            ? 'Reminders keep their current schedule and ask for the full balance due, not this request’s amount.'
             : 'Upcoming reminders for this invoice stop when you send this request.';
     }
 }
@@ -1667,17 +1867,18 @@ function openComm(id, mode) {
     commInvoiceId = id; commMode = mode;
     closeMenus(false);
     var mb = $('menubtn-' + id); if (mb) mb.focus();
-    var first = inv.customer.split(' ')[0], bal = fmt(balanceOf(inv)), num = inv.invoiceNo.replace('#','');
-    var isReq = mode === 'request';
-    $('commTitle').textContent = (isReq ? 'Request Payment for Invoice ' : 'Send Invoice ') + inv.invoiceNo;
+    var first = inv.customer.split(' ')[0], num = inv.invoiceNo.replace('#','');
+    var isReq = mode === 'sendrequest';
+    if (isReq) $('commTitle').innerHTML = miss('Send Request title'); else $('commTitle').textContent = 'Send Invoice ' + inv.invoiceNo;
     $('commChannelLbl').textContent = 'Choose additional ways to communicate this ' + (isReq ? 'payment request' : 'invoice');
     $('commChannel').value = 'both';
     $('commEmailTo').value = inv.customer + ' (' + inv.customer.toLowerCase().replace(/[^a-z]/g,'') + '@example.com)';
     $('commCc').value = '';
     if (isReq) {
-        $('commSmsBody').value = 'Hi!\n\nThis is a request for a progress payment on your project with Sparrow\'s Nest Painting. Please make a progress payment in the amount of: ' + bal + '. You can view your invoice here: https://app.example.com/pay/' + num;
+        var amt = fmt(inv.paymentRequest.amount);
+        $('commSmsBody').value = 'Hi!\n\nThis is a request for a progress payment on your project with Sparrow\'s Nest Painting. Please make a progress payment in the amount of: ' + amt + '. You can view your invoice here: https://app.example.com/pay/' + num;
         $('commSubject').value = 'Progress Payment Request - Sparrow\'s Nest Painting';
-        $('commEmailBody').innerText = 'Hi, ' + first + '!\n\nThis is a request for a progress payment on our project.\n\nPlease make a progress payment in the amount of: ' + bal + ' by clicking the button below.\n\n{online-payment-button}\n\nIf you have any questions regarding this progress payment request, please call our office: (555) 555-5555.\n\nThank you!';
+        $('commEmailBody').innerText = 'Hi, ' + first + '!\n\nThis is a request for a progress payment on our project.\n\nPlease make a progress payment in the amount of: ' + amt + ' by clicking the button below.\n\n{online-payment-button}\n\nIf you have any questions regarding this progress payment request, please call our office: (555) 555-5555.\n\nThank you!';
     } else {
         $('commSmsBody').value = 'Please review invoice ' + num + ' from Sparrow\'s Nest Painting: https://app.example.com/pay/' + num;
         $('commSubject').value = 'Sparrow\'s Nest Painting Invoice ' + inv.invoiceNo;
@@ -1687,14 +1888,19 @@ function openComm(id, mode) {
     $('commSendOnCustom').textContent = 'Tomorrow at ' + CUSTOM_INVOICE_SEND_TIME;
     $('commSendOn').value = 'now';
     $('commSendBtn').textContent = 'Send';
-    // BR-27 / BR-29 (with BR-14): toggle exists only when reminders are set up and enabled, the invoice has a due date, and it is not Paid
-    var showToggle = anyEnabledRows() && invoiceRemindersSetUp && !!inv.dueDate && inv.status !== 'PAID';
-    var keepMode = showToggle && isReq && hasActiveCadence(inv); // BR-34
-    $('commReminderCard').hidden = !showToggle;
-    $('commStartRow').hidden = keepMode;
+    // BR-27 / BR-29 (with BR-14): reminder controls only when set up and enabled, the invoice has a due date, and it is not Paid
+    var eligible = anyEnabledRows() && invoiceRemindersSetUp && !!inv.dueDate && inv.status !== 'PAID';
+    var group = inAccessGroup(), active = hasActiveCadence(inv);
+    var keepMode = group && eligible && isReq && active;       // BR-30: a Send Request never replaces a cadence
+    var startMode = group && eligible && !keepMode;
+    var readOnly = !group && eligible && !isReq;                // BR-29: outside the access group, Send Invoice shows a notice only
+    $('commReminderCard').hidden = !(keepMode || startMode || readOnly);
+    $('commStartRow').hidden = !startMode;
     $('commKeepRow').hidden = !keepMode;
+    $('commReadOnly').hidden = !readOnly;
     [$('commReminderSwitch'), $('commKeepSwitch')].forEach(function(sw) { sw.setAttribute('aria-checked', 'true'); sw.querySelector('.switch-state').textContent = 'On'; });
     if (keepMode) $('commKeepAlertText').textContent = nextText(inv);
+    if (readOnly) $('commReadOnlyText').textContent = active ? 'Sending restarts this invoice’s reminders.' : 'Sending starts reminders for this invoice.';
     updateCommNotice();
     applyCommChannel();
     $('commModalCard').querySelector('.edit-modal-body').scrollTop = 0;
@@ -1702,32 +1908,33 @@ function openComm(id, mode) {
 }
 function closeCommModal() { closeOverlay($('commOverlay')); }
 function submitComm() {
-    var inv = byId(commInvoiceId), isReq = commMode === 'request';
-    var shown = !$('commReminderCard').hidden, keepMode = !$('commKeepRow').hidden;
+    var inv = byId(commInvoiceId), isReq = commMode === 'sendrequest';
+    var cardShown = !$('commReminderCard').hidden;
+    var startMode = cardShown && !$('commStartRow').hidden, keepMode = cardShown && !$('commKeepRow').hidden, readOnly = cardShown && !$('commReadOnly').hidden;
     var startOn = $('commReminderSwitch').getAttribute('aria-checked') === 'true';
     var keepOn = $('commKeepSwitch').getAttribute('aria-checked') === 'true';
     var sendSel = $('commSendOn'), later = !isReq && sendSel.value !== 'now';
     var when = later ? sendSel.options[sendSel.selectedIndex].text.replace('Tomorrow', 'tomorrow') : '';
-    var note = '';
     if (isReq) {
-        // BR-34: a Request Payment never replaces a cadence
-        if (keepMode) { if (!keepOn) { inv.cadence = null; note = ' Reminders for this invoice have stopped.'; } }
-        else if (shown) { if (startOn) inv.cadence = newCadence('request'); note = startOn ? ' Reminders are on.' : ' Reminders are off.'; }
-        inv.paymentRequest = true;
+        // BR-30: a Send Request never replaces a cadence. Keep OFF ends it; the Command Center off message is not set.
+        if (keepMode) { if (!keepOn) inv.cadence = null; }
+        else if (startMode && startOn) startCadence(inv, 'request');
+        inv.paymentRequest.sent = true;
     } else if (!later) {
-        // BR-28 / BR-30: a send starts a cadence and replaces any existing one; OFF (or no toggle) ends it
-        inv.cadence = shown && startOn ? newCadence('send') : null;
-        if (shown) note = startOn ? ' Reminders are on.' : ' Reminders are off.';
-    } // a scheduled send leaves the cadence unchanged until it sends (BR-28)
+        // BR-28 / BR-30: a send starts a cadence and replaces any existing one; OFF or an ineligible invoice ends it
+        if (startMode) { if (startOn) startCadence(inv, 'send'); else inv.cadence = null; }
+        else if (readOnly) startCadence(inv, 'send');
+        else inv.cadence = null;
+    } // a scheduled send leaves the cadence unchanged until it sends
     closeCommModal();
     renderAll();
     var b = $('menubtn-' + inv.id); if (b) b.focus();
-    showToast(isReq ? 'Payment request sent for invoice ' + inv.invoiceNo + '.' + note
-        : (later ? 'Invoice ' + inv.invoiceNo + ' scheduled to send ' + when + '. Reminders update when it sends.' : 'Invoice ' + inv.invoiceNo + ' sent.' + note));
+    if (isReq) showToast('[MISSING: production string]', 'Send Request toast');
+    else showToast(later ? 'Invoice ' + inv.invoiceNo + ' scheduled to send ' + when + '.' : 'Invoice ' + inv.invoiceNo + ' sent.');
 }
 function cancelPaymentRequest(id) {
     var inv = byId(id);
-    inv.paymentRequest = false; // BR-34: cancelling a request does not touch reminders
+    inv.paymentRequest = null; // cancelling a request does not touch reminders
     closeMenus(false);
     renderAll();
     var b = $('menubtn-' + id); if (b) b.focus();
@@ -1737,10 +1944,36 @@ $('disableOverlay').addEventListener('click', function(e) { if (e.target === thi
 $('offOverlay').addEventListener('click', function(e) { if (e.target === this) closeOffModal(); });
 $('commOverlay').addEventListener('click', function(e) { if (e.target === this) closeCommModal(); });
 
+// ---- Reminder history (BR-16, BR-38): shared by the Command Center and the invoice record ----
+var SKIP_REASONS = {
+    'optout-reminders': 'customer opted out of reminders',
+    'optout-emails': 'customer opted out of all emails',
+    'optout-sms': 'customer opted out of all SMS',
+    'bounced': 'email address bounced',
+    'paid': 'invoice was paid',
+    'voided': 'invoice was voided',
+    'inactive': 'your account was inactive',
+    'offline': 'customer chose to pay offline'
+};
+function histTime(h) { return new Date(h.date + ' ' + h.time).getTime(); }
+function histText(h) {
+    var ch = h.channel === 'SMS' ? 'SMS' : 'Email';
+    return h.type === 'skipped'
+        ? ch + ' reminder skipped: ' + h.date + ' at ' + h.time + ' (' + SKIP_REASONS[h.reason] + ')'
+        : ch + ' reminder sent: ' + h.date + ' at ' + h.time;
+}
+function historyListHtml(inv, id, hidden) {
+    var list = inv.history.slice().sort(function(a, b){ return histTime(b) - histTime(a); }); // newest first
+    var items = list.length ? list.map(function(h) {
+        var icon = h.type === 'skipped' ? 'ti-circle-off' : (h.channel === 'SMS' ? 'ti-message' : 'ti-mail');
+        return '<li' + (h.type === 'skipped' ? ' class="hist-skipped"' : '') + '><i class="ti ' + icon + '" aria-hidden="true"></i><span>' + esc(histText(h)) + '</span></li>';
+    }).join('') : '<li><span>No reminders sent yet.</span></li>';
+    return '<ul class="hist-list" id="' + id + '"' + (hidden ? ' hidden' : '') + '>' + items + '</ul>';
+}
+
 // ---- Command Center (BR-37, BR-16): shares state with the Invoices page ----
 var CC_INVOICE_IDS = [16, 12];
 var ccOpen = {};
-function fmtHist(h) { return (h.channel === 'SMS' ? 'SMS' : 'Email') + ' reminder sent: ' + h.date + ' at ' + h.time; }
 function ccCard(inv) {
     var s = STATUS[inv.status], active = hasActiveCadence(inv), id = inv.id;
     var html = '<article class="cc-inv-card" aria-label="Invoice ' + esc(inv.invoiceNo) + '"><div class="cc-inv-main">'
@@ -1749,17 +1982,19 @@ function ccCard(inv) {
         + '<div class="cc-inv-right">of ' + fmt(inv.amountN) + '<br><span class="cc-link">Invoice ' + esc(inv.invoiceNo) + '</span></div></div>';
     if (active) {
         html += '<div class="settings-alert settings-alert--info"><i class="ti ti-bell-ringing" aria-hidden="true"></i><div>' + esc(nextText(inv))
-            + ' <span class="br-chip br-annot" tabindex="0">BR-37 <span class="br-tooltip">BR-37: the Command Center shows the next reminder and a Disable Reminders action per invoice card. Same confirm and same shared state as the Invoices page.</span></span>'
+            + ' <span class="br-chip br-annot" tabindex="0">BR-37 <span class="br-tooltip">BR-37: the Command Center shows the next reminder, and the Disable Reminders action for the access group only. Same confirm and same shared state as the Invoices page.</span></span>'
             + ' <span class="br-chip br-annot" tabindex="0">Assumption: action is per invoice card <span class="br-tooltip">Assumption: Disable Reminders acts on one invoice card, not on the whole deal.</span></span></div>'
-            + '<button type="button" class="btn btn-outline-primary alert-action-btn settings-alert-action" onclick="openDisable(\'single\', [' + id + '], \'cc\')">Disable Reminders</button></div>';
+            + (inAccessGroup() ? '<button type="button" class="btn btn-outline-primary alert-action-btn settings-alert-action" onclick="openDisable(\'single\', [' + id + '], \'cc\')">Disable Reminders</button>' : '')
+            + '</div>';
+    } else if (inv.remindersDisabled) {
+        html += '<div class="settings-alert settings-alert--info" id="cc-off-' + id + '" tabindex="-1"><i class="ti ti-bell-off" aria-hidden="true"></i><div>Reminders are off for this invoice. To start them again, send the invoice or a payment request with Invoice Reminders turned on. '
+            + '<span class="br-chip br-annot" tabindex="0">BR-37 · Q3 <span class="br-tooltip">Shows until a new cadence starts; not shown when a schedule ends on its own. Question for Jeremy.</span></span></div></div>';
     }
     if (inv.dueDate) {
         var open = !!ccOpen[id];
         html += '<button type="button" class="cc-hist-btn" id="cc-hist-' + id + '" aria-expanded="' + open + '" aria-controls="cc-hist-list-' + id + '" onclick="toggleCcHist(' + id + ')">Reminder history <i class="ti ti-chevron-down" aria-hidden="true"></i></button>'
-            + ' <span class="br-chip br-annot" tabindex="0">BR-16 <span class="br-tooltip">BR-16: each reminder send is logged (date, time, channel) and shown on the invoice record.</span></span>'
-            + '<ul class="cc-hist-list" id="cc-hist-list-' + id + '"' + (open ? '' : ' hidden') + '>'
-            + (inv.history.length ? inv.history.map(function(h){ return '<li>' + esc(fmtHist(h)) + '</li>'; }).join('') : '<li>No reminders sent yet.</li>')
-            + '</ul>';
+            + ' <span class="br-chip br-annot" tabindex="0">BR-16 · BR-38 <span class="br-tooltip">BR-16: each reminder send, and each skipped reminder with its reason (BR-38), is shown on the invoice record and here, newest first. History stays after Disable.</span></span>'
+            + historyListHtml(inv, 'cc-hist-list-' + id, !open);
     }
     return html + '</article>';
 }
@@ -1775,6 +2010,42 @@ function renderCommandCenter() {
     if (focusId && $(focusId) && panel.contains($(focusId))) $(focusId).focus();
 }
 
+// ---- Invoice record (BR-16), low fidelity ----
+var recordInvoiceId = null;
+function renderInvoiceRecord() {
+    var box = $('invoice-record');
+    if (recordInvoiceId == null || !box) return;
+    var inv = byId(recordInvoiceId), s = STATUS[inv.status];
+    var html = '<button type="button" class="back-link" onclick="closeInvoiceRecord()"><i class="ti ti-arrow-left" aria-hidden="true"></i>Back to Invoices</button>'
+        + '<h1 id="rec-title" tabindex="-1">Invoice ' + esc(inv.invoiceNo) + ' <span class="status-chip ' + s.cls + '">' + s.label + '</span>'
+        + ' <span class="br-chip br-annot" tabindex="0">Low-fi: awaiting production screenshot <span class="br-tooltip">Low-fi: awaiting production screenshot (Q6).</span></span></h1>'
+        + '<div class="rec-meta">'
+        + '<div class="stat-card"><div class="stat-label">Amount</div><div class="stat-value">' + fmt(inv.amountN) + '</div></div>'
+        + '<div class="stat-card"><div class="stat-label">Paid</div><div class="stat-value">' + fmt(inv.paidN) + '</div></div>'
+        + '<div class="stat-card"><div class="stat-label">Balance</div><div class="stat-value">' + fmt(balanceOf(inv)) + '</div></div>'
+        + '<div class="stat-card"><div class="stat-label">Due date</div><div class="stat-value" style="font-size:16px;">' + (inv.dueDate ? esc(inv.dueDate) : 'No due date') + '</div></div></div>'
+        + '<div class="rec-placeholder" aria-hidden="true">Existing invoice details (unchanged)</div>';
+    if (inv.dueDate) {
+        html += '<section class="rec-section" aria-labelledby="rec-hist-h"><h2 id="rec-hist-h">Reminder history '
+            + '<span class="br-chip br-annot" tabindex="0">BR-16 <span class="br-tooltip">BR-16: same history as the Command Center card, newest first.</span></span></h2>'
+            + historyListHtml(inv, 'rec-hist-list', false) + '</section>';
+    }
+    box.innerHTML = html;
+}
+function openInvoiceRecord(id) {
+    closeMenus(false);
+    recordInvoiceId = id;
+    renderInvoiceRecord();
+    $('invoices-list-view').hidden = true; $('invoice-record').hidden = false;
+    $('rec-title').focus();
+}
+function closeInvoiceRecord() {
+    var id = recordInvoiceId; recordInvoiceId = null;
+    $('invoice-record').hidden = true; $('invoices-list-view').hidden = false;
+    renderAll();
+    var b = $('menubtn-' + id); if (b) b.focus();
+}
+
 // ---------- Init ----------
 renderInvoiceSection();
 renderAll();
@@ -1783,7 +2054,7 @@ renderAll();
 <!-- Proto Bar -->
 <div style="position:fixed;bottom:0;left:0;right:0;background:#2A2440;color:#fff;font-size:12px;padding:8px 20px;display:flex;align-items:center;gap:16px;z-index:9999;font-family:'Nunito',sans-serif;">
   <strong style="color:#C9C4FF;">PROTOTYPE</strong>
-  <span>Invoice Reminders: Reminders Page + Invoices Page + Command Center &#183; Rev. Oct 5, 2026</span>
+  <span>Invoice Reminders: Reminders Page + Invoices Page + Command Center &#183; Rev. Oct 6, 2026 (codebase review)</span>
   <a href="https://app.clickup.com/t/86b32d4gr" target="_blank" rel="noopener" style="color:#C9C4FF;font-weight:700;">86b32d4gr</a>
   <span style="margin-left:auto;opacity:0.75;">dripjobsjeremy.github.io/dripjobs-prototypes</span>
   <a href="../index.html" style="color:#C9C4FF;font-weight:700;text-decoration:none;">&#8592; Hub</a>
