@@ -1583,3 +1583,8 @@ Format:
 - Decision: Confirmed by Jeremy: production shows no toast after an invoice is sent, so the Send Invoice and scheduled send toasts are removed. The Send Invoice note now covers the title only.
 - Confirmed: Amount starts at $0.00, selects on focus, and Custom stays empty.
 - Open question: Payment methods come from Company Settings > App Settings (defaults credit card and check, plus custom ones). Which method Mark as Paid on a request records is not specified, so Method still shows N/A.
+
+## [2026-10-08] Invoice Reminders (86b32d4gr): Receive Payment modal reverted, error styling matched
+- Decision: Jeremy clarified the Receive Payment screenshot was only a reference for the payment method list (credit card, check, Cash, Retainer, Skittles, M&Ms, IOU, PayPal, Zelle, from Company Settings > App Settings), not what Mark as Paid opens. The modal was reverted, and Mark as Paid records the payment directly again.
+- Decision: Request Payment errors now match production screens: bold bright red bulleted text above the legend, and Amount starts as "0". The red (#F5222D) was matched by eye from the screenshot.
+- Open question: Which method Mark as Paid on a request records. It shows N/A until specified.
