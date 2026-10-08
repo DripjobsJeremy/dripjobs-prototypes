@@ -1586,4 +1586,9 @@ Format:
 
 ## [2026-10-08] Invoice Reminders (86b32d4gr): Mark as Paid opens Receive Payment
 - Decision: From Jeremy's production screenshot of Receive Payment, Mark as Paid on a payment request now opens that modal with the request amount filled in. It has Date Received (10/08/2026), Amount, Method (Select a method, credit card, check, Cash, Retainer, Skittles, M&Ms, IOU, PayPal, Zelle), Ref Number, Notes, a Deposit Payment switch, and the receipt email block (To, Subject, Body). Save records a payment row with the chosen method and removes the request. Methods come from Company Settings > App Settings, so the list here is sample data.
-- Assumption: The screenshot was sent without text, so I assumed it is what Mark as Paid opens. Also assumed: Method is optional (shows N/A if blank), Amount only needs to be above $0 (error "Amount received cannot be $0", wording invented), a different amount than the request is allowed, the receipt email does not send, and the rich text toolbar is not built.
+- Assumption: The screenshot was sent without text, so I assumed it is what Mark as Paid opens. Also assumed (Method since made required, see below): Amount only needs to be above $0 (error "Amount received cannot be $0", wording invented), a different amount than the request is allowed, the receipt email does not send, and the rich text toolbar is not built.
+
+## [2026-10-08] Invoice Reminders (86b32d4gr): Receive Payment restored, method required, error styling
+- Decision: Jeremy clarified that clicking Mark as Paid does open the Receive Payment modal and the user must pick a method from the dropdown. The modal is restored from the earlier build (the screenshot shows the method list: credit card, check, Cash, Retainer, Skittles, M&Ms, IOU, PayPal, Zelle, which come from Company Settings > App Settings).
+- Assumption: Method is required. Saving without one shows "Select a method" (wording invented). Amount only needs to be above $0.
+- Decision: Request Payment errors match production screens: bold bright red bulleted text above the legend (#F5222D, matched by eye), and Amount starts as "0".

@@ -1049,7 +1049,7 @@ body.phone-preview .req-pill span { min-height: 48px; }
             <div class="pay-grid">
                 <div class="req-group"><label for="payDate">Date Received</label><div class="req-box"><i class="ti ti-calendar req-affix" aria-hidden="true"></i><input type="text" id="payDate"></div></div>
                 <div class="req-group"><label for="payAmount">Amount</label><div class="req-box"><span class="req-affix" aria-hidden="true">$</span><input type="text" inputmode="decimal" id="payAmount" aria-describedby="payError" oninput="this.value=this.value.replace(/[^0-9.]/g,'');$('payError').classList.remove('show');this.removeAttribute('aria-invalid')" onfocus="this.select()"></div></div>
-                <div class="req-group"><label for="payMethod">Method</label><div class="req-box pay-box"><select id="payMethod"><option value="">Select a method...</option><option>credit card</option><option>check</option><option>Cash</option><option>Retainer</option><option>Skittles</option><option>M&amp;Ms</option><option>IOU</option><option>PayPal</option><option>Zelle</option></select></div></div>
+                <div class="req-group"><label for="payMethod">Method</label><div class="req-box pay-box"><select id="payMethod" aria-describedby="payError" onchange="this.removeAttribute('aria-invalid');$('payError').classList.remove('show')"><option value="">Select a method...</option><option>credit card</option><option>check</option><option>Cash</option><option>Retainer</option><option>Skittles</option><option>M&amp;Ms</option><option>IOU</option><option>PayPal</option><option>Zelle</option></select></div></div>
                 <div class="req-group"><label for="payRef">Ref Number</label><div class="req-box"><input type="text" id="payRef"></div></div>
                 <div class="req-group span2"><label for="payNotes">Notes</label><div class="req-box pay-box is-area"><textarea id="payNotes" placeholder="Notes about this payment..."></textarea></div></div>
                 <div class="span2"><button type="button" class="reminder-switch" id="payDeposit" role="switch" aria-checked="false" onclick="this.setAttribute('aria-checked', this.getAttribute('aria-checked') === 'true' ? 'false' : 'true')"><span class="switch-track" aria-hidden="true"></span><span>Deposit Payment</span></button></div>
@@ -1059,7 +1059,7 @@ body.phone-preview .req-pill span { min-height: 48px; }
                 <div class="req-group"><label for="paySubject">Subject</label><div class="req-box"><input type="text" id="paySubject" value="Sparrow's Nest Painting - Payment Receipt"></div></div>
                 <div class="req-group"><label id="payBodyLbl">Body</label><div class="pay-body" role="textbox" aria-multiline="true" aria-labelledby="payBodyLbl" contenteditable="true" tabindex="0"><p>Hi {customer-name},</p><p>Thank you for your payment of <strong>{payment-amount}</strong> towards {company-name} invoice <strong>#{invoice-number}</strong>.</p><p>{payment-details}</p><p>If you would like to view your invoice, click here:</p><p>{view-invoice-button}</p></div></div>
             </div>
-            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">Mark as Paid <span class="br-tooltip">Mark as Paid opens Receive Payment with the request amount filled in. Save records the payment and removes the request. Assumed: Method is optional, Amount only needs to be above $0, the receipt email does not send in the prototype, and the rich text toolbar is not built.</span></span>
+            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">Mark as Paid <span class="br-tooltip">Mark as Paid opens Receive Payment with the request amount filled in. Save records the payment and removes the request. Assumed: Method must be selected (error text invented), Amount only needs to be above $0, the receipt email does not send in the prototype, and the rich text toolbar is not built.</span></span>
         </div>
         <div class="edit-modal-footer">
             <button class="btn btn-primary" id="paySaveBtn" onclick="savePay()">Save</button>
@@ -2243,9 +2243,14 @@ function savePay() {
         $('payError').classList.add('show'); $('payAmount').setAttribute('aria-invalid', 'true'); $('payAmount').focus();
         return;
     }
+    if (!$('payMethod').value) {
+        $('payErrorText').textContent = 'Select a method';
+        $('payError').classList.add('show'); $('payMethod').setAttribute('aria-invalid', 'true'); $('payMethod').focus();
+        return;
+    }
     amt = cents(amt);
     var pays = paymentsOf(inv), m = $('payMethod');
-    pays.push({no: 'Payment #6306' + String(100 + pays.length + inv.id).slice(-3), method: m.value || 'N/A', received: $('payDate').value, ref: $('payRef').value.trim() || 'N/A', amount: amt}); // recorded as a payment row
+    pays.push({no: 'Payment #6306' + String(100 + pays.length + inv.id).slice(-3), method: m.value, received: $('payDate').value, ref: $('payRef').value.trim() || 'N/A', amount: amt}); // recorded as a payment row
     inv.paidN = cents(inv.paidN + amt);
     if (balanceOf(inv) <= 0.004) { inv.status = 'PAID'; inv.cadence = null; } // BR-12 / BR-13; no off message (BR-37)
     else inv.status = 'PARTIAL';
