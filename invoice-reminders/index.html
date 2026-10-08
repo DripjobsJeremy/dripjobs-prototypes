@@ -1079,7 +1079,7 @@ body.phone-preview .req-pill span { min-height: 48px; }
                     <span class="br-chip br-annot" tabindex="0" style="margin-top:8px;">BR-29 <span class="br-tooltip">Access group switch simulates a non-Admin, non-assignee user; the Invoices page itself is Admin only.</span></span>
                 </div>
                 <div id="commNotice" aria-live="polite"></div>
-                <span class="br-chip br-annot" id="commTitleNote" tabindex="0" hidden>Send Invoice unverified <span class="br-tooltip">Send Invoice title and no-toast behavior unverified against production.</span></span>
+                <span class="br-chip br-annot" id="commTitleNote" tabindex="0" hidden>Send Invoice title unverified <span class="br-tooltip">Send Invoice title unverified against production. Production shows no toast after sending an invoice, and the prototype matches.</span></span>
                 <div id="commKeepRow" hidden>
                     <div class="settings-alert settings-alert--info" style="margin:0 0 6px;"><i class="ti ti-info-circle" aria-hidden="true"></i><div id="commKeepAlertText"></div></div>
                     <div class="reminder-toggle-row">
@@ -2000,7 +2000,6 @@ function submitComm() {
     var startOn = $('commReminderSwitch').getAttribute('aria-checked') === 'true';
     var keepOn = $('commKeepSwitch').getAttribute('aria-checked') === 'true';
     var sendSel = $('commSendOn'), later = !isReq && sendSel.value !== 'now';
-    var when = later ? sendSel.options[sendSel.selectedIndex].text.replace('Tomorrow', 'tomorrow') : '';
     if (isReq) {
         // BR-30: a Send Request never replaces a cadence. Keep OFF ends it; the Command Center off message is not set.
         if (keepMode) { if (!keepOn) inv.cadence = null; }
@@ -2016,7 +2015,6 @@ function submitComm() {
     renderAll();
     if (isReq && !$('invoice-record').hidden) { var rb = $('rec-send-btn'); if (rb) rb.focus(); }
     else { var b = $('menubtn-' + inv.id); if (b) b.focus(); }
-    if (!isReq) showToast(later ? 'Invoice ' + inv.invoiceNo + ' scheduled to send ' + when + '.' : 'Invoice ' + inv.invoiceNo + ' sent.');
 }
 function cancelPaymentRequest(id) {
     var inv = byId(id);

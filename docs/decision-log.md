@@ -1578,3 +1578,8 @@ Format:
 - Decision: Added a note on the Send Invoice modal: title and no-toast behavior unverified against production. Send Invoice still shows its existing toast.
 - Cleanup: Removed the QBO Failed open gap from the BR-26 note. Zapier was already absent. Revision label and proto bar now read Rev. Oct 8, 2026.
 - Open question: Method for a payment recorded from a request, and whether Send Invoice should show a toast.
+
+## [2026-10-08] Invoice Reminders (86b32d4gr): Send Invoice toast removed, Amount at $0 confirmed
+- Decision: Confirmed by Jeremy: production shows no toast after an invoice is sent, so the Send Invoice and scheduled send toasts are removed. The Send Invoice note now covers the title only.
+- Confirmed: Amount starts at $0.00, selects on focus, and Custom stays empty.
+- Open question: Payment methods come from Company Settings > App Settings (defaults credit card and check, plus custom ones). Which method Mark as Paid on a request records is not specified, so Method still shows N/A.
