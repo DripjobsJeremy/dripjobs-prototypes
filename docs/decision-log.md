@@ -1584,7 +1584,6 @@ Format:
 - Confirmed: Amount starts at $0.00, selects on focus, and Custom stays empty.
 - Open question: Payment methods come from Company Settings > App Settings (defaults credit card and check, plus custom ones). Which method Mark as Paid on a request records is not specified, so Method still shows N/A.
 
-## [2026-10-08] Invoice Reminders (86b32d4gr): Receive Payment modal reverted, error styling matched
-- Decision: Jeremy clarified the Receive Payment screenshot was only a reference for the payment method list (credit card, check, Cash, Retainer, Skittles, M&Ms, IOU, PayPal, Zelle, from Company Settings > App Settings), not what Mark as Paid opens. The modal was reverted, and Mark as Paid records the payment directly again.
-- Decision: Request Payment errors now match production screens: bold bright red bulleted text above the legend, and Amount starts as "0". The red (#F5222D) was matched by eye from the screenshot.
-- Open question: Which method Mark as Paid on a request records. It shows N/A until specified.
+## [2026-10-08] Invoice Reminders (86b32d4gr): Mark as Paid opens Receive Payment
+- Decision: From Jeremy's production screenshot of Receive Payment, Mark as Paid on a payment request now opens that modal with the request amount filled in. It has Date Received (10/08/2026), Amount, Method (Select a method, credit card, check, Cash, Retainer, Skittles, M&Ms, IOU, PayPal, Zelle), Ref Number, Notes, a Deposit Payment switch, and the receipt email block (To, Subject, Body). Save records a payment row with the chosen method and removes the request. Methods come from Company Settings > App Settings, so the list here is sample data.
+- Assumption: The screenshot was sent without text, so I assumed it is what Mark as Paid opens. Also assumed: Method is optional (shows N/A if blank), Amount only needs to be above $0 (error "Amount received cannot be $0", wording invented), a different amount than the request is allowed, the receipt email does not send, and the rich text toolbar is not built.
