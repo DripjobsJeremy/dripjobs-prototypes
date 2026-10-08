@@ -1567,3 +1567,7 @@ Format:
 - Decision: In the Request Payment modal, choosing a percent now fills Custom with that percent (for example 50) and Amount from the remaining balance, as production does. A selected pill is solid purple with white text. The chip now says only the typing behavior is pending a screenshot.
 - Deviation: The Oct 7 spec said Cancel should be a red outline, but the production screen shows a dark outline, so the dark outline is used.
 - Assumption: Production does not show Reminder history, so it sits below Payments, marked by a "Placement assumed" chip. The Low-fi chip is gone from the record. The 16px gap before Cancel is kept from the earlier spec, even though production looks tighter.
+
+## [2026-10-08] Invoice Reminders (86b32d4gr): Request Payment typing behavior confirmed
+- Decision: Confirmed by Jeremy with a production screenshot: typing a custom value clears the selected percent pill. Typing in Amount leaves Custom as it was (production showed Custom 50 with Amount 23), so the prototype no longer blanks Custom.
+- Still assumed: Amount is validated on Save only, not while typing. The typing chip now reads "from production".
