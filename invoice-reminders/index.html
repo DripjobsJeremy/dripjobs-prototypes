@@ -429,9 +429,6 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
 .hist-list li:first-child { border-top: none; }
 .hist-list li i { font-size: 15px; margin-top: 1px; color: #5E6578; }
 .hist-list li.hist-skipped { color: #5E6578; }
-.req-money { display: flex; align-items: center; gap: 6px; border: 1px solid #DAD8E3; border-radius: 8px; padding: 0 12px; max-width: 220px; min-height: 40px; }
-.req-money input { border: none; outline: none; flex: 1; min-height: 38px; font-size: 14px; font-family: 'Nunito', sans-serif; min-width: 0; }
-.req-money:focus-within { border-color: #8B85EA; box-shadow: 0 0 0 3px rgba(139,133,234,.18); }
 @media (max-width: 860px) { .rec-meta { grid-template-columns: repeat(2, 1fr); } }
 
 /* ---- Phone width (BR-28): real viewport at 480px or less, and the Phone preview frame ---- */
@@ -469,23 +466,38 @@ body.phone-preview #commOverlay *, body.phone-preview #reqOverlay * { text-overf
 }
 body.phone-preview #commOverlay.is-open, body.phone-preview #reqOverlay.is-open { align-items: center; justify-content: center; }
 
-.req-radios { display: flex; flex-wrap: wrap; gap: 0 22px; }
-.req-field { margin-top: 12px; }
-.req-field label { display: block; font-size: 12px; font-weight: 600; margin: 0 0 4px; }
-.req-field > input { width: 100%; max-width: 220px; min-height: 40px; border: 1px solid #DAD8E3; border-radius: 8px; padding: 0 12px; font-size: 14px; font-family: 'Nunito', sans-serif; }
-.req-field > input:focus { outline: none; border-color: #8B85EA; box-shadow: 0 0 0 3px rgba(139,133,234,.18); }
-.req-field .req-money { max-width: 220px; }
-.req-money input:focus-visible { outline: none; }
-.req-money:focus-within { outline: 2px solid #5C53DC; outline-offset: 2px; }
 #invoices-page .btn-outline-danger { color: #B42318; border-color: #B42318; background: transparent; }
 #invoices-page .btn-outline-danger:hover { background: #B42318; border-color: #B42318; color: #fff; }
 .rec-req-actions { display: flex; flex-wrap: wrap; gap: 16px; }
 .rec-req-actions .btn { min-height: 48px; padding: 0 22px; }
-@media (max-width: 480px) { .req-field > input, .req-field .req-money { max-width: 100%; } }
-body.phone-preview .req-field > input, body.phone-preview .req-field .req-money { max-width: 100%; }
 /* The fixed prototype bar (z-index 9999) must never cover the footer of a phone-width modal */
 @media (max-width: 480px) { #commOverlay, #reqOverlay { z-index: 10000; } }
 body.phone-preview #commOverlay, body.phone-preview #reqOverlay { z-index: 10000; }
+/* Request Payment modal, matched to the production screens */
+#reqModalCard { width: 480px; }
+#reqOverlay .edit-modal-footer { background: #F2F2F7; }
+#reqOverlay .edit-modal-footer .btn-outline-primary { background: #fff; }
+ul.req-errors { display: none; margin: 0 0 14px; padding-left: 26px; color: #991B1B; list-style: disc; }
+ul.req-errors.show { display: block; }
+ul.req-errors li { font-size: 13px; font-weight: 700; }
+.req-fs { border: none; padding: 0; margin: 0; min-width: 0; }
+.req-fs legend { display: block; float: none; width: 100%; padding: 0; margin: 0 0 14px; text-align: center; font-size: 18px; font-weight: 600; }
+.req-radios { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.req-pill { position: relative; display: inline-flex; margin: 0; cursor: pointer; }
+.req-pill input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.req-pill span { display: inline-flex; align-items: center; justify-content: center; min-width: 62px; min-height: 40px; padding: 0 18px; border: 1px solid #8B85EA; border-radius: 999px; background: #fff; color: #5C53DC; font-size: 14px; font-weight: 600; }
+.req-pill input:checked + span { background: #E8E6FA; border-color: #5C53DC; box-shadow: inset 0 0 0 1px #5C53DC; }
+.req-pill input:focus-visible + span { outline: 2px solid #5C53DC; outline-offset: 2px; }
+.req-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
+.req-group { position: relative; min-width: 0; }
+.req-group > label { position: absolute; top: -8px; left: 10px; z-index: 1; margin: 0; padding: 0 6px; background: #fff; font-size: 11px; font-weight: 500; color: #5E6578; letter-spacing: .2px; }
+.req-box { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border: 1px solid #DAD8E3; border-radius: 8px; background: #fff; }
+.req-box:focus-within { border-color: #8B85EA; outline: 2px solid #5C53DC; outline-offset: 2px; }
+.req-box input { flex: 1; min-width: 0; min-height: 40px; border: none; outline: none; background: transparent; font-family: 'Nunito', sans-serif; font-size: 14px; color: #32415B; }
+.req-box input:focus-visible { outline: none; }
+.req-affix { color: #5E6578; font-size: 14px; }
+@media (max-width: 480px) { .req-pill span { min-height: 48px; } .req-row { gap: 12px; } }
+body.phone-preview .req-pill span { min-height: 48px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
 </style>
 </head>
@@ -945,18 +957,20 @@ body.phone-preview #commOverlay, body.phone-preview #reqOverlay { z-index: 10000
             <button class="modal-close-btn" onclick="closeRequestModal()" aria-label="Close"><i class="ti ti-x" aria-hidden="true"></i></button>
         </div>
         <div class="edit-modal-body">
-            <p class="field-error" id="reqAmountError" role="alert" style="margin:0 0 12px;"><i class="ti ti-alert-circle" aria-hidden="true"></i><span id="reqAmountErrorText"></span></p>
-            <fieldset class="void-fieldset" style="margin-top:0;">
+            <ul class="req-errors" id="reqAmountError" role="alert"><li id="reqAmountErrorText"></li></ul>
+            <fieldset class="req-fs">
                 <legend id="reqLegend">Remaining Balance</legend>
                 <div class="req-radios">
-                    <label class="radio-row"><input type="radio" name="reqAmt" value="25" onchange="onReqPercent(this)"> 25%</label>
-                    <label class="radio-row"><input type="radio" name="reqAmt" value="50" onchange="onReqPercent(this)"> 50%</label>
-                    <label class="radio-row"><input type="radio" name="reqAmt" value="75" onchange="onReqPercent(this)"> 75%</label>
-                    <label class="radio-row"><input type="radio" name="reqAmt" value="100" onchange="onReqPercent(this)"> 100%</label>
+                    <label class="req-pill"><input type="radio" name="reqAmt" value="25" onchange="onReqPercent(this)"><span>25%</span></label>
+                    <label class="req-pill"><input type="radio" name="reqAmt" value="50" onchange="onReqPercent(this)"><span>50%</span></label>
+                    <label class="req-pill"><input type="radio" name="reqAmt" value="75" onchange="onReqPercent(this)"><span>75%</span></label>
+                    <label class="req-pill"><input type="radio" name="reqAmt" value="100" onchange="onReqPercent(this)"><span>100%</span></label>
                 </div>
-                <div class="req-field"><label for="reqCustomPct">Custom %</label><input type="text" inputmode="decimal" id="reqCustomPct" oninput="onReqCustomPct()"></div>
-                <div class="req-field"><label for="reqAmount">Amount</label>
-                    <div class="req-money"><span aria-hidden="true">$</span><input type="text" inputmode="decimal" id="reqAmount" aria-describedby="reqAmountError" oninput="onReqAmount()"></div>
+                <div class="req-row">
+                    <div class="req-group"><label for="reqCustomPct">Custom</label>
+                        <div class="req-box"><input type="text" inputmode="decimal" id="reqCustomPct" aria-label="Custom %" oninput="onReqCustomPct()"><span class="req-affix" aria-hidden="true">%</span></div></div>
+                    <div class="req-group"><label for="reqAmount">Amount</label>
+                        <div class="req-box"><span class="req-affix" aria-hidden="true">$</span><input type="text" inputmode="decimal" id="reqAmount" aria-describedby="reqAmountError" oninput="onReqAmount()"></div></div>
                 </div>
             </fieldset>
             <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">BR-28 <span class="br-tooltip">BR-28: creating a request sends nothing and never touches reminders.</span></span>
