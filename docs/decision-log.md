@@ -1571,3 +1571,10 @@ Format:
 ## [2026-10-08] Invoice Reminders (86b32d4gr): Request Payment typing behavior confirmed
 - Decision: Confirmed by Jeremy with a production screenshot: typing a custom value clears the selected percent pill. Typing in Amount leaves Custom as it was (production showed Custom 50 with Amount 23), so the prototype no longer blanks Custom.
 - Still assumed: Amount is validated on Save only, not while typing. The typing chip now reads "from production".
+
+## [2026-10-08] Invoice Reminders (86b32d4gr): Oct 8 decisions (field sync, payment rows, stale items)
+- Decision: Request Payment shows the FIXED field sync, since a separate bug ticket will cover production. Custom % recalculates Amount to the nearest cent (35% of $4,647.02 is $1,626.46), Amount recalculates Custom % to up to 2 decimals ($23 on $8,652.48 is 0.27), pills fill both (100% equals the balance exactly), and typing in either field clears the pill. Amount starts at $0.00. A "Field sync and rounding" chip names the bug ticket.
+- Decision: Mark as Paid on a payment request removes it and records a payment row in Payments (invoice goes Partially Paid or Paid), and Request Payment is available again. The new row's Method shows N/A because the method was not specified.
+- Decision: Added a note on the Send Invoice modal: title and no-toast behavior unverified against production. Send Invoice still shows its existing toast.
+- Cleanup: Removed the QBO Failed open gap from the BR-26 note. Zapier was already absent. Revision label and proto bar now read Rev. Oct 8, 2026.
+- Open question: Method for a payment recorded from a request, and whether Send Invoice should show a toast.

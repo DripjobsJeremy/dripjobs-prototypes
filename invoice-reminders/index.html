@@ -4,7 +4,7 @@
 <script src="../gate.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Invoice Reminders: Combined Prototype (Rev. Oct 7, 2026)</title>
+<title>Invoice Reminders: Combined Prototype (Rev. Oct 8, 2026)</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -528,6 +528,8 @@ body.phone-preview .req-pill span { min-height: 48px; }
 .rec-totals { margin: 6px 0 0 auto; width: 300px; max-width: 100%; background: #F8F8FA; border: 1px solid #DAD8E3; border-radius: 8px; padding: 12px 16px; font-size: 13px; }
 .rec-totals div { display: flex; justify-content: space-between; padding: 4px 0; }
 .rec-totals .rec-bal { border-top: 1px solid #DAD8E3; margin-top: 6px; padding-top: 10px; font-weight: 800; }
+#commTitleNote[hidden] { display: none; }
+.rec-payrow + .rec-payrow { margin-top: 8px; }
 .rec-payrow { display: grid; grid-template-columns: 1.2fr 1.2fr 1.2fr 1.2fr 1fr; gap: 10px; padding: 12px 18px; background: #fff; border: 1px solid #DAD8E3; border-radius: 10px; }
 .rec-payrow > div:last-child { text-align: right; }
 .rec-voidnote { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0; padding: 12px 16px; background: #FFF4CC; border: 1px solid #F3DF8F; border-radius: 8px; font-size: 12.5px; color: #7A5300; }
@@ -543,7 +545,7 @@ body.phone-preview .req-pill span { min-height: 48px; }
     <div class="demo-banner-left">
         <strong>PROTOTYPE</strong>
         <span class="br-chip" tabindex="0">86b32d4gr <i class="ti ti-info-circle" aria-hidden="true"></i>
-            <span class="br-tooltip below">Ticket 86b32d4gr: Invoice Reminders. Revised to requirements current as of Oct 7, 2026 (BR-1 to BR-38).</span>
+            <span class="br-tooltip below">Ticket 86b32d4gr: Invoice Reminders. Revised to requirements current as of Oct 8, 2026 (BR-1 to BR-38).</span>
         </span>
     </div>
     <nav class="demo-nav" aria-label="Prototype screens">
@@ -834,7 +836,7 @@ body.phone-preview .req-pill span { min-height: 48px; }
                     <th scope="col">Status</th>
                     <th scope="col">Customer</th>
                     <th scope="col">Proposal</th>
-                    <th scope="col">Invoice <span class="br-chip br-annot" tabindex="0">BR-26 <span class="br-tooltip below">BR-26: QBO indicator shows Synced, Not synced, or Sync failed. Retry beside Sync failed: existing behavior, unchanged. Open gap: what sets Failed (TJ).</span></span></th>
+                    <th scope="col">Invoice <span class="br-chip br-annot" tabindex="0">BR-26 <span class="br-tooltip below">BR-26: QBO indicator shows Synced, Not synced, or Sync failed. Retry beside Sync failed: existing behavior, unchanged.</span></span></th>
                     <th scope="col" data-sort="amountN" aria-sort="none"><button class="sort-btn" onclick="sortBy('amountN')">Amount <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
                     <th scope="col" data-sort="paidN" aria-sort="none"><button class="sort-btn" onclick="sortBy('paidN')">Paid <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
                     <th scope="col" data-sort="balanceN" aria-sort="none"><button class="sort-btn" onclick="sortBy('balanceN')">Balance <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
@@ -1005,11 +1007,12 @@ body.phone-preview .req-pill span { min-height: 48px; }
                     <div class="req-group"><label for="reqCustomPct">Custom</label>
                         <div class="req-box"><input type="text" inputmode="decimal" id="reqCustomPct" aria-label="Custom %" oninput="onReqCustomPct()"><span class="req-affix" aria-hidden="true">%</span></div></div>
                     <div class="req-group"><label for="reqAmount">Amount</label>
-                        <div class="req-box"><span class="req-affix" aria-hidden="true">$</span><input type="text" inputmode="decimal" id="reqAmount" aria-describedby="reqAmountError" oninput="onReqAmount()"></div></div>
+                        <div class="req-box"><span class="req-affix" aria-hidden="true">$</span><input type="text" inputmode="decimal" id="reqAmount" aria-describedby="reqAmountError" oninput="onReqAmount()" onfocus="this.select()"></div></div>
                 </div>
             </fieldset>
             <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">BR-28 <span class="br-tooltip">BR-28: creating a request sends nothing and never touches reminders.</span></span>
-            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">Typing behavior from production <span class="br-tooltip">Choosing a percent fills Custom with that percent and Amount from the remaining balance. Typing in Custom or Amount clears the selected percent. Typing in Amount leaves Custom as it was. Amount is checked on Save only (assumed).</span></span>
+            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">Typing behavior <span class="br-tooltip">Choosing a percent fills Custom with that percent and Amount from the remaining balance. Typing in Custom or Amount clears the selected percent. Amount is checked on Save only (existing production behavior, not yet confirmed).</span></span>
+            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">Field sync and rounding <span class="br-tooltip">Field sync and rounding: fixed by separate bug ticket (to be created). Production today does not update Custom % from Amount and truncates Amount.</span></span>
         </div>
         <div class="edit-modal-footer">
             <button class="btn btn-primary" id="reqCreateBtn" onclick="submitRequest()">Save</button>
@@ -1076,6 +1079,7 @@ body.phone-preview .req-pill span { min-height: 48px; }
                     <span class="br-chip br-annot" tabindex="0" style="margin-top:8px;">BR-29 <span class="br-tooltip">Access group switch simulates a non-Admin, non-assignee user; the Invoices page itself is Admin only.</span></span>
                 </div>
                 <div id="commNotice" aria-live="polite"></div>
+                <span class="br-chip br-annot" id="commTitleNote" tabindex="0" hidden>Send Invoice unverified <span class="br-tooltip">Send Invoice title and no-toast behavior unverified against production.</span></span>
                 <div id="commKeepRow" hidden>
                     <div class="settings-alert settings-alert--info" style="margin:0 0 6px;"><i class="ti ti-info-circle" aria-hidden="true"></i><div id="commKeepAlertText"></div></div>
                     <div class="reminder-toggle-row">
@@ -1852,21 +1856,26 @@ var reqInvoiceId = null;
 function plain(n) { return (Math.round(n * 100) / 100).toFixed(2); }
 function clearReqError() { $('reqAmountError').classList.remove('show'); $('reqAmount').removeAttribute('aria-invalid'); }
 function clearReqRadios() { document.querySelectorAll('input[name="reqAmt"]').forEach(function(r){ r.checked = false; }); }
+function cents(n) { return Math.round(n * 100 + 1e-7) / 100; } // nearest cent, never truncates
+function pctText(n) { return String(Math.round(n * 100) / 100); } // up to 2 decimals, no trailing zeros
 function onReqPercent(radio) {
-    $('reqCustomPct').value = String(radio.value); // production shows the chosen percent in Custom
-    $('reqAmount').value = plain(balanceOf(byId(reqInvoiceId)) * Number(radio.value) / 100);
+    var bal = balanceOf(byId(reqInvoiceId)), v = Number(radio.value);
+    $('reqCustomPct').value = String(v);
+    $('reqAmount').value = v === 100 ? plain(bal) : plain(cents(bal * v / 100)); // 100% equals the remaining balance exactly
     clearReqError();
 }
 function onReqCustomPct() {
     var el = $('reqCustomPct'); el.value = el.value.replace(/[^0-9.]/g, '');
     clearReqRadios();
     var v = parseFloat(el.value);
-    $('reqAmount').value = isNaN(v) ? '' : plain(balanceOf(byId(reqInvoiceId)) * v / 100);
+    $('reqAmount').value = isNaN(v) ? '' : plain(cents(balanceOf(byId(reqInvoiceId)) * v / 100));
     clearReqError();
 }
 function onReqAmount() {
     var el = $('reqAmount'); el.value = el.value.replace(/[^0-9.]/g, '');
-    clearReqRadios(); // production leaves Custom as it was
+    clearReqRadios();
+    var a = parseFloat(el.value), bal = balanceOf(byId(reqInvoiceId));
+    $('reqCustomPct').value = (isNaN(a) || bal <= 0) ? '' : pctText(a / bal * 100); // Amount drives Custom %
     clearReqError();
 }
 function openRequest(id) {
@@ -1874,7 +1883,7 @@ function openRequest(id) {
     closeMenus(false); var mb = $('menubtn-' + id); if (mb) mb.focus();
     $('reqTitle').textContent = 'Request Payment for Invoice ' + inv.invoiceNo;
     $('reqLegend').textContent = 'Remaining Balance - ' + fmt(balanceOf(inv));
-    clearReqRadios(); $('reqCustomPct').value = ''; $('reqAmount').value = '';
+    clearReqRadios(); $('reqCustomPct').value = ''; $('reqAmount').value = '0.00'; // nothing pre-selected, Amount starts at $0
     clearReqError();
     openOverlay($('reqOverlay'), document.querySelector('input[name="reqAmt"]'));
 }
@@ -1964,6 +1973,7 @@ function openComm(id, mode) {
     $('commSendOnCustom').textContent = 'Tomorrow at ' + CUSTOM_INVOICE_SEND_TIME;
     $('commSendOn').value = 'now';
     $('commSendBtn').textContent = 'Send';
+    $('commTitleNote').hidden = isReq;
     // BR-27 / BR-29 (with BR-14): reminder controls only when set up and enabled, the invoice has a due date, and it is not Paid
     var eligible = anyEnabledRows() && invoiceRemindersSetUp && !!inv.dueDate && inv.status !== 'PAID';
     var group = inAccessGroup(), active = hasActiveCadence(inv);
@@ -2146,9 +2156,12 @@ function renderInvoiceRecord() {
     });
     html += '<div class="rec-totals"><div><span>Subtotal</span><strong>' + fmt(inv.amountN) + '</strong></div><div><span>Sales Tax</span><strong class="rec-link">$0.00</strong></div><div><span>Total</span><strong>' + fmt(inv.amountN) + '</strong></div><div class="rec-bal"><span>Balance</span><span>' + fmt(balanceOf(inv)) + '</span></div></div>'
         + '<div class="rec-itemhead"><h2 class="rec-h2" style="margin:22px 0 12px;">Payments</h2><span class="rec-fake" style="min-height:32px;font-size:12px;">Receive Payment</span></div>';
-    if (inv.paidN > 0) {
-        html += '<div class="rec-payrow"><div><div class="rec-fl">Payment</div><div class="rec-fv rec-link">Payment #6305' + (id < 10 ? '0' : '') + id + '</div></div>' + recField('Method', 'credit card') + recField('Received', esc(inv.date)) + recField('Reference', 'N/A') + recField('Amount', fmt(inv.paidN)) + '</div>'
-            + '<div class="rec-voidnote"><span>To void this invoice, you must first delete any logged payments.</span><span class="rec-fake" style="min-height:30px;font-size:12px;">Void Invoice</span></div>';
+    var payList = paymentsOf(inv);
+    if (payList.length) {
+        payList.forEach(function(pm) {
+            html += '<div class="rec-payrow"><div><div class="rec-fl">Payment</div><div class="rec-fv rec-link">' + esc(pm.no) + '</div></div>' + recField('Method', esc(pm.method)) + recField('Received', esc(pm.received)) + recField('Reference', esc(pm.ref)) + recField('Amount', fmt(pm.amount)) + '</div>';
+        });
+        html += '<div class="rec-voidnote"><span>To void this invoice, you must first delete any logged payments.</span><span class="rec-fake" style="min-height:30px;font-size:12px;">Void Invoice</span></div>';
     } else {
         html += '<p style="text-align:center;font-size:13px;color:#5E6578;margin:10px 0;">No payments have been made</p>';
     }
@@ -2161,8 +2174,14 @@ function renderInvoiceRecord() {
     html += '<div class="rec-created">Invoice created at ' + esc(inv.date) + ' 12:08:32 PM</div>';
     box.innerHTML = html;
 }
+function paymentsOf(inv) { // seeded invoices with a paid balance get one sample payment
+    if (!inv.payments) inv.payments = inv.paidN > 0 ? [{no: 'Payment #6305' + (inv.id < 10 ? '0' : '') + inv.id, method: 'credit card', received: inv.date, ref: 'N/A', amount: inv.paidN}] : [];
+    return inv.payments;
+}
 function recMarkPaid(id) {
     var inv = byId(id), amt = inv.paymentRequest.amount;
+    var pays = paymentsOf(inv);
+    pays.push({no: 'Payment #6306' + String(100 + pays.length + id).slice(-3), method: 'N/A', received: SAMPLE_TODAY, ref: 'N/A', amount: amt}); // recorded as a payment row (Oct 8)
     inv.paidN = Math.round((inv.paidN + amt) * 100) / 100;
     if (balanceOf(inv) <= 0.004) { inv.status = 'PAID'; inv.cadence = null; } // BR-12 / BR-13; no off message (BR-37)
     else inv.status = 'PARTIAL';
@@ -2197,7 +2216,7 @@ renderAll();
 <!-- Proto Bar -->
 <div style="position:fixed;bottom:0;left:0;right:0;background:#2A2440;color:#fff;font-size:12px;padding:8px 20px;display:flex;align-items:center;gap:16px;z-index:9999;font-family:'Nunito',sans-serif;">
   <strong style="color:#C9C4FF;">PROTOTYPE</strong>
-  <span>Invoice Reminders: Reminders Page + Invoices Page + Command Center &#183; Rev. Oct 7, 2026</span>
+  <span>Invoice Reminders: Reminders Page + Invoices Page + Command Center &#183; Rev. Oct 8, 2026</span>
   <a href="https://app.clickup.com/t/86b32d4gr" target="_blank" rel="noopener" style="color:#C9C4FF;font-weight:700;">86b32d4gr</a>
   <span style="margin-left:auto;opacity:0.75;">dripjobsjeremy.github.io/dripjobs-prototypes</span>
   <a href="../index.html" style="color:#C9C4FF;font-weight:700;text-decoration:none;">&#8592; Hub</a>
