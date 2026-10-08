@@ -1571,3 +1571,24 @@ Format:
 ## [2026-10-08] Invoice Reminders (86b32d4gr): Request Payment typing behavior confirmed
 - Decision: Confirmed by Jeremy with a production screenshot: typing a custom value clears the selected percent pill. Typing in Amount leaves Custom as it was (production showed Custom 50 with Amount 23), so the prototype no longer blanks Custom.
 - Still assumed: Amount is validated on Save only, not while typing. The typing chip now reads "from production".
+
+## [2026-10-08] Invoice Reminders (86b32d4gr): Oct 8 decisions (field sync, payment rows, stale items)
+- Decision: Request Payment shows the FIXED field sync, since a separate bug ticket will cover production. Custom % recalculates Amount to the nearest cent (35% of $4,647.02 is $1,626.46), Amount recalculates Custom % to up to 2 decimals ($23 on $8,652.48 is 0.27), pills fill both (100% equals the balance exactly), and typing in either field clears the pill. Amount starts at $0.00. A "Field sync and rounding" chip names the bug ticket.
+- Decision: Mark as Paid on a payment request removes it and records a payment row in Payments (invoice goes Partially Paid or Paid), and Request Payment is available again. The new row's Method shows N/A because the method was not specified.
+- Decision: Added a note on the Send Invoice modal: title and no-toast behavior unverified against production. Send Invoice still shows its existing toast.
+- Cleanup: Removed the QBO Failed open gap from the BR-26 note. Zapier was already absent. Revision label and proto bar now read Rev. Oct 8, 2026.
+- Open question: Method for a payment recorded from a request, and whether Send Invoice should show a toast.
+
+## [2026-10-08] Invoice Reminders (86b32d4gr): Send Invoice toast removed, Amount at $0 confirmed
+- Decision: Confirmed by Jeremy: production shows no toast after an invoice is sent, so the Send Invoice and scheduled send toasts are removed. The Send Invoice note now covers the title only.
+- Confirmed: Amount starts at $0.00, selects on focus, and Custom stays empty.
+- Open question: Payment methods come from Company Settings > App Settings (defaults credit card and check, plus custom ones). Which method Mark as Paid on a request records is not specified, so Method still shows N/A.
+
+## [2026-10-08] Invoice Reminders (86b32d4gr): Mark as Paid opens Receive Payment
+- Decision: From Jeremy's production screenshot of Receive Payment, Mark as Paid on a payment request now opens that modal with the request amount filled in. It has Date Received (10/08/2026), Amount, Method (Select a method, credit card, check, Cash, Retainer, Skittles, M&Ms, IOU, PayPal, Zelle), Ref Number, Notes, a Deposit Payment switch, and the receipt email block (To, Subject, Body). Save records a payment row with the chosen method and removes the request. Methods come from Company Settings > App Settings, so the list here is sample data.
+- Assumption: The screenshot was sent without text, so I assumed it is what Mark as Paid opens. Also assumed (Method since made required, see below): Amount only needs to be above $0 (error "Amount received cannot be $0", wording invented), a different amount than the request is allowed, the receipt email does not send, and the rich text toolbar is not built.
+
+## [2026-10-08] Invoice Reminders (86b32d4gr): Receive Payment restored, method required, error styling
+- Decision: Jeremy clarified that clicking Mark as Paid does open the Receive Payment modal and the user must pick a method from the dropdown. The modal is restored from the earlier build (the screenshot shows the method list: credit card, check, Cash, Retainer, Skittles, M&Ms, IOU, PayPal, Zelle, which come from Company Settings > App Settings).
+- Assumption: Method is required. Saving without one shows "Select a method" (wording invented). Amount only needs to be above $0.
+- Decision: Request Payment errors match production screens: bold bright red bulleted text above the legend (#F5222D, matched by eye), and Amount starts as "0".
