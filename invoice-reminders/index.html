@@ -407,7 +407,6 @@ th[aria-sort="ascending"] .sort-icon, th[aria-sort="descending"] .sort-icon { co
 
 
 /* ---- Oct 6 codebase review ---- */
-.missing-copy { outline: 1px dashed #D97706; outline-offset: 1px; color: #92400E; background: #FFFBEB; font-weight: 600; border-radius: 3px; padding: 0 3px; }
 .demo-settings-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; color: #fff; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; padding: 0 6px; min-height: 40px; }
 .demo-panel { position: absolute; top: 46px; right: 12px; width: 330px; max-height: calc(100vh - 110px); overflow-y: auto; background: #2A2440; color: #fff; border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 10px 14px; box-shadow: 0 10px 28px rgba(0,0,0,0.35); z-index: 55; }
 .demo-panel[hidden] { display: none; }
@@ -484,6 +483,9 @@ body.phone-preview #commOverlay.is-open, body.phone-preview #reqOverlay.is-open 
 .rec-req-actions .btn { min-height: 48px; padding: 0 22px; }
 @media (max-width: 480px) { .req-field > input, .req-field .req-money { max-width: 100%; } }
 body.phone-preview .req-field > input, body.phone-preview .req-field .req-money { max-width: 100%; }
+/* The fixed prototype bar (z-index 9999) must never cover the footer of a phone-width modal */
+@media (max-width: 480px) { #commOverlay, #reqOverlay { z-index: 10000; } }
+body.phone-preview #commOverlay, body.phone-preview #reqOverlay { z-index: 10000; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
 </style>
 </head>
@@ -939,12 +941,13 @@ body.phone-preview .req-field > input, body.phone-preview .req-field .req-money 
 <div class="modal-overlay page-modal" id="reqOverlay">
     <div class="edit-modal" id="reqModalCard" role="dialog" aria-modal="true" aria-labelledby="reqTitle">
         <div class="edit-modal-header">
-            <h2 id="reqTitle"><span class="missing-copy" title="Request Payment title">[MISSING: production string]</span></h2>
+            <h2 id="reqTitle">Request Payment</h2>
             <button class="modal-close-btn" onclick="closeRequestModal()" aria-label="Close"><i class="ti ti-x" aria-hidden="true"></i></button>
         </div>
         <div class="edit-modal-body">
+            <p class="field-error" id="reqAmountError" role="alert" style="margin:0 0 12px;"><i class="ti ti-alert-circle" aria-hidden="true"></i><span id="reqAmountErrorText"></span></p>
             <fieldset class="void-fieldset" style="margin-top:0;">
-                <legend><span class="missing-copy" title="amount legend">[MISSING: production string]</span></legend>
+                <legend id="reqLegend">Remaining Balance</legend>
                 <div class="req-radios">
                     <label class="radio-row"><input type="radio" name="reqAmt" value="25" onchange="onReqPercent(this)"> 25%</label>
                     <label class="radio-row"><input type="radio" name="reqAmt" value="50" onchange="onReqPercent(this)"> 50%</label>
@@ -954,16 +957,14 @@ body.phone-preview .req-field > input, body.phone-preview .req-field .req-money 
                 <div class="req-field"><label for="reqCustomPct">Custom %</label><input type="text" inputmode="decimal" id="reqCustomPct" oninput="onReqCustomPct()"></div>
                 <div class="req-field"><label for="reqAmount">Amount</label>
                     <div class="req-money"><span aria-hidden="true">$</span><input type="text" inputmode="decimal" id="reqAmount" aria-describedby="reqAmountError" oninput="onReqAmount()"></div>
-                    <p class="field-error" id="reqAmountError" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span id="reqAmountErrorText"></span></p>
                 </div>
             </fieldset>
             <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">BR-28 <span class="br-tooltip">BR-28: creating a request sends nothing and never touches reminders.</span></span>
             <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">Interaction pending production screenshot <span class="br-tooltip">Interpretation: a percent fills Amount from the remaining balance and clears Custom %; Custom % fills Amount and clears the percent; typing Amount clears both. Checked on Create only.</span></span>
-            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">Low-fi: awaiting production screenshot <span class="br-tooltip">Low-fi: awaiting production screenshot (Q6).</span></span>
         </div>
         <div class="edit-modal-footer">
-            <button class="btn btn-primary" id="reqCreateBtn" onclick="submitRequest()"><span class="missing-copy" title="create button">[MISSING: production string]</span></button>
-            <button class="btn btn-outline-primary" onclick="closeRequestModal()">Cancel</button>
+            <button class="btn btn-primary" id="reqCreateBtn" onclick="submitRequest()">Save</button>
+            <button class="btn btn-outline-primary" onclick="closeRequestModal()">Close</button>
         </div>
     </div>
 </div>
@@ -1080,7 +1081,6 @@ var OFF_BODY = {
     dont: 'Turning off every invoice reminder stops scheduled reminders on all invoices. To start them again, send each invoice with Invoice Reminders turned on.',
     resume: 'Turning off every invoice reminder pauses scheduled reminders on all invoices. If you turn reminders back on, upcoming reminders will send again, and any dates that passed while they were off are skipped.'
 };
-function miss(key) { return '<span class="missing-copy" title="' + esc(key) + '">[MISSING: production string]</span>'; }
 function toggleDemoPanel(force) {
     var panel = $('demoPanel'), btn = $('demoPanelBtn');
     var open = typeof force === 'boolean' ? force : panel.hidden;
@@ -1822,6 +1822,8 @@ function onReqAmount() {
 function openRequest(id) {
     var inv = byId(id); reqInvoiceId = id;
     closeMenus(false); var mb = $('menubtn-' + id); if (mb) mb.focus();
+    $('reqTitle').textContent = 'Request Payment for Invoice ' + inv.invoiceNo;
+    $('reqLegend').textContent = 'Remaining Balance - ' + fmt(balanceOf(inv));
     clearReqRadios(); $('reqCustomPct').value = ''; $('reqAmount').value = '';
     clearReqError();
     openOverlay($('reqOverlay'), document.querySelector('input[name="reqAmt"]'));
@@ -1893,7 +1895,7 @@ function openComm(id, mode) {
     var mb = $('menubtn-' + id); if (mb) mb.focus();
     var first = inv.customer.split(' ')[0], num = inv.invoiceNo.replace('#','');
     var isReq = mode === 'sendrequest';
-    if (isReq) $('commTitle').innerHTML = miss('Send Request title'); else $('commTitle').textContent = 'Send Invoice ' + inv.invoiceNo;
+    $('commTitle').textContent = (isReq ? 'Request Payment for Invoice ' : 'Send Invoice ') + inv.invoiceNo;
     $('commChannelLbl').textContent = 'Choose additional ways to communicate this ' + (isReq ? 'payment request' : 'invoice');
     $('commChannel').value = 'both';
     $('commEmailTo').value = inv.customer + ' (' + inv.customer.toLowerCase().replace(/[^a-z]/g,'') + '@example.com)';
@@ -2051,7 +2053,7 @@ function renderInvoiceRecord() {
     if (inv.paymentRequest) {
         html += '<section class="rec-section" style="margin-bottom:16px;" aria-labelledby="rec-pay-h"><h2 id="rec-pay-h">Payment Requests '
             + '<span class="br-chip br-annot" tabindex="0">BR-28 · BR-29 <span class="br-tooltip">BR-28: Send Request and Re-Send live here and open the Send Request modal. Mark as Paid records a payment; BR-12 and BR-13 apply. BR-29: reminder controls follow the access group.</span></span>'
-            + '<span class="br-chip br-annot" tabindex="0">Low-fi: awaiting production screenshot <span class="br-tooltip">Low-fi: awaiting production screenshot (Q6).</span></span></h2>'
+            + '</h2>'
             + '<p style="margin:0 0 12px;font-size:14px;">Request amount: <strong>' + fmt(inv.paymentRequest.amount) + '</strong></p>'
             + '<div class="rec-req-actions">'
             + '<button type="button" class="btn btn-primary" id="rec-send-btn" onclick="openComm(' + inv.id + ', \'sendrequest\')">' + (inv.paymentRequest.sent ? 'Re-Send' : 'Send Request') + '</button>'
