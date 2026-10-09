@@ -99,7 +99,9 @@ tr:last-child td{border-bottom:0}
 .icon-btn{width:44px;height:44px;border:0;background:none;border-radius:8px;cursor:pointer;color:var(--muted);display:inline-grid;place-items:center}
 .icon-btn:hover{background:var(--lav);color:var(--primary-strong)}
 .sortable{cursor:pointer;user-select:none}
-.sortable:hover{color:var(--primary-strong)}
+.sortable:hover,.sortable:focus-visible{color:var(--primary-strong);background:#F3F4F6}
+.sortable[aria-sort="none"]::after{content:" \21C5";font-size:10px;opacity:0;color:var(--muted)}
+.sortable[aria-sort="none"]:hover::after,.sortable[aria-sort="none"]:focus-visible::after{opacity:.8}
 .sortable[aria-sort="ascending"]::after{content:" \25B2";color:var(--primary-strong);font-size:9px}
 .sortable[aria-sort="descending"]::after{content:" \25BC";color:var(--primary-strong);font-size:9px}
 
@@ -329,9 +331,9 @@ select.inact{color:#B91C1C}
         <thead><tr>
           <th class="sortable" data-sort="company" tabindex="0">Company Name</th>
           <th class="sortable" data-sort="date" tabindex="0">Signup Date</th>
-          <th>Health Tier</th><th>Plan</th><th>Total Sales</th><th>A2P Status</th>
+          <th class="sortable" data-sort="tier" tabindex="0">Health Tier</th><th class="sortable" data-sort="plan" tabindex="0">Plan</th><th class="sortable" data-sort="sales" tabindex="0">Total Sales</th><th class="sortable" data-sort="a2p" tabindex="0">A2P Status</th>
           <th class="sortable" data-sort="css" tabindex="0">Account Representative<span class="br" title="BR10/BR17: column renamed to Account Representative. Sorting orders rows by member name, not Role. Header and cells wrap so there is no horizontal scroll. BR19.3: hover a name for Roles History.">BR10 · 17 · 19</span></th>
-          <th>Contact Name</th><th>Email</th><th>Phone</th>
+          <th class="sortable" data-sort="contact" tabindex="0">Contact Name</th><th class="sortable" data-sort="email" tabindex="0">Email</th><th class="sortable" data-sort="phone" tabindex="0">Phone</th>
         </tr></thead>
         <tbody></tbody>
       </table>
@@ -786,6 +788,13 @@ function renderFinder(){
     var x,y;
     if(s.key==='company'){x=a.co.toLowerCase();y=b.co.toLowerCase();}
     else if(s.key==='css'){x=a.css?fullName(member(a.css)).toLowerCase():'￿';y=b.css?fullName(member(b.css)).toLowerCase():'￿';}
+    else if(s.key==='tier'){var T={risk:0,na:1,ok:2};x=T[a.tier];y=T[b.tier];}
+    else if(s.key==='plan'){x=a.plan;y=b.plan;}
+    else if(s.key==='sales'){x=a.sales;y=b.sales;}
+    else if(s.key==='a2p'){var Q={None:0,Pending:1,Active:2};x=Q[a.a2p];y=Q[b.a2p];}
+    else if(s.key==='contact'){x=a.contact.toLowerCase();y=b.contact.toLowerCase();}
+    else if(s.key==='email'){x=a.email.toLowerCase();y=b.email.toLowerCase();}
+    else if(s.key==='phone'){x=a.phone||'\uffff';y=b.phone||'\uffff';}
     else{x=a.date;y=b.date;}
     return (x<y?-1:x>y?1:0)*dir;
   });
@@ -901,7 +910,7 @@ document.addEventListener('click',function(e){
   else if(t.hasAttribute('data-del-r')){toast('Deleting a Role is not part of this ticket.');}
   else if(t.hasAttribute('data-sort')){
     var k=t.getAttribute('data-sort');
-    ui.sort=ui.sort.key===k?{key:k,dir:ui.sort.dir==='asc'?'desc':'asc'}:{key:k,dir:k==='date'?'desc':'asc'};
+    ui.sort=ui.sort.key===k?{key:k,dir:ui.sort.dir==='asc'?'desc':'asc'}:{key:k,dir:(k==='date'||k==='sales')?'desc':'asc'};
     renderFinder();
   }
 });
