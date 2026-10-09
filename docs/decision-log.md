@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-10-09] Weekly Product Update + Product Roadmap refreshed for Oct 5-9, 2026
+
+- Decision: Rebuilt `weekly-product-update/index.html` and `Weekly_Product_Update.md` with 6 of the 9 tickets pushed to production this week (all closed Oct 5, despite several carrying a stale "release-2026-09-06" tag), grouped into Contacts (2), Integrations (2), and Admin Tools (2). Excluded the Cancellation Intercept Modal ticket (86bbah6jq) and its same-batch revert (86bcczqwy): both closed within seconds of each other, so the feature shipped and was pulled in the same release with zero net change for users. Generalized three account-specific ticket titles (custom email domain verification, Google Calendar permission errors, Google Calendar event time offset, large contact export) into customer-facing wording. Rebuilt `dripjobs-product-roadmap/index.html` from a fresh workspace-wide pull of the bare 🎯 tag: 27 in-flight tickets, 2 on hold/parked. Updated both Release Notes cards on the hub to the new dates.
+- Why: Routine weekly refresh per Jeremy's instruction, sourced directly from ClickUp. The ship-then-revert exclusion follows the same precedent set in the September Release Notes build: near-empty or single-account tickets don't belong in customer-facing notes, and a feature with zero net effect on users is the same case.
+
 ## [2026-10-09] Invoice Reminders (86b32d4gr): ClickUp now matches the roadmap
 
 - Decision: Checked ticket 86b32d4gr in ClickUp; its status is already "in review", matching the manual roadmap override from 2026-10-02. No ClickUp update needed, Jeremy had already moved it himself. The roadmap card and ClickUp are back in sync, so the override no longer needs special handling on the next weekly refresh.
