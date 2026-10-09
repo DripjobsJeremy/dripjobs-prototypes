@@ -4,7 +4,7 @@
 <script src="../gate.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Role Departments and CSS Rename - DripJobs</title>
+<title>Role Departments and Roles History - DripJobs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -144,7 +144,17 @@ tr:last-child td{border-bottom:0}
 .a2p{display:inline-block;border-radius:999px;padding:3px 8px;font-weight:600;font-size:12px;background:#FEE2E2;color:#991B1B}
 .a2p.act{background:#DCFCE7;color:#166534}.a2p.pen{background:#FEF3C7;color:#92400E}
 .css-cell{font-weight:500}
-.css-cell.un{color:var(--muted);font-weight:400}
+.css-cell .hl{border-bottom:1px dotted var(--primary-strong);cursor:help}
+.css-cell .hl.un{color:var(--muted);font-weight:400}
+.css-cell:focus-visible{outline-offset:-2px}
+.htip{position:fixed;z-index:120;width:340px;max-width:calc(100vw - 24px);max-height:340px;overflow:auto;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 10px 30px rgba(50,65,91,.2);padding:14px 16px;font-size:12.5px;font-weight:400}
+.htip h4{margin:0 0 6px;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.htip h4:not(:first-child){margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.htip .he{padding:6px 0;border-bottom:1px solid #F0EFF5}
+.htip .he:last-child{border-bottom:0}
+.htip .hw{color:var(--muted);font-size:11.5px}
+.htip .hv{margin-top:2px;overflow-wrap:anywhere}
+.htip .none{color:var(--muted)}
 .empty{padding:28px;text-align:center;color:var(--muted)}
 
 /* Company settings */
@@ -218,7 +228,7 @@ tr:last-child td{border-bottom:0}
   <div class="proto-bar-left">
     <a class="back-link" href="../index.html">← Hub</a>
     <span class="divider">|</span>
-    <span class="proto-bar-title">Role Departments, Multiple Roles, and CSS Rename</span>
+    <span class="proto-bar-title">Role Departments, Multiple Roles, and Roles History</span>
   </div>
   <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bcaf2hu" target="_blank">86bcaf2hu</a>
 </div>
@@ -233,8 +243,9 @@ tr:last-child td{border-bottom:0}
   </div>
   <button id="brToggle" aria-pressed="true">BR chips</button>
   <button id="scenOne">Scenario: OBCSS is the only Customer Success Role</button>
+  <button id="sampleHist">Add sample history</button>
   <button id="resetData">Reset data</button>
-  <span class="status" id="demoStatus" aria-live="polite">Post-release state. Try: edit the OBCSS Role Department, edit Dripjobs Harrison (Product Manager, assigned to The Nest), then check the Finder and Company Settings.</span>
+  <span class="status" id="demoStatus" aria-live="polite">Post-release state. Try: edit the OBCSS Role Department, edit Dripjobs Harrison (Product Manager, assigned to The Nest), then hover names in At Risk Accounts to see Roles History.</span>
 </div>
 
 <header class="topbar">
@@ -260,7 +271,7 @@ tr:last-child td{border-bottom:0}
         <span class="sec-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-6 6.5-6s6.5 2.5 6.5 6M16 4.5a3.5 3.5 0 010 7M18 14c2.2.6 3.5 2.6 3.5 5"/></svg></span>
         <div>
           <h2>Members <span class="count" id="memCount"></span></h2>
-          <div class="sub">Source of truth for the CSS Representative dropdown in Company Settings<span class="br" title="Assumption: this subtitle read 'OBCSS dropdown' today. Updated to match the BR7 rename. Confirm with Copywriter.">Copy</span></div>
+          <div class="sub">Source of truth for the Account Representative dropdown in Company Settings &amp; filter in At Risk Accounts<span class="br" title="BR18: Members subtitle copy.">BR18</span></div>
         </div>
         <div class="sec-tools">
           <select class="ctl" id="memStatus" aria-label="Status"><option value="active">Status: Active</option><option value="all">Status: All</option></select>
@@ -279,7 +290,7 @@ tr:last-child td{border-bottom:0}
         <span class="sec-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg></span>
         <div>
           <h2>Roles <span class="count" id="roleCount"></span></h2>
-          <div class="sub">Roles that members can be assigned. Every Role belongs to one Department; Roles in Customer Success feed the CSS Representative dropdown and the Finder.<span class="br" title="BR1/BR2: Department is required. There is no on/off toggle: a Role is Customer Success or not based only on its Department.">BR1 · BR2</span></div>
+          <div class="sub">Roles that members can be assigned. Every Role belongs to one Department; Roles in Customer Success feed the Account Representative dropdown and the At Risk Accounts filter.<span class="br" title="BR1/BR2: Department is required. There is no on/off toggle: a Role is Customer Success or not based only on its Department.">BR1 · BR2</span></div>
         </div>
         <div class="sec-tools"><button class="btn btn-p" id="addRole">+ Add Role</button></div>
       </div>
@@ -295,7 +306,7 @@ tr:last-child td{border-bottom:0}
       <div class="filters">
         <div class="f-grp"><span class="f-lbl">Health Tier</span><select class="ctl" aria-label="Health tier"><option>All tiers</option></select></div>
         <div class="f-grp"><span class="f-lbl">Plan</span><select class="ctl" aria-label="Plan"><option>All plans</option></select></div>
-        <div class="f-grp css-f"><span class="f-lbl">CSS<span class="br" title="BR10: filter label renamed from OBCSS to CSS. BR9/BR11: lists every member assigned to at least one account (Customer Success or not), shown as Name, Role.">BR9-11</span></span><select class="ctl" id="cssFilter" aria-label="CSS"></select></div>
+        <div class="f-grp css-f"><span class="f-lbl">Account Representative<span class="br" title="BR10: filter title renamed from OBCSS to Account Representative. BR9/BR11: lists every member assigned to at least one account (Customer Success or not), shown as Name, Role.">BR9-11</span></span><select class="ctl" id="cssFilter" aria-label="Account Representative"></select></div>
         <div class="f-grp"><span class="f-lbl">Signup Date</span><select class="ctl" aria-label="Signup date"><option>All time</option></select></div>
       </div>
     </div>
@@ -310,7 +321,7 @@ tr:last-child td{border-bottom:0}
           <th class="sortable" data-sort="company" tabindex="0">Company Name</th>
           <th class="sortable" data-sort="date" tabindex="0">Signup Date</th>
           <th>Health Tier</th><th>Plan</th><th>Total Sales</th><th>A2P Status</th>
-          <th class="sortable" data-sort="css" tabindex="0">CSS<span class="br" title="BR10/BR17: column renamed to CSS. Sorting orders rows by member name, not Role. Cells wrap so there is no horizontal scroll.">BR10 · 17</span></th>
+          <th class="sortable" data-sort="css" tabindex="0">Account Representative<span class="br" title="BR10/BR17: column renamed to Account Representative. Sorting orders rows by member name, not Role. Header and cells wrap so there is no horizontal scroll. BR19.3: hover a name for Roles History.">BR10 · 17 · 19</span></th>
           <th>Contact Name</th><th>Email</th><th>Phone</th>
         </tr></thead>
         <tbody></tbody>
@@ -349,7 +360,7 @@ tr:last-child td{border-bottom:0}
         <div class="field"><label>Plan</label><select class="in" disabled><option>DripJobs Advanced</option></select></div>
         <div class="field"><label>Subscription ID</label><input class="in ro" value="AzZfGBUTpYIKC3aY2" readonly></div>
         <div class="field">
-          <label for="cssRep">CSS Representative<span class="br" title="BR7: label renamed from OBCSS Representative. BR6/BR8: lists only members holding a Customer Success Role, shown as Name, Role. BR12: an existing non-Customer Success assignee stays as the selected value but cannot be newly selected.">BR6-8 · 12</span></label>
+          <label for="cssRep">Account Representative<span class="br" title="BR7: label renamed from OBCSS Representative. BR6/BR8: lists only members holding a Customer Success Role, shown as Name, Role. BR12: an existing non-Customer Success assignee stays as the selected value but cannot be newly selected.">BR6-8 · 12</span></label>
           <select class="in" id="cssRep"></select>
           <div class="hint" id="cssChanged"></div>
         </div>
@@ -382,7 +393,7 @@ tr:last-child td{border-bottom:0}
       <div class="field"><label class="req" for="roleDept">Department<span class="br" title="BR1: required. Fixed list of 11 Departments managed by DripJobs (assumption: Super Admins cannot add, rename, or remove Departments). Label copy goes to Copywriter.">BR1</span></label>
         <select class="in" id="roleDept"></select>
         <div class="err-t" id="roleDeptErr" hidden>Choose a Department.</div>
-        <div class="hint">Roles in Customer Success appear in the CSS Representative dropdown and the Finder.</div>
+        <div class="hint">Roles in Customer Success appear in the Account Representative dropdown and the At Risk Accounts filter.</div>
       </div>
     </div>
     <div class="m-f"><button class="btn btn-s" data-close="ov-role">Cancel</button><button class="btn btn-p" id="saveRole">Add Role</button></div>
@@ -392,7 +403,7 @@ tr:last-child td{border-bottom:0}
 <!-- Add/Edit Member -->
 <div class="ov" id="ov-member" hidden>
   <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="memTitle">
-    <div class="m-h"><div><h2 id="memTitle">Edit Member</h2><p id="memSubT">Changes will update this member's name and email in the CSS Representative dropdown.</p></div><button class="x" data-close="ov-member" aria-label="Close">×</button></div>
+    <div class="m-h"><div><h2 id="memTitle">Edit Member</h2><p id="memSubT">Changes will update this member's name and email in the Account Representative dropdown.</p></div><button class="x" data-close="ov-member" aria-label="Close">×</button></div>
     <div class="m-b">
       <div class="m-grid">
         <div><div class="big-av" id="memBig">DL</div>
@@ -443,6 +454,7 @@ tr:last-child td{border-bottom:0}
   </div>
 </div>
 
+<div class="htip" id="histTip" role="tooltip" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
@@ -450,7 +462,7 @@ tr:last-child td{border-bottom:0}
 'use strict';
 var CS = 'Customer Success';
 var DEPTS = ['Customer Success','Development','Operations','Partnerships','Sales & Marketing','Billing','Product Management','Project Management','Human Resources','Accounting','External Team'];
-var TODAY = new Date(2026,9,1);
+var TODAY = new Date(2026,9,9);
 var ICON_EDIT = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20l4-1 11-11-3-3L5 16zM14 6l3 3"/></svg>';
 var ICON_DEL = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>';
 
@@ -477,7 +489,7 @@ function seed(){
     M('m10','David','Cerro',['obcss','css'],'david.cerro@dripjobs.com'),
     M('m11','David','Arteaga',['css'],'david.arteaga@dripjobs.com'),
     M('m12','Juan','Solano Quintero',['css'],'juan.solano@dripjobs.com'),
-    M('m13','Ana','Fernandez',['css'],'ana.fernandez@dripjobs.com'),
+    M('m13','Ana Delia','Villegas Fernandez',['css'],'ana.fernandez@dripjobs.com'),
     M('m14','Lasonia','Brady',['css'],'lasonia.brady@dripjobs.com')
   ];
   function A(co,acct,d,tier,plan,sales,a2p,css,contact,email,phone){return {co:co,acct:acct,date:d,tier:tier,plan:plan,sales:sales,a2p:a2p,css:css,contact:contact,email:email,phone:phone||'',changed:'09/30/2026 08:30 PM'};}
@@ -503,7 +515,7 @@ function seed(){
     A('Oak & Ash Finishing',18270,'2026-09-16','risk','Advanced',0,'None','m1','Ben Carter','ben@oakandash.com'),
     A("Sparrow's Nest Painting",11265,'2026-09-14','na','Advanced',0,'Active','m2','Jeremy Harrison','jeremy+1@dripjobs.com','(555) 555-5555')
   ];
-  return {roles:roles, members:members, accounts:accounts, nextId:100};
+  return {roles:roles, members:members, accounts:accounts, nextId:100, hist:{assign:[], roles:[]}};
 }
 db = seed();
 var ui = {screen:'admin', sort:{key:'date',dir:'desc'}, filter:'', editRole:null, editMember:null, finderOpts:[]};
@@ -529,9 +541,23 @@ function csRoles(except){return db.roles.filter(function(r){return r.dept===CS &
 function nowStamp(){
   var d=new Date(),h=d.getHours(),ap=h>=12?'PM':'AM';h=h%12||12;
   var mi=('0'+d.getMinutes()).slice(-2);
-  return '10/01/2026 '+('0'+h).slice(-2)+':'+mi+' '+ap;
+  return '10/09/2026 '+('0'+h).slice(-2)+':'+mi+' '+ap;
 }
 function plural(n,w){return n+' '+w+(n===1?'':'s');}
+var ACTOR='Jeremy Harrison';
+/* BR19: every assignment change and member Role change is recorded; history starts empty at release */
+function setAssign(a,newId){
+  if((a.css||null)===(newId||null)) return;
+  var stamp=nowStamp(), pm=a.css?member(a.css):null, nm=newId?member(newId):null;
+  db.hist.assign.push({t:stamp,acct:a.acct,prev:pm?display(pm):null,next:nm?display(nm):null,by:ACTOR});
+  a.css=newId||null; a.changed=stamp;
+}
+function logRoles(m,prevIds,nextIds){
+  var a=prevIds.slice().sort().join(','), b=nextIds.slice().sort().join(',');
+  if(a===b) return;
+  function nm(ids){return ids.map(function(id){return role(id).name;});}
+  db.hist.roles.push({t:nowStamp(),mid:m.id,name:fullName(m),prev:nm(prevIds),next:nm(nextIds),by:ACTOR});
+}
 var toastT;
 function toast(msg){var t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},4200);}
 function show(id){$('#'+id).hidden=false;var f=$('#'+id+' input, #'+id+' select, #'+id+' button.btn');if(f)f.focus();}
@@ -620,7 +646,7 @@ function openDeptPrompt(r,name,dept,affected){
     $('#deptOk').textContent='Reassign and save'; $('#deptOk').className='btn btn-p';
     $('#deptOk').onclick=function(){
       var t=$('#deptTarget').value;
-      affected.forEach(function(m){m.roles=m.roles.filter(function(id){return id!==r.id;}); if(m.roles.indexOf(t)<0)m.roles.push(t);});
+      affected.forEach(function(m){var before=m.roles.slice();m.roles=m.roles.filter(function(id){return id!==r.id;}); if(m.roles.indexOf(t)<0)m.roles.push(t); logRoles(m,before,m.roles);});
       r.name=name; r.dept=dept; hide('ov-dept'); hide('ov-role');
       toast('Reassigned '+plural(affected.length,'member')+' to '+role(t).name+'. Department saved. No notification sent.'); renderAll();
     };
@@ -630,11 +656,10 @@ function openDeptPrompt(r,name,dept,affected){
     $('#deptOk').textContent='Transfer and leave accounts unassigned'; $('#deptOk').className='btn btn-d';
     $('#deptOk').onclick=function(){
       openConfirm('Are you sure?',
-        '<p style="margin:0">Are you sure? This can\'t be undone. All accounts assigned to these members will be left without an assigned CSS.<span class="br" title="BR13.2: second confirmation. Copy is the draft intent for Copywriter.">BR13.2</span></p>'+names+'<p class="hint">You can cancel and keep everything as it is.</p>',
+        '<p style="margin:0">Are you sure? This can\'t be undone. All accounts assigned to these members will be left without an Account Representative.<span class="br" title="BR13.2: second confirmation. Copy is the draft intent for Copywriter.">BR13.2</span></p>'+names+'<p class="hint">You can cancel and keep everything as it is.</p>',
         'Yes, transfer',
         function(){
-          var stamp=nowStamp();
-          affected.forEach(function(m){assigned(m).forEach(function(a){a.css=null;a.changed=stamp;});});
+          affected.forEach(function(m){assigned(m).forEach(function(a){setAssign(a,null);});});
           r.name=name; r.dept=dept; hide('ov-conf'); hide('ov-dept'); hide('ov-role');
           toast('Department saved. '+plural(cnt,'account')+' left unassigned. No notification sent.'); renderAll();
         });
@@ -653,7 +678,7 @@ function openMember(id){
   ui.editMember=id||null;
   var m=id?member(id):null;
   $('#memTitle').textContent=m?'Edit Member':'Add Member';
-  $('#memSubT').textContent=m?"Changes will update this member's name and email in the CSS Representative dropdown.":'New members appear in the CSS Representative dropdown once they hold a Customer Success Role.';
+  $('#memSubT').textContent=m?"Changes will update this member's name and email in the Account Representative dropdown.":'New members appear in the Account Representative dropdown once they hold a Customer Success Role.';
   $('#saveMember').textContent=m?'Save Changes':'Add Member';
   $('#mFirst').value=m?m.first:''; $('#mLast').value=m?m.last:''; $('#mEmail').value=m?m.email:'';
   $('#memBig').textContent=m?(m.first[0]+m.last[0]):'+';
@@ -677,8 +702,8 @@ function saveMember(){
   commitMember(m,draft);
 }
 function commitMember(m,d){
-  if(m){m.first=d.first;m.last=d.last;m.email=d.email;m.roles=d.roles;toast('Member saved.');}
-  else{db.members.push({id:'m'+(db.nextId++),first:d.first,last:d.last,email:d.email,roles:d.roles,active:true});toast('Member added.');}
+  if(m){var before=m.roles.slice();m.first=d.first;m.last=d.last;m.email=d.email;m.roles=d.roles;logRoles(m,before,m.roles);toast('Member saved.');}
+  else{var nm={id:'m'+(db.nextId++),first:d.first,last:d.last,email:d.email,roles:d.roles,active:true};db.members.push(nm);logRoles(nm,[],nm.roles);toast('Member added.');}
   hide('ov-member'); renderAll();
 }
 
@@ -711,9 +736,9 @@ function openReplacement(m,draft,mode){
   $$('input[name=replOpt]',$('#replBody')).forEach(function(i){i.onchange=sync;}); sync();
   $('#replOk').textContent=mode==='edit'?'Confirm and save':'Confirm and remove';
   $('#replOk').onclick=function(){
-    var v=$('input[name=replOpt]:checked',$('#replBody')).value, stamp=nowStamp();
-    if(v==='rep'){var to=$('#replSel').value;accts.forEach(function(a){a.css=to;a.changed=stamp;});}
-    else if(v==='none'){accts.forEach(function(a){a.css=null;a.changed=stamp;});}
+    var v=$('input[name=replOpt]:checked',$('#replBody')).value;
+    if(v==='rep'){var to=$('#replSel').value;accts.slice().forEach(function(a){setAssign(a,to);});}
+    else if(v==='none'){accts.slice().forEach(function(a){setAssign(a,null);});}
     else if(v==='add'){var rid=$('#replRole').value; if(draft.roles.indexOf(rid)<0)draft.roles.push(rid);}
     hide('ov-repl');
     if(mode==='edit'){commitMember(m,draft);}
@@ -724,7 +749,7 @@ function openReplacement(m,draft,mode){
 function removeMember(id){
   var m=member(id);
   if(assigned(m).length){openReplacement(m,null,'remove');return;}
-  openConfirm('Remove '+fullName(m)+'?','<p style="margin:0">This member will be removed from Admin Settings and from the CSS Representative dropdown.</p>','Remove',function(){
+  openConfirm('Remove '+fullName(m)+'?','<p style="margin:0">This member will be removed from Admin Settings and from the Account Representative dropdown.</p>','Remove',function(){
     db.members=db.members.filter(function(x){return x.id!==id;}); hide('ov-conf'); toast('Member removed.'); renderAll();
   });
 }
@@ -763,10 +788,43 @@ function renderFinder(){
       +'<td><span class="plan'+(a.plan==='Pro'?' pro':'')+'">'+a.plan+(a.plan==='Advanced'?' ★':'')+'</span></td>'
       +'<td>$'+a.sales.toLocaleString('en-US',{minimumFractionDigits:a.sales%1?2:0})+'</td>'
       +'<td><span class="a2p '+(a.a2p==='Active'?'act':a.a2p==='Pending'?'pen':'')+'">'+a.a2p+'</span></td>'
-      +'<td class="css-cell'+(a.css?'':' un')+'">'+esc(c)+'</td>'
+      +'<td class="css-cell" tabindex="0" data-acct="'+a.acct+'" aria-describedby="histTip"><span class="hl'+(a.css?'':' un')+'">'+esc(c)+'</span></td>'
       +'<td>'+esc(a.contact)+'</td><td>'+esc(a.email)+'</td><td>'+(a.phone?esc(a.phone):'–')+'</td></tr>';
   }).join('') || '<tr><td colspan="10" class="empty">No accounts match.</td></tr>';
 }
+
+/* BR19.3: Roles History hover info box on the Account Representative cell */
+var tipT;
+function histHtml(a){
+  function entries(list,fmt){
+    return list.length?list.slice().reverse().map(function(h){return '<div class="he"><div class="hw">'+esc(h.t)+' · by '+esc(h.by)+'</div><div class="hv">'+fmt(h)+'</div></div>';}).join(''):'<div class="none">No changes recorded since release.</div>';
+  }
+  function v(x){return x?'<b>'+esc(x)+'</b>':'<b>Unassigned</b>';}
+  var h='<h4>Account Assignment History</h4>'+entries(db.hist.assign.filter(function(x){return x.acct===a.acct;}),function(e){return v(e.prev)+' → '+v(e.next);});
+  if(a.css){
+    var m=member(a.css);
+    h+='<h4>Role History: '+esc(fullName(m))+'</h4>'+entries(db.hist.roles.filter(function(x){return x.mid===a.css;}),function(e){
+      function L(l){return l.length?'<b>'+esc(l.join(', '))+'</b>':'<b>No Role</b>';} return L(e.prev)+' → '+L(e.next);});
+  }
+  return h;
+}
+function showTip(cell){
+  clearTimeout(tipT);
+  var a=db.accounts.filter(function(x){return String(x.acct)===cell.getAttribute('data-acct');})[0], tip=$('#histTip');
+  tip.innerHTML=histHtml(a); tip.hidden=false;
+  var r=cell.getBoundingClientRect(), w=tip.offsetWidth, h=tip.offsetHeight;
+  var left=Math.max(12,Math.min(r.left,window.innerWidth-w-12));
+  var top=r.bottom+4; if(top+h>window.innerHeight-12) top=Math.max(12,r.top-h-4);
+  tip.style.left=left+'px'; tip.style.top=top+'px';
+}
+function hideTip(){tipT=setTimeout(function(){$('#histTip').hidden=true;},150);}
+$('#finTable').addEventListener('mouseover',function(e){var c=e.target.closest('.css-cell');if(c)showTip(c);});
+$('#finTable').addEventListener('mouseout',function(e){if(e.target.closest('.css-cell'))hideTip();});
+$('#finTable').addEventListener('focusin',function(e){var c=e.target.closest('.css-cell');if(c)showTip(c);});
+$('#finTable').addEventListener('focusout',hideTip);
+$('#histTip').addEventListener('mouseenter',function(){clearTimeout(tipT);});
+$('#histTip').addEventListener('mouseleave',hideTip);
+window.addEventListener('scroll',function(e){if(e.target!==$('#histTip'))$('#histTip').hidden=true;},true);
 
 /* ---------- Company Settings ---------- */
 function nest(){return db.accounts.filter(function(a){return a.acct===11265;})[0];}
@@ -833,12 +891,22 @@ $('#memSearch').oninput=renderAdmin; $('#memStatus').onchange=renderAdmin;
 $('#cssFilter').onchange=function(){ui.filter=this.value;renderFinder();};
 $('#clearFilters').onclick=function(){ui.filter='';renderFinder();};
 $('#cssRep').onchange=function(){
-  var a=nest(); a.css=this.value||null; a.changed=nowStamp();
+  var a=nest(); setAssign(a,this.value||null);
   $('#cssChanged').textContent='Last changed: '+a.changed;
-  toast('CSS Representative updated. No notification is sent.'); renderAdmin();
+  toast('Account Representative updated. No notification is sent.'); renderAdmin();
 };
 $('#brToggle').onclick=function(){var on=this.getAttribute('aria-pressed')!=='true';this.setAttribute('aria-pressed',String(on));document.body.classList.toggle('hide-br',!on);};
 $('#resetData').onclick=function(){db=seed();ui.filter='';ui.sort={key:'date',dir:'desc'};renderAll();status('Data reset to the post-release state.');};
+$('#sampleHist').onclick=function(){
+  var A=function(acct,t,prev,next){db.hist.assign.push({t:t,acct:acct,prev:prev,next:next,by:ACTOR});};
+  A(11265,'10/05/2026 10:12 AM',null,'Seth Brown, OBCSS');
+  A(11265,'10/07/2026 03:40 PM','Seth Brown, OBCSS','Dripjobs Harrison, Product Manager');
+  A(18290,'10/03/2026 09:05 AM',null,'Matt Fournier, OBCSS');
+  A(18290,'10/08/2026 11:30 AM','Matt Fournier, OBCSS','David Cerro, OBCSS, CSS');
+  db.hist.roles.push({t:'10/06/2026 01:20 PM',mid:'m2',name:'Dripjobs Harrison',prev:['Routemize'],next:['Product Manager'],by:ACTOR});
+  db.hist.roles.push({t:'10/08/2026 08:50 AM',mid:'m10',name:'David Cerro',prev:['OBCSS'],next:['OBCSS','CSS'],by:ACTOR});
+  status('Sample history added (demo only, release itself creates no entries). Hover Dripjobs Harrison on The Nest or David Cerro on Pinnacle Coatings in At Risk Accounts.');
+};
 $('#scenOne').onclick=function(){
   db=seed(); ui.filter='';
   db.roles=db.roles.filter(function(r){return r.id!=='css'&&r.id!=='cer';});
