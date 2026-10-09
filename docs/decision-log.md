@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-10-09] Invoice Reminders (86b32d4gr): ClickUp now matches the roadmap
+
+- Decision: Checked ticket 86b32d4gr in ClickUp; its status is already "in review", matching the manual roadmap override from 2026-10-02. No ClickUp update needed, Jeremy had already moved it himself. The roadmap card and ClickUp are back in sync, so the override no longer needs special handling on the next weekly refresh.
+- Why: Follow-up on the 2026-10-02 override, confirming it won't be silently reverted by a future ClickUp re-pull.
+
 ## [2026-10-02] Roadmap: Invoice Reminders (86b32d4gr) manually placed in In Review
 
 - Decision: Moved the "Invoice Reminders" card from Needs PM Analysis to In Review on `dripjobs-product-roadmap/index.html`, per Jeremy's direct instruction, even though ClickUp shows this ticket as Needs Design. This is a one-off manual override, not a re-pull from ClickUp, so this one card is out of sync with its live ClickUp status until Jeremy updates ClickUp to match or the next weekly refresh reconciles it.
