@@ -178,6 +178,14 @@ tr:last-child td{border-bottom:0}
 .banner.blue{background:#EAF2FD;color:#1E40AF}
 .banner.green{background:#E7F8EE;color:#166534}
 .tg{width:52px;height:30px;border-radius:999px;background:var(--primary);position:relative;display:inline-block;flex:none}
+.tg.off{background:#C9CCD6}
+.tg.off::after{left:3px}
+.tgb{display:flex;align-items:center;gap:10px;width:100%;margin-top:14px;border:1px solid var(--border);border-radius:10px;padding:8px 12px;background:#fff;cursor:pointer;min-height:48px}
+.tgb .tg{margin-left:auto;transform:scale(.8);transform-origin:right center}
+.st.off{color:var(--muted)}.st.off::before{background:#9CA3AF}
+.st.inact{color:#B91C1C}.st.inact::before{background:#DC2626}
+.inact{color:#B91C1C!important}
+select.inact{color:#B91C1C}
 .tg::after{content:"";position:absolute;top:3px;left:25px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25)}
 
 /* modals */
@@ -245,7 +253,7 @@ tr:last-child td{border-bottom:0}
   <button id="scenOne">Scenario: OBCSS is the only Customer Success Role</button>
   <button id="sampleHist">Add sample history</button>
   <button id="resetData">Reset data</button>
-  <span class="status" id="demoStatus" aria-live="polite">Post-release state. Try: edit the OBCSS Role Department, edit Dripjobs Harrison (Product Manager, assigned to The Nest), then hover names in At Risk Accounts to see Roles History.</span>
+  <span class="status" id="demoStatus" aria-live="polite">Post-release state. Try: edit the OBCSS Role Department, edit Dripjobs Harrison (Product Manager, assigned to The Nest), then hover names in At Risk Accounts to see Roles History. Inactive demo: set The Nest to Seth Brown in Company Settings, then mark Seth Inactive in Admin Settings.</span>
 </div>
 
 <header class="topbar">
@@ -274,7 +282,7 @@ tr:last-child td{border-bottom:0}
           <div class="sub">Source of truth for the Account Representative dropdown in Company Settings &amp; filter in At Risk Accounts<span class="br" title="BR18: Members subtitle copy.">BR18</span></div>
         </div>
         <div class="sec-tools">
-          <select class="ctl" id="memStatus" aria-label="Status"><option value="active">Status: Active</option><option value="all">Status: All</option></select>
+          <select class="ctl" id="memStatus" aria-label="Status"><option value="active">Status: Active</option><option value="inactive">Status: Inactive</option><option value="all">Status: All</option></select>
           <input class="ctl" id="memSearch" placeholder="Search members…" aria-label="Search members">
           <button class="btn btn-p" id="addMember">+ Add Member</button>
         </div>
@@ -407,8 +415,7 @@ tr:last-child td{border-bottom:0}
     <div class="m-b">
       <div class="m-grid">
         <div><div class="big-av" id="memBig">DL</div>
-          <div style="display:flex;align-items:center;gap:10px;margin-top:14px;border:1px solid var(--border);border-radius:10px;padding:10px 12px"><span class="st" style="font-weight:600">Active</span><span class="tg" style="margin-left:auto;transform:scale(.8)" aria-hidden="true"></span></div>
-        </div>
+          <button type="button" class="tgb" id="mActive" role="switch" aria-checked="true" aria-label="Member status"><span class="st" id="mActiveLbl" style="font-weight:600">Active</span><span class="tg" aria-hidden="true"></span></button><span class="br" title="New request: Super Admin can set a member Active or Inactive. An Inactive member who is still assigned to an account stays visible (in red) where that assignment is shown, and cannot be newly selected.">Active</span>
         <div class="stack">
           <div class="two">
             <div class="field"><label class="req" for="mFirst">First Name</label><input class="in" id="mFirst"><div class="err-t" id="mFirstErr" hidden>Required.</div></div>
@@ -536,7 +543,9 @@ function roleText(m){
   return list.map(function(id){return role(id).name;}).join(', ');
 }
 function display(m){var t=roleText(m);return fullName(m)+(t?', '+t:'');}
-function csMembers(){return db.members.filter(isCSMember);}
+function csMembers(){return db.members.filter(function(m){return m.active && isCSMember(m);});}
+/* Inactive members who are still assigned stay visible, flagged in red */
+function dlabel(m){return display(m)+(m.active?'':' (Inactive)');}
 function csRoles(except){return db.roles.filter(function(r){return r.dept===CS && r.id!==except;});}
 function nowStamp(){
   var d=new Date(),h=d.getHours(),ap=h>=12?'PM':'AM';h=h%12||12;
@@ -581,13 +590,13 @@ function renderNav(){
 function renderAdmin(){
   var q=$('#memSearch').value.toLowerCase(), st=$('#memStatus').value;
   var rows=db.members.filter(function(m){
-    return (st==='all'||m.active) && (!q || (fullName(m)+' '+m.email).toLowerCase().indexOf(q)>-1);
+    return (st==='all'||(st==='active'?m.active:!m.active)) && (!q || (fullName(m)+' '+m.email).toLowerCase().indexOf(q)>-1);
   }).sort(function(a,b){return fullName(a).localeCompare(fullName(b));});
   $('#memCount').textContent=plural(db.members.length,'member');
   $('#memTable tbody').innerHTML=rows.map(function(m){
     var pills=m.roles.length?m.roles.map(function(id){return '<span class="pill">'+esc(role(id).name)+'</span>';}).join(''):'<span class="hint" style="margin:0">No Role</span>';
-    return '<tr><td><div class="mem"><span class="av">'+esc(m.first[0]+m.last[0])+'<i></i></span>'+esc(fullName(m))+'</div></td>'
-      +'<td class="mono">'+esc(m.email)+'</td><td>'+pills+'</td><td><span class="st">Active</span></td>'
+    return '<tr><td><div class="mem"><span class="av">'+esc(m.first[0]+m.last[0])+(m.active?'<i></i>':'')+'</span>'+esc(fullName(m))+'</div></td>'
+      +'<td class="mono">'+esc(m.email)+'</td><td>'+pills+'</td><td>'+(m.active?'<span class="st">Active</span>':'<span class="st inact">Inactive</span>')+'</td>'
       +'<td style="text-align:right;white-space:nowrap"><button class="icon-btn" data-edit-m="'+m.id+'" aria-label="Edit '+esc(fullName(m))+'">'+ICON_EDIT+'</button><button class="icon-btn" data-del-m="'+m.id+'" aria-label="Remove '+esc(fullName(m))+'">'+ICON_DEL+'</button></td></tr>';
   }).join('') || '<tr><td colspan="5" class="empty">No members match.</td></tr>';
 
@@ -682,7 +691,7 @@ function openMember(id){
   $('#saveMember').textContent=m?'Save Changes':'Add Member';
   $('#mFirst').value=m?m.first:''; $('#mLast').value=m?m.last:''; $('#mEmail').value=m?m.email:'';
   $('#memBig').textContent=m?(m.first[0]+m.last[0]):'+';
-  renderRoleBox(m?m.roles:[]);
+  renderRoleBox(m?m.roles:[]); setActive(m?m.active:true);
   ['mFirstErr','mLastErr','mEmailErr'].forEach(function(i){$('#'+i).hidden=true;});
   show('ov-member');
 }
@@ -691,19 +700,20 @@ function renderRoleBox(checked){
     return '<label><input type="checkbox" value="'+r.id+'"'+(checked.indexOf(r.id)>-1?' checked':'')+'><span>'+esc(r.name)+'</span><span class="dept'+(r.dept===CS?' cs':'')+'">'+esc(r.dept)+'</span></label>';
   }).join('');
 }
+function setActive(on){var b=$('#mActive');b.setAttribute('aria-checked',String(on));$('.tg',b).classList.toggle('off',!on);var l=$('#mActiveLbl');l.textContent=on?'Active':'Inactive';l.className='st'+(on?'':' inact');}
 function checkedRoles(){return $$('#mRoles input:checked').map(function(i){return i.value;});}
 function saveMember(){
   var f=$('#mFirst').value.trim(), l=$('#mLast').value.trim(), e=$('#mEmail').value.trim();
   $('#mFirstErr').hidden=!!f; $('#mLastErr').hidden=!!l; $('#mEmailErr').hidden=!!e;
   if(!f||!l||!e) return;
   var roles=checkedRoles(), m=ui.editMember?member(ui.editMember):null;
-  var draft={first:f,last:l,email:e,roles:roles};
+  var draft={first:f,last:l,email:e,roles:roles,active:$('#mActive').getAttribute('aria-checked')==='true'};
   if(m && assigned(m).length && !roles.some(isCSRole)){ openReplacement(m,draft,'edit'); return; }
   commitMember(m,draft);
 }
 function commitMember(m,d){
-  if(m){var before=m.roles.slice();m.first=d.first;m.last=d.last;m.email=d.email;m.roles=d.roles;logRoles(m,before,m.roles);toast('Member saved.');}
-  else{var nm={id:'m'+(db.nextId++),first:d.first,last:d.last,email:d.email,roles:d.roles,active:true};db.members.push(nm);logRoles(nm,[],nm.roles);toast('Member added.');}
+  if(m){var before=m.roles.slice();m.first=d.first;m.last=d.last;m.email=d.email;m.active=d.active;m.roles=d.roles;logRoles(m,before,m.roles);toast('Member saved.');}
+  else{var nm={id:'m'+(db.nextId++),first:d.first,last:d.last,email:d.email,roles:d.roles,active:d.active};db.members.push(nm);logRoles(nm,[],nm.roles);toast('Member added.');}
   hide('ov-member'); renderAll();
 }
 
@@ -763,7 +773,7 @@ function finderLoad(){
 }
 function renderFinder(){
   var sel=$('#cssFilter');
-  sel.innerHTML='<option value="">All team members</option>'+ui.finderOpts.map(member).filter(Boolean).map(function(m){return '<option value="'+m.id+'"'+(ui.filter===m.id?' selected':'')+'>'+esc(display(m))+'</option>';}).join('');
+  sel.innerHTML='<option value="">All team members</option>'+ui.finderOpts.map(member).filter(Boolean).map(function(m){return '<option value="'+m.id+'"'+(ui.filter===m.id?' selected':'')+(m.active?'':' class="inact"')+'>'+esc(dlabel(m))+'</option>';}).join('');
   sel.value=ui.filter;
   var rows=db.accounts.filter(function(a){return !ui.filter||a.css===ui.filter;});
   var s=ui.sort, dir=s.dir==='asc'?1:-1;
@@ -781,14 +791,14 @@ function renderFinder(){
   $('#finTable tbody').innerHTML=rows.map(function(a){
     var d=new Date(a.date+'T00:00:00'), age=Math.round((TODAY-d)/86400000);
     var ds=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-    var c=a.css?display(member(a.css)):'Unassigned';
+    var cm=a.css?member(a.css):null, c=cm?dlabel(cm):'Unassigned';
     return '<tr class="row"><td class="co"><b>'+esc(a.co)+'</b><small>Account #'+a.acct+'</small></td>'
       +'<td>'+ds+'<span class="age">'+age+'d</span></td>'
       +'<td><span class="tier '+a.tier+'">'+tierL[a.tier]+'</span></td>'
       +'<td><span class="plan'+(a.plan==='Pro'?' pro':'')+'">'+a.plan+(a.plan==='Advanced'?' ★':'')+'</span></td>'
       +'<td>$'+a.sales.toLocaleString('en-US',{minimumFractionDigits:a.sales%1?2:0})+'</td>'
       +'<td><span class="a2p '+(a.a2p==='Active'?'act':a.a2p==='Pending'?'pen':'')+'">'+a.a2p+'</span></td>'
-      +'<td class="css-cell" tabindex="0" data-acct="'+a.acct+'" aria-describedby="histTip"><span class="hl'+(a.css?'':' un')+'">'+esc(c)+'</span></td>'
+      +'<td class="css-cell" tabindex="0" data-acct="'+a.acct+'" aria-describedby="histTip"><span class="hl'+(a.css?(cm.active?'':' inact'):' un')+'">'+esc(c)+'</span></td>'
       +'<td>'+esc(a.contact)+'</td><td>'+esc(a.email)+'</td><td>'+(a.phone?esc(a.phone):'–')+'</td></tr>';
   }).join('') || '<tr><td colspan="10" class="empty">No accounts match.</td></tr>';
 }
@@ -835,8 +845,9 @@ function renderCompany(){
   /* BR12: existing non-Customer Success assignee stays as the selected value only */
   if(cur && list.indexOf(cur)<0) list.push(cur);
   list.sort(function(x,y){return fullName(x).localeCompare(fullName(y));});
-  list.forEach(function(m){opts.push('<option value="'+m.id+'">'+esc(display(m))+'</option>');});
+  list.forEach(function(m){opts.push('<option value="'+m.id+'"'+(m.active?'':' class="inact"')+'>'+esc(dlabel(m))+'</option>');});
   sel.innerHTML=opts.join(''); sel.value=a.css||'';
+  sel.classList.toggle('inact',!!(cur&&!cur.active));
   $('#cssChanged').textContent='Last changed: '+a.changed;
 }
 
@@ -887,13 +898,14 @@ $('#mAddRole').onclick=function(){
 };
 $('#ov-role').addEventListener('click',function(){});
 ['ov-role'].forEach(function(id){var o=$('#'+id);new MutationObserver(function(){if(o.hidden)o.classList.remove('top');}).observe(o,{attributes:true,attributeFilter:['hidden']});});
+$('#mActive').onclick=function(){setActive(this.getAttribute('aria-checked')!=='true');};
 $('#memSearch').oninput=renderAdmin; $('#memStatus').onchange=renderAdmin;
 $('#cssFilter').onchange=function(){ui.filter=this.value;renderFinder();};
 $('#clearFilters').onclick=function(){ui.filter='';renderFinder();};
 $('#cssRep').onchange=function(){
   var a=nest(); setAssign(a,this.value||null);
   $('#cssChanged').textContent='Last changed: '+a.changed;
-  toast('Account Representative updated. No notification is sent.'); renderAdmin();
+  toast('Account Representative updated. No notification is sent.'); renderAdmin(); renderCompany();
 };
 $('#brToggle').onclick=function(){var on=this.getAttribute('aria-pressed')!=='true';this.setAttribute('aria-pressed',String(on));document.body.classList.toggle('hide-br',!on);};
 $('#resetData').onclick=function(){db=seed();ui.filter='';ui.sort={key:'date',dir:'desc'};renderAll();status('Data reset to the post-release state.');};
