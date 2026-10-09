@@ -1592,3 +1592,9 @@ Format:
 - Decision: Jeremy clarified that clicking Mark as Paid does open the Receive Payment modal and the user must pick a method from the dropdown. The modal is restored from the earlier build (the screenshot shows the method list: credit card, check, Cash, Retainer, Skittles, M&Ms, IOU, PayPal, Zelle, which come from Company Settings > App Settings).
 - Assumption: Method is required. Saving without one shows "Select a method" (wording invented). Amount only needs to be above $0.
 - Decision: Request Payment errors match production screens: bold bright red bulleted text above the legend (#F5222D, matched by eye), and Amount starts as "0".
+
+## [2026-10-09] Role Departments prototype (86bcaf2hu): Account Representative labels and Roles History
+- Decision: Updated to the Oct 9 ticket. Labels now read "Account Representative" on Company Settings, the At Risk Accounts filter title and column header, and the Transfer confirmation copy; Admin Settings Members subtitle uses the BR18 text. Role names (OBCSS, CSS) are unchanged. Ana's member name is now Ana Delia Villegas Fernandez.
+- Decision: Added Roles History (BR19). Assignment changes (Company Settings, 13.1 and removal prompts, Transfer) and member Role changes (member edit, Reassign) are logged with time, previous value, new value, and actor. Shown only in At Risk Accounts as a hover/focus info box on the Account Representative name (two sections, newest first; "Unassigned" shows assignment history only). The box is fixed-position with a max height and inner scroll so it never clips or adds horizontal scroll. History starts empty (no backfill, release creates nothing); a demo-bar "Add sample history" button seeds example entries for review only.
+- Assumption: The actor is always Jeremy Harrison since the prototype has a single signed-in user. Adding a new member with Roles is logged as a Role change from no Roles. Email for Ana remains a placeholder.
+
