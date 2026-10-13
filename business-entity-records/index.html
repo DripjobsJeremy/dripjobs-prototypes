@@ -65,6 +65,11 @@
      not the #7C3AED marketing brand purple — this surface is in-product chrome)
      ══════════════════════════════════════════════ */
   #be-app {
+    /* Contrast flag (Notes tab a11y pass): white text on --purple (.btn-primary) and on --red/white
+       on --red (.btn-danger) both read ~3.1-3.8:1 against their backgrounds, below the 4.5:1 AA floor
+       for normal text. Both are pre-existing, global components used throughout this whole prototype,
+       not something newly introduced here, so left unchanged per brief ("don't change existing
+       elements"), flagged for a follow-up design-system pass instead of a one-off patch. */
     --purple: #8B85EA;
     --purple-hover: #736BE3;
     --purple-light: #E8E6FA;
@@ -500,12 +505,55 @@
   #be-app .dcc-people-value { font-size: 13px; font-weight: 700; color: var(--gray-800); margin-top: 2px; }
   #be-app .dcc-stage-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--gray-200); margin-bottom: 14px; font-size: 13px; }
   #be-app .dcc-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--gray-200); margin-bottom: 14px; flex-wrap: wrap; }
-  #be-app .dcc-tab { padding: 8px 12px; font-size: 12.5px; font-weight: 700; color: var(--gray-500); cursor: pointer; border-bottom: 2px solid transparent; }
+  #be-app .dcc-tab { padding: 8px 12px; font-size: 12.5px; font-weight: 700; color: var(--gray-500); cursor: pointer; border: none; border-bottom: 2px solid transparent; background: none; font-family: inherit; }
   #be-app .dcc-tab.active { color: var(--purple); border-bottom-color: var(--purple); }
   @media (max-width: 720px) {
     #be-app .modal-dcc .modal-body { flex-direction: column; max-height: 80vh; }
     #be-app .dcc-left { flex: none; border-right: none; border-bottom: 1px solid var(--gray-200); }
   }
+
+  /* ─── Notes tab (Business Notes + Deal Notes, BR60-65) ─── */
+  #be-app .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  #be-app .hidden { display: none !important; }
+  #be-app .notes-search-field label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-500); margin-bottom: 4px; }
+  #be-app .notes-sub { padding-top: 18px; }
+  #be-app .notes-sub + .notes-sub { margin-top: 22px; border-top: 1px solid var(--gray-200); }
+  #be-app .notes-sub-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+  #be-app .notes-sub-head h3, #be-app .notes-sub-head h4 { font-size: 14px; font-weight: 800; margin: 0; color: var(--gray-800); }
+  #be-app .notes-sub-desc { font-size: 12.5px; color: var(--gray-500); margin: 0 0 14px; max-width: 760px; }
+  #be-app .note-composer { border: 1px solid var(--gray-200); border-radius: 10px; padding: 16px 14px 14px; max-width: 760px; margin-bottom: 4px; }
+  #be-app .note-field { position: relative; margin-bottom: 14px; }
+  #be-app .note-field label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-500); margin-bottom: 6px; }
+  #be-app .note-field textarea { width: 100%; min-height: 76px; border: 1px solid var(--gray-200); border-radius: 8px; padding: 10px 12px; font: inherit; resize: vertical; }
+  #be-app .note-field textarea:focus { outline: none; border-color: var(--purple); box-shadow: 0 0 0 3px rgba(139,133,234,0.18); }
+  #be-app .note-field.err textarea { border-color: var(--red); }
+  #be-app .note-field-error { font-size: 12px; color: var(--red); margin-top: 6px; display: flex; gap: 6px; align-items: flex-start; }
+  #be-app .note-row-end { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+  #be-app .note-list { list-style: none; margin: 16px 0 0; padding: 0; max-width: 760px; display: grid; gap: 10px; }
+  #be-app .note-row { border: 1px solid var(--gray-200); border-radius: 10px; padding: 14px; }
+  #be-app .note-text { margin: 0 0 10px; white-space: pre-wrap; word-break: break-word; }
+  #be-app .note-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+  #be-app .note-who { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--gray-800); }
+  /* gray-500 not gray-400 for this small muted text: gray-400 on white is ~2.5:1, fails WCAG AA 4.5:1
+     (same systemic gap flagged for --purple/--red below), gray-500 is ~4.8:1, scoped to these new
+     elements only per the brief, existing elements using gray-400 elsewhere are left untouched. */
+  #be-app .note-when { font-size: 12px; color: var(--gray-500); }
+  #be-app .note-actions { margin-left: auto; display: flex; gap: 8px; }
+  #be-app .note-confirm { margin-top: 12px; padding: 12px; border-radius: 8px; background: var(--red-light); border: 1px solid #FECACA; color: #991B1B; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; font-size: 13px; }
+  #be-app .note-group { border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; margin-bottom: 10px; max-width: 760px; }
+  #be-app .note-group-head { display: flex; align-items: center; gap: 10px; background: var(--gray-50); padding: 10px 14px; width: 100%; border: 0; text-align: left; cursor: pointer; }
+  #be-app .note-group-head .caret { transition: transform 0.15s; flex-shrink: 0; }
+  #be-app .note-group-head[aria-expanded="false"] .caret { transform: rotate(-90deg); }
+  #be-app .note-group-head .gname { font-weight: 800; font-size: 13px; color: var(--gray-800); }
+  #be-app .note-group-head .gemail { font-size: 11px; color: var(--gray-500); }
+  #be-app .note-group ul { list-style: none; margin: 0; padding: 4px 14px 10px 40px; }
+  #be-app .note-group li { display: flex; gap: 12px; align-items: flex-start; padding: 8px 0; font-size: 13px; border-top: 1px solid var(--gray-100); }
+  #be-app .note-group li:first-child { border-top: 0; }
+  #be-app .note-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--purple); flex: none; margin-top: 5px; }
+  #be-app .note-group li .ts { margin-left: auto; font-size: 11px; color: var(--gray-500); white-space: nowrap; }
+  #be-app .note-footer { font-size: 12px; color: var(--gray-500); margin-top: 12px; }
+  #be-app .note-footer b { color: var(--gray-800); }
+  #be-app .note-add-toggle { margin-top: 4px; }
 
   /* ─── Entry-point demo ─── */
   #be-app .entry-frame { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; }
@@ -1397,14 +1445,14 @@
 
 <!-- ═══ Modal: Deal Command Center (BR53 Business identifier, BR54 Change action) ═══ -->
 <div class="modal-overlay" id="modalDealCommandCenter">
-  <div class="modal-card modal-dcc">
+  <div class="modal-card modal-dcc" role="dialog" aria-modal="true" aria-labelledby="dccModalTitle">
     <div class="modal-header">
-      <h3>Deal Command Center</h3>
-      <button class="modal-close" onclick="closeModal('modalDealCommandCenter')">✕</button>
+      <h3 id="dccModalTitle">Deal Command Center</h3>
+      <button class="modal-close" onclick="closeDealCommandCenter()">✕</button>
     </div>
     <div class="modal-body" id="dccBody"></div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal('modalDealCommandCenter')">Close</button>
+      <button class="btn btn-outline" onclick="closeDealCommandCenter()">Close</button>
     </div>
   </div>
 </div>
@@ -1448,6 +1496,10 @@
 let nextBizId = 100;
 let nextContactId = 100;
 let nextJobAddressId = 100;
+// BR60/61: the prototype's logged-in user (matches the header avatar below, "JH"), used across
+// Business Notes and Deal Notes to decide whether Edit/Delete render for a given note's author.
+const CURRENT_USER = 'Jeremy Harrison';
+let nextNoteId = 205;
 
 const BUSINESSES = [
   {
@@ -1467,8 +1519,15 @@ const BUSINESSES = [
     // gone out for this Deal (see pushEpRecordOntoBusiness) — West Wing demos the already-sent, locked
     // path (Proposal #4821 below is Sent), Parking Structure demos the not-yet-sent, unrestricted path.
     deals: [
-      { title: 'Exterior Repaint — West Wing', sub: 'Stage: Proposal Sent', stage: 'Proposal Sent', meta: '$18,400', via: 'Karen Whitfield', contactId: 'c1', updatedAt: '2026-08-24', leadSource: 'Referral', salesperson: 'Jordan P.', dealNo: 5101, sentLocked: true },
-      { title: 'Parking Structure Coating', sub: 'Stage: Negotiation', stage: 'Negotiation', meta: '$42,000', via: 'Tom Reyes', contactId: 'c2', updatedAt: '2026-08-15', leadSource: 'Referral', salesperson: 'Jordan P.', dealNo: 5102, sentLocked: false }
+      { title: 'Exterior Repaint — West Wing', sub: 'Stage: Proposal Sent', stage: 'Proposal Sent', meta: '$18,400', via: 'Karen Whitfield', contactId: 'c1', updatedAt: '2026-08-24', leadSource: 'Referral', salesperson: 'Jordan P.', dealNo: 5101, sentLocked: true,
+        notes: [
+          { id: 203, text: 'Karen wants color samples before final signature.', author: 'Jordan P.', when: 'Oct 13, 3:01 PM', edited: false },
+          { id: 202, text: 'Confirmed exact footage with Karen: 18,400 sqft total across both wings.', author: CURRENT_USER, when: 'Oct 13, 3:02 PM', edited: false }
+        ] },
+      { title: 'Parking Structure Coating', sub: 'Stage: Negotiation', stage: 'Negotiation', meta: '$42,000', via: 'Tom Reyes', contactId: 'c2', updatedAt: '2026-08-15', leadSource: 'Referral', salesperson: 'Jordan P.', dealNo: 5102, sentLocked: false,
+        notes: [
+          { id: 204, text: 'Tom flagged a possible scope increase for the loading dock area.', author: 'Jordan P.', when: 'Oct 13, 3:04 PM', edited: false }
+        ] }
     ],
     proposals: [
       { title: 'Proposal #4821 — Exterior Repaint', sub: 'Sent · Awaiting signature', meta: '$18,400', via: 'Karen Whitfield', contactId: 'c1', status: 'Sent', createdAt: '2026-08-20', jobAddressId: 'ja1', proposalNo: 4821 },
@@ -1485,6 +1544,11 @@ const BUSINESSES = [
     payments: [
       { title: 'Payment received — INV-2204', sub: 'Jul 2, 2026 · Card ending 4471', meta: '$3,120.00', via: 'Karen Whitfield' },
       { title: 'Deposit — Proposal #4790', sub: 'Jun 18, 2026 · ACH', meta: '$1,500.00', via: 'Tom Reyes' }
+    ],
+    // BR61 demo: one note by CURRENT_USER (gets Edit/Delete) and one by a different author (read-only).
+    notes: [
+      { id: 201, text: 'Net 30, AP requires a PO number on every invoice. Send invoices to billing@acmepaintinggroup.com, not to project contacts.', author: CURRENT_USER, when: 'Oct 13, 3:12 PM', edited: false },
+      { id: 200, text: 'Karen prefers a call before any schedule change. Loading dock closes at 5 PM.', author: 'Jordan P.', when: 'Oct 13, 3:20 PM', edited: false }
     ],
     jobs: [
       { title: 'Job — Lobby Refresh', sub: 'Project Accepted', dealStage: 'Project Accepted', meta: '$6,250', via: 'Tom Reyes', contactId: 'c2', active: true, fromDeal: 'Proposal #4790 — Lobby Refresh', updatedAt: '2026-07-21', salesperson: 'Jordan P.', projectManager: 'No project manager', crew: null, color: null, scheduledStart: null, scheduledEnd: null, jobNo: 8801 }
@@ -1899,9 +1963,15 @@ function renderProfileHeader(biz) {
 }
 
 function renderProfileTabs() {
-  document.getElementById('profileTabsNav').innerHTML = TABS.map(t =>
-    '<a href="javascript:void(0)" class="settings-tab-link" data-tab="' + t.key + '" onclick="setProfileTab(\'' + t.key + '\')">' + t.label + '</a>'
-  ).join('');
+  const biz = getBiz(currentBizId);
+  // BR63: combined badge (business notes + deal notes) on the Notes tab only; every other tab is
+  // unchanged, per brief.
+  document.getElementById('profileTabsNav').innerHTML = TABS.map(t => {
+    const notesBadge = t.key === 'notes'
+      ? ' <span class="list-heading-count-pill" id="notesTabBadge" aria-hidden="true">' + countAllNotes(biz) + '</span><span class="sr-only" id="notesTabBadgeSr">, ' + countAllNotes(biz) + ' notes</span>'
+      : '';
+    return '<a href="javascript:void(0)" class="settings-tab-link" data-tab="' + t.key + '" onclick="setProfileTab(\'' + t.key + '\')">' + t.label + notesBadge + '</a>';
+  }).join('');
   document.getElementById('profileTabPanels').innerHTML = TABS.map(t =>
     '<div class="settings-tab-content" data-content="' + t.key + '" id="panel-' + t.key + '"></div>'
   ).join('');
@@ -1926,7 +1996,7 @@ function renderTabContent(key) {
   if (dataTabs.includes(key)) { panel.innerHTML = dataTabHtml(key, biz); return; }
 
   if (key === 'tasks') { panel.innerHTML = tasksHtml(biz); return; }
-  if (key === 'notes') { panel.innerHTML = notesHtml(biz); return; }
+  if (key === 'notes') { panel.innerHTML = notesHtml(biz); renderNoteLists(biz); return; }
   if (key === 'attachments') { panel.innerHTML = attachmentsHtml(biz); return; }
   if (key === 'email') { panel.innerHTML = emailTextHtml(biz, 'email'); return; }
   if (key === 'text') { panel.innerHTML = emailTextHtml(biz, 'text'); return; }
@@ -2260,6 +2330,8 @@ function openRecordDetail(bizId, key, idx) {
    this ticket.
    ═══════════════════════════════════════════════ */
 let currentDccBizId = null, currentDccDealIdx = null;
+let dccActiveTab = 'Chat';
+let dccOpener = null;
 function bizLegalWithDba(biz) {
   return biz.legal + (biz.dba && biz.dba.trim() ? ' (' + biz.dba.trim() + ')' : '');
 }
@@ -2273,15 +2345,34 @@ function copyText(text) {
 function openDealCommandCenter(bizId, idx) {
   currentDccBizId = bizId;
   currentDccDealIdx = idx;
+  dccActiveTab = 'Chat';
+  notesUi.deal = { editId: null, confirmId: null };
+  notesUi.biz.modal = { editId: null, confirmId: null };
+  dccOpener = document.activeElement;
   renderDealCommandCenter();
   openModal('modalDealCommandCenter');
+  const closeBtn = document.querySelector('#modalDealCommandCenter .modal-close');
+  if (closeBtn) closeBtn.focus();
+}
+// BR: dialog semantics for the Deal Command Center: focus returns to whatever opened it, matching
+// the role="dialog"/aria-modal markup and the Tab-trap wired once at the bottom of this script.
+function closeDealCommandCenter() {
+  closeModal('modalDealCommandCenter');
+  if (dccOpener && typeof dccOpener.focus === 'function') dccOpener.focus();
+  dccOpener = null;
 }
 function renderDealCommandCenter() {
   const biz = getBiz(currentDccBizId);
   const deal = biz && biz.deals[currentDccDealIdx];
   if (!biz || !deal) return;
   const contact = deal.contactId ? getContact(deal.contactId) : null;
-  document.getElementById('dccBody').innerHTML = dccLeftPaneHtml(biz, deal, contact) + dccRightPaneHtml(deal);
+  document.getElementById('dccBody').innerHTML = dccLeftPaneHtml(biz, deal, contact) + dccRightPaneHtml(biz, deal);
+  renderModalNoteLists(biz, deal);
+}
+function setDccTab(tabName) {
+  dccActiveTab = tabName;
+  renderDealCommandCenter();
+  if (tabName !== 'Notes') toast('The ' + tabName + ' tab is not modeled in this Deal Command Center skeleton, out of scope for this ticket.');
 }
 function dccBusinessLineHtml(biz) {
   return '<div class="dcc-biz-line">🏢 ' + bizLegalWithDba(biz) +
@@ -2321,22 +2412,52 @@ function dccLeftPaneHtml(biz, deal, contact) {
     '</div>' +
   '</div>';
 }
-function dccRightPaneHtml(deal) {
+function dccRightPaneHtml(biz, deal) {
   const tabs = ['Chat', 'Jobi AI', 'Proposals', 'Jobs', 'Invoices', 'Payments', 'Notes', 'Attachments', 'Tasks'];
+  const active = dccActiveTab || 'Chat';
+  const bodyHtml = active === 'Notes' ? dccNotesTabHtml(biz, deal) :
+    '<div class="empty-state" style="flex:1;">' +
+      '<div class="empty-state-icon">💬</div>' +
+      '<div class="empty-state-title">' + escHtml(active) + ' is not modeled here</div>' +
+      '<div class="empty-state-desc">This skeleton exists to host the Business identifier (BR53), Change action (BR54), and the Notes tab (BR60-65). Other tab content is out of scope for this ticket.</div>' +
+    '</div>';
   return '<div class="dcc-right">' +
     '<div class="dcc-stage-row">' +
       '<div><span style="color:var(--gray-400);">Current Stage:</span> <strong>' + (deal.stage || '—') + '</strong> <span class="btn-link" onclick="toast(\'Moving stage from the Command Center is not modeled in this prototype — drag the card on the Pipeline instead.\')">Move</span></div>' +
       '<div><span style="color:var(--gray-400);">Current Sequence:</span> <strong>' + (deal.stage === 'In Draft' ? 'Proposal Draft' : '—') + '</strong> <span class="btn-link" onclick="toast(\'Drip Sequence detail is not modeled in this prototype.\')">Change</span></div>' +
     '</div>' +
-    '<div class="dcc-tabs">' + tabs.map((t, i) =>
-      '<div class="dcc-tab' + (i === 0 ? ' active' : '') + '" onclick="toast(\'The ' + t + ' tab is not modeled in this Deal Command Center skeleton — out of scope for BR53/54/55.\')">' + t + '</div>'
+    '<div class="dcc-tabs" role="tablist" aria-label="Deal sections">' + tabs.map(t =>
+      '<button type="button" class="dcc-tab' + (t === active ? ' active' : '') + '" role="tab" aria-selected="' + (t === active) + '" onclick="setDccTab(\'' + t + '\')">' + t + '</button>'
     ).join('') + '</div>' +
-    '<div class="empty-state" style="flex:1;">' +
-      '<div class="empty-state-icon">💬</div>' +
-      '<div class="empty-state-title">Chat is not modeled here</div>' +
-      '<div class="empty-state-desc">This skeleton exists to host the Business identifier (BR53) and Change action (BR54). Full tab content is out of scope for this ticket.</div>' +
-    '</div>' +
+    '<div style="flex:1; display:flex; flex-direction:column; min-height:0; overflow-y:auto;">' + bodyHtml + '</div>' +
   '</div>';
+}
+// BR60/62: the Deal Command Center's Notes tab: this Deal's own Deal Notes (full add/edit/delete,
+// built here for real) plus a Business Notes section at the bottom sharing the same data as the
+// Business Profile's Notes tab (BR62). Only ever rendered for a Business Project Deal, see the
+// comment on openRecordDetail's 'deals' branch for why a Personal Project Deal never reaches here.
+function dccNotesTabHtml(biz, deal) {
+  return '' +
+    '<div class="settings-alert settings-alert--info" style="margin-bottom:14px;">' +
+      '<div class="settings-alert-icon">✨</div>' +
+      '<div><div class="settings-alert-title">Jobi AI Tip <span class="br-annotation-chip" title="ClickUp 86bbhhhqd, Business Rule 64: Jobi AI analyzes Business Notes the same way it analyzes Deal Notes, no separate UI">🔗 BR64: Jobi AI + Business Notes</span></div>' +
+      '<div>These notes are analyzed by Jobi AI for communication assistant text and email. Write more detail for better follow-up suggestions.</div></div>' +
+    '</div>' +
+    '<h4 class="sr-only">Deal notes</h4>' +
+    '<div class="note-composer" id="dealNoteComposer" style="margin-bottom:14px;">' +
+      '<div class="note-field" id="dealNoteField">' +
+        '<label for="dealNoteText">Deal note</label>' +
+        '<textarea id="dealNoteText" aria-describedby="dealNoteErr" placeholder="Add your note here" oninput="clearDealNoteFieldError()"></textarea>' +
+        '<div class="note-field-error hidden" id="dealNoteErr" role="alert"><span>Enter a note before saving.</span></div>' +
+      '</div>' +
+      '<div class="note-row-end">' +
+        '<button type="button" class="btn btn-outline" onclick="cancelDealNoteCompose()">Cancel</button>' +
+        '<button type="button" class="btn btn-primary" onclick="saveDealNote()">Save</button>' +
+      '</div>' +
+    '</div>' +
+    '<ul class="note-list" id="dealNoteList" aria-label="Deal notes" style="margin-top:0;"></ul>' +
+    '<div class="empty-state hidden" id="dealNoteListEmpty"></div>' +
+    bizNotesSectionHtml('modal', biz);
 }
 function openChangeDealBusiness() {
   const biz = getBiz(currentDccBizId);
@@ -2398,12 +2519,456 @@ function tasksHtml(biz) {
   ];
   return activityListHtml(rows);
 }
+/* ═══════════════════════════════════════════════
+   NOTES TAB: Business Notes (new) + Deal Notes (existing concept, now built for real), ClickUp
+   86bbhhhqd, Oct 13 QA call add-on (BR60-65). Business Notes and Deal Notes share one data source
+   (biz.notes / deal.notes) between the Business Profile's own Notes tab and the Deal Command Center's
+   Notes tab, so an edit in either place shows up in both (BR62). Author-only Edit/Delete (BR61) is
+   enforced here by simply not rendering the buttons for a note that isn't CURRENT_USER's; a real
+   build must also enforce this server-side, hiding the buttons client-side is not the permission check.
+   ═══════════════════════════════════════════════ */
+const notesUi = {
+  q: '',
+  groupsOpen: {},
+  biz: { rec: { editId: null, confirmId: null }, modal: { editId: null, confirmId: null } },
+  deal: { editId: null, confirmId: null }
+};
+function escHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+function noteAvatarHtml(name) {
+  return '<span class="pipeline-card-avatar" aria-hidden="true">' + initialsOf(name) + '</span>';
+}
+function noteCaretSvg() {
+  return '<svg class="caret" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
+}
+function noteMatches(note, q) {
+  if (!q) return true;
+  q = q.toLowerCase();
+  return note.text.toLowerCase().includes(q) || note.author.toLowerCase().includes(q);
+}
+function countAllNotes(biz) {
+  if (!biz) return 0;
+  return (biz.notes || []).length + (biz.deals || []).reduce((sum, d) => sum + (d.notes || []).length, 0);
+}
+function updateNotesTabBadge(biz) {
+  const n = countAllNotes(biz);
+  const badge = document.getElementById('notesTabBadge');
+  const sr = document.getElementById('notesTabBadgeSr');
+  if (badge) badge.textContent = n;
+  if (sr) sr.textContent = ', ' + n + ' notes';
+}
+function announceNotes(msg) {
+  let live = document.getElementById('notesLiveRegion');
+  if (!live) { live = document.createElement('div'); live.id = 'notesLiveRegion'; live.className = 'sr-only'; live.setAttribute('aria-live', 'polite'); document.getElementById('be-app').appendChild(live); }
+  live.textContent = '';
+  setTimeout(() => { live.textContent = msg; }, 30);
+}
+// Refreshes whichever Notes views are currently on screen after any note mutation, regardless of
+// which view (Business Profile record, or Deal Command Center modal) the mutation happened in.
+function refreshAllNoteViews() {
+  if (typeof currentBizId !== 'undefined' && currentBizId) {
+    const biz = getBiz(currentBizId);
+    const panel = document.getElementById('panel-notes');
+    if (biz) updateNotesTabBadge(biz);
+    if (biz && panel && panel.classList.contains('active')) renderNoteLists(biz);
+  }
+  const overlay = document.getElementById('modalDealCommandCenter');
+  if (currentDccBizId != null && currentDccDealIdx != null && overlay && overlay.classList.contains('open')) {
+    const mbiz = getBiz(currentDccBizId);
+    const deal = mbiz && mbiz.deals[currentDccDealIdx];
+    if (mbiz && deal) renderModalNoteLists(mbiz, deal);
+  }
+}
+
+/* ─── Business Notes: composer + row markup, shared by the record view ('rec') and the Deal modal
+   ('modal'), same data (biz.notes), same behavior, different surrounding copy/placement. ─── */
+function bizNotesSectionHtml(ctx, biz) {
+  const isModal = ctx === 'modal';
+  const headChip = isModal
+    ? ' <span class="br-annotation-chip" title="ClickUp 86bbhhhqd, Business Rule 62: Business Notes are editable from the Deal modal too, in a section at the bottom below Deal Notes, since they belong to the Business not any one Deal">🔗 BR62: Business Notes in the Deal modal</span>'
+    : ' <span class="br-annotation-chip" title="ClickUp 86bbhhhqd, Business Rule 60: the Notes tab splits into Business Notes (new, first) and Deal Notes (existing), mirroring the Contact record\'s own Appointments / Job Schedule split">🔗 BR60: Business Notes + Deal Notes split</span>';
+  const authorOnlyNote = isModal ? '' :
+    '<div class="settings-help" style="margin:10px 0 14px;">Edit and Delete show only for your own notes, on both Business Notes and Deal Notes <span class="br-annotation-chip" title="ClickUp 86bbhhhqd, Business Rule 61: Edit/Delete render only for the note\'s author, not disabled for everyone else; the server must enforce this too, hiding the buttons client-side is not the permission check">🔗 BR61: Author-only Edit/Delete</span>. Related Contact is deferred to a follow-up <span class="br-annotation-chip" title="ClickUp 86bbhhhqd, Business Rule 65: Related contact (a contact picker/tag on a Business Note) is out of scope for V1. Recommended data model: one notes table with BusinessId, ContactId (nullable), DealId (nullable), so Related Contact and a future convert-to-deal-note become setting a key, and the planned Tasks overhaul can tag the same record">🔗 BR65: Related contact (follow-up)</span>, no contact picker or contact tag here.</div>';
+  return '<section class="notes-sub" aria-labelledby="bizNotesHead-' + ctx + '">' +
+      '<div class="notes-sub-head"><h3 id="bizNotesHead-' + ctx + '">' + (isModal ? 'Business Notes · ' + escHtml(bizDisplayLabel(biz)) : 'Business Notes') + '</h3><span class="list-heading-count-pill" id="bizNotesCount-' + ctx + '" aria-label="business notes">0</span>' + headChip + '</div>' +
+      '<p class="notes-sub-desc">' + (isModal
+        ? 'Shared across every deal for this business. Changes here also update the business record.'
+        : 'Notes about this business that aren’t tied to a deal: payment rules, billing instructions, site or access details. Also shown and editable on every deal for this business.') + '</p>' +
+      authorOnlyNote +
+      (isModal ? '<button type="button" class="btn btn-outline btn-sm note-add-toggle" id="mAddBizNoteToggle" aria-expanded="false" aria-controls="bizNoteComposer-modal" onclick="toggleModalBizComposer()">+ Add business note</button>' : '') +
+      '<div class="note-composer' + (isModal ? ' hidden' : '') + '" id="bizNoteComposer-' + ctx + '"' + (isModal ? ' style="margin-top:12px;"' : '') + '>' +
+        '<div class="note-field" id="bizNoteField-' + ctx + '">' +
+          '<label for="bizNoteText-' + ctx + '">Business note</label>' +
+          '<textarea id="bizNoteText-' + ctx + '" aria-describedby="bizNoteErr-' + ctx + '" placeholder="e.g. AP requires a PO number on every invoice." oninput="clearBizNoteFieldError(\'' + ctx + '\')"></textarea>' +
+          '<div class="note-field-error hidden" id="bizNoteErr-' + ctx + '" role="alert"><span>Enter a note before saving.</span></div>' +
+        '</div>' +
+        '<div class="note-row-end">' +
+          '<button type="button" class="btn btn-outline" onclick="cancelBizNoteCompose(\'' + ctx + '\')">Cancel</button>' +
+          '<button type="button" class="btn btn-primary" onclick="saveBizNote(\'' + ctx + '\')">Save note</button>' +
+        '</div>' +
+      '</div>' +
+      '<ul class="note-list" id="bizNotesList-' + ctx + '" aria-label="Business notes"></ul>' +
+      '<div class="empty-state hidden" id="bizNotesEmpty-' + ctx + '"></div>' +
+      (isModal ? '' : '<p class="note-footer" id="bizNotesFooter-' + ctx + '"></p>') +
+    '</section>';
+}
+function bizNotesEmptyHtml(biz) {
+  return '<div class="empty-state-icon">📝</div><div class="empty-state-title">No business notes yet</div><div class="empty-state-desc">Add payment rules, billing instructions, or site details that apply to ' + escHtml(bizDisplayLabel(biz)) + ', not a specific deal.</div>';
+}
+function bizNoteRowHtml(ctx, note) {
+  const st = notesUi.biz[ctx];
+  const idp = 'bn-' + ctx + '-' + note.id;
+  if (st.editId === note.id) {
+    return '<li class="note-row" data-id="' + note.id + '">' +
+        '<div class="note-field" id="' + idp + '-ef">' +
+          '<label for="' + idp + '-et">Edit business note</label>' +
+          '<textarea id="' + idp + '-et" aria-describedby="' + idp + '-ee">' + escHtml(note.text) + '</textarea>' +
+          '<div class="note-field-error hidden" id="' + idp + '-ee" role="alert"><span>Enter a note before saving, or delete it instead.</span></div>' +
+        '</div>' +
+        '<div class="note-row-end">' +
+          '<button type="button" class="btn btn-outline" onclick="cancelBizNoteEdit(\'' + ctx + '\', ' + note.id + ')">Cancel</button>' +
+          '<button type="button" class="btn btn-primary" onclick="saveBizNoteEdit(\'' + ctx + '\', ' + note.id + ')">Save changes</button>' +
+        '</div>' +
+      '</li>';
+  }
+  const mine = note.author === CURRENT_USER;
+  const whereText = ctx === 'modal' ? 'removed from the business record and all of its deals' : 'removed for everyone, including on this business’s deals';
+  const confirm = st.confirmId === note.id ?
+    '<div class="note-confirm" role="group" aria-labelledby="' + idp + '-cftxt" onkeydown="if(event.key===\'Escape\'){event.stopPropagation();cancelDeleteBizNote(\'' + ctx + '\', ' + note.id + ')}">' +
+      '<span id="' + idp + '-cftxt"><b>Delete this business note?</b> It will be ' + whereText + '. This can’t be undone.</span>' +
+      '<span class="note-row-end" style="margin:0;"><button type="button" class="btn btn-sm btn-outline" id="' + idp + '-keep" onclick="cancelDeleteBizNote(\'' + ctx + '\', ' + note.id + ')">Keep note</button><button type="button" class="btn btn-sm btn-danger solid" onclick="deleteBizNoteDo(\'' + ctx + '\', ' + note.id + ')">Delete note</button></span>' +
+    '</div>' : '';
+  const actions = mine ? '<span class="note-actions">' +
+      '<button type="button" class="btn btn-sm btn-outline" onclick="editBizNote(\'' + ctx + '\', ' + note.id + ')" aria-label="Edit note: ' + escHtml(note.text.slice(0, 40)) + '">Edit</button>' +
+      '<button type="button" class="btn btn-sm btn-danger" onclick="confirmDeleteBizNote(\'' + ctx + '\', ' + note.id + ')" aria-label="Delete note: ' + escHtml(note.text.slice(0, 40)) + '">Delete</button>' +
+    '</span>' : '';
+  return '<li class="note-row" data-id="' + note.id + '">' +
+      '<p class="note-text">' + escHtml(note.text) + '</p>' +
+      '<div class="note-meta">' +
+        '<span class="note-who">' + noteAvatarHtml(note.author) + escHtml(note.author) + '</span>' +
+        '<span class="note-when">' + note.when + (note.edited ? ' (edited)' : '') + '</span>' +
+        actions +
+      '</div>' + confirm +
+    '</li>';
+}
+function renderBizNoteListFor(ctx, biz) {
+  const list = document.getElementById('bizNotesList-' + ctx);
+  if (!list) return;
+  const all = biz.notes || [];
+  const q = ctx === 'rec' ? notesUi.q : '';
+  const vis = all.filter(n => noteMatches(n, q));
+  list.innerHTML = vis.slice().sort((a, b) => b.id - a.id).map(n => bizNoteRowHtml(ctx, n)).join('');
+  const empty = document.getElementById('bizNotesEmpty-' + ctx);
+  if (empty) {
+    if (!all.length) { empty.innerHTML = bizNotesEmptyHtml(biz); empty.classList.remove('hidden'); }
+    else if (!vis.length) { empty.innerHTML = '<div class="empty-state-title">No business notes match "' + escHtml(q) + '"</div><div class="empty-state-desc">Try a different search term.</div>'; empty.classList.remove('hidden'); }
+    else empty.classList.add('hidden');
+  }
+  const footer = document.getElementById('bizNotesFooter-' + ctx);
+  if (footer) footer.innerHTML = vis.length ? ('Showing <b>1</b> to <b>' + vis.length + '</b> of <b>' + all.length + '</b> business notes') : '';
+  const count = document.getElementById('bizNotesCount-' + ctx);
+  if (count) count.textContent = all.length;
+}
+function clearBizNoteFieldError(ctx) {
+  const ta = document.getElementById('bizNoteText-' + ctx);
+  if (ta && ta.value.trim()) setBizNoteFieldError(ctx, false);
+}
+function setBizNoteFieldError(ctx, on) {
+  const field = document.getElementById('bizNoteField-' + ctx);
+  const err = document.getElementById('bizNoteErr-' + ctx);
+  const ta = document.getElementById('bizNoteText-' + ctx);
+  if (field) field.classList.toggle('err', on);
+  if (err) err.classList.toggle('hidden', !on);
+  if (ta) { if (on) ta.setAttribute('aria-invalid', 'true'); else ta.removeAttribute('aria-invalid'); }
+}
+function saveBizNote(ctx) {
+  const ta = document.getElementById('bizNoteText-' + ctx);
+  const v = ta.value.trim();
+  if (!v) { setBizNoteFieldError(ctx, true); ta.focus(); return; }
+  setBizNoteFieldError(ctx, false);
+  const biz = getBiz(ctx === 'modal' ? currentDccBizId : currentBizId);
+  biz.notes = biz.notes || [];
+  biz.notes.push({ id: nextNoteId++, text: v, author: CURRENT_USER, when: 'Just now', edited: false });
+  ta.value = '';
+  refreshAllNoteViews();
+  announceNotes('Business note saved.');
+  toast('Business note saved.');
+  if (ctx === 'modal') closeModalBizComposer(); else ta.focus();
+}
+function cancelBizNoteCompose(ctx) {
+  const ta = document.getElementById('bizNoteText-' + ctx);
+  if (ta) ta.value = '';
+  setBizNoteFieldError(ctx, false);
+  if (ctx === 'modal') closeModalBizComposer(); else if (ta) ta.focus();
+}
+function toggleModalBizComposer() {
+  const btn = document.getElementById('mAddBizNoteToggle');
+  const open = btn.getAttribute('aria-expanded') === 'true';
+  if (open) { closeModalBizComposer(); return; }
+  btn.setAttribute('aria-expanded', 'true');
+  document.getElementById('bizNoteComposer-modal').classList.remove('hidden');
+  document.getElementById('bizNoteText-modal').focus();
+}
+function closeModalBizComposer() {
+  const btn = document.getElementById('mAddBizNoteToggle');
+  if (!btn) return;
+  btn.setAttribute('aria-expanded', 'false');
+  const composer = document.getElementById('bizNoteComposer-modal');
+  if (composer) composer.classList.add('hidden');
+  const ta = document.getElementById('bizNoteText-modal');
+  if (ta) ta.value = '';
+  setBizNoteFieldError('modal', false);
+  btn.focus();
+}
+function focusBizNoteBtn(ctx, id, act) {
+  const el = document.querySelector('#bizNotesList-' + ctx + ' li[data-id="' + id + '"] button.btn-' + (act === 'edit' ? 'outline' : 'danger'));
+  if (el) el.focus();
+}
+function editBizNote(ctx, id) {
+  notesUi.biz[ctx].editId = id;
+  notesUi.biz[ctx].confirmId = null;
+  refreshAllNoteViews();
+  const ta = document.getElementById('bn-' + ctx + '-' + id + '-et');
+  if (ta) ta.focus();
+}
+function cancelBizNoteEdit(ctx, id) {
+  notesUi.biz[ctx].editId = null;
+  refreshAllNoteViews();
+  focusBizNoteBtn(ctx, id, 'edit');
+}
+function saveBizNoteEdit(ctx, id) {
+  const ta = document.getElementById('bn-' + ctx + '-' + id + '-et');
+  const v = ta.value.trim();
+  if (!v) { document.getElementById('bn-' + ctx + '-' + id + '-ef').classList.add('err'); document.getElementById('bn-' + ctx + '-' + id + '-ee').classList.remove('hidden'); ta.focus(); return; }
+  const biz = getBiz(ctx === 'modal' ? currentDccBizId : currentBizId);
+  const note = (biz.notes || []).find(n => n.id === id);
+  if (note) { note.text = v; note.edited = true; }
+  notesUi.biz[ctx].editId = null;
+  refreshAllNoteViews();
+  announceNotes('Business note updated.');
+  toast('Business note updated.');
+  focusBizNoteBtn(ctx, id, 'edit');
+}
+function confirmDeleteBizNote(ctx, id) {
+  notesUi.biz[ctx].confirmId = id;
+  notesUi.biz[ctx].editId = null;
+  refreshAllNoteViews();
+  const btn = document.getElementById('bn-' + ctx + '-' + id + '-keep');
+  if (btn) btn.focus();
+}
+function cancelDeleteBizNote(ctx, id) {
+  notesUi.biz[ctx].confirmId = null;
+  refreshAllNoteViews();
+  focusBizNoteBtn(ctx, id, 'del');
+}
+function deleteBizNoteDo(ctx, id) {
+  const biz = getBiz(ctx === 'modal' ? currentDccBizId : currentBizId);
+  biz.notes = (biz.notes || []).filter(n => n.id !== id);
+  notesUi.biz[ctx].confirmId = null;
+  refreshAllNoteViews();
+  announceNotes('Business note deleted.');
+  toast('Business note deleted.');
+  if (ctx === 'modal') { const btn = document.getElementById('mAddBizNoteToggle'); if (btn) btn.focus(); }
+  else { const ta = document.getElementById('bizNoteText-rec'); if (ta) ta.focus(); }
+}
+
+/* ─── Deal Notes: read-only, grouped-by-contact aggregate in the Business Profile's own Notes tab
+   (BR60), editing happens from the Deal itself, in the Deal Command Center (below). ─── */
+function dealNotesSectionShellHtml() {
+  return '<section class="notes-sub" aria-labelledby="dealNotesHead">' +
+      '<div class="notes-sub-head"><h3 id="dealNotesHead">Deal Notes</h3><span class="list-heading-count-pill" id="dealNotesCount" aria-label="deal notes">0</span></div>' +
+      '<p class="notes-sub-desc">Notes added on this business’s deals, grouped by contact. Add or edit them from the deal.</p>' +
+      '<div id="dealNotesGroups"></div>' +
+      '<div class="empty-state hidden" id="dealNotesEmpty"></div>' +
+      '<p class="note-footer" id="dealNotesFooter"></p>' +
+    '</section>';
+}
+function toggleNoteGroup(cid) {
+  notesUi.groupsOpen[cid] = !(notesUi.groupsOpen[cid] !== false);
+  const biz = getBiz(currentBizId);
+  if (biz) renderDealNotesGrouped(biz);
+}
+function renderDealNotesGrouped(biz) {
+  const groupsEl = document.getElementById('dealNotesGroups');
+  if (!groupsEl) return;
+  const groups = {};
+  const order = [];
+  let total = 0, shown = 0;
+  (biz.deals || []).forEach(deal => {
+    (deal.notes || []).forEach(note => {
+      total++;
+      if (!noteMatches(note, notesUi.q)) return;
+      const cid = deal.contactId || deal.title;
+      if (!groups[cid]) { groups[cid] = { contact: deal.contactId ? getContact(deal.contactId) : null, via: deal.via, items: [] }; order.push(cid); }
+      groups[cid].items.push(note);
+      shown++;
+    });
+  });
+  groupsEl.innerHTML = order.map(cid => {
+    const g = groups[cid];
+    const name = g.contact ? g.contact.name : (g.via || 'Unknown contact');
+    const email = g.contact ? g.contact.email : '';
+    const open = notesUi.groupsOpen[cid] !== false;
+    const items = g.items.slice().sort((a, b) => b.id - a.id);
+    return '<div class="note-group">' +
+        '<button type="button" class="note-group-head" aria-expanded="' + open + '" aria-controls="dng-' + escHtml(cid) + '" onclick="toggleNoteGroup(\'' + cid.replace(/'/g, "\\'") + '\')">' +
+          noteCaretSvg() + noteAvatarHtml(name) +
+          '<span><span class="gname">' + escHtml(name) + '</span>' + (email ? '<br><span class="gemail">' + escHtml(email) + '</span>' : '') + '</span>' +
+        '</button>' +
+        '<ul id="dng-' + escHtml(cid) + '"' + (open ? '' : ' class="hidden"') + '>' +
+          items.map(n => '<li><span class="note-dot" aria-hidden="true"></span><span>' + escHtml(n.text) + '</span><span class="ts">' + n.when + '</span></li>').join('') +
+        '</ul>' +
+      '</div>';
+  }).join('');
+  const empty = document.getElementById('dealNotesEmpty');
+  if (empty) {
+    if (!total) { empty.innerHTML = '<div class="empty-state-icon">📋</div><div class="empty-state-title">No deal notes yet</div><div class="empty-state-desc">Notes added on this business’s deals will appear here, grouped by contact.</div>'; empty.classList.remove('hidden'); }
+    else if (!shown) { empty.innerHTML = '<div class="empty-state-title">No deal notes match "' + escHtml(notesUi.q) + '"</div><div class="empty-state-desc">Try a different search term.</div>'; empty.classList.remove('hidden'); }
+    else empty.classList.add('hidden');
+  }
+  const footer = document.getElementById('dealNotesFooter');
+  if (footer) footer.innerHTML = shown ? ('Showing <b>1</b> to <b>' + shown + '</b> of <b>' + total + '</b> deal notes') : '';
+  const count = document.getElementById('dealNotesCount');
+  if (count) count.textContent = total;
+}
+function renderNoteLists(biz) {
+  renderBizNoteListFor('rec', biz);
+  renderDealNotesGrouped(biz);
+  updateNotesTabBadge(biz);
+}
+function filterNotesTab(v) {
+  notesUi.q = v;
+  const biz = getBiz(currentBizId);
+  if (biz) renderNoteLists(biz);
+}
+
+/* ─── Deal Notes: real add/edit/delete for THIS deal, inside the Deal Command Center (BR60's "add or
+   edit them from the deal"): this is the CRUD the aggregate view above only displays read-only. ─── */
+function currentDccDeal() { const biz = getBiz(currentDccBizId); return biz && biz.deals[currentDccDealIdx]; }
+function dealNoteRowHtml(note) {
+  const st = notesUi.deal;
+  const idp = 'dn-' + note.id;
+  if (st.editId === note.id) {
+    return '<li class="note-row" data-id="' + note.id + '">' +
+        '<div class="note-field" id="' + idp + '-ef">' +
+          '<label for="' + idp + '-et">Edit note</label>' +
+          '<textarea id="' + idp + '-et" aria-describedby="' + idp + '-ee">' + escHtml(note.text) + '</textarea>' +
+          '<div class="note-field-error hidden" id="' + idp + '-ee" role="alert"><span>Enter a note before saving, or delete it instead.</span></div>' +
+        '</div>' +
+        '<div class="note-row-end">' +
+          '<button type="button" class="btn btn-outline" onclick="cancelDealNoteEdit(' + note.id + ')">Cancel</button>' +
+          '<button type="button" class="btn btn-primary" onclick="saveDealNoteEdit(' + note.id + ')">Save changes</button>' +
+        '</div>' +
+      '</li>';
+  }
+  const mine = note.author === CURRENT_USER;
+  const confirm = st.confirmId === note.id ?
+    '<div class="note-confirm" role="group" aria-labelledby="' + idp + '-cftxt" onkeydown="if(event.key===\'Escape\'){event.stopPropagation();cancelDeleteDealNote(' + note.id + ')}">' +
+      '<span id="' + idp + '-cftxt"><b>Delete this note?</b> This can’t be undone.</span>' +
+      '<span class="note-row-end" style="margin:0;"><button type="button" class="btn btn-sm btn-outline" id="' + idp + '-keep" onclick="cancelDeleteDealNote(' + note.id + ')">Keep note</button><button type="button" class="btn btn-sm btn-danger solid" onclick="deleteDealNoteDo(' + note.id + ')">Delete note</button></span>' +
+    '</div>' : '';
+  const actions = mine ? '<span class="note-actions">' +
+      '<button type="button" class="btn btn-sm btn-outline" onclick="editDealNote(' + note.id + ')" aria-label="Edit note: ' + escHtml(note.text.slice(0, 40)) + '">Edit</button>' +
+      '<button type="button" class="btn btn-sm btn-danger" onclick="confirmDeleteDealNote(' + note.id + ')" aria-label="Delete note: ' + escHtml(note.text.slice(0, 40)) + '">Delete</button>' +
+    '</span>' : '';
+  return '<li class="note-row" data-id="' + note.id + '">' +
+      '<p class="note-text">' + escHtml(note.text) + '</p>' +
+      '<div class="note-meta">' +
+        '<span class="note-who">' + noteAvatarHtml(note.author) + escHtml(note.author) + '</span>' +
+        '<span class="note-when">' + note.when + (note.edited ? ' (edited)' : '') + '</span>' +
+        actions +
+      '</div>' + confirm +
+    '</li>';
+}
+function clearDealNoteFieldError() {
+  const ta = document.getElementById('dealNoteText');
+  if (ta && ta.value.trim()) { document.getElementById('dealNoteField').classList.remove('err'); document.getElementById('dealNoteErr').classList.add('hidden'); }
+}
+function saveDealNote() {
+  const ta = document.getElementById('dealNoteText');
+  const v = ta.value.trim();
+  if (!v) { document.getElementById('dealNoteField').classList.add('err'); document.getElementById('dealNoteErr').classList.remove('hidden'); ta.focus(); return; }
+  document.getElementById('dealNoteField').classList.remove('err'); document.getElementById('dealNoteErr').classList.add('hidden');
+  const deal = currentDccDeal();
+  deal.notes = deal.notes || [];
+  deal.notes.push({ id: nextNoteId++, text: v, author: CURRENT_USER, when: 'Just now', edited: false });
+  ta.value = '';
+  refreshAllNoteViews();
+  announceNotes('Note saved.');
+  toast('Note saved.');
+  ta.focus();
+}
+function cancelDealNoteCompose() {
+  const ta = document.getElementById('dealNoteText');
+  if (ta) ta.value = '';
+  document.getElementById('dealNoteField').classList.remove('err'); document.getElementById('dealNoteErr').classList.add('hidden');
+  if (ta) ta.focus();
+}
+function focusDealNoteBtn(id, act) {
+  const el = document.querySelector('#dealNoteList li[data-id="' + id + '"] button.btn-' + (act === 'edit' ? 'outline' : 'danger'));
+  if (el) el.focus();
+}
+function editDealNote(id) {
+  notesUi.deal.editId = id; notesUi.deal.confirmId = null;
+  refreshAllNoteViews();
+  const ta = document.getElementById('dn-' + id + '-et'); if (ta) ta.focus();
+}
+function cancelDealNoteEdit(id) { notesUi.deal.editId = null; refreshAllNoteViews(); focusDealNoteBtn(id, 'edit'); }
+function saveDealNoteEdit(id) {
+  const ta = document.getElementById('dn-' + id + '-et');
+  const v = ta.value.trim();
+  if (!v) { document.getElementById('dn-' + id + '-ef').classList.add('err'); document.getElementById('dn-' + id + '-ee').classList.remove('hidden'); ta.focus(); return; }
+  const deal = currentDccDeal();
+  const note = (deal.notes || []).find(n => n.id === id);
+  if (note) { note.text = v; note.edited = true; }
+  notesUi.deal.editId = null;
+  refreshAllNoteViews();
+  announceNotes('Note updated.');
+  toast('Note updated.');
+  focusDealNoteBtn(id, 'edit');
+}
+function confirmDeleteDealNote(id) {
+  notesUi.deal.confirmId = id; notesUi.deal.editId = null;
+  refreshAllNoteViews();
+  const btn = document.getElementById('dn-' + id + '-keep'); if (btn) btn.focus();
+}
+function cancelDeleteDealNote(id) { notesUi.deal.confirmId = null; refreshAllNoteViews(); focusDealNoteBtn(id, 'del'); }
+function deleteDealNoteDo(id) {
+  const deal = currentDccDeal();
+  deal.notes = (deal.notes || []).filter(n => n.id !== id);
+  notesUi.deal.confirmId = null;
+  refreshAllNoteViews();
+  announceNotes('Note deleted.');
+  toast('Note deleted.');
+  const ta = document.getElementById('dealNoteText'); if (ta) ta.focus();
+}
+function renderModalNoteLists(biz, deal) {
+  renderBizNoteListFor('modal', biz);
+  const list = document.getElementById('dealNoteList');
+  if (list) {
+    const items = (deal.notes || []).slice().sort((a, b) => b.id - a.id);
+    list.innerHTML = items.map(n => dealNoteRowHtml(n)).join('');
+    const empty = document.getElementById('dealNoteListEmpty');
+    if (empty) { if (!items.length) { empty.innerHTML = '<div class="empty-state-desc">No notes on this Deal yet.</div>'; empty.classList.remove('hidden'); } else empty.classList.add('hidden'); }
+  }
+}
+
 function notesHtml(biz) {
-  const rows = [
-    { icon: '📝', title: 'Prefers email over phone for scheduling', sub: 'Added by Jordan P. · Jul 15, 2026', time: '' },
-    { icon: '📝', title: 'Requires COI on file before any site visit', sub: 'Added by Sales · Jun 30, 2026', time: '' }
-  ];
-  return activityListHtml(rows);
+  return '' +
+    '<div style="display:flex; align-items:flex-start; flex-wrap:wrap; gap:12px; justify-content:space-between; margin-bottom:16px;">' +
+      '<div class="settings-help" style="margin:8px 0 0;">The count above combines Business Notes and Deal Notes <span class="br-annotation-chip" title="ClickUp 86bbhhhqd, Business Rule 63: the Notes tab badge is one combined total, Business Notes plus Deal Notes, not two separate counts. Screen-reader text reads &quot;Notes, N notes&quot;">🔗 BR63: Combined tab badge</span></div>' +
+      '<div class="notes-search-field" style="max-width:280px; width:100%;">' +
+        '<label for="notesSearchInput">Search notes</label>' +
+        '<div class="search-input-wrap">' +
+          '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>' +
+          '<input class="search-input" id="notesSearchInput" type="search" value="' + escHtml(notesUi.q) + '" placeholder="Subject, contact or note text" oninput="filterNotesTab(this.value)" aria-describedby="notesSearchScope">' +
+        '</div>' +
+        '<span id="notesSearchScope" class="sr-only">Filters both Business Notes and Deal Notes below.</span>' +
+      '</div>' +
+    '</div>' +
+    bizNotesSectionHtml('rec', biz) +
+    dealNotesSectionShellHtml();
 }
 function attachmentsHtml(biz) {
   const rows = [
@@ -5101,6 +5666,20 @@ document.querySelectorAll('.formatted-phone-no').forEach(el => el.addEventListen
     : digits.length > 0 ? '(' + digits
     : '';
 }));
+// Deal Command Center dialog semantics (BR a11y pass, scoped to this modal only): Esc closes, Tab
+// traps focus inside. The overlay element itself is static markup (never destroyed/recreated), so
+// this listener stays valid across every render of #dccBody.
+document.getElementById('modalDealCommandCenter').addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeDealCommandCenter(); return; }
+  if (e.key !== 'Tab') return;
+  const modalEl = document.getElementById('modalDealCommandCenter');
+  const focusables = [...modalEl.querySelectorAll('button, textarea, select, input, a[href], [tabindex]:not([tabindex="-1"])')]
+    .filter(el => el.offsetParent !== null && !el.disabled);
+  if (!focusables.length) return;
+  const first = focusables[0], last = focusables[focusables.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
 </script>
 
 </body>
