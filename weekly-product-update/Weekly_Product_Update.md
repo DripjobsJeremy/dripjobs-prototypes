@@ -1,46 +1,40 @@
 # DripJobs Weekly Product Update
 
-**Period:** October 5 – October 9, 2026
-**Release:** Oct 5 deployment · 6 updates
+**Period:** October 12 – October 16, 2026
+**Release:** Oct 13 deployment · 4 updates
 
 ---
 
-## Contacts
+## Proposal Builder
 
-### Fixed Google Address Autofill Not Appearing (*Oct 5*)
-**What changed:** Fixed a bug where Google's address autofill suggestions weren't appearing when adding or editing an address on Contacts, Proposals, or Invoices.
-**Why it matters:** You can once again pick a suggested address while typing instead of entering the full address manually every time.
+### Fixed Proposal Countersign Dates Changing After Acceptance (*Oct 13*)
+**What changed:** Fixed a bug where a proposal's countersign date showed today's date instead of the original acceptance date whenever the proposal was reopened later.
+**Why it matters:** A proposal's countersign always reflects the actual date it was accepted, even if you reopen it weeks or months afterward.
 **Action needed:** None
 
-### Fixed Large Contact List Exports Failing (*Oct 5*)
-**What changed:** Fixed a bug where exporting your full contacts list failed for accounts with a very large number of contacts.
-**Why it matters:** You can now export your complete contacts list regardless of how many contacts you have.
+---
+
+## Appointments
+
+### Fixed Appointments Missing from the Appointments Calendar (*Oct 13*)
+**What changed:** Fixed a bug where some scheduled appointments showed up on a contact's record and in the Sales Pipeline but didn't appear on the Appointments calendar for their scheduled date.
+**Why it matters:** Your Appointments calendar now reliably shows every appointment you've scheduled.
+**Action needed:** None
+
+---
+
+## Job Schedule
+
+### Fixed Holiday Names Truncated to One Letter in the Mobile App's Month View (*Oct 13*)
+**What changed:** Fixed a bug where holiday entries on the mobile app's Job Schedule month view showed only the first letter of the holiday name, and tapping a holiday did nothing. Holidays are now identifiable at a glance, and tapping one reveals its full name.
+**Why it matters:** You can now tell which holiday falls on a given day from the mobile app, the same way you already could on desktop.
 **Action needed:** None
 
 ---
 
 ## Integrations
 
-### Fixed Google Calendar Sync Getting Stuck on Permission Errors (*Oct 5*)
-**What changed:** Fixed a bug where a Google Calendar connection without write access could get stuck retrying and abandon syncing, instead of being handled as an expected permissions state.
-**Why it matters:** A Google Calendar connection missing write access no longer triggers repeated failed sync attempts, and other calendar connections keep syncing normally.
-**Action needed:** None
-
-### Fixed Google Calendar Events Displaying Hours Off from Their Actual Time (*Oct 5*)
-**What changed:** Fixed a bug where some Google Calendar events displayed at the wrong time in DripJobs, several hours off from the time shown in Google Calendar, even when both were set to the same timezone.
-**Why it matters:** Synced calendar events now show the same time in DripJobs as they do in Google Calendar.
-**Action needed:** None
-
----
-
-## Admin Tools
-
-### Updated the Zapier Demo Link in Company Settings (*Oct 5*)
-**What changed:** Updated the demo link in the Zapier integration card under Company Settings to point to the correct overview page.
-**Why it matters:** Clicking the Zapier demo link now takes you to the right scheduling page instead of an outdated one.
-**Action needed:** None
-
-### Fixed Custom Email Domains Failing to Verify (*Oct 5*)
-**What changed:** Fixed a bug preventing a custom sending domain from being added and verified in Company Settings > Email Settings.
-**Why it matters:** You can now successfully set up and verify a custom email domain for your outbound drip messages.
+### Google Calendar Now Has a Dedicated Home in My Profile (*New · Oct 13*)
+**What changed:** Replaced the Google Calendar status widget on the Appointments and Job Schedule pages with a compact icon that takes you to an expanded Google Calendar section in My Profile, the new single place to connect, manage, and disconnect Google Calendar. Admins also get a read-only Google Calendar status card in Company Settings > Integrations with a link back to My Profile.
+**Why it matters:** Connecting, checking, or disconnecting your Google Calendar now lives in one consistent place instead of scattered across different pages.
 **Action needed:** None
