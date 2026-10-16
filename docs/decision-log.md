@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-10-16] Product Roadmap refreshed (same-day check, no new ClickUp activity to ship)
+
+- Decision: Re-pulled the workspace-wide bare 🎯 tag the same day as the week close-out refresh; no tickets pushed to production since, so the Weekly Product Update is unchanged. Updated `dripjobs-product-roadmap/index.html` for two ClickUp changes: added a new ticket ("Update Production Rates Add-On Default Seed to Paint Pro Base Rates") to Needs PM Analysis, bringing the board to 29 in-flight tickets, and removed the High priority pill from the Flashline Integration ticket (86bbfqr1t), whose priority dropped to normal in ClickUp.
+- Why: Direct request to run the refresh again; pulled fresh data rather than assuming nothing changed, since the roadmap can move even without a new release.
+
 ## [2026-10-16] Weekly Product Update + Product Roadmap refreshed for Oct 12-16, 2026 (week close-out)
 
 - Decision: Rebuilt `weekly-product-update/index.html` and `Weekly_Product_Update.md` to add the 4 customer-facing tickets from the Oct 15 release (closing out the Oct 12-16 week, following the Oct 13 mid-week refresh): Contacts (a cross-tenant contact-record isolation fix, worded plainly without naming the affected companies), Inbox (Salesperson/Project Manager assignment tags showing the wrong user), and two Integrations entries (a verified-company text-messaging status fix, and new required Privacy Policy/Terms & Conditions links on A2P 10DLC text messaging registration, a Twilio compliance requirement). Total for the week is now 8 updates across 6 sections. Rebuilt `dripjobs-product-roadmap/index.html` from a fresh workspace-wide pull of the bare 🎯 tag: 28 in-flight tickets, 1 on hold/parked (unchanged QA Kickback card). Updated the roadmap's Release Notes card date on the hub; the Weekly Product Update card's date range was already correct from the mid-week refresh.
