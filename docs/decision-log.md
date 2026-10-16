@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-10-16] Weekly Product Update + Product Roadmap refreshed for Oct 12-16, 2026 (week close-out)
+
+- Decision: Rebuilt `weekly-product-update/index.html` and `Weekly_Product_Update.md` to add the 4 customer-facing tickets from the Oct 15 release (closing out the Oct 12-16 week, following the Oct 13 mid-week refresh): Contacts (a cross-tenant contact-record isolation fix, worded plainly without naming the affected companies), Inbox (Salesperson/Project Manager assignment tags showing the wrong user), and two Integrations entries (a verified-company text-messaging status fix, and new required Privacy Policy/Terms & Conditions links on A2P 10DLC text messaging registration, a Twilio compliance requirement). Total for the week is now 8 updates across 6 sections. Rebuilt `dripjobs-product-roadmap/index.html` from a fresh workspace-wide pull of the bare 🎯 tag: 28 in-flight tickets, 1 on hold/parked (unchanged QA Kickback card). Updated the roadmap's Release Notes card date on the hub; the Weekly Product Update card's date range was already correct from the mid-week refresh.
+- Why: Routine week-closing refresh per Jeremy's instruction, sourced directly from ClickUp. All four new tickets passed the customer-facing filter (none were internal-only tooling, pure infra, or a same-batch revert), so none were excluded this round.
+
 ## [2026-10-13] Business Entity Records V1: Notes tab splits into Business Notes + Deal Notes (Rev 3)
 
 - Revision Log: Date 2026-10-13. Section: Notes tab. Summary: Business Notes added (Rev 3). Decided by: Jeremy Harrison (PM), QA call with Jesus and Michael. (This prototype has no in-page revision log, so this entry is that record; see BR60-65 below for the annotated chips in the UI itself.)
