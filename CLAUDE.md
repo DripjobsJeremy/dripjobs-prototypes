@@ -49,6 +49,14 @@ Deploy sync (Drippy Slack reports):
 - If a multi-ticket card only partially matches (some linked tickets deployed, some not), don't remove it, update its status tooltip/description instead to reflect what shipped.
 - Append a dated entry to `docs/decision-log.md` naming which cards were removed and which deployed items had no match. Commit, push a branch named `claude/prototype-hub-sync-<date>`, and open a PR, do not merge it, Jeremy reviews and merges these himself.
 
+Signals sync (Product Signals tab):
+- Trigger: "Sync signals:" from Jeremy or Laura. The source is the daily feedback sweep posts in Slack `#prod-assistant` (channel ID `C0BSNSG2GQK`), read through the Slack connector, nothing needs to be pasted.
+- The tab is driven by `product-signals/signals-data.js` (rows, themes, sweep timestamps) and rendered by `product-signals/signals-app.js`. The field guide is the comment at the top of the data file.
+- Read every sweep post newer than `PS_META.lastSweep`, append one row per bug or enhancement, add the post's message timestamp to `PS_SWEEPS`, then bump `lastSweep` and `syncedOn`. Update `PS_RECURRING` counts when a sweep flags a recurring theme again.
+- For every ClickUp link in the new posts, read the live ticket status (ClickUp connector) and store it with `live: true`. Re-check the open tickets already in the file and move rows to `tracked` or `shipped` when their status changed.
+- Leave customer and account names out (rep names only). Severity is copied as rated in the sweep, never computed.
+- Append a dated entry to `docs/decision-log.md`, commit, push a branch named `claude/signals-sync-<date>`, and open a PR. Do not merge it.
+
 GitHub API mechanics:
 - Always fetch a fresh file SHA immediately before any PUT to that file. Stale SHAs cause 409 conflicts. Don't reuse a SHA from earlier in a long session.
 - Poll `/repos/{repo}/pages/builds/latest` to check build status.
