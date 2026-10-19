@@ -1649,3 +1649,12 @@ Format:
 
 ## [2026-10-09] Role Departments prototype (86bcaf2hu): sort arrows on every Finder column header
 - Decision: Every At Risk Accounts column header is now sortable and shows a faint sort icon on hover or keyboard focus, with a gray header hover background, matching production. The active column keeps its solid ▲/▼ arrow. Added sort keys for Health Tier (At Risk, Needs Attention, On Track), Plan, Total Sales, A2P Status (None, Pending, Active), Contact, Email, and Phone (empty last). Sorting the Account Representative column still orders by member name, not Role (BR17).
+
+## [2026-10-19] Product Signals tab rebuild for Laura (Junior PM, starts Nov 2)
+- Decision: The tab was last synced by hand on Aug 21, which is why it looked stale. It now reads from `product-signals/signals-data.js`, filled from the daily sweep posts in #prod-assistant (Aug 26 to Oct 19, 156 rows) plus 34 real rows migrated from the old Aug 21 batch. Added severity, ticket coverage (no ticket, verify match, tracked, shipped), source channel, theme, mention counts, a Slack link back to each sweep post, a recurring themes view, filters, CSV export, and a freshness banner that turns amber after 3 days. A "Sync signals:" workflow was added to CLAUDE.md so the refresh is repeatable.
+- Decision: Customer and account names are left out of the rows (rep names only), per the no real customer data rule. Laura can reach the customer through the Slack link. The 7 fictional sample rows in the old tab were dropped.
+- Decision: Default sort is severity as rated in the sweep, then rows with no ticket first, then mentions, then newest. No priority score was invented. Default window is the last 30 days before the last sweep, with an "all time" option.
+- Assumption: Triage states (Untriaged, Reviewing, Needs ticket, Ticket created, Parked, Dismissed) are a proposed minimal set, saved per browser only (localStorage), not shared between people. Needs Laura and Jeremy to confirm the real workflow before this becomes shared state.
+- Assumption: Sweep icons were read as ticket coverage (ticket icon = no ticket found, warning = related ticket may cover it, check mark = tracked). Inferred from the Aug 29 sweep note, not from a legend.
+- Open question: Parent epic 86bbueq42 (Google Calendar sync) shows "pushed to production" in ClickUp, but the Oct 5 sweep described it as in dev with 3 subtasks ready for dev. Needs a human check.
+

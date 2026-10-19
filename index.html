@@ -492,10 +492,28 @@
     font-size: 13px;
     color: var(--color-text-muted);
     line-height: 1.5;
-    margin: -4px 0 24px 0;
-    max-width: 720px;
+    margin: -4px 0 16px 0;
+    max-width: 760px;
   }
-  .ps-stats { margin-bottom: 24px; }
+  .ps-intro-desc a { color: var(--color-primary); font-weight: 600; text-decoration: none; }
+  .ps-intro-desc a:hover { text-decoration: underline; }
+  .ps-sync {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    align-items: center;
+    font-size: 12.5px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-card);
+    margin-bottom: 20px;
+  }
+  .ps-sync.fresh { background: #E6FAF0; border-color: #B7EBCF; color: #166534; }
+  .ps-sync.stale { background: #FFFBEB; border-color: #FCD9A0; color: #92400E; }
+  .ps-sync strong { font-weight: 700; }
+  .ps-sync code { font-family: inherit; font-weight: 700; background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 4px; }
+  .ps-stats { margin-bottom: 20px; }
   .ps-stat {
     text-align: left;
     cursor: pointer;
@@ -507,29 +525,75 @@
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15);
   }
+  .ps-stat-sub { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; }
 
-  .ps-table {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 16px;
+  .ps-viewswitch { display: flex; gap: 8px; margin-bottom: 16px; }
+  .ps-viewbtn {
+    appearance: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-card);
+    color: var(--color-text-muted);
+    cursor: pointer;
   }
+  .ps-viewbtn:hover { border-color: var(--color-primary); color: var(--color-text); }
+  .ps-viewbtn.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  .ps-viewcount { opacity: 0.8; font-weight: 500; }
+
+  .ps-filters { flex-wrap: wrap; }
+  .ps-filters .ps-search { flex: 1 1 260px; min-width: 200px; }
+  .ps-filters .ps-select { flex: 0 1 auto; min-width: 140px; cursor: pointer; }
+  .ps-resultbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--color-text-muted);
+    margin: 4px 0 12px 0;
+  }
+  .ps-resultbar strong { color: var(--color-text); }
+  .ps-resultactions { display: flex; gap: 14px; }
+  .ps-linkbtn {
+    appearance: none;
+    border: none;
+    background: none;
+    padding: 4px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--color-primary);
+    cursor: pointer;
+  }
+  .ps-linkbtn:hover { color: var(--color-primary-hover); text-decoration: underline; }
+
+  .ps-table { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  #psRows { display: flex; flex-direction: column; gap: 8px; }
   .ps-row {
     display: grid;
-    grid-template-columns: minmax(0, 2.6fr) 1.2fr 1.1fr 1fr 100px;
+    grid-template-columns: minmax(0, 2.8fr) 92px minmax(0, 1.4fr) minmax(0, 1.1fr) 150px;
     gap: 14px;
     align-items: start;
     background: var(--color-card);
     border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-border);
     border-radius: 10px;
     padding: 14px 16px;
     transition: border-color 0.15s, box-shadow 0.15s;
   }
   .ps-row:hover { border-color: var(--color-primary); box-shadow: 0 2px 10px rgba(var(--color-primary-rgb), 0.10); }
+  .ps-row.ps-sev-hot { border-left-color: #F5222D; }
+  .ps-row.ps-sev-warm { border-left-color: #F59E0B; }
+  .ps-row.ps-dismissed { opacity: 0.6; }
   .ps-row.ps-row-head {
     background: transparent;
     border: none;
-    padding: 0 16px;
+    padding: 0 16px 0 20px;
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
@@ -537,23 +601,37 @@
     color: var(--color-text-muted);
   }
   .ps-row.ps-row-head:hover { box-shadow: none; }
-  .ps-row.hidden { display: none; }
   .ps-col-label { display: none; }
   .ps-type-icon { font-size: 14px; line-height: 1; margin-right: 4px; }
   .ps-signal-title { font-size: 13.5px; font-weight: 600; color: var(--color-text); line-height: 1.4; }
-  .ps-quote {
+  .ps-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .ps-chip {
+    appearance: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: #F7F6FD;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+  button.ps-chip { cursor: pointer; }
+  button.ps-chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .ps-chip.ps-chip-human { background: #FFFBEB; border-color: #FCD9A0; color: #92400E; }
+  .ps-note {
     font-size: 12px;
     color: var(--color-text-muted);
-    font-style: italic;
     line-height: 1.5;
-    margin-top: 4px;
+    margin-top: 6px;
     display: -webkit-box;
-    -webkit-line-clamp: 1;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .ps-quote.expanded { -webkit-line-clamp: unset; overflow: visible; }
-  .ps-quote-toggle {
+  .ps-note.expanded { -webkit-line-clamp: unset; overflow: visible; }
+  .ps-toggle {
     appearance: none;
     border: none;
     background: none;
@@ -564,14 +642,15 @@
     font-weight: 700;
     color: var(--color-primary);
     cursor: pointer;
-    display: block;
   }
-  .ps-quote-toggle:hover { color: var(--color-primary-hover); text-decoration: underline; }
-  .ps-quote-toggle.is-placeholder { visibility: hidden; pointer-events: none; }
+  .ps-toggle:hover { color: var(--color-primary-hover); text-decoration: underline; }
+  .ps-slacklink { font-size: 11px; font-weight: 600; color: var(--color-primary); text-decoration: none; margin-left: 10px; }
+  .ps-slacklink:hover { text-decoration: underline; }
   .ps-col-user, .ps-col-date, .ps-col-ref { font-size: 12.5px; color: var(--color-text-muted); padding-top: 2px; }
-  .ps-severity-note { font-size: 12px; color: var(--color-text-muted); }
-  .ps-severity-note strong { color: var(--color-text); font-weight: 600; }
-  .ps-status-badge {
+  .ps-col-user strong { color: var(--color-text); font-weight: 600; }
+  .ps-ticket-status { display: block; font-size: 11.5px; margin-top: 5px; line-height: 1.4; }
+  .ps-ticket-status .ps-checked { color: #166534; font-weight: 600; }
+  .ps-badge {
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -581,15 +660,76 @@
     border-radius: 999px;
     white-space: nowrap;
   }
-  .ps-status-ticketed    { background: #E6FAF0; color: #166534; }
-  .ps-status-cs          { background: #FFFBEB; color: #92400E; }
-  .ps-status-duplicate   { background: #F3F4F6; color: #4B5563; }
-  .ps-status-featurebase { background: #EFF6FF; color: #1E40AF; }
-  .ps-status-declined    { background: #FAE6E6; color: #991B1B; }
+  .ps-cov-none     { background: #FAE6E6; color: #991B1B; }
+  .ps-cov-possible { background: #FFFBEB; color: #92400E; }
+  .ps-cov-tracked  { background: #EFF6FF; color: #1E40AF; }
+  .ps-cov-shipped  { background: #E6FAF0; color: #166534; }
+  .ps-sev {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #F3F4F6;
+    color: #4B5563;
+  }
+  .ps-sev-Expedite { background: #F5222D; color: #fff; }
+  .ps-sev-S1, .ps-sev-High { background: #FDE2E2; color: #991B1B; }
+  .ps-sev-S2 { background: #FFEDD5; color: #9A3412; }
+  .ps-sev-S3, .ps-sev-Medium { background: #FEF9C3; color: #854D0E; }
+  .ps-triage-select {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12.5px;
+    padding: 7px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-card);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+  .ps-triage-select:focus, .ps-triage-note:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.15); }
+  .ps-triage-note {
+    width: 100%;
+    margin-top: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 6px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    resize: vertical;
+    min-height: 56px;
+    color: var(--color-text);
+  }
+  .ps-legend { font-size: 12px; color: var(--color-text-muted); line-height: 2; margin-top: 8px; }
+  .ps-legend .ps-badge { margin: 0 4px 0 8px; }
 
+  .ps-themes { display: flex; flex-direction: column; gap: 8px; }
+  .ps-theme {
+    display: grid;
+    grid-template-columns: minmax(0, 2.6fr) 110px minmax(0, 1.4fr) 150px;
+    gap: 14px;
+    align-items: start;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .ps-theme:hover { border-color: var(--color-primary); }
+  .ps-theme-name { font-size: 13.5px; font-weight: 600; line-height: 1.4; }
+  .ps-theme-count { font-size: 20px; font-weight: 700; color: var(--color-primary); line-height: 1.1; }
+  .ps-theme-count small { display: block; font-size: 11px; font-weight: 500; color: var(--color-text-muted); margin-top: 2px; }
+
+  @media (max-width: 900px) {
+    .ps-row { grid-template-columns: 1fr 1fr; }
+    .ps-row .ps-col-signal { grid-column: 1 / -1; }
+    .ps-row .ps-col-triage { grid-column: 1 / -1; }
+    .ps-theme { grid-template-columns: 1fr 1fr; }
+    .ps-theme > :first-child { grid-column: 1 / -1; }
+  }
   @media (max-width: 760px) {
     .ps-row.ps-row-head { display: none; }
-    .ps-row { grid-template-columns: 1fr; gap: 8px; }
+    .ps-row, .ps-theme { grid-template-columns: 1fr; gap: 8px; }
     .ps-col-label {
       display: block;
       font-size: 10px;
@@ -600,7 +740,14 @@
       margin-bottom: 2px;
     }
     .ps-col-signal .ps-col-label { display: none; }
+    .ps-filters .ps-select, .ps-filters .ps-search { flex: 1 1 100%; }
+    .ps-filters .filter-search, .ps-triage-select, .ps-viewbtn, .ps-chip, .ps-linkbtn, .ps-toggle { min-height: 48px; }
+    .ps-chip { display: inline-flex; align-items: center; }
+    .ps-toggle, .ps-linkbtn { padding: 0 6px; }
+    .ps-viewswitch { flex-wrap: wrap; }
   }
+
+  #productSignalsView [hidden] { display: none !important; }
 
   /* ── Footer ── */
   .hub-footer {
@@ -1460,533 +1607,122 @@
   <div class="hub-view" id="productSignalsView">
 
     <div class="section-heading">Product Signals Tracker</div>
-    <p class="ps-intro-desc">Triage tracker for bug reports and feature requests submitted in #product-signals, so the channel can see what's already ticketed, what's covered by existing work, and what still needs CS follow-up, without digging back through Slack. Most rows below are synced from real ClickUp tickets (batch reviewed Aug 21, 2026); a handful of illustrative placeholder rows from the tab's initial build (fictional names, no real ticket) remain until reconciled.</p>
+    <p class="ps-intro-desc">Triage view of the priority bugs and enhancement requests surfaced by the daily feedback sweep in <a href="https://dripjobs.slack.com/archives/C0BSNSG2GQK" target="_blank" rel="noopener">#prod-assistant</a>. Each row shows how it was rated, whether a ClickUp ticket already covers it, and who raised it, with a link back to the Slack post it came from. Severity is the rating from the sweep, not a computed score.</p>
 
-    <!-- Stat filters (click a stat to filter the table) -->
+    <!-- Freshness banner (filled by JS from PS_META) -->
+    <div class="ps-sync" id="psSync" role="status"></div>
+
+    <!-- Stat filters (click a stat to filter the list) -->
     <div class="stats-row ps-stats" id="psStats">
       <button class="stat-card ps-stat active" data-ps-filter="all" type="button">
         <div class="stat-label">All Signals</div>
         <div class="stat-value">0</div>
       </button>
-      <button class="stat-card ps-stat" data-ps-filter="ticketed" type="button">
-        <div class="stat-label">✅ Ticketed</div>
+      <button class="stat-card ps-stat" data-ps-filter="critical" type="button">
+        <div class="stat-label">🔥 Critical Bugs</div>
         <div class="stat-value">0</div>
+        <div class="ps-stat-sub">Expedite and S1</div>
       </button>
-      <button class="stat-card ps-stat" data-ps-filter="cs" type="button">
-        <div class="stat-label">🐞 CS Verification</div>
+      <button class="stat-card ps-stat" data-ps-filter="none" type="button">
+        <div class="stat-label">🎫 No Ticket Found</div>
         <div class="stat-value">0</div>
+        <div class="ps-stat-sub">Needs a ticket decision</div>
       </button>
-      <button class="stat-card ps-stat" data-ps-filter="duplicate" type="button">
-        <div class="stat-label">🔁 Duplicate / Existing</div>
+      <button class="stat-card ps-stat" data-ps-filter="possible" type="button">
+        <div class="stat-label">⚠️ Verify Match</div>
         <div class="stat-value">0</div>
+        <div class="ps-stat-sub">Related ticket may cover it</div>
       </button>
-      <button class="stat-card ps-stat" data-ps-filter="featurebase" type="button">
-        <div class="stat-label">📋 FeatureBase</div>
+      <button class="stat-card ps-stat" data-ps-filter="human" type="button">
+        <div class="stat-label">👀 Needs a Human Look</div>
         <div class="stat-value">0</div>
+        <div class="ps-stat-sub">Too vague to triage</div>
       </button>
-      <button class="stat-card ps-stat" data-ps-filter="declined" type="button">
-        <div class="stat-label">⛔ Declined</div>
+      <button class="stat-card ps-stat" data-ps-filter="covered" type="button">
+        <div class="stat-label">✅ Tracked or Shipped</div>
         <div class="stat-value">0</div>
+        <div class="ps-stat-sub">Already handled</div>
       </button>
     </div>
 
-    <!-- Filter bar -->
-    <div class="filter-bar">
-      <input class="filter-search" type="text" id="psSearch" placeholder="Search signals, users…" />
-      <select class="filter-search" id="psSort" style="flex:0 0 auto; min-width:170px; cursor:pointer;">
-        <option value="newest" selected>Sort: Newest First</option>
-        <option value="oldest">Sort: Oldest First</option>
-      </select>
+    <!-- View switch -->
+    <div class="ps-viewswitch" role="tablist" aria-label="Product signals views">
+      <button class="ps-viewbtn active" id="psViewSignals" data-ps-view="signals" type="button" role="tab" aria-selected="true">Signals</button>
+      <button class="ps-viewbtn" id="psViewThemes" data-ps-view="themes" type="button" role="tab" aria-selected="false">Recurring Themes <span class="ps-viewcount" id="psThemeCount"></span></button>
     </div>
 
-    <div class="section-heading">Signal Queue</div>
-
-    <div class="ps-table" id="psTable">
-
-      <div class="ps-row ps-row-head">
-        <div class="ps-col ps-col-signal">Signal</div>
-        <div class="ps-col ps-col-user">Submitted By</div>
-        <div class="ps-col ps-col-status">Status</div>
-        <div class="ps-col ps-col-ref">Reference</div>
-        <div class="ps-col ps-col-date">Reviewed</div>
+    <!-- Signals list -->
+    <div id="psSignalsPane">
+      <div class="filter-bar ps-filters">
+        <input class="filter-search ps-search" type="text" id="psSearch" placeholder="Search signals, reps, ticket IDs…" aria-label="Search signals" />
+        <select class="filter-search ps-select" id="psType" aria-label="Type">
+          <option value="all">All types</option>
+          <option value="bug">Bugs</option>
+          <option value="enh">Enhancements</option>
+        </select>
+        <select class="filter-search ps-select" id="psSev" aria-label="Severity">
+          <option value="all">All severities</option>
+          <option value="Expedite">Expedite</option>
+          <option value="S1">S1</option>
+          <option value="S2">S2</option>
+          <option value="S3">S3</option>
+          <option value="S4">S4</option>
+        </select>
+        <select class="filter-search ps-select" id="psSource" aria-label="Source channel"></select>
+        <select class="filter-search ps-select" id="psTheme" aria-label="Theme"></select>
+        <select class="filter-search ps-select" id="psWindow" aria-label="Time window">
+          <option value="14">Last 14 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="60">Last 60 days</option>
+          <option value="all">All time</option>
+        </select>
+        <select class="filter-search ps-select" id="psTriageFilter" aria-label="Triage state"></select>
+        <select class="filter-search ps-select" id="psSort" aria-label="Sort">
+          <option value="priority" selected>Sort: Priority</option>
+          <option value="newest">Sort: Newest First</option>
+          <option value="oldest">Sort: Oldest First</option>
+          <option value="mentions">Sort: Most Mentions</option>
+        </select>
       </div>
 
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="automated follow-up unpaid invoice northstar painting">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Automated follow-up for completed jobs with an unpaid invoice</div>
-          <div class="ps-quote">&ldquo;An automated follow-up sequence, or a dedicated pipeline stage, for jobs that are complete but still have an unpaid invoice.&rdquo;</div>
+      <div class="ps-resultbar">
+        <span id="psResultCount"></span>
+        <span class="ps-resultactions">
+          <button class="ps-linkbtn" id="psClear" type="button">Clear filters</button>
+          <button class="ps-linkbtn" id="psExport" type="button">Export CSV</button>
+        </span>
+      </div>
+
+      <div class="ps-table" id="psTable">
+        <div class="ps-row ps-row-head">
+          <div class="ps-col">Signal</div>
+          <div class="ps-col">Severity</div>
+          <div class="ps-col">Ticket Coverage</div>
+          <div class="ps-col">Reported</div>
+          <div class="ps-col">Triage (this browser)</div>
         </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Northstar Painting</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="#" target="_blank">86bs10a1 (sample)</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
+        <div id="psRows"></div>
       </div>
 
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="payment status pipeline view outstanding balance bluerock coatings">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Payment-status visibility in the pipeline view</div>
-          <div class="ps-quote">&ldquo;A payment-status-aware pipeline view, or per-stage outstanding balance visibility, so I can see who still owes money without opening every deal.&rdquo;</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>BlueRock Coatings</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="#" target="_blank">86bs10a2 (sample)</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
+      <div class="empty-state" id="psEmptyState">
+        <div style="font-size:32px;">🔍</div>
+        <p>No signals match those filters.</p>
       </div>
 
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="route optimization map view crew sequencing summit exteriors">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Route optimization / map view for daily crew sequencing</div>
-          <div class="ps-quote">&ldquo;Route optimization or a map view of the day's jobs so the crew can be sequenced geographically instead of by appointment time.&rdquo;</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Summit Exteriors</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="#" target="_blank">86bs10a3 (sample)</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
+      <p class="ps-legend">
+        <strong>Ticket coverage:</strong>
+        <span class="ps-badge ps-cov-none">🎫 No ticket found</span> nothing in ClickUp matched when the sweep ran.
+        <span class="ps-badge ps-cov-possible">⚠️ Verify match</span> a related ticket exists, confirm it is the same root cause.
+        <span class="ps-badge ps-cov-tracked">✅ Tracked</span> a ticket covers it.
+        <span class="ps-badge ps-cov-shipped">🚀 Shipped</span> released to production.
+        Ticket statuses marked "checked" were read from ClickUp on the sync date; the rest are as reported in the sweep.
+      </p>
+    </div>
 
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="two way contact sync phone google contacts lakeside painting">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Two-way contact sync between DripJobs and phone contacts</div>
-          <div class="ps-quote">&ldquo;Two-way contact sync between DripJobs and my phone's contacts, directly or through Zapier, so new leads land in both places.&rdquo;</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Lakeside Painting Co.</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="#" target="_blank">86bs10a4 (sample)</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="outbound sms intermittently never delivered work order review onboarding links bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Outbound SMS Intermittently Never Delivered (Work-Order Links, Review Requests, Onboarding Links)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9f00" target="_blank">86bbj9f00</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>High</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="package view details renders incorrectly proposal customer view bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Package "View Details" Renders Incorrectly in Proposal Customer View</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9fpj" target="_blank">86bbj9fpj</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>Medium</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="proposal template editing noticeably slow laggy bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Proposal Template Editing Noticeably Slow/Laggy</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9fr2" target="_blank">86bbj9fr2</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>Medium</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="proposal template integrity disappeared embedded video not rendering bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Proposal Template Integrity: Template Disappeared + Embedded Video Not Rendering</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9ftu" target="_blank">86bbj9ftu</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>High</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="estimate requested count list mismatch mobile app desktop stale appointments tab bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Estimate Requested Count/List Mismatch Between Mobile App and Desktop + Stale Appointments Tab</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9fyv" target="_blank">86bbj9fyv</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>High</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="appointment synced google calendar did not appear dripjobs refresh bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Appointment Added to a Synced Google Calendar Did Not Appear in DripJobs Until Later/Refresh</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbjbt1p" target="_blank">86bbjbt1p</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>Medium</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="custom email domain dns verification fails webador hosted hostname mismatch bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Custom Email Domain DNS Verification Fails for Webador-Hosted Domain (Hostname Mismatch)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9g4b" target="_blank">86bbj9g4b</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>Medium</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="booking form preferred date field does not open date picker first tap bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Booking Form: Preferred-Date Field Doesn't Open Date Picker on First Tap</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9g35" target="_blank">86bbj9g35</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>Medium</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="jobs pipeline deal card cannot be dragged off screen stage no auto scroll bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Jobs Pipeline: Deal Card Cannot Be Dragged to Off-Screen Stage (No Auto-Scroll While Dragging)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9g0x" target="_blank">86bbj9g0x</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>Medium</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="ios push notifications missing dripjobs dj chat sms replies android ok bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>iOS Push Notifications Missing for DripJobs & DJ Chat SMS Replies (Android OK, Same Account)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9fmp" target="_blank">86bbj9fmp</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>High</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="quickbooks shows connected invoices products services fail to sync bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>QuickBooks Shows Connected but Invoices and Products/Services Fail to Sync</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9fk8" target="_blank">86bbj9fk8</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>High</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="email delivery bounce suppression false positive notification emails never arriving bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Email Delivery: Bounce-Suppression False Positive + Notification Emails Never Arriving</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9f30" target="_blank">86bbj9f30</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>High</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="cs" data-ps-added="2026-08-21" data-ps-name="text messaging number search returns no results chicago area codes bug">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Bug report">🐞</span>Text-Messaging Number Search Returns No Results for Valid Chicago-Area Codes</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-cs">🐞 CS Verification</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9f0z" target="_blank">86bbj9f0z</a><div class="ps-severity-note" style="margin-top:4px;">Severity: <strong>Medium</strong></div></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="duplicate" data-ps-added="2026-08-21" data-ps-name="google local services ads lsa lead ingestion fairview home services duplicate">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Native ingestion of Google Local Services Ads (LSA) leads</div>
-          <div class="ps-quote">&ldquo;Native ingestion of Google Local Services Ads leads directly into DripJobs, without a Zapier workaround.&rdquo;</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Fairview Home Services</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-duplicate">🔁 Existing Workstream</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="#" target="_blank">86bs20a1 (sample, existing)</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="duplicate" data-ps-added="2026-08-21" data-ps-name="direct native thumbtack integration lead capture redwood painting group duplicate">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Direct native Thumbtack integration for lead capture</div>
-          <div class="ps-quote">&ldquo;A direct, native integration with Thumbtack for lead capture instead of routing it through a third-party connector.&rdquo;</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Redwood Painting Group</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-duplicate">🔁 Existing Workstream</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="#" target="_blank">86bs20a2 (sample, existing)</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="duplicate" data-ps-added="2026-08-20" data-ps-name="annual billing discount option alpine coatings duplicate policy">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Annual billing option at a discount</div>
-          <div class="ps-quote">&ldquo;An annual billing option at a discount for accounts that want to commit for the year up front.&rdquo;</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Alpine Coatings</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-duplicate">🔁 Existing Policy</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><span class="ps-severity-note">Governed by Billing SOP, no new ticket</span></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 20, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="historical data import prior crm documents estimates proposals invoices metrics">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Historical Data Import From Prior CRM — Documents (Estimates/Proposals/Invoices) and Metrics</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9gfb" target="_blank">86bbj9gfb</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="declined" data-ps-added="2026-08-19" data-ps-name="custom per crew mobile app branding skin solstice painting declined">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Custom per-crew mobile app branding/skin</div>
-          <div class="ps-quote">&ldquo;Could we get a custom-branded skin for the crew mobile app, matching our own logo and colors instead of DripJobs branding?&rdquo;</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>Solstice Painting Co.</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-declined">⛔ Declined</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><span class="ps-severity-note">Out of scope, single-account demand</span></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 19, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="embeddable third party widgets proposal not just hyperlinks">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Embeddable Third-Party Widgets in the Proposal (Not Just Hyperlinks)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbjbtah" target="_blank">86bbjbtah</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="sentiment gated review requests only send google review link satisfied customers">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Sentiment-Gated Review Requests — Only Send the Google Review Link to Satisfied Customers</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbjbta5" target="_blank">86bbjbta5</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="import path third party estimating tool simplywise dripjobs proposals">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Import Path From a Third-Party Estimating Tool (SimplyWise) Into DripJobs Proposals</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbjbt95" target="_blank">86bbjbt95</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="painter specific estimating base plan production rates packaging">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Painter-Specific Estimating in the Base Plan (Production Rates Packaging)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbjbt8g" target="_blank">86bbjbt8g</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="group multiple line items single collapsed block proposal paintscout style">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Group Multiple Line Items Into a Single Collapsed Block on the Proposal (PaintScout-Style)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbjbt5w" target="_blank">86bbjbt5w</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="hide unit quantities work order hours can be hidden units cannot">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Hide Unit Quantities on the Work Order (Hours Can Be Hidden, Units Cannot)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbjbt5e" target="_blank">86bbjbt5e</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="default proposal expiration period set once apply every proposal">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Default Proposal Expiration Period (Set Once, Apply to Every Proposal)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbjbt4r" target="_blank">86bbjbt4r</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="send conversion events back meta lead becomes sold job native">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Send Conversion Events Back to Meta When a Lead Becomes a Sold Job (Native)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9hr5" target="_blank">86bbj9hr5</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="booking form qr code portability stable redirect control">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Booking-Form QR Code Portability / Stable Redirect Control</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9hpp" target="_blank">86bbj9hpp</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="commercial vs residential proposal presentation separate branding portal treatments">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Commercial vs Residential Proposal Presentation — Separate Branding/Portal Treatments</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9hn8" target="_blank">86bbj9hn8</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="greensky financing integration proposals alongside acorn">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>GreenSky Financing Integration on Proposals (Alongside Acorn)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9hdw" target="_blank">86bbj9hdw</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="native lead capture pop up newsletter modal websites cold leads">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Native Lead-Capture Pop-Up / Newsletter Modal for Websites → Cold Leads</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9hcb" target="_blank">86bbj9hcb</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="square payment processing option alongside stripe">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Square as a Payment Processing Option (Alongside Stripe)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9hb7" target="_blank">86bbj9hb7</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="ringcentral integration keep texting existing phone system">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>RingCentral Integration / Keep Texting in an Existing Phone System</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9h9q" target="_blank">86bbj9h9q</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="published starter cheat sheet production spread rates surface type">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Published Starter Cheat Sheet of Production/Spread Rates by Surface Type</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9h7t" target="_blank">86bbj9h7t</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="native new lead push sms notification owner no zapier twilio required">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Native New-Lead Push/SMS Notification to Owner (No Zapier+Twilio Required)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9h09" target="_blank">86bbj9h09</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="per service booking form branching different landing page video service selected">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Per-Service Booking Form Branching — Different Landing Page/Video by Service Selected</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9gz1" target="_blank">86bbj9gz1</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="sms blast marketing alongside email blast">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>SMS Blast Marketing (Alongside Email Blast)</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9gxw" target="_blank">86bbj9gxw</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="ai assistant natural language instruction estimate quote scheduled appointment">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>AI Assistant: Natural-Language Instruction → Estimate, Quote, or Scheduled Appointment</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9gw0" target="_blank">86bbj9gw0</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-      <div class="ps-row" data-ps-category="ticketed" data-ps-added="2026-08-21" data-ps-name="route inbound business line calls specific salesperson within dripjobs">
-        <div class="ps-col ps-col-signal">
-          <span class="ps-col-label">Signal</span>
-          <div class="ps-signal-title"><span class="ps-type-icon" title="Feature request">💡</span>Route Inbound Business-Line Calls to a Specific Salesperson From Within DripJobs</div>
-        </div>
-        <div class="ps-col ps-col-user"><span class="ps-col-label">Submitted By</span>DJI Intake</div>
-        <div class="ps-col ps-col-status"><span class="ps-col-label">Status</span><span class="ps-status-badge ps-status-ticketed">✅ Ticketed</span></div>
-        <div class="ps-col ps-col-ref"><span class="ps-col-label">Reference</span><a class="ticket-link" href="https://app.clickup.com/t/86bbj9gry" target="_blank">86bbj9gry</a></div>
-        <div class="ps-col ps-col-date"><span class="ps-col-label">Reviewed</span>Aug 21, 2026</div>
-      </div>
-
-    </div><!-- /ps-table -->
-
-    <!-- Empty state -->
-    <div class="empty-state" id="psEmptyState">
-      <div style="font-size:32px;">🔍</div>
-      <p>No signals match that filter.</p>
+    <!-- Recurring themes -->
+    <div id="psThemesPane" hidden>
+      <p class="ps-intro-desc ps-themes-intro">Asks that keep coming back across #product-signals and the internal channels. Mention counts are as flagged in the sweeps. Use this view to decide which themes deserve a deliberate yes or no instead of continuing to accumulate mentions.</p>
+      <div class="ps-themes" id="psThemes"></div>
     </div>
 
   </div><!-- /productSignalsView -->
@@ -2337,102 +2073,6 @@
   sortSelect.addEventListener('change', applySort);
   applySort();
 
-  // ── Product Signals Tracker: stat-filter, search, sort, quote show-more ──
-  (function setupProductSignals() {
-    const table = document.getElementById('psTable');
-    if (!table) return;
-    const rows = Array.from(table.querySelectorAll('.ps-row:not(.ps-row-head)'));
-    const statButtons = Array.from(document.querySelectorAll('.ps-stat'));
-    const psSearch = document.getElementById('psSearch');
-    const psSort = document.getElementById('psSort');
-    const psEmptyState = document.getElementById('psEmptyState');
-    const defaultOrder = [...rows];
-    let activeCategory = 'all';
-
-    function updateCounts() {
-      const counts = { all: rows.length };
-      rows.forEach(r => {
-        const c = r.dataset.psCategory;
-        counts[c] = (counts[c] || 0) + 1;
-      });
-      statButtons.forEach(btn => {
-        const valueEl = btn.querySelector('.stat-value');
-        if (valueEl) valueEl.textContent = counts[btn.dataset.psFilter] || 0;
-      });
-    }
-
-    function applyPsFilters() {
-      const q = psSearch.value.toLowerCase().trim();
-      let visible = 0;
-      rows.forEach(row => {
-        const nameMatch = row.dataset.psName.includes(q);
-        const catMatch = activeCategory === 'all' || row.dataset.psCategory === activeCategory;
-        if (nameMatch && catMatch) {
-          row.classList.remove('hidden');
-          visible++;
-        } else {
-          row.classList.add('hidden');
-        }
-      });
-      psEmptyState.classList.toggle('visible', visible === 0);
-    }
-
-    function applyPsSort() {
-      const mode = psSort.value;
-      const ordered = [...defaultOrder].sort((a, b) => {
-        const cmp = (a.dataset.psAdded || '').localeCompare(b.dataset.psAdded || '');
-        return mode === 'oldest' ? cmp : -cmp;
-      });
-      ordered.forEach(row => table.appendChild(row));
-    }
-
-    statButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        activeCategory = btn.dataset.psFilter;
-        statButtons.forEach(b => b.classList.toggle('active', b === btn));
-        applyPsFilters();
-      });
-    });
-    psSearch.addEventListener('input', applyPsFilters);
-    psSort.addEventListener('change', applyPsSort);
-
-    function refreshQuoteToggles() {
-      document.querySelectorAll('.ps-quote').forEach(quote => {
-        // Skip a quote the user has expanded — removing the clamp erases the
-        // overflow this function is measuring, which would otherwise hide the
-        // "Show less" control out from under them.
-        if (quote.classList.contains('expanded')) return;
-        const toggle = quote.nextElementSibling;
-        if (!toggle || !toggle.classList.contains('ps-quote-toggle')) return;
-        toggle.classList.toggle('is-placeholder', quote.scrollHeight <= quote.clientHeight + 1);
-      });
-    }
-
-    document.querySelectorAll('.ps-quote').forEach(quote => {
-      const toggle = document.createElement('button');
-      toggle.type = 'button';
-      toggle.className = 'ps-quote-toggle';
-      toggle.textContent = 'Show more';
-      toggle.addEventListener('click', () => {
-        const expanded = quote.classList.toggle('expanded');
-        toggle.textContent = expanded ? 'Show less' : 'Show more';
-      });
-      quote.insertAdjacentElement('afterend', toggle);
-    });
-    refreshQuoteToggles();
-    // This tab starts as display:none until clicked, so the row above measures
-    // 0-height quotes. Re-measure whenever a quote's rendered size actually
-    // changes — that covers tab activation, window resize, and orientation change.
-    if (window.ResizeObserver) {
-      const quoteObserver = new ResizeObserver(refreshQuoteToggles);
-      document.querySelectorAll('.ps-quote').forEach(quote => quoteObserver.observe(quote));
-    }
-
-    updateCounts();
-    applyPsSort();
-    applyPsFilters();
-  })();
-
   const hubTabs = document.querySelectorAll('.hub-tab');
   const hubViews = document.querySelectorAll('.hub-view');
   function activateHubTab(tab) {
@@ -2450,6 +2090,8 @@
   const initialTab = [...hubTabs].find(t => t.dataset.hash === location.hash.replace('#', ''));
   if (initialTab) activateHubTab(initialTab);
 </script>
+<script src="./product-signals/signals-data.js"></script>
+<script src="./product-signals/signals-app.js"></script>
 </body>
 </html>
 
