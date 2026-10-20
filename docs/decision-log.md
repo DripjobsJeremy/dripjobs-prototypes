@@ -1658,3 +1658,9 @@ Format:
 - Assumption: Sweep icons were read as ticket coverage (ticket icon = no ticket found, warning = related ticket may cover it, check mark = tracked). Inferred from the Aug 29 sweep note, not from a legend.
 - Open question: Parent epic 86bbueq42 (Google Calendar sync) shows "pushed to production" in ClickUp, but the Oct 5 sweep described it as in dev with 3 subtasks ready for dev. Needs a human check.
 
+## [2026-10-20] Product Signals: Laura's first triage export applied
+- Decision: Triage decisions from the Oct 19 export (61 dismissed with reasons, 4 marked ticket created, 5 left untriaged) are now stored in the data file (`PS_TRIAGE`) so everyone sees them, instead of only in one browser. Edits made on the tab still save per browser and override the shared decision for that row. Dismissed items are hidden by default (Open filter, one click to show them).
+- Decision: Updated coverage for the 3 rows with new tickets after live ClickUp checks: email thread attribution shipped Oct 15, line item drag-out shipped Oct 19, "Pay with Check" invoice status tracked (PR created Oct 20). The Add-Ons tab row now shows its live status (pushed to production Sep 8).
+- Assumption: The tickets linked to the drag-out and "Pay with Check" rows have titles that differ from the signal (a drop-target feedback fix and an "Offline Requested" invoice filter). They were applied as Laura linked them, with the title noted on the row. Needs Laura to confirm they fully fix the reported behavior.
+- Assumption: Only "Dismissed" is hidden by default. Parked items stay visible. Dismissed reasons are shown as triage notes.
+

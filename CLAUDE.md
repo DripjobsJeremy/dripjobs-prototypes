@@ -55,6 +55,7 @@ Signals sync (Product Signals tab):
 - Read every sweep post newer than `PS_META.lastSweep`, append one row per bug or enhancement, add the post's message timestamp to `PS_SWEEPS`, then bump `lastSweep` and `syncedOn`. Update `PS_RECURRING` counts when a sweep flags a recurring theme again.
 - For every ClickUp link in the new posts, read the live ticket status (ClickUp connector) and store it with `live: true`. Re-check the open tickets already in the file and move rows to `tracked` or `shipped` when their status changed.
 - Leave customer and account names out (rep names only). Severity is copied as rated in the sweep, never computed.
+- Triage decisions live in `PS_TRIAGE` in the data file (key is `date|first 70 characters of the title`). When someone shares an "Export CSV" file from the tab, apply its Triage and Triage note columns to `PS_TRIAGE`, apply any changed ticket or coverage columns to the matching rows (confirm the live ClickUp status), and bump `triageSyncedOn`. A routine sync must never overwrite or drop existing `PS_TRIAGE` entries.
 - Append a dated entry to `docs/decision-log.md`, commit, push a branch named `claude/signals-sync-<date>`, and open a PR. Do not merge it.
 
 GitHub API mechanics:

@@ -1,6 +1,7 @@
 /*
  * Product Signals tab: renders PS_ROWS / PS_RECURRING (signals-data.js) into the hub.
- * Triage state and notes are saved in this browser only (localStorage), they never leave the device.
+ * Shared triage decisions come from the data file (PS_TRIAGE). Changes made on the tab are saved in this browser only
+ * (localStorage), they never leave the device, and they override the shared decision for that row.
  */
 (function () {
   var rows = window.PS_ROWS || [];
@@ -43,10 +44,11 @@
   var triage = {};
   try { triage = JSON.parse(localStorage.getItem(STORE_KEY) || '{}') || {}; } catch (e) { triage = {}; }
   function saveTriage() { try { localStorage.setItem(STORE_KEY, JSON.stringify(triage)); } catch (e) { /* storage blocked, state stays in memory */ } }
-  function getTriage(r) { return triage[rowKey(r)] || { s: '', n: '' }; }
+  function getTriage(r) { return triage[rowKey(r)] || { s: r.triage || '', n: r.tnote || '' }; }
 
   // Filter state
-  var state = { stat: 'all', q: '', type: 'all', sev: 'all', source: 'all', theme: 'all', win: '30', triage: 'all', sort: 'priority' };
+  var DEFAULT_STATE = { stat: 'all', q: '', type: 'all', sev: 'all', source: 'all', theme: 'all', win: '30', triage: 'open', sort: 'priority' };
+  var state = JSON.parse(JSON.stringify(DEFAULT_STATE));
   var lastSweepMs = meta.lastSweep ? parseDay(meta.lastSweep) : Date.now();
 
   var ui = {
@@ -65,6 +67,7 @@
   fillSelect(ui.source, Object.keys(CHANNELS).map(function (k) { return [k, CHANNELS[k]]; }), 'All sources');
   fillSelect(ui.theme, Object.keys(themes).map(function (k) { return [k, themes[k]]; }), 'All themes');
   fillSelect(ui.triage, TRIAGE.map(function (t) { return [t[0] || 'untriaged', t[1]]; }), 'All triage states');
+  (function () { var o = el('option', null, 'Open (hide dismissed)'); o.value = 'open'; ui.triage.insertBefore(o, ui.triage.firstChild); ui.triage.value = 'open'; })();
 
   function matchesBase(r) {
     if (state.type !== 'all' && r.type !== state.type) return false;
@@ -74,7 +77,8 @@
     if (state.win !== 'all' && parseDay(r.d) < lastSweepMs - (+state.win) * 86400000) return false;
     if (state.triage !== 'all') {
       var s = getTriage(r).s || 'untriaged';
-      if (s !== state.triage) return false;
+      if (state.triage === 'open') { if (s === 'dismissed') return false; }
+      else if (s !== state.triage) return false;
     }
     if (state.q) {
       var hay = [r.title, r.note, r.who, r.ch, themes[r.theme] || '', r.ticket ? r.ticket.id + ' ' + r.ticket.status : ''].join(' ').toLowerCase();
@@ -125,6 +129,16 @@
       more.type = 'button';
       more.addEventListener('click', function () { state.win = 'all'; ui.win.value = 'all'; render(); });
       ui.count.appendChild(more);
+    }
+    if (state.triage === 'open') {
+      var dismissed = rows.filter(function (r) { return getTriage(r).s === 'dismissed'; }).length;
+      if (dismissed) {
+        ui.count.appendChild(document.createTextNode(' · ' + dismissed + ' dismissed hidden '));
+        var sd = el('button', 'ps-linkbtn', 'Show dismissed');
+        sd.type = 'button';
+        sd.addEventListener('click', function () { state.triage = 'all'; ui.triage.value = 'all'; render(); });
+        ui.count.appendChild(sd);
+      }
     }
   }
 
@@ -207,7 +221,7 @@
 
     // Triage
     var c5 = el('div', 'ps-col ps-col-triage');
-    c5.appendChild(el('span', 'ps-col-label', 'Triage (this browser)'));
+    c5.appendChild(el('span', 'ps-col-label', 'Triage'));
     var sel = el('select', 'ps-triage-select');
     sel.setAttribute('aria-label', 'Triage state for ' + r.title);
     TRIAGE.forEach(function (o) { var op = el('option', null, o[1]); op.value = o[0]; if (o[0] === t.s) op.selected = true; sel.appendChild(op); });
@@ -222,7 +236,7 @@
     function persist() {
       var cur = triage[key] || { s: '', n: '' };
       cur.s = sel.value; cur.n = ta.value;
-      if (!cur.s && !cur.n) delete triage[key]; else triage[key] = cur;
+      triage[key] = cur;
       saveTriage();
       nb.textContent = ta.value ? 'Edit note' : 'Add note';
     }
@@ -241,7 +255,7 @@
     box.classList.add(stale ? 'stale' : 'fresh');
     var msg = el('span');
     msg.appendChild(el('strong', null, stale ? 'Data is ' + days + ' days old. ' : 'Up to date. '));
-    msg.appendChild(document.createTextNode('Last sweep covered through ' + fmtDate(meta.lastSweep) + '; synced ' + fmtDate(meta.syncedOn) + '.'));
+    msg.appendChild(document.createTextNode('Last sweep covered through ' + fmtDate(meta.lastSweep) + '; synced ' + fmtDate(meta.syncedOn) + (meta.triageSyncedOn ? '; triage decisions applied ' + fmtDate(meta.triageSyncedOn) : '') + '.'));
     box.appendChild(msg);
     if (stale) {
       var how = el('span');
@@ -337,10 +351,10 @@
     ui[p[0]].addEventListener('change', function () { state[p[1]] = ui[p[0]].value; render(); });
   });
   document.getElementById('psClear').addEventListener('click', function () {
-    state = { stat: 'all', q: '', type: 'all', sev: 'all', source: 'all', theme: 'all', win: '30', triage: 'all', sort: 'priority' };
+    state = JSON.parse(JSON.stringify(DEFAULT_STATE));
     ui.search.value = '';
-    ['type', 'sev', 'source', 'theme', 'triage'].forEach(function (k) { ui[k].value = 'all'; });
-    ui.win.value = '30'; ui.sort.value = 'priority';
+    ['type', 'sev', 'source', 'theme'].forEach(function (k) { ui[k].value = 'all'; });
+    ui.triage.value = 'open'; ui.win.value = '30'; ui.sort.value = 'priority';
     ui.stats.forEach(function (x) { x.classList.toggle('active', x.dataset.psFilter === 'all'); });
     render();
   });
