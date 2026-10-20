@@ -21,6 +21,7 @@
   var PS_META = {
     lastSweep: '2026-10-19',
     syncedOn: '2026-10-19',
+    triageSyncedOn: '2026-10-20',
     channelUrl: 'https://dripjobs.slack.com/archives/C0BSNSG2GQK'
   };
 
@@ -202,7 +203,8 @@
   B('2026-09-22', 's28b', 'S1', 'none', 'Google Calendar to DripJobs sync does not pull Google events into Appointments; DripJobs to Google works (one-way only)', 'David Cerro', '', { theme: 'gcal-sync' });
   B('2026-09-22', 's28b', 'S1', 'none', 'Invoices intermittently fail to auto-sync to QuickBooks; manual Sync works every time', 'Juan Quintero', '', { theme: 'qb-sync' });
   B('2026-09-22', 's28b', 'S1', 'none', 'Salesperson selected on New Proposal sometimes does not persist; the proposal saves with the account owner as salesperson', 'Nemesis Pena');
-  B('2026-09-23', 's28b', 'S1', 'none', 'Email thread in the DripJobs email view attributes to the wrong user when the sending user and assigned salesperson or PM are the same person', 'David Arteaga');
+  B('2026-09-23', 's28b', 'S1', 'shipped', 'Email thread in the DripJobs email view attributes to the wrong user when the sending user and assigned salesperson or PM are the same person', 'David Arteaga',
+    'Ticketed after triage as "Inbox Assignment Tags Show Account Owner as Salesperson and Omit Assigned Project Manager". Released Oct 15.', { ticket: tk('86bc8t6z5', 'pushed to production (Oct 15)', true) });
   B('2026-09-23', 's28b', 'S1', 'none', 'The same saved product/service renders without a "/each" unit on one proposal but with "/each" when re-added to a new proposal', 'Seth Brown');
 
   /* ---------- Sep 18 ---------- */
@@ -248,8 +250,8 @@
   B('2026-09-11', 's14a', 'S4', 'none', 'Company logo upload silently rejects a valid image; only succeeded after multiple re-saves', 'Seth Brown', 'Third distinct logo-upload report since Aug 25.');
   B('2026-09-11', 's14a', 'S4', 'none', 'Proposal-approval notification email CCs an address never configured anywhere in account settings', 'David Cerro');
   B('2026-09-11', 's14a', 'S4', 'none', 'Newly scheduled job with an assigned crew does not render on the Jobs Schedule for the admin until log-out and log-in (the rep sees it immediately)', 'David Cerro');
-  B('2026-09-11', 's14a', 'S1', 'none', 'A line item dragged into a package cannot be dragged back out, and a refresh does not recover it', 'Daniel Lee',
-    'Same call also requested bidirectional drag-and-drop as a feature.', { theme: 'line-items' });
+  B('2026-09-11', 's14a', 'S1', 'shipped', 'A line item dragged into a package cannot be dragged back out, and a refresh does not recover it', 'Daniel Lee',
+    'Same call also requested bidirectional drag-and-drop as a feature. Linked after triage to "Drag-and-Drop Feedback Inconsistent and Inaccurate Between Packages, Areas, and Line Items" (released Oct 19). That ticket covers the drop-target feedback and says it expands an original ticket, so confirm the drag-out failure itself is fixed.', { theme: 'line-items', ticket: tk('86bbzbz6m', 'pushed to production (Oct 19)', true) });
 
   /* ---------- Sep 9 ---------- */
   B('2026-09-09', 's09', 'S1', 'none', '"Cash" is missing from the payment-method dropdown when marking an invoice as received', 'Yoselin Bressan');
@@ -314,7 +316,7 @@
   B('2026-09-01', 's01', 'S4', 'none', 'AI-generated cover photo cannot be saved from the Customer Portal generator', 'Ximena Jimenez');
   B('2026-09-01', 's01', 'S4', 'none', 'Interior categories still show in the category selector after picking an Exterior area in Production Rates', 'Daniel Lee');
   B('2026-09-01', 's01', 'S1', 'shipped', 'Company Settings "Add-Ons" tab becomes unreachable on narrower browser windows because horizontal scroll does not appear', 'Seth Brown',
-    'Ticketed the same day ("Horizontal Tab Bar Cannot Be Dragged to Reveal Hidden Tabs at 100% Zoom") and shipped in the Sep 8 deploy batch.', { ticket: tk('86bbqxmmj', 'shipped Sep 8 (per sweep)', false) });
+    'Ticketed the same day ("Horizontal Tab Bar Cannot Be Dragged to Reveal Hidden Tabs at 100% Zoom") and shipped in the Sep 8 deploy batch.', { ticket: tk('86bbqxmmj', 'pushed to production (Sep 8)', true) });
   P('2026-09-01', 's01', 'S3', 'tracked', 'Offline mode in the mobile app to build estimates with no cell or Wi-Fi', '', 'Second mention (Aug 22, Sep 1).', { n: 2, ticket: tk('86azr0fj8', 'new (V2 backlog)', true) });
 
   /* ---------- Aug 27 to Aug 31 ---------- */
@@ -354,7 +356,8 @@
     'A "View Details Button Overlaps Line Item Text" fix deployed to PROD that morning. Re-check before filing.');
   B('2026-08-27', 'a27', 'S4', 'none', 'Customer View does not reflect proposal state until a manual refresh', 'Daniel Lee');
   B('2026-08-27', 'a27', 'S4', 'none', 'Review-request link does not persist on first save, leaving a dead button in the email', 'Ximena Jimenez');
-  B('2026-08-27', 'a27', 'S1', 'none', 'Invoice loses its status entirely when the customer pays via "Pay with Check" (disappears from Open, Partially Paid, Paid filters)', 'Seth Brown');
+  B('2026-08-27', 'a27', 'S1', 'tracked', 'Invoice loses its status entirely when the customer pays via "Pay with Check" (disappears from Open, Partially Paid, Paid filters)', 'Seth Brown',
+    'Ticketed after triage as "Add Offline Requested to the Invoices Status Filter". A PR was created Oct 20.', { ticket: tk('86bbn1y5k', 'pr created (Oct 20)', true) });
   B('2026-08-27', 'a27', 'S1', 'none', 'A contact who opted out of SMS still received a drip text', 'Seth Brown');
   P('2026-08-27', 'a27', 'S3', 'none', 'Specific booking-form appointment time window (e.g. 11am to 4pm), not just available days', '', 'Second mention (Aug 23, Aug 27).', { theme: 'booking-form', n: 2 });
   P('2026-08-27', 'a27', 'S3', 'tracked', 'AI cover-image generator for multiple trades in one image', '', 'Second mention (Aug 26, Aug 27). Many later mentions of non-painting trades.', { n: 2, ticket: tk('86b9t5cqx', 'needs pm analysis', true) });
@@ -422,6 +425,81 @@
     { name: 'Thumbtack and Google LSA native lead integrations', mentions: '3+', since: 'Aug 21', cov: 'none', note: 'Reinforced Sep 22.' },
     { name: 'Per-proposal branding: hero or banner image and color', mentions: '4', since: 'Aug 25', cov: 'none', note: 'Color asked Aug 25 and Aug 29; hero image Sep 6 and Oct 13.' }
   ];
+  // Shared triage decisions (from the Oct 19 triage export). Browser-local changes on the tab override these.
+  // Key is date|first 70 chars of the title, same as the tab's row key.
+  var PS_TRIAGE = {
+    "2026-09-23|Email thread in the DripJobs email view attributes to the wrong user w": { s: "ticketed", n: "" },
+    "2026-09-11|A line item dragged into a package cannot be dragged back out, and a r": { s: "ticketed", n: "" },
+    "2026-08-27|Invoice loses its status entirely when the customer pays via \"Pay with": { s: "ticketed", n: "" },
+    "2026-09-01|Company Settings \"Add-Ons\" tab becomes unreachable on narrower browser": { s: "ticketed", n: "" },
+    "2026-10-01|Account-activation email and onboarding calendar invite never delivere": { s: "dismissed", n: "Sent to billing" },
+    "2026-09-30|QuickBooks Time: OAuth allow-step hits an error page, then the integra": { s: "dismissed", n: "" },
+    "2026-09-29|Bank/ACH payment option on the invoice customer view errors when the c": { s: "dismissed", n: "CA company" },
+    "2026-09-22|QuickBooks Time integration fails at OAuth: \"only authorized to log in": { s: "dismissed", n: "" },
+    "2026-09-21|Persistent 403 error loading DripJobs in Chrome; clearing cache and in": { s: "dismissed", n: "poor internet connection" },
+    "2026-09-06|Password reset loops: after setting a new password the user is bounced": { s: "dismissed", n: "" },
+    "2026-09-04|DripJobs Chat mobile app rejects login with credentials that work for ": { s: "dismissed", n: "Using an old app version" },
+    "2026-10-16|Proposal marked accepted (with or without signature) does not move the": { s: "dismissed", n: "Invoice created before the proposal acceptance" },
+    "2026-10-07|Abandoned text-messaging add-on flow triggered a subscription update a": { s: "dismissed", n: "they didn't have balance on twilio" },
+    "2026-10-06|Google Calendar multi-calendar selection: Appointments and Jobs both w": { s: "dismissed", n: "" },
+    "2026-10-06|Contact phone number cannot be corrected when the target number is alr": { s: "dismissed", n: "This is expected, if there's already a contact with that number they can delete the other record" },
+    "2026-10-03|Scheduled jobs stopped writing to the subscribed shared Google calenda": { s: "dismissed", n: "The job is going to be on every USER calendar, not the crew members" },
+    "2026-10-02|Google Calendar events created on the customer's Google side do not ap": { s: "dismissed", n: "Those are recurring events, those are not going to sync" },
+    "2026-10-02|Scheduling a multi-day job cannot exclude non-working days: Saturdays ": { s: "dismissed", n: "" },
+    "2026-10-01|Work order printed from the browser cuts off content; the downloaded P": { s: "dismissed", n: "The type using in the description was the small one" },
+    "2026-09-29|Tax rate field truncates a 5-decimal rate (0.06625) to 3 decimals, pro": { s: "dismissed", n: "" },
+    "2026-09-29|Google Calendar sync brings a multi-day job into DripJobs as a single-": { s: "dismissed", n: "" },
+    "2026-09-23|Manually created invoices show in global search as deals labeled \"Invo": { s: "dismissed", n: "" },
+    "2026-09-23|The same saved product/service renders without a \"/each\" unit on one p": { s: "dismissed", n: "" },
+    "2026-09-22|QuickBooks integration silently disconnects; \"Connect to QuickBooks\" h": { s: "dismissed", n: "it was their internet, QB is connected to their account now" },
+    "2026-09-22|QuickBooks invoices and payments frequently do not auto-sync, require ": { s: "dismissed", n: "Not a bug, for an invoice to sync, all the products/services must be synced, their settings in CS must be set, and all the line items must be included in the P/s list" },
+    "2026-09-22|QuickBooks sync fails with a validation error when a DripJobs product/": { s: "dismissed", n: "" },
+    "2026-09-22|Google Calendar to DripJobs sync does not pull Google events into Appo": { s: "dismissed", n: "" },
+    "2026-09-22|Invoices intermittently fail to auto-sync to QuickBooks; manual Sync w": { s: "dismissed", n: "P/S not synced" },
+    "2026-09-22|Salesperson selected on New Proposal sometimes does not persist; the p": { s: "dismissed", n: "" },
+    "2026-09-21|Google Calendar events from secondary or subscribed calendars do not s": { s: "dismissed", n: "" },
+    "2026-09-20|Proposal send fails with a send-email error on a deal whose card shows": { s: "dismissed", n: "no email in the contact" },
+    "2026-09-19|Mobile photo upload rejects images as too large, forcing a screenshot ": { s: "dismissed", n: "" },
+    "2026-09-19|Proposal send intermittently fails with the client shown blocked in re": { s: "dismissed", n: "" },
+    "2026-09-18|Contacts manually added to Cold Leads did not receive the automatic fi": { s: "dismissed", n: "I did the test and it's sending." },
+    "2026-09-18|Mobile app hangs on the loading screen after tapping \"Activate account": { s: "dismissed", n: "" },
+    "2026-09-10|Adding a door or substrate to a Production Rates area hangs in infinit": { s: "dismissed", n: "no default product was assgined" },
+    "2026-09-10|Proposal builder hangs on a loading spinner and loses unsaved progress": { s: "dismissed", n: "" },
+    "2026-09-09|\"Cash\" is missing from the payment-method dropdown when marking an inv": { s: "dismissed", n: "" },
+    "2026-09-04|Production Rates \"Add Area\" is unusable on one account; settings appea": { s: "dismissed", n: "if the categories on production rates doesn't have substrates, production rates is not going to work properly" },
+    "2026-09-04|Project-accepted notification email to the business owner stopped arri": { s: "dismissed", n: "Not a bug, sometimes the email might be delayed a couple of minutes based on the recipients internet. I sent it to myself from their account and received it in seconds" },
+    "2026-09-04|Review Request drip in Project Complete defaulted to SMS-only with an ": { s: "dismissed", n: "" },
+    "2026-09-04|Proposal send-by-SMS no longer allows editing the recipient phone numb": { s: "dismissed", n: "" },
+    "2026-09-03|Google Calendar events sync into the Appointments calendar but do not ": { s: "dismissed", n: "" },
+    "2026-08-30|On iPad, changing a deal's Current Stage from the deal card does not p": { s: "dismissed", n: "" },
+    "2026-08-29|DripJobs Chat sends no notification on a customer text reply despite s": { s: "dismissed", n: "they didn't have the latest version" },
+    "2026-08-29|New Appointment button requires an email even for phone-only contacts ": { s: "dismissed", n: "" },
+    "2026-08-28|Proposal or change-order email link opens the mobile app instead of th": { s: "dismissed", n: "On my side it opens Google." },
+    "2026-08-28|Proposal link opens a blank black page in Safari on iPad": { s: "dismissed", n: "" },
+    "2026-08-28|Company notes drag-and-drop rejects XLSX and PDF with no format guidan": { s: "dismissed", n: "Not a bug, this is expected, our notes are not designed to allow these files" },
+    "2026-08-27|A contact who opted out of SMS still received a drip text": { s: "dismissed", n: "" },
+    "2026-09-10|Cold Leads first-drip follow-up did not send to 2 of 3 Zapier-sourced ": { s: "dismissed", n: "they didn't opt out" },
+    "2026-09-10|Negative-priced line item on a change order zeroes out the item total ": { s: "dismissed", n: "" },
+    "2026-09-04|No notification for incoming DripJobs Chat messages, even though the s": { s: "dismissed", n: "not using the latest app version" },
+    "2026-09-04|QuickBooks payment sync fails on invoices with a locked sales-discount": { s: "dismissed", n: "" },
+    "2026-08-29|Closing Ratio by Source under-counts compared with Sales by Source for": { s: "dismissed", n: "customer didnt understand metrics" },
+    "2026-08-28|QuickBooks sync fails with \"discount amount greater than subtotal\"": { s: "dismissed", n: "" },
+    "2026-10-17|Job start and completion dates do not populate on the Jobs List after ": { s: "dismissed", n: "Those dates are taken from the job scheduled and the job they were talking about was not scheduled" },
+    "2026-10-09|Previously synced payments spontaneously revert to unsynced in QuickBo": { s: "dismissed", n: "P/S not synced" },
+    "2026-10-02|Work order PDF export renders text at an unreadably small size compare": { s: "dismissed", n: "The type using in the description was the small one" },
+    "2026-08-21|Outbound SMS Intermittently Never Delivered (Work-Order Links, Review ": { s: "dismissed", n: "" },
+    "2026-08-21|Proposal Template Integrity: Template Disappeared + Embedded Video Not": { s: "dismissed", n: "" },
+    "2026-08-21|Estimate Requested Count/List Mismatch Between Mobile App and Desktop ": { s: "dismissed", n: "" },
+    "2026-08-21|iOS Push Notifications Missing for DripJobs & DJ Chat SMS Replies (And": { s: "dismissed", n: "" },
+    "2026-08-21|QuickBooks Shows Connected but Invoices and Products/Services Fail to ": { s: "dismissed", n: "" },
+    "2026-08-21|Email Delivery: Bounce-Suppression False Positive + Notification Email": { s: "dismissed", n: "" }
+  };
+
+  rows.forEach(function (r) {
+    var t = PS_TRIAGE[r.d + '|' + r.title.slice(0, 70)];
+    if (t) { r.triage = t.s; r.tnote = t.n; }
+  });
+
   window.PS_RECURRING = PS_RECURRING;
   window.PS_META = PS_META;
   window.PS_SWEEPS = PS_SWEEPS;
