@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-10-22] Weekly Product Update + Product Roadmap refreshed for Oct 19-23, 2026
+
+- Decision: Rebuilt `weekly-product-update/index.html` and `Weekly_Product_Update.md` with 6 of the 7 tickets pushed to production this week (2 closed Oct 19, 4 closed Oct 22), grouped into Proposal Builder, Communications, Jobs & Job Schedule, Customer Portal (new section, major feature), and Integrations (2 Zapier entries). Excluded one ticket (Password Last Updated Edit State/Datepicker fix, 86bcb8wr1): its own ticket text confirms the affected edit control is visible only to DripJobs Super Admins, not any customer-side role, matching the established internal-staff-tooling exclusion. Generalized one ticket's account-specific framing (email blast image rendering, originally tied to a named customer account) into general customer-facing wording. Rebuilt `dripjobs-product-roadmap/index.html` from a fresh workspace-wide pull of the bare 🎯 tag: 30 in-flight tickets, 3 on hold/parked (QA Kickback gained two tickets: one genuinely kicked back from QA, one ClickUp marked "resolved without fix," which the board's own legend already covers under its parked-lane catch-all). Updated both Release Notes cards on the hub to the new dates.
+- Why: Routine weekly refresh per Jeremy's instruction, sourced directly from ClickUp. The exclusion and generalization both follow established precedent from prior weeks' refreshes.
+
 ## [2026-10-16] Product Roadmap refreshed (same-day check, no new ClickUp activity to ship)
 
 - Decision: Re-pulled the workspace-wide bare 🎯 tag the same day as the week close-out refresh; no tickets pushed to production since, so the Weekly Product Update is unchanged. Updated `dripjobs-product-roadmap/index.html` for two ClickUp changes: added a new ticket ("Update Production Rates Add-On Default Seed to Paint Pro Base Rates") to Needs PM Analysis, bringing the board to 29 in-flight tickets, and removed the High priority pill from the Flashline Integration ticket (86bbfqr1t), whose priority dropped to normal in ClickUp.

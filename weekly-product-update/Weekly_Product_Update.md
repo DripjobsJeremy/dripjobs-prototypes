@@ -1,72 +1,56 @@
 # DripJobs Weekly Product Update
 
-**Period:** October 12 – October 16, 2026
-**Release:** Oct 13 & Oct 15 deployments · 8 updates
+**Period:** October 19 – October 23, 2026
+**Release:** Oct 19 & Oct 22 deployments · 6 updates
 
 ---
 
 ## Proposal Builder
 
-### Fixed Proposal Countersign Dates Changing After Acceptance (*Oct 13*)
-**What changed:** Fixed a bug where a proposal's countersign date showed today's date instead of the original acceptance date whenever the proposal was reopened later.
-**Why it matters:** A proposal's countersign always reflects the actual date it was accepted, even if you reopen it weeks or months afterward.
+### Fixed Inconsistent Drag-and-Drop Feedback Between Packages, Areas, and Line Items (*Oct 19*)
+**What changed:** Fixed a bug where dragging a line item out of a package showed the wrong drop-target indicator, and dragging an area or line item into a package showed no indicator at all. Drag-and-drop now shows the correct visual feedback in every direction between packages, areas, and line items.
+**Why it matters:** It's now clear where you can drop an item while rearranging a proposal, instead of guessing.
 **Action needed:** None
 
 ---
 
-## Appointments
+## Communications
 
-### Fixed Appointments Missing from the Appointments Calendar (*Oct 13*)
-**What changed:** Fixed a bug where some scheduled appointments showed up on a contact's record and in the Sales Pipeline but didn't appear on the Appointments calendar for their scheduled date.
-**Why it matters:** Your Appointments calendar now reliably shows every appointment you've scheduled.
+### Fixed Email Blast Images Not Appearing in Preview, and Message Body Being Cut Off (*Oct 19*)
+**What changed:** Fixed a bug where images in an email blast displayed correctly in the editor but didn't appear in the preview or delivered preview email, and the email body was sometimes truncated in the recipient's inbox until they clicked "View entire message."
+**Why it matters:** Previewing a blast before you send it now accurately shows what your customers will actually receive, images and all.
 **Action needed:** None
 
 ---
 
-## Job Schedule
+## Jobs & Job Schedule
 
-### Fixed Holiday Names Truncated to One Letter in the Mobile App's Month View (*Oct 13*)
-**What changed:** Fixed a bug where holiday entries on the mobile app's Job Schedule month view showed only the first letter of the holiday name, and tapping a holiday did nothing. Holidays are now identifiable at a glance, and tapping one reveals its full name.
-**Why it matters:** You can now tell which holiday falls on a given day from the mobile app, the same way you already could on desktop.
+### Fixed the "Show All Jobs" Toggle Not Applying to Every Jobs and Job Schedule View (*Oct 22*)
+**What changed:** Fixed a bug where the "Show All Jobs For Project Manager Role" toggle opened full visibility on the Jobs Pipeline List and Job Schedule Calendar, but the Jobs Board view and the "needs scheduling" list still only showed a Project Manager's own assigned jobs.
+**Why it matters:** With the toggle on, a Project Manager now sees the same full set of jobs across every view in Jobs and Job Schedule, so nothing is missed depending on which view they're looking at.
 **Action needed:** None
 
 ---
 
-## Contacts
+## Customer Portal
 
-### Fixed a Bug Where a Contact Record Could Appear in the Wrong Company's Account (*Oct 15*)
-**What changed:** Fixed a bug where, in rare cases involving a homeowner shared between two companies, a contact record (along with its deal, proposal, and message history) could appear in another company's contact search results and open from within that company's account.
-**Why it matters:** Your contacts and their associated deal, proposal, and message history are now reliably isolated to your account only.
-**Action needed:** None
-
----
-
-## Inbox
-
-### Fixed Inbox Conversation Tags Showing the Wrong Salesperson (*Oct 15*)
-**What changed:** Fixed a bug where Inbox conversations sent from a deal showed the account owner as the Salesperson instead of the Salesperson actually assigned to that deal. The Project Manager tag now also displays correctly whenever one is assigned.
-**Why it matters:** Inbox conversation tags now accurately reflect who's assigned to each deal, so the right name shows at a glance.
+### Customers Can Now View Proposals, Invoices, and Change Orders in Their Own Language (*New · Oct 22*)
+**What changed:** Added a Default Document Language setting in Company Settings > Customer Portal that Admins can set for all customers, plus a per-document language option on individual Proposals and Invoices. Customers can also pick their own language from a new selector in the Customer Portal header, which takes priority over any default. Translation covers portal web pages only; downloaded PDFs stay in the original language.
+**Why it matters:** Customers can read their proposals, invoices, and change orders in the language they're most comfortable with, without you having to do anything extra.
 **Action needed:** None
 
 ---
 
 ## Integrations
 
-### Google Calendar Now Has a Dedicated Home in My Profile (*New · Oct 13*)
-**What changed:** Replaced the Google Calendar status widget on the Appointments and Job Schedule pages with a compact icon that takes you to an expanded Google Calendar section in My Profile, the new single place to connect, manage, and disconnect Google Calendar. Admins also get a read-only Google Calendar status card in Company Settings > Integrations with a link back to My Profile.
-**Why it matters:** Connecting, checking, or disconnecting your Google Calendar now lives in one consistent place instead of scattered across different pages.
+### Zapier: Payment Schedule Now Available on the "New Invoice Created" Trigger (*New · Oct 22*)
+**What changed:** Added a Payment Schedule field to the existing "New Invoice Created" Zapier trigger, exposing each scheduled payment's name, percentage, and dollar amount so it can be mapped into downstream Zaps.
+**Why it matters:** Zaps that use invoice data can now also account for how payments are scheduled, without an extra lookup step.
 **Action needed:** None
 
 ---
 
-### Fixed Verified Companies Incorrectly Shown as Text Messaging Disabled (*Oct 15*)
-**What changed:** Fixed a bug where some companies that were already verified for text messaging still saw a "Text Messages are disabled" label on the Integrations page and were redirected to a verification form when opening Chat.
-**Why it matters:** If your company is verified, Chat and your text messaging status now reflect that accurately, without being routed through extra verification steps.
-**Action needed:** None
-
----
-
-### Added Required Privacy Policy and Terms & Conditions Links to Text Messaging Registration (*New · Oct 15*)
-**What changed:** Added required Privacy Policy and Terms & Conditions links to the text messaging (A2P 10DLC) campaign registration process, per an updated requirement from our messaging provider.
-**Why it matters:** Keeps your text messaging registration in good standing so your SMS campaigns continue to be approved without delay.
+### New Zapier Trigger: "New Email Received" (*New · Oct 22*)
+**What changed:** Added a new Zapier trigger, "New Email Received," that fires whenever a customer email arrives in your Inbox Email (when "Route all email replies to DripJobs" is enabled in Company Settings > Email Settings). The trigger includes customer name, phone, email, assigned Salesperson and Project Manager, email content, received date, and email type.
+**Why it matters:** You can now build Zaps that react the moment a customer email lands in your Inbox, without checking DripJobs first.
 **Action needed:** None
