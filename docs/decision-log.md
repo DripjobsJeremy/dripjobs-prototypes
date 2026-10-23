@@ -1678,3 +1678,7 @@ Format:
 - Decision: Description Only and Optional column headers get a select-all checkbox that applies to visible (search-filtered) rows only and never changes row selection. The two are no longer mutually exclusive, so a row can be both.
 - Assumption: Description Only still locks Qty and Price. A row that is both shows in the Optional section with the Description Only display. Select-all is web only (mobile has no table header).
 - Open question: BR-4, BR-9, BR-11 and BR-12 are stale and are left unchanged until the updated ticket text is available.
+
+## [2026-10-23] Add Multiple Items: select-all change reverted
+- Decision: The select-all for Description Only and Optional, and the removal of their mutual exclusivity, are reverted. Optional Items cannot be used in Packages today, so this is out of scope for ticket 86bcqaczq.
+- Decision: The prototype is back to its first published version (BR-1 to BR-19 as originally written, Description Only and Optional mutually exclusive). The earlier select-all log entry is superseded by this one.
