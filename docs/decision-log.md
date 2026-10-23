@@ -1669,3 +1669,7 @@ Format:
 - Assumption: The tickets linked to the drag-out and "Pay with Check" rows have titles that differ from the signal (a drop-target feedback fix and an "Offline Requested" invoice filter). They were applied as Laura linked them, with the title noted on the row. Needs Laura to confirm they fully fix the reported behavior.
 - Assumption: Only "Dismissed" is hidden by default. Parked items stay visible. Dismissed reasons are shown as triage notes.
 
+
+## [2026-10-23] Add Multiple Items: Description Only prototype added to hub
+- Decision: Prototype added as `add-multiple-description-only` with a Needs Design card tagged 🎯 (ticket 86bcqaczq). Platforms (Web + Mobile) appear in the card description only, since cards have no platform field.
+- Decision: The standard `gate.js` include and proto-bar were added to the prototype file; its content is otherwise unchanged.

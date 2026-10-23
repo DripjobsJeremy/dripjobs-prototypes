@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Add Multiple Items – Description Only (86bcqaczq) | DripJobs Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --primary:#8B85EA; --primary-hover:#736BE3; --primary-active:#5C53DC; --primary-rgb:139,133,234;
+  --btn:#6C5CE7; --btn-hover:#5C53DC;
+  --link:#5B50D6;
+  --text:#32415B; --muted:#646B7E; --muted-soft:#80879A;
+  --border:#DAD8E3; --line:#E7E6EE; --card:#FFFFFF; --page:#F7F7FB;
+  --row-sel:#F4F3FC; --field-dis:#F1F1F5; --prefix:#EEEFF4;
+  --info-bg:#EFF6FF; --info-bd:#BFDBFE; --info-tx:#1E40AF;
+  --warn-bg:#FFFBEB; --warn-bd:#FDE68A; --warn-tx:#92400E;
+  --pill-bg:#E8E6FA; --pill-tx:#5C53DC;
+  --demo-bg:#1F2433; --demo-tx:#FFFFFF; --br:#F59E0B;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--page);color:var(--text);font:14px/1.45 Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+button,input{font:inherit;color:inherit}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+:focus-visible{outline:2px solid var(--primary-active);outline-offset:2px}
+
+/* ---------- Demo chrome (excluded from a11y audit, still keyboard-usable) ---------- */
+.demo-bar{position:sticky;top:0;z-index:50;background:var(--demo-bg);color:var(--demo-tx);display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:10px 20px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--demo-bg)}
+.demo-title{font-weight:700;font-size:13px;margin-right:auto}
+.demo-title small{display:block;font-weight:400;opacity:.8;font-size:12px}
+.seg{display:inline-flex;border:1px solid #4B5268;border-radius:999px;overflow:hidden}
+.seg button{background:transparent;border:0;color:#fff;padding:8px 16px;min-height:40px;cursor:pointer;font-size:13px}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--demo-bg);font-weight:600}
+.demo-switch{display:inline-flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;background:transparent;border:0;color:#fff;min-height:40px;padding:0 4px}
+.demo-switch .track{width:36px;height:20px;border-radius:999px;background:#4B5268;position:relative;transition:background .15s}
+.demo-switch .track::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.demo-switch[aria-checked="true"] .track{background:var(--br)}
+.demo-switch[aria-checked="true"] .track::after{left:18px}
+.demo-btn{background:transparent;border:1px solid #4B5268;color:#fff;border-radius:8px;padding:0 12px;min-height:40px;cursor:pointer;font-size:13px}
+.demo-note{width:100%;font-size:12px;color:#FDE68A;min-height:0}
+.demo-note:empty{display:none}
+
+/* BR chips */
+.br{display:inline-flex;align-items:center;justify-content:center;font:700 10px/1 Inter,sans-serif;background:#FEF3C7;color:#78350F;border:1px solid var(--br);border-radius:999px;padding:3px 7px;margin:0 2px;cursor:help;position:relative;vertical-align:middle;min-height:20px}
+.br .tip{display:none;position:absolute;z-index:200;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);width:260px;background:var(--demo-bg);color:#fff;font-weight:400;font-size:12px;line-height:1.4;text-align:left;padding:8px 10px;border-radius:8px;white-space:normal;text-transform:none;letter-spacing:0}
+.br:hover .tip,.br:focus .tip{display:block}
+body.no-br .br{display:none}
+
+/* ---------- Proposal page ---------- */
+.page{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 22px;margin-bottom:22px}
+.hdr{border-left:4px solid #F0A93B;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
+.cust{display:flex;gap:16px}
+.avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#8B85EA,#5C53DC);color:#fff;font-weight:700;font-size:20px;display:flex;align-items:center;justify-content:center;flex:none}
+.cust a,.meta a{color:var(--link);text-decoration:none;font-weight:500}
+.cust-name{font-weight:700;font-size:15px}
+.cust-line{font-size:14px;margin-top:4px}
+.pnum{font-size:30px;font-weight:800;margin:0;text-align:right}
+.status{display:inline-block;margin-top:10px;background:#FEF9E7;border:1px solid #F5D98B;color:#7C4A03;border-radius:999px;padding:6px 16px;font-weight:600;font-size:14px}
+.meta{width:100%;border-top:1px solid var(--line);padding-top:14px;display:flex;flex-wrap:wrap;gap:6px 26px;font-size:14px}
+.meta dt{display:inline;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.4px;margin-right:6px}
+.meta dd{display:inline;margin:0}
+.sec-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.sec-title{font-size:22px;font-weight:500;margin:0}
+.sec-title:focus{outline:none}
+.sec-title:focus-visible{outline:2px solid var(--primary-active);outline-offset:4px;border-radius:4px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border-radius:8px;min-height:40px;padding:0 14px;font-weight:600;font-size:13px;cursor:pointer;border:1px solid transparent}
+.btn-outline{background:#fff;border-color:var(--primary);color:var(--link);font-weight:500}
+.btn-outline:hover{background:var(--row-sel)}
+.btn-primary{background:linear-gradient(180deg,#8B85EA,#6C5CE7);color:#fff;box-shadow:0 2px 6px rgba(108,92,231,.3)}
+.btn-primary:hover{background:var(--btn-hover)}
+.btn[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
+.empty{background:var(--info-bg);border:1px solid var(--info-bd);color:var(--info-tx);border-radius:8px;padding:14px 18px;font-style:italic;display:flex;gap:12px;align-items:center}
+.ico-info{flex:none;width:20px;height:20px;border-radius:50%;background:var(--info-tx);color:#fff;font:700 13px/20px Georgia,serif;text-align:center;font-style:normal}
+
+.tbl-wrap{overflow-x:auto}
+table.li{width:100%;border-collapse:collapse;min-width:680px}
+table.li th{font-size:13px;font-weight:500;color:var(--muted);text-align:right;padding:10px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.2px}
+table.li th:first-child,table.li th:nth-child(2){text-align:left}
+table.li td{padding:12px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.li td.nm{text-align:left;white-space:normal}
+table.li td.hd{width:28px;text-align:left;color:var(--text)}
+.item-link{color:var(--link);text-decoration:none;font-weight:500}
+.ibtn{background:none;border:0;color:var(--primary);width:32px;height:32px;cursor:pointer;vertical-align:middle;border-radius:6px}
+.ibtn:hover{background:var(--row-sel)}
+.do-badge{display:inline-block;background:#C4511C;color:#fff;border-radius:4px;font-size:13px;font-weight:500;padding:5px 7px;line-height:1.2;white-space:nowrap}
+table.li th:nth-child(3),table.li td:nth-child(3){text-align:center}
+.dash{color:var(--muted)}
+tr.grp td{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.4px;text-align:left;padding-top:22px}
+tr.tot td{font-weight:700;border-bottom:1px solid var(--line);border-top:2px solid var(--border)}
+tr.tot td.hi{background:var(--row-sel);color:var(--link)}
+
+.pkg{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.pkg.is-sel{border:1.5px solid #15803D;background:#F6FBF7}
+.pkg.is-sel .pkg-head{background:#F1F8F3}
+.pkg-selbadge{background:#15803D;color:#fff;border-radius:4px;font-size:12px;font-weight:600;padding:3px 8px;margin-right:14px}
+.pkg-right{display:flex;align-items:center}
+.pkg-head{background:#F7F7FA;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border)}
+.pkg-name{font-weight:700;font-size:16px;margin:0}
+.pkg-sub{font-size:12px;color:var(--muted)}
+.pkg-amt{font-weight:700;font-size:18px}
+.pkg-body{padding:6px 12px 14px}
+.pkg-foot{display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--line);padding-top:14px;margin-top:10px}
+.pkg-empty{color:var(--muted);padding:16px 8px;font-style:italic}
+
+.totals{margin-top:30px}
+.totals h2{font-size:20px;font-weight:700;margin:0 0 6px;padding-bottom:6px;border-bottom:1px solid #9AA0AE}
+.trow{display:flex;justify-content:flex-end;gap:0;padding:10px 0;border-bottom:1px solid var(--line)}
+.trow span{min-width:160px;text-align:right;padding-right:10px}
+.trow.grand{border:0;padding:0;margin-top:2px}
+.trow.grand div{background:#666;color:#fff;font-weight:700;font-size:16px;display:flex;width:min(100%,520px)}
+.trow.grand span{padding:12px 10px}
+.warn{display:flex;gap:10px;align-items:flex-start;background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn-tx);border-radius:8px;padding:12px 16px;margin-top:18px;font-weight:500}
+.warn svg{flex:none;margin-top:1px}
+.actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;margin-top:18px}
+.actions .btn{min-height:48px;padding:0 20px;font-size:14px}
+.btn-solid{background:var(--btn);color:#fff}
+.btn-solid:hover{background:var(--btn-hover)}
+
+/* ---------- Web modal ---------- */
+.backdrop{position:fixed;inset:0;background:rgba(30,32,44,.55);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:28px 12px;overflow-y:auto}
+.backdrop.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:min(860px,100%);box-shadow:0 20px 50px rgba(0,0,0,.25);display:flex;flex-direction:column;max-height:calc(100vh - 56px)}
+.m-head{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line)}
+.m-title{font-size:20px;font-weight:700;margin:0}
+.m-x{background:none;border:0;width:44px;height:44px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:22px}
+.m-x:hover{background:#F1F1F5}
+.m-body{padding:18px 20px 10px;overflow-y:auto}
+.m-top{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+.search{flex:1;position:relative}
+.search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search input{width:100%;height:52px;border:1px solid var(--border);border-radius:10px;padding:0 16px 0 48px;font-size:16px}
+.search input::placeholder{color:#8A90A0}
+.search input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.18)}
+.sel-pill{display:inline-flex;align-items:center;gap:10px;background:var(--pill-bg);border:1px solid #D6D2F5;color:var(--pill-tx);border-radius:999px;padding:0 14px;height:48px;font-weight:600;white-space:nowrap}
+.sel-pill b{background:var(--pill-tx);color:#fff;border-radius:999px;min-width:28px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;padding:0 8px}
+.m-tbl-wrap{border:1px solid var(--border);border-radius:12px;padding:6px 14px 12px;overflow-x:auto}
+table.mt{width:100%;border-collapse:collapse;min-width:700px}
+table.mt th{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;padding:14px 6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:bottom}
+table.mt th.c{text-align:center}
+table.mt th.r{text-align:right}
+table.mt th.c-do{width:96px;line-height:1.25}
+table.mt td{padding:10px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.mt tr.sel td{background:var(--row-sel)}
+table.mt td.nm{font-size:16px}
+table.mt td.cb{text-align:center;width:56px}
+table.mt td.c-do{text-align:center}
+.mt-foot{display:flex;justify-content:flex-end;align-items:baseline;gap:14px;border-top:1px solid var(--border);margin-top:14px;padding-top:14px}
+.mt-foot .lbl{font-size:13px;font-weight:600;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+.mt-foot .amt{font-size:24px;font-weight:700;color:var(--link)}
+.m-hint{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;margin:12px 2px 6px}
+.m-hint .ico-info{width:16px;height:16px;font-size:11px;line-height:16px;background:var(--muted)}
+.m-foot{background:#F0F0F4;border-radius:0 0 14px 14px;padding:14px 20px;display:flex;justify-content:flex-end;gap:10px}
+.m-foot .btn{min-height:48px;padding:0 22px;font-size:16px;font-weight:500}
+.btn-plain{background:#fff;border-color:var(--border);color:var(--text)}
+.btn-plain:hover{background:#F7F7FA}
+
+/* checkbox: 48px hit area, visible 22px box */
+.ck{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;cursor:pointer;position:relative;border-radius:8px}
+.ck input{position:absolute;opacity:0;width:48px;height:48px;margin:0;cursor:pointer}
+.ck .box{width:22px;height:22px;border:1.5px solid var(--muted-soft);border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;transition:background .1s,border-color .1s}
+.ck .box svg{opacity:0}
+.ck input:checked + .box,.ck input:indeterminate + .box{background:var(--primary);border-color:var(--primary)}
+.ck input:checked + .box svg.chk{opacity:1}
+.ck input:indeterminate + .box svg.ind{opacity:1}
+.ck input:focus-visible + .box{outline:2px solid var(--primary-active);outline-offset:3px}
+.ck input:disabled{cursor:not-allowed}
+.ck.is-dis{cursor:not-allowed}
+.ck input:disabled + .box{background:var(--field-dis);border-color:#C9CBD6;opacity:.6}
+.ck input:disabled:checked + .box{background:var(--primary);opacity:.4}
+
+.qty{width:110px;height:48px;border:1px solid var(--border);border-radius:8px;text-align:center;font-size:16px;background:#fff}
+.money{display:flex;width:170px;height:48px;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-left:auto}
+.money span{background:var(--prefix);color:var(--muted);display:flex;align-items:center;padding:0 12px;border-right:1px solid var(--border)}
+.money input{border:0;width:100%;text-align:right;padding:0 14px;font-size:16px;background:#fff}
+.qty:focus,.money:focus-within{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(var(--primary-rgb),.18)}
+.money input:focus{outline:none}
+.qty:disabled,.money input:disabled{background:var(--field-dis);color:#8A90A0;cursor:not-allowed}
+.money.is-dis{background:var(--field-dis)}
+tr.is-do .qty,tr.is-do .money{border-style:dashed}
+
+/* ---------- Customer Portal view ---------- */
+#portalView{display:none;background:#F3F4F6;min-height:100vh;padding-bottom:110px}
+body.view-portal #portalView{display:block}
+body.view-portal #webView{display:none}
+.pt-top{background:#F2A93B;display:flex;justify-content:space-between;align-items:center;padding:10px 24px;font-weight:700;color:#1F2433}
+.pt-wrap{max-width:640px;margin:0 auto;padding:16px}
+.pt-hero{background:#6C5CE7;color:#fff;border-radius:12px 12px 0 0;padding:18px 20px}
+.pt-hero-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.pt-co{font-weight:600;font-size:15px}
+.pt-pend{background:#FCD34D;color:#78350F;border-radius:999px;font-size:11px;font-weight:700;padding:3px 10px}
+.pt-h1{font-size:24px;font-weight:800;margin:6px 0 0;text-align:right}
+.pt-meta{display:flex;gap:28px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.35);margin-top:14px;padding-top:10px;font-size:14px;font-weight:600}
+.pt-meta small{display:block;font-size:10px;font-weight:600;letter-spacing:.5px;opacity:.9}
+.pt-info{background:#fff;border:1px solid var(--border);border-top:0;border-radius:0 0 12px 12px;padding:14px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;font-size:13px;margin-bottom:24px}
+.pt-info small{display:block;font-size:10px;font-weight:600;letter-spacing:.5px;color:var(--muted)}
+.pt-info b{font-size:14px}
+.pt-sec{display:flex;justify-content:space-between;align-items:center;margin:8px 0 10px}
+.pt-sec h2{font-size:17px;margin:0;display:flex;align-items:center;gap:10px}
+.pt-ico{width:30px;height:30px;border-radius:8px;background:#2B3A55;color:#fff;display:inline-flex;align-items:center;justify-content:center}
+.pt-collapse{background:none;border:0;color:var(--muted);font-size:13px;cursor:pointer;min-height:44px;padding:0 6px}
+.pt-card{background:#fff;border:1px solid var(--border);border-radius:10px;margin-bottom:10px}
+.pt-card h3{margin:0}
+.pt-head{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;background:none;border:0;padding:16px 18px;cursor:pointer;text-align:left;min-height:56px;font-weight:700;font-size:16px;color:var(--text)}
+.pt-head .amt{margin-left:auto;font-size:17px}
+.pt-head .chev{transition:transform .15s;color:var(--muted);flex:none}
+.pt-head[aria-expanded="false"] .chev{transform:rotate(180deg)}
+.pt-desc{border-top:1px solid var(--line);padding:12px 18px 16px;font-size:14px}
+.pt-desc p{margin:8px 0 4px;font-weight:600}
+.pt-desc ul{margin:0 0 4px;padding-left:22px}
+.pt-opt-title{font-size:14px;font-weight:600;margin:22px 0 10px;display:flex;align-items:center;gap:6px}
+.pt-opt-title span{font-weight:400;color:var(--muted);font-size:12px}
+.pt-opt{border:1.5px dashed #F2A93B;border-radius:10px;background:#fff;margin-bottom:10px;overflow:hidden}
+.pt-opt-bar{background:#FFF7ED;display:flex;justify-content:space-between;align-items:center;padding:6px 12px;font-size:12px;color:#C2410C;font-weight:500}
+.pt-add{background:#C4511C;color:#fff;border:0;border-radius:6px;font-size:13px;font-weight:600;padding:0 12px;min-height:32px;cursor:pointer}
+.pt-itemtot{margin-left:auto;text-align:right;font-size:17px}
+.pt-itemtot small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
+.pt-foot{position:fixed;left:0;right:0;bottom:0;z-index:40;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;padding:12px max(16px,calc(50% - 320px));padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.pt-foot small{display:block;font-size:12px;color:var(--muted)}
+.pt-foot b{font-size:22px}
+.pt-approve{background:#15803D;color:#fff;border:0;border-radius:10px;min-height:48px;padding:0 26px;font-weight:700;font-size:16px;cursor:pointer}
+.pt-empty{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;color:var(--muted)}
+
+/* Portal packages */
+.pt-topact{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.pt-topact .btn{min-height:44px}
+.pt-zero{color:#B91C1C;font-size:13px;text-align:center;margin:0 0 12px;display:flex;justify-content:center;gap:6px;align-items:center}
+.pt-pk-h{text-align:center;margin:34px 0 4px;font-size:26px;font-weight:700}
+.pt-pk-sub{text-align:center;color:var(--muted);margin:0 0 20px}
+.pt-pkgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;align-items:stretch}
+.pt-pk{background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;overflow:hidden}
+.pt-pk.is-sel{border:2px solid #15803D;box-shadow:0 6px 18px rgba(21,128,61,.15)}
+.pt-pk-top{background:#F8F9FB;border-bottom:1px solid var(--line);padding:16px 16px 20px;text-align:center;position:relative}
+.pt-pk.is-sel .pt-pk-top{background:#EEF8F1}
+.pt-radio{position:absolute;top:12px;left:12px;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--muted-soft);background:#fff}
+.pt-pk.is-sel .pt-radio{border:6px solid #15803D}
+.pt-pk-top h3{margin:10px 0 4px;font-size:20px;font-weight:600}
+.pt-pk-top p{margin:0;color:var(--muted);font-size:13px}
+.pt-pk-price{font-size:38px;font-weight:700;margin-top:14px;line-height:1}
+.pt-pk-price sup{font-size:16px;vertical-align:22px;margin-right:2px}
+.pt-pk-items{list-style:none;margin:0;padding:8px 18px;flex:1}
+.pt-pk-items>li{border-bottom:1px solid var(--line);padding:12px 0}
+.pt-pk-items>li:last-child{border-bottom:0}
+.pt-pk-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pt-pk-row b{font-weight:600;white-space:nowrap}
+.pt-check{color:#15803D;flex:none;display:inline-flex}
+.pt-vd{background:none;border:0;color:#6C5CE7;font-weight:600;font-size:13px;padding:0;min-height:28px;cursor:pointer}
+.pt-vd:hover{text-decoration:underline}
+.pt-vd-body{font-size:13px;margin-top:6px}
+.pt-vd-body p{margin:6px 0 2px;font-weight:600}
+.pt-vd-body ul{margin:0;padding-left:18px}
+.pt-vd-body li{padding:2px 0}
+.pt-pk-btn{margin:8px 18px 18px;min-height:52px;border-radius:10px;border:1px solid var(--border);background:#fff;font-weight:600;font-size:15px;cursor:pointer;color:var(--text)}
+.pt-pk-btn:hover{background:#F7F7FA}
+.pt-pk-btn[aria-pressed="true"]{background:#15803D;border-color:#15803D;color:#fff}
+.pt-pk-btn small{display:block;font-weight:400;font-size:12px}
+.pt-inv{background:#F8F9FB;border-radius:12px;padding:16px;margin-top:26px}
+.pt-inv h2{font-size:17px;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+.pt-inv-box{background:#fff;border-radius:12px;overflow:hidden}
+.pt-inv-row{display:flex;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+.pt-inv-row b{font-weight:700}
+.pt-inv-band{background:#6C5CE7;color:#fff;display:flex;justify-content:space-between;align-items:flex-end;padding:14px 18px}
+.pt-inv-band small{display:block;font-size:12px;opacity:.95}
+.pt-inv-band .big{font-size:28px;font-weight:700}
+.pt-approve[disabled]{opacity:.45;cursor:not-allowed}
+body.view-portal .pt-wrap{max-width:900px}
+
+/* ---------- Mobile view ---------- */
+#mobileView{display:none;padding:24px 12px 60px;justify-content:center}
+body.view-mobile #mobileView{display:flex}
+body.view-mobile #webView,body.view-mobile #portalView{display:none}
+.phone{width:390px;max-width:100%;height:780px;border:10px solid #1F2433;border-radius:38px;background:#fff;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.mm-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);flex:none}
+.mm-head h2{font-size:18px;margin:0;font-weight:700}
+.mm-body{flex:1;min-height:0;overflow-y:auto;padding:12px;background:#F7F7FA}
+.mcard{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
+.mcard.sel{border-color:var(--primary);background:var(--row-sel)}
+.mcard h3{font-size:16px;font-weight:600;margin:0 0 10px}
+.mfields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mfield label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.mfield .qty{width:100%}
+.mfield .money{width:100%;margin:0}
+.mchecks{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.mchk{display:flex;align-items:center;gap:2px;font-size:13px;font-weight:500;min-height:48px;border-radius:8px;cursor:pointer}
+.mchk .ck{width:40px;flex:none}
+.mchk.is-dis{color:#8A90A0;cursor:not-allowed}
+.mm-foot{flex:none;display:flex;gap:10px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--line);background:#F0F0F4}
+.mm-foot .btn{min-height:48px;padding:0 22px;font-size:16px;font-weight:500}
+.mm-closed{flex:1;display:flex;flex-direction:column;gap:14px;padding:22px;background:#F7F7FA;overflow-y:auto}
+.demo-panel{border:2px dashed var(--br);border-radius:10px;padding:14px;background:#FFFBEB;font-size:13px}
+.demo-panel h3{margin:0 0 8px;font-size:14px}
+.demo-panel ul{margin:0;padding-left:18px}
+.mm-closed .btn{min-height:48px}
+
+@media (max-width:640px){
+  .m-top{flex-direction:column;align-items:stretch}
+  .sel-pill{align-self:flex-start}
+  .pnum{font-size:24px;text-align:left}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>
+.proto-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:Inter,system-ui,sans-serif}
+.proto-bar-left{display:flex;align-items:center;gap:10px}
+.proto-bar .back-link{font-size:12px;font-weight:500;color:#6B7280;text-decoration:none;display:flex;align-items:center;gap:4px}
+.proto-bar .back-link:hover{color:#8B85EA}
+.proto-bar .divider{color:#E5E7EB;font-size:16px}
+.proto-bar-title{font-size:14px;font-weight:600;color:#1F2937}
+.proto-bar-ticket{font-size:11px;font-weight:600;color:#5C53DC;text-decoration:none;padding:4px 10px;border:1px solid #D6D2F5;background:#E8E6FA;border-radius:999px;letter-spacing:.2px}
+.proto-bar-ticket:hover{background:#8B85EA;color:#fff}
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">&larr; Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Add Multiple Items: Description Only</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bcqaczq" target="_blank">86bcqaczq</a>
+</div>
+
+<div class="demo-bar" role="region" aria-label="Prototype controls">
+  <div class="demo-title">Add Multiple Items: Description Only<small>Ticket 86bcqaczq · prototype controls are not part of the product</small></div>
+  <div class="seg" role="group" aria-label="Platform">
+    <button type="button" id="vWeb" aria-pressed="true">Web Builder</button>
+    <button type="button" id="vPortal" aria-pressed="false">Customer Portal</button>
+    <button type="button" id="vMobile" aria-pressed="false">Mobile</button>
+  </div>
+  <button type="button" class="demo-switch" id="brToggle" role="switch" aria-checked="true"><span class="track" aria-hidden="true"></span>BR annotations</button>
+  <button type="button" class="demo-btn" id="resetBtn">Reset demo</button>
+  <button type="button" class="demo-btn" id="sampleBtn">Load sample packages</button>
+  <div class="demo-note" id="demoNote" role="status" aria-live="polite"></div>
+</div>
+
+<!-- ================= WEB ================= -->
+<main id="webView" class="page">
+  <section class="card hdr" aria-label="Proposal header">
+    <div class="cust">
+      <div class="avatar" aria-hidden="true">MD</div>
+      <div>
+        <div class="cust-name"><a href="#web">Marcus Delgado</a></div>
+        <div class="cust-line"><a href="#web">2209 Bayshore Palms Ct, Tampa, FL, 33611</a></div>
+        <div class="cust-line"><a href="#web">marcus.delgado@example.com</a></div>
+        <div class="cust-line">(813) 555-0102</div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <h1 class="pnum">Proposal #3500131</h1>
+      <span class="status">Pending</span>
+    </div>
+    <dl class="meta">
+      <div><dt>CREATED</dt><dd>10/23/2026</dd></div>
+      <div><dt>EXP. DATE</dt><dd><a href="#web">Not Set</a></dd></div>
+      <div><dt>SALESPERSON</dt><dd><a href="#web">Jeremy Harrison</a></dd></div>
+      <div><dt>LANGUAGE</dt><dd><a href="#web">English (original) (company default)</a></dd></div>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="liTitle">
+    <div class="sec-head">
+      <h2 class="sec-title" id="liTitle" tabindex="-1">Line Items</h2>
+      <div class="btns" id="liBtns"></div>
+    </div>
+    <div id="liBody"></div>
+  </section>
+
+  <section class="card" aria-labelledby="arTitle">
+    <div class="sec-head">
+      <h2 class="sec-title" id="arTitle">Areas</h2>
+      <div class="btns"><button type="button" class="btn btn-primary" data-oos>Add Area</button></div>
+    </div>
+    <div class="empty"><span class="ico-info" aria-hidden="true">i</span>Start by adding an Area here...</div>
+  </section>
+
+  <section class="card" aria-labelledby="pkTitle">
+    <div class="sec-head">
+      <h2 class="sec-title" id="pkTitle">Packages</h2>
+      <div class="btns"><button type="button" class="btn btn-primary" data-oos>Add Package</button></div>
+    </div>
+    <div id="pkgList"></div>
+  </section>
+
+  <section class="totals" id="totals" aria-labelledby="ttTitle"></section>
+</main>
+
+<!-- Web modal -->
+<div class="backdrop" id="backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" id="modal">
+    <div class="m-head">
+      <h2 class="m-title" id="mTitle">Add Items</h2>
+      <button type="button" class="m-x" id="mX" aria-label="Close Add Items">×</button>
+    </div>
+    <div class="m-body">
+      <div class="m-top">
+        <div class="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <label for="mSearch" class="sr-only">Search products</label>
+          <input id="mSearch" type="search" placeholder="Search products..." autocomplete="off">
+        </div>
+        <div class="sel-pill">Selected <b id="selCount">0</b><span data-br="6"></span></div>
+      </div>
+      <div class="sr-only" role="status" aria-live="polite" id="selLive"></div>
+      <div class="m-tbl-wrap">
+        <table class="mt">
+          <caption class="sr-only">Products and services. Use the selection checkbox to include a row when you save.</caption>
+          <thead><tr>
+            <th scope="col" class="c"><label class="ck"><input type="checkbox" id="selAll" aria-label="Select all listed products"><span class="box"><svg class="chk" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><svg class="ind" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" style="position:absolute"><path d="M5 12h14" stroke="#fff" stroke-width="3.5"/></svg></span></label></th>
+            <th scope="col">Product/Service</th>
+            <th scope="col" class="c c-do">Description Only<span data-br="1,3,4"></span></th>
+            <th scope="col" class="c">Qty</th>
+            <th scope="col" class="r">Price</th>
+            <th scope="col" class="c">Optional<span data-br="11,12"></span></th>
+          </tr></thead>
+          <tbody id="mRows"></tbody>
+        </table>
+        <p class="pkg-empty" id="noMatch" hidden>No products match your search — try a different name.</p>
+        <div class="mt-foot"><span class="lbl">Estimated total</span><span class="amt" id="estTotal">$0.00</span><span data-br="14"></span></div>
+      </div>
+      <p class="m-hint"><span class="ico-info" aria-hidden="true">i</span>Description and tax details are set from defaults.</p>
+    </div>
+    <div class="m-foot">
+      <span data-br="5,7,8" style="margin-right:auto;align-self:center"></span><button type="button" class="btn btn-solid" id="mSave">Save</button>
+      <button type="button" class="btn btn-plain" id="mClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CUSTOMER PORTAL ================= -->
+<div id="portalView" role="region" aria-label="Customer Portal view">
+  <div class="pt-top"><span>JH Prod Test</span><span style="font-weight:500;font-size:13px">(354) 678-9654</span></div>
+  <main class="pt-wrap">
+    <div class="pt-topact"><button type="button" class="pt-approve" id="ptApproveTop" style="min-height:44px;font-size:14px" data-oos>Approve</button><button type="button" class="btn btn-plain" data-oos>Download Proposal PDF</button></div>
+    <p class="pt-zero" id="ptZero" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16h.01"/></svg>This proposal has a $0 total and cannot be approved.</p>
+    <section aria-label="Proposal summary">
+      <div class="pt-hero">
+        <div class="pt-hero-row"><span class="pt-co">JH Prod Test</span><span class="pt-pend">PENDING</span></div>
+        <h1 class="pt-h1">Proposal</h1>
+        <div class="pt-meta"><div><small>PROPOSAL #</small>3500131</div><div><small>DATE</small>10/23/2026</div><div><small>STATUS</small>Proposal #3500131</div></div>
+      </div>
+      <div class="pt-info">
+        <div><small>PREPARED FOR</small><b>Marcus Delgado</b><br>marcus.delgado@example.com<br>(813) 555-0102</div>
+        <div><small>PROJECT LOCATION</small><b>2209 Bayshore Palms Ct, Tampa, FL, 33611</b></div>
+        <div><small>COMPANY</small><b>JH Prod Test</b><br>3101 Southwest 34th Avenue<br>Ocala, FL 34474</div>
+      </div>
+    </section>
+    <section aria-labelledby="ptLiTitle">
+      <div class="pt-sec">
+        <h2 id="ptLiTitle"><span class="pt-ico" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></span>Line Items</h2>
+        <button type="button" class="pt-collapse" id="ptCollapse">Collapse all</button>
+      </div>
+      <div id="ptItems"></div>
+    </section>
+    <section id="ptOptSec" aria-labelledby="ptOptTitle"></section>
+    <section id="ptPkgSec" aria-labelledby="ptPkTitle"></section>
+    <section id="ptInvSec" aria-labelledby="ptInvTitle"></section>
+  </main>
+  <div class="pt-foot"><div><small>Project Total</small><b id="ptTotal">$0.00</b></div><button type="button" class="pt-approve" id="ptApprove" data-oos>Approve</button></div>
+</div>
+
+<!-- ================= MOBILE ================= -->
+<div id="mobileView" role="region" aria-label="Mobile view">
+  <div class="phone" id="phone">
+    <div id="mmOpen" style="display:flex;flex-direction:column;flex:1;min-height:0" role="dialog" aria-labelledby="mmTitle">
+      <div class="mm-head">
+        <h2 id="mmTitle">Add Multiple Line Items</h2>
+        <button type="button" class="m-x" id="mmX" aria-label="Close Add Multiple Line Items">×</button>
+      </div>
+      <div class="mm-body" id="mmBody"></div>
+      <div class="mm-foot">
+        <button type="button" class="btn btn-solid" id="mmSave">Save</button>
+        <button type="button" class="btn btn-plain" id="mmClose">Close</button>
+      </div>
+    </div>
+    <div class="mm-closed" id="mmClosed" hidden>
+      <div class="demo-panel" id="mmResult" role="status" aria-live="polite"></div>
+      <button type="button" class="btn btn-solid" id="mmReopen">Open Add Multiple Line Items</button>
+    </div>
+  </div>
+</div>
+
+<div class="sr-only" role="status" aria-live="polite" id="pageLive"></div>
+
+<script>
+(function(){
+  const BR = {
+    1:"Web: Description Only column sits between Product/Service and Qty.",
+    2:"Mobile: Description Only checkbox sits on each card between Optional and Add.",
+    3:"Label and checkboxes match existing Optional styling.",
+    4:"No select-all for Description Only (Optional has none either).",
+    5:"Row selection (Add on mobile) alone decides inclusion on Save.",
+    6:"Checking Description Only does not select the row or change the Selected counter.",
+    7:"Unselected rows are excluded on Save, even with Description Only checked.",
+    8:"Save adds selected items directly — no intermediate step.",
+    9:"Description Only checked → Qty, Price, Optional greyed out and locked.",
+    10:"Unchecking Description Only unlocks fields with previous values intact.",
+    11:"Optional checked → Description Only greyed out and disabled; unchecking restores it.",
+    12:"An item cannot be both Optional and Description Only.",
+    13:"Saved items match Description Only items set in the single line item editor: orange “Description only” badge in the Quantity column, Price/Subtotal/Tax/Total blank.",
+    14:"Description Only items don't count toward the proposal total, even with a catalog price. (Prototype also excludes them from the modal's Estimated Total — open question.)",
+    15:"No price shown on PDF, Customer Portal, or invoice. Portal line item card shows name and description only; in portal package cards a green check replaces the price.",
+    17:"Setting is editable later in the normal line item editor.",
+    18:"Existing $0 total validation: no modal warning; yellow warning + Send Proposal / Approve Without Signature disabled. Unchanged.",
+    16:"Package totals: Description Only items add nothing; priced items keep current behavior, including tax in the item Total.",
+    19:"Same modal and behavior in proposals, packages, and proposal templates (web and mobile)."
+  };
+  const D_EXT=[["Preparation:",["Scrape and sand loose or peeling paint","Clean surfaces to remove dirt, mildew, and debris","Spot prime bare wood or exposed areas","Protect surrounding areas, landscaping, and fixtures"]],["Application:",["Apply exterior paint to designated surfaces","Ensure even coverage and smooth finish","Follow manufacturer recommendations for proper application"]],["Areas of Application:",["Exterior surfaces as specified"]]];
+  const D_INT=[["Preparation:",["Move furniture away from application areas","Cover and protect all floors and furniture with drop cloths and plastic sheets where necessary","Remove & re-install window treatments where necessary (blinds, drapery)","Remove all outlet covers & re-install","All cracks and nail holes will be caulked and filled where necessary"]],["Paint Brand:",["Sherwin-Williams"]],["Sheen:",["Satin"]],["Areas of Application:",["Living Room","Dining Room","Kitchen"]],["Does Not Include:",["Closets"]]];
+  const CATALOG = [
+    {id:1,name:"5-Year Warranty",price:400,tax:.05,desc:[["Warranty Coverage:",["Covers workmanship and application defects for a period of five years from the date of project completion","Includes coverage for peeling, flaking, or blistering of applied coatings under normal conditions","Warranty is transferable to new property owners within the coverage period"]]]},
+    {id:2,name:"Cabinet Refinishing",price:0,tax:0,desc:[["Scope:",["Clean, degloss, and refinish cabinet doors, drawers, and frames"]]]},
+    {id:3,name:"Exterior Painting",price:4000,tax:.05,desc:D_EXT},
+    {id:5,name:"Interior Painting - Ceiling",price:1200,tax:0,desc:[["Preparation:",["Cover and protect floors and furniture"]],["Sheen:",["Flat"]]]},
+    {id:6,name:"Interior Painting - Doors",price:50,tax:.05,desc:[["Preparation:",["Remove hardware and re-install after painting"]],["Sheen:",["Semi-Gloss"]]]},
+    {id:7,name:"Interior Painting - Trim",price:1000,tax:0,desc:[["Preparation:",["Caulk gaps and sand glossy surfaces"]],["Sheen:",["Semi-Gloss"]]]},
+    {id:8,name:"Interior Painting - Walls",price:1500,tax:0,desc:D_INT},
+    {id:9,name:"Misc. Materials",price:100,tax:.05,desc:[["Includes:",["Tape, plastic, caulk, patching compound, and sundries"]]]},
+    {id:10,name:"Pressure Washing (General",price:250,tax:.05,desc:[]}
+  ];
+  const $ = s=>document.querySelector(s);
+  const fmt = n=>"$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const CHK='<span class="box"><svg class="chk" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg></span>';
+  const freshRows = ()=>CATALOG.map(c=>({id:c.id,sel:false,qty:1,price:c.price,opt:false,desc:false}));
+  let state, rows, mRows, target, lastTrigger;
+  const PKG_DEFS=[{name:"Good Package",sub:"This package is really GOOD."},{name:"Better Package",sub:"This package is much BETTER."},{name:"Best Package",sub:"This package is THE BEST."}];
+  function item(id,qty,price,desc){const c=CATALOG.find(x=>x.id===id);return {name:c.name,qty,price,tax:c.tax,opt:false,desc:!!desc,text:c.desc};}
+  function loadSample(){
+    const good=()=>[item(1,1,400,1),item(7,1,1000),item(8,1,1500),item(10,1,250,1)];
+    state.pkgs[0].items=good();
+    state.pkgs[1].items=good().concat([item(6,6,50)]);
+    state.pkgs[2].items=good().concat([item(6,6,50),item(5,1,0,1)]);
+    state.sel=null; renderPage();
+  }
+  const pkgTot=p=>lineTotals(p.items);
+  function grand(){ const l=lineTotals(state.line), p=state.sel!==null?pkgTot(state.pkgs[state.sel]):{sub:0,tax:0,total:0}; return {sub:l.sub+p.sub,tax:l.tax+p.tax,total:l.total+p.total,l,p}; }
+
+  function reset(){
+    state={line:[],pkgs:PKG_DEFS.map(d=>({...d,items:[]})),sel:null}; rows=freshRows(); mRows=freshRows();
+    renderPage(); renderMobile(); $("#mmOpen").style.display="flex"; $("#mmClosed").hidden=true;
+  }
+  function demoNote(m){ $("#demoNote").textContent=m; clearTimeout(demoNote.t); demoNote.t=setTimeout(()=>$("#demoNote").textContent="",4000); }
+
+  /* ---------- BR chips ---------- */
+  function paintBR(root){
+    (root||document).querySelectorAll("[data-br]").forEach(el=>{
+      if(el.dataset.done) return; el.dataset.done=1;
+      el.innerHTML = el.dataset.br.split(",").map(n=>`<span class="br" tabindex="0" aria-label="Business rule ${n}">BR-${n}<span class="tip" role="tooltip">${esc(BR[n]||"")}</span></span>`).join("");
+    });
+  }
+
+  /* ---------- Totals ---------- */
+  function lineTotals(items){
+    let sub=0,tax=0;
+    items.forEach(i=>{ if(i.opt||i.desc) return; const s=i.qty*i.price; sub+=s; tax+=s*i.tax; });
+    return {sub,tax,total:sub+tax};
+  }
+  function rowCells(i,withTax){
+    if(i.desc){
+      return `<td><span class="do-badge">Description only</span></td><td style="text-align:left"><span data-br="13,15"></span></td><td></td>${withTax?"<td></td>":""}<td></td>`;
+    }
+    const s=i.qty*i.price;
+    return `<td>${i.qty.toFixed(2)}</td><td>${fmt(i.price)}</td><td>${fmt(s)}</td>${withTax?`<td>${fmt(s*i.tax)}</td>`:""}<td>${fmt(s*(1+i.tax))}</td>`;
+  }
+  function nameCell(i){
+    return `<td class="nm"><a href="#web" class="item-link" data-oos>${esc(i.name)}</a>
+      <button type="button" class="ibtn" aria-label="Duplicate ${esc(i.name)}" data-oos><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button><button type="button" class="ibtn" aria-label="Attach file to ${esc(i.name)}" data-oos><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 11l-8.5 8.5a5 5 0 0 1-7-7L14 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 7"/></svg></button></td>`;
+  }
+  const HANDLE='<td class="hd"><button type="button" class="ibtn" style="color:var(--text)" aria-label="Reorder" data-oos>≡</button></td>';
+
+  function renderPage(){
+    const L=state.line, has=L.length>0;
+    $("#liBtns").innerHTML = (has?'<button type="button" class="btn btn-outline" data-oos>Add Optional</button>':"")+
+      '<button type="button" class="btn btn-outline" data-open="line" aria-haspopup="dialog">Add Multiple</button><button type="button" class="btn btn-primary" data-oos>Add Item</button>';
+    if(!has){
+      $("#liBody").innerHTML='<div class="empty"><span class="ico-info" aria-hidden="true">i</span>Start by adding a Line Item here...</div>';
+    } else {
+      const std=L.filter(i=>!i.opt), opt=L.filter(i=>i.opt), t=lineTotals(L);
+      let h='<div class="tbl-wrap"><table class="li"><caption class="sr-only">Line items</caption><thead><tr><th scope="col"><span class="sr-only">Reorder</span></th><th scope="col">Product / Service</th><th scope="col">Quantity</th><th scope="col">Price</th><th scope="col">Subtotal</th><th scope="col">Tax</th><th scope="col">Total</th></tr></thead><tbody>';
+      std.forEach(i=>h+=`<tr>${HANDLE}${nameCell(i)}${rowCells(i,true)}</tr>`);
+      if(opt.length){ h+='<tr class="grp"><td colspan="7">OPTIONAL ITEMS</td></tr>'; opt.forEach(i=>h+=`<tr>${HANDLE}${nameCell(i)}${rowCells(i,true)}</tr>`); }
+      h+=`<tr class="tot"><td></td><td style="text-align:left">Total</td><td></td><td></td><td>${fmt(t.sub)}</td><td>${fmt(t.tax)}</td><td class="hi">${fmt(t.total)}</td></tr></tbody></table></div>`;
+      $("#liBody").innerHTML=h;
+    }
+    // packages
+    $("#pkgList").innerHTML=state.pkgs.map((P,k)=>{
+      const t=pkgTot(P), sel=state.sel===k;
+      let body;
+      if(!P.items.length) body='<p class="pkg-empty">No items in this package yet — use Add Multiple Items to add some.</p>';
+      else {
+        body='<div class="tbl-wrap"><table class="li"><caption class="sr-only">'+esc(P.name)+' items</caption><thead><tr><th scope="col"><span class="sr-only">Reorder</span></th><th scope="col">Product / Service</th><th scope="col">Quantity</th><th scope="col">Price</th><th scope="col">Subtotal</th><th scope="col">Total</th></tr></thead><tbody>';
+        P.items.forEach(i=>body+=`<tr>${HANDLE}${nameCell(i)}${rowCells(i,false)}</tr>`);
+        body+=`<tr class="tot"><td></td><td style="text-align:left">Package Total</td><td></td><td></td><td>${fmt(t.sub)}</td><td class="hi">${fmt(t.total)}</td></tr></tbody></table></div>`;
+      }
+      return `<div class="pkg${sel?" is-sel":""}"><div class="pkg-head"><div><h3 class="pkg-name" id="pkgName${k}" tabindex="-1">${esc(P.name)}</h3><div class="pkg-sub">${esc(P.sub)}</div></div><div class="pkg-right">${sel?'<span class="pkg-selbadge">Selected</span>':""}<span class="pkg-amt">${fmt(t.total)}</span></div></div>
+        <div class="pkg-body">${body}<div class="pkg-foot"><button type="button" class="btn btn-outline" data-oos>Add Area</button><button type="button" class="btn btn-outline" data-open="pkg:${k}" aria-haspopup="dialog">Add Multiple Items</button>${k===0?'<span data-br="19"></span>':""}<button type="button" class="btn btn-primary" data-oos>Add Item</button></div></div></div>`;
+    }).join("");
+    // totals (line items + customer-selected package)
+    const G=grand(), t=G, zero=t.total===0;
+    const anyPkg=state.pkgs.some(p=>p.items.length);
+    let th='<h2 id="ttTitle">Totals</h2>';
+    if(has||anyPkg){
+      th+=`<div class="trow"><span>Subtotal</span><span>${fmt(t.sub)}</span></div>`;
+      if(t.tax>0) th+=`<div class="trow"><span>Tax</span><span>${fmt(t.tax)}</span></div>`;
+      th+=`<div class="trow grand"><div><span style="flex:1;text-align:center">Total</span><span>${fmt(t.total)}</span></div></div>`;
+      if(zero) th+=`<div class="warn" role="alert"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18h.01"/></svg><span>Cannot Send: Proposal has a $0 total. Please adjust pricing before sending.</span><span data-br="18"></span></div>`;
+    } else {
+      th+='<div class="trow"><span>Total</span><span>$0.00</span></div>';
+    }
+    th+=`<div class="actions"><button type="button" class="btn btn-plain" ${zero?'disabled aria-describedby="zeroWhy"':''} data-oos>Approve Without Signature</button><button type="button" class="btn btn-solid" ${zero?'disabled aria-describedby="zeroWhy"':''} data-oos>Send Proposal</button><button type="button" class="btn btn-solid" data-oos>Apply Discount</button></div>`;
+    if(zero) th+='<span id="zeroWhy" class="sr-only">Unavailable because the proposal total is $0.</span>';
+    $("#totals").innerHTML=th;
+    renderPortal();
+    paintBR();
+  }
+
+  /* ---------- Customer Portal ---------- */
+  let ptSeq=0;
+  const CHEV='<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>';
+  function descHTML(t){ return (t||[]).map(([h,li])=>`<p>${esc(h)}</p><ul>${li.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`).join(""); }
+  function ptCard(i){
+    const id="ptd"+(++ptSeq);
+    const amt=i.desc?"":`<span class="amt">${fmt(i.qty*i.price)}</span>`;
+    return `<div class="pt-card"><h3><button type="button" class="pt-head" aria-expanded="true" aria-controls="${id}"><span>${esc(i.name)}</span>${amt}${CHEV}</button></h3>${i.desc?'<span data-br="15" style="display:block;padding:0 18px"></span>':""}${i.text&&i.text.length?`<div class="pt-desc" id="${id}">${descHTML(i.text)}</div>`:""}</div>`;
+  }
+  function renderPortal(){
+    ptSeq=0;
+    const L=state.line, std=L.filter(i=>!i.opt), opt=L.filter(i=>i.opt);
+    const noPk=!state.pkgs.some(p=>p.items.length);
+    $("#ptLiTitle").parentElement.parentElement.hidden = !std.length && !noPk;
+    $("#ptItems").innerHTML = std.length ? std.map(ptCard).join("") : '<div class="pt-empty">No line items or packages on this proposal yet — add some in the Web Builder view.</div>';
+    $("#ptOptSec").innerHTML = opt.length ? `<h2 class="pt-opt-title" id="ptOptTitle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Optional Add-ons <span>– Customize your project</span></h2>`+opt.map(i=>{const id="ptd"+(++ptSeq);return `<div class="pt-opt"><div class="pt-opt-bar"><span>Not Included</span><button type="button" class="pt-add" data-oos aria-label="Add ${esc(i.name)}">+ Add</button></div><h3 style="margin:0"><button type="button" class="pt-head" aria-expanded="true" aria-controls="${id}"><span>${esc(i.name)}</span><span class="pt-itemtot"><small>Item Total</small>${fmt(i.qty*i.price)}</span>${CHEV}</button></h3><div class="pt-desc" id="${id}">${descHTML(i.text)}</div></div>`;}).join("") : "";
+    const G=grand();
+    const visPk=state.pkgs.map((p,k)=>({p,k})).filter(x=>x.p.items.length);
+    const CK='<span class="pt-check"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span class="sr-only">Included</span></span>';
+    $("#ptPkgSec").innerHTML = !visPk.length ? "" : `<h2 class="pt-pk-h" id="ptPkTitle">Select Your Package</h2><p class="pt-pk-sub">(Optional) Choose a package that best fits your needs</p><div class="pt-pkgs">`+
+      visPk.map(({p,k})=>{
+        const t=pkgTot(p), sel=state.sel===k, whole=Math.round(t.total*100)%100===0;
+        const price=t.total.toLocaleString("en-US",{minimumFractionDigits:whole?0:2,maximumFractionDigits:2});
+        const lis=p.items.filter(i=>!i.opt).map(i=>{
+          const has=i.text&&i.text.length, id="ptv"+(++ptSeq);
+          const right=i.desc?CK:`<b>${fmt(i.qty*i.price*(1+i.tax))}</b>`;
+          return `<li><div class="pt-pk-row"><span>${esc(i.name)}</span>${right}</div>${has?`<button type="button" class="pt-vd" aria-expanded="false" aria-controls="${id}" aria-label="View details for ${esc(i.name)}">View details</button><div class="pt-vd-body" id="${id}" hidden>${descHTML(i.text)}</div>`:""}</li>`;
+        }).join("");
+        return `<div class="pt-pk${sel?" is-sel":""}" role="group" aria-labelledby="ptpk${k}"><div class="pt-pk-top"><span class="pt-radio" aria-hidden="true"></span><h3 id="ptpk${k}">${esc(p.name)}</h3><p>${esc(p.sub)}</p><div class="pt-pk-price"><sup>$</sup>${price}</div></div><ul class="pt-pk-items">${lis}</ul>${k===visPk[0].k?'<span data-br="15" style="padding:0 18px"></span>':""}<button type="button" class="pt-pk-btn" data-pick="${k}" aria-pressed="${sel}">${sel?'Selected<small>(click to remove)</small>':'Select Package'}</button></div>`;
+      }).join("")+"</div>";
+    const inv=[];
+    if(state.line.length) inv.push(`<div class="pt-inv-row"><span>Line Items</span><b>${fmt(G.l.sub)}</b></div>`);
+    if(state.sel!==null) inv.push(`<div class="pt-inv-row"><span>${esc(state.pkgs[state.sel].name)} Package</span><b>${fmt(G.p.sub)}</b></div>`);
+    $("#ptInvSec").innerHTML = !visPk.length ? "" : `<div class="pt-inv"><h2 id="ptInvTitle"><span class="pt-ico" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2"/></svg></span>Your Investment</h2><div class="pt-inv-box">${inv.join("")}<div class="pt-inv-row"><span>Tax</span><b>${fmt(G.tax)}</b></div><div class="pt-inv-band" role="status" aria-live="polite"><div><small>Project Total</small><span class="big">${fmt(G.total)}</span></div><div style="text-align:right"><small>Balance at Completion</small><b style="font-size:20px">${fmt(G.total)}</b></div></div></div></div>`;
+    $("#ptTotal").textContent=fmt(G.total);
+    const z=G.total===0;
+    $("#ptApprove").disabled=z; $("#ptApproveTop").disabled=z; $("#ptZero").hidden=!z;
+    $("#ptCollapse").textContent="Collapse all";
+  }
+  document.getElementById("portalView").addEventListener("click",e=>{
+    const pk=e.target.closest("[data-pick]");
+    if(pk){ const k=+pk.dataset.pick; state.sel = state.sel===k?null:k; renderPage(); document.querySelector(`[data-pick="${k}"]`).focus(); $("#pageLive").textContent = state.sel===null?"Package removed.":state.pkgs[k].name+" selected."; return; }
+    const vd=e.target.closest(".pt-vd");
+    if(vd){ const open=vd.getAttribute("aria-expanded")!=="true"; vd.setAttribute("aria-expanded",open); vd.textContent=open?"Hide details":"View details"; document.getElementById(vd.getAttribute("aria-controls")).hidden=!open; return; }
+    const h=e.target.closest(".pt-head"); if(!h||!h.getAttribute("aria-controls")||!document.getElementById(h.getAttribute("aria-controls"))) return;
+    const open=h.getAttribute("aria-expanded")!=="true"; h.setAttribute("aria-expanded",open);
+    document.getElementById(h.getAttribute("aria-controls")).hidden=!open;
+  });
+
+  /* ---------- Shared row logic ---------- */
+  function applyLocks(r, els){
+    // els: {desc, opt, qty, price, money, descWrap, optWrap}
+    els.qty.disabled=r.desc; els.price.disabled=r.desc; els.money.classList.toggle("is-dis",r.desc);
+    els.opt.disabled=r.desc; els.optWrap.classList.toggle("is-dis",r.desc);
+    els.desc.disabled=r.opt; els.descWrap.classList.toggle("is-dis",r.opt);
+    els.desc.setAttribute("aria-describedby", r.opt?"whyDesc":"");
+    els.opt.setAttribute("aria-describedby", r.desc?"whyOpt":"");
+    if(!r.opt) els.desc.removeAttribute("aria-describedby");
+    if(!r.desc) els.opt.removeAttribute("aria-describedby");
+    els.descWrap.title = r.opt ? "Unavailable while Optional is checked" : "";
+    els.optWrap.title = r.desc ? "Unavailable while Description Only is checked" : "";
+  }
+  function numVal(v,min){ const n=parseFloat(v); return isNaN(n)||n<min?min:n; }
+
+  /* ---------- Web modal ---------- */
+  function buildModal(){
+    const tb=$("#mRows"); tb.innerHTML="";
+    rows.forEach((r,idx)=>{
+      const c=CATALOG[idx], tr=document.createElement("tr");
+      tr.dataset.id=r.id;
+      tr.innerHTML=`
+        <td class="cb"><label class="ck"><input type="checkbox" class="f-sel" aria-label="Select ${esc(c.name)}">${CHK}</label></td>
+        <td class="nm">${esc(c.name)}</td>
+        <td class="c-do"><label class="ck f-descw"><input type="checkbox" class="f-desc" aria-label="Description only: ${esc(c.name)}">${CHK}</label>${idx===0?'<span data-br="6,9,10"></span>':""}</td>
+        <td style="text-align:center"><input class="qty f-qty" type="number" min="0" step="1" inputmode="decimal" aria-label="Quantity for ${esc(c.name)}"></td>
+        <td><div class="money f-money"><span aria-hidden="true">$</span><input class="f-price" type="number" min="0" step="0.01" inputmode="decimal" aria-label="Price for ${esc(c.name)}, dollars"></div></td>
+        <td class="cb"><label class="ck f-optw"><input type="checkbox" class="f-opt" aria-label="Optional: ${esc(c.name)}">${CHK}</label></td>`;
+      tb.appendChild(tr);
+      const els=getEls(tr);
+      els.sel.checked=r.sel; els.desc.checked=r.desc; els.opt.checked=r.opt; els.qty.value=r.qty; els.price.value=r.price;
+      wire(r,els,()=>{ tr.classList.toggle("sel",r.sel); tr.classList.toggle("is-do",r.desc); updateModalMeta(); });
+      tr.classList.toggle("sel",r.sel); tr.classList.toggle("is-do",r.desc);
+      applyLocks(r,els);
+    });
+    paintBR($("#modal"));
+    updateModalMeta(true);
+  }
+  function getEls(root){
+    return {sel:root.querySelector(".f-sel"),desc:root.querySelector(".f-desc"),opt:root.querySelector(".f-opt"),
+      qty:root.querySelector(".f-qty"),price:root.querySelector(".f-price"),money:root.querySelector(".f-money"),
+      descWrap:root.querySelector(".f-descw"),optWrap:root.querySelector(".f-optw")};
+  }
+  function wire(r,els,after){
+    els.sel.addEventListener("change",()=>{r.sel=els.sel.checked;after();});
+    els.desc.addEventListener("change",()=>{ if(r.opt){els.desc.checked=false;return;} r.desc=els.desc.checked; applyLocks(r,els); after(); });
+    els.opt.addEventListener("change",()=>{ if(r.desc){els.opt.checked=false;return;} r.opt=els.opt.checked; applyLocks(r,els); after(); });
+    els.qty.addEventListener("input",()=>{r.qty=numVal(els.qty.value,0);after();});
+    els.price.addEventListener("input",()=>{r.price=numVal(els.price.value,0);after();});
+  }
+  function updateModalMeta(silent){
+    const n=rows.filter(r=>r.sel).length;
+    const prev=$("#selCount").textContent;
+    $("#selCount").textContent=n;
+    if(!silent && String(n)!==prev) $("#selLive").textContent=`${n} selected`;
+    const est=rows.reduce((a,r)=>a+(r.sel&&!r.desc?r.qty*r.price:0),0);
+    $("#estTotal").textContent=fmt(est);
+    // select-all state across visible rows
+    const vis=[...$("#mRows").rows].filter(tr=>!tr.hidden).map(tr=>rows.find(r=>r.id==tr.dataset.id));
+    const s=vis.filter(r=>r.sel).length, sa=$("#selAll");
+    sa.checked = vis.length>0 && s===vis.length; sa.indeterminate = s>0 && s<vis.length;
+  }
+  function openModal(t,trigger){
+    target=t.startsWith("pkg:")?+t.slice(4):"line"; lastTrigger=trigger; rows=freshRows(); $("#mSearch").value="";
+    buildModal(); $("#noMatch").hidden=true;
+    $("#backdrop").classList.add("open"); document.body.style.overflow="hidden";
+    $("#webView").setAttribute("aria-hidden","true");
+    setTimeout(()=>$("#mSearch").focus(),0);
+  }
+  function closeModal(focusEl){
+    $("#backdrop").classList.remove("open"); document.body.style.overflow="";
+    $("#webView").removeAttribute("aria-hidden");
+    (focusEl||lastTrigger)?.focus();
+  }
+  function commit(list){
+    return list.filter(r=>r.sel).map(r=>{const c=CATALOG.find(x=>x.id===r.id);return {name:c.name,qty:r.qty,price:r.price,tax:c.tax,opt:r.opt&&!r.desc,desc:r.desc,text:c.desc};});
+  }
+  function saveModal(){
+    const added=commit(rows);
+    if(!added.length){ closeModal(); return; }
+    if(target==="line") state.line=state.line.concat(added); else state.pkgs[target].items=state.pkgs[target].items.concat(added);
+    renderPage();
+    const where = target==="line" ? "Line Items" : state.pkgs[target].name;
+    const dn=added.filter(a=>a.desc).length;
+    $("#pageLive").textContent=`${added.length} item${added.length>1?"s":""} added to ${where}${dn?`, ${dn} as Description Only`:""}.`;
+    closeModal(target==="line"?$("#liTitle"):$("#pkgName"+target));
+  }
+
+  $("#mSearch").addEventListener("input",e=>{
+    const q=e.target.value.trim().toLowerCase(); let any=false;
+    [...$("#mRows").rows].forEach(tr=>{const c=CATALOG.find(x=>x.id==tr.dataset.id);const show=!q||c.name.toLowerCase().includes(q);tr.hidden=!show;if(show)any=true;});
+    $("#noMatch").hidden=any; updateModalMeta(true);
+  });
+  $("#selAll").addEventListener("change",e=>{
+    [...$("#mRows").rows].filter(tr=>!tr.hidden).forEach(tr=>{
+      const r=rows.find(x=>x.id==tr.dataset.id); r.sel=e.target.checked; tr.querySelector(".f-sel").checked=r.sel; tr.classList.toggle("sel",r.sel);
+    });
+    updateModalMeta();
+  });
+  $("#mSave").addEventListener("click",saveModal);
+  $("#mClose").addEventListener("click",()=>closeModal());
+  $("#mX").addEventListener("click",()=>closeModal());
+  $("#backdrop").addEventListener("keydown",e=>{
+    if(e.key==="Escape"){e.preventDefault();closeModal();return;}
+    if(e.key!=="Tab") return;
+    const f=[...$("#modal").querySelectorAll('button,input,[tabindex="0"]')].filter(el=>!el.disabled&&el.offsetParent!==null&&!el.closest("tr[hidden]"));
+    const first=f[0], last=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  });
+
+  /* ---------- Mobile ---------- */
+  function renderMobile(){
+    const b=$("#mmBody"); b.innerHTML="";
+    mRows.forEach((r,idx)=>{
+      const c=CATALOG[idx], d=document.createElement("div"); d.className="mcard"; d.setAttribute("role","group"); d.setAttribute("aria-labelledby","mn"+r.id);
+      d.innerHTML=`<h3 id="mn${r.id}">${esc(c.name)}</h3>
+        <div class="mfields">
+          <div class="mfield"><label for="mq${r.id}">Quantity</label><input id="mq${r.id}" class="qty f-qty" type="number" min="0" inputmode="decimal"></div>
+          <div class="mfield"><label for="mp${r.id}">Price</label><div class="money f-money"><span aria-hidden="true">$</span><input id="mp${r.id}" class="f-price" type="number" min="0" step="0.01" inputmode="decimal"></div></div>
+        </div>
+        <div class="mchecks">
+          <label class="mchk f-optw"><span class="ck"><input type="checkbox" class="f-opt">${CHK}</span>Optional</label>
+          <label class="mchk f-descw"><span class="ck"><input type="checkbox" class="f-desc">${CHK}</span>Description Only</label>
+          <label class="mchk"><span class="ck"><input type="checkbox" class="f-sel">${CHK}</span>Add</label>
+        </div>${idx===0?'<div style="margin-top:6px"><span data-br="2,3,5,9,11"></span></div>':""}`;
+      b.appendChild(d);
+      const els=getEls(d);
+      els.sel.checked=r.sel; els.desc.checked=r.desc; els.opt.checked=r.opt; els.qty.value=r.qty; els.price.value=r.price;
+      wire(r,els,()=>d.classList.toggle("sel",r.sel));
+      d.classList.toggle("sel",r.sel); applyLocks(r,els);
+    });
+    paintBR(b);
+  }
+  $("#mmSave").addEventListener("click",()=>{
+    const added=commit(mRows);
+    $("#mmResult").innerHTML = `<h3>Demo: what Save sends to the proposal</h3>`+(added.length?`<ul>${added.map(a=>`<li>${esc(a.name)} — ${a.desc?"Description Only (no price, not in total)":a.opt?`Optional, ${a.qty} × ${fmt(a.price)}`:`${a.qty} × ${fmt(a.price)}`}</li>`).join("")}</ul>`:"<p>Nothing selected — no items added.</p>");
+    showMobileClosed();
+  });
+  function showMobileClosed(){ $("#mmOpen").style.display="none"; $("#mmClosed").hidden=false; $("#mmReopen").focus(); }
+  $("#mmClose").addEventListener("click",()=>{ $("#mmResult").innerHTML="<h3>Demo</h3><p>Modal closed without saving.</p>"; showMobileClosed(); });
+  $("#mmX").addEventListener("click",()=>$("#mmClose").click());
+  $("#mmReopen").addEventListener("click",()=>{ mRows=freshRows(); renderMobile(); $("#mmClosed").hidden=true; $("#mmOpen").style.display="flex"; $("#mmX").focus(); });
+
+  /* ---------- Page-level delegation ---------- */
+  document.addEventListener("click",e=>{
+    const o=e.target.closest("[data-open]"); if(o){ e.preventDefault(); openModal(o.dataset.open,o); return; }
+    const x=e.target.closest("[data-oos]"); if(x){ e.preventDefault(); demoNote("That control isn’t part of this prototype — only Add Multiple is wired up."); }
+  });
+
+  /* ---------- Demo chrome ---------- */
+  function setView(v){
+    document.body.classList.toggle("view-mobile",v==="mobile");
+    document.body.classList.toggle("view-portal",v==="portal");
+    $("#vWeb").setAttribute("aria-pressed",v==="web"); $("#vPortal").setAttribute("aria-pressed",v==="portal"); $("#vMobile").setAttribute("aria-pressed",v==="mobile");
+    if(location.hash.slice(1)!==v) history.replaceState(null,"","#"+v);
+  }
+  $("#vWeb").addEventListener("click",()=>setView("web"));
+  $("#vMobile").addEventListener("click",()=>setView("mobile"));
+  $("#vPortal").addEventListener("click",()=>setView("portal"));
+  $("#brToggle").addEventListener("click",e=>{const on=e.currentTarget.getAttribute("aria-checked")!=="true";e.currentTarget.setAttribute("aria-checked",on);document.body.classList.toggle("no-br",!on);});
+  $("#ptCollapse").addEventListener("click",e=>{
+    const collapse=e.currentTarget.textContent==="Collapse all";
+    document.querySelectorAll("#ptItems .pt-head").forEach(h=>{h.setAttribute("aria-expanded",!collapse);document.getElementById(h.getAttribute("aria-controls")).hidden=collapse;});
+    e.currentTarget.textContent=collapse?"Expand all":"Collapse all";
+  });
+  $("#sampleBtn").addEventListener("click",()=>{loadSample();demoNote("Loaded the Good / Better / Best packages from the production screenshots. Description Only items are flagged as if added through Add Multiple.");});
+  $("#resetBtn").addEventListener("click",()=>{reset();demoNote("Demo reset.");});
+
+  // shared hidden reasons for disabled checkboxes
+  const why=document.createElement("div"); why.className="sr-only";
+  why.innerHTML='<span id="whyDesc">Unavailable while Optional is checked.</span><span id="whyOpt">Unavailable while Description Only is checked.</span>';
+  document.body.appendChild(why);
+
+  reset();
+  setView(["mobile","portal"].includes(location.hash.slice(1))?location.hash.slice(1):"web");
+})();
+</script>
+</body>
+</html>
