@@ -1673,3 +1673,8 @@ Format:
 ## [2026-10-23] Add Multiple Items: Description Only prototype added to hub
 - Decision: Prototype added as `add-multiple-description-only` with a Needs Design card tagged 🎯 (ticket 86bcqaczq). Platforms (Web + Mobile) appear in the card description only, since cards have no platform field.
 - Decision: The standard `gate.js` include and proto-bar were added to the prototype file; its content is otherwise unchanged.
+
+## [2026-10-23] Add Multiple Items: select-all for Description Only and Optional
+- Decision: Description Only and Optional column headers get a select-all checkbox that applies to visible (search-filtered) rows only and never changes row selection. The two are no longer mutually exclusive, so a row can be both.
+- Assumption: Description Only still locks Qty and Price. A row that is both shows in the Optional section with the Description Only display. Select-all is web only (mobile has no table header).
+- Open question: BR-4, BR-9, BR-11 and BR-12 are stale and are left unchanged until the updated ticket text is available.
