@@ -159,6 +159,10 @@ table.mt td.c-do{text-align:center}
 .mt-foot .amt{font-size:24px;font-weight:700;color:var(--link)}
 .m-hint{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;margin:12px 2px 6px}
 .m-hint .ico-info{width:16px;height:16px;font-size:11px;line-height:16px;background:var(--muted)}
+.mm-total{display:flex;justify-content:flex-end;align-items:baseline;flex-wrap:wrap;gap:6px 14px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px}
+.mm-total .lbl{font-size:13px;font-weight:600;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+.mm-total .amt{font-size:24px;font-weight:700;color:var(--link)}
+.mm-hint{flex:none;margin:0;padding:10px 16px;background:#F7F7FA}
 .m-foot{background:#F0F0F4;border-radius:0 0 14px 14px;padding:14px 20px;display:flex;justify-content:flex-end;gap:10px}
 .m-foot .btn{min-height:48px;padding:0 22px;font-size:16px;font-weight:500}
 .btn-plain{background:#fff;border-color:var(--border);color:var(--text)}
@@ -477,6 +481,7 @@ body.view-mobile #webView,body.view-mobile #portalView{display:none}
         <button type="button" class="m-x" id="mmX" aria-label="Close Add Multiple Line Items">×</button>
       </div>
       <div class="mm-body" id="mmBody"></div>
+      <p class="m-hint mm-hint"><span class="ico-info" aria-hidden="true">i</span>Description and tax details are set from defaults.</p>
       <div class="mm-foot">
         <button type="button" class="btn btn-solid" id="mmSave">Save</button>
         <button type="button" class="btn btn-plain" id="mmClose">Close</button>
@@ -802,10 +807,16 @@ body.view-mobile #webView,body.view-mobile #portalView{display:none}
       b.appendChild(d);
       const els=getEls(d);
       els.sel.checked=r.sel; els.desc.checked=r.desc; els.opt.checked=r.opt; els.qty.value=r.qty; els.price.value=r.price;
-      wire(r,els,()=>d.classList.toggle("sel",r.sel));
+      wire(r,els,()=>{ d.classList.toggle("sel",r.sel); updateMobileTotal(); });
       d.classList.toggle("sel",r.sel); applyLocks(r,els);
     });
+    const tot=document.createElement("div"); tot.className="mm-total";
+    tot.innerHTML='<span class="lbl">Estimated total</span><span class="amt" id="mmEst">$0.00</span><span data-br="14"></span>';
+    b.appendChild(tot); updateMobileTotal();
     paintBR(b);
+  }
+  function updateMobileTotal(){
+    $("#mmEst").textContent=fmt(mRows.reduce((a,r)=>a+(r.sel&&!r.desc?r.qty*r.price:0),0));
   }
   $("#mmSave").addEventListener("click",()=>{
     const added=commit(mRows);
