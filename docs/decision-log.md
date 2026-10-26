@@ -1682,3 +1682,7 @@ Format:
 ## [2026-10-23] Add Multiple Items: select-all change reverted
 - Decision: The select-all for Description Only and Optional, and the removal of their mutual exclusivity, are reverted. Optional Items cannot be used in Packages today, so this is out of scope for ticket 86bcqaczq.
 - Decision: The prototype is back to its first published version (BR-1 to BR-19 as originally written, Description Only and Optional mutually exclusive). The earlier select-all log entry is superseded by this one.
+
+## [2026-10-26] Add Multiple Items: mobile Estimated Total and info line
+- Decision: Mobile modal now shows the Estimated Total (end of the card list) and the "Description and tax details are set from defaults." info line above Save/Close, matching production.
+- Assumption: Mobile total follows the web prototype rule (selected rows only, Description Only excluded), so it starts at $0.00. Production's screenshot showed a total with nothing ticked; needs confirmation.
