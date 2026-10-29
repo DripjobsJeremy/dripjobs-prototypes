@@ -1686,3 +1686,8 @@ Format:
 ## [2026-10-26] Add Multiple Items: mobile Estimated Total and info line
 - Decision: Mobile modal now shows the Estimated Total (end of the card list) and the "Description and tax details are set from defaults." info line above Save/Close, matching production.
 - Assumption: Mobile total follows the web prototype rule (selected rows only, Description Only excluded), so it starts at $0.00. Production's screenshot showed a total with nothing ticked; needs confirmation.
+
+## [2026-10-29] Invoice Reminders: Rev. Oct 29, 2026 (ticket 86b32d4gr)
+- Decision: Invoice record now shows the next-reminder notice (same string as the Command Center) below the client details card and above Payment Requests, with no Disable Reminders. Placement is assumed, flagged "Placement assumed; UX to confirm."
+- Decision: Mark as Paid with the request's amount removes the request; a changed amount records the payment but leaves the request open. Send Request shows an inline result message (placeholder copy, none in the Copy Review); a failed send changes nothing.
+- Assumption: The Offline Requested sample has no active schedule (Reminders Off, no notice) and the Sent sample behaves like Open. Offline Requested invoices keep the Open-style invoice actions. Needs confirmation.
