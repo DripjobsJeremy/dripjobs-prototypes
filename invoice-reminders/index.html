@@ -609,7 +609,7 @@ body.phone-preview .req-pill span { min-height: 48px; }
             <label><input type="radio" name="demoAccess" value="in" checked onchange="demo.access = this.value; renderAll()"> In access group</label>
             <label><input type="radio" name="demoAccess" value="out" onchange="demo.access = this.value; renderAll()"> Outside access group</label>
         </fieldset>
-        <fieldset class="demo-fs"><legend>Send Request result</legend>
+        <fieldset class="demo-fs"><legend>Send result (Invoice and Request)</legend>
             <label><input type="radio" name="demoSend" value="ok" checked onchange="demo.sendResult = this.value"> Both channels send</label>
             <label><input type="radio" name="demoSend" value="partial" onchange="demo.sendResult = this.value"> One channel fails</label>
             <label><input type="radio" name="demoSend" value="fail" onchange="demo.sendResult = this.value"> Send fails</label>
@@ -1077,7 +1077,7 @@ body.phone-preview .req-pill span { min-height: 48px; }
                 <div class="req-group"><label for="paySubject">Subject</label><div class="req-box"><input type="text" id="paySubject" value="Sparrow's Nest Painting - Payment Receipt"></div></div>
                 <div class="req-group"><label id="payBodyLbl">Body</label><div class="pay-body" role="textbox" aria-multiline="true" aria-labelledby="payBodyLbl" contenteditable="true" tabindex="0"><p>Hi {customer-name},</p><p>Thank you for your payment of <strong>{payment-amount}</strong> towards {company-name} invoice <strong>#{invoice-number}</strong>.</p><p>{payment-details}</p><p>If you would like to view your invoice, click here:</p><p>{view-invoice-button}</p></div></div>
             </div>
-            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">Mark as Paid <span class="br-tooltip">Mark as Paid opens Receive Payment with the request amount filled in. Save records the payment; the request is marked Paid and removed only when the saved amount equals the request amount, otherwise it stays open (BR-28). Assumed: Method must be selected (error text invented), Amount only needs to be above $0, the receipt email does not send in the prototype, and the rich text toolbar is not built.</span></span>
+            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">Mark as Paid <span class="br-tooltip">Mark as Paid opens Receive Payment with the request amount filled in. Save records the payment. Request marked Paid and hidden from the card (BR-28), when the saved amount equals the request amount. Assumed: Method must be selected (error text invented), Amount only needs to be above $0, the receipt email does not send in the prototype, and the rich text toolbar is not built.</span></span>
         </div>
         <div class="edit-modal-footer">
             <button class="btn btn-primary" id="paySaveBtn" onclick="savePay()">Save</button>
@@ -1143,6 +1143,7 @@ body.phone-preview .req-pill span { min-height: 48px; }
                     <div class="settings-alert settings-alert--info" style="margin:0;"><i class="ti ti-info-circle" aria-hidden="true"></i><div id="commReadOnlyText"></div></div>
                     <span class="br-chip br-annot" tabindex="0" style="margin-top:8px;">BR-29 <span class="br-tooltip">Access group switch simulates a non-Admin, non-assignee user; the Invoices page itself is Admin only.</span></span>
                 </div>
+                <div id="commSendError" role="alert"></div>
                 <div id="commNotice" aria-live="polite"></div>
                 <span class="br-chip br-annot" id="commTitleNote" tabindex="0" hidden>Send Invoice title unverified <span class="br-tooltip">Send Invoice title unverified against production. Production shows no toast after sending an invoice, and the prototype matches.</span></span>
                 <div id="commKeepRow" hidden>
@@ -1579,7 +1580,7 @@ var invoices = [
     {id:15, initials:'JB', customer:'James Bond', proposal:'Proposal #2679119', invoiceNo:'#007', status:'OPEN', sync:'not-synced', amountN:4387.39, paidN:0, date:'4/6/2026', dueDate:'5/6/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[]},
     {id:16, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #3330640', invoiceNo:'#531224', status:'PARTIAL', sync:'synced', amountN:6389.54, paidN:638.95, date:'10/3/2026', dueDate:'11/3/2026', paymentRequest:null, cadence:{source:'send', next:{date:'Oct 12, 2026', channel:'email'}}, remindersDisabled:false, history:[snt('Sep 28, 2026','8:00 AM','email'), snt('Oct 2, 2026','8:00 AM','SMS'), skp('Oct 5, 2026','8:00 AM','email','bounced')]},
     {id:17, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #3330712', invoiceNo:'#531290', status:'SENT', sync:'not-synced', amountN:1850.00, paidN:0, date:'10/6/2026', dueDate:'11/12/2026', paymentRequest:null, cadence:{source:'send', next:{date:'Nov 5, 2026', channel:'email'}}, remindersDisabled:false, history:[]},
-    {id:18, initials:'AS', customer:'Arya Stark', proposal:'Proposal #3330755', invoiceNo:'#531301', status:'OFFLINE', sync:'not-synced', amountN:2400.00, paidN:0, date:'10/7/2026', dueDate:'10/20/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[skp('Oct 13, 2026','8:00 AM','email','offline'), skp('Oct 13, 2026','8:00 AM','SMS','offline')]}
+    {id:18, initials:'AS', customer:'Arya Stark', proposal:'Proposal #3330755', invoiceNo:'#531301', status:'OFFLINE', sync:'not-synced', amountN:2400.00, paidN:0, date:'10/7/2026', dueDate:'10/20/2026', paymentRequest:null, cadence:{source:'send', next:{date:'Oct 29, 2026', channel:'email and SMS'}}, remindersDisabled:false, history:[skp('Oct 13, 2026','8:00 AM','email','offline'), skp('Oct 13, 2026','8:00 AM','SMS','offline')]}
 ];
 // Balance is derived; voided invoices carry $0 balance (prototype assumption, flagged)
 function balanceOf(inv) { return Math.max(0, inv.amountN - inv.paidN); }
@@ -2050,7 +2051,7 @@ function applyCommChannel() {
 }
 function openComm(id, mode) {
     var inv = byId(id);
-    commInvoiceId = id; commMode = mode;
+    commInvoiceId = id; commMode = mode; $('commSendError').innerHTML = '';
     closeMenus(false);
     var mb = $('menubtn-' + id); if (mb) mb.focus();
     var first = inv.customer.split(' ')[0], num = inv.invoiceNo.replace('#','');
@@ -2101,6 +2102,13 @@ function submitComm() {
     var startOn = $('commReminderSwitch').getAttribute('aria-checked') === 'true';
     var keepOn = $('commKeepSwitch').getAttribute('aria-checked') === 'true';
     var sendSel = $('commSendOn'), later = !isReq && sendSel.value !== 'now';
+    // BR-28: a failed Send Invoice leaves reminders unchanged. PLACEHOLDER copy, production failure message unconfirmed. The modal stays open.
+    if (!isReq && demo.sendResult === 'fail') {
+        $('commSendError').innerHTML = alertHtml('danger', 'ti-alert-circle', '[Placeholder] Invoice couldn\u2019t be sent.'
+            + ' <span class="br-chip br-annot" tabindex="0">Placeholder copy <span class="br-tooltip">BR-28: a failed send changes nothing, and one channel succeeding counts as success. Production failure message for Send Invoice is unconfirmed, so this is a placeholder (demo setting: Send result).</span></span>');
+        return;
+    }
+    $('commSendError').innerHTML = '';
     if (isReq) {
         // BR-28: only a successful send changes anything; one channel succeeding counts as success. A failed send leaves the request and reminders as they were.
         reqMsg = { id: inv.id, ok: demo.sendResult !== 'fail' };

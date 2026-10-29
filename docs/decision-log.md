@@ -1690,4 +1690,4 @@ Format:
 ## [2026-10-29] Invoice Reminders: Rev. Oct 29, 2026 (ticket 86b32d4gr)
 - Decision: Invoice record now shows the next-reminder notice (same string as the Command Center) below the client details card and above Payment Requests, with no Disable Reminders. Placement is assumed, flagged "Placement assumed; UX to confirm."
 - Decision: Mark as Paid with the request's amount removes the request; a changed amount records the payment but leaves the request open. Send Request shows an inline result message (placeholder copy, none in the Copy Review); a failed send changes nothing.
-- Assumption: The Offline Requested sample has no active schedule (Reminders Off, no notice) and the Sent sample behaves like Open. Offline Requested invoices keep the Open-style invoice actions. Needs confirmation.
+- Decision (Jeremy, Oct 29): The Offline Requested sample keeps an ACTIVE schedule (Reminders On, notice shows, skips logged with the offline reason) and keeps Open-style actions. Send Invoice also has a failure state, with placeholder copy since the production message is unconfirmed.
