@@ -196,6 +196,11 @@ body.hide-br .br-chip.br-annot { display: none; }
 .settings-alert--info   { background: #EFF6FF; border-color: #BFDBFE; color: #1E40AF; }
 .settings-alert--success { background: #F0FDF4; border-color: #BBF7D0; color: #166534; }
 .rec-next { margin: 14px 0 0; }
+.send-banner { padding: 10px 16px; margin: 0 0 14px; border: 1px solid; border-radius: 4px; font-size: 13px; line-height: 1.5; }
+.send-banner.is-ok { background: #D4EDDA; border-color: #C3E6CB; color: #155724; }
+.send-banner.is-fail { background: #F8D7DA; border-color: #F5C6CB; color: #721C24; }
+.rec-sched { margin: -6px 0 14px; font-size: 13px; color: #32415B; }
+.rec-sched button { background: none; border: none; padding: 0 2px; min-height: 48px; color: #5C53DC; font: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; }
 
 /* Void modal form */
 .void-summary { font-size: 13px; line-height: 1.55; margin-bottom: 14px; }
@@ -615,6 +620,10 @@ body.phone-preview .req-pill span { min-height: 48px; }
             <label><input type="radio" name="demoSend" value="emailfail" onchange="demo.sendResult = this.value"> Email failed (email only)</label>
             <label><input type="radio" name="demoSend" value="bothfail" onchange="demo.sendResult = this.value"> Email and text failed</label>
             <label><input type="radio" name="demoSend" value="emailfailtext" onchange="demo.sendResult = this.value"> Email failed, text sent</label>
+        </fieldset>
+        <fieldset class="demo-fs"><legend>Receive Payment result</legend>
+            <label><input type="radio" name="demoPay" value="ok" checked onchange="demo.payResult = this.value"> Payment saves</label>
+            <label><input type="radio" name="demoPay" value="fail" onchange="demo.payResult = this.value"> Payment fails</label>
         </fieldset>
         <fieldset class="demo-fs"><legend>Company invoices</legend>
             <label><input type="radio" name="demoData" value="sample" checked onchange="demo.data = this.value; renderAll()"> Sample invoices</label>
@@ -1196,7 +1205,7 @@ function showToast(msg, key) {
 
 // ---------- Demo controls ----------
 function toggleDemo(btn) { btn.setAttribute('aria-checked', btn.getAttribute('aria-checked') === 'true' ? 'false' : 'true'); }
-var demo = { access: 'in', data: 'sample', sendResult: 'ok' };
+var demo = { access: 'in', data: 'sample', sendResult: 'ok', payResult: 'ok' };
 function inAccessGroup() { return demo.access === 'in'; }
 function toggleDemoPanel(force) {
     var panel = $('demoPanel'), btn = $('demoPanelBtn');
@@ -2010,19 +2019,19 @@ var SEND_OUTCOMES = {
     textfail:      { ok: true,  text: 'Eek, something went wrong trying to send your text message but the email sent successfully.' },
     emailfail:     { ok: false, text: 'There was an issue sending the email to this recipient, please try again' },
     bothfail:      { ok: false, text: 'Eek, something went wrong trying to send your email & text message.' },
-    emailfailtext: { ok: true,  placeholder: true, text: '[Placeholder] Email failed, text sent.' }
+    emailfailtext: { ok: true,  placeholder: true, text: '[Placeholder] Email failed, text sent.', note: 'Banner for email failed, text sent is unverified in production.' }
 };
 var sendBanner = null;
-function sendBannerHtml(id) {
+function sendBannerHtml(id, where) {
     if (!sendBanner) return '';
     var b = sendBanner;
-    return '<div id="' + id + '" role="' + (b.ok ? 'status' : 'alert') + '" tabindex="-1" class="send-banner">'
-        + alertHtml(b.ok ? 'success' : 'danger', b.ok ? 'ti-circle-check' : 'ti-alert-circle', esc(b.text)
-            + (b.placeholder ? ' <span class="br-chip br-annot" tabindex="0">Placeholder copy <span class="br-tooltip">Banner for email failed, text sent is unverified in production.</span></span>' : '')
-            + ' <span class="br-chip br-annot" tabindex="0">BR-28 <span class="br-tooltip">BR-28: Send Invoice and Send Request show the same banner text. A failed send leaves reminders unchanged; one channel succeeding counts as a successful send. Demo setting: Send result.</span></span>')
+    return '<div id="' + id + '" role="' + (b.ok ? 'status' : 'alert') + '" tabindex="-1" class="send-banner ' + (b.ok ? 'is-ok' : 'is-fail') + '">' + esc(b.text)
+        + (b.placeholder ? ' <span class="br-chip br-annot" tabindex="0">Placeholder copy <span class="br-tooltip">' + esc(b.note) + '</span></span>' : '')
+        + (b.pay ? '' : ' <span class="br-chip br-annot" tabindex="0">BR-28 <span class="br-tooltip">BR-28: Send Invoice and Send Request show the same banner text. A failed send leaves reminders unchanged; one channel succeeding counts as a successful send. Demo setting: Send result.</span></span>')
+        + (where === 'list' ? ' <span class="br-chip br-annot" tabindex="0">List-page banner placement assumed <span class="br-tooltip">List-page banner placement assumed; verify in production.</span></span>' : '')
         + '</div>';
 }
-function renderSendBanner() { var el = $('sendBannerList'); if (el) el.innerHTML = recordInvoiceId == null ? sendBannerHtml('sendBannerListBox') : ''; }
+function renderSendBanner() { var el = $('sendBannerList'); if (el) el.innerHTML = recordInvoiceId == null ? sendBannerHtml('sendBannerListBox', 'list') : ''; }
 function channelLabel() {
     function en(r) { return r.enabled; }
     var e = invoiceReminders.email.some(en), t = invoiceReminders.sms.some(en);
@@ -2118,6 +2127,10 @@ function submitComm() {
     var keepOn = $('commKeepSwitch').getAttribute('aria-checked') === 'true';
     var sendSel = $('commSendOn'), later = !isReq && sendSel.value !== 'now';
     // BR-28: only a successful send changes anything; one channel succeeding counts as success. A failed send leaves the request and reminders as they were.
+    if (later) { // BR-28: a scheduled send has not gone out, so no banner; the cadence starts at the actual send time
+        var sv = sendSel.value, tm = sv === 't9' ? '9:00 AM' : sv === 't11' ? '11:00 AM' : CUSTOM_INVOICE_SEND_TIME.replace(/^0/, '');
+        inv.scheduledSend = { date: '10/9/2026', time: tm };
+    }
     var outcome = SEND_OUTCOMES[demo.sendResult] || SEND_OUTCOMES.ok, sent = outcome.ok || (!isReq && later);
     if (!(!isReq && later)) sendBanner = outcome; // a scheduled send has not gone out yet, so no result banner
     if (!sent) { /* failed: reminders and the request stay as they were */ }
@@ -2138,6 +2151,11 @@ function submitComm() {
     if (bn && !(!isReq && later)) bn.focus();
     else if (!$('invoice-record').hidden) { var rb = $('rec-send-btn'); if (rb) rb.focus(); }
     else { var b = $('menubtn-' + inv.id); if (b) b.focus(); }
+}
+function cancelScheduledSend(id) {
+    byId(id).scheduledSend = null; // BR-28: reminders are not touched
+    renderAll();
+    $('rec-title').focus();
 }
 function cancelPaymentRequest(id) {
     var inv = byId(id);
@@ -2258,6 +2276,8 @@ function renderInvoiceRecord() {
         + '<div class="rec-actions">'
         + (inv.status !== 'VOIDED' ? '<button type="button" class="btn btn-primary" onclick="openComm(' + id + ', \'send\')"><i class="ti ti-send" style="margin-right:6px;" aria-hidden="true"></i>Send Invoice</button>' : '')
         + '<span class="rec-fake">Receive Payment</span><span class="rec-fake">More Actions <i class="ti ti-chevron-down" aria-hidden="true"></i></span></div></div>'
+        + (inv.scheduledSend ? '<div class="rec-sched">Scheduled to send at ' + esc(inv.scheduledSend.date) + ' ' + esc(inv.scheduledSend.time) + ' <button type="button" id="rec-sched-cancel" onclick="cancelScheduledSend(' + id + ')">(Cancel)</button>'
+            + ' <span class="br-chip br-annot" tabindex="0">BR-28 <span class="br-tooltip">BR-28: existing production indicator for a scheduled Send Invoice. Cancelling removes the scheduled send and changes nothing about reminders; the cadence starts at the actual send time.</span></span></div>' : '')
         + '<div class="rec-card rec-client"><div><div class="rec-fl">Client</div><div class="rec-name">' + esc(inv.customer) + '</div>'
         + '<div class="rec-line"><i class="ti ti-map-pin" aria-hidden="true"></i>' + esc(c.addr) + '</div>'
         + '<div class="rec-line"><i class="ti ti-mail" aria-hidden="true"></i>' + esc(c.email) + '</div>'
@@ -2349,6 +2369,13 @@ function savePay() {
         return;
     }
     amt = cents(amt);
+    if (demo.payResult === 'fail') { // failure banner at the top of the invoice page; nothing is recorded. PLACEHOLDER copy, no production string given.
+        sendBanner = { ok: false, pay: true, placeholder: true, text: '[Placeholder] Payment couldn\u2019t be recorded.', note: 'Receive Payment failure banner copy is unconfirmed, so this is a placeholder. Nothing is recorded and the request, status and reminders stay as they were (demo setting: Receive Payment result).' };
+        closeOverlay($('payOverlay'), true);
+        renderAll();
+        var pb = $('sendBannerRec'); if (pb) pb.focus();
+        return;
+    }
     var pays = paymentsOf(inv), m = $('payMethod');
     pays.push({no: 'Payment #6306' + String(100 + pays.length + inv.id).slice(-3), method: m.value, received: $('payDate').value, ref: $('payRef').value.trim() || 'N/A', amount: amt}); // recorded as a payment row
     inv.paidN = cents(inv.paidN + amt);

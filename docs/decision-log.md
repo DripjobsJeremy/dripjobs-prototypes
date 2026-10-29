@@ -1695,3 +1695,7 @@ Format:
 ## [2026-10-29] Invoice Reminders: send result banners and housekeeping (ticket 86b32d4gr)
 - Decision: Send Invoice and Send Request now share the production send result banners (green success, red failure) at the top of the invoice page. Reminders start only on a successful send; one channel succeeding counts as success. The banner for "email failed, text sent" is a marked placeholder, unverified in production.
 - Decision: The Reminders column tooltip adds "Reminders are skipped while an invoice is Offline Requested." The Command Center sample card now has six history entries so Show all can be checked at 375px and 320px.
+
+## [2026-10-29] Invoice Reminders: list banners, scheduled send indicator, Receive Payment failure
+- Decision: A send made from the Invoices list shows the same banner at the top of the list (placement assumed, verify in production). A scheduled Send Invoice shows no banner; the invoice record shows "Scheduled to send at {date} {time} (Cancel)", and Cancel leaves reminders untouched.
+- Decision: Receive Payment has a failure state with a red banner at the top of the invoice page and nothing recorded. Its copy is a marked placeholder. The Mark as Paid chip keeps its unverified-strings disclosure.
