@@ -1691,3 +1691,7 @@ Format:
 - Decision: Invoice record now shows the next-reminder notice (same string as the Command Center) below the client details card and above Payment Requests, with no Disable Reminders. Placement is assumed, flagged "Placement assumed; UX to confirm."
 - Decision: Mark as Paid with the request's amount removes the request; a changed amount records the payment but leaves the request open. Send Request shows an inline result message (placeholder copy, none in the Copy Review); a failed send changes nothing.
 - Decision (Jeremy, Oct 29): The Offline Requested sample keeps an ACTIVE schedule (Reminders On, notice shows, skips logged with the offline reason) and keeps Open-style actions. Send Invoice also has a failure state, with placeholder copy since the production message is unconfirmed.
+
+## [2026-10-29] Invoice Reminders: send result banners and housekeeping (ticket 86b32d4gr)
+- Decision: Send Invoice and Send Request now share the production send result banners (green success, red failure) at the top of the invoice page. Reminders start only on a successful send; one channel succeeding counts as success. The banner for "email failed, text sent" is a marked placeholder, unverified in production.
+- Decision: The Reminders column tooltip adds "Reminders are skipped while an invoice is Offline Requested." The Command Center sample card now has six history entries so Show all can be checked at 375px and 320px.

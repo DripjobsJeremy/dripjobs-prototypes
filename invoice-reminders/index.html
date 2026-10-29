@@ -610,9 +610,11 @@ body.phone-preview .req-pill span { min-height: 48px; }
             <label><input type="radio" name="demoAccess" value="out" onchange="demo.access = this.value; renderAll()"> Outside access group</label>
         </fieldset>
         <fieldset class="demo-fs"><legend>Send result (Invoice and Request)</legend>
-            <label><input type="radio" name="demoSend" value="ok" checked onchange="demo.sendResult = this.value"> Both channels send</label>
-            <label><input type="radio" name="demoSend" value="partial" onchange="demo.sendResult = this.value"> One channel fails</label>
-            <label><input type="radio" name="demoSend" value="fail" onchange="demo.sendResult = this.value"> Send fails</label>
+            <label><input type="radio" name="demoSend" value="ok" checked onchange="demo.sendResult = this.value"> Email sent</label>
+            <label><input type="radio" name="demoSend" value="textfail" onchange="demo.sendResult = this.value"> Text failed, email sent</label>
+            <label><input type="radio" name="demoSend" value="emailfail" onchange="demo.sendResult = this.value"> Email failed (email only)</label>
+            <label><input type="radio" name="demoSend" value="bothfail" onchange="demo.sendResult = this.value"> Email and text failed</label>
+            <label><input type="radio" name="demoSend" value="emailfailtext" onchange="demo.sendResult = this.value"> Email failed, text sent</label>
         </fieldset>
         <fieldset class="demo-fs"><legend>Company invoices</legend>
             <label><input type="radio" name="demoData" value="sample" checked onchange="demo.data = this.value; renderAll()"> Sample invoices</label>
@@ -801,6 +803,7 @@ body.phone-preview .req-pill span { min-height: 48px; }
      ===================== -->
 <main id="invoices-page">
 <div id="invoices-list-view">
+    <div id="sendBannerList"></div>
     <div class="invoices-header">
         <h1 class="invoices-title">Invoices <span class="invoices-count-badge" id="countBadge" aria-label="invoices shown">0</span>
             <span class="br-chip br-annot" tabindex="0">BR-19 <span class="br-tooltip below">BR-19: The Invoices page, including bulk actions, is Admin only.</span></span>
@@ -875,7 +878,7 @@ body.phone-preview .req-pill span { min-height: 48px; }
                     <th scope="col" data-sort="paidN" aria-sort="none"><button class="sort-btn" onclick="sortBy('paidN')">Paid <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
                     <th scope="col" data-sort="balanceN" aria-sort="none"><button class="sort-btn" onclick="sortBy('balanceN')">Balance <i class="ti ti-arrows-sort sort-icon" aria-hidden="true"></i></button></th>
                     <th scope="col" data-sort="date" aria-sort="descending"><button class="sort-btn" onclick="sortBy('date')">Date <i class="ti ti-arrow-down sort-icon" aria-hidden="true"></i></button></th>
-                    <th scope="col">Reminders <span class="info-tip-wrap tip-right"><button type="button" class="info-tip-btn" aria-label="More info: Reminders" aria-describedby="tip-reminders"><i class="ti ti-info-circle" aria-hidden="true"></i></button><span class="info-tooltip" role="tooltip" id="tip-reminders">On means a reminder is still scheduled. Off means none are left to send.</span></span> <span class="br-chip br-annot" tabindex="0">BR-22 · BR-35 <span class="br-tooltip below">BR-22: Reminders column sits between Date and Actions and is not sortable. BR-35: On when a reminder is still scheduled, Off when none are left to send. Global Off (no enabled invoice reminder rows) shows every invoice as Off.</span></span></th>
+                    <th scope="col">Reminders <span class="info-tip-wrap tip-right"><button type="button" class="info-tip-btn" aria-label="More info: Reminders" aria-describedby="tip-reminders"><i class="ti ti-info-circle" aria-hidden="true"></i></button><span class="info-tooltip" role="tooltip" id="tip-reminders">On means a reminder is still scheduled. Reminders are skipped while an invoice is Offline Requested. Off means none are left to send.</span></span> <span class="br-chip br-annot" tabindex="0">BR-22 · BR-35 <span class="br-tooltip below">BR-22: Reminders column sits between Date and Actions and is not sortable. BR-35: On when a reminder is still scheduled, Off when none are left to send. Global Off (no enabled invoice reminder rows) shows every invoice as Off.</span></span></th>
                     <th scope="col" class="row-actions-cell">Actions</th>
                 </tr>
             </thead>
@@ -1077,7 +1080,7 @@ body.phone-preview .req-pill span { min-height: 48px; }
                 <div class="req-group"><label for="paySubject">Subject</label><div class="req-box"><input type="text" id="paySubject" value="Sparrow's Nest Painting - Payment Receipt"></div></div>
                 <div class="req-group"><label id="payBodyLbl">Body</label><div class="pay-body" role="textbox" aria-multiline="true" aria-labelledby="payBodyLbl" contenteditable="true" tabindex="0"><p>Hi {customer-name},</p><p>Thank you for your payment of <strong>{payment-amount}</strong> towards {company-name} invoice <strong>#{invoice-number}</strong>.</p><p>{payment-details}</p><p>If you would like to view your invoice, click here:</p><p>{view-invoice-button}</p></div></div>
             </div>
-            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">Mark as Paid <span class="br-tooltip">Mark as Paid opens Receive Payment with the request amount filled in. Save records the payment. Request marked Paid and hidden from the card (BR-28), when the saved amount equals the request amount. Assumed: Method must be selected (error text invented), Amount only needs to be above $0, the receipt email does not send in the prototype, and the rich text toolbar is not built.</span></span>
+            <span class="br-chip br-annot" tabindex="0" style="margin-top:12px;">Mark as Paid <span class="br-tooltip">Mark as Paid opens Receive Payment with the request amount filled in. Request marked Paid and hidden from the card (BR-28). Assumed: Method must be selected (error text invented), Amount only needs to be above $0, the receipt email does not send in the prototype, and the rich text toolbar is not built.</span></span>
         </div>
         <div class="edit-modal-footer">
             <button class="btn btn-primary" id="paySaveBtn" onclick="savePay()">Save</button>
@@ -1143,7 +1146,6 @@ body.phone-preview .req-pill span { min-height: 48px; }
                     <div class="settings-alert settings-alert--info" style="margin:0;"><i class="ti ti-info-circle" aria-hidden="true"></i><div id="commReadOnlyText"></div></div>
                     <span class="br-chip br-annot" tabindex="0" style="margin-top:8px;">BR-29 <span class="br-tooltip">Access group switch simulates a non-Admin, non-assignee user; the Invoices page itself is Admin only.</span></span>
                 </div>
-                <div id="commSendError" role="alert"></div>
                 <div id="commNotice" aria-live="polite"></div>
                 <span class="br-chip br-annot" id="commTitleNote" tabindex="0" hidden>Send Invoice title unverified <span class="br-tooltip">Send Invoice title unverified against production. Production shows no toast after sending an invoice, and the prototype matches.</span></span>
                 <div id="commKeepRow" hidden>
@@ -1578,7 +1580,7 @@ var invoices = [
     {id:13, initials:'DS', customer:'Dana Scully', proposal:'Proposal #2544066', invoiceNo:'#414859', status:'VOIDED', sync:'not-synced', amountN:2000.00, paidN:0, date:'4/7/2026', dueDate:'5/7/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[snt('Sep 20, 2026','8:00 AM','email'), skp('Oct 1, 2026','8:00 AM','email','voided')]},
     {id:14, initials:'AB', customer:'Al Bundy', proposal:'Invoice Only', invoiceNo:'#414852', status:'OPEN', sync:'not-synced', amountN:5000.00, paidN:0, date:'4/7/2026', dueDate:'5/7/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[skp('Oct 3, 2026','8:00 AM','SMS','offline')]},
     {id:15, initials:'JB', customer:'James Bond', proposal:'Proposal #2679119', invoiceNo:'#007', status:'OPEN', sync:'not-synced', amountN:4387.39, paidN:0, date:'4/6/2026', dueDate:'5/6/2026', paymentRequest:null, cadence:null, remindersDisabled:false, history:[]},
-    {id:16, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #3330640', invoiceNo:'#531224', status:'PARTIAL', sync:'synced', amountN:6389.54, paidN:638.95, date:'10/3/2026', dueDate:'11/3/2026', paymentRequest:null, cadence:{source:'send', next:{date:'Oct 12, 2026', channel:'email'}}, remindersDisabled:false, history:[snt('Sep 28, 2026','8:00 AM','email'), snt('Oct 2, 2026','8:00 AM','SMS'), skp('Oct 5, 2026','8:00 AM','email','bounced')]},
+    {id:16, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #3330640', invoiceNo:'#531224', status:'PARTIAL', sync:'synced', amountN:6389.54, paidN:638.95, date:'10/3/2026', dueDate:'11/3/2026', paymentRequest:null, cadence:{source:'send', next:{date:'Oct 12, 2026', channel:'email'}}, remindersDisabled:false, history:[snt('Sep 20, 2026','8:00 AM','email'), snt('Sep 22, 2026','8:00 AM','SMS'), snt('Sep 25, 2026','8:00 AM','email'), snt('Sep 28, 2026','8:00 AM','email'), snt('Oct 2, 2026','8:00 AM','SMS'), skp('Oct 5, 2026','8:00 AM','email','bounced')]},
     {id:17, initials:'DH', customer:'Dripjobs Harrison', proposal:'Proposal #3330712', invoiceNo:'#531290', status:'SENT', sync:'not-synced', amountN:1850.00, paidN:0, date:'10/6/2026', dueDate:'11/12/2026', paymentRequest:null, cadence:{source:'send', next:{date:'Nov 5, 2026', channel:'email'}}, remindersDisabled:false, history:[]},
     {id:18, initials:'AS', customer:'Arya Stark', proposal:'Proposal #3330755', invoiceNo:'#531301', status:'OFFLINE', sync:'not-synced', amountN:2400.00, paidN:0, date:'10/7/2026', dueDate:'10/20/2026', paymentRequest:null, cadence:{source:'send', next:{date:'Oct 29, 2026', channel:'email and SMS'}}, remindersDisabled:false, history:[skp('Oct 13, 2026','8:00 AM','email','offline'), skp('Oct 13, 2026','8:00 AM','SMS','offline')]}
 ];
@@ -1793,6 +1795,7 @@ function renderAll() {
     updateBulkBar();
     renderCommandCenter();
     renderInvoiceRecord();
+    renderSendBanner();
 }
 
 // ---- Selection + bulk bar (BR-25) ----
@@ -2001,13 +2004,25 @@ $('reqOverlay').addEventListener('click', function(e) { if (e.target === this) c
 
 // -- Send Invoice (mode 'send') and Send Request (mode 'sendrequest') --
 var commInvoiceId = null, commMode = 'send';
-// BR-28: sending a request shows an inline result on the Payment Requests card, not a toast. PLACEHOLDER copy: the Copy Review has no string for it.
-var reqMsg = null;
-function reqMsgHtml(ok) {
-    return '<div id="reqResult" role="' + (ok ? 'status' : 'alert') + '" tabindex="-1" style="margin-top:12px;">'
-        + alertHtml(ok ? 'success' : 'danger', ok ? 'ti-circle-check' : 'ti-alert-circle', (ok ? '[Placeholder] Payment request sent.' : '[Placeholder] Payment request couldn\u2019t be sent.')
-            + ' <span class="br-chip br-annot" tabindex="0">Placeholder copy <span class="br-tooltip">BR-28: sending a request shows an inline success or failure message, not a toast. The Copy Review has no string for it, so this is a placeholder. A failed send changes nothing; one channel succeeding counts as success (demo setting: Send Request result).</span></span>') + '</div>';
+// BR-28: send result banners (existing production copy, same text for Send Invoice and Send Request). Banners sit at the top of the invoice page.
+var SEND_OUTCOMES = {
+    ok:            { ok: true,  text: 'Successfully sent your email to the specified recipient(s)' },
+    textfail:      { ok: true,  text: 'Eek, something went wrong trying to send your text message but the email sent successfully.' },
+    emailfail:     { ok: false, text: 'There was an issue sending the email to this recipient, please try again' },
+    bothfail:      { ok: false, text: 'Eek, something went wrong trying to send your email & text message.' },
+    emailfailtext: { ok: true,  placeholder: true, text: '[Placeholder] Email failed, text sent.' }
+};
+var sendBanner = null;
+function sendBannerHtml(id) {
+    if (!sendBanner) return '';
+    var b = sendBanner;
+    return '<div id="' + id + '" role="' + (b.ok ? 'status' : 'alert') + '" tabindex="-1" class="send-banner">'
+        + alertHtml(b.ok ? 'success' : 'danger', b.ok ? 'ti-circle-check' : 'ti-alert-circle', esc(b.text)
+            + (b.placeholder ? ' <span class="br-chip br-annot" tabindex="0">Placeholder copy <span class="br-tooltip">Banner for email failed, text sent is unverified in production.</span></span>' : '')
+            + ' <span class="br-chip br-annot" tabindex="0">BR-28 <span class="br-tooltip">BR-28: Send Invoice and Send Request show the same banner text. A failed send leaves reminders unchanged; one channel succeeding counts as a successful send. Demo setting: Send result.</span></span>')
+        + '</div>';
 }
+function renderSendBanner() { var el = $('sendBannerList'); if (el) el.innerHTML = recordInvoiceId == null ? sendBannerHtml('sendBannerListBox') : ''; }
 function channelLabel() {
     function en(r) { return r.enabled; }
     var e = invoiceReminders.email.some(en), t = invoiceReminders.sms.some(en);
@@ -2051,7 +2066,7 @@ function applyCommChannel() {
 }
 function openComm(id, mode) {
     var inv = byId(id);
-    commInvoiceId = id; commMode = mode; $('commSendError').innerHTML = '';
+    commInvoiceId = id; commMode = mode;
     closeMenus(false);
     var mb = $('menubtn-' + id); if (mb) mb.focus();
     var first = inv.customer.split(' ')[0], num = inv.invoiceNo.replace('#','');
@@ -2102,22 +2117,15 @@ function submitComm() {
     var startOn = $('commReminderSwitch').getAttribute('aria-checked') === 'true';
     var keepOn = $('commKeepSwitch').getAttribute('aria-checked') === 'true';
     var sendSel = $('commSendOn'), later = !isReq && sendSel.value !== 'now';
-    // BR-28: a failed Send Invoice leaves reminders unchanged. PLACEHOLDER copy, production failure message unconfirmed. The modal stays open.
-    if (!isReq && demo.sendResult === 'fail') {
-        $('commSendError').innerHTML = alertHtml('danger', 'ti-alert-circle', '[Placeholder] Invoice couldn\u2019t be sent.'
-            + ' <span class="br-chip br-annot" tabindex="0">Placeholder copy <span class="br-tooltip">BR-28: a failed send changes nothing, and one channel succeeding counts as success. Production failure message for Send Invoice is unconfirmed, so this is a placeholder (demo setting: Send result).</span></span>');
-        return;
-    }
-    $('commSendError').innerHTML = '';
-    if (isReq) {
-        // BR-28: only a successful send changes anything; one channel succeeding counts as success. A failed send leaves the request and reminders as they were.
-        reqMsg = { id: inv.id, ok: demo.sendResult !== 'fail' };
-        if (reqMsg.ok) {
-            // BR-30: a Send Request never replaces a cadence. Keep OFF ends it; the Command Center off message is not set.
-            if (keepMode) { if (!keepOn) inv.cadence = null; }
-            else if (startMode && startOn) startCadence(inv, 'request');
-            inv.paymentRequest.sent = true;
-        }
+    // BR-28: only a successful send changes anything; one channel succeeding counts as success. A failed send leaves the request and reminders as they were.
+    var outcome = SEND_OUTCOMES[demo.sendResult] || SEND_OUTCOMES.ok, sent = outcome.ok || (!isReq && later);
+    if (!(!isReq && later)) sendBanner = outcome; // a scheduled send has not gone out yet, so no result banner
+    if (!sent) { /* failed: reminders and the request stay as they were */ }
+    else if (isReq) {
+        // BR-30: a Send Request never replaces a cadence. Keep OFF ends it; the Command Center off message is not set.
+        if (keepMode) { if (!keepOn) inv.cadence = null; }
+        else if (startMode && startOn) startCadence(inv, 'request');
+        inv.paymentRequest.sent = true;
     } else if (!later) {
         // BR-28 / BR-30: a send starts a cadence and replaces any existing one; OFF or an ineligible invoice ends it
         if (startMode) { if (startOn) startCadence(inv, 'send'); else inv.cadence = null; }
@@ -2126,7 +2134,9 @@ function submitComm() {
     } // a scheduled send leaves the cadence unchanged until it sends
     closeCommModal();
     renderAll();
-    if (isReq && !$('invoice-record').hidden) { var rr = $('reqResult'); if (rr) rr.focus(); else { var rb = $('rec-send-btn'); if (rb) rb.focus(); } }
+    var bn = $(!$('invoice-record').hidden ? 'sendBannerRec' : 'sendBannerListBox');
+    if (bn && !(!isReq && later)) bn.focus();
+    else if (!$('invoice-record').hidden) { var rb = $('rec-send-btn'); if (rb) rb.focus(); }
     else { var b = $('menubtn-' + inv.id); if (b) b.focus(); }
 }
 function cancelPaymentRequest(id) {
@@ -2243,7 +2253,7 @@ function renderInvoiceRecord() {
     var box = $('invoice-record');
     if (recordInvoiceId == null || !box) return;
     var inv = byId(recordInvoiceId), s = STATUS[inv.status], c = custInfo(inv), items = invItems(inv), id = inv.id;
-    var html = '<button type="button" class="back-link" onclick="closeInvoiceRecord()"><i class="ti ti-arrow-left" aria-hidden="true"></i>Back to Invoices</button>'
+    var html = sendBannerHtml('sendBannerRec') + '<button type="button" class="back-link" onclick="closeInvoiceRecord()"><i class="ti ti-arrow-left" aria-hidden="true"></i>Back to Invoices</button>'
         + '<div class="rec-head"><div class="rec-title-wrap"><h1 id="rec-title" tabindex="-1">Invoice ' + esc(inv.invoiceNo) + ' <span class="status-chip ' + s.cls + '">' + s.label + '</span></h1><span class="rec-iconbtn" aria-hidden="true"><i class="ti ti-download"></i></span></div>'
         + '<div class="rec-actions">'
         + (inv.status !== 'VOIDED' ? '<button type="button" class="btn btn-primary" onclick="openComm(' + id + ', \'send\')"><i class="ti ti-send" style="margin-right:6px;" aria-hidden="true"></i>Send Invoice</button>' : '')
@@ -2276,7 +2286,6 @@ function renderInvoiceRecord() {
             + '<button type="button" class="btn btn-outline-primary" onclick="recMarkPaid(' + id + ')">Mark as Paid</button>'
             + '<button type="button" class="btn rec-cancel" onclick="recCancelRequest(' + id + ')">Cancel</button>'
             + '</div>'
-            + (reqMsg && reqMsg.id === id ? reqMsgHtml(reqMsg.ok) : '')
             + '</div>';
     }
     html += '<div class="rec-tabs" role="tablist" aria-label="Invoice sections">'
@@ -2358,13 +2367,13 @@ function recCancelRequest(id) {
 }
 function openInvoiceRecord(id) {
     closeMenus(false);
-    recordInvoiceId = id; reqMsg = null;
+    recordInvoiceId = id; sendBanner = null;
     renderInvoiceRecord();
     $('invoices-list-view').hidden = true; $('invoice-record').hidden = false;
     $('rec-title').focus();
 }
 function closeInvoiceRecord() {
-    var id = recordInvoiceId; recordInvoiceId = null;
+    var id = recordInvoiceId; recordInvoiceId = null; sendBanner = null;
     $('invoice-record').hidden = true; $('invoices-list-view').hidden = false;
     renderAll();
     var b = $('menubtn-' + id); if (b) b.focus();
