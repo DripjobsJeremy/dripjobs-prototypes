@@ -1,56 +1,72 @@
 # DripJobs Weekly Product Update
 
-**Period:** October 19 – October 23, 2026
-**Release:** Oct 19 & Oct 22 deployments · 6 updates
+**Period:** October 26 – October 30, 2026
+**Release:** Oct 26 & Oct 29 deployments · 7 updates
 
 ---
 
 ## Proposal Builder
 
-### Fixed Inconsistent Drag-and-Drop Feedback Between Packages, Areas, and Line Items (*Oct 19*)
-**What changed:** Fixed a bug where dragging a line item out of a package showed the wrong drop-target indicator, and dragging an area or line item into a package showed no indicator at all. Drag-and-drop now shows the correct visual feedback in every direction between packages, areas, and line items.
-**Why it matters:** It's now clear where you can drop an item while rearranging a proposal, instead of guessing.
+### Fixed Reopened Proposals Not Updating After a Stage Change in Command Center (*Oct 26*)
+**What changed:** Fixed a bug where changing a proposal's stage through the Command Center's Move workflow (for example, reopening a Rejected proposal to Draft) appeared to save but didn't actually update the proposal's status. Moving a proposal by drag-and-drop was not affected.
+**Why it matters:** Reopening a rejected proposal through Command Center now reliably updates its status, the same as dragging it to a new stage.
 **Action needed:** None
 
 ---
 
-## Communications
-
-### Fixed Email Blast Images Not Appearing in Preview, and Message Body Being Cut Off (*Oct 19*)
-**What changed:** Fixed a bug where images in an email blast displayed correctly in the editor but didn't appear in the preview or delivered preview email, and the email body was sometimes truncated in the recipient's inbox until they clicked "View entire message."
-**Why it matters:** Previewing a blast before you send it now accurately shows what your customers will actually receive, images and all.
+### Fixed New Proposals Not Inheriting the Deal's Assigned Project Manager (*Oct 26*)
+**What changed:** Fixed a bug where creating a new proposal from a deal correctly defaulted the assigned Salesperson but left the Project Manager field blank, even when the deal had one assigned.
+**Why it matters:** New proposals created from a deal now carry over both the Salesperson and Project Manager automatically, so you don't have to re-select the Project Manager by hand.
 **Action needed:** None
 
 ---
 
-## Jobs & Job Schedule
-
-### Fixed the "Show All Jobs" Toggle Not Applying to Every Jobs and Job Schedule View (*Oct 22*)
-**What changed:** Fixed a bug where the "Show All Jobs For Project Manager Role" toggle opened full visibility on the Jobs Pipeline List and Job Schedule Calendar, but the Jobs Board view and the "needs scheduling" list still only showed a Project Manager's own assigned jobs.
-**Why it matters:** With the toggle on, a Project Manager now sees the same full set of jobs across every view in Jobs and Job Schedule, so nothing is missed depending on which view they're looking at.
+### Fixed Scheduled Proposal Sends Not Saving or Queuing in Some Cases (*Oct 29*)
+**What changed:** Fixed a bug that, for some accounts, prevented a proposal scheduled to send at a future date and time from saving or queuing. Clicking Send appeared to work but the proposal was never actually scheduled or sent.
+**Why it matters:** Scheduling a proposal for a future send now reliably saves and sends at the time you selected.
 **Action needed:** None
 
 ---
 
-## Customer Portal
+## Appointments
 
-### Customers Can Now View Proposals, Invoices, and Change Orders in Their Own Language (*New · Oct 22*)
-**What changed:** Added a Default Document Language setting in Company Settings > Customer Portal that Admins can set for all customers, plus a per-document language option on individual Proposals and Invoices. Customers can also pick their own language from a new selector in the Customer Portal header, which takes priority over any default. Translation covers portal web pages only; downloaded PDFs stay in the original language.
-**Why it matters:** Customers can read their proposals, invoices, and change orders in the language they're most comfortable with, without you having to do anything extra.
+### Fixed Duplicate Calendar Entries After Scheduling an On-Site Estimate (*Oct 26*)
+**What changed:** Fixed a bug where the original booking-form request stayed visible on the calendar after an on-site estimate was scheduled from Command Center, creating a duplicate entry alongside the new appointment.
+**Why it matters:** Your calendar now shows a single, accurate entry once an on-site estimate request has been scheduled.
 **Action needed:** None
 
 ---
 
-## Integrations
+## Inbox
 
-### Zapier: Payment Schedule Now Available on the "New Invoice Created" Trigger (*New · Oct 22*)
-**What changed:** Added a Payment Schedule field to the existing "New Invoice Created" Zapier trigger, exposing each scheduled payment's name, percentage, and dollar amount so it can be mapped into downstream Zaps.
-**Why it matters:** Zaps that use invoice data can now also account for how payments are scheduled, without an extra lookup step.
+### Fixed Email Unread Badge Showing Conversations You Can't Access (*Oct 26*)
+**What changed:** Fixed a bug where the unread badge on the Email menu could count conversations from deals you're not assigned to, even though your Inbox correctly showed them as not visible to you.
+**Why it matters:** The unread count on the Email menu now always matches what's actually waiting in your Inbox.
 **Action needed:** None
 
 ---
 
-### New Zapier Trigger: "New Email Received" (*New · Oct 22*)
-**What changed:** Added a new Zapier trigger, "New Email Received," that fires whenever a customer email arrives in your Inbox Email (when "Route all email replies to DripJobs" is enabled in Company Settings > Email Settings). The trigger includes customer name, phone, email, assigned Salesperson and Project Manager, email content, received date, and email type.
-**Why it matters:** You can now build Zaps that react the moment a customer email lands in your Inbox, without checking DripJobs first.
+## Contacts
+
+### Added Explanations to Contact Option Toggles (*New · Oct 26*)
+**What changed:** Added info icons next to the Active Contact, Opt Out of Blasts/Newsletters, Opt Out of Drips, and Opt Out of SMS toggles on a contact's Options section. Hovering or tapping an icon explains what the toggle does.
+**Why it matters:** It's now clear at a glance what each contact-level toggle controls, especially for the communication opt-out settings.
+**Action needed:** None
+
+---
+
+## Invoicing
+
+### Fixed Request Payment's Custom % and Amount Fields Not Staying in Sync (*Oct 29*)
+**What changed:** Fixed a bug in the Request Payment modal where entering a dollar amount didn't update the Custom % field to match, and where a percentage entry rounded the calculated amount down instead of to the nearest cent.
+**Why it matters:** The percentage and dollar amount in a payment request now always match, and amounts are rounded correctly.
+**Action needed:** None
+
+---
+
+## Production Rates
+
+### Added a 48-Character Limit to Substrate Client Labels (*Oct 29*)
+**What changed:** Limited the Client label field on a substrate to 48 characters going forward, with a live character counter, so new labels always display in full on customer-facing documents. Existing longer labels are unchanged and show a warning until edited back under the limit.
+**Why it matters:** Client labels you add from now on will always show completely on proposals, invoices, and change orders instead of getting cut off.
 **Action needed:** None
