@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-10-30] Hub sync: removed 4 more shipped cards
+- Decision: Removed Cancellation Intercept Modal (86bbah6jq), Event Banner Relocation (86bc3at0e), Google Calendar Icon + My Profile Relocation (86bc5bcfc), and Customer Portal Document Language (86bc6vwzh) from `#protoGrid`. All four are Pushed to Production in ClickUp (releases 09-06, 10-13, 10-22).
+- Why: Direct request after the re-sync marked them shipped.
+- Open question: None.
+
 ## [2026-10-30] Hub: re-synced remaining #protoGrid statuses and tags to ClickUp
 - Decision: Rechecked all 28 ClickUp-linked cards after the shipped-card removal. 19 unchanged; 9 updated: 4 now Pushed to Production (Cancellation Intercept Modal, Event Banner Relocation, Google Calendar Icon, Customer Portal Document Language), 2 moved to In Progress (Role Departments, Add Multiple Items Description Only, both at "pr created"), Invoice Reminders to In Review, Job Costing UI Refresh to In QA Testing, and the 🎯 badge added to Subcontractor Paid Indicator. Business Entity Records stays In QA Testing ("testing ready").
 - Why: Direct request, a month after the 2026-10-01 sync.
