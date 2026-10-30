@@ -2,6 +2,21 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-10-30] Hub sync: removed 4 more shipped cards
+- Decision: Removed Cancellation Intercept Modal (86bbah6jq), Event Banner Relocation (86bc3at0e), Google Calendar Icon + My Profile Relocation (86bc5bcfc), and Customer Portal Document Language (86bc6vwzh) from `#protoGrid`. All four are Pushed to Production in ClickUp (releases 09-06, 10-13, 10-22).
+- Why: Direct request after the re-sync marked them shipped.
+- Open question: None.
+
+## [2026-10-30] Hub: re-synced remaining #protoGrid statuses and tags to ClickUp
+- Decision: Rechecked all 28 ClickUp-linked cards after the shipped-card removal. 19 unchanged; 9 updated: 4 now Pushed to Production (Cancellation Intercept Modal, Event Banner Relocation, Google Calendar Icon, Customer Portal Document Language), 2 moved to In Progress (Role Departments, Add Multiple Items Description Only, both at "pr created"), Invoice Reminders to In Review, Job Costing UI Refresh to In QA Testing, and the 🎯 badge added to Subcontractor Paid Indicator. Business Entity Records stays In QA Testing ("testing ready").
+- Why: Direct request, a month after the 2026-10-01 sync.
+- Open question: The 4 newly shipped cards are left on the hub with the Pushed to Production badge; removal needs another "Sync hub" request. 4 cards have no ClickUp link and were not checked.
+
+## [2026-10-30] Hub sync: removed 5 shipped cards
+- Decision: Removed Link Multiple Google Calendars (86bbkb1vp), Deal Stage and Deal/Proposal Status (86bbyr3w2), Holiday Calendar Company-Wide (86bbv6zhh), AI Assisted Drip Message Writing (86b9bmab5), and Address Line 2 (86bbwn0r2) from `#protoGrid`. All five were Pushed to Production in ClickUp (releases 09-21 through 09-30) and already carried the Pushed to Production badge on the hub.
+- Why: Direct "Sync hub" request to clear shipped items. No Drippy message was pasted, so removal was based on the 2026-10-01 ClickUp status sync, not on deploy reports.
+- Open question: Statuses for the remaining cards were last checked on 2026-10-01 and may have changed; a fresh status sync or Drippy messages would catch anything else that has shipped since.
+
 ## [2026-10-30] Weekly Product Update + Product Roadmap refreshed for Oct 26-30, 2026
 
 - Decision: Rebuilt `weekly-product-update/index.html` and `Weekly_Product_Update.md` with 7 of the 9 tickets pushed to production this week (5 closed Oct 26, 4 closed Oct 29), grouped into Proposal Builder (3), Appointments, Inbox, Contacts (new, tooltips), Invoicing, and Production Rates. Excluded one ticket (Add Configurable Training Demo URLs to Super Admin Settings, 86bbzc99e): it's a DripJobs Super Admin / Customer Success configuration panel that customers never see, matching the established internal-staff-tooling exclusion. Generalized one ticket's account-specific framing (Scheduled Proposal Sends fix, originally tied to a named customer tenant) into general customer-facing wording. Added "LC" as the two-letter assignee abbreviation for Laura Cuadros, the first ticket this session where she's been a card's sole/first assignee rather than a second "+1". Rebuilt `dripjobs-product-roadmap/index.html` from a fresh workspace-wide pull of the bare 🎯 tag: 34 in-flight tickets, 1 on hold/parked (down from 3; one ticket shipped off QA Kickback into PR Created, one dropped off the open tag list entirely, presumably closed). First real use of the roadmap's "New" lane and its urgent-priority pill, both previously defined in the board's CSS/legend but never populated by live data.
