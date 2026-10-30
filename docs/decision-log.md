@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-10-30] Release Notes | October 2026: added to hub, sourced from ClickUp
+- Decision: Built `release-notes-october-2026/` (index.html + Release_Notes_October_2026.md) matching September's structure and voice, and added its card after September. Content compiled from ClickUp tickets Pushed to Production in October (36 tickets, 7 release dates: Oct 5, 13, 15, 19, 22, 26, 29): 23 entries kept. Excluded internal-only items (cancellation intercept modal and its revert, /QA-ticket auto mode, OpenAI key rotation, At Risk Account Finder default, training demo URLs, super admin password date editor), single-account or no-outcome investigations (custom email domain, Google Calendar permission errors, Google Calendar five-hour offset, missing appointments, scheduled proposal sends), and the cross-account contact visibility fix, which is a security incident and needs a leadership decision before any public wording. Tickets naming a customer in the body were kept with generic wording when the acceptance criteria were general.
+- Why: Same ClickUp-sourcing and exclusion rules as June through September. Jeremy confirmed earlier that the Cancellation Intercept Modal is internal.
+- Assumption: Nine tickets (Oct 5 group) carry a mistyped release-2026-09-06 tag; they closed Oct 5, so they are dated Oct 5. Upcoming (Thumbtack, Business Entity Records, Per-Package Discounts, Job Costing Design Refresh, Description Only in Add Multiple Items) and Coming Soon (Invoice Reminders) were chosen from in-flight customer-facing tickets; Thumbtack moved up from Coming Soon since ClickUp shows testing complete.
+- Open question: Confirm the held-back contact visibility fix stays out, the Upcoming picks, and whether the Google Calendar five-hour and missing-appointments fixes should be written up generically once dev confirms they shipped.
+
 ## [2026-10-30] Hub sync: removed 4 more shipped cards
 - Decision: Removed Cancellation Intercept Modal (86bbah6jq), Event Banner Relocation (86bc3at0e), Google Calendar Icon + My Profile Relocation (86bc5bcfc), and Customer Portal Document Language (86bc6vwzh) from `#protoGrid`. All four are Pushed to Production in ClickUp (releases 09-06, 10-13, 10-22).
 - Why: Direct request after the re-sync marked them shipped.
