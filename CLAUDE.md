@@ -78,6 +78,7 @@ The Roadmap is a standalone page (`dripjobs-product-roadmap/index.html`) rendere
 - `roadmap-config.js`: hand-edited settings. `inFlightSpaces` (matched by space NAME, currently DripJobs Development V1 and QA Space - V1), `shippingTitles` (remove a title once it ships), `pins.now` / `pins.next` (optional, ships empty), `inFlightOrder` (status order for In Flight, closest to done first).
 - `?fixtures=1` on the roadmap URL adds three local test tickets (no lane tag, two lane tags, retired tags only) to check the logic.
 - Product Signals shows a lane badge on rows whose linked ticket is on the board (or whose `ticket.parent` is). Other rows show nothing. The hub `index.html` loads the three roadmap files for this.
+- Policy source: `docs/DripJobs_V1_Operating_Mode_Nov2026.md` (lane tags and precedence). It lists rule 1 as the Development V1 space only; Jeremy approved adding QA Space - V1 on Nov 3 because the QA Development Testing list lives there.
 - Do not show raw task IDs on the board. Do not move the board back to status columns.
 
 ## Out of Scope for This Repo
