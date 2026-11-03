@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-11-03] Proposal Social Proof Banner: star rating and satisfaction guarantee prototype
+- Decision: Built `proposal-social-proof-banner/` with two surfaces (Company Settings > Customer Portal tab, and the portal "Your Investment" card with banner), switched from the demo bar. Banner uses container queries so the 375px frame and a real phone behave the same. Revision Log lives in a collapsed section at the bottom of the page.
+- Assumptions: "Blank" scenario means Google Rating blank with Projects Completed and Years in Business filled. Save feedback is a demo note, not product UI. Save button keeps production #8B85EA (3.16:1 white text), which the ticket logs as pre-existing, so axe flags it on that one element. Alert action link and " out of 5" screen reader text are marked pending Copywriter.
+- Hub: card added with status Needs Design (ticket status "needs design"); static header fallback count corrected from 26 to 29 (the live count is computed from #protoGrid cards).
+
 ## [2026-11-03] Roadmap rebuilt around V1 lanes
 - Decision: Rebuilt `dripjobs-product-roadmap/` from hand-written HTML into data (`roadmap-data.js`), lane rules (`roadmap-lanes.js`), config (`roadmap-config.js`) and a renderer. Lanes replace status columns; status is a secondary badge. In Flight covers two spaces, DripJobs Development V1 and QA Space - V1, because the QA Development Testing list lives in QA Space - V1 (confirmed against live ClickUp). In Flight order follows Jeremy's path reversed: Branch Ready, Code Complete, PR Created, Testing Complete, QA Kickback, Test In Progress, Testing Ready, In Progress, Ready for Dev.
 - Product Signals: lane badge only for tickets on the board (or whose parent is). The 21 other linked tickets show nothing (no "Not on roadmap" label). Today that is one row (Job Costing export, In Flight).
