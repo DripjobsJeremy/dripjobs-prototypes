@@ -16,6 +16,8 @@
  *   who     DripJobs rep or channel member who raised it (customer names are left out on purpose)
  *   theme   cluster key (see PS_THEMES), n = mentions seen so far, human = needs a human look
  *   ticket  { id, status, live }  live:true means status was read from ClickUp on syncedOn
+ *           optional parent: id of a parent ticket tagged 🎯; the row then shows the parent's lane
+ *           (lane badges only appear for tickets on the Roadmap board, see roadmap-lanes.js)
  */
 (function () {
   var PS_META = {
