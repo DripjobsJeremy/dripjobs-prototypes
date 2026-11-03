@@ -29,6 +29,27 @@
   ];
   var STORE_KEY = 'dj-product-signals-triage-v1';
 
+    // Lane badge: only for tickets on the Roadmap board (or whose parent is). Lane rules live in roadmap-lanes.js.
+  function laneBadge(ticket) {
+    if (!ticket || !window.RMLanes || !window.RM_DATA || !window.RM_CONFIG) return null;
+    var cards = laneCards();
+    var c = cards[ticket.id] || (ticket.parent && cards[ticket.parent]);
+    if (!c) return null;
+    var lane = window.RMLanes.LANES.filter(function (l) { return l.key === c.lane; })[0];
+    var b = document.createElement('span');
+    b.className = 'ps-badge ps-lane ps-lane-' + (lane.group === 'V2' ? 'v2' : 'v1');
+    b.textContent = 'Lane: ' + lane.label;
+    b.title = 'From the Roadmap lane rules (ClickUp tags). Change the tag in ClickUp to move it.';
+    return b;
+  }
+  var _laneCards = null;
+  function laneCards() {
+    if (_laneCards) return _laneCards;
+    _laneCards = {};
+    window.RMLanes.build(window.RM_DATA.tasks, window.RM_CONFIG).cards.forEach(function (c) { _laneCards[c.task.id] = c; });
+    return _laneCards;
+  }
+
   function el(tag, cls, text) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -209,6 +230,7 @@
         line.appendChild(ck);
       }
       c3.appendChild(line);
+      var lb = laneBadge(r.ticket); if (lb) c3.appendChild(lb);
     }
     row.appendChild(c3);
 
@@ -288,6 +310,7 @@
         line.appendChild(document.createTextNode(' · ' + t.ticket.status));
         if (t.ticket.live) line.appendChild(el('span', 'ps-checked', ' ✓ checked'));
         c3.appendChild(line);
+        var lb2 = laneBadge(t.ticket); if (lb2) c3.appendChild(lb2);
       }
       card.appendChild(c3);
       var c4 = el('div');

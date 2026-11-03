@@ -70,6 +70,16 @@ GitHub API mechanics:
 - After any session with a real design decision (a layout choice, a scope cut, a pattern deviation from the design system and why), append a dated entry to `docs/decision-log.md`. Keep entries to 2 to 4 lines.
 - If a request would require deviating from an anti-pattern listed in the design system, flag it explicitly rather than silently doing it.
 
+## Roadmap Lanes (dripjobs-product-roadmap)
+
+The Roadmap is a standalone page (`dripjobs-product-roadmap/index.html`) rendered from files, not hand-edited HTML:
+- `roadmap-data.js`: every open ClickUp task tagged 🎯 (bare tag only, not `🎯 focus`), read only. Refresh it on request ("Refresh roadmap") with the ClickUp connector: `clickup_filter_tasks` (tag 🎯) for name, status, priority, tags, list, then `clickup_get_task` per task for `task_type` and the space id, and map list to space name. Update `syncedAt`. Never write to ClickUp.
+- `roadmap-lanes.js`: the ONLY place lane rules live. Precedence: 1 space in `inFlightSpaces` = In Flight, 2 tag `v2 candidate`, 3 `lane: exception`, 4 `lane: maintenance` or type Bug, 5 `lane: gate`, 6 `lane: v2 prep`, 7 Unassigned (hidden when empty). Tags are case insensitive, the retired `v1` and `v2` tags are ignored, and more than one lane tag outside In Flight shows a "Lane conflict" badge.
+- `roadmap-config.js`: hand-edited settings. `inFlightSpaces` (matched by space NAME, currently DripJobs Development V1 and QA Space - V1), `shippingTitles` (remove a title once it ships), `pins.now` / `pins.next` (optional, ships empty), `inFlightOrder` (status order for In Flight, closest to done first).
+- `?fixtures=1` on the roadmap URL adds three local test tickets (no lane tag, two lane tags, retired tags only) to check the logic.
+- Product Signals shows a lane badge on rows whose linked ticket is on the board (or whose `ticket.parent` is). Other rows show nothing. The hub `index.html` loads the three roadmap files for this.
+- Do not show raw task IDs on the board. Do not move the board back to status columns.
+
 ## Out of Scope for This Repo
 
 - Ticket drafting, bug reports, QA test plans as ClickUp artifacts, PRDs. Those stay in the DripJobs PM Claude Project.
