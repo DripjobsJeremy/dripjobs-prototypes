@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Proposal Social Proof Banner | DripJobs Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --primary:#8B85EA; --primary-active:#5C53DC;
+  --text:#32415B; --help:#6B7280; --border:#D5DCE8; --card:#FFFFFF; --page:#F7F7FB;
+  --err-tx:#991B1B; --err-bd:#DC2626; --err-bg:#FEF2F2; --err-line:#FECACA;
+  --demo-bg:#1F2433; --demo-tx:#FFFFFF; --br:#F59E0B;
+  box-sizing:border-box;
+}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+body{margin:0;background:var(--page);color:var(--text);font:14px/1.45 Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+button,input{font:inherit;color:inherit}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+:focus-visible{outline:2px solid var(--primary-active);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+/* ---------- Proto bar (hub standard) ---------- */
+.proto-bar{background:#fff;border-bottom:1px solid #E5E7EB;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.proto-bar-left{display:flex;align-items:center;gap:10px}
+.proto-bar .back-link{font-size:12px;font-weight:500;color:#6B7280;text-decoration:none;display:flex;align-items:center;gap:4px}
+.proto-bar .back-link:hover{color:#5C53DC}
+.proto-bar .divider{color:#E5E7EB;font-size:16px}
+.proto-bar-title{font-size:14px;font-weight:600;color:#1F2937}
+.proto-bar-ticket{font-size:11px;font-weight:600;color:#5C53DC;text-decoration:none;padding:4px 10px;border:1px solid #D6D2F5;background:#E8E6FA;border-radius:999px;letter-spacing:.2px}
+.proto-bar-ticket:hover{background:#8B85EA;color:#fff}
+
+/* ---------- Demo chrome (excluded from a11y audit, still keyboard usable) ---------- */
+.demo-bar{position:sticky;top:0;z-index:50;background:var(--demo-bg);color:var(--demo-tx);display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:10px 20px}
+.demo-title{font-weight:700;font-size:13px;margin-right:auto}
+.demo-title small{display:block;font-weight:400;opacity:.8;font-size:12px}
+.seg{display:inline-flex;border:1px solid #4B5268;border-radius:999px;overflow:hidden}
+.seg button{background:transparent;border:0;color:#fff;padding:8px 14px;min-height:40px;cursor:pointer;font-size:13px}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--demo-bg);font-weight:600}
+.seg-label{font-size:12px;opacity:.85}
+@media (max-width:760px){.demo-bar{position:static}}
+.demo-switch{display:inline-flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;background:transparent;border:0;color:#fff;min-height:40px;padding:0 4px}
+.demo-switch .track{width:36px;height:20px;border-radius:999px;background:#4B5268;position:relative;transition:background .15s}
+.demo-switch .track::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.demo-switch[aria-checked="true"] .track{background:var(--br)}
+.demo-switch[aria-checked="true"] .track::after{left:18px}
+.demo-note{width:100%;font-size:12px;color:#FDE68A;min-height:0}
+.demo-note:empty{display:none}
+.demo-caption{font-size:12px;color:#4B5563;background:#FFFBEB;border:1px dashed #F59E0B;border-radius:8px;padding:8px 12px;margin:12px 0}
+
+/* BR chips (hub pattern, tooltip also opens on keyboard focus) */
+.br{display:inline-flex;align-items:center;justify-content:center;font:700 10px/1 Inter,sans-serif;background:#FEF3C7;color:#78350F;border:1px solid var(--br);border-radius:999px;padding:3px 7px;margin:0 2px;cursor:help;position:relative;vertical-align:middle;min-height:20px}
+.br .tip{display:none;position:absolute;z-index:200;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);width:260px;background:var(--demo-bg);color:#fff;font-weight:400;font-size:12px;line-height:1.4;text-align:left;padding:8px 10px;border-radius:8px;white-space:normal;text-transform:none;letter-spacing:0}
+.br:hover .tip,.br:focus .tip,.br:focus-visible .tip{display:block}
+.br.dismissed .tip{display:none!important}
+.br-pend{display:inline-block;font:700 10px/1 Inter,sans-serif;background:#FEF3C7;color:#78350F;border:1px dashed var(--br);border-radius:999px;padding:3px 7px;margin-left:8px;vertical-align:middle}
+body.no-br .br,body.no-br .br-pend{display:none}
+.brs{display:inline-block;margin-left:4px}
+
+/* ---------- Settings surface ---------- */
+.page{max-width:1200px;margin:0 auto;padding:20px 16px 40px}
+.page h1{font-size:20px;font-weight:700;margin:0 0 12px}
+.tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tab{padding:10px 16px;font-size:14px;font-weight:600;color:var(--text);border-bottom:3px solid var(--primary)}
+.settings-section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:18px}
+.title-row{display:flex;align-items:center;flex-wrap:wrap;gap:2px;margin:0 0 6px}
+.settings-section-title{font-size:14px;font-weight:600;margin:0}
+.settings-section-subtitle{font-size:12px;color:var(--help);margin:0 0 16px}
+.settings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
+.lbl-row{display:flex;align-items:center;flex-wrap:wrap;gap:2px;margin:0 0 6px;min-height:20px}
+.settings-field label{display:inline-block;font-size:11px;font-weight:600;margin:0;color:var(--text)}
+.settings-field input[type=text]{width:100%;height:36px;padding:0 10px;font-size:13px;border:1px solid var(--border);border-radius:4px;background:#fff;color:var(--text)}
+.settings-field input[type=text]:focus{border-color:var(--primary);outline:2px solid var(--primary-active);outline-offset:1px}
+.settings-field input[aria-invalid="true"]{border-color:var(--err-bd)}
+#googleRating{scroll-margin-top:120px;scroll-margin-bottom:120px}
+.field-help{font-size:12px;color:var(--help);margin:6px 0 0}
+.err-slot{margin:0}
+.field-error{display:flex;gap:6px;align-items:flex-start;font-size:12px;font-weight:500;color:var(--err-tx);margin:6px 0 0}
+.field-error svg{flex:none;margin-top:1px}
+.toggle-wrap{margin-top:16px}
+.toggle-row{display:flex;align-items:center;gap:12px;min-height:48px}
+.toggle-row label{font-size:14px;font-weight:600;cursor:pointer;min-height:48px;display:flex;align-items:center}
+input.sw{appearance:none;-webkit-appearance:none;flex:none;margin:0;width:44px;height:24px;border-radius:999px;background:#8B949E;position:relative;cursor:pointer;transition:background .15s}
+input.sw::before{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s}
+input.sw:checked{background:var(--primary)}
+input.sw:checked::before{left:22px}
+.toggle-help{font-size:12px;color:var(--help);margin:0 0 0 56px;max-width:640px}
+.docs-box{border:2px dashed #CBD5E1;border-radius:8px;min-height:240px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;font-size:13px;color:#4B5563;background:#FAFAFC}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.btn{min-height:48px;padding:0 24px;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid transparent}
+.btn-save{background:var(--primary);color:#fff}
+.btn-save:hover{background:#736BE3}
+.btn-cancel{background:#fff;color:var(--text);border-color:var(--border)}
+.settings-alert{display:flex;gap:10px;align-items:flex-start;border-radius:8px;padding:12px 14px;margin-bottom:18px}
+.settings-alert--danger{background:var(--err-bg);border:1px solid var(--err-line);color:var(--err-tx)}
+.settings-alert svg{flex:none;margin-top:2px}
+.settings-alert-body{flex:1;font-size:13px}
+.settings-alert-action{margin-left:auto;font-weight:600;font-size:13px;color:var(--err-tx);text-decoration:underline;white-space:nowrap;align-self:center}
+@media (max-width:760px){
+  .settings-grid{grid-template-columns:1fr;gap:0}
+  .settings-field{margin-bottom:6px}
+  .err-slot{min-height:44px}
+  .settings-alert{flex-wrap:wrap}
+  .settings-alert-action{margin-left:28px;align-self:flex-start}
+}
+
+/* ---------- Portal surface (container queries so the 375px frame and a real phone behave the same) ---------- */
+.portal-wrap{margin:0 auto;width:100%;max-width:960px}
+.portal-wrap.is-mobile{width:375px;max-width:100%;border:1px solid #CBD5E1;border-radius:18px;overflow:hidden;box-shadow:0 4px 16px rgba(15,23,42,.12)}
+.portal{container-type:inline-size;background:#F8FAFC;padding:18px 16px 20px}
+.pv-head{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.pv-ico{width:36px;height:36px;border-radius:10px;background:#1E2A47;display:flex;align-items:center;justify-content:center;flex:none}
+.pv-head h2{font-size:18px;font-weight:700;margin:0;color:#111827}
+.pv-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.08)}
+.pv-row{display:flex;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #EEF1F6;font-size:14px;color:#374151}
+.pv-row b{color:#111827}
+.pv-total{background:#5B05D6;color:#fff;display:flex;justify-content:space-between;align-items:flex-end;padding:16px}
+.pv-total small{display:block;font-size:12px;color:#E9DDFB}
+.pv-total .big{font-size:26px;font-weight:800;line-height:1.1}
+.pv-total .bal{font-size:18px;font-weight:700;text-align:right}
+.sp{background:#F1F5F9;border-radius:12px;margin-top:16px;padding:20px 8px;display:flex;justify-content:center}
+.sp-item{flex:1 1 0;min-width:0;text-align:center;padding:0 12px}
+.sp-item + .sp-item{border-left:1px solid #CBD5E1}
+.sp-val{font-size:22px;font-weight:800;color:#1E2A47;line-height:1.2;display:flex;align-items:center;justify-content:center;gap:4px}
+.sp-val.ok{color:#15803D}
+.sp-lbl{font-size:12px;color:#4B5563;margin-top:4px}
+.stars{display:inline-flex;gap:1px;margin-left:2px}
+.stars svg{width:16px;height:16px;display:block}
+@container (max-width:520px){
+  .sp{flex-direction:column;align-items:center;gap:20px;padding:22px 16px}
+  .sp-item{flex:none;width:100%;padding:0}
+  .sp-item + .sp-item{border-left:0}
+  .sp-val{font-size:26px}
+  .sp-lbl{font-size:14px}
+  .stars svg{width:18px;height:18px}
+  .pv-total{flex-direction:column;align-items:flex-start;gap:12px}
+  .pv-total .bal{text-align:left}
+}
+
+/* ---------- Revision log ---------- */
+.revlog{max-width:1200px;margin:0 auto;padding:0 16px 60px}
+.revlog summary{cursor:pointer;font-weight:600;font-size:13px;padding:8px 0}
+.revlog table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border:1px solid var(--border)}
+.revlog th,.revlog td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.revlog th{background:#F1F5F9}
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">&larr; Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Proposal Social Proof Banner</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bcxp94k" target="_blank" rel="noopener">Proposal Social Proof Banner: Star Rating Display and Satisfaction Guarantee Control</a>
+</div>
+
+<div class="demo-bar" role="region" aria-label="Prototype controls">
+  <div class="demo-title">Proposal Social Proof Banner<small>Prototype controls are not part of the product</small></div>
+  <span class="seg-label" id="scenLbl">Starting scenario</span>
+  <div class="seg" role="group" aria-labelledby="scenLbl">
+    <button type="button" data-scen="legacy" aria-pressed="true">Legacy 4.893</button>
+    <button type="button" data-scen="valid" aria-pressed="false">Valid 4.8</button>
+    <button type="button" data-scen="blank" aria-pressed="false">Blank</button>
+  </div>
+  <span class="seg-label" id="surfLbl">Surface</span>
+  <div class="seg" role="group" aria-labelledby="surfLbl">
+    <button type="button" data-surf="settings" aria-pressed="true">Settings</button>
+    <button type="button" data-surf="portal" aria-pressed="false">Customer portal</button>
+  </div>
+  <div id="widthGroup" hidden>
+    <span class="seg-label" id="widLbl">Portal width</span>
+    <div class="seg" role="group" aria-labelledby="widLbl">
+      <button type="button" data-wid="desktop" aria-pressed="true">Desktop</button>
+      <button type="button" data-wid="mobile" aria-pressed="false">Mobile 375px</button>
+    </div>
+  </div>
+  <button type="button" class="demo-switch" id="brToggle" role="switch" aria-checked="true"><span class="track" aria-hidden="true"></span>BR annotations</button>
+  <div class="demo-note" id="demoNote" role="status" aria-live="polite"></div>
+</div>
+
+<!-- ================= SETTINGS ================= -->
+<main id="settingsView" class="page">
+  <h1>Company Settings</h1>
+  <div class="tabs"><span class="tab" aria-current="page">Customer Portal</span></div>
+
+  <div id="pageAlert" role="alert"></div>
+
+  <section class="settings-section" aria-labelledby="spTitle">
+    <div class="title-row"><h2 class="settings-section-title" id="spTitle">Proposal Social Proof Banner</h2><span class="brs" data-br="20"></span></div>
+    <p class="settings-section-subtitle">This banner shows on your proposals in the customer portal once Projects Completed, Years in Business, and Google Rating are all filled in. Don’t offer a satisfaction guarantee? Turn off Show Satisfaction Guarantee to hide it from the banner.</p>
+
+    <div class="settings-grid">
+      <div class="settings-field">
+        <div class="lbl-row"><label for="projects">Projects Completed</label></div>
+        <input type="text" id="projects" autocomplete="off">
+        <div class="err-slot"></div>
+      </div>
+      <div class="settings-field">
+        <div class="lbl-row"><label for="years">Years in Business</label></div>
+        <input type="text" id="years" autocomplete="off">
+        <div class="err-slot"></div>
+      </div>
+      <div class="settings-field">
+        <div class="lbl-row"><label for="googleRating">Google Rating</label><span class="brs" data-br="1,2,3"></span></div>
+        <input type="text" id="googleRating" inputmode="decimal" autocomplete="off" aria-describedby="ratingHelp">
+        <div class="err-slot"><p class="field-error" id="ratingErr" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 7v6M12 16.5v.01"/></svg><span id="ratingErrText"></span></p></div>
+        <p class="field-help" id="ratingHelp">Enter your current Google rating from 1.0 to 5.0, using one decimal place (like 4.8). DripJobs doesn’t pull this from Google or check it, so update it here whenever your rating changes.</p>
+      </div>
+    </div>
+
+    <div class="toggle-wrap">
+      <div class="toggle-row">
+        <input type="checkbox" role="switch" class="sw" id="guarantee" aria-describedby="guaranteeHelp" checked>
+        <label for="guarantee">Show Satisfaction Guarantee</label><span class="brs" data-br="13,14,16,17"></span>
+      </div>
+      <p class="toggle-help" id="guaranteeHelp">Shows “100% Satisfaction Guaranteed” on your banner. Turn this off if your business doesn’t offer a guarantee. Your banner still shows without it.</p>
+    </div>
+  </section>
+
+  <section class="settings-section" aria-labelledby="docTitle">
+    <h2 class="settings-section-title" id="docTitle">Company Documents</h2>
+    <p class="settings-section-subtitle">Upload key business documents to share on the customer portal.</p>
+    <div class="docs-box">Demo only: Company Documents placeholder, sized like production. Not part of this prototype.</div>
+  </section>
+
+  <div class="actions">
+    <button type="button" class="btn btn-save" id="saveBtn">Save</button>
+    <button type="button" class="btn btn-cancel" id="cancelBtn">Cancel - Return to Dashboard</button>
+    <span class="brs" data-br="11,12,21,22"></span>
+  </div>
+</main>
+
+<!-- ================= PORTAL ================= -->
+<main id="portalView" class="page" hidden>
+  <h1 class="sr-only">Proposal, customer portal preview</h1>
+  <div class="demo-caption">Demo: the banner reflects the last saved settings. Unsaved edits are not shown here. Pending Copywriter: the screen reader only text " out of 5".</div>
+  <div class="portal-wrap" id="portalWrap">
+    <div class="portal" id="portal"></div>
+  </div>
+</main>
+
+<footer class="revlog">
+  <details>
+    <summary>Revision Log</summary>
+    <table>
+      <thead><tr><th scope="col">Date</th><th scope="col">Section</th><th scope="col">Change</th><th scope="col">Decided by</th></tr></thead>
+      <tbody><tr><td>November 3, 2026</td><td>Prototype (new)</td><td>Built from the UX spec in the ticket</td><td>Jeremy Harrison</td></tr></tbody>
+    </table>
+  </details>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(s){ return document.querySelector(s); };
+  var BR = {
+    1:"Accepts 1.0 to 5.0 with up to one decimal place. Trailing zeros are accepted: 4.80 is 4.8, 5.00 is 5.0.",
+    2:"Rejected on save: below 1.0, above 5.0, more than one meaningful decimal place, non numeric. All show the same single inline message.",
+    3:"Blank is valid on save. The save goes through and the banner stays hidden.",
+    4:"The banner shows the rating to one decimal place (5 shows as 5.0).",
+    5:"Five stars replace the current single star.",
+    6:"Stars fill proportionally: 4.8 is four full stars plus 80% of the fifth; 3.0 is three full stars.",
+    7:"Filled portions are gold. Unfilled portions are neutral gray.",
+    8:"Stars are generic. No Google logo or Google branded graphics.",
+    9:"Saved ratings that meet the new rule show the five star visual immediately.",
+    10:"Saved ratings that do not meet the rule (such as 4.893) show as today, the raw value with a single star, until the next successful save.",
+    11:"Every save validates the Google Rating, touched or not. An invalid rating blocks the save and alerts the user. Blank passes.",
+    12:"When the rating blocks a save, the other unsaved changes stay on the page.",
+    13:"New Show Satisfaction Guarantee toggle in this section.",
+    14:"The toggle defaults to ON for all companies.",
+    15:"When OFF, the guarantee item is fully hidden. The other three metrics show with no gap or trailing divider.",
+    16:"The toggle is not a required field. Turning it off never hides the banner.",
+    17:"The guarantee text is not editable.",
+    18:"The banner shows only when Projects Completed, Years in Business, and Google Rating are all filled in.",
+    19:"The banner renders only on the customer portal proposal view, not the proposal PDF or other views.",
+    20:"The section helper explains the three field requirement and the guarantee toggle.",
+    21:"A newly entered invalid rating that blocks a save gets the same page alert and field focus as BR11, with the BR2 inline message.",
+    22:"Editing a legacy value to another invalid value replaces the BR11 inline message with the BR2 message."
+  };
+  var MSG_BR2 = "Enter a rating from 1.0 to 5.0 with one decimal place, like 4.8.";
+  var MSG_BR11 = "Update this rating to a number from 1.0 to 5.0 with one decimal place to save your settings.";
+  var MSG_ALERT = "We couldn’t save your settings. Update your Google Rating to a number from 1.0 to 5.0 with one decimal place (like 4.8), then save again.";
+  var SCEN = {
+    legacy:{projects:"2000+",years:"4",rating:"4.893",guarantee:true},
+    valid:{projects:"2000+",years:"4",rating:"4.8",guarantee:true},
+    blank:{projects:"2000+",years:"4",rating:"",guarantee:true}
+  };
+  var saved = null, widthMode = "desktop", uid = 0;
+
+  /* ---------- Rating parser (BR1, BR2, BR3) ---------- */
+  function parseRating(raw){
+    var s = String(raw == null ? "" : raw).trim();
+    if(s === "") return {ok:true, blank:true, text:""};
+    var m = /^(\d{1,3})(?:\.(\d+))?$/.exec(s);
+    if(!m) return {ok:false};
+    var frac = (m[2] || "").replace(/0+$/, "");
+    if(frac.length > 1) return {ok:false};
+    var v = Number(m[1] + "." + (frac || "0"));
+    if(v < 1 || v > 5) return {ok:false};
+    return {ok:true, blank:false, value:v, text:v.toFixed(1)};
+  }
+
+  /* ---------- Helpers ---------- */
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function demoNote(m){ var n=$("#demoNote"); n.textContent=m; clearTimeout(demoNote.t); demoNote.t=setTimeout(function(){ n.textContent=""; },5000); }
+  function reduced(){ return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+
+  function paintBR(){
+    document.querySelectorAll("[data-br]").forEach(function(el){
+      if(el.dataset.done) return; el.dataset.done = 1;
+      el.innerHTML = el.dataset.br.split(",").map(function(n){
+        uid++;
+        return '<button type="button" class="br" aria-label="Business rule '+n+'" aria-describedby="tip'+uid+'">BR'+n+'<span class="tip" role="tooltip" id="tip'+uid+'">'+esc(BR[n])+'</span></button>';
+      }).join("");
+    });
+  }
+  function clampTip(chip){
+    var tip = chip.querySelector(".tip"); if(!tip) return;
+    tip.style.marginLeft = "0px";
+    var r = tip.getBoundingClientRect(), shift = 0;
+    if(r.left < 8) shift = 8 - r.left;
+    else if(r.right > window.innerWidth - 8) shift = (window.innerWidth - 8) - r.right;
+    tip.style.marginLeft = shift + "px";
+  }
+  document.addEventListener("mouseover", function(e){ var c = e.target.closest && e.target.closest(".br"); if(c) clampTip(c); });
+  document.addEventListener("focusin", function(e){ var c = e.target.closest && e.target.closest(".br"); if(c) clampTip(c); });
+  document.addEventListener("focusout", function(e){ var c = e.target.closest && e.target.closest(".br"); if(c) c.classList.remove("dismissed"); });
+  document.addEventListener("mouseout", function(e){ var c = e.target.closest && e.target.closest(".br"); if(c) c.classList.remove("dismissed"); });
+  document.addEventListener("keydown", function(e){
+    if(e.key !== "Escape") return;
+    var c = document.activeElement && document.activeElement.closest(".br") || document.querySelector(".br:hover");
+    if(c) c.classList.add("dismissed");
+  });
+
+  /* ---------- Stars (BR5 to BR8) ---------- */
+  var STAR = "M12 2.5l2.94 5.96 6.58.96-4.76 4.64 1.12 6.55L12 17.5l-5.88 3.11 1.12-6.55L2.48 9.42l6.58-.96z";
+  function starsSVG(rating){
+    var out = "";
+    for(var i=0;i<5;i++){
+      var f = Math.max(0, Math.min(1, rating - i)), id = "clip"+(++uid);
+      var svg = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+        + '<path d="'+STAR+'" fill="#CBD5E1" stroke="#94A3B8" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>';
+      if(f > 0){
+        var w = (2.48 + f * 19.04).toFixed(2);
+        svg += '<clipPath id="'+id+'"><rect x="0" y="0" width="'+w+'" height="24"/></clipPath>'
+          + '<path d="'+STAR+'" fill="#F59E0B" stroke="#D97706" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round" clip-path="url(#'+id+')"/>';
+      }
+      out += svg + '</svg>';
+    }
+    return '<span class="stars" aria-hidden="true">'+out+'</span>';
+  }
+
+  /* ---------- Portal render (BR4 to BR10, BR15, BR16, BR18, BR19) ---------- */
+  function renderPortal(){
+    var s = saved, p = parseRating(s.rating);
+    var filled = s.projects.trim() !== "" && s.years.trim() !== "" && s.rating.trim() !== "";
+    var banner = "";
+    if(filled){
+      var ratingVal;
+      if(p.ok && !p.blank){
+        ratingVal = esc(p.text)+'<span class="sr-only"> out of 5</span>'+starsSVG(p.value);
+      } else {
+        ratingVal = esc(s.rating.trim())+"★";
+      }
+      banner = '<section class="sp" aria-label="Social proof">'
+        + '<div class="sp-item"><div class="sp-val">'+esc(s.projects.trim())+'</div><div class="sp-lbl">Projects Completed</div></div>'
+        + '<div class="sp-item"><div class="sp-val">'+esc(s.years.trim())+'</div><div class="sp-lbl">Years in Business</div></div>'
+        + '<div class="sp-item"><div class="sp-val">'+ratingVal+'</div><div class="sp-lbl">Google Rating</div></div>'
+        + (s.guarantee ? '<div class="sp-item"><div class="sp-val ok">100%</div><div class="sp-lbl">Satisfaction Guaranteed</div></div>' : '')
+        + '</section>';
+    } else {
+      var miss = [];
+      if(!s.projects.trim()) miss.push("Projects Completed");
+      if(!s.years.trim()) miss.push("Years in Business");
+      if(!s.rating.trim()) miss.push("Google Rating");
+      banner = '<div class="demo-caption">Demo note: the banner is hidden because Projects Completed, Years in Business, and Google Rating must all be filled in. Missing: '+miss.join(", ")+'.</div>';
+    }
+    $("#portal").innerHTML =
+      '<div class="pv-head"><span class="pv-ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2"/><path d="M8.5 7h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></svg></span><h2>Your Investment</h2></div>'
+      + '<div class="pv-card"><div class="pv-row"><span>Line Items</span><b>$370.00</b></div><div class="pv-row"><span>Tax</span><b>$12.00</b></div>'
+      + '<div class="pv-total"><div><small>Project Total</small><span class="big">$382.00</span></div><div><small>Balance at Completion</small><span class="bal">$382.00</span></div></div></div>'
+      + banner;
+  }
+
+  /* ---------- Settings form ---------- */
+  var elRating = $("#googleRating");
+  function setError(msg){
+    var err = $("#ratingErr");
+    if(!msg){
+      err.hidden = true; $("#ratingErrText").textContent = "";
+      elRating.removeAttribute("aria-invalid");
+      elRating.setAttribute("aria-describedby","ratingHelp");
+      return;
+    }
+    $("#ratingErrText").textContent = msg; err.hidden = false;
+    elRating.setAttribute("aria-invalid","true");
+    elRating.setAttribute("aria-describedby","ratingErr ratingHelp");
+  }
+  function isEdited(){ return elRating.value.trim() !== saved.rating.trim(); }
+  function inlineMessage(){ return isEdited() ? MSG_BR2 : MSG_BR11; }
+
+  elRating.addEventListener("input", function(){
+    var p = parseRating(elRating.value);
+    if(p.ok){ setError(null); }
+    else if(!$("#ratingErr").hidden){ setError(inlineMessage()); }
+  });
+  elRating.addEventListener("blur", function(){
+    if(!isEdited()) return;
+    var p = parseRating(elRating.value);
+    setError(p.ok ? null : MSG_BR2);
+  });
+
+  function focusRating(){
+    elRating.focus({preventScroll:true});
+    elRating.scrollIntoView({block:"center", behavior: reduced() ? "auto" : "smooth"});
+  }
+  function showAlert(){
+    $("#pageAlert").innerHTML = '<div class="settings-alert settings-alert--danger">'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 7v6M12 16.5v.01"/></svg>'
+      + '<div class="settings-alert-body">'+esc(MSG_ALERT)+'</div>'
+      + '<a href="#googleRating" class="settings-alert-action" id="alertAction">Go to Google Rating</a><span class="br-pend">Pending Copywriter</span></div>';
+    $("#alertAction").addEventListener("click", function(e){ e.preventDefault(); focusRating(); });
+  }
+
+  $("#saveBtn").addEventListener("click", function(){
+    var p = parseRating(elRating.value);
+    if(!p.ok){
+      setError(inlineMessage());
+      showAlert();
+      focusRating();
+      return;
+    }
+    saved = {
+      projects: $("#projects").value.trim(),
+      years: $("#years").value.trim(),
+      rating: p.blank ? "" : p.text,
+      guarantee: $("#guarantee").checked
+    };
+    $("#projects").value = saved.projects; $("#years").value = saved.years; elRating.value = saved.rating;
+    setError(null);
+    $("#pageAlert").innerHTML = "";
+    renderPortal();
+    demoNote("Settings saved. The customer portal view now shows the saved values.");
+  });
+  $("#cancelBtn").addEventListener("click", function(){ demoNote("Prototype only: this would return to the Dashboard."); });
+
+  /* ---------- Demo chrome ---------- */
+  function loadScenario(key){
+    saved = JSON.parse(JSON.stringify(SCEN[key]));
+    $("#projects").value = saved.projects; $("#years").value = saved.years;
+    elRating.value = saved.rating; $("#guarantee").checked = saved.guarantee;
+    setError(null); $("#pageAlert").innerHTML = "";
+    document.querySelectorAll("[data-scen]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.scen === key)); });
+    renderPortal();
+  }
+  function setSurface(which){
+    var portal = which === "portal";
+    $("#settingsView").hidden = portal; $("#portalView").hidden = !portal;
+    $("#widthGroup").hidden = !portal;
+    document.querySelectorAll("[data-surf]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.surf === which)); });
+    try{ history.replaceState(null,"","#"+which); }catch(e){}
+  }
+  function setWidth(w){
+    widthMode = w;
+    $("#portalWrap").classList.toggle("is-mobile", w === "mobile");
+    document.querySelectorAll("[data-wid]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.dataset.wid === w)); });
+  }
+  document.querySelectorAll("[data-scen]").forEach(function(b){ b.addEventListener("click", function(){ loadScenario(b.dataset.scen); demoNote("Page reset to the "+b.textContent+" scenario."); }); });
+  document.querySelectorAll("[data-surf]").forEach(function(b){ b.addEventListener("click", function(){ setSurface(b.dataset.surf); }); });
+  document.querySelectorAll("[data-wid]").forEach(function(b){ b.addEventListener("click", function(){ setWidth(b.dataset.wid); }); });
+  $("#brToggle").addEventListener("click", function(){
+    var on = this.getAttribute("aria-checked") !== "true";
+    this.setAttribute("aria-checked", String(on));
+    document.body.classList.toggle("no-br", !on);
+  });
+
+  window.__sp = {parseRating:parseRating};
+  paintBR();
+  loadScenario("legacy");
+  if(location.hash === "#portal") setSurface("portal");
+})();
+</script>
+</body>
+</html>
