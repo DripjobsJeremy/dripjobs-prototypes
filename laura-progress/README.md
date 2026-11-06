@@ -41,6 +41,16 @@ Nothing from the data is shown anywhere else in the Hub: the tab button is only 
 4. Commit `data.enc.json` and `notes.enc.json` and open a PR. Until a first pull is merged the tab shows "Nothing has been pulled yet" with no password box.
 5. Run the first refresh (see `ROUTINE.md`).
 
+## What the page shows, top to bottom
+
+1. The latest Highlights (newest week with any text; older weeks keep theirs inside their week section).
+2. The four count tiles for the current week.
+3. A thin bar of Laura's own tickets by status group. Counts are written out and there are no percentages or comparisons.
+4. Shipped: Laura's tickets whose status is `pushed to production`, newest first. It shows "Shipped <date>" when ClickUp has a closed date and "Updated <date>" otherwise.
+5. The Weekly view and All tickets with the filters.
+
+The status bar and Shipped list do not follow the filters, like the tiles.
+
 ## Using the tab
 
 Enter the password once. The derived keys (not the password) live in `sessionStorage`, so the tab stays unlocked until the browser tab closes. The **Lock** button clears them immediately. A wrong password shows one generic message.
@@ -65,6 +75,7 @@ It decrypts to a private temp file, opens `$EDITOR`, validates, re-encrypts, and
 }
 ```
 
+- `notes.mjs override <task id> include|exclude "<reason>"` adds or replaces one override without opening an editor.
 - `include` brings a ticket in (the next weekly pull fetches it) and shows "Included by override: reason" on its card. `exclude` hides it and lists it, with the reason, under "Excluded by override" at the bottom.
 - Highlights are keyed by the Monday of the week. Empty fields are not shown; a week with no text shows nothing.
 
@@ -109,7 +120,7 @@ LAURA_PW='your passphrase' node laura-progress/tools/notes.mjs update 2026-11-02
 
 - ClickUp stores only each ticket's last update time, so every weekly pull appends it to a "touch ledger" inside the encrypted data. That keeps past weeks stable. A week that passed with no pull can miss an update that was later overwritten.
 - "Last updated" in ClickUp also moves when someone else comments or an automation changes the ticket, so "worked" can include activity by others.
-- Not in scope today: tickets in the ClickUp "Shared with me" folder (space 90142657770, list 901422482967) and the QA space (90142569445). Laura's own tickets there only appear if you add an `include` override or widen the scope in `logic.js` and `ROUTINE.md`.
+- Outside the two searched spaces: nothing is searched there, but anything Jeremy or Laura presents (for example a ticket linked in Laura's update) gets an `include` override and then appears in the report with its own status. Add one with `notes.mjs override <task id> include "<reason>"`. The "Shared with me" list (901422482967) shows as Draft, and the QA space (90142569445) gets the In Flight lane like the Roadmap.
 - Assumption: tickets assigned to Laura but created before Nov 2 still count as worked (`ASSIGNED_IGNORES_BASELINE` in `logic.js`). Flip it to `false` to apply the baseline to them too.
 
 ## Tests

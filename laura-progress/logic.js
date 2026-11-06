@@ -13,8 +13,10 @@
     // Assumption (flagged in docs/decision-log.md): tickets merely assigned to Laura
     // are shown as "worked" even when created before the baseline.
     ASSIGNED_IGNORES_BASELINE: true,
-    SPACES: { pm: '90140994633', dev: '90140994811' },
-    FORM_LIST_ID: '901413487018',      // ClickUp form list: Draft until moved to Active Triage
+    SPACES: { pm: '90140994633', dev: '90140994811', qa: '90142569445' /* QA Space - V1, in the Roadmap In Flight list since Nov 3 */ },
+    // Draft lists: tickets here are Draft until they move to Active Triage.
+    // 901413487018 is the Form list (UX Review folder); 901422482967 is the "Shared with me" list (Feature Radar).
+    FORM_LIST_IDS: ['901413487018', '901422482967'],
     // Never read, never shown. 901421393122 is the V2 Web Development list (never touch).
     EXCLUDED_LIST_IDS: ['901421393122', '901412659249' /* V2 folder list */, '901413486812' /* UX Review Tracking */],
     FRESH_DAYS: 7,
@@ -40,7 +42,7 @@
       'long term parking', 'boarding gates closing', 'gate change to (v2)'],
     flight: ['send to dev', 'ready for dev', 'need more context', 'need context', 'qa kickback', 'in progress',
       'awaiting test site', 'deployed to test', 'testing complete', 'pr created', 'code complete',
-      'branch ready', 'pr rejected', 'needs more work', 'ready for production'],
+      'branch ready', 'pr rejected', 'needs more work', 'ready for production', 'test in progress', 'testing ready'],
     shipped: ['pushed to production'],
     closed: ['no fix needed', 'resolved without fix', 'trashed']
   };
@@ -53,7 +55,7 @@
 
   /* Returns group key, or '' when the status is not mapped (the routine reports these). */
   function statusGroup(t) {
-    if (String(t.listId) === CFG.FORM_LIST_ID) return 'draft';
+    if (CFG.FORM_LIST_IDS.indexOf(String(t.listId)) !== -1) return 'draft';
     return STATUS_LOOKUP[norm(t.status)] || '';
   }
 
@@ -82,7 +84,7 @@
   }
   function laneOf(t) {
     var tags = (t.tags || []).map(norm);
-    if (String(t.spaceId) === CFG.SPACES.dev) return { lane: 'inflight', conflict: [] };
+    if (String(t.spaceId) === CFG.SPACES.dev || String(t.spaceId) === CFG.SPACES.qa) return { lane: 'inflight', conflict: [] };
     var present = Object.keys(LANE_TAGS).filter(function (k) { return tags.indexOf(k) !== -1; });
     var lane = 'none';
     if (tags.indexOf('v2 candidate') !== -1) lane = 'v2cand';
@@ -258,6 +260,36 @@
     return out;
   }
 
+  /* Laura's own tickets by status group, counts only (no percentages, no comparison). */
+  function statusMix(model) {
+    var c = {};
+    model.items.forEach(function (it) { if (!it.own) return; var k = it.group || 'unmapped'; c[k] = (c[k] || 0) + 1; });
+    var out = GROUPS.map(function (g) { return { key: g.key, label: g.label, count: c[g.key] || 0 }; })
+      .filter(function (x) { return x.count > 0; });
+    if (c.unmapped) out.push({ key: 'unmapped', label: 'Status not mapped', count: c.unmapped });
+    return out;
+  }
+
+  /* Laura's own shipped tickets, newest first. ClickUp's closed date is used when it has one,
+     otherwise the last updated date (exact: false). */
+  function shipped(model) {
+    return model.items.filter(function (it) { return it.own && it.group === 'shipped'; })
+      .map(function (it) { return { it: it, at: it.t.closed || it.t.updated, exact: !!it.t.closed }; })
+      .sort(function (a, b) { return b.at - a.at; });
+  }
+
+  /* Newest week (not in the future) that has any Highlights text. */
+  function latestHighlights(model) {
+    var hs = model.notes.highlights || {}, cur = mondayOf(localDate(model.now));
+    var keys = Object.keys(hs).filter(function (k) {
+      var h = hs[k];
+      return k <= cur && h && (String(h.growth || '').trim() || String(h.value || '').trim() || String(h.setbacks || '').trim());
+    }).sort();
+    if (!keys.length) return null;
+    var k = keys[keys.length - 1];
+    return { key: k, week: weekRange(k), hl: hs[k] };
+  }
+
   function freshness(data, now) {
     if (!data.pulledAt) return { pulledAt: 0, stale: false, empty: true };
     return { pulledAt: data.pulledAt, stale: (now - data.pulledAt) > CFG.FRESH_DAYS * 86400000, empty: false };
@@ -267,7 +299,8 @@
     laneOf: laneOf, effectiveType: effectiveType, typeKey: typeKey, isFocus: isFocus, localDate: localDate, startMs: startMs,
     endMs: endMs, addDays: addDays, mondayOf: mondayOf, weekRange: weekRange, weekOf: weekOf, rampOf: rampOf,
     fmtDate: fmtDate, fmtYmd: fmtYmd, classify: classify, buildModel: buildModel, tiles: tiles,
-    presetRange: presetRange, filterItems: filterItems, weeks: weeks, freshness: freshness, touchedIn: touchedIn };
+    presetRange: presetRange, filterItems: filterItems, weeks: weeks, freshness: freshness, touchedIn: touchedIn,
+    statusMix: statusMix, shipped: shipped, latestHighlights: latestHighlights };
   root.LPLogic = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : this);

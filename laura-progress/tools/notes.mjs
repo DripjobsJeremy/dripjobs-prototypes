@@ -3,6 +3,8 @@
 //   node laura-progress/tools/notes.mjs edit     decrypt to a private temp file, open $EDITOR, re-encrypt
 //   node laura-progress/tools/notes.mjs show     print the decrypted notes to the terminal
 //   node laura-progress/tools/notes.mjs init     create an empty notes file
+//   node laura-progress/tools/notes.mjs override <ClickUp task id> include|exclude "<one line reason>"
+//                                                add or replace one override (for example a ticket outside the searched spaces)
 //   node laura-progress/tools/notes.mjs update <monday YYYY-MM-DD> <file.md> [--received YYYY-MM-DD]
 //                                                store Laura's weekly update (markdown file kept OUTSIDE the repo)
 // Password comes from LAURA_PW or a hidden prompt.
@@ -16,7 +18,7 @@ const TEMPLATE = {
   highlights: {},
   updates: {}
 };
-if (!['edit', 'show', 'init', 'update'].includes(cmd)) { console.error('usage: notes.mjs edit|show|init|update <monday> <file.md> [--received YYYY-MM-DD]'); process.exit(2); }
+if (!['edit', 'show', 'init', 'update', 'override'].includes(cmd)) { console.error('usage: notes.mjs edit|show|init|update <monday> <file.md> [--received YYYY-MM-DD]|override <id> include|exclude "<reason>"'); process.exit(2); }
 
 const pw = await getPassword();
 const file = readEnc(NOTES_FILE);
@@ -27,6 +29,19 @@ if (cmd === 'init') {
   if (file) { console.error('notes.enc.json already exists.'); process.exit(1); }
   writeEnc(NOTES_FILE, await LPCrypto.encrypt({ overrides: [], highlights: {} }, pw, 'notes'));
   console.log('Created laura-progress/notes.enc.json'); process.exit(0);
+}
+
+if (cmd === 'override') {
+  const [, , , id, action, ...reasonParts] = process.argv;
+  if (!id || !action || !reasonParts.length) { console.error('usage: notes.mjs override <ClickUp task id> include|exclude "<one line reason>"'); process.exit(2); }
+  const next = { ...current, overrides: (current.overrides || []).filter((o) => String(o.id) !== String(id)) };
+  delete next._help;
+  next.overrides.push({ id: String(id), action, reason: reasonParts.join(' ').trim() });
+  const errs = validateNotes(next);
+  if (errs.length) { console.error('Problems:\n - ' + errs.join('\n - ')); process.exit(1); }
+  writeEnc(NOTES_FILE, await LPCrypto.encrypt(next, pw, 'notes'));
+  console.log('Override stored for one ticket (' + action + '). Commit laura-progress/notes.enc.json only.');
+  process.exit(0);
 }
 
 if (cmd === 'update') {

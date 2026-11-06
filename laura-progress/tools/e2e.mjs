@@ -58,6 +58,15 @@ try {
   assert.match(await frame.locator('.lp-hl').first().innerText(), /SYNTH growth text/);
   assert.equal(await frame.locator('.lp-hl h4:has-text("Setbacks")').count(), 0, 'empty highlight field is not shown');
   assert.equal(await frame.locator('text=Excluded by override (1)').count(), 1);
+  // Leadership view: highlights at the top, status bar with counts, shipped list
+  assert.match(await frame.locator('.lp-top-hl').innerText(), /SYNTH growth text/);
+  assert.equal(await frame.locator('.lp-week .lp-hl').count(), 0, 'featured week highlights are not repeated');
+  assert.match(await frame.locator('.lp-mix-bar').getAttribute('aria-label'), /In Flight \d/);
+  assert.ok((await frame.locator('.lp-mix-legend li').count()) >= 3);
+  assert.doesNotMatch(await frame.locator('.lp-mix').innerText(), /%/, 'no percentages');
+  assert.equal(await frame.locator('.lp-ship-row').count(), 1);
+  assert.match(await frame.locator('.lp-ship-row').innerText(), /SYNTH shipped exception[\s\S]*Updated Nov 3, 2026/);
+  assert.equal(await frame.locator('.lp-ship-row a').getAttribute('rel'), 'noopener noreferrer');
   // Laura's update: rendered as safe markdown, never as HTML
   assert.match(await frame.locator('.lp-upd').first().innerText(), /Sent to Jeremy on Nov 6, 2026/);
   assert.equal(await frame.locator('.lp-upd h4 a[href="https://example.com/section"]').count(), 1);

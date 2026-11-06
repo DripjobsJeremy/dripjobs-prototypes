@@ -28,6 +28,10 @@ await ok('status groups cover every real status in both spaces (and Form is Draf
     'resolved without fix','pushed to production','Open','need context','needs more work','ready for production'];
   for (const s of real) assert.ok(L.statusGroup({ status: s, listId: '1' }), 'unmapped: ' + s);
   assert.equal(L.statusGroup({ status: 'in progress', listId: '901413487018' }), 'draft');
+  assert.equal(L.statusGroup({ status: 'ticket created', listId: '901422482967' }), 'draft', 'Shared with me list is Draft');
+  assert.equal(L.statusGroup({ status: 'spec drafted', listId: '901422482967' }), 'draft');
+  assert.equal(L.statusGroup({ status: 'testing ready', listId: '901408821625' }), 'flight');
+  assert.equal(L.statusGroup({ status: 'test in progress', listId: '901408821625' }), 'flight');
   assert.equal(L.statusGroup({ status: 'send to dev', listId: '1' }), 'flight');
   assert.equal(L.statusGroup({ status: 'ready for production', listId: '1' }), 'flight');
   assert.equal(L.statusGroup({ status: 'gate change to (v2)', listId: '1' }), 'triage');
@@ -40,6 +44,7 @@ await ok('status groups cover every real status in both spaces (and Form is Draf
 await ok('lane precedence', () => {
   const lane = (t) => L.laneOf({ spaceId: '90140994633', tags: [], ...t }).lane;
   assert.equal(lane({ spaceId: '90140994811', tags: ['v2 candidate'] }), 'inflight');
+  assert.equal(lane({ spaceId: '90142569445', tags: [] }), 'inflight', 'QA Space - V1 is In Flight like the Roadmap');
   assert.equal(lane({ tags: ['V2 Candidate', 'lane: exception'] }), 'v2cand');
   assert.equal(lane({ tags: ['lane: exception', 'lane: maintenance'] }), 'exception');
   assert.equal(lane({ tags: ['lane: gate'], type: 'Bug ' }), 'maintenance');
@@ -110,6 +115,22 @@ await ok('filters and weekly view', () => {
   assert.equal(ws.length, 1); assert.ok(ws[0].highlights && ws[0].highlights.growth === 'SYNTH growth text');
   const withEmptyHl = L.buildModel(PULL, { highlights: { '2026-11-02': { growth: ' ', value: '', setbacks: '' } } }, NOW);
   assert.equal(L.weeks(withEmptyHl, f({}))[0].highlights, null);
+});
+
+await ok('status bar counts, shipped list and latest highlights (counts only, no comparison)', () => {
+  const mix = L.statusMix(model);
+  assert.equal(mix.reduce((a, x) => a + x.count, 0), model.items.filter((i) => i.own).length, 'own tickets only');
+  assert.ok(mix.every((x) => x.count > 0 && !('pct' in x)));
+  assert.ok(mix.some((x) => x.key === 'unmapped'), 'unmapped status is surfaced, not hidden');
+  const sh = L.shipped(model);
+  assert.deepEqual(sh.map((s) => s.it.t.id), ['tst000a8']);
+  assert.equal(sh[0].exact, false); assert.equal(sh[0].at, sh[0].it.t.updated);
+  const closedModel = L.buildModel({ ...PULL, tickets: PULL.tickets.map((t) => (t.id === 'tst000a8' ? { ...t, closed: t.updated + 5000 } : t)) }, NOTES, NOW);
+  assert.equal(L.shipped(closedModel)[0].exact, true); assert.equal(L.shipped(closedModel)[0].at, closedModel.items.find((i) => i.t.id === 'tst000a8').t.closed);
+  const lh = L.latestHighlights(model);
+  assert.equal(lh.key, '2026-11-02'); assert.equal(lh.hl.growth, 'SYNTH growth text');
+  assert.equal(L.latestHighlights(L.buildModel(PULL, { highlights: { '2026-11-09': { growth: 'future' } } }, NOW)), null, 'future weeks are ignored');
+  assert.equal(L.latestHighlights(L.buildModel(PULL, null, NOW)), null);
 });
 
 await ok('freshness turns amber only after 7 days', () => {
@@ -208,7 +229,15 @@ await ok('tools: empty bundle, notes, build, ledger merge, guard, rotate', async
   await assert.rejects(LPCrypto.decrypt(rot, PW, 'data'));
   assert.equal((await LPCrypto.decrypt(rot, NEW, 'data')).obj.tickets.length, 10);
   const rotN = JSON.parse(fs.readFileSync(nf, 'utf8'));
-  assert.equal((await LPCrypto.decrypt(rotN, NEW, 'notes')).obj.overrides.length, 2);
+  assert.equal((await LPCrypto.decrypt(rotN, NEW, "notes")).obj.overrides.length, 2);
+  // override command: a ticket outside the searched spaces, presented by Jeremy or in Laura's update
+  r = run('notes.mjs', ['override', 'tst000zz1', 'include', 'bad'], { LAURA_PW: NEW }); assert.equal(r.status, 0, r.stderr);
+  r = run('notes.mjs', ['override', 'tst000zz1', 'include', 'Presented in an update, outside the searched spaces'], { LAURA_PW: NEW }); assert.equal(r.status, 0, r.stderr);
+  r = run('notes.mjs', ['override', 'x', 'include', 'bad id'], { LAURA_PW: NEW }); assert.notEqual(r.status, 0);
+  r = run('notes.mjs', ['override', 'tst000zz2', 'maybe', 'bad action'], { LAURA_PW: NEW }); assert.notEqual(r.status, 0);
+  { const o = (await LPCrypto.decrypt(JSON.parse(fs.readFileSync(nf, 'utf8')), NEW, 'notes')).obj.overrides;
+    assert.equal(o.length, 3); assert.equal(o.filter((x) => x.id === 'tst000zz1').length, 1, 'replaced, not duplicated');
+    assert.equal(o.find((x) => x.id === 'tst000zz1').reason, 'Presented in an update, outside the searched spaces'); }
   // notes update command (markdown kept outside the repo)
   const md = path.join(sandbox, 'upd.md'); fs.writeFileSync(md, '### Heading\n* one\n');
   r = run('notes.mjs', ['update', '2026-11-09', path.join(repo, 'laura-progress/README.md')], { LAURA_PW: NEW }); assert.notEqual(r.status, 0, 'refuses markdown inside the repo');
@@ -216,7 +245,7 @@ await ok('tools: empty bundle, notes, build, ledger merge, guard, rotate', async
   r = run('notes.mjs', ['update', '2026-11-09', md, '--received', '2026-11-13'], { LAURA_PW: NEW }); assert.equal(r.status, 0, r.stderr);
   const afterN = (await LPCrypto.decrypt(JSON.parse(fs.readFileSync(nf, 'utf8')), NEW, 'notes')).obj;
   assert.equal(afterN.updates['2026-11-09'].markdown, '### Heading\n* one'); assert.equal(afterN.updates['2026-11-09'].received, '2026-11-13');
-  assert.equal(afterN.overrides.length, 2, 'existing overrides kept');
+  assert.equal(afterN.overrides.length, 3, 'existing overrides kept');
   assert.equal(fs.readFileSync(nf, 'utf8').includes('Heading'), false);
   r = run('rotate.mjs', [], { LAURA_PW_OLD: NEW, LAURA_PW_NEW: 'short' }); assert.notEqual(r.status, 0);
 });
