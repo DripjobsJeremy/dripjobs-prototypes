@@ -13,8 +13,10 @@
     // Assumption (flagged in docs/decision-log.md): tickets merely assigned to Laura
     // are shown as "worked" even when created before the baseline.
     ASSIGNED_IGNORES_BASELINE: true,
-    SPACES: { pm: '90140994633', dev: '90140994811' },
-    FORM_LIST_ID: '901413487018',      // ClickUp form list: Draft until moved to Active Triage
+    SPACES: { pm: '90140994633', dev: '90140994811', qa: '90142569445' /* QA Space - V1, in the Roadmap In Flight list since Nov 3 */ },
+    // Draft lists: tickets here are Draft until they move to Active Triage.
+    // 901413487018 is the Form list (UX Review folder); 901422482967 is the "Shared with me" list (Feature Radar).
+    FORM_LIST_IDS: ['901413487018', '901422482967'],
     // Never read, never shown. 901421393122 is the V2 Web Development list (never touch).
     EXCLUDED_LIST_IDS: ['901421393122', '901412659249' /* V2 folder list */, '901413486812' /* UX Review Tracking */],
     FRESH_DAYS: 7,
@@ -40,7 +42,7 @@
       'long term parking', 'boarding gates closing', 'gate change to (v2)'],
     flight: ['send to dev', 'ready for dev', 'need more context', 'need context', 'qa kickback', 'in progress',
       'awaiting test site', 'deployed to test', 'testing complete', 'pr created', 'code complete',
-      'branch ready', 'pr rejected', 'needs more work', 'ready for production'],
+      'branch ready', 'pr rejected', 'needs more work', 'ready for production', 'test in progress', 'testing ready'],
     shipped: ['pushed to production'],
     closed: ['no fix needed', 'resolved without fix', 'trashed']
   };
@@ -53,7 +55,7 @@
 
   /* Returns group key, or '' when the status is not mapped (the routine reports these). */
   function statusGroup(t) {
-    if (String(t.listId) === CFG.FORM_LIST_ID) return 'draft';
+    if (CFG.FORM_LIST_IDS.indexOf(String(t.listId)) !== -1) return 'draft';
     return STATUS_LOOKUP[norm(t.status)] || '';
   }
 
@@ -82,7 +84,7 @@
   }
   function laneOf(t) {
     var tags = (t.tags || []).map(norm);
-    if (String(t.spaceId) === CFG.SPACES.dev) return { lane: 'inflight', conflict: [] };
+    if (String(t.spaceId) === CFG.SPACES.dev || String(t.spaceId) === CFG.SPACES.qa) return { lane: 'inflight', conflict: [] };
     var present = Object.keys(LANE_TAGS).filter(function (k) { return tags.indexOf(k) !== -1; });
     var lane = 'none';
     if (tags.indexOf('v2 candidate') !== -1) lane = 'v2cand';

@@ -64,6 +64,7 @@ Laura Progress sync (Laura Progress tab, password-gated):
 - Rules, rotation, and the public repo caveats are in `laura-progress/README.md`. Lane and status rules live only in `laura-progress/logic.js`.
 - Trigger "Add laura update:" stores a weekly message from Laura (encrypted, in `notes.enc.json`). Steps are in `laura-progress/ROUTINE.md`. Never paste any of it into the repo, a commit, or a PR body.
 - Tickets with an empty body are left out of the report.
+- When Jeremy or Laura's update presents a ClickUp ticket outside the two searched spaces, add an include override for it (`notes.mjs override`), see `laura-progress/ROUTINE.md`.
 - Do not show anything from this tab elsewhere in the Hub (no counts, previews, titles, cards, or search entries).
 - Push a branch named `claude/laura-progress-<date>` and open a PR. Do not merge it.
 

@@ -1750,3 +1750,7 @@ Format:
 - Decision (Jeremy): Laura's weekly message to Jeremy is added through `notes.mjs update <monday> <file>` and stored encrypted in the notes file, shown per week as "Laura's update". Markdown is rendered safely (no raw HTML, http and https links only).
 - Open: Laura's own tickets in the "Shared with me" folder (two Feature Radar tickets) and the QA space (the Job Scheduled ticket) are outside the two spaces named in the brief, so they are not in the pull. Waiting on Jeremy to say whether to include them.
 
+## [2026-11-06] Laura Progress: tickets outside the searched spaces
+- Decision (Jeremy): Search scope stays at the two spaces. Anything Jeremy or Laura's update presents from elsewhere gets an include override (with a reason shown on the card) instead of widening the search. Done now for the Job Scheduled ticket (QA space) and the two Feature Radar tickets ("Shared with me").
+- Assumption: The "Shared with me" list counts as a Draft list like the Form list, and QA Space - V1 gets the In Flight lane, matching the Roadmap config approved Nov 3 (the brief's rule 1 names only the Development V1 space). `testing ready` and `test in progress` map to In Flight. Needs Jeremy to confirm.
+

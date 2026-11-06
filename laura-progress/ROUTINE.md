@@ -7,10 +7,14 @@ Result: one PR containing ciphertext only. Do not merge it. Jeremy reviews and m
 
 Jeremy pastes the message Laura sent him. Do not put any of it in the repo, a commit message, or a PR body.
 1. Save the pasted text as markdown to a file OUTSIDE the repo (for example `$TMPDIR/laura-update.md`). Keep her wording. Section lines become `### Heading` (make a ClickUp link on the heading when she gave one), her bullets stay bullets, links stay `[text](url)`.
-2. Pick the Monday of the week the update covers (for example `2026-11-02` for "Nov 2 to 6") and the date Jeremy received it.
-3. `node laura-progress/tools/notes.mjs update 2026-11-02 "$TMPDIR/laura-update.md" --received 2026-11-06` (needs `LAURA_PW`). It replaces any update already stored for that week and keeps overrides and Highlights.
-4. `node laura-progress/tools/guard.mjs "$TMPDIR/laura-pull.json" --also "$TMPDIR/laura-update.md"` (use the latest pull file, or an empty `{"tickets":[]}`), then commit ONLY `laura-progress/notes.enc.json`, open the PR, do not merge.
-5. Delete the temp files.
+2. Tickets outside the two searched spaces (Jeremy's rule, Nov 6): for every ClickUp link in the update, `clickup_get_task` (read only) and look at its space and list. If it is NOT in space `90140994633` or `90140994811`, and not in an excluded list, add an include override so it appears in the report:
+   `node laura-progress/tools/notes.mjs override <task id> include "Presented in Laura's update for the week of <monday>"`
+   The same applies when Jeremy himself presents a ClickUp link and says to include it (reason: "Presented by Jeremy on <date>"). Never override anything in an excluded list (`901421393122`, `901412659249`, `901413486812`).
+   The next pull fetches override tickets (step 1D), so they show up with their own status, list and dates. Tickets in the "Shared with me" list (`901422482967`) show as Draft, tickets in the QA space (`90142569445`) get the In Flight lane like the Roadmap.
+3. Pick the Monday of the week the update covers (for example `2026-11-02` for "Nov 2 to 6") and the date Jeremy received it.
+4. `node laura-progress/tools/notes.mjs update 2026-11-02 "$TMPDIR/laura-update.md" --received 2026-11-06` (needs `LAURA_PW`). It replaces any update already stored for that week and keeps overrides and Highlights.
+5. `node laura-progress/tools/guard.mjs "$TMPDIR/laura-pull.json" --also "$TMPDIR/laura-update.md"` (use the latest pull file, or an empty `{"tickets":[]}`), then commit `laura-progress/notes.enc.json` (and `data.enc.json` too when you also pulled the override tickets), open the PR, do not merge.
+6. Delete the temp files.
 
 ## Hard rules
 

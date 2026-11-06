@@ -65,6 +65,7 @@ It decrypts to a private temp file, opens `$EDITOR`, validates, re-encrypts, and
 }
 ```
 
+- `notes.mjs override <task id> include|exclude "<reason>"` adds or replaces one override without opening an editor.
 - `include` brings a ticket in (the next weekly pull fetches it) and shows "Included by override: reason" on its card. `exclude` hides it and lists it, with the reason, under "Excluded by override" at the bottom.
 - Highlights are keyed by the Monday of the week. Empty fields are not shown; a week with no text shows nothing.
 
@@ -109,7 +110,7 @@ LAURA_PW='your passphrase' node laura-progress/tools/notes.mjs update 2026-11-02
 
 - ClickUp stores only each ticket's last update time, so every weekly pull appends it to a "touch ledger" inside the encrypted data. That keeps past weeks stable. A week that passed with no pull can miss an update that was later overwritten.
 - "Last updated" in ClickUp also moves when someone else comments or an automation changes the ticket, so "worked" can include activity by others.
-- Not in scope today: tickets in the ClickUp "Shared with me" folder (space 90142657770, list 901422482967) and the QA space (90142569445). Laura's own tickets there only appear if you add an `include` override or widen the scope in `logic.js` and `ROUTINE.md`.
+- Outside the two searched spaces: nothing is searched there, but anything Jeremy or Laura presents (for example a ticket linked in Laura's update) gets an `include` override and then appears in the report with its own status. Add one with `notes.mjs override <task id> include "<reason>"`. The "Shared with me" list (901422482967) shows as Draft, and the QA space (90142569445) gets the In Flight lane like the Roadmap.
 - Assumption: tickets assigned to Laura but created before Nov 2 still count as worked (`ASSIGNED_IGNORES_BASELINE` in `logic.js`). Flip it to `false` to apply the baseline to them too.
 
 ## Tests
