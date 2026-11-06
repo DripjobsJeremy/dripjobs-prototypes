@@ -58,6 +58,14 @@ try {
   assert.match(await frame.locator('.lp-hl').first().innerText(), /SYNTH growth text/);
   assert.equal(await frame.locator('.lp-hl h4:has-text("Setbacks")').count(), 0, 'empty highlight field is not shown');
   assert.equal(await frame.locator('text=Excluded by override (1)').count(), 1);
+  // Laura's update: rendered as safe markdown, never as HTML
+  assert.match(await frame.locator('.lp-upd').first().innerText(), /Sent to Jeremy on Nov 6, 2026/);
+  assert.equal(await frame.locator('.lp-upd h4 a[href="https://example.com/section"]').count(), 1);
+  assert.equal(await frame.locator('.lp-upd li strong:has-text("bold")').count(), 1);
+  assert.equal(await frame.locator('.lp-upd a[href^="javascript"]').count(), 0, 'javascript: links are not links');
+  assert.match(await frame.locator('.lp-upd').first().innerText(), /<script>window\.__xss=1<\/script>/, 'HTML stays as text');
+  assert.equal(await frame.owner().evaluate((el) => el.contentWindow.__xss), undefined);
+  assert.equal(await frame.locator('.lp-upd a[href="https://example.com/bare"]').count(), 1);
   assert.equal(await frame.locator('.lp-flag:has-text("Product Drafter missing")').count() >= 1, true);
   assert.equal(await frame.locator('.lp-flag:has-text("Included by override: Laura drafted it offline")').count() >= 1, true);
   assert.equal(await frame.locator('.lp-card-title a').first().getAttribute('rel'), 'noopener noreferrer');

@@ -62,6 +62,8 @@ Laura Progress sync (Laura Progress tab, password-gated):
 - Trigger: "Refresh laura progress:" (also runs weekly on Fridays). Full steps are in `laura-progress/ROUTINE.md`.
 - ClickUp is read only. The tab's data and notes are AES-GCM ciphertext (`laura-progress/data.enc.json`, `notes.enc.json`). The repo is public, so never commit, paste, or log plaintext ticket data; the password is read from `LAURA_PW` and never stored.
 - Rules, rotation, and the public repo caveats are in `laura-progress/README.md`. Lane and status rules live only in `laura-progress/logic.js`.
+- Trigger "Add laura update:" stores a weekly message from Laura (encrypted, in `notes.enc.json`). Steps are in `laura-progress/ROUTINE.md`. Never paste any of it into the repo, a commit, or a PR body.
+- Tickets with an empty body are left out of the report.
 - Do not show anything from this tab elsewhere in the Hub (no counts, previews, titles, cards, or search entries).
 - Push a branch named `claude/laura-progress-<date>` and open a PR. Do not merge it.
 

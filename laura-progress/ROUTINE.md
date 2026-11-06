@@ -3,6 +3,15 @@
 Trigger: "Refresh Laura progress:" (manual) or the Friday scheduled task. It may run any time on Friday, including evening. Running it twice is safe.
 Result: one PR containing ciphertext only. Do not merge it. Jeremy reviews and merges.
 
+## Adding Laura's weekly update (separate trigger: "Add laura update:")
+
+Jeremy pastes the message Laura sent him. Do not put any of it in the repo, a commit message, or a PR body.
+1. Save the pasted text as markdown to a file OUTSIDE the repo (for example `$TMPDIR/laura-update.md`). Keep her wording. Section lines become `### Heading` (make a ClickUp link on the heading when she gave one), her bullets stay bullets, links stay `[text](url)`.
+2. Pick the Monday of the week the update covers (for example `2026-11-02` for "Nov 2 to 6") and the date Jeremy received it.
+3. `node laura-progress/tools/notes.mjs update 2026-11-02 "$TMPDIR/laura-update.md" --received 2026-11-06` (needs `LAURA_PW`). It replaces any update already stored for that week and keeps overrides and Highlights.
+4. `node laura-progress/tools/guard.mjs "$TMPDIR/laura-pull.json" --also "$TMPDIR/laura-update.md"` (use the latest pull file, or an empty `{"tickets":[]}`), then commit ONLY `laura-progress/notes.enc.json`, open the PR, do not merge.
+5. Delete the temp files.
+
 ## Hard rules
 
 - ClickUp is READ ONLY. Use only `clickup_filter_tasks`, `clickup_get_task`, `clickup_get_user`, and `clickup_execute_operator` with `task.get_many` (bulk fetch). Never create, update, comment on, move, tag, or delete anything.
@@ -17,7 +26,8 @@ Result: one PR containing ciphertext only. Do not merge it. Jeremy reviews and m
    - B. `clickup_filter_tasks` with `assignees: ["82240534"]`.
    - C. Fallback: `clickup_filter_tasks` with Product Drafter `IS NULL`, `order_by: created`. Keep only tickets whose creator is Laura. Stop paging when a whole page was created before Nov 2, 2026.
    - D. Overrides: run `node laura-progress/tools/notes.mjs show` (needs `LAURA_PW`) and also fetch every `include` ticket id (still skipping the excluded lists).
-2. Drop candidates whose list is excluded. Deduplicate by id.
+2. Drop candidates whose list is excluded. Deduplicate by id. A ticket with an empty body is not reported: set `hasBody: false` and the build drops it (an `include` override in the notes is the only way to bring one back).
+   Shortcut for repeat runs: the filter results carry `date_updated`; a ticket whose `date_updated` equals the value in the previous bundle has not changed, so its stored fields can be reused instead of fetching the full ticket again.
 3. Fetch details in bulk (`task.get_many`, 100 ids per call) or `clickup_get_task` with `include: ["custom_fields"]`, and build one record per ticket:
 
    | Field | Source |
@@ -34,6 +44,7 @@ Result: one PR containing ciphertext only. Do not merge it. Jeremy reviews and m
    | `pms` | **Project Manager** (`716b00e9-b31a-49df-9bbc-c0583347aa70`) user names |
    | `created`, `updated`, `closed` | `date_created`, `date_updated`, `date_closed` in ms (numbers) |
    | `parent` | parent task id if any |
+   | `hasBody` | `true` when `markdown_description` or `text_content` has any non-whitespace text, otherwise `false` (always include it, the build refuses a ticket without it) |
 
 4. Write `{ "pulledAt": <now in ms>, "tickets": [ ... ] }` to `$TMPDIR/laura-pull.json` (outside the repo).
 5. Build the ciphertext: `node laura-progress/tools/build.mjs --in "$TMPDIR/laura-pull.json"`.

@@ -143,6 +143,9 @@
   /* t: raw ticket as stored. Returns 'drafter' | 'fallback' | 'assigned' | '' (not Laura's). */
   function classify(t) {
     if (String(t.listId) && CFG.EXCLUDED_LIST_IDS.indexOf(String(t.listId)) !== -1) return '';
+    // A ticket with nothing in its body (no description) is left out of the report.
+    // Only an explicit include override in the notes file can bring it back.
+    if (t.hasBody === false) return '';
     var inSpace = [CFG.SPACES.pm, CFG.SPACES.dev].indexOf(String(t.spaceId)) !== -1;
     if (!inSpace) return '';
     var base = startMs(CFG.BASELINE);
@@ -248,7 +251,9 @@
       });
       var h = (model.notes.highlights || {})[m] || null;
       if (h && !(String(h.growth || '').trim() || String(h.value || '').trim() || String(h.setbacks || '').trim())) h = null;
-      out.push({ week: w, worked: worked, added: added, highlights: h });
+      var up = (model.notes.updates || {})[m] || null;
+      if (up && !String(up.markdown || '').trim()) up = null;
+      out.push({ week: w, worked: worked, added: added, highlights: h, update: up });
     }
     return out;
   }

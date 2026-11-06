@@ -27,12 +27,13 @@ if (flag('--empty')) {
   const pull = JSON.parse(fs.readFileSync(inFile, 'utf8'));
   if (!Number.isFinite(pull.pulledAt) || !Array.isArray(pull.tickets)) { console.error('pull file needs pulledAt (ms) and tickets[]'); process.exit(1); }
   const includeIds = new Set((notes.overrides || []).filter((o) => o.action === 'include').map((o) => String(o.id)));
-  const seen = new Set(), kept = [], dropped = { notLaura: 0, excludedList: 0, invalid: 0 };
+  const seen = new Set(), kept = [], dropped = { notLaura: 0, excludedList: 0, noBody: 0, invalid: 0 };
   for (const raw of pull.tickets) {
     const t = cleanTicket(raw);
     if (validateTicket(t).length) { dropped.invalid++; continue; }
     if (Logic.CFG.EXCLUDED_LIST_IDS.includes(t.listId)) { dropped.excludedList++; continue; }
     if (seen.has(t.id)) continue;
+    if (t.hasBody === false && !includeIds.has(t.id)) { dropped.noBody++; continue; }
     if (!Logic.classify(t) && !includeIds.has(t.id)) { dropped.notLaura++; continue; }
     seen.add(t.id); kept.push(t);
   }

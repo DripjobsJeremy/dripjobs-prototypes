@@ -1745,3 +1745,8 @@ Format:
 - Assumption: Tickets assigned to Laura but created before Nov 2 still count as "worked this week" (flag `ASSIGNED_IGNORES_BASELINE`). Weeks use the ClickUp account timezone (America/New_York). Every Form list ticket shows Draft regardless of its status there. Date range matches tickets created or updated in range. Each weekly pull appends a ticket's last update time to an encrypted history, so a week with no pull can miss an update that was later overwritten.
 - Decision (Jeremy, Nov 6): All of these assumptions confirmed as written.
 
+## [2026-11-06] Laura Progress: empty-body rule and Laura's weekly updates
+- Decision (Jeremy): A ticket with no description is excluded from the report (the empty "N/A" ticket is the example). Only an include override brings one back. The routine records `hasBody` and the build drops tickets without a body.
+- Decision (Jeremy): Laura's weekly message to Jeremy is added through `notes.mjs update <monday> <file>` and stored encrypted in the notes file, shown per week as "Laura's update". Markdown is rendered safely (no raw HTML, http and https links only).
+- Open: Laura's own tickets in the "Shared with me" folder (two Feature Radar tickets) and the QA space (the Job Scheduled ticket) are outside the two spaces named in the brief, so they are not in the pull. Waiting on Jeremy to say whether to include them.
+

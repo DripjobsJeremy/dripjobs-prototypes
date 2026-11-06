@@ -68,6 +68,18 @@ It decrypts to a private temp file, opens `$EDITOR`, validates, re-encrypts, and
 - `include` brings a ticket in (the next weekly pull fetches it) and shows "Included by override: reason" on its card. `exclude` hides it and lists it, with the reason, under "Excluded by override" at the bottom.
 - Highlights are keyed by the Monday of the week. Empty fields are not shown; a week with no text shows nothing.
 
+## Laura's weekly update
+
+Laura's message to Jeremy is stored encrypted in the same notes file and shown in that week's section as "Laura's update" (with "Sent to Jeremy on <date>"). Keep her text as markdown in a file outside the repo, then:
+
+```bash
+LAURA_PW='your passphrase' node laura-progress/tools/notes.mjs update 2026-11-02 ~/laura-update.md --received 2026-11-06
+```
+
+- The key is the Monday of the week the update covers. Running it again for the same week replaces that week's update.
+- Supported markdown: `### headings`, `*` or `-` bullets, `**bold**`, `[text](https://link)` and bare links. Anything else, including pasted HTML, is shown as plain text, and only http and https links are clickable.
+- In a Claude session with `LAURA_PW` set, say "Add laura update:" and paste her message. The steps are in `ROUTINE.md`.
+
 ## Rotating the password
 
 1. Choose the new passphrase (5+ random words).
@@ -85,6 +97,7 @@ It decrypts to a private temp file, opens `$EDITOR`, validates, re-encrypts, and
 
 - Laura's ticket: Product Drafter = Laura Cuadros (whoever created it). Fallback: created by Laura with Product Drafter blank, flagged "Product Drafter missing". Baseline: created on or after Nov 2, 2026.
 - Spaces: DripJobs Product Management (90140994633) and DripJobs Development V1 (90140994811). Never read: V2 Web Development list 901421393122. Also excluded: the PM space V 2 folder list and UX Review Tracking.
+- A ticket with nothing in its body (no description) is left out of the report. Only an `include` override brings it back.
 - Form list (901413487018): Draft until the ticket moves to Active Triage.
 - Lanes (first match wins): Dev V1 space In Flight; `v2 candidate`; `lane: exception`; `lane: maintenance` or Type Bug; `lane: gate`; `lane: v2 prep`; else No lane. Shipped tickets in the Dev V1 space keep the In Flight lane (same as the Roadmap).
 - Status groups: In Triage, In Flight, Shipped, Closed Without Fix, plus Draft. The full mapping is `STATUS_MAP` in `logic.js`; the routine reports any status it does not know.
@@ -96,6 +109,7 @@ It decrypts to a private temp file, opens `$EDITOR`, validates, re-encrypts, and
 
 - ClickUp stores only each ticket's last update time, so every weekly pull appends it to a "touch ledger" inside the encrypted data. That keeps past weeks stable. A week that passed with no pull can miss an update that was later overwritten.
 - "Last updated" in ClickUp also moves when someone else comments or an automation changes the ticket, so "worked" can include activity by others.
+- Not in scope today: tickets in the ClickUp "Shared with me" folder (space 90142657770, list 901422482967) and the QA space (90142569445). Laura's own tickets there only appear if you add an `include` override or widen the scope in `logic.js` and `ROUTINE.md`.
 - Assumption: tickets assigned to Laura but created before Nov 2 still count as worked (`ASSIGNED_IGNORES_BASELINE` in `logic.js`). Flip it to `false` to apply the baseline to them too.
 
 ## Tests
