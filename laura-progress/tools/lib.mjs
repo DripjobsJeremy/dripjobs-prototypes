@@ -70,6 +70,13 @@ export function validateNotes(n) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || Logic.mondayOf(k) !== k) errs.push('highlight key ' + k + ' must be a Monday (YYYY-MM-DD)');
     for (const f of Object.keys(v || {})) if (!['growth', 'value', 'setbacks'].includes(f)) errs.push('highlight ' + k + ': unknown field ' + f);
   }
+  for (const [k, v] of Object.entries(n.updates || {})) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || Logic.mondayOf(k) !== k) errs.push('update key ' + k + ' must be a Monday (YYYY-MM-DD)');
+    else if (!v || typeof v.markdown !== 'string' || !v.markdown.trim()) errs.push('update ' + k + ': markdown text is required');
+    else if (v.markdown.length > 20000) errs.push('update ' + k + ': markdown is longer than 20000 characters');
+    else if (v.received != null && !/^\d{4}-\d{2}-\d{2}$/.test(String(v.received))) errs.push('update ' + k + ': received must be YYYY-MM-DD');
+    for (const f of Object.keys(v || {})) if (!['markdown', 'received'].includes(f)) errs.push('update ' + k + ': unknown field ' + f);
+  }
   return errs;
 }
 
@@ -83,12 +90,14 @@ export function cleanTicket(t) {
     tags: arr(t.tags), drafter: t.drafter ? String(t.drafter) : '', creator: String(t.creator || ''),
     assignees: arr(t.assignees), assigneeIds: arr(t.assigneeIds), reviewers: arr(t.reviewers), pms: arr(t.pms),
     created: Number(t.created), updated: Number(t.updated), closed: t.closed ? Number(t.closed) : 0,
-    parent: t.parent ? String(t.parent) : ''
+    parent: t.parent ? String(t.parent) : '',
+    hasBody: typeof t.hasBody === 'boolean' ? t.hasBody : undefined
   };
 }
 export function validateTicket(t) {
   const miss = ['id', 'name', 'status', 'spaceId', 'listId'].filter((k) => !t[k]);
   if (!Number.isFinite(t.created) || !Number.isFinite(t.updated)) miss.push('created/updated');
+  if (typeof t.hasBody !== 'boolean') miss.push('hasBody (true when the ticket has any description text)');
   return miss;
 }
 export { fs, os, path };

@@ -3,17 +3,20 @@
 //   node laura-progress/tools/notes.mjs edit     decrypt to a private temp file, open $EDITOR, re-encrypt
 //   node laura-progress/tools/notes.mjs show     print the decrypted notes to the terminal
 //   node laura-progress/tools/notes.mjs init     create an empty notes file
+//   node laura-progress/tools/notes.mjs update <monday YYYY-MM-DD> <file.md> [--received YYYY-MM-DD]
+//                                                store Laura's weekly update (markdown file kept OUTSIDE the repo)
 // Password comes from LAURA_PW or a hidden prompt.
-import { LPCrypto, NOTES_FILE, readEnc, writeEnc, getPassword, validateNotes, fs, os, path } from './lib.mjs';
+import { LPCrypto, NOTES_FILE, readEnc, writeEnc, getPassword, validateNotes, assertOutsideRepo, fs, os, path } from './lib.mjs';
 import { spawnSync } from 'node:child_process';
 
 const cmd = process.argv[2];
 const TEMPLATE = {
   _help: 'overrides: [{"id":"<ClickUp task id>","action":"include|exclude","reason":"one line"}]. highlights: keyed by the Monday of the week (YYYY-MM-DD) with growth, value, setbacks. Delete this line if you like.',
   overrides: [],
-  highlights: {}
+  highlights: {},
+  updates: {}
 };
-if (!['edit', 'show', 'init'].includes(cmd)) { console.error('usage: notes.mjs edit|show|init'); process.exit(2); }
+if (!['edit', 'show', 'init', 'update'].includes(cmd)) { console.error('usage: notes.mjs edit|show|init|update <monday> <file.md> [--received YYYY-MM-DD]'); process.exit(2); }
 
 const pw = await getPassword();
 const file = readEnc(NOTES_FILE);
@@ -24,6 +27,22 @@ if (cmd === 'init') {
   if (file) { console.error('notes.enc.json already exists.'); process.exit(1); }
   writeEnc(NOTES_FILE, await LPCrypto.encrypt({ overrides: [], highlights: {} }, pw, 'notes'));
   console.log('Created laura-progress/notes.enc.json'); process.exit(0);
+}
+
+if (cmd === 'update') {
+  const [, , , week, mdFile, ...rest] = process.argv;
+  if (!week || !mdFile) { console.error('usage: notes.mjs update <monday YYYY-MM-DD> <file.md> [--received YYYY-MM-DD]'); process.exit(2); }
+  assertOutsideRepo(mdFile);
+  const ri = rest.indexOf('--received');
+  const next = { ...current, updates: { ...(current.updates || {}) } };
+  delete next._help;
+  next.updates[week] = { markdown: fs.readFileSync(mdFile, 'utf8').replace(/\r\n/g, '\n').trim() };
+  if (ri !== -1) next.updates[week].received = rest[ri + 1];
+  const errs = validateNotes(next);
+  if (errs.length) { console.error('Problems:\n - ' + errs.join('\n - ')); process.exit(1); }
+  writeEnc(NOTES_FILE, await LPCrypto.encrypt(next, pw, 'notes'));
+  console.log('Stored the update for the week of ' + week + ' in laura-progress/notes.enc.json (ciphertext). Commit that file only.');
+  process.exit(0);
 }
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lp-notes-'));

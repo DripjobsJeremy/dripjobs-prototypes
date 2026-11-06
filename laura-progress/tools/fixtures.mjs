@@ -2,7 +2,7 @@
 export const NOW = Date.parse('2026-11-06T21:36:00Z');
 const ms = (s) => Date.parse(s);
 const base = { type: '', taskType: '', tags: [], drafter: 'Laura Cuadros', creator: 'Jeremy Harrison', assignees: [], assigneeIds: [],
-  reviewers: ['Jeremy Harrison'], pms: ['Terry Bennett'], closed: 0, parent: '', listName: 'Active Triage', listId: '901402649270', spaceId: '90140994633' };
+  reviewers: ['Jeremy Harrison'], pms: ['Terry Bennett'], closed: 0, parent: '', hasBody: true, listName: 'Active Triage', listId: '901402649270', spaceId: '90140994633' };
 const T = (o) => ({ ...base, url: 'https://app.clickup.com/t/' + o.id, ...o });
 export const PULL = {
   pulledAt: NOW,
@@ -18,6 +18,7 @@ export const PULL = {
     T({ id: 'tst000a9', name: 'SYNTH lane conflict', status: 'on hold', tags: ['lane: gate', 'v2 candidate'], created: ms('2026-11-04T15:00:00Z'), updated: ms('2026-11-04T15:00:00Z') }),
     T({ id: 'tst000b1', name: 'SYNTH closed no fix', status: 'no fix needed', created: ms('2026-11-02T15:00:00Z'), updated: ms('2026-11-02T20:00:00Z') }),
     T({ id: 'tst000b2', name: 'SYNTH not laura', status: 'new', drafter: 'Someone Else', created: ms('2026-11-04T15:00:00Z'), updated: ms('2026-11-04T15:00:00Z') }),
+    T({ id: 'tst000b4', name: 'SYNTH empty body', status: 'new', hasBody: false, created: ms('2026-11-04T15:00:00Z'), updated: ms('2026-11-04T15:00:00Z') }),
     T({ id: 'tst000b3', name: 'SYNTH weird status', status: 'brand new status', created: ms('2026-11-04T15:00:00Z'), updated: ms('2026-11-04T15:00:00Z') })
   ]
 };
@@ -29,6 +30,9 @@ export const NOTES = {
   highlights: {
     '2026-11-02': { growth: 'SYNTH growth text', value: 'SYNTH value text', setbacks: '' },
     '2026-11-09': { growth: '', value: '', setbacks: '' }
+  },
+  updates: {
+    '2026-11-02': { received: '2026-11-06', markdown: '### [SYNTH Section](https://example.com/section)\n* SYNTH item with **bold** and [a link](https://example.com/a)\n* <script>window.__xss=1</script> [bad link](javascript:alert(1))\n\nSYNTH plain paragraph https://example.com/bare' }
   }
 };
 export const PW = 'throwaway test passphrase 1';

@@ -181,6 +181,45 @@
       h('div', { class: 'lp-hl' }, rows.map(function (r) { return h('div', {}, [h('h4', { text: r[0] }), h('p', { text: r[1] })]); }))]);
   }
 
+  /* Safe markdown for Laura's updates: headings (#, ##, ###), bullets (*, -), bold, and
+     http(s) links. Everything is created with textContent, so pasted HTML stays plain text. */
+  var INLINE = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|\*\*([^*]+)\*\*|(https?:\/\/[^\s)]+)/g;
+  function inline(parent, text) {
+    var last = 0, m;
+    INLINE.lastIndex = 0;
+    while ((m = INLINE.exec(text)) !== null) {
+      if (m.index > last) parent.appendChild(document.createTextNode(text.slice(last, m.index)));
+      if (m[2]) parent.appendChild(h('a', { href: m[2], target: '_blank', rel: 'noopener noreferrer', text: m[1] }));
+      else if (m[3]) parent.appendChild(h('strong', { text: m[3] }));
+      else parent.appendChild(h('a', { href: m[4], target: '_blank', rel: 'noopener noreferrer', text: m[4] }));
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) parent.appendChild(document.createTextNode(text.slice(last)));
+    return parent;
+  }
+  function renderMarkdown(md) {
+    var root = h('div', { class: 'lp-md' }), ul = null;
+    String(md).replace(/\r\n/g, '\n').split('\n').forEach(function (raw) {
+      var line = raw.replace(/\s+$/, ''), m;
+      if (!line.trim()) { ul = null; return; }
+      if ((m = /^\s*#{1,4}\s+(.*)$/.exec(line))) { ul = null; root.appendChild(inline(h('h4', {}), m[1])); return; }
+      if ((m = /^(\s*)[*\-\u2022]\s+(.*)$/.exec(line))) {
+        if (!ul) { ul = h('ul', {}); root.appendChild(ul); }
+        ul.appendChild(inline(h('li', { class: m[1].length >= 2 ? 'lp-md-sub' : '' }), m[2]));
+        return;
+      }
+      ul = null;
+      root.appendChild(inline(h('p', {}), line.trim()));
+    });
+    return root;
+  }
+  function updateBlock(up) {
+    if (!up) return null;
+    var meta = up.received ? 'Sent to Jeremy on ' + L.fmtYmd(up.received) : '';
+    return h('div', {}, [h('div', { class: 'lp-sec', text: 'Laura\u2019s update' }),
+      h('div', { class: 'lp-upd' }, [meta ? h('div', { class: 'lp-upd-meta', text: meta }) : null, renderMarkdown(up.markdown)])]);
+  }
+
   function listOrEmpty(items, empty) {
     return items.length ? h('div', { class: 'lp-list' }, items.map(ticketCard)) : h('p', { class: 'lp-empty', text: empty });
   }
@@ -199,6 +238,8 @@
       var body = h('div', { class: 'lp-week-body' });
       var hl = highlightsBlock(w.highlights);
       if (hl) body.appendChild(hl);
+      var ub = updateBlock(w.update);
+      if (ub) body.appendChild(ub);
       body.appendChild(h('div', { class: 'lp-sec', text: 'Tickets worked' }));
       body.appendChild(listOrEmpty(w.worked, 'No tickets worked this week.'));
       body.appendChild(h('div', { class: 'lp-sec', text: 'Tickets added' }));

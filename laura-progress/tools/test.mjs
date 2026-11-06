@@ -124,6 +124,25 @@ await ok('notes validation', () => {
   assert.ok(validateNotes({ overrides: [{ id: 'abcdef1', action: 'maybe', reason: 'r' }] }).length);
   assert.ok(validateNotes({ overrides: [{ id: 'abcdef1', action: 'include', reason: '' }] }).length);
   assert.ok(validateNotes({ highlights: { '2026-11-03': {} } }).length, 'not a Monday');
+  assert.ok(validateNotes({ updates: { '2026-11-03': { markdown: 'x' } } }).length, 'update key must be a Monday');
+  assert.ok(validateNotes({ updates: { '2026-11-02': { markdown: '  ' } } }).length, 'update needs text');
+  assert.ok(validateNotes({ updates: { '2026-11-02': { markdown: 'x', received: 'yesterday' } } }).length, 'received must be a date');
+  assert.deepEqual(validateNotes({ updates: { '2026-11-02': { markdown: 'x', received: '2026-11-06' } } }), []);
+});
+
+await ok('tickets with an empty body are excluded unless an include override says otherwise', () => {
+  const t = PULL.tickets.find((x) => x.id === 'tst000b4');
+  assert.equal(L.classify(t), '');
+  assert.ok(!L.buildModel(PULL, null, NOW).items.some((i) => i.t.id === 'tst000b4'));
+  const withOverride = L.buildModel(PULL, { overrides: [{ id: 'tst000b4', action: 'include', reason: 'kept on purpose' }] }, NOW);
+  assert.ok(withOverride.items.some((i) => i.t.id === 'tst000b4'));
+});
+
+await ok('weekly update is attached to its week and empty ones are ignored', () => {
+  const ws = L.weeks(model, { range: L.presetRange('since-start', NOW) });
+  assert.ok(ws[0].update && ws[0].update.received === '2026-11-06' && /SYNTH Section/.test(ws[0].update.markdown));
+  const m2 = L.buildModel(PULL, { updates: { '2026-11-02': { markdown: '   ' } } }, NOW);
+  assert.equal(L.weeks(m2, { range: L.presetRange('since-start', NOW) })[0].update, null);
 });
 
 // ---- tool flow in a throwaway repo copy ----
@@ -147,6 +166,13 @@ await ok('tools: empty bundle, notes, build, ledger merge, guard, rotate', async
   fs.rmSync(path.join(repo, 'inside.json'));
   r = run('build.mjs', ['--in', pullFile], env); assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, /UNMAPPED STATUSES.*brand new status/);
+  assert.match(r.stdout, /"noBody":1/);
+  { // pull without hasBody is rejected rather than silently included
+    const bad = JSON.parse(JSON.stringify(PULL)); delete bad.tickets[0].hasBody;
+    const badFile = path.join(sandbox, 'bad.json'); fs.writeFileSync(badFile, JSON.stringify(bad));
+    const rb = run('build.mjs', ['--in', badFile], env); assert.equal(rb.status, 0, rb.stderr); assert.match(rb.stdout, /"invalid":1/);
+    const rg = run('build.mjs', ['--in', pullFile], env); assert.equal(rg.status, 0, rg.stderr); // restore the good bundle
+  }
   const file = JSON.parse(fs.readFileSync(path.join(repo, 'laura-progress/data.enc.json'), 'utf8'));
   const raw = fs.readFileSync(path.join(repo, 'laura-progress/data.enc.json'), 'utf8');
   for (const needle of ['SYNTH', 'tst000a1', 'Laura', 'clickup']) assert.equal(raw.includes(needle), false, 'plaintext leaked: ' + needle);
@@ -165,6 +191,13 @@ await ok('tools: empty bundle, notes, build, ledger merge, guard, rotate', async
   // guard: ciphertext-only tree passes, plaintext leak is caught
   fs.writeFileSync(pullFile, JSON.stringify(pull2));
   r = run('guard.mjs', [pullFile], env); assert.equal(r.status, 0, r.stderr);
+  { // --also: a line from a plaintext update must not appear in the repo
+    const upd = path.join(sandbox, 'upd2.md'); fs.writeFileSync(upd, '* A long distinctive plaintext update line\n');
+    r = run('guard.mjs', [pullFile, '--also', upd], env); assert.equal(r.status, 0, r.stderr);
+    fs.writeFileSync(path.join(repo, 'leak2.md'), 'x A long distinctive plaintext update line x');
+    r = run('guard.mjs', [pullFile, '--also', upd], env); assert.notEqual(r.status, 0);
+    fs.rmSync(path.join(repo, 'leak2.md'));
+  }
   fs.writeFileSync(path.join(repo, 'leak.md'), 'oops SYNTH dev ticket in flight');
   r = run('guard.mjs', [pullFile], env); assert.notEqual(r.status, 0);
   fs.rmSync(path.join(repo, 'leak.md'));
@@ -176,6 +209,15 @@ await ok('tools: empty bundle, notes, build, ledger merge, guard, rotate', async
   assert.equal((await LPCrypto.decrypt(rot, NEW, 'data')).obj.tickets.length, 10);
   const rotN = JSON.parse(fs.readFileSync(nf, 'utf8'));
   assert.equal((await LPCrypto.decrypt(rotN, NEW, 'notes')).obj.overrides.length, 2);
+  // notes update command (markdown kept outside the repo)
+  const md = path.join(sandbox, 'upd.md'); fs.writeFileSync(md, '### Heading\n* one\n');
+  r = run('notes.mjs', ['update', '2026-11-09', path.join(repo, 'laura-progress/README.md')], { LAURA_PW: NEW }); assert.notEqual(r.status, 0, 'refuses markdown inside the repo');
+  r = run('notes.mjs', ['update', '2026-11-03', md], { LAURA_PW: NEW }); assert.notEqual(r.status, 0, 'refuses a non-Monday');
+  r = run('notes.mjs', ['update', '2026-11-09', md, '--received', '2026-11-13'], { LAURA_PW: NEW }); assert.equal(r.status, 0, r.stderr);
+  const afterN = (await LPCrypto.decrypt(JSON.parse(fs.readFileSync(nf, 'utf8')), NEW, 'notes')).obj;
+  assert.equal(afterN.updates['2026-11-09'].markdown, '### Heading\n* one'); assert.equal(afterN.updates['2026-11-09'].received, '2026-11-13');
+  assert.equal(afterN.overrides.length, 2, 'existing overrides kept');
+  assert.equal(fs.readFileSync(nf, 'utf8').includes('Heading'), false);
   r = run('rotate.mjs', [], { LAURA_PW_OLD: NEW, LAURA_PW_NEW: 'short' }); assert.notEqual(r.status, 0);
 });
 fs.rmSync(sandbox, { recursive: true, force: true });
