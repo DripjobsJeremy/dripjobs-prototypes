@@ -1,72 +1,72 @@
 # DripJobs Weekly Product Update
 
-**Period:** October 26 – October 30, 2026
-**Release:** Oct 26 & Oct 29 deployments · 7 updates
+**Period:** November 2 – November 6, 2026
+**Release:** Nov 2 & Nov 5 deployments · 8 updates
 
 ---
 
 ## Proposal Builder
 
-### Fixed Reopened Proposals Not Updating After a Stage Change in Command Center (*Oct 26*)
-**What changed:** Fixed a bug where changing a proposal's stage through the Command Center's Move workflow (for example, reopening a Rejected proposal to Draft) appeared to save but didn't actually update the proposal's status. Moving a proposal by drag-and-drop was not affected.
-**Why it matters:** Reopening a rejected proposal through Command Center now reliably updates its status, the same as dragging it to a new stage.
+### Fixed Non-Admin Users Seeing a Restricted Settings Link in Proposal Line Items (*Nov 5*)
+**What changed:** Fixed a bug where the "Edit Your Products and Services" helper link appeared in the Add/Edit Line Item modal for non-admin users, even though they don't have access to that settings page. Saving a line item as a new product or service still works the same for non-admin users.
+**Why it matters:** Non-admin users no longer see a link to a settings page they can't open.
 **Action needed:** None
 
 ---
 
-### Fixed New Proposals Not Inheriting the Deal's Assigned Project Manager (*Oct 26*)
-**What changed:** Fixed a bug where creating a new proposal from a deal correctly defaulted the assigned Salesperson but left the Project Manager field blank, even when the deal had one assigned.
-**Why it matters:** New proposals created from a deal now carry over both the Salesperson and Project Manager automatically, so you don't have to re-select the Project Manager by hand.
+### Increased Proposal and Work Order PDF Line Item Text Size to Match Invoices (*Nov 5*)
+**What changed:** Increased the line item and area table text size on Proposal PDFs (including Change Orders) and Work Order PDFs so they match the larger text already used on Invoice PDFs.
+**Why it matters:** Proposals and work orders are now as easy to read as your invoices, for both homeowners reviewing a scope and crews reading job details in the field.
 **Action needed:** None
 
 ---
 
-### Fixed Scheduled Proposal Sends Not Saving or Queuing in Some Cases (*Oct 29*)
-**What changed:** Fixed a bug that, for some accounts, prevented a proposal scheduled to send at a future date and time from saving or queuing. Clicking Send appeared to work but the proposal was never actually scheduled or sent.
-**Why it matters:** Scheduling a proposal for a future send now reliably saves and sends at the time you selected.
+## Jobs
+
+### Fixed Job Amounts Showing the Summed Invoice Total Instead of the Proposal Price (*Nov 2*)
+**What changed:** Fixed a bug where several screens, including a contact's Proposals/Jobs tab, the Deal modal, the Schedule page, and the Calendar, showed a job's amount as the sum of every visit invoice once the job was invoiced, instead of the proposal price. A multi-visit job could appear at double or more its actual proposal price on these screens.
+**Why it matters:** Job amounts now match the proposal price everywhere except the Jobs Pipeline, which still compares the proposal to what's actually been invoiced.
 **Action needed:** None
 
 ---
 
-## Appointments
+## Sales Pipeline
 
-### Fixed Duplicate Calendar Entries After Scheduling an On-Site Estimate (*Oct 26*)
-**What changed:** Fixed a bug where the original booking-form request stayed visible on the calendar after an on-site estimate was scheduled from Command Center, creating a duplicate entry alongside the new appointment.
-**Why it matters:** Your calendar now shows a single, accurate entry once an on-site estimate request has been scheduled.
-**Action needed:** None
-
----
-
-## Inbox
-
-### Fixed Email Unread Badge Showing Conversations You Can't Access (*Oct 26*)
-**What changed:** Fixed a bug where the unread badge on the Email menu could count conversations from deals you're not assigned to, even though your Inbox correctly showed them as not visible to you.
-**Why it matters:** The unread count on the Email menu now always matches what's actually waiting in your Inbox.
-**Action needed:** None
-
----
-
-## Contacts
-
-### Added Explanations to Contact Option Toggles (*New · Oct 26*)
-**What changed:** Added info icons next to the Active Contact, Opt Out of Blasts/Newsletters, Opt Out of Drips, and Opt Out of SMS toggles on a contact's Options section. Hovering or tapping an icon explains what the toggle does.
-**Why it matters:** It's now clear at a glance what each contact-level toggle controls, especially for the communication opt-out settings.
+### Removed "Generate Invoice" from Command Center for Sales Pipeline Deals (*Nov 5*)
+**What changed:** Removed the "Generate Invoice" option from the Command Center for deals still in the Sales Pipeline, so an invoice can no longer be created before a proposal is accepted. The option remains available in the Jobs Pipeline when a deal doesn't yet have an invoice.
+**Why it matters:** Prevents invoices from being generated too early, which could leave a customer's Stripe payment unrecorded in DripJobs.
 **Action needed:** None
 
 ---
 
 ## Invoicing
 
-### Fixed Request Payment's Custom % and Amount Fields Not Staying in Sync (*Oct 29*)
-**What changed:** Fixed a bug in the Request Payment modal where entering a dollar amount didn't update the Custom % field to match, and where a percentage entry rounded the calculated amount down instead of to the nearest cent.
-**Why it matters:** The percentage and dollar amount in a payment request now always match, and amounts are rounded correctly.
+### Added Text Message Option for Payment Receipts (*New · Nov 2*)
+**What changed:** You can now send a payment receipt by text message, email, or both from Receive Payment and Edit Payment, for companies with Text Messaging enabled. The text includes your company name, the payment amount, the invoice number, and a link to view the invoice.
+**Why it matters:** Customers can now get payment confirmation on the same channel they already use for proposals and invoices.
 **Action needed:** None
 
 ---
 
-## Production Rates
-
-### Added a 48-Character Limit to Substrate Client Labels (*Oct 29*)
-**What changed:** Limited the Client label field on a substrate to 48 characters going forward, with a live character counter, so new labels always display in full on customer-facing documents. Existing longer labels are unchanged and show a warning until edited back under the limit.
-**Why it matters:** Client labels you add from now on will always show completely on proposals, invoices, and change orders instead of getting cut off.
+### Added "Offline Requested" to the Invoices Status Filter (*Nov 2*)
+**What changed:** Added "Offline Requested" as an option in the Invoices Status filter dropdown, alongside the existing Open, Partially Paid, and Paid statuses.
+**Why it matters:** You can now filter your Invoices list by every supported status.
 **Action needed:** None
+
+---
+
+## Integrations
+
+### Fixed Zapier's Deal Stage Change Trigger Failing to Load Sample Records (*Nov 2*)
+**What changed:** Fixed a bug where testing the Deal Stage Change trigger in Zapier failed with an error instead of loading sample records, which blocked setting up new Zaps based on that trigger.
+**Why it matters:** You can now test and set up Zaps using the Deal Stage Change trigger without errors.
+**Action needed:** None
+
+---
+
+## Billing
+
+### Added an Alert for Expired Payment Cards (*New · Nov 5*)
+**What changed:** Account owners now see a persistent banner when the card DripJobs charges for your subscription has expired, prompting you to update your payment method before the next billing attempt.
+**Why it matters:** You can update an expired card before it causes a failed payment or an interruption to your subscription.
+**Action needed:** Update your payment method if this banner appears.
