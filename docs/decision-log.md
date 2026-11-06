@@ -1758,3 +1758,6 @@ Format:
 - Decision (Jeremy): No pie chart. With about 10 tickets a pie exaggerates single tickets and implies proportion, which conflicts with the counts-only rule. Added a thin status-group bar with written counts (no percentages, no comparison), a Shipped list, and the latest Highlights at the top of the page.
 - Assumption: The Shipped date uses ClickUp's closed date when present, otherwise the last updated date, labeled "Updated". No shipped tickets exist in the data yet, so the list shows an empty note for now.
 
+## [2026-11-06] Laura Progress page renamed
+- Decision (Jeremy): The page is now called "Jr Prod Mgr | Weekly Progress Report" (Hub tab label, page title, lock screen, heading). The link stays `#laura-progress` and the folder stays `laura-progress/` so bookmarks, the routine, and the docs keep working.
+

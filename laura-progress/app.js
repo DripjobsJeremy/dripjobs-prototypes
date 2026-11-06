@@ -318,7 +318,7 @@
       fr.empty ? 'No ClickUp pull has been merged yet.' : 'Last pulled from ClickUp on ' + L.fmtDate(fr.pulledAt) + '.' + (fr.stale ? ' That was more than 7 days ago.' : '')]);
 
     var head = h('div', { class: 'lp-head' }, [
-      h('div', {}, [h('div', { class: 'lp-title', text: 'Laura Progress' }),
+      h('div', {}, [h('div', { class: 'lp-title', text: 'Jr Prod Mgr | Weekly Progress Report' }),
         h('p', { class: 'lp-sub', text: 'Weekly view of Laura Cuadros’s work as Junior Product Manager. V1 is in maintenance mode, so low volume is expected.' })]),
       h('button', { class: 'lp-btn ghost', type: 'button', onclick: lock, text: 'Lock' })
     ]);

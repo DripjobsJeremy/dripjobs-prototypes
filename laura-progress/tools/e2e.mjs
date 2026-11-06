@@ -38,8 +38,9 @@ try {
   await frame.locator('#lpPw').waitFor();
   assert.equal(await frame.locator('#lpApp').isHidden(), true);
   const hubHtml = fs.readFileSync(path.join(site, 'index.html'), 'utf8');
-  assert.equal(/SYNTH|Laura Cuadros/.test(hubHtml.replace(/Laura Progress/g, '')), false);
-  assert.match(await page.locator('.hub-tab.active').innerText(), /Laura Progress/);
+  assert.equal(/SYNTH|Laura Cuadros/.test(hubHtml.replace(/Jr Prod Mgr \| Weekly Progress Report/g, '')), false);
+  assert.match(await page.locator('.hub-tab.active').innerText(), /Jr Prod Mgr \| Weekly Progress Report/);
+  assert.equal(await frame.locator('.lp-title').count(), 0, 'heading appears only after unlock');
 
   // Wrong password
   await frame.locator('#lpPw').fill('wrong password');
