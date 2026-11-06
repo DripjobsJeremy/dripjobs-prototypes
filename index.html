@@ -110,6 +110,8 @@
   }
   .hub-view { display: none; }
   .hub-view.active { display: block; }
+  /* Laura Progress: password-gated, encrypted data, loaded only when the tab is opened */
+  .lp-frame { display: block; width: 100%; height: 640px; border: 0; background: transparent; }
 
   /* ── Release notes grid ── */
   .release-grid {
@@ -799,6 +801,7 @@
     <button class="hub-tab" data-view="productSignalsView" data-hash="product-signals">Product Signals</button>
     <button class="hub-tab" data-view="releaseNotesView" data-hash="release-notes">Product Release Notes</button>
     <button class="hub-tab" data-view="resourcesView" data-hash="resources">Resources</button>
+    <button class="hub-tab" data-view="lauraProgressView" data-hash="laura-progress">Laura Progress</button>
   </div>
 
   <!-- Prototypes View -->
@@ -1833,6 +1836,11 @@
 
   </div><!-- /resourcesView -->
 
+  <!-- Laura Progress View (password-gated; the page decrypts its own data, nothing from it is rendered here) -->
+  <div class="hub-view" id="lauraProgressView">
+    <iframe class="lp-frame" id="lpFrame" title="Laura Progress" referrerpolicy="no-referrer" data-src="./laura-progress/index.html"></iframe>
+  </div>
+
   <!-- Footer -->
   <div class="hub-footer">
     DripJobs Prototype Hub
@@ -1949,7 +1957,16 @@
     tab.classList.add('active');
     const target = tab.dataset.view;
     hubViews.forEach(v => v.classList.toggle('active', v.id === target));
+    if (target === 'lauraProgressView') {
+      const lpFrame = document.getElementById('lpFrame');
+      if (!lpFrame.getAttribute('src')) lpFrame.setAttribute('src', lpFrame.dataset.src);
+    }
   }
+  window.addEventListener('message', (e) => {
+    const lpFrame = document.getElementById('lpFrame');
+    if (e.origin !== location.origin || !lpFrame || e.source !== lpFrame.contentWindow) return;
+    if (e.data && typeof e.data.lpHeight === 'number') lpFrame.style.height = Math.max(360, Math.ceil(e.data.lpHeight)) + 'px';
+  });
   hubTabs.forEach(tab => {
     tab.addEventListener('click', () => {
       activateHubTab(tab);
