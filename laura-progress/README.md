@@ -1,4 +1,4 @@
-# Laura Progress (Hub tab `#laura-progress`)
+# Jr Prod Mgr | Weekly Progress Report (Hub tab, link `#laura-progress`)
 
 Weekly progress view of Laura Cuadros's work as Junior Product Manager. Visible to Jeremy, Tanner, and Eli only.
 Counts only: no targets, scores, thresholds, or comparisons. V1 is in maintenance mode, so low volume is expected.
