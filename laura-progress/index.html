@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
+<meta name="referrer" content="no-referrer" />
+<title>Laura Progress</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --color-primary: #8B85EA; --color-primary-hover: #736BE3; --color-primary-active: #5C53DC;
+    --color-primary-rgb: 139, 133, 234; --color-bg: #F3F1FC; --color-text: #32415B;
+    --color-text-muted: #80879A; --color-border: #DAD8E3; --color-card: #FFFFFF;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--color-bg); color: var(--color-text); min-height: 100vh; font-size: 14px; }
+  body.embedded { background: transparent; min-height: 0; }
+  .lp-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 24px 60px; }
+  body.embedded .lp-wrap { padding: 0 0 40px; }
+  [hidden] { display: none !important; }
+
+  /* Lock screen */
+  .lp-lock { display: flex; justify-content: center; padding: 56px 0; }
+  .lp-lock-card { width: 100%; max-width: 380px; background: var(--color-card); border: 1px solid var(--color-border);
+    border-radius: 14px; padding: 30px 28px; text-align: center; box-shadow: 0 8px 28px rgba(50,65,91,0.10); }
+  .lp-lock-mark { width: 40px; height: 40px; margin: 0 auto 14px; border-radius: 10px; background: var(--color-primary); color: #fff;
+    display: flex; align-items: center; justify-content: center; }
+  .lp-lock-mark svg { width: 20px; height: 20px; }
+  .lp-lock h1 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .lp-lock p { font-size: 12.5px; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 18px; }
+  .lp-lock form { display: flex; flex-direction: column; gap: 10px; }
+  .lp-input, .lp-select { height: 48px; border: 1px solid var(--color-border); border-radius: 8px; padding: 0 14px; font-size: 14px;
+    font-family: inherit; color: var(--color-text); background: var(--color-card); outline: none; transition: border-color .15s, box-shadow .15s; }
+  .lp-input:focus, .lp-select:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), .18); }
+  .lp-btn { height: 48px; border: none; border-radius: 8px; background: var(--color-primary); color: #fff; font-size: 14px; font-weight: 600;
+    font-family: inherit; cursor: pointer; padding: 0 20px; transition: background .15s; }
+  .lp-btn:hover { background: var(--color-primary-hover); }
+  .lp-btn:disabled { opacity: .6; cursor: default; }
+  .lp-btn.ghost { background: var(--color-card); color: var(--color-primary-active); border: 1px solid var(--color-border); height: 40px; min-height: 48px; }
+  .lp-btn.ghost:hover { background: #F7F6FD; border-color: var(--color-primary); }
+  .lp-err { font-size: 12.5px; color: #991B1B; min-height: 18px; margin-top: 2px; }
+  .lp-note { font-size: 12.5px; color: var(--color-text-muted); line-height: 1.6; }
+
+  /* Header */
+  .lp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+  .lp-title { font-size: 20px; font-weight: 700; letter-spacing: -.2px; }
+  .lp-sub { font-size: 12.5px; color: var(--color-text-muted); margin-top: 3px; max-width: 640px; line-height: 1.55; }
+
+  .lp-sync { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 12.5px; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid var(--color-border); background: var(--color-card); margin-bottom: 18px; }
+  .lp-sync.fresh { background: #E6FAF0; border-color: #B7EBCF; color: #166534; }
+  .lp-sync.stale { background: #FFFBEB; border-color: #FCD9A0; color: #92400E; }
+
+  /* Tiles */
+  .lp-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 6px; }
+  .lp-tile { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 10px; padding: 14px 18px; }
+  .lp-tile-label { font-size: 11px; font-weight: 500; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+  .lp-tile-value { font-size: 22px; font-weight: 700; }
+  .lp-tile-cap { font-size: 12px; color: var(--color-text-muted); margin: 0 0 20px; }
+
+  /* View switch + filters */
+  .lp-switch { display: inline-flex; background: #E8E6FA; border-radius: 10px; padding: 3px; gap: 2px; margin-bottom: 14px; }
+  .lp-switch button { appearance: none; border: none; background: transparent; font-family: inherit; font-size: 13px; font-weight: 600;
+    color: var(--color-primary-active); padding: 0 16px; min-height: 40px; border-radius: 8px; cursor: pointer; }
+  .lp-switch button.active { background: var(--color-card); box-shadow: 0 1px 3px rgba(50,65,91,.12); }
+  .lp-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .lp-filters .lp-select, .lp-filters .lp-input { height: 40px; min-height: 40px; font-size: 13px; }
+  .lp-check { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; min-height: 40px; padding: 0 10px; cursor: pointer; }
+  .lp-check input { width: 18px; height: 18px; accent-color: var(--color-primary); }
+  .lp-custom { display: inline-flex; gap: 6px; align-items: center; }
+  .lp-resultbar { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--color-text-muted); margin-bottom: 10px; }
+  .lp-link { appearance: none; border: none; background: none; font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--color-primary); cursor: pointer; min-height: 32px; }
+  .lp-link:hover { text-decoration: underline; color: var(--color-primary-hover); }
+
+  /* Ticket cards */
+  .lp-list { display: flex; flex-direction: column; gap: 8px; }
+  .lp-card { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 12px; padding: 14px 16px; }
+  .lp-card-title { font-size: 14px; font-weight: 700; line-height: 1.4; margin-bottom: 8px; }
+  .lp-card-title a { color: var(--color-text); text-decoration: none; }
+  .lp-card-title a:hover { color: var(--color-primary); text-decoration: underline; }
+  .lp-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .lp-badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; white-space: nowrap; background: #EFEFF3; color: #4B5563; }
+  .lp-g-draft { background: #FFFFFF; color: #4B5563; border: 1px dashed #B8B5C9; }
+  .lp-g-triage { background: #EFF6FF; color: #1E40AF; }
+  .lp-g-flight { background: #E8E6FA; color: #5C53DC; }
+  .lp-g-shipped { background: #E6FAF0; color: #166534; }
+  .lp-g-closed { background: #EFEFF3; color: #4B5563; }
+  .lp-lane { background: #FAF7E6; color: #5B4B16; }
+  .lp-type { background: #E6F3FA; color: #155E75; }
+  .lp-focus { background: #FAE6F0; color: #831843; }
+  .lp-flag { background: #F3F1FC; color: var(--color-primary-active); border: 1px solid #D6D2F5; }
+  .lp-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 16px; font-size: 12.5px; }
+  .lp-meta dt { font-size: 10.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--color-text-muted); font-weight: 500; }
+  .lp-meta dd { font-weight: 500; margin-top: 1px; word-break: break-word; }
+  .lp-flags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+
+  /* Weeks */
+  .lp-week { background: var(--color-card); border: 1px solid var(--color-border); border-radius: 12px; margin-bottom: 10px; }
+  .lp-week > summary { list-style: none; cursor: pointer; padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; min-height: 48px; }
+  .lp-week > summary::-webkit-details-marker { display: none; }
+  .lp-week > summary::before { content: '\25B8'; color: var(--color-primary); font-size: 12px; transition: transform .15s; }
+  .lp-week[open] > summary::before { transform: rotate(90deg); }
+  .lp-week-name { font-weight: 700; }
+  .lp-week-meta { font-size: 12.5px; color: var(--color-text-muted); }
+  .lp-week-body { padding: 0 16px 16px; }
+  .lp-sec { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--color-text-muted); margin: 14px 0 8px; }
+  .lp-empty { font-size: 12.5px; color: var(--color-text-muted); padding: 4px 0; }
+  .lp-hl { background: #F7F6FD; border: 1px solid #D6D2F5; border-radius: 10px; padding: 12px 14px; display: grid; gap: 10px; }
+  .lp-hl h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--color-primary-active); margin-bottom: 2px; }
+  .lp-hl p { font-size: 13px; line-height: 1.55; white-space: pre-wrap; }
+  .lp-ovr { margin-top: 24px; }
+  .lp-ovr summary { cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--color-text-muted); min-height: 40px; display: flex; align-items: center; }
+
+  @media (max-width: 640px) {
+    .lp-wrap { padding: 16px 16px 48px; }
+    body.embedded .lp-wrap { padding: 0 0 40px; }
+    .lp-filters .lp-select, .lp-filters .lp-input { flex: 1 1 100%; height: 48px; min-height: 48px; }
+    .lp-custom { flex: 1 1 100%; }
+    .lp-custom .lp-input { flex: 1; }
+    .lp-btn.ghost { min-height: 48px; }
+  }
+</style>
+</head>
+<body>
+<div class="lp-wrap">
+
+  <!-- Lock screen: nothing from the data is rendered until the browser decrypts it. -->
+  <section class="lp-lock" id="lpLock">
+    <div class="lp-lock-card">
+      <div class="lp-lock-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+      <h1>Laura Progress</h1>
+      <p id="lpLockMsg">This view is limited to Jeremy, Tanner, and Eli. Enter its password to unlock it for this browser tab.</p>
+      <form id="lpForm" autocomplete="off">
+        <input class="lp-input" type="password" id="lpPw" placeholder="Password" aria-label="Password" autocomplete="off" required />
+        <button class="lp-btn" type="submit" id="lpUnlock">Unlock</button>
+        <div class="lp-err" id="lpErr" role="alert"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- App (filled after unlock) -->
+  <section id="lpApp" hidden></section>
+</div>
+<script src="./lpcrypto.js"></script>
+<script src="./logic.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

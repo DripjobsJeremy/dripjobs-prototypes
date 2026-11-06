@@ -58,6 +58,13 @@ Signals sync (Product Signals tab):
 - Triage decisions live in `PS_TRIAGE` in the data file (key is `date|first 70 characters of the title`). When someone shares an "Export CSV" file from the tab, apply its Triage and Triage note columns to `PS_TRIAGE`, apply any changed ticket or coverage columns to the matching rows (confirm the live ClickUp status), and bump `triageSyncedOn`. A routine sync must never overwrite or drop existing `PS_TRIAGE` entries.
 - Append a dated entry to `docs/decision-log.md`, commit, push a branch named `claude/signals-sync-<date>`, and open a PR. Do not merge it.
 
+Laura Progress sync (Laura Progress tab, password-gated):
+- Trigger: "Refresh laura progress:" (also runs weekly on Fridays). Full steps are in `laura-progress/ROUTINE.md`.
+- ClickUp is read only. The tab's data and notes are AES-GCM ciphertext (`laura-progress/data.enc.json`, `notes.enc.json`). The repo is public, so never commit, paste, or log plaintext ticket data; the password is read from `LAURA_PW` and never stored.
+- Rules, rotation, and the public repo caveats are in `laura-progress/README.md`. Lane and status rules live only in `laura-progress/logic.js`.
+- Do not show anything from this tab elsewhere in the Hub (no counts, previews, titles, cards, or search entries).
+- Push a branch named `claude/laura-progress-<date>` and open a PR. Do not merge it.
+
 GitHub API mechanics:
 - Always fetch a fresh file SHA immediately before any PUT to that file. Stale SHAs cause 409 conflicts. Don't reuse a SHA from earlier in a long session.
 - Poll `/repos/{repo}/pages/builds/latest` to check build status.

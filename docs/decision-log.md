@@ -1738,3 +1738,10 @@ Format:
 
 ## [2026-10-29] Invoice Reminders: email failed, text sent banner confirmed
 - Decision: Production screenshots confirm both banners. "Email and text failed" keeps its text; "email failed, text sent" now uses the production text ("...your email but the text message sent successfully. Please try again") and counts as a successful send, so reminders start.
+
+## [2026-11-06] Laura Progress: new password-gated Hub tab
+- Decision: The repo is public, so the tab's data is committed only as AES-256-GCM ciphertext (PBKDF2-SHA256, 1,000,000 iterations, random salt per encryption) and decrypted in the browser. The Hub gate hash is not relied on. Overrides and Highlights are also encrypted and edited through `laura-progress/tools/notes.mjs`, since plaintext would expose ticket ids and notes about Laura. The tab loads as its own page (noindex) inside an iframe, only when opened.
+- Decision (Jeremy, Nov 6): Status groups confirmed: send to dev, ready for production = In Flight; gate change to (v2), cannot replicate = In Triage; UX Review Tracking ignored; Form list tickets are Draft until moved to Active Triage; V 2 folder excluded and list 901421393122 never read; shipped Dev V1 tickets keep the In Flight lane.
+- Assumption: Tickets assigned to Laura but created before Nov 2 still count as "worked this week" (flag `ASSIGNED_IGNORES_BASELINE`). Weeks use the ClickUp account timezone (America/New_York). Every Form list ticket shows Draft regardless of its status there. Date range matches tickets created or updated in range. Each weekly pull appends a ticket's last update time to an encrypted history, so a week with no pull can miss an update that was later overwritten.
+- Decision (Jeremy, Nov 6): All of these assumptions confirmed as written.
+
