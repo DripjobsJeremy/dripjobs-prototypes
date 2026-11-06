@@ -41,6 +41,16 @@ Nothing from the data is shown anywhere else in the Hub: the tab button is only 
 4. Commit `data.enc.json` and `notes.enc.json` and open a PR. Until a first pull is merged the tab shows "Nothing has been pulled yet" with no password box.
 5. Run the first refresh (see `ROUTINE.md`).
 
+## What the page shows, top to bottom
+
+1. The latest Highlights (newest week with any text; older weeks keep theirs inside their week section).
+2. The four count tiles for the current week.
+3. A thin bar of Laura's own tickets by status group. Counts are written out and there are no percentages or comparisons.
+4. Shipped: Laura's tickets whose status is `pushed to production`, newest first. It shows "Shipped <date>" when ClickUp has a closed date and "Updated <date>" otherwise.
+5. The Weekly view and All tickets with the filters.
+
+The status bar and Shipped list do not follow the filters, like the tiles.
+
 ## Using the tab
 
 Enter the password once. The derived keys (not the password) live in `sessionStorage`, so the tab stays unlocked until the browser tab closes. The **Lock** button clears them immediately. A wrong password shows one generic message.

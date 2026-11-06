@@ -117,6 +117,22 @@ await ok('filters and weekly view', () => {
   assert.equal(L.weeks(withEmptyHl, f({}))[0].highlights, null);
 });
 
+await ok('status bar counts, shipped list and latest highlights (counts only, no comparison)', () => {
+  const mix = L.statusMix(model);
+  assert.equal(mix.reduce((a, x) => a + x.count, 0), model.items.filter((i) => i.own).length, 'own tickets only');
+  assert.ok(mix.every((x) => x.count > 0 && !('pct' in x)));
+  assert.ok(mix.some((x) => x.key === 'unmapped'), 'unmapped status is surfaced, not hidden');
+  const sh = L.shipped(model);
+  assert.deepEqual(sh.map((s) => s.it.t.id), ['tst000a8']);
+  assert.equal(sh[0].exact, false); assert.equal(sh[0].at, sh[0].it.t.updated);
+  const closedModel = L.buildModel({ ...PULL, tickets: PULL.tickets.map((t) => (t.id === 'tst000a8' ? { ...t, closed: t.updated + 5000 } : t)) }, NOTES, NOW);
+  assert.equal(L.shipped(closedModel)[0].exact, true); assert.equal(L.shipped(closedModel)[0].at, closedModel.items.find((i) => i.t.id === 'tst000a8').t.closed);
+  const lh = L.latestHighlights(model);
+  assert.equal(lh.key, '2026-11-02'); assert.equal(lh.hl.growth, 'SYNTH growth text');
+  assert.equal(L.latestHighlights(L.buildModel(PULL, { highlights: { '2026-11-09': { growth: 'future' } } }, NOW)), null, 'future weeks are ignored');
+  assert.equal(L.latestHighlights(L.buildModel(PULL, null, NOW)), null);
+});
+
 await ok('freshness turns amber only after 7 days', () => {
   assert.equal(L.freshness({ pulledAt: NOW }, NOW + 7 * 86400000).stale, false);
   assert.equal(L.freshness({ pulledAt: NOW }, NOW + 7 * 86400000 + 1).stale, true);

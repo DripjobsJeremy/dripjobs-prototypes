@@ -1754,3 +1754,7 @@ Format:
 - Decision (Jeremy): Search scope stays at the two spaces. Anything Jeremy or Laura's update presents from elsewhere gets an include override (with a reason shown on the card) instead of widening the search. Done now for the Job Scheduled ticket (QA space) and the two Feature Radar tickets ("Shared with me").
 - Assumption: The "Shared with me" list counts as a Draft list like the Form list, and QA Space - V1 gets the In Flight lane, matching the Roadmap config approved Nov 3 (the brief's rule 1 names only the Development V1 space). `testing ready` and `test in progress` map to In Flight. Needs Jeremy to confirm.
 
+## [2026-11-06] Laura Progress: leadership view (no pie chart)
+- Decision (Jeremy): No pie chart. With about 10 tickets a pie exaggerates single tickets and implies proportion, which conflicts with the counts-only rule. Added a thin status-group bar with written counts (no percentages, no comparison), a Shipped list, and the latest Highlights at the top of the page.
+- Assumption: The Shipped date uses ClickUp's closed date when present, otherwise the last updated date, labeled "Updated". No shipped tickets exist in the data yet, so the list shows an empty note for now.
+

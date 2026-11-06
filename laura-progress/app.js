@@ -220,12 +220,52 @@
       h('div', { class: 'lp-upd' }, [meta ? h('div', { class: 'lp-upd-meta', text: meta }) : null, renderMarkdown(up.markdown)])]);
   }
 
+  /* Latest Highlights, shown at the very top (independent of the filters). */
+  function topHighlights(m) {
+    var lh = L.latestHighlights(m);
+    if (!lh) return null;
+    var rows = [['Growth moment', lh.hl.growth], ['Value to Product', lh.hl.value], ['Setbacks', lh.hl.setbacks]]
+      .filter(function (r) { return String(r[1] || '').trim(); });
+    return { key: lh.key, node: h('section', { class: 'lp-top', 'aria-label': 'Latest highlights' }, [
+      h('div', { class: 'lp-sec lp-top-title', text: 'Highlights, week of ' + L.fmtYmd(lh.week.key).replace(/, \d{4}$/, '') + ' to ' + L.fmtYmd(lh.week.sunday) }),
+      h('div', { class: 'lp-hl lp-top-hl' }, rows.map(function (r) { return h('div', {}, [h('h4', { text: r[0] }), h('p', { text: r[1] })]); }))]) };
+  }
+
+  /* One thin bar split by status group. Counts are written out, color is never the only signal. */
+  function statusBar(m) {
+    var mix = L.statusMix(m);
+    if (!mix.length) return null;
+    var total = mix.reduce(function (a, x) { return a + x.count; }, 0);
+    var aria = 'Laura\u2019s tickets by status group: ' + mix.map(function (x) { return x.label + ' ' + x.count; }).join(', ');
+    var bar = h('div', { class: 'lp-mix-bar', role: 'img', 'aria-label': aria }, mix.map(function (x) {
+      return h('span', { class: 'lp-mix-seg lp-mix-' + x.key, style: 'flex-grow:' + x.count }); }));
+    var legend = h('ul', { class: 'lp-mix-legend' }, mix.map(function (x) {
+      return h('li', {}, [h('span', { class: 'lp-mix-dot lp-mix-' + x.key, 'aria-hidden': 'true' }), x.label + ' ', h('strong', { text: String(x.count) })]); }));
+    return h('section', { class: 'lp-mix', 'aria-label': 'Tickets by status group' }, [
+      h('div', { class: 'lp-sec', text: 'Laura\u2019s tickets by status group (' + total + ')' }), bar, legend]);
+  }
+
+  /* What went live. Independent of the filters. */
+  function shippedList(m) {
+    var rows = L.shipped(m);
+    var kids = [h('div', { class: 'lp-sec', text: 'Shipped' })];
+    if (!rows.length) kids.push(h('p', { class: 'lp-empty', text: 'Shipped tickets will appear here.' }));
+    else kids.push(h('ul', { class: 'lp-ship' }, rows.map(function (r) {
+      var t = r.it.t;
+      return h('li', { class: 'lp-ship-row' }, [
+        h('a', { href: t.url, target: '_blank', rel: 'noopener noreferrer', text: t.name }),
+        h('span', { class: 'lp-ship-meta', text: (r.exact ? 'Shipped ' : 'Updated ') + L.fmtDate(r.at) + ' \u00B7 ' + (L.effectiveType(t).trim() || 'No type') + ' \u00B7 ' + LANE_LABEL[r.it.lane] })]);
+    })));
+    return h('section', { class: 'lp-shipped', 'aria-label': 'Shipped tickets' }, kids);
+  }
+
   function listOrEmpty(items, empty) {
     return items.length ? h('div', { class: 'lp-list' }, items.map(ticketCard)) : h('p', { class: 'lp-empty', text: empty });
   }
 
   function renderWeekly(m) {
     var ws = L.weeks(m, filterObj());
+    var featured = L.latestHighlights(m);
     var wrap = h('div', {});
     if (!ws.length) wrap.appendChild(h('p', { class: 'lp-empty', text: 'No weeks in this range.' }));
     ws.forEach(function (w, i) {
@@ -236,7 +276,7 @@
       ]);
       if (i === 0) d.setAttribute('open', '');
       var body = h('div', { class: 'lp-week-body' });
-      var hl = highlightsBlock(w.highlights);
+      var hl = featured && featured.key === w.week.key ? null : highlightsBlock(w.highlights); // shown at the top of the page instead
       if (hl) body.appendChild(hl);
       var ub = updateBlock(w.update);
       if (ub) body.appendChild(ub);
@@ -291,8 +331,9 @@
     var clear = h('button', { class: 'lp-link', type: 'button', text: 'Clear filters', onclick: function () {
       S.f = { preset: 'since-start', custom: { from: '', to: '' }, group: 'all', lane: 'all', type: 'all', focus: false, ramp: 'all' }; render(); } });
 
+    var top = topHighlights(m);
     $app.textContent = '';
-    [head, banner].concat(renderTiles(m), [sw, renderFilters(), h('div', { class: 'lp-resultbar' }, [h('span'), clear]),
+    [head, banner, top ? top.node : null].concat(renderTiles(m), [statusBar(m), shippedList(m), sw, renderFilters(), h('div', { class: 'lp-resultbar' }, [h('span'), clear]),
       S.view === 'weekly' ? renderWeekly(m) : renderAll(m), renderOverrides(m)]).forEach(function (n) { if (n) $app.appendChild(n); });
     postHeight();
   }

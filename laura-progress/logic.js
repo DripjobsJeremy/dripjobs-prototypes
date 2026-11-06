@@ -260,6 +260,36 @@
     return out;
   }
 
+  /* Laura's own tickets by status group, counts only (no percentages, no comparison). */
+  function statusMix(model) {
+    var c = {};
+    model.items.forEach(function (it) { if (!it.own) return; var k = it.group || 'unmapped'; c[k] = (c[k] || 0) + 1; });
+    var out = GROUPS.map(function (g) { return { key: g.key, label: g.label, count: c[g.key] || 0 }; })
+      .filter(function (x) { return x.count > 0; });
+    if (c.unmapped) out.push({ key: 'unmapped', label: 'Status not mapped', count: c.unmapped });
+    return out;
+  }
+
+  /* Laura's own shipped tickets, newest first. ClickUp's closed date is used when it has one,
+     otherwise the last updated date (exact: false). */
+  function shipped(model) {
+    return model.items.filter(function (it) { return it.own && it.group === 'shipped'; })
+      .map(function (it) { return { it: it, at: it.t.closed || it.t.updated, exact: !!it.t.closed }; })
+      .sort(function (a, b) { return b.at - a.at; });
+  }
+
+  /* Newest week (not in the future) that has any Highlights text. */
+  function latestHighlights(model) {
+    var hs = model.notes.highlights || {}, cur = mondayOf(localDate(model.now));
+    var keys = Object.keys(hs).filter(function (k) {
+      var h = hs[k];
+      return k <= cur && h && (String(h.growth || '').trim() || String(h.value || '').trim() || String(h.setbacks || '').trim());
+    }).sort();
+    if (!keys.length) return null;
+    var k = keys[keys.length - 1];
+    return { key: k, week: weekRange(k), hl: hs[k] };
+  }
+
   function freshness(data, now) {
     if (!data.pulledAt) return { pulledAt: 0, stale: false, empty: true };
     return { pulledAt: data.pulledAt, stale: (now - data.pulledAt) > CFG.FRESH_DAYS * 86400000, empty: false };
@@ -269,7 +299,8 @@
     laneOf: laneOf, effectiveType: effectiveType, typeKey: typeKey, isFocus: isFocus, localDate: localDate, startMs: startMs,
     endMs: endMs, addDays: addDays, mondayOf: mondayOf, weekRange: weekRange, weekOf: weekOf, rampOf: rampOf,
     fmtDate: fmtDate, fmtYmd: fmtYmd, classify: classify, buildModel: buildModel, tiles: tiles,
-    presetRange: presetRange, filterItems: filterItems, weeks: weeks, freshness: freshness, touchedIn: touchedIn };
+    presetRange: presetRange, filterItems: filterItems, weeks: weeks, freshness: freshness, touchedIn: touchedIn,
+    statusMix: statusMix, shipped: shipped, latestHighlights: latestHighlights };
   root.LPLogic = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : this);
