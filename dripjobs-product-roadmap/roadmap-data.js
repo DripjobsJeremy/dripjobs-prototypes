@@ -31,6 +31,7 @@
   window.RM_DATA = {
     syncedAt: '2026-11-11',
     tasks: [
+      T('86bd1pm85','Replace Production Rate Tutorial Videos in Settings with New 8 Part Series','triage','normal','',['lane: maintenance'],'triage',1794410286354),
       T('86bd1e56a','Job Costing: Remember QB Time Job Mapping for Future Time Sheet Entries','needs pm analysis','','',['lane: gate'],'triage',1794345958538),
       T('86bd18vxh','Smart Invoice Due Dates: Quick-Select Picker, Custom Payment Terms, Progressive Portal Banners','new','low','',['v2 candidate'],'triage',1794332158509),
       T('86bd15vcp','Seasonal Pause Resume: Billing Resumes in Chargebee but DripJobs Access Is Not Restored','ready for dev','high','Bug',[],'tj',1794329510536),
