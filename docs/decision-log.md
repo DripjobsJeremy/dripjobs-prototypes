@@ -2,6 +2,10 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-11-13] Corrected Weekly Product Update period to Nov 9-13
+- Decision: Jeremy flagged the displayed period as wrong (showed Nov 12-13, should be Nov 9-13). Corrected the period text in all four spots: `Weekly_Product_Update.md` Period line, `weekly-product-update/index.html` hero stat, title tag, and footer, plus the hub's Release Notes card subtitle. Ticket content (3 updates) unchanged, this was a date-range display fix only.
+- Open question: None.
+
 ## [2026-11-13] Weekly refresh: Weekly Product Update (Nov 12-13) and Roadmap data sync
 - Decision: Rebuilt the Weekly Product Update for Nov 12-13, 2026 from 5 tickets Pushed to Production (Nov 12 release), keeping 3: Text Messaging Add-On Setup Fix for CAD Accounts, Proposal Tax Rate Two-Decimal Display Fix, and the new Zapier Proposal Sent Trigger. Excluded two internal code-optimization tickets (retiring unreachable Proposal Builder views, deleting 34 unreachable views) as engineering cleanup with no user-facing change.
 - Decision: Refreshed `roadmap-data.js` (54 to 54 tracked tickets): 1 ticket dropped (Default Payment Terms, status moved to "no fix needed" and detagged), 1 newly tagged (The Good Contractors List partner guarantee banner, `lane: gate`). A few carried-over tickets picked up renamed titles or status changes (a Bug ticket's title broadened, Subcontractor Record UI Refresh moved to Needs Design). Result: In Flight 10, Approved Exceptions 6, Maintenance 8, Gate Decision 7, Unassigned 1, V2 Prep 14, V2 Candidates 8, 0 lane conflicts.

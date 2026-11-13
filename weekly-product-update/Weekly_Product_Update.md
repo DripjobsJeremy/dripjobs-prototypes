@@ -1,6 +1,6 @@
 # DripJobs Weekly Product Update
 
-**Period:** November 12 – November 13, 2026
+**Period:** November 9 – November 13, 2026
 **Release:** Nov 12 deployment · 3 updates
 
 ---
