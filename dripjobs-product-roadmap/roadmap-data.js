@@ -31,17 +31,18 @@
   window.RM_DATA = {
     syncedAt: '2026-11-13',
     tasks: [
+      T('86bd384r8','The Good Contractors List (TGCL): Partner Guarantee Banner on Proposals via Activation Key','needs pm analysis','normal','',['lane: gate'],'triage',1794601152959),
       T('86bd2fc5w','Job Costing: Supplier PO Reference for Matching Supplier Receipts to Jobs','needs pm analysis','normal','',['lane: gate'],'triage',1794505896458),
       T('86bd1pm85','Replace Production Rate Tutorial Videos in Settings with New 8 Part Series','triage','normal','',['lane: maintenance'],'triage',1794581803977),
       T('86bd1e56a','Job Costing: Remember QB Time Job Mapping for Future Time Sheet Entries','needs pm analysis','','',['lane: gate'],'triage',1794520146573),
-      T('86bd1dj0y','Bug: Reminders and Invoices Pages Open to Non-Admins by Direct URL','needs pm analysis','normal','Bug',['lane: maintenance'],'triage',1794597040505),
+      T('86bd1dj0y','Bug: Pages Hidden From a Role\'s Menu Still Open by Direct URL (Including Reminders and Invoices)','needs pm analysis','normal','Bug',['lane: maintenance'],'triage',1794598846333),
       T('86bd1b4yw','Bug: Change Method in the Portal Writes "Sent" Instead of the Invoice\'s Real Status','triage','normal','Bug',['lane: maintenance'],'triage',1794595758290),
       T('86bd18vxh','Smart Invoice Due Dates: Default Payment Terms, Due Date Keyword, Quick-Select Picker, Progressive Portal Banners','needs pm analysis','low','',['v2 candidate'],'v2',1794581735621),
       T('86bd15vcp','Seasonal Pause Resume: Billing Resumes in Chargebee but DripJobs Access Is Not Restored','ready for dev','high','Bug',[],'tj',1794329510536),
       T('86bd136ud','User Unable to Log In: App Hangs on Loading After Reinstall (Reported on Android, User Has 3 Active Accounts Across 3 Companies)','resolved without fix','normal','Bug',[],'tj',1794343409845),
       T('86bcz692c','QuickBooks Relink: Let Super Admins Link to an Existing QuickBooks Record or Create a New One','needs design','normal','',['lane: maintenance'],'triage',1793986570574),
       T('86bcxp94k','Proposal Social Proof Banner: Star Rating Display and Satisfaction Guarantee Control','triage','normal','',['lane: maintenance'],'triage',1794581795933),
-      T('86bcwtubp','Add Public Zapier Trigger: Job Scheduled','qa kickback','normal','',[],'qa',1794329301098),
+      T('86bcwtubp','Add Public Zapier Trigger: Job Scheduled','qa kickback','normal','',[],'qa',1794601811790),
       T('86bcvnm6q','Color Chart: Customer Approval of Color Changes After Proposal Acceptance','needs pm analysis','normal','',['lane: exception'],'triage',1793722343946),
       T('86bcuz39k','Payment Requests: Mark as Paid Should Close or Reduce the Request Based on the Amount Paid','ready for dev','normal','',['lane: maintenance'],'dev',1794575142499),
       T('86bctymnd','Add Missing Canadian Time Zones: British Columbia, Alberta, Manitoba, Saskatchewan, and Newfoundland','in review','urgent','',['lane: maintenance'],'triage',1794584253955),
@@ -51,7 +52,7 @@
       T('86bcjdgjn','Zapier Action: Update Job Labor Costs','needs pm analysis','normal','',['lane: exception'],'triage',1793911876602),
       T('86bcffa8f','Color Chart: Show on Customer Proposal (Portal & PDF) + Auto-Fill from Production Rates Products','needs design','normal','',['lane: exception'],'triage',1793722340165),
       T('86bcdt9jh','Business-Aware Customer Name in Internal Notification Emails','needs pm analysis','normal','',['lane: maintenance'],'triage',1793722357561),
-      T('86bca5551','QuickBooks Unlink Can Be Undone or Create Duplicate Customers, and Sync Status Resets on Save','in progress','normal','Bug',[],'tj',1793998696577),
+      T('86bca5551','QuickBooks Unlink Can Be Undone or Create Duplicate Customers, and Sync Status Resets on Save','in progress','normal','Bug',[],'tj',1794601733006),
       T('86bc33f26','Add Per Package Discount Action for All Packages','qa kickback','normal','',[],'qa',1790874573028),
       T('86bc1vdyn','Business Entity: Contact-to-Job-Address Pairing for Sub-Properties (Property Management Use Case)','needs pm analysis','normal','',['lane: exception'],'triage',1793726053246),
       T('86bbuyf0m','CompanyCam AI Voice Walkthrough: API Discovery & Feasibility Assessment','needs pm analysis','normal','',['investigate','v2 candidate'],'v2',1794581735621),
@@ -66,7 +67,6 @@
       T('86bagb0jj','Multiple Discounts on a Proposal — Stack via Apply Discount Modal','needs pm analysis','normal','',['v2 candidate'],'v2',1794581735621),
       T('86ba1ggxb','Job Costing UI Refresh: Align to DripJobs Design System','pr created','normal','',[],'dev',1793999930745),
       T('86b9bgfd0','Evaluate Stripe Multi-Currency Conversion for DripJobs Connected Accounts','needs pm analysis','normal','',['lane: v2 prep'],'triage',1793907299903),
-      T('86b9abbcc','Default Payment Terms: Company Default Due Date on New Invoices','no fix needed','normal','',['lane: gate'],'triage',1794533607905),
       T('86b96cf69','Epic: Zapier Integration Enhancement Suite','in review','high','',[],'triage',1794584243888),
       T('86b929zpn','Stripe Auto-Charge → DripJobs Payment Sync','needs pm analysis','normal','',['lane: v2 prep'],'triage',1793905914196),
       T('86b9246bt','EPIC | Stripe Payment Feature Suite','needs pm analysis','normal','Epic',['lane: v2 prep'],'triage',1793990438413),
@@ -84,7 +84,7 @@
       T('86b3h976w','Add ACSS Pre-Authorized Debit Payments for CAD Accounts','needs pm analysis','normal','',['lane: v2 prep','featurebase'],'triage',1793902777649),
       T('86b32d4gr','Invoice Reminders','in review','normal','',['featurebase','lane: exception'],'triage',1794590263695),
       T('86b0v2qjg','Add “Paid” Indicator for Subcontractors in Job Costing','needs design','normal','',['featurebase','lane: exception'],'triage',1793722347430),
-      T('86b07w2z0','UI Refresh: Subcontractor Record (Settings › Subcontractors)','needs pm analysis','normal','',['lane: maintenance'],'triage',1794521673542)
+      T('86b07w2z0','UI Refresh: Subcontractor Record (Settings › Subcontractors)','needs design','normal','',['lane: maintenance'],'triage',1794598901158)
     ]
   };
 })();

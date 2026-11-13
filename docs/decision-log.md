@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-11-13] Weekly refresh: Weekly Product Update (Nov 12-13) and Roadmap data sync
+- Decision: Rebuilt the Weekly Product Update for Nov 12-13, 2026 from 5 tickets Pushed to Production (Nov 12 release), keeping 3: Text Messaging Add-On Setup Fix for CAD Accounts, Proposal Tax Rate Two-Decimal Display Fix, and the new Zapier Proposal Sent Trigger. Excluded two internal code-optimization tickets (retiring unreachable Proposal Builder views, deleting 34 unreachable views) as engineering cleanup with no user-facing change.
+- Decision: Refreshed `roadmap-data.js` (54 to 54 tracked tickets): 1 ticket dropped (Default Payment Terms, status moved to "no fix needed" and detagged), 1 newly tagged (The Good Contractors List partner guarantee banner, `lane: gate`). A few carried-over tickets picked up renamed titles or status changes (a Bug ticket's title broadened, Subcontractor Record UI Refresh moved to Needs Design). Result: In Flight 10, Approved Exceptions 6, Maintenance 8, Gate Decision 7, Unassigned 1, V2 Prep 14, V2 Candidates 8, 0 lane conflicts.
+- Hub: synced the two Release Notes cards (Roadmap badge to "Updated Nov 13, 2026", Weekly Product Update subtitle to "Nov 12 – Nov 13, 2026").
+- Open question: None.
+
 ## [2026-11-13] Resolved the Smart Contact Detection lane conflict
 - Decision: Per Jeremy's direction, removed the `v2 candidate` tag from "Smart Contact Detection & Merging for Duplicate Prevention" (86b4n10f5) in ClickUp, keeping `lane: v2 prep`. Updated `roadmap-data.js` to match. The ticket now resolves cleanly to V2 Prep, no lane conflict.
 - Result: In Flight 10, Approved Exceptions 6, Maintenance 8, Gate Decision 7, Unassigned 1, V2 Prep 14, V2 Candidates 8, 0 lane conflicts.
