@@ -1791,3 +1791,7 @@ Format:
 ## [2026-11-06] Laura Progress page renamed
 - Decision (Jeremy): The page is now called "Jr Prod Mgr | Weekly Progress Report" (Hub tab label, page title, lock screen, heading). The link stays `#laura-progress` and the folder stays `laura-progress/` so bookmarks, the routine, and the docs keep working.
 
+## [2026-11-13] Laura Progress: old assigned tickets counted, shown as Cleared
+- Decision (Jeremy): Tickets assigned to Laura but created before Nov 2 stay in the report (ASSIGNED_IGNORES_BASELINE stays true), including the "no fix needed" product signal tickets closed on Nov 11 and 12. They are shown as tickets Laura cleared from the board after evaluating or testing: the Closed Without Fix group is now labeled Cleared, and a "Cleared this week" count tile was added (counts only).
+- Assumption: Tickets that are no longer assigned to Laura and were created before Nov 2 (two others in the same cleanup) are not included, since they no longer meet any rule. The Cleared count includes any ticket in that group updated during the week, so it cannot tell who made the change in ClickUp.
+

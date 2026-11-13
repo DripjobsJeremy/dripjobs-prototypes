@@ -53,7 +53,7 @@ try {
   await frame.locator('#lpUnlock').click();
   await frame.locator('.lp-tile').first().waitFor({ timeout: 20000 });
   const tiles = await frame.locator('.lp-tile-value').allInnerTexts();
-  assert.deepEqual(tiles, ['9', '8', '1', '1']);
+  assert.deepEqual(tiles, ['9', '8', '0', '1', '1']);
   assert.match(await frame.locator('.lp-sync').innerText(), /Nov 6, 2026/);
   assert.equal(await frame.locator('.lp-sync.fresh').count(), 1);
   assert.match(await frame.locator('.lp-hl').first().innerText(), /SYNTH growth text/);
