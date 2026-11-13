@@ -2,6 +2,10 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-11-13] Resolved the Smart Contact Detection lane conflict
+- Decision: Per Jeremy's direction, removed the `v2 candidate` tag from "Smart Contact Detection & Merging for Duplicate Prevention" (86b4n10f5) in ClickUp, keeping `lane: v2 prep`. Updated `roadmap-data.js` to match. The ticket now resolves cleanly to V2 Prep, no lane conflict.
+- Result: In Flight 10, Approved Exceptions 6, Maintenance 8, Gate Decision 7, Unassigned 1, V2 Prep 14, V2 Candidates 8, 0 lane conflicts.
+
 ## [2026-11-13] Roadmap: full re-sync after ClickUp cleanup (Airport Parking removed, v2 candidates moved to DripJobs (v2) list)
 - Decision: Full re-sync of `roadmap-data.js` (51 to 54 tickets) after Jeremy's ClickUp cleanup: cleared the Airport Parking list (not referenced anywhere in this architecture, so no code change needed) and moved `v2 candidate`-tagged tickets out of Active Triage into DripJobs Product Management > V2 > DripJobs (v2). The `v2` short key already mapped to that exact list, so no logic change was required, only fresh data: 9 tickets now resolve to it (Smart Invoice Due Dates, Epic: Completed Job Lifecycle, CompanyCam AI Voice Walkthrough, Multiple Concurrent Payment Requests, Flashline Integration, MMS Drip Support, Multiple Discounts Stacking, Tasks Page Overhaul, Smart Contact Detection). 2 tickets shipped off the board (Proposal Tax Rate Decimals, Zapier Trigger: Proposal Sent), 5 newly tagged (Job Costing Supplier PO, two new Bugs on Invoice Reminders dependencies, an Automated Follow Up Sequence product-signal ticket, and a Subcontractor Record UI Refresh).
 - Flag: "Smart Contact Detection & Merging for Duplicate Prevention" (86b4n10f5) now carries both `v2 candidate` and `lane: v2 prep` tags, triggering a Lane conflict badge (resolves to V2 Candidates per precedence). Left as is rather than guessing which tag should be removed; Jeremy to confirm the intended single tag.
