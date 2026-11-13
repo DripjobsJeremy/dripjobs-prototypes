@@ -80,7 +80,7 @@
       T('86b5hu44p','Job Costing — Export Job Costing Data to Spreadsheet','ready for dev','normal','',['featurebase'],'dev',1793921918532),
       T('86b4xwfe0','Integrate Stripe Tap to Pay for iOS and Android Devices','needs pm analysis','normal','',['lane: v2 prep'],'triage',1793990441016),
       T('86b4ucn0t','Stripe ACH Pending Payment Handling & Customer Communication Enhancements','needs pm analysis','normal','',['lane: v2 prep'],'triage',1793903283663),
-      T('86b4n10f5','Smart Contact Detection & Merging for Duplicate Prevention','needs pm analysis','normal','',['lane: v2 prep','v2 candidate'],'v2',1794516488180),
+      T('86b4n10f5','Smart Contact Detection & Merging for Duplicate Prevention','needs pm analysis','normal','',['lane: v2 prep'],'v2',1794516488180),
       T('86b3h976w','Add ACSS Pre-Authorized Debit Payments for CAD Accounts','needs pm analysis','normal','',['lane: v2 prep','featurebase'],'triage',1793902777649),
       T('86b32d4gr','Invoice Reminders','in review','normal','',['featurebase','lane: exception'],'triage',1794590263695),
       T('86b0v2qjg','Add “Paid” Indicator for Subcontractors in Job Costing','needs design','normal','',['featurebase','lane: exception'],'triage',1793722347430),
