@@ -143,7 +143,7 @@
     var t = L.tiles(m), c = t.counts;
     function tile(label, v) { return h('div', { class: 'lp-tile' }, [h('div', { class: 'lp-tile-label', text: label }), h('div', { class: 'lp-tile-value', text: String(v) })]); }
     return [
-      h('div', { class: 'lp-tiles' }, [tile('Worked this week', c.worked), tile('New this week', c.added), tile('Shipped since start', c.shipped), tile('In flight', c.flight)]),
+      h('div', { class: 'lp-tiles' }, [tile('Worked this week', c.worked), tile('New this week', c.added), tile('Cleared this week', c.cleared), tile('Shipped since start', c.shipped), tile('In flight', c.flight)]),
       h('p', { class: 'lp-tile-cap', text: 'Week of ' + L.fmtYmd(t.week.key) + ' to ' + L.fmtYmd(t.week.sunday) + '. Counts only.' })
     ];
   }

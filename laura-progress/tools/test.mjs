@@ -90,7 +90,17 @@ await ok('tiles are counts for the current week only', () => {
   const t = L.tiles(model);
   // worked: a1(Nov5) a2(Nov4) a3(Nov5) a5 assigned(Nov4) a6 a8(Nov3) a9 b2(include override) b3 = 9 ; closed b1 excluded
   assert.equal(t.counts.worked, 9); assert.equal(t.counts.added, 8);
-  assert.equal(t.counts.shipped, 1); assert.equal(t.counts.flight, 1);
+  assert.equal(t.counts.shipped, 1); assert.equal(t.counts.flight, 1); assert.equal(t.counts.cleared, 0);
+});
+
+await ok('Cleared: closed-without-fix tickets are labeled Cleared and counted for the week', () => {
+  assert.equal(L.GROUPS.find((g) => g.key === 'closed').label, 'Cleared');
+  const cleared = { ...PULL.tickets[0], id: 'tst000c1', name: 'SYNTH cleared one', status: 'no fix needed', spaceId: '90140994633', listId: '901402649270', tags: [], created: Date.parse('2026-09-01T15:00:00Z'), updated: Date.parse('2026-11-05T15:00:00Z'), drafter: '', creator: 'Someone Else', assignees: ['Laura Cuadros'], assigneeIds: ['82240534'] };
+  const m = L.buildModel({ ...PULL, tickets: [...PULL.tickets, cleared] }, NOTES, NOW);
+  const it = m.items.find((i) => i.t.id === 'tst000c1');
+  assert.equal(it.inc, 'assigned'); assert.equal(it.group, 'closed');
+  assert.equal(L.tiles(m).counts.cleared, 1);
+  assert.ok(!L.statusMix(m).some((x) => x.key === 'closed' && x.count > 1), 'assigned-only tickets stay out of the status bar (own tickets only)');
 });
 
 await ok('touch ledger keeps earlier weeks stable', () => {

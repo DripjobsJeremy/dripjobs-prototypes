@@ -44,7 +44,7 @@ Nothing from the data is shown anywhere else in the Hub: the tab button is only 
 ## What the page shows, top to bottom
 
 1. The latest Highlights (newest week with any text; older weeks keep theirs inside their week section).
-2. The four count tiles for the current week.
+2. The count tiles for the current week: Worked, New, Cleared, Shipped since start, In flight. Cleared counts tickets in the Cleared group that were updated this week.
 3. A thin bar of Laura's own tickets by status group. Counts are written out and there are no percentages or comparisons.
 4. Shipped: Laura's tickets whose status is `pushed to production`, newest first. It shows "Shipped <date>" when ClickUp has a closed date and "Updated <date>" otherwise.
 5. The Weekly view and All tickets with the filters.
@@ -111,7 +111,7 @@ LAURA_PW='your passphrase' node laura-progress/tools/notes.mjs update 2026-11-02
 - A ticket with nothing in its body (no description) is left out of the report. Only an `include` override brings it back.
 - Form list (901413487018): Draft until the ticket moves to Active Triage.
 - Lanes (first match wins): Dev V1 space In Flight; `v2 candidate`; `lane: exception`; `lane: maintenance` or Type Bug; `lane: gate`; `lane: v2 prep`; else No lane. Shipped tickets in the Dev V1 space keep the In Flight lane (same as the Roadmap).
-- Status groups: In Triage, In Flight, Shipped, Closed Without Fix, plus Draft. The full mapping is `STATUS_MAP` in `logic.js`; the routine reports any status it does not know.
+- Status groups: In Triage, In Flight, Shipped, Cleared (tickets closed without a fix, such as `no fix needed`, `resolved without fix` and `trashed`: Laura evaluated or tested them and cleared them from the board), plus Draft. The full mapping is `STATUS_MAP` in `logic.js`; the routine reports any status it does not know.
 - Weeks run Monday to Sunday in America/New_York (the ClickUp account timezone). Ramp: Month 1 Nov 2 to Nov 29, Month 2 Nov 30 to Dec 27, Month 3 Dec 28, 2026 to Jan 31, 2027.
 - Worked this week: Laura's tickets updated in the week, plus tickets assigned to Laura updated in the week. New this week: Laura's tickets created in the week. Shipped since start and In flight count Laura's own tickets by current status group.
 - A ticket matches the date range filter when it was created or updated in the range.

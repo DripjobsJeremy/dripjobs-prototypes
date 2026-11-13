@@ -33,7 +33,7 @@
     { key: 'triage',  label: 'In Triage' },
     { key: 'flight',  label: 'In Flight' },
     { key: 'shipped', label: 'Shipped' },
-    { key: 'closed',  label: 'Closed Without Fix' }
+    { key: 'closed',  label: 'Cleared' }
   ];
   var STATUS_MAP = {
     triage: ['new', 'open', 'product signals dji', 'dji bugs review', 'needs pm analysis', 'needs design',
@@ -190,9 +190,10 @@
   function createdIn(it, from, to) { return it.t.created >= from && it.t.created <= to; }
 
   function tiles(model) {
-    var w = weekOf(model.now), n = { worked: 0, added: 0, shipped: 0, flight: 0 };
+    var w = weekOf(model.now), n = { worked: 0, added: 0, cleared: 0, shipped: 0, flight: 0 };
     model.items.forEach(function (it) {
       if (touchedIn(it, w.from, w.to)) n.worked++;
+      if (it.group === 'closed' && touchedIn(it, w.from, w.to)) n.cleared++; // cleared from the board after evaluating or testing
       if (it.own && createdIn(it, w.from, w.to)) n.added++;
       if (it.own && it.group === 'shipped') n.shipped++;
       if (it.own && it.group === 'flight') n.flight++;
