@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-11-13] Roadmap: full re-sync after ClickUp cleanup (Airport Parking removed, v2 candidates moved to DripJobs (v2) list)
+- Decision: Full re-sync of `roadmap-data.js` (51 to 54 tickets) after Jeremy's ClickUp cleanup: cleared the Airport Parking list (not referenced anywhere in this architecture, so no code change needed) and moved `v2 candidate`-tagged tickets out of Active Triage into DripJobs Product Management > V2 > DripJobs (v2). The `v2` short key already mapped to that exact list, so no logic change was required, only fresh data: 9 tickets now resolve to it (Smart Invoice Due Dates, Epic: Completed Job Lifecycle, CompanyCam AI Voice Walkthrough, Multiple Concurrent Payment Requests, Flashline Integration, MMS Drip Support, Multiple Discounts Stacking, Tasks Page Overhaul, Smart Contact Detection). 2 tickets shipped off the board (Proposal Tax Rate Decimals, Zapier Trigger: Proposal Sent), 5 newly tagged (Job Costing Supplier PO, two new Bugs on Invoice Reminders dependencies, an Automated Follow Up Sequence product-signal ticket, and a Subcontractor Record UI Refresh).
+- Flag: "Smart Contact Detection & Merging for Duplicate Prevention" (86b4n10f5) now carries both `v2 candidate` and `lane: v2 prep` tags, triggering a Lane conflict badge (resolves to V2 Candidates per precedence). Left as is rather than guessing which tag should be removed; Jeremy to confirm the intended single tag.
+- Result: In Flight 10, Approved Exceptions 6, Maintenance 8, Gate Decision 7, Unassigned 1, V2 Prep 13, V2 Candidates 9, 1 lane conflict.
+
 ## [2026-11-11] Roadmap: added one ticket on request
 - Decision: Added "Replace Production Rate Tutorial Videos in Settings with New 8 Part Series" (86bd1pm85, `lane: maintenance`, Active Triage) to `roadmap-data.js` at Jeremy's direct request, outside the regular weekly refresh cadence. Lands in V1 Maintenance per its tag. No other tickets touched; counts otherwise unchanged from the Nov 11 weekly sync (51 total, Maintenance 4 to 5).
 
