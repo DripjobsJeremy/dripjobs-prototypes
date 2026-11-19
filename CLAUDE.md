@@ -20,11 +20,13 @@ Audience is field contractors using this on mobile in the field. Mobile-first, m
 
 ## Absolute Rules
 
-- Never use an em dash in any output: code comments, commit messages, doc content, or prototype copy. Use colons, commas, parentheses, or restructure the sentence.
+- Never use an em dash or en dash in any output: code comments, commit messages, doc content, or prototype copy. Use colons, commas, parentheses, or restructure the sentence.
 - Never invent business logic that wasn't specified. If a prototype needs a business rule to function (what happens on submit, what triggers a state change) and it wasn't given, ask or flag it as an assumption in the decision log rather than guessing silently.
 - Prototypes show WHAT the experience looks and feels like. They are not required to wire up real backend calls, persistence, or auth unless a prototype is specifically testing that.
 - Preserve the JS hooks listed in the design system doc (`.select2`, `.switchery`, `.formatted-phone-no`, autocomplete classes, `.tag-input.tagging`, `.ckeditor`, etc.) if a prototype is meant to represent a real page. Renaming them breaks the real implementation's assumptions if this prototype's markup gets reused.
 - Match existing terminology. Don't rename product concepts (Deals, Proposals, Drips, Command Center, etc.) casually.
+- Never name, promise, or imply V2 functionality in prototype copy. Any V2 audit claim used in notes is marked ⚠️ Unverified.
+- Refer to ClickUp tickets by title, never by bare ticket ID, in docs, decision-log entries, and commit messages. Hyperlink the title when a URL is known. List IDs are fine to use numerically.
 
 ## GitHub Prototype Hub Mechanics
 
@@ -76,9 +78,17 @@ GitHub API mechanics:
 ## Working Style
 
 - Confirm-then-execute: for anything beyond a single prototype tweak, show what you're about to build or change before pushing to GitHub, especially for hub structure changes that could break the marker/filter logic.
-- When a prototype maps to a specific DripJobs ticket, ask for the ticket title and a short summary of scope pasted in, this repo has no ClickUp connection and shouldn't guess at ticket scope from memory.
+- Prototype scope comes from the pasted Implementation Brief (preferred) or the ticket text. Do not infer scope from memory or by searching ClickUp. If the brief states a V1 LANE, confirm the request fits it. If it carries an open blocking flag (🚨 DECISION REQUIRED, or a ⚠️ Assumption or ❓ Gap marked blocking), stop and say which item blocks the build instead of guessing.
 - After any session with a real design decision (a layout choice, a scope cut, a pattern deviation from the design system and why), append a dated entry to `docs/decision-log.md`. Keep entries to 2 to 4 lines.
 - If a request would require deviating from an anti-pattern listed in the design system, flag it explicitly rather than silently doing it.
+
+## Flagging and Handoff
+
+- Flag Threshold for questions: stop and ask mid-build only when the answer changes what gets built and no existing pattern, doc, or brief resolves it. Everything else (cosmetic or wording questions, details a developer would decide, quick product questions) goes to Jeremy as one short batched list at the end of the session, not as interruptions.
+- Every business rule invented to make a prototype work still gets logged as an assumption in `docs/decision-log.md`. The threshold limits interruptions, not the log.
+- Resolve before asking: check this repo's docs, the brief, and existing prototypes first. Reuse answers Jeremy already gave. When an answer is likely to recur, offer a one line standing rule to add to this file.
+- Routing: AWS, server, hosting, environment, and deployment questions go to Jason. Code level V1 feasibility goes to Nate. Lane and low lift questions go to Jeremy and Jesus first.
+- On finishing a build from an Implementation Brief, end with a "Built vs Brief" note: what was built, and anything that changed from the brief during the build. This is what goes back to QA.
 
 ## Roadmap Lanes (dripjobs-product-roadmap)
 
