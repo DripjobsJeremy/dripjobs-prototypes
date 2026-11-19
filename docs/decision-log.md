@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-11-19] Align Claude Code flow with the Nov 19 Agile Team updates
+- Decision: Replaced `docs/DripJobs_V1_Operating_Mode_Nov2026.md` with the Nov 19 version: AWS, server, hosting, environment, and deployment questions route to Jason (Nate keeps code level V1 feasibility), V2 Alignment Check gains V2 source and "Exists (pending)", V2 Web Development list added as the preferred V2 source.
+- Decision: `CLAUDE.md` now builds from the Implementation Brief, stops on open blocking flags, asks mid-build only when the answer changes what gets built (all other questions batched to Jeremy at the end), ends builds with a "Built vs Brief" note, and adds no V2 in prototype copy, tickets by title, and no en dashes. Assumption logging in this file is unchanged.
+- Assumption: The Implementation Brief field names beyond V1 LANE and V2 ALIGNMENT were not available, so `CLAUDE.md` refers to them generally. The five Project copies of the Operating Mode file still need the same replacement by Jeremy.
+- Open question: None.
+
 ## [2026-11-13] Corrected Weekly Product Update period to Nov 9-13
 - Decision: Jeremy flagged the displayed period as wrong (showed Nov 12-13, should be Nov 9-13). Corrected the period text in all four spots: `Weekly_Product_Update.md` Period line, `weekly-product-update/index.html` hero stat, title tag, and footer, plus the hub's Release Notes card subtitle. Ticket content (3 updates) unchanged, this was a date-range display fix only.
 - Open question: None.

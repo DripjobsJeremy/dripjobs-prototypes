@@ -1,6 +1,7 @@
 # DripJobs V1 Operating Mode (Nov 2026)
 
 Effective: Tuesday, November 3, 2026 (immediately, until otherwise directed)
+Last updated: Thursday, November 19, 2026 (AWS and server routing to Jason, V2 source updates)
 Owner: Jeremy Harrison, PM
 Applies to: DripJobs | Product Management, UX/UI, QA, Delivery Orchestrator, Copywriter
 
@@ -20,10 +21,10 @@ Business Entity Records (V1) and Add Thumbtack direct integration continue to co
 | Person | Role in this mode |
 |---|---|
 | TJ (Terry Bennett) | Sole V1 developer: bugs and approved enhancements. Treat V1 capacity as one developer. |
-| Nate Wallin | Technical Lead Manager. Owns V1 technical feasibility and code review. All V1 DECISION REQUIRED items route to Nate. |
+| Nate Wallin | Technical Lead Manager. Owns V1 technical feasibility and code review. All V1 code level DECISION REQUIRED items route to Nate. Nate has no AWS or server access at present. |
 | Ali Raza | Moves to the V2 team once Business Entity Records (V1) is complete. No new V1 work routes to Ali. |
 | Jesus Rubio | Project Manager, now also V2 Project Manager. Bridges V1 and V2. Makes initial scope calls with Jeremy and decides any pause or gate on in flight work. |
-| Jason (CTO) | Owns V2. Technical questions route to Jason only for explicitly V2 scope work. |
+| Jason (CTO) | Owns V2, the Stripe Epic, AWS, and servers. Technical questions route to Jason for explicitly V2 scope work and for any AWS, server, hosting, environment configuration, deployment, or server log question, including on V1 tickets, until Jeremy says otherwise. |
 | Jeremy Harrison and Laura Cuadros | Own V1 product side. Laura started as Junior PM on Nov 2, 2026, under these guidelines from day one. |
 
 ---
@@ -74,7 +75,8 @@ Reframed as future V2 integration enhancements. Model = V2, engineering owner = 
 ## 4. V2 Alignment Check (standing rule)
 
 Required on every enhancement and bug ticket, next to the Communications Impact Check. Document:
-- V2 equivalent: Exists / Partial / Not seen / Unknown
+- V2 equivalent: Exists / Exists (pending) / Partial / Not seen / Unknown
+- V2 source: the V2 Web Development ticket title with its status tier, or the audit claim marked ⚠️ Unverified
 - Divergence risk: does this V1 change introduce behavior, terminology, or data V2 handles differently?
 - V2 insight: is there a V2 pattern worth mirroring in V1?
 
@@ -84,19 +86,35 @@ V2 alignment questions that need a V2 answer route to Jesus (V2 PM) for product 
 
 ---
 
-## 5. Using the V2 Functionality Audit
+## 5. Using V2 sources
 
+Two sources inform V2 alignment. Use both, and prefer the V2 Web Development list where they disagree.
+
+### V2 Web Development list (ClickUp list 901421393122)
+The V2 engineering list and the most current view of what is planned, in development, or built in V2. Search it by keyword rather than pulling the full list. Cite tickets by status tier:
+
+| V2 ClickUp status | Citation | V2 equivalent |
+|---|---|---|
+| Pushed to production | ✅ V2 ClickUp: built and shipped | Exists |
+| Code complete, reviewing | ⚠️ V2 ClickUp: built, not yet shipped | Exists (pending) |
+| In progress, ready for dev | ⚠️ V2 ClickUp: in development | Partial |
+| Future, need more context | ⚠️ V2 ClickUp: planned only | Partial / Unknown |
+| Resolved without fix | Note only, no alignment weight | Not seen |
+
+### V2 Functionality Audit
 DripJobs_V2_Functionality_Audit.md (Nov 2, 2026) is a high level, read only pass on the V2 test environment, run without codebase access. Features are incomplete and may change.
 
 Rules:
 1. Cite every audit claim as ⚠️ Unverified.
 2. Never treat it as confirmed V2 behavior or as a source of truth.
-3. Never promise, name, or imply V2 functionality in customer facing copy until there is an official announcement.
+3. Never promise, name, or imply V2 functionality in customer facing copy until there is an official announcement. This applies to both sources, including tickets marked pushed to production.
 4. When the audit is refreshed, replace the file and log the date here.
+5. If the audit and the V2 Web Development list conflict, flag the conflict and treat the list as the more current source.
 
 ---
 
 ## 6. Revision Log
 
+> Nov 19, 2026 | Sections 2, 4, 5 | AWS, server, hosting, environment, deployment, and server log questions route to Jason, not Nate, including on V1 tickets. V2 Alignment Check gains V2 source and "Exists (pending)". V2 Web Development list added as the preferred V2 source with status tiers | Decided by Jeremy Harrison
 > Nov 3, 2026 | Section 3 | V2 Candidate tag renamed to "v2 candidate", 🎯 retained, lane tags and precedence added | Decided by Jeremy Harrison
 > Nov 3, 2026 | All sections | Initial version: V1 operating mode, intake gate, decision path, in flight rule, V2 tag, V2 Alignment Check | Decided by Jesus Rubio and Jeremy Harrison
