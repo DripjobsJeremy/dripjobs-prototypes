@@ -2,6 +2,12 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-11-20] Weekly refresh: Weekly Product Update (Nov 14-20) and Roadmap data sync
+- Decision: Rebuilt the Weekly Product Update for Nov 14-20, 2026 from 4 tickets Pushed to Production (Nov 19 release), keeping 3: Business Entity Records (V1), the Category/Substrate order fix in Proposal Area creation, and the Production Rate tutorial video replacement. Excluded "Only Log Company Updates Saved Through Company Settings" as an internal logging fix with no user-facing change.
+- Decision: Refreshed `roadmap-data.js` (54 to 63 tracked tickets): 2 tickets dropped (Business Entity Records (V1) and the Production Rate tutorial videos ticket, both shipped in the Nov 19 release and removed from the 🎯 list), 11 newly tagged. Result: In Flight 14, Approved Exceptions 5, Maintenance 9, Gate Decision 10, Unassigned 1, V2 Prep 14, V2 Candidates 10, 0 lane conflicts.
+- Hub: synced the two Release Notes cards (Roadmap badge to "Updated Nov 20, 2026", Weekly Product Update subtitle to "Nov 14 - Nov 20, 2026").
+- Open question: `roadmap-config.js` `shippingTitles` still lists "Business Entity Records (V1)", which has now shipped and left the board; left untouched per the file's own note that the weekly refresh never edits it. Jeremy may want to remove that title himself.
+
 ## [2026-11-13] Corrected Weekly Product Update period to Nov 9-13
 - Decision: Jeremy flagged the displayed period as wrong (showed Nov 12-13, should be Nov 9-13). Corrected the period text in all four spots: `Weekly_Product_Update.md` Period line, `weekly-product-update/index.html` hero stat, title tag, and footer, plus the hub's Release Notes card subtitle. Ticket content (3 updates) unchanged, this was a date-range display fix only.
 - Open question: None.

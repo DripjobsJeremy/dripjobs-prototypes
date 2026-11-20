@@ -1,31 +1,31 @@
 # DripJobs Weekly Product Update
 
-**Period:** November 9 – November 13, 2026
-**Release:** Nov 12 deployment · 3 updates
+**Period:** November 14 – November 20, 2026
+**Release:** Nov 19 deployment · 3 updates
 
 ---
 
-## Billing
+## Sales Pipeline
 
-### Fixed Text Messaging Add-On Setup Failing to Open for CAD Accounts (*Nov 12*)
-**What changed:** Fixed a bug where starting Text Messaging add-on setup with Canadian dollars (CAD) selected as the account currency refreshed the page instead of opening the configuration form, blocking setup. The existing USD setup flow is unaffected.
-**Why it matters:** CAD accounts can now complete Text Messaging add-on setup through the standard flow.
+### Added Business Entity Records (V1) (*New · Nov 19*)
+**What changed:** Added Business Entity as a new, standalone record type so commercial accounts with multiple contacts can be tracked under one shared account instead of as disconnected individual Contact records. A new "Businesses" nav item now lives in the Sales section, and each Business profile brings together its associated contacts, deals, proposals, invoices, payments, and more.
+**Why it matters:** Commercial accounts with several points of contact now have a single home for all related activity, deals, and documents instead of being scattered across separate Contact records.
 **Action needed:** None
 
 ---
 
 ## Proposal Builder
 
-### Fixed Proposal Tax Rate Displaying Two Decimals Instead of Three (*Nov 12*)
-**What changed:** Fixed a bug where the proposal Tax Rate row, save confirmation toast, rate difference banner, and Edit Tax Rate toggle options on web and mobile rounded the tax rate to two decimal places instead of showing the full three-decimal rate that's actually stored and applied to every calculation.
-**Why it matters:** The tax rate you see now always matches the rate you're actually charging.
+### Fixed Category/Substrate Order Not Preserved When Creating a Proposal Area (*Nov 19*)
+**What changed:** Fixed a bug where the category/substrate order selected when adding an area to a proposal (for example, Doors, Ceiling, Walls) was silently reordered after clicking Next, forcing users to manually fix the order again on the following step.
+**Why it matters:** The order you choose for an area's categories and substrates now stays exactly as you set it, with no extra reordering work.
 **Action needed:** None
 
 ---
 
-## Integrations
+## Production Rates
 
-### Added Public Zapier Trigger: Proposal Sent (*New · Nov 12*)
-**What changed:** Added a new Proposal Sent trigger to the DripJobs Zapier app, firing whenever a proposal is sent or resent, with a snapshot of totals, customer and deal details, line items, areas, substrates, and packages at the moment of sending.
-**Why it matters:** You can now build Zaps that react the moment a proposal goes out, instead of only when a deal changes stage.
+### Replaced Production Rate Tutorial Videos with New 8-Part Series (*Nov 19*)
+**What changed:** Replaced the 4 tutorial video tiles in Settings > Production Rates > Settings with a new, up to date 8-part video series covering why to use production rates, standard prep setup, pricing materials/labor/costs, the Production Rates tabs, substrate and area setup, and exterior repaint labor and materials estimating, each with matching thumbnails.
+**Why it matters:** Users configuring Production Rates now learn from current, accurate guidance instead of the outdated 4-video series.
 **Action needed:** None
