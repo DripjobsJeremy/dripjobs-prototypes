@@ -2,6 +2,10 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-11-23] Prototype Hub status sync: corrected 5 stale status badges
+- Decision: Checked every remaining card's live ClickUp status against its displayed badge and corrected 5 that had drifted: Invoice Void Handling (86b8qu9b4) Needs PM Analysis to No Fix Needed, Package Templates Save & Reuse (86b848td9) Needs PM Analysis to In Review, Text Messaging Card A2P Status (86bak26q5) Needs PM Analysis to Needs Design, Proposal Expiration Enforcement (86b2xn7hx) Needs PM Analysis to No Fix Needed, Proposal Social Proof Banner (86bcxp94k) Needs Design to Ready for Dev. The other 15 ticketed cards and 5 no-ticket cards already matched.
+- Open question: None.
+
 ## [2026-11-23] Prototype Hub cleanup: removed 5 shipped cards from the Prototypes tab
 - Decision: Reviewed every card's linked ClickUp ticket in `#protoGrid` and removed the 5 whose ticket status is now "Pushed to Production": Production Rate Guides: 8 Part Video Series (86bd1pm85), Business Entity Records, V1 (86bbhhhqd), Job Costing UI Refresh: Design System Alignment (86ba1ggxb), Role Departments, Multiple Roles, and Roles History (86bcaf2hu), and Add Multiple Items, Description Only (86bcqaczq). Card count: 30 to 25.
 - All 5 removed cards were single-ticket cards with no partial-match case to flag. No other cards' tickets had shipped.
