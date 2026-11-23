@@ -2,6 +2,11 @@
 
 Append a short entry after any session with a real design or scope decision. Newest entries at the top. Keep each entry to 2 to 4 lines: what was decided, why, and any open question left for Jeremy.
 
+## [2026-11-23] Prototype Hub cleanup: removed 5 shipped cards from the Prototypes tab
+- Decision: Reviewed every card's linked ClickUp ticket in `#protoGrid` and removed the 5 whose ticket status is now "Pushed to Production": Production Rate Guides: 8 Part Video Series (86bd1pm85), Business Entity Records, V1 (86bbhhhqd), Job Costing UI Refresh: Design System Alignment (86ba1ggxb), Role Departments, Multiple Roles, and Roles History (86bcaf2hu), and Add Multiple Items, Description Only (86bcqaczq). Card count: 30 to 25.
+- All 5 removed cards were single-ticket cards with no partial-match case to flag. No other cards' tickets had shipped.
+- Open question: None.
+
 ## [2026-11-20] Weekly refresh: Weekly Product Update (Nov 14-20) and Roadmap data sync
 - Decision: Rebuilt the Weekly Product Update for Nov 14-20, 2026 from 4 tickets Pushed to Production (Nov 19 release), keeping 3: Business Entity Records (V1), the Category/Substrate order fix in Proposal Area creation, and the Production Rate tutorial video replacement. Excluded "Only Log Company Updates Saved Through Company Settings" as an internal logging fix with no user-facing change.
 - Decision: Refreshed `roadmap-data.js` (54 to 63 tracked tickets): 2 tickets dropped (Business Entity Records (V1) and the Production Rate tutorial videos ticket, both shipped in the Nov 19 release and removed from the 🎯 list), 11 newly tagged. Result: In Flight 14, Approved Exceptions 5, Maintenance 9, Gate Decision 10, Unassigned 1, V2 Prep 14, V2 Candidates 10, 0 lane conflicts.
