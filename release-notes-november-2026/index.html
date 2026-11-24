@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DripJobs Release Notes: November 2026 (Preliminary)</title>
+<style>
+  :root{
+    --purple-deep:#5B1A96;
+    --purple:#6B21A8;
+    --purple-med:#9333EA;
+    --purple-light:#DDD6FE;
+    --purple-wash:#F6F1FC;
+    --ink:#1E1530;
+    --ink-soft:#5B5468;
+    --line:#E7DFF5;
+    --amber:#B45309;
+    --amber-wash:#FEF3E2;
+    --green:#15803D;
+    --green-wash:#EAFBF1;
+    --white:#FFFFFF;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Inter","Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
+    color:var(--ink);
+    background:var(--white);
+    line-height:1.55;
+  }
+  a{color:var(--purple-med);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:linear-gradient(135deg,var(--purple-deep) 0%,var(--purple) 55%,var(--purple-med) 100%);
+    color:#fff;
+    padding:64px 24px 56px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:-120px; right:-120px;
+    width:380px; height:380px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.08);
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    bottom:-160px; left:-80px;
+    width:320px; height:320px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.06);
+  }
+  .hero-inner{
+    max-width:780px;
+    margin:0 auto;
+    position:relative;
+    z-index:2;
+  }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(255,255,255,0.16);
+    border:1px solid rgba(255,255,255,0.28);
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:22px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:#fff;display:inline-block;}
+  .hero h1{
+    font-size:44px;
+    line-height:1.1;
+    margin:0 0 14px;
+    font-weight:800;
+    letter-spacing:-0.02em;
+  }
+  .hero p.sub{
+    font-size:17px;
+    color:rgba(255,255,255,0.86);
+    max-width:560px;
+    margin:0 0 30px;
+  }
+  .hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:28px;
+    border-top:1px solid rgba(255,255,255,0.22);
+    padding-top:22px;
+  }
+  .hero-meta .stat-label{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:rgba(255,255,255,0.65);
+    margin-bottom:4px;
+  }
+  .hero-meta .stat-value{
+    font-size:16px;
+    font-weight:700;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{max-width:780px;margin:0 auto;padding:0 24px;}
+  .toc-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:center;
+    padding:28px 0 8px;
+  }
+  .toc{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .toc a{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--purple);
+    background:var(--purple-wash);
+    border:1px solid var(--purple-light);
+    padding:7px 14px;
+    border-radius:999px;
+    text-decoration:none;
+    transition:background .15s ease;
+  }
+  .toc a:hover{background:var(--purple-light);}
+  .toggle-all-btn{
+    flex-shrink:0;
+    margin-left:auto;
+    font-size:13.5px;
+    font-weight:700;
+    color:#fff;
+    background:var(--purple-med);
+    border:1px solid var(--purple-med);
+    padding:7px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s ease;
+    font-family:inherit;
+  }
+  .toggle-all-btn:hover{background:var(--purple-deep);border-color:var(--purple-deep);}
+
+  .section{padding:46px 0 8px;}
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    margin-bottom:22px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .section-head:hover h2{color:var(--purple-med);}
+  .section-head .icon{
+    font-size:20px;
+  }
+  .section-head h2{
+    font-size:22px;
+    font-weight:800;
+    margin:0;
+    color:var(--purple-deep);
+    letter-spacing:-0.01em;
+    transition:color .15s ease;
+  }
+  .section-head .count{
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    background:var(--purple-wash);
+    padding:3px 10px;
+    border-radius:999px;
+  }
+  .section-head .chevron{
+    margin-left:auto;
+    width:20px;
+    height:20px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--purple-med);
+    transition:transform .2s ease;
+  }
+  .section.collapsed .chevron{transform:rotate(-90deg);}
+  .section-body{
+    overflow:hidden;
+    max-height:none;
+  }
+  .section.collapsed .section-body{
+    display:none;
+  }
+  .section.collapsed{padding-bottom:46px;}
+
+  /* ---------- FEATURE CARD ---------- */
+  .card{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px 24px;
+    margin-bottom:16px;
+    background:#fff;
+    transition:box-shadow .15s ease, border-color .15s ease;
+  }
+  .card:hover{
+    border-color:var(--purple-light);
+    box-shadow:0 4px 18px rgba(107,33,168,0.08);
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .card-title{
+    font-size:16.5px;
+    font-weight:700;
+    color:var(--ink);
+    margin:0;
+  }
+  .badge{
+    flex-shrink:0;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .badge.released{color:var(--ink-soft);background:#F2F0F6;}
+
+  .field{
+    display:grid;
+    grid-template-columns:128px 1fr;
+    gap:6px 14px;
+    padding:10px 0;
+    border-top:1px solid #F1ECFA;
+    font-size:14.5px;
+  }
+  .field:first-of-type{border-top:none;padding-top:0;}
+  .field .label{
+    font-weight:700;
+    font-size:12.5px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    padding-top:2px;
+  }
+  .field.what .label{color:var(--purple);}
+  .field.why .label{color:var(--amber);}
+  .field.action .label{color:var(--green);}
+  .field .value{color:var(--ink-soft);}
+  .field.action .value.none{color:var(--green);font-weight:600;}
+
+  @media (max-width:560px){
+    .field{grid-template-columns:1fr;}
+    .field .label{padding-top:0;}
+  }
+
+  /* ---------- UPCOMING / OTHER (always-visible detail) ---------- */
+  .future-card{
+    border:1px solid var(--purple-light);
+    background:var(--purple-wash);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    margin-bottom:14px;
+  }
+  .future-card.alt{
+    border-color:#E9E1F7;
+    background:#FBF9FE;
+  }
+  .future-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:8px;
+  }
+  .future-title{
+    font-size:16px;
+    font-weight:700;
+    color:var(--purple-deep);
+    margin:0;
+  }
+  .future-desc{
+    font-size:14.5px;
+    color:var(--ink-soft);
+    margin:0 0 12px;
+  }
+  .future-link{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--purple-med);
+    text-decoration:none;
+  }
+  .future-link:hover{text-decoration:underline;}
+  .pill{
+    flex-shrink:0;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:999px;
+    background:#fff;
+    border:1px solid var(--purple-light);
+    color:var(--purple);
+    white-space:nowrap;
+  }
+
+  /* ---------- BACK TO TOP ---------- */
+  .back-to-top{
+    position:fixed;
+    right:24px;
+    bottom:24px;
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    background:var(--purple-med);
+    border:none;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow:0 6px 18px rgba(107,33,168,0.32);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(10px);
+    transition:opacity .2s ease, transform .2s ease, background .15s ease;
+    z-index:20;
+  }
+  .back-to-top.visible{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+  }
+  .back-to-top:hover{background:var(--purple-deep);}
+
+  /* ---------- FOOTER ---------- */
+  .footer{
+    margin-top:54px;
+    padding:36px 0 56px;
+    border-top:1px solid var(--line);
+    text-align:center;
+  }
+  .footer p{
+    color:var(--ink-soft);
+    font-size:14px;
+    margin:0 0 6px;
+  }
+  .footer .gear{
+    width:34px;height:34px;
+    margin-bottom:14px;
+  }
+  .back-bar{
+    max-width:780px;
+    margin:0 auto;
+    padding:16px 24px 0;
+  }
+  .back-link{
+    color:var(--purple);
+    font-weight:700;
+    font-size:13.5px;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    min-height:44px;
+  }
+  .back-link:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+  <div class="back-bar">
+    <a class="back-link" href="../index.html#release-notes">&larr; Product Release Notes</a>
+  </div>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow"><span class="dot"></span>Product Release Notes</span>
+      <h1>What's new in DripJobs</h1>
+      <p class="sub">Your monthly recap of everything shipped, fixed, and on the way, written for the way you actually use DripJobs day to day.</p>
+      <div class="hero-meta">
+        <div>
+          <div class="stat-label">Period</div>
+          <div class="stat-value">November 1 – November 23, 2026 (preliminary)</div>
+        </div>
+        <div>
+          <div class="stat-label">Releases</div>
+          <div class="stat-value">6 deployments so far</div>
+        </div>
+        <div>
+          <div class="stat-label">Improvements</div>
+          <div class="stat-value">21 updates so far</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="toc-row">
+      <div class="toc">
+        <a href="#proposals">Proposals &amp; Proposal Builder</a>
+        <a href="#portal">Customer Portal &amp; Invoicing</a>
+        <a href="#pipeline">Pipeline &amp; Mobile</a>
+        <a href="#messaging">Messaging &amp; Notifications</a>
+        <a href="#integrations">Integrations</a>
+        <a href="#metrics">Metrics &amp; Reports</a>
+        <a href="#settings">Settings</a>
+        <a href="#upcoming">Upcoming</a>
+        <a href="#soon">Coming Soon</a>
+      </div>
+      <button class="toggle-all-btn" id="toggleAllBtn" type="button">Collapse All</button>
+    </div>
+
+    <!-- PROPOSALS & PROPOSAL BUILDER -->
+    <div class="section" id="proposals">
+      <div class="section-head"><span class="icon">📄</span><h2>Proposals &amp; Proposal Builder</h2><span class="count">6 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Category and Substrate Order Is Now Kept When Adding an Area</h3><span class="badge released">Nov 19</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where the order you pick categories and substrates in when adding an Interior or Exterior Area, for example Doors, Ceiling, Walls, was re-sorted after you clicked Next. The order you chose is now kept through Next and in the saved Area.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You no longer have to re-order items by hand while building a bid.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal Tax Rate Now Shows Three Decimals on Web and Mobile</h3><span class="badge released">Nov 12</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">In the proposal and template builders on web and mobile, the tax rate now displays to three decimals, for example 7.666% or 5.000%, including the Tax Rate row, the save message, the rate-difference banner, and the toggle options. Tax calculations, the Customer Portal, PDFs, and invoices are unchanged.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can see the exact tax rate you are charging. The amounts charged were already correct.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Description Only Option When Adding Multiple Items</h3><span class="badge released">Nov 9</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The Add Multiple Items window on web and mobile now has a Description Only checkbox for each item, in proposals, packages, and proposal templates. It locks Qty, Price, and Optional for that row and cannot be combined with Optional. Description Only items add nothing to the proposal total and show no price on the PDF, Customer Portal, or invoice.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can add a batch of description-only lines in one pass instead of editing each one afterward.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">"Edit Your Products and Services" Link Hidden From Non-Admin Users</h3><span class="badge released">Nov 5</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">In the Proposal Builder's line item window, the "Edit Your Products and Services" link is now hidden from non-admin users such as salespeople. They can still save a line item as a new product or service, and admins keep the link.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Your staff are no longer pointed to a settings page they cannot use.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Proposal and Work Order PDF Text Now Matches the Invoice PDF Size</h3><span class="badge released">Nov 5</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Table text on Proposal PDFs, including Change Order sections, and on Work Order PDFs is now larger to match the Invoice PDF. This covers line item tables, production rate area tables, and package line items. Descriptions that set their own size keep it, and the totals block, Proposal Summary, and address positions are unchanged.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Homeowners and crews can read line items and work orders more easily.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, long proposals may run a page or two longer.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Job Amounts Now Show the Proposal Price Everywhere</h3><span class="badge released">Nov 2</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Job amounts on the contact page, deal window, Schedule page, calendar banners and visit pop-ups, Schedule Job dropdown, Proposals list, and Proposals Sent report now consistently show the proposal price. Multi-visit invoiced jobs no longer show doubled totals, and pending change orders are no longer counted on the Proposals list. The Job Pipeline and billing screens still use invoice totals.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">The same job shows the same dollar amount everywhere, so recurring and multi-visit jobs are no longer overstated.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, expect Proposals Sent report values to change for jobs that were invoiced in visits.</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER PORTAL & INVOICING -->
+    <div class="section" id="portal">
+      <div class="section-head"><span class="icon">💳</span><h2>Customer Portal &amp; Invoicing</h2><span class="count">3 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Invoices No Longer Charge Tax on Change Order Areas When Production Rates Tax Is Off</h3><span class="badge released">Nov 23</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where Areas added by a Change Order were invoiced with the company tax rate even when Tax on Materials and Tax on Labor were turned off in Production Rates. The invoice now shows no tax on those Areas, and the invoice total matches the signed proposal plus change orders. Behavior with tax turned on, and tax on standalone line items, is unchanged.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Customers are no longer billed tax that was not on anything they signed.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, you may want to review past invoices that had change order Areas while Production Rates tax was off.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Text Message Option for Payment Receipts</h3><span class="badge released">Nov 2</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">For companies with Text Messaging, the Receive Payment window now lets you send the receipt by email, text, both, or neither, and Edit Payment has the same options, defaulting to No Receipt. The text is prefilled and editable, includes a link to the invoice, and is logged in the contact's communication history. Texts are not sent to contacts with no phone number or who opted out of SMS.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Customers get their payment confirmation on the same channel you use for proposals and invoices.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">"Offline Requested" Added to the Invoices Status Filter</h3><span class="badge released">Nov 2</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The Status dropdown on the Invoices tab now includes "Offline Requested", so you can filter by every invoice status. Existing filters are unchanged.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can quickly find invoices where the customer asked to pay offline.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- PIPELINE & MOBILE -->
+    <div class="section" id="pipeline">
+      <div class="section-head"><span class="icon">📱</span><h2>Pipeline &amp; Mobile</h2><span class="count">2 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Business Records for Commercial Accounts</h3><span class="badge released">Nov 19</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">You can now create a Business as its own record, with a required Legal Name and optional DBA, email, phone, industry, and addresses, and associate several Contacts with it, one of them marked Primary. A new Businesses item in the Sales menu leads to a tabbed Business profile that brings together the activity tied to that business. You can create or choose a Business from New Lead, New Appointment, New Proposal, and Create Invoice, see Business icons on pipeline cards and calendar tiles, and turn on a Show Business toggle on the Contact List. A Business with open deals, invoices, or jobs can be archived but not deleted.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can track commercial customers with several contacts under one business, with their deals and proposals in one place.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, create a Business for any commercial account you want to track this way.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">"Generate Invoice" No Longer Offered Before a Proposal Is Accepted</h3><span class="badge released">Nov 5</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">"Generate Invoice" in Command Center &gt; Invoices no longer appears for deals in the Sales Pipeline. It still appears for Jobs Pipeline deals that have no invoice, for example after an invoice was deleted. Accepting a proposal still creates the invoice as usual, and existing invoices and payments are untouched.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can't invoice a proposal before it is accepted, which avoided status mismatches and Stripe payments not showing in DripJobs.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, invoices already generated early are not changed by this update.</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- MESSAGING & NOTIFICATIONS -->
+    <div class="section" id="messaging">
+      <div class="section-head"><span class="icon">💬</span><h2>Messaging &amp; Notifications</h2><span class="count">2 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Text Messaging Setup Now Opens for Canadian-Dollar Accounts</h3><span class="badge released">Nov 12</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where, for accounts set to Canadian dollars, Text Messaging add-on setup refreshed the page instead of opening the configuration form after Continue and Complete setup. The form now opens, and a failed setup request shows an actionable error.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Canadian contractors can set up texting themselves.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, retry setup if you were stuck before.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Emojis in Email Blast Subject Lines Now Save Correctly</h3><span class="badge released">Nov 9</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Fixed an issue where emojis typed or pasted into an email blast subject line were lost when saved and showed as "??". They now stay intact after saving, in the Live Preview, in test sends, and in recipients' inboxes.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Your seasonal promotion blasts no longer go out with broken "??" subject lines.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">Blasts or scheduled sends saved before this fix still contain "??", so re-enter the emojis in the subject.</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- INTEGRATIONS -->
+    <div class="section" id="integrations">
+      <div class="section-head"><span class="icon">🔌</span><h2>Integrations</h2><span class="count">3 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Zapier "Find Most Recent Deal or Job" Action Updated to Help Move Deal Cards</h3><span class="badge released">Nov 23</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">The Zapier action "Find Most Recent Deal or Job" was updated to return the Deal or Job ID, plus a clearly labeled record type, so a Zap can find a deal by email and phone and then move its deal card.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Your automations can find a customer's deal and move it through the pipeline automatically.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">If you use this action in a Zap, re-test it and map the new ID fields if needed.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Zapier "Proposal Sent" Trigger</h3><span class="badge released">Nov 12</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">A new public Zapier trigger, "Proposal Sent", fires each time a proposal is sent or resent, including scheduled sends when they actually go out. It sends a snapshot of the proposal with totals, deal and customer details, line items, areas, substrates, and packages. It does not fire on manual deal-stage moves or on saves.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can automate follow-ups and record keeping the moment a proposal goes out.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">Optional, create a Zap with the Proposal Sent trigger.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Zapier "Deal Stage Change" Trigger Test Now Works</h3><span class="badge released">Nov 2</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Testing the Deal Stage Change trigger in Zapier now loads valid sample deals instead of failing with "Unable to pull deals". Accounts with no sample data get an empty result, and behind-the-scenes errors no longer expose technical details.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You can set up and test Zapier automations on deal stage changes without hitting a dead end.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- METRICS & REPORTS -->
+    <div class="section" id="metrics">
+      <div class="section-head"><span class="icon">📊</span><h2>Metrics &amp; Reports</h2><span class="count">1 update</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Job Costing Refreshed to Match the Current DripJobs Design</h3><span class="badge released">Nov 23</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Eight Job Costing screens, the Dashboard, Details, Reports index, Employee Timesheets, Employee Payroll, QuickBooks Time entries, Misc. Costs, and Tutorials, now use the current DripJobs look with section cards, floating-label fields, standard buttons, and pill tabs. The Edit action on Materials and Misc. Costs rows now actually edits the row, and Costing Status can move from Costing Complete back to Costing Active.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">Job Costing looks consistent with the rest of DripJobs, and you can correct a cost line without deleting it.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="section" id="settings">
+      <div class="section-head"><span class="icon">⚙️</span><h2>Settings</h2><span class="count">4 updates</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New Production Rate Tutorial Video Series</h3><span class="badge released">Nov 19</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Production Rate Guides in Settings &gt; Production Rates now has an 8-part video series in place of the previous 4 videos, covering why to use Production Rates, setting up standard prep, pricing materials, labor, and total costs, a tour of the tabs, setting up substrates and areas, building a living room bid, and estimating exterior repaint labor and materials.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You get current, step-by-step training for setting up accurate bids.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">None, watch the videos from the Production Rate Guides section.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Full Logo Upload for Wide Logos</h3><span class="badge released">Nov 9</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Company Settings &gt; Brand now has an optional "Full Logo" upload for wide or horizontal logos, and the existing logo field is now labeled Logo Icon for your square logo. The Full Logo appears in proposals, invoices, work orders, the Customer Portal sidebar, and outbound emails, while the portal header box and watermark keep the Logo Icon. Brand Finder fills in both.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">A wide logo now shows at a readable size instead of being squeezed into a square.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">Optional, upload a Full Logo if you have a wide logo. Once uploaded, emails, queued sends, and PDFs switch to it.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">Expanded Starting Rates for Companies Adding Production Rates</h3><span class="badge released">Nov 9</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Companies adding the Production Rates add-on for the first time now start with an expanded set of default base rates that merges with the existing defaults, including combined categories, a new Interior Closets category, many more substrates, and 30 products. Existing add-on accounts are not changed.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">New users get realistic starting rates for their first proposals.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value none">None</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-top"><h3 class="card-title">New: Expired Payment Card Banner for Account Owners</h3><span class="badge released">Nov 5</span></div>
+        <div class="field what"><div class="label">What changed</div><div class="value">Account owners now see a red banner when the primary card on their DripJobs subscription has expired, with an "Update Billing Details" button that opens Manage Billing. It shows on active and trial subscriptions and clears once a valid primary card is on file.</div></div>
+        <div class="field why"><div class="label">Why it matters</div><div class="value">You get a warning before a failed charge interrupts your subscription.</div></div>
+        <div class="field action"><div class="label">Action needed</div><div class="value">If your card has expired, update your billing details.</div></div>
+      </div>
+      </div>
+    </div>
+
+    <!-- UPCOMING RELEASES -->
+    <div class="section" id="upcoming">
+      <div class="section-head"><span class="icon">🚀</span><h2>Upcoming Releases</h2><span class="count">3 in progress</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="future-card">
+        <div class="future-top">
+          <h3 class="future-title">Direct Thumbtack Integration</h3>
+          <span class="pill">QA complete</span>
+        </div>
+        <p class="future-desc">A direct Thumbtack integration is in the works. Once live, new Thumbtack leads will flow straight into DripJobs as contacts and deals, tagged with Thumbtack as the lead source, and dropped automatically into your Sales Pipeline and drip sequences, no manual entry required.</p>
+      </div>
+
+      <div class="future-card">
+        <div class="future-top">
+          <h3 class="future-title">Per-Package Discounts</h3>
+          <span class="pill">In QA</span>
+        </div>
+        <p class="future-desc">Every package on a proposal will get its own discount action, flat or percentage, calculated against that package's subtotal and added as a discount line inside the package. Each package's discount stays independent of the others.</p>
+      </div>
+
+      <div class="future-card">
+        <div class="future-top">
+          <h3 class="future-title">Job Costing Export to Spreadsheet</h3>
+          <span class="pill">PR in review</span>
+        </div>
+        <p class="future-desc">Admins will be able to download Job Costing data as CSV files from the Job Costing Dashboard, matching the jobs on screen, and from each Job Costing Details page, with its snapshot totals, labor, subcontractors, materials, and miscellaneous costs in one file, for any costing status.</p>
+      </div>
+      </div>
+    </div>
+
+    <!-- OTHER EXCITING UPDATES COMING SOON -->
+    <div class="section" id="soon">
+      <div class="section-head"><span class="icon">✨</span><h2>Other Exciting Updates Coming Soon</h2><span class="count">1 planned</span><span class="chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span></div>
+
+      <div class="section-body">
+
+      <div class="future-card alt">
+        <div class="future-top">
+          <h3 class="future-title">Invoice Reminders</h3>
+          <span class="pill">Planned</span>
+        </div>
+        <p class="future-desc">Automatic, configurable reminders for outstanding invoices are on the way, sent by email or text before the due date, on the due date, or after, on a schedule you control. The Invoices page is also getting summary stats, more filters, a reminder status for every invoice, and bulk actions like Send Reminder, Mark as Paid, and Export.</p>
+      </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p><strong>Questions about anything above?</strong></p>
+      <p>Visit <a href="https://help.dripjobs.com" target="_blank" rel="noopener">help.dripjobs.com</a> or reach out to your DripJobs support team.</p>
+    </div>
+  </div>
+
+  <button class="back-to-top" id="backToTop" type="button" aria-label="Back to top">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+  </button>
+
+  <script>
+    document.querySelectorAll('.section-head').forEach(function(head){
+      head.addEventListener('click', function(){
+        head.closest('.section').classList.toggle('collapsed');
+      });
+    });
+
+    var toggleAllBtn = document.getElementById('toggleAllBtn');
+    var allCollapsed = false;
+    toggleAllBtn.addEventListener('click', function(){
+      allCollapsed = !allCollapsed;
+      document.querySelectorAll('.section').forEach(function(section){
+        section.classList.toggle('collapsed', allCollapsed);
+      });
+      toggleAllBtn.textContent = allCollapsed ? 'Expand All' : 'Collapse All';
+    });
+
+    var backToTopBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll', function(){
+      backToTopBtn.classList.toggle('visible', window.scrollY > 500);
+    });
+    backToTopBtn.addEventListener('click', function(){
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+  </script>
+</body>
+</html>
