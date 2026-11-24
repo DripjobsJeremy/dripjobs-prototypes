@@ -1819,3 +1819,8 @@ Format:
 - Decision (Jeremy): Tickets assigned to Laura but created before Nov 2 stay in the report (ASSIGNED_IGNORES_BASELINE stays true), including the "no fix needed" product signal tickets closed on Nov 11 and 12. They are shown as tickets Laura cleared from the board after evaluating or testing: the Closed Without Fix group is now labeled Cleared, and a "Cleared this week" count tile was added (counts only).
 - Assumption: Tickets that are no longer assigned to Laura and were created before Nov 2 (two others in the same cleanup) are not included, since they no longer meet any rule. The Cleared count includes any ticket in that group updated during the week, so it cannot tell who made the change in ClickUp.
 
+
+## [2026-11-24] Hub: "Product Release Notes" tab renamed "Product Updates" and segmented
+- Decision (Jeremy): Tab label is now "Product Updates". The hash stays `#release-notes` so existing links keep working. Back links on sub pages now read "Product Updates".
+- Decision: The tab has three sections. Live & Current (roadmaps and weekly update, always open), Product Release Notes (collapsible, grouped by year, compact month rows, newest two shown with "Show earlier"), and Archive (Internal), collapsed by default. Open state is remembered per viewer in localStorage (`puState`).
+- Maintenance: Add a new month as a `.rn-row` below the "ADD NEW MONTH ROWS BELOW THIS LINE" marker (newest first). The two-row cutoff is computed in JS, so no class changes are needed when a row is added. Add a new year as a `.rn-year` group above the "ADD NEW YEAR GROUPS ABOVE THIS LINE" marker.
