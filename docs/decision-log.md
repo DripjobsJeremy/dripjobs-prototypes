@@ -1828,4 +1828,5 @@ Format:
 ## [2026-11-25] Text Messages Disabled Banner: Complete Setup (86bak26q5)
 - Decision: Built `text-messages-disabled-banner/index.html` for the rescoped ticket. The production badge (coral pill, white two-line text, sampled from the 86b49manh screenshot) stays unchanged in a white header; the new button or message sits to its right in one flex group and wraps below it at narrow widths. The button reuses the card's Complete Setup style at btn-sm size (30px) to fit the 57px header.
 - Decision: The hub card now points to this prototype. `sms-integration-status/` (the June card-states build) is left in the repo but unlinked, since card states moved to the V2 ticket.
-- Assumption: The setup form is shown as a placeholder modal (not redesigned). The prototype hides the search field and user name at narrow widths to make room; production should keep its own narrow header behavior.
+- Decision (Jeremy, Nov 25): The Text Messaging setup is a full page (Business Registration), not a pop-up. Complete Setup navigates straight to that page; it is reproduced unchanged with sample data. The ticket's UX section still says "Integrations with the setup form already open" and should be updated to match.
+- Assumption: The prototype hides the search field and user name at narrow widths to make room; production should keep its own narrow header behavior.
