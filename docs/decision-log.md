@@ -1830,3 +1830,8 @@ Format:
 - Decision: The hub card now points to this prototype. `sms-integration-status/` (the June card-states build) is left in the repo but unlinked, since card states moved to the V2 ticket.
 - Decision (Jeremy, Nov 25): The Text Messaging setup is a full page (Business Registration), not a pop-up. Complete Setup navigates straight to that page; it is reproduced unchanged with sample data. The ticket's UX section still says "Integrations with the setup form already open" and should be updated to match.
 - Assumption: The prototype hides the search field and user name at narrow widths to make room; production should keep its own narrow header behavior.
+
+## [2026-11-25] Resources: new "DJ brush-up" learning space + Adding a New Lead module
+- Decision (Jeremy): Resources tab gets a "DJ brush-up" space (banner + `#brushUpGrid`) above the existing Resources grid, for internal review sessions and refreshers (platform, CS practices, more later). Module cards use `data-status="learning"` and a new `status-learning` badge; add new modules above the "More modules coming" placeholder.
+- Decision: First module `dj-brush-up/new-lead/index.html` is a 20 question clickable quiz (Individual Customer and Business tracks, 10 each) built from the live New Lead form on app.dripjobs.com (Nov 25). Correct answers show the design system success alert; misses show a danger alert followed by an info alert with the correct path (tag pills) and why. Best scores are kept per viewer in localStorage only.
+- Assumption: Mock screens use sample names and addresses only. Explanations that go beyond on-screen text (e.g. picking Warm vs. Cold Leads) defer to "your company's own rule" rather than stating a policy.
