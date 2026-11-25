@@ -1824,3 +1824,8 @@ Format:
 - Decision (Jeremy): Tab label is now "Product Updates". The hash stays `#release-notes` so existing links keep working. Back links on sub pages now read "Product Updates".
 - Decision: The tab has three sections. Live & Current (roadmaps and weekly update, always open), Product Release Notes (collapsible, grouped by year, compact month rows, newest two shown with "Show earlier"), and Archive (Internal), collapsed by default. Open state is remembered per viewer in localStorage (`puState`).
 - Maintenance: Add a new month as a `.rn-row` below the "ADD NEW MONTH ROWS BELOW THIS LINE" marker (newest first). The two-row cutoff is computed in JS, so no class changes are needed when a row is added. Add a new year as a `.rn-year` group above the "ADD NEW YEAR GROUPS ABOVE THIS LINE" marker.
+
+## [2026-11-25] Text Messages Disabled Banner: Complete Setup (86bak26q5)
+- Decision: Built `text-messages-disabled-banner/index.html` for the rescoped ticket. The production badge (coral pill, white two-line text, sampled from the 86b49manh screenshot) stays unchanged in a white header; the new button or message sits to its right in one flex group and wraps below it at narrow widths. The button reuses the card's Complete Setup style at btn-sm size (30px) to fit the 57px header.
+- Decision: The hub card now points to this prototype. `sms-integration-status/` (the June card-states build) is left in the repo but unlinked, since card states moved to the V2 ticket.
+- Assumption: The setup form is shown as a placeholder modal (not redesigned). The prototype hides the search field and user name at narrow widths to make room; production should keep its own narrow header behavior.

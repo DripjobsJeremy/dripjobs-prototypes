@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Text Messages Disabled Banner: Complete Setup · DripJobs Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --primary:#8B85EA;
+  --primary-hover:#736BE3;
+  --primary-active:#5C53DC;
+  --primary-rgb:139,133,234;
+  --text:#32415B;
+  --text-muted:#80879A;
+  --border:#DAD8E3;
+  --card-bg:#FFFFFF;
+  --teal:#0DCECE;
+  --app-bg:#F4F5F8;
+  /* Existing header badge, sampled from production screenshot (unchanged by this ticket) */
+  --sms-badge-bg:#FF6B7A;
+}
+body{font-family:'Nunito',sans-serif;background:#E9EAF0;color:var(--text);font-size:14px;min-height:100vh;}
+
+/* ── Proto top bar ───────────────────────────────── */
+.proto-bar{
+  background:#fff;border-bottom:1px solid var(--border);
+  padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.proto-bar-left{display:flex;align-items:center;gap:10px;min-width:0;}
+.back-link{font-size:12px;font-weight:500;color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:4px;transition:color .15s;}
+.back-link:hover{color:var(--primary);}
+.divider{color:var(--border);font-size:16px;}
+.proto-bar-title{font-size:14px;font-weight:600;}
+.proto-bar-ticket{
+  font-size:11px;font-weight:600;color:var(--primary);text-decoration:none;white-space:nowrap;
+  padding:4px 10px;border:1px solid #D6D2F5;background:#E8E6FA;border-radius:999px;letter-spacing:.2px;
+}
+.proto-bar-ticket:hover{background:var(--primary);color:#fff;}
+
+/* ── Demo control banner ─────────────────────────── */
+.demo-banner{
+  background:#32415B;color:#fff;padding:10px 20px;
+  display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:200;
+}
+.demo-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--teal);white-space:nowrap;}
+.demo-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.demo-state-lbl{font-size:10px;font-weight:600;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.demo-states{display:flex;gap:5px;flex-wrap:wrap;}
+.dbtn{
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:20px;
+  color:#fff;font-family:'Nunito',sans-serif;font-size:11px;font-weight:600;padding:4px 11px;
+  cursor:pointer;transition:background .15s;white-space:nowrap;
+}
+.dbtn:hover{background:rgba(255,255,255,.2);}
+.dbtn:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+.dbtn.active{background:var(--teal);border-color:var(--teal);color:#32415B;}
+.dbtn-br{margin-left:auto;}
+
+/* ── BR chip system ──────────────────────────────── */
+.br-chip{
+  display:none;position:absolute;top:-10px;right:-6px;
+  background:#F97316;color:#fff;
+  font-size:9px;font-weight:700;letter-spacing:.3px;
+  padding:2px 6px;border-radius:10px;z-index:50;
+  white-space:nowrap;pointer-events:none;
+}
+body.show-br .br-chip{display:block;}
+.br-a{position:relative;}
+
+/* ── Stage: holds the simulated app at the chosen width ── */
+.stage{padding:20px 16px 12px;display:flex;justify-content:center;}
+.app-frame{
+  width:100%;max-width:1280px;background:var(--app-bg);
+  border:1px solid var(--border);border-radius:10px;overflow:hidden;
+  box-shadow:0 6px 24px rgba(50,65,91,.10);
+  transition:max-width .25s ease;
+}
+.app-frame.is-narrow{max-width:600px;}
+.frame-caption{text-align:center;font-size:11px;color:var(--text-muted);padding:0 16px 4px;}
+
+/* ── App header (matches production: white, 57px, logo + search left, actions right) ── */
+.app-header{
+  container-type:inline-size;container-name:apphdr;
+  background:#fff;border-bottom:1px solid #E7E7EE;
+}
+.app-header-inner{
+  min-height:57px;padding:8px 18px;
+  display:flex;align-items:center;gap:16px;
+}
+.hdr-logo{display:flex;align-items:center;gap:6px;color:#6A5AEB;font-weight:800;font-size:22px;letter-spacing:-.4px;flex-shrink:0;}
+.hdr-logo i{font-size:26px;}
+.hdr-search{
+  flex:0 1 220px;min-width:0;height:30px;border:1px solid #DFE1E6;border-radius:999px;
+  display:flex;align-items:center;gap:6px;padding:0 12px;color:#A1A6B4;font-size:12px;
+}
+.hdr-search span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:16px;min-width:0;}
+.hdr-bell{position:relative;color:#6B7280;font-size:19px;line-height:1;flex-shrink:0;}
+.hdr-bell::after{content:"";position:absolute;top:-1px;right:-1px;width:7px;height:7px;background:#EF4444;border-radius:50%;}
+.hdr-user{display:flex;align-items:center;gap:8px;flex-shrink:0;font-size:12px;font-weight:600;color:var(--text);}
+.hdr-avatar{width:28px;height:28px;border-radius:50%;background:#32415B;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+
+/* ── Text Messaging group: existing badge + new action (THE CHANGE) ── */
+.tm-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+/* Existing badge: unchanged size, color and text */
+.tm-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--sms-badge-bg);color:#fff;border-radius:4px;
+  padding:3px 9px;font-size:11px;font-weight:600;line-height:1.15;text-align:center;
+  flex-shrink:0;
+}
+.tm-badge i{font-size:12px;}
+/* New: admin button. Same class as the card's Complete Setup button, at btn-sm size to fit the header */
+.tm-btn{
+  height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--primary);
+  background:var(--primary);color:#fff;
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;white-space:nowrap;
+  cursor:pointer;transition:background .15s,border-color .15s;flex-shrink:0;
+}
+.tm-btn:hover{background:var(--primary-hover);border-color:var(--primary-hover);}
+.tm-btn:active{background:var(--primary-active);}
+.tm-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(var(--primary-rgb),.35);}
+/* New: non-admin message. Plain text, header text color, up to two lines */
+#tmActionWrap{display:inline-flex;align-items:center;}
+.tm-msg{display:block;font-size:11px;font-weight:600;line-height:1.2;color:var(--text);max-width:96px;}
+
+/* Narrow: action wraps BELOW the badge; never hidden or truncated */
+@container apphdr (max-width: 760px){
+  .app-header-inner{align-items:flex-start;}
+  .hdr-search{display:none;}
+  .hdr-right{gap:12px;align-items:flex-start;}
+  .hdr-bell,.hdr-user{margin-top:4px;}
+  .tm-group{flex-direction:column;align-items:flex-start;gap:6px;}
+  .tm-msg{max-width:none;white-space:nowrap;}
+  .hdr-user-name{display:none;}
+}
+
+/* ── App body: sidebar + page ─────────────────────── */
+.app-body{display:flex;min-height:520px;}
+.sidebar{width:190px;flex-shrink:0;background:#fff;border-right:1px solid #E7E7EE;padding:14px 10px;}
+.sb-company{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;padding:6px 8px 12px;}
+.sb-company i{color:var(--primary);font-size:18px;}
+.sb-head{font-size:10px;font-weight:700;color:#9AA0AE;letter-spacing:.6px;text-transform:uppercase;padding:10px 8px 4px;}
+.sb-link{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--text);padding:6px 8px;border-radius:6px;}
+.sb-link i{font-size:15px;color:#6B7280;}
+.sb-link.active{background:#EEEDFB;color:#5C53DC;}
+.sb-link.active i{color:#5C53DC;}
+.is-narrow .sidebar{display:none;}
+
+.page{flex:1;min-width:0;padding:18px 20px 28px;}
+.page h1{font-size:17px;font-weight:700;margin-bottom:2px;}
+.page-sub{font-size:12px;color:var(--text-muted);margin-bottom:16px;}
+
+/* Sales Pipeline context (faded, not part of the change) */
+.pipe{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:10px;opacity:.55;overflow:hidden;}
+.pipe-col{background:#ECEDF2;border-radius:8px;min-height:300px;}
+.pipe-col-h{font-size:12px;font-weight:700;padding:8px 10px;border-radius:8px 8px 0 0;}
+.is-narrow .pipe{grid-template-columns:repeat(2,1fr);}
+
+/* Integrations page (destination) */
+.settings-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:16px;padding-bottom:2px;}
+.settings-tabs::-webkit-scrollbar{display:none;}
+.settings-tab{font-size:12px;font-weight:500;padding:6px 12px;border-radius:16px;white-space:nowrap;color:var(--text);}
+.settings-tab:nth-child(1){background:#E8E6FA}.settings-tab:nth-child(2){background:#FAF0E6}.settings-tab:nth-child(3){background:#E6FAF0}
+.settings-tab:nth-child(4){background:#E6F3FA}.settings-tab:nth-child(5){background:#FAF7E6}.settings-tab:nth-child(6){background:#FAE6E6}
+.settings-tab:nth-child(7){background:#F0FAE6}.settings-tab:nth-child(8){background:#E6FAFA}.settings-tab:nth-child(9){background:#FAEAE6}
+.settings-tab.active{box-shadow:inset 0 0 0 2px var(--primary);font-weight:600;}
+.integ-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.is-narrow .integ-grid{grid-template-columns:1fr;}
+.integ-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;min-height:190px;display:flex;flex-direction:column;gap:12px;}
+.integ-card.ctx{opacity:.5;}
+.integ-name{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;}
+.integ-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;}
+.integ-sub{font-size:12px;color:var(--text-muted);}
+.integ-cta{margin-top:auto;display:flex;justify-content:center;}
+.btn-card{height:40px;padding:0 24px;border-radius:10px;border:none;background:var(--primary);color:#fff;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.btn-card:hover{background:var(--primary-hover);}
+
+/* Setup form modal (existing form, not redesigned) */
+.modal-scrim{position:absolute;inset:0;background:rgba(50,65,91,.45);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:20;}
+.modal-scrim.open{display:flex;}
+.modal{background:#fff;border-radius:10px;width:100%;max-width:520px;box-shadow:0 12px 40px rgba(0,0,0,.2);overflow:hidden;}
+.modal-h{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+.modal-h h2{font-size:15px;font-weight:700;}
+.modal-x{background:none;border:none;font-size:20px;color:var(--text-muted);cursor:pointer;width:32px;height:32px;border-radius:8px;}
+.modal-x:hover{background:#F1F1F6;color:var(--text);}
+.modal-b{padding:18px;}
+.form-placeholder{border:2px dashed var(--border);border-radius:8px;padding:28px 18px;text-align:center;color:var(--text-muted);font-size:12px;line-height:1.6;}
+.form-placeholder strong{display:block;color:var(--text);font-size:13px;margin-bottom:4px;}
+.ph-lines{margin:14px auto 0;max-width:320px;display:grid;gap:8px;}
+.ph-lines span{display:block;height:34px;border:1px solid var(--border);border-radius:8px;background:#FAFAFC;}
+.page-wrap{position:relative;}
+
+/* No-banner explainer chip (scenario state, prototype only) */
+.no-banner-note{
+  display:none;font-size:11px;font-weight:600;color:#166534;background:#F0FDF4;border:1px solid #BBF7D0;
+  border-radius:999px;padding:3px 10px;white-space:nowrap;
+}
+
+/* ── Developer notes ─────────────────────────────── */
+.notes{max-width:1280px;margin:8px auto 40px;padding:0 16px;}
+.notes details{background:#fff;border:1px solid var(--border);border-radius:10px;}
+.notes summary{cursor:pointer;padding:14px 18px;font-weight:700;font-size:14px;list-style:none;display:flex;align-items:center;gap:8px;}
+.notes summary::-webkit-details-marker{display:none;}
+.notes summary i{transition:transform .15s;}
+.notes details[open] summary i{transform:rotate(90deg);}
+.notes-body{padding:0 18px 18px;display:grid;gap:14px;font-size:13px;line-height:1.6;}
+.notes-body h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:4px;}
+.notes-body ul{padding-left:18px;}
+.notes-body code{background:#F1F1F6;border-radius:4px;padding:1px 5px;font-size:12px;}
+.state-table{width:100%;border-collapse:collapse;font-size:12px;}
+.state-table th,.state-table td{text-align:left;padding:7px 8px;border-bottom:1px solid #EEE;vertical-align:top;}
+.state-table th{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;}
+
+/* Toast */
+#toastArea{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:#32415B;color:#fff;font-size:12px;font-weight:600;padding:10px 16px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.2);}
+
+@media (max-width:640px){
+  .proto-bar{padding:10px 16px;}
+  .proto-bar-title{font-size:13px;}
+  .demo-banner{padding:10px 16px;}
+  .dbtn-br{margin-left:0;}
+  .sidebar{display:none;}
+  .pipe{grid-template-columns:repeat(2,1fr);}
+  .integ-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="proto-bar">
+  <div class="proto-bar-left">
+    <a class="back-link" href="../index.html">← Hub</a>
+    <span class="divider">|</span>
+    <span class="proto-bar-title">Text Messages Disabled Banner: Complete Setup</span>
+  </div>
+  <a class="proto-bar-ticket" href="https://app.clickup.com/t/8633445/86bak26q5" target="_blank">86bak26q5</a>
+</div>
+
+<!-- Demo control banner -->
+<div class="demo-banner">
+  <span class="demo-label">Prototype</span>
+  <div class="demo-group">
+    <span class="demo-state-lbl">Scenario:</span>
+    <div class="demo-states" id="scenarioBtns">
+      <button class="dbtn active" data-s="admin-new">Admin: Setup Not Started</button>
+      <button class="dbtn" data-s="admin-draft">Admin: Draft Application</button>
+      <button class="dbtn" data-s="nonadmin">No Company Settings Access</button>
+      <button class="dbtn" data-s="submitted">Submitted (Pending / Rejected)</button>
+      <button class="dbtn" data-s="verified">SMS Verified</button>
+      <button class="dbtn" data-s="no-addon">No Add-On</button>
+    </div>
+  </div>
+  <div class="demo-group">
+    <span class="demo-state-lbl">Width:</span>
+    <div class="demo-states" id="widthBtns">
+      <button class="dbtn active" data-w="wide">Desktop</button>
+      <button class="dbtn" data-w="narrow">Narrow</button>
+    </div>
+  </div>
+  <button class="dbtn dbtn-br" id="brBtn">BRs Off</button>
+</div>
+
+<!-- Simulated app -->
+<div class="stage">
+  <div class="app-frame" id="appFrame">
+
+    <header class="app-header">
+      <div class="app-header-inner">
+        <div class="hdr-logo"><i class="ti ti-settings-filled"></i>dripjobs</div>
+        <div class="hdr-search"><i class="ti ti-search"></i><span>Search leads, contacts, tags...</span></div>
+
+        <div class="hdr-right">
+          <span class="no-banner-note" id="noBannerNote"><i class="ti ti-check"></i> No banner in this state</span>
+
+          <!-- Existing badge + new action. Hidden entirely when the banner does not show (BR 1) -->
+          <div class="tm-group br-a" id="tmGroup">
+            <span class="br-chip">BR 1 · BR 6 (unchanged)</span>
+            <span class="tm-badge" title="Text Messages Are Disabled">
+              <i class="ti ti-alert-triangle-filled" aria-hidden="true"></i>
+              <span>Text Messages<br>Are Disabled</span>
+            </span>
+
+            <span class="br-a" id="tmActionWrap">
+              <span class="br-chip" id="tmActionChip">BR 2 · BR 3</span>
+              <!-- Admin (Company Settings access) -->
+              <button type="button" class="tm-btn" id="tmBtn">Complete Setup</button>
+              <!-- Everyone else -->
+              <span class="tm-msg" id="tmMsg">Ask your admin to finish setup</span>
+            </span>
+          </div>
+
+          <span class="hdr-bell" aria-label="Notifications"><i class="ti ti-bell"></i></span>
+          <span class="hdr-user"><span class="hdr-avatar">TM</span><span class="hdr-user-name">Taylor Morgan</span><i class="ti ti-chevron-down"></i></span>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-body">
+      <nav class="sidebar" aria-label="Main">
+        <div class="sb-company"><i class="ti ti-building-store"></i> Sample Painting Co.</div>
+        <div class="sb-head">Sales</div>
+        <div class="sb-link"><i class="ti ti-address-book"></i>Contacts</div>
+        <div class="sb-link"><i class="ti ti-list"></i>Sales List</div>
+        <div class="sb-link" id="sbPipeline"><i class="ti ti-layout-kanban"></i>Sales Pipeline</div>
+        <div class="sb-head">Jobs</div>
+        <div class="sb-link"><i class="ti ti-calendar"></i>Job Schedule</div>
+        <div class="sb-link"><i class="ti ti-list-details"></i>Jobs List</div>
+        <div class="sb-head">Daily Operations</div>
+        <div class="sb-link"><i class="ti ti-message"></i>Chat</div>
+        <div class="sb-link"><i class="ti ti-file-invoice"></i>Invoices</div>
+        <div class="sb-head">Company</div>
+        <div class="sb-link" id="sbSettings"><i class="ti ti-settings"></i>Settings</div>
+      </nav>
+
+      <div class="page-wrap" style="flex:1;min-width:0;">
+        <!-- Page: Sales Pipeline (start page, context only) -->
+        <main class="page" id="pagePipeline">
+          <h1>Sales Pipeline</h1>
+          <div class="page-sub">Total Deals: 9 · Total Value: $15,740.36</div>
+          <div class="pipe" aria-hidden="true">
+            <div class="pipe-col"><div class="pipe-col-h" style="background:#D6E6FB">Cold Leads</div></div>
+            <div class="pipe-col"><div class="pipe-col-h" style="background:#FBE3D6">Warm Leads</div></div>
+            <div class="pipe-col"><div class="pipe-col-h" style="background:#E3F3DA">Estimate Requested</div></div>
+            <div class="pipe-col"><div class="pipe-col-h" style="background:#FBF1CF">Estimate Scheduled</div></div>
+          </div>
+        </main>
+
+        <!-- Page: Company Settings > Integrations (destination) -->
+        <main class="page" id="pageIntegrations" hidden>
+          <h1>Company Settings</h1>
+          <div class="page-sub">Integrations</div>
+          <div class="settings-tabs" aria-hidden="true">
+            <span class="settings-tab">Company Information</span>
+            <span class="settings-tab">Brand</span>
+            <span class="settings-tab">Email Settings</span>
+            <span class="settings-tab">App Settings</span>
+            <span class="settings-tab">Calendar</span>
+            <span class="settings-tab">Templates</span>
+            <span class="settings-tab">Notifications</span>
+            <span class="settings-tab">Payments</span>
+            <span class="settings-tab active">Integrations</span>
+          </div>
+          <div class="integ-grid">
+            <div class="integ-card ctx">
+              <div class="integ-name"><span class="integ-ico" style="background:#2E7D32"><i class="ti ti-leaf"></i></span>Acorn Finance</div>
+              <div class="integ-sub">Unchanged, shown for context.</div>
+            </div>
+            <div class="integ-card ctx">
+              <div class="integ-name"><span class="integ-ico" style="background:#FF4A00"><i class="ti ti-bolt"></i></span>Zapier</div>
+              <div class="integ-sub">Unchanged, shown for context.</div>
+            </div>
+            <div class="integ-card">
+              <div class="integ-name"><span class="integ-ico" style="background:linear-gradient(135deg,#8B85EA,#6C63D4)"><i class="ti ti-device-mobile-message"></i></span>Text Messaging</div>
+              <div class="integ-sub">Send &amp; Receive Text Messages in DripJobs</div>
+              <div class="integ-cta"><button type="button" class="btn-card" id="cardBtn">Complete Setup</button></div>
+            </div>
+          </div>
+        </main>
+
+        <!-- Existing Text Messaging setup form (opened directly, BR 3) -->
+        <div class="modal-scrim" id="setupModal" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+          <div class="modal br-a">
+            <span class="br-chip" style="top:6px;right:52px;">BR 3 · same form as card</span>
+            <div class="modal-h">
+              <h2 id="setupTitle">Text Messaging Setup</h2>
+              <button type="button" class="modal-x" id="modalClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-b">
+              <div class="form-placeholder">
+                <strong>Existing Text Messaging setup form</strong>
+                The same form the Text Messaging card's Complete Setup button opens, shown here unchanged.
+                Fields, validation and submit are out of scope for this ticket.
+                <div class="ph-lines"><span></span><span></span><span></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="frame-caption" id="frameCaption">Desktop web. Header shown on the Sales Pipeline; the banner shows on every page.</div>
+
+<!-- Developer notes -->
+<div class="notes">
+  <details open>
+    <summary><i class="ti ti-chevron-right"></i> Developer notes (changed parts only)</summary>
+    <div class="notes-body">
+      <div>
+        <h3>What changed</h3>
+        <ul>
+          <li>Added one element directly to the right of the existing "Text Messages Are Disabled" badge, inside the same header row. The badge's size, color and text are unchanged.</li>
+          <li>Users with Company Settings access see a <strong>Complete Setup</strong> button. Reuse the Text Messaging card's Complete Setup button class at <code>btn-sm</code> size (30px tall, 8px radius) so it fits the 57px header.</li>
+          <li>All other users see the plain, non-clickable text <strong>Ask your admin to finish setup</strong> in the header's existing text color, 11px, wrapping to two lines to match the badge. No button is rendered for them.</li>
+          <li>Wrap the badge and the new element in one flex group (<code>gap: 8px</code>) so they read as one unit and wrap together.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Click behavior</h3>
+        <ul>
+          <li>From any page, Complete Setup goes to Company Settings &gt; Integrations and opens the existing Text Messaging setup form on arrival (for example via a query flag the Integrations page reads on load). It must not just land on Integrations.</li>
+          <li>The form is the same one the card's Complete Setup button opens. CAD accounts rely on the Nov 12 CAD fix and should reach the same form without error.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Narrow web widths</h3>
+        <ul>
+          <li>When there isn't room beside the badge, the button or message wraps below it (column direction, left aligned). It is never hidden, ellipsized or moved into a menu.</li>
+          <li>The header grows to fit the wrapped row (about 95px). In this prototype the search field and user name hide at narrow widths only to make room; match whatever production already does there. Engineering to confirm the taller header doesn't overlap fixed-top content.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>When it shows (unchanged by this ticket)</h3>
+        <table class="state-table">
+          <thead><tr><th>State</th><th>Banner</th><th>Admin sees</th><th>Others see</th></tr></thead>
+          <tbody>
+            <tr><td>Add-on on, setup not started</td><td>Yes</td><td>Complete Setup</td><td>Ask your admin to finish setup</td></tr>
+            <tr><td>Add-on on, application started but not submitted</td><td>Yes</td><td>Complete Setup</td><td>Ask your admin to finish setup</td></tr>
+            <tr><td>Submitted: pending or rejected</td><td>No</td><td colspan="2">Nothing</td></tr>
+            <tr><td>SMS Verified</td><td>No</td><td colspan="2">Nothing</td></tr>
+            <tr><td>No Text Messaging add-on</td><td>No</td><td colspan="2">Nothing</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>Accessibility</h3>
+        <ul>
+          <li>Complete Setup is a real <code>&lt;button&gt;</code> with a visible focus ring. The non-admin text is plain text, not a link.</li>
+          <li>30px button height follows the header's compact size; this change is web only and does not touch the mobile apps.</li>
+        </ul>
+      </div>
+    </div>
+  </details>
+</div>
+
+<div id="toastArea" aria-live="polite"></div>
+
+<script>
+const SCENARIOS = {
+  'admin-new':   { banner:true,  admin:true  },
+  'admin-draft': { banner:true,  admin:true  },
+  'nonadmin':    { banner:true,  admin:false },
+  'submitted':   { banner:false, admin:true  },
+  'verified':    { banner:false, admin:true  },
+  'no-addon':    { banner:false, admin:true  }
+};
+let scenario = 'admin-new';
+let narrow = false;
+let page = 'pipeline';
+
+const $ = id => document.getElementById(id);
+
+function render(){
+  const s = SCENARIOS[scenario];
+  $('tmGroup').style.display = s.banner ? '' : 'none';
+  $('noBannerNote').style.display = s.banner ? 'none' : 'inline-flex';
+  $('tmBtn').style.display = s.admin ? '' : 'none';
+  $('tmMsg').style.display = s.admin ? 'none' : '';
+  $('tmActionChip').textContent = s.admin ? 'BR 2 · BR 3' : 'BR 4';
+
+  $('appFrame').classList.toggle('is-narrow', narrow);
+  $('pagePipeline').hidden = page !== 'pipeline';
+  $('pageIntegrations').hidden = page !== 'integrations';
+  $('sbPipeline').classList.toggle('active', page === 'pipeline');
+  $('sbSettings').classList.toggle('active', page === 'integrations');
+
+  $('frameCaption').textContent =
+    (narrow ? 'Narrow web width. ' : 'Desktop web. ') +
+    (page === 'pipeline'
+      ? 'Header shown on the Sales Pipeline; the banner shows on every page.'
+      : 'Arrived at Company Settings > Integrations with the setup form already open.');
+
+  document.querySelectorAll('#scenarioBtns .dbtn').forEach(b => b.classList.toggle('active', b.dataset.s === scenario));
+  document.querySelectorAll('#widthBtns .dbtn').forEach(b => b.classList.toggle('active', (b.dataset.w === 'narrow') === narrow));
+}
+
+function openSetup(){
+  page = 'integrations';
+  render();
+  $('setupModal').classList.add('open');
+  $('modalClose').focus();
+}
+function closeSetup(){
+  $('setupModal').classList.remove('open');
+}
+
+document.querySelectorAll('#scenarioBtns .dbtn').forEach(b => b.addEventListener('click', () => {
+  scenario = b.dataset.s; page = 'pipeline'; closeSetup(); render();
+}));
+document.querySelectorAll('#widthBtns .dbtn').forEach(b => b.addEventListener('click', () => {
+  narrow = b.dataset.w === 'narrow'; render();
+}));
+$('brBtn').addEventListener('click', () => {
+  const on = document.body.classList.toggle('show-br');
+  $('brBtn').textContent = on ? 'BRs On' : 'BRs Off';
+  $('brBtn').classList.toggle('active', on);
+});
+$('tmBtn').addEventListener('click', openSetup);
+$('cardBtn').addEventListener('click', () => $('setupModal').classList.add('open'));
+$('modalClose').addEventListener('click', closeSetup);
+$('setupModal').addEventListener('click', e => { if (e.target.id === 'setupModal') closeSetup(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSetup(); });
+$('sbPipeline').addEventListener('click', () => { page = 'pipeline'; closeSetup(); render(); });
+
+render();
+</script>
+</body>
+</html>
