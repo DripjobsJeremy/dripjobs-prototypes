@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="../gate.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Job Costing Dashboard | Salesperson Filter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #F4F5F8;
+    color: #32415B;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input, select { font-family: inherit; }
+  button { cursor: pointer; }
+
+  /* ---------- Hub proto-bar (prototype only, not product UI) ---------- */
+  .proto-bar { background: #fff; border-bottom: 1px solid #DAD8E3; padding: 10px 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .proto-bar a { font-size: 12px; font-weight: 600; color: #80879A; text-decoration: none; min-height: 32px; display: inline-flex; align-items: center; }
+  .proto-bar a:hover, .proto-bar a:focus-visible { color: #8B85EA; }
+  .proto-bar .divider { color: #DAD8E3; }
+  .proto-bar .title { font-size: 14px; font-weight: 700; }
+
+  /* ---------- Prototype note (prototype only, not product UI) ---------- */
+  .demo-banner {
+    background: #FFF8E6; border: 1px solid #F3D98B; border-radius: 8px;
+    padding: 12px 16px; margin: 0 0 22px; font-size: 12.5px; color: #6B5A18; line-height: 1.55;
+  }
+  .demo-banner strong { color: #4F4008; }
+  .demo-banner ul { margin: 6px 0 0; padding-left: 18px; }
+
+  /* ===================================================================
+     JOB COSTING DASHBOARD (scoped per the design system)
+     =================================================================== */
+  #job-costing-page {
+    --st-color-primary:        #8B85EA;
+    --st-color-primary-hover:  #736BE3;
+    --st-color-primary-active: #5C53DC;
+    --st-color-primary-rgb:    139, 133, 234;
+    --st-color-text:           #32415B;
+    --st-color-text-muted:     #80879A;
+    --st-color-border:         #DAD8E3;
+    --st-color-card-bg:        #FFFFFF;
+    --c-labor:   #5B8DEF;
+    --c-expense: #EE9A4D;
+    --c-profit:  #5CC46A;
+    max-width: 1640px; margin: 0 auto; padding: 24px 32px 64px;
+  }
+
+  .sr-only {
+    position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* ---------- Header + "Showing jobs where" bar ---------- */
+  .jc-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px; margin-bottom: 22px; }
+  .jc-title { font-family: 'Montserrat', 'Inter', sans-serif; font-size: 32px; font-weight: 500; margin: 0 0 6px; color: var(--st-color-text); }
+  .jc-subtitle { font-size: 15px; color: var(--st-color-text-muted); margin: 0; }
+
+  .jc-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+  .jc-bar-group { display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+  /* Inline text uses body text color for 4.5:1 contrast */
+  .jc-bar-text { font-size: 15px; font-weight: 500; color: var(--st-color-text); }
+
+  .jc-select {
+    height: 48px; padding: 0 40px 0 16px; border: 1px solid var(--st-color-border); border-radius: 8px;
+    font-size: 15px; font-weight: 600; color: var(--st-color-text); background-color: var(--st-color-card-bg);
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2380879A' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .jc-select.w-date { width: 230px; }
+  .jc-select.w-range { width: 180px; }
+  .jc-select:focus-visible, .jc-select:focus {
+    outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), .18);
+  }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 20px;
+    border-radius: 10px; font-size: 15px; font-weight: 600; border: 1px solid transparent;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease; }
+  .btn-primary { background: var(--st-color-primary); color: #fff; }
+  .btn-primary:hover { background: var(--st-color-primary-hover); }
+  .btn-primary:active { background: var(--st-color-primary-active); }
+  .btn-outline-primary { background: #fff; color: var(--st-color-primary-active); border-color: var(--st-color-primary); }
+  .btn-outline-primary:hover { background: rgba(var(--st-color-primary-rgb), .08); }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), .35); }
+  .btn svg { width: 16px; height: 16px; }
+
+  /* ---------- Salesperson checkbox list (reused Jobs Pipeline control) ---------- */
+  .sp-filter { position: relative; }
+  .sp-trigger {
+    height: 48px; width: 190px; padding: 0 40px 0 16px; text-align: left;
+    border: 1px solid var(--st-color-border); border-radius: 8px; background-color: var(--st-color-card-bg);
+    font-size: 15px; font-weight: 600; color: var(--st-color-text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2380879A' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .sp-trigger:focus-visible, .sp-trigger[aria-expanded="true"] {
+    outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), .18);
+  }
+  .sp-panel {
+    position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; min-width: 240px;
+    background: #fff; border: 1px solid var(--st-color-border); border-radius: 8px;
+    box-shadow: 0 12px 32px rgba(50, 65, 91, .18);
+    max-height: calc(48px * 8 + 12px); overflow-y: auto; padding: 6px 0;
+  }
+  .sp-panel[hidden] { display: none; }
+  .sp-panel fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .sp-row {
+    display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 18px;
+    font-size: 15px; font-weight: 500; color: var(--st-color-text); cursor: pointer; white-space: nowrap;
+  }
+  .sp-row:hover { background: #F6F5FD; }
+  .sp-row input { width: 18px; height: 18px; margin: 0; accent-color: var(--st-color-primary); cursor: pointer; flex-shrink: 0; }
+  .sp-row input:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 2px; }
+
+  /* ---------- Indicator (settings-alert--info, body slot only) ---------- */
+  .settings-alert {
+    display: flex; align-items: flex-start; gap: 10px; border-radius: 8px; border: 1px solid;
+    padding: 10px 14px; margin-bottom: 16px; font-size: 13px; line-height: 1.45;
+  }
+  .settings-alert--info { background: #EFF6FF; border-color: #BFDBFE; color: #1E40AF; }
+  .settings-alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+  .settings-alert-body { overflow-wrap: break-word; min-width: 0; }
+  .settings-alert[hidden] { display: none; }
+
+  /* ---------- Summary cards ---------- */
+  .jc-cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px; margin-bottom: 24px; }
+  .jc-card {
+    background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(50, 65, 91, .06);
+    position: relative; overflow: hidden; min-width: 0;
+  }
+  .jc-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .jc-card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .jc-card-icon svg { width: 20px; height: 20px; }
+  .jc-card-label { font-size: 14px; font-weight: 500; letter-spacing: .4px; text-transform: uppercase; color: var(--st-color-text-muted); }
+  .jc-pct-pill { margin-left: auto; font-size: 12px; font-weight: 600; background: #EFEFF4; color: var(--st-color-text-muted); border-radius: 999px; padding: 3px 9px; }
+  .jc-card-value { font-size: 28px; font-weight: 800; color: var(--st-color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .jc-card.margin { background: linear-gradient(135deg, #8B85EA 0%, #6157DB 100%); color: #fff; box-shadow: 0 8px 22px rgba(97, 87, 219, .28); }
+  .jc-card.margin::after { content: ""; position: absolute; right: -40px; bottom: -70px; width: 190px; height: 190px; border-radius: 50%; border: 28px solid rgba(255,255,255,.07); }
+  .jc-card.margin .jc-card-icon { background: rgba(255,255,255,.18); }
+  .jc-card.margin .jc-card-label { color: #fff; }
+  .jc-card.margin .jc-card-value { color: #fff; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; white-space: normal; }
+  .jc-card.margin .gp { font-size: 14px; font-weight: 600; }
+
+  /* ---------- Cost breakdown ---------- */
+  .jc-panel { background: #fff; border: 1px solid #ECEBF2; border-radius: 12px; padding: 28px 32px; margin-bottom: 24px; }
+  .jc-breakdown { display: flex; align-items: center; gap: 40px; }
+  .jc-donut { position: relative; width: 210px; height: 210px; flex-shrink: 0; }
+  .jc-donut svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .jc-donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .jc-donut-center .l { font-size: 13px; color: var(--st-color-text-muted); }
+  .jc-donut-center .v { font-size: 20px; font-weight: 700; color: var(--st-color-text); }
+  .jc-bd-main { flex: 1; min-width: 0; }
+  .jc-bd-title { font-family: 'Montserrat', 'Inter', sans-serif; font-size: 18px; font-weight: 500; margin: 0 0 16px; }
+  .jc-bd-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .jc-bd-col { padding: 0 26px; border-left: 1px solid #ECEBF2; }
+  .jc-bd-col:first-child { padding-left: 0; border-left: 0; }
+  .jc-bd-col:last-child { padding-right: 0; }
+  .jc-bd-head { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+  .jc-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .jc-bd-head .jc-pct-pill { font-size: 11.5px; }
+  .jc-bd-row { display: flex; align-items: center; gap: 10px; padding: 6px 0 6px 20px; font-size: 15px; color: var(--st-color-text-muted); }
+  .jc-bd-row .amt { margin-left: auto; font-weight: 600; color: var(--st-color-text); white-space: nowrap; }
+  .jc-bd-row .pct { font-weight: 600; color: var(--st-color-text); width: 38px; text-align: right; }
+
+  /* ---------- Jobs section ---------- */
+  .jc-jobs-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+  .jc-jobs-title { font-size: 20px; font-weight: 500; margin: 0; display: flex; align-items: center; gap: 10px; }
+  .jc-jobs-title:focus { outline: none; }
+  .jc-count { font-size: 13px; font-weight: 600; color: var(--st-color-primary-active); background: #EEECFD; border-radius: 999px; padding: 2px 10px; }
+  .jc-jobs-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+  .settings-field { position: relative; display: flex; flex-direction: column; }
+  .settings-field-label {
+    position: absolute; top: -9px; left: 12px; background: var(--st-color-card-bg); padding: 0 6px;
+    font-size: 12px; font-weight: 500; color: var(--st-color-text-muted); z-index: 1; pointer-events: none; letter-spacing: .2px;
+  }
+  .settings-field-input {
+    height: 48px; padding: 0 16px; border: 1px solid var(--st-color-border); border-radius: 8px;
+    font-size: 15px; background: var(--st-color-card-bg); color: var(--st-color-text);
+    transition: border-color .15s ease, box-shadow .15s ease; width: 100%;
+  }
+  select.settings-field-input {
+    appearance: none; -webkit-appearance: none; padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2332415B' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+  }
+  .settings-field-input::placeholder { color: #A9AFBD; }
+  .settings-field-input:focus { outline: none; border-color: var(--st-color-primary); box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), .18); }
+  .f-search { width: 250px; } .f-status { width: 240px; } .f-sort { width: 300px; }
+
+  .jc-rows { display: flex; flex-direction: column; gap: 16px; }
+  .jc-row {
+    display: flex; align-items: center; gap: 24px; background: #fff; border: 1px solid #ECEBF2; border-radius: 10px;
+    padding: 20px 24px; position: relative; overflow: hidden;
+  }
+  .jc-row::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--row-accent, #5CC46A); }
+  .jc-row:hover { border-color: #D6D2F5; box-shadow: 0 2px 10px rgba(var(--st-color-primary-rgb), .10); }
+  .jc-row-main { flex: 1; min-width: 0; }
+  .jc-row-name { font-size: 18px; font-weight: 700; margin: 0 0 6px; }
+  .jc-row-date { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; color: var(--st-color-text-muted); margin-bottom: 10px; }
+  .icon-btn { background: none; border: 0; padding: 0; color: #A9AFBD; display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; border-radius: 6px; }
+  .icon-btn:hover { color: var(--st-color-primary); }
+  .icon-btn:focus-visible { outline: 2px solid var(--st-color-primary-active); outline-offset: 1px; }
+  .icon-btn svg { width: 15px; height: 15px; }
+  .status-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; border-radius: 999px; padding: 4px 12px; }
+  .status-chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .st-active   { background: #E9F8EC; color: #2E7D3E; }
+  .st-ready    { background: #FDF1E4; color: #A55A12; }
+  .st-complete { background: #EEF0F5; color: #4F5A70; }
+  .margin-chip { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 140px; border-radius: 8px; padding: 10px 16px; }
+  .margin-chip .v { font-size: 20px; font-weight: 700; }
+  .margin-chip .l { font-size: 13px; font-weight: 500; color: #4F5A70; }
+  .margin-chip.good { background: #EAF8EE; color: #2E8B47; }
+  .margin-chip.bad  { background: #FDECEC; color: #D23B3B; }
+  .jc-stats { display: flex; gap: 0; }
+  .jc-stat { width: 160px; }
+  .jc-stat .k { font-size: 13px; font-weight: 600; letter-spacing: .5px; color: var(--st-color-text-muted); display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .jc-stat .k .jc-pct-pill { margin-left: 0; font-size: 11.5px; padding: 2px 8px; }
+  .jc-stat .v { font-size: 19px; font-weight: 700; }
+  .jc-go-job { width: 48px; height: 48px; border-radius: 10px; border: 0; background: none; color: #A9AFBD; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .jc-go-job:hover { color: var(--st-color-primary-active); background: #F6F5FD; }
+  .jc-go-job:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), .35); color: var(--st-color-primary-active); }
+  .jc-go-job svg { width: 20px; height: 20px; }
+
+  .jc-empty { border: 1px dashed #DAD8E3; background: #FAFAFC; border-radius: 10px; padding: 36px 20px; text-align: center; font-size: 15px; color: #4F5A70; }
+  .jc-empty svg { width: 26px; height: 26px; color: var(--st-color-text-muted); }
+  .jc-empty .t { font-weight: 700; color: var(--st-color-text); margin: 10px 0 14px; }
+  .jc-empty p { margin: 0 0 10px; }
+  .jc-empty b { color: var(--st-color-text); }
+  .jc-chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .jc-chip { min-height: 32px; padding: 4px 12px; border-radius: 8px; border: 1px solid var(--st-color-primary); background: #fff; color: var(--st-color-primary-active); font-size: 14px; font-weight: 500; }
+  .jc-chip:hover { background: rgba(var(--st-color-primary-rgb), .08); }
+  .jc-chip:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(var(--st-color-primary-rgb), .35); }
+
+  /* ---------- Toast (prototype only) ---------- */
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #32415B; color: #fff; font-size: 14px; padding: 12px 18px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.2); z-index: 100; max-width: calc(100% - 32px); }
+  .toast[hidden] { display: none; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 1400px) {
+    .jc-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .jc-stat { width: 130px; }
+  }
+  @media (max-width: 1100px) {
+    .jc-row { flex-wrap: wrap; }
+    .jc-row-main { flex: 1 1 100%; }
+    .jc-breakdown { flex-direction: column; align-items: stretch; }
+    .jc-donut { align-self: center; }
+  }
+  @media (max-width: 900px) {
+    .jc-bd-cols { grid-template-columns: 1fr; gap: 16px; }
+    .jc-bd-col { padding: 16px 0 0; border-left: 0; border-top: 1px solid #ECEBF2; }
+    .jc-bd-col:first-child { padding-top: 0; border-top: 0; }
+    .jc-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 575.98px) {
+    #job-costing-page { padding: 16px 16px 48px; }
+    .proto-bar { padding: 8px 16px; }
+    .jc-title { font-size: 26px; }
+    .jc-bar, .jc-bar-group { flex-direction: column; align-items: stretch; width: 100%; white-space: normal; }
+    .jc-bar { gap: 12px; }
+    .jc-bar-group { gap: 6px; }
+    .jc-select.w-date, .jc-select.w-range, .sp-trigger, #topGo { width: 100%; }
+    .sp-panel { left: 0; right: 0; min-width: 0; max-height: 50vh; }
+    .jc-cards { grid-template-columns: 1fr; }
+    .jc-panel { padding: 20px 16px; }
+    .jc-jobs-controls, .jc-jobs-controls > * { width: 100%; }
+    .f-search, .f-status, .f-sort { width: 100%; }
+    .jc-row { padding: 18px 16px; gap: 14px; }
+    .jc-stats { flex-wrap: wrap; row-gap: 12px; width: 100%; }
+    .jc-stat { width: 50%; }
+    .margin-chip { width: 100%; }
+    .jc-go-job { margin-left: auto; }
+    .jc-chip { min-height: 48px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  <a href="../index.html">&larr; Hub</a>
+  <span class="divider">|</span>
+  <span class="title">Job Costing: Salesperson Filter</span>
+</div>
+
+<div id="job-costing-page">
+
+  <div class="demo-banner" role="note">
+    <strong>Prototype note.</strong> Sample data only. Try:
+    <ul>
+      <li>Open <strong>Salesperson</strong> in the top bar, check one or more names, then click the top bar <strong>Go</strong>. Nothing changes until you click that Go.</li>
+      <li>Watch the blue line above the cards, the totals, the donut and the Jobs count update together. Uncheck <strong>All Salespeople</strong> for jobs with no salesperson.</li>
+      <li>Pick Tom Okafor with Costing Active for the empty state, or Lena Brooks with Ready for Costing for a $0 revenue view.</li>
+      <li><strong>Download CSV</strong> saves the applied view with a Salesperson column. The row arrow and edit icon are not simulated.</li>
+    </ul>
+  </div>
+
+  <!-- Header + "Showing jobs where" bar -->
+  <div class="jc-header">
+    <div>
+      <h1 class="jc-title">Job Costing Dashboard</h1>
+      <p class="jc-subtitle">Profit, labor and expenses across your costed jobs.</p>
+    </div>
+    <div class="jc-bar" id="topBar">
+      <div class="jc-bar-group">
+        <label class="jc-bar-text" for="dateField">Showing jobs where</label>
+        <select class="jc-select w-date" id="dateField">
+          <option value="accepted">Date Accepted</option>
+        </select>
+      </div>
+      <div class="jc-bar-group">
+        <label class="jc-bar-text" for="dateRange">is within</label>
+        <select class="jc-select w-range" id="dateRange">
+          <option value="anytime">Anytime</option>
+          <option value="thisMonth">This Month</option>
+          <option value="lastMonth">Last Month</option>
+          <option value="last90">Last 90 Days</option>
+          <option value="thisYear">This Year</option>
+          <option value="lastYear">Last Year</option>
+        </select>
+      </div>
+      <div class="jc-bar-group">
+        <label class="jc-bar-text" id="spLabel" for="spTrigger">Salesperson</label>
+        <div class="sp-filter" id="spFilter">
+          <button type="button" class="sp-trigger" id="spTrigger" aria-haspopup="true" aria-expanded="false" aria-controls="spPanel" aria-labelledby="spLabel spTriggerText"><span id="spTriggerText">All Salespeople</span></button>
+          <div class="sp-panel" id="spPanel" hidden>
+            <fieldset>
+              <legend class="sr-only">Salesperson</legend>
+              <div id="spList"></div>
+            </fieldset>
+            <div class="sr-only" aria-live="polite" id="spLive"></div>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary" id="topGo">Go</button>
+    </div>
+  </div>
+
+  <!-- Indicator: one full width line above the summary cards -->
+  <div class="settings-alert settings-alert--info" id="spIndicator" hidden>
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+    <div class="settings-alert-body" id="spIndicatorText"></div>
+  </div>
+  <div class="sr-only" aria-live="polite" id="resultsLive"></div>
+
+  <!-- Summary cards -->
+  <div class="jc-cards" id="summaryCards" role="group" aria-label="Summary">
+    <div class="jc-card margin">
+      <div class="jc-card-head">
+        <span class="jc-card-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
+        <span class="jc-card-label">Profit Margin</span>
+      </div>
+      <div class="jc-card-value"><span id="cMargin">0%</span><span class="gp"><span id="cMarginGp">$0.00</span> gross profit</span></div>
+    </div>
+    <div class="jc-card">
+      <div class="jc-card-head">
+        <span class="jc-card-icon" style="background:#EFF0F5;"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#32415B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+        <span class="jc-card-label">Revenue</span>
+      </div>
+      <div class="jc-card-value" id="cRevenue">$0.00</div>
+    </div>
+    <div class="jc-card">
+      <div class="jc-card-head">
+        <span class="jc-card-icon" style="background:#EBF1FD;"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#5B8DEF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span class="jc-card-label">Labor</span>
+        <span class="jc-pct-pill" id="cLaborPct">0%</span>
+      </div>
+      <div class="jc-card-value" id="cLabor">$0.00</div>
+    </div>
+    <div class="jc-card">
+      <div class="jc-card-head">
+        <span class="jc-card-icon" style="background:#FDF1E4;"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#EE9A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
+        <span class="jc-card-label">Expenses</span>
+        <span class="jc-pct-pill" id="cExpensesPct">0%</span>
+      </div>
+      <div class="jc-card-value" id="cExpenses">$0.00</div>
+    </div>
+    <div class="jc-card">
+      <div class="jc-card-head">
+        <span class="jc-card-icon" style="background:#EAF8EE;"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="#2E8B47" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></span>
+        <span class="jc-card-label">Gross Profit</span>
+        <span class="jc-pct-pill" id="cProfitPct">0%</span>
+      </div>
+      <div class="jc-card-value" id="cProfit">$0.00</div>
+    </div>
+  </div>
+
+  <!-- Cost breakdown -->
+  <section class="jc-panel" id="costBreakdown" aria-labelledby="bdTitle">
+    <div class="jc-breakdown">
+      <div class="jc-donut">
+        <svg viewBox="0 0 120 120" id="donutSvg" role="img" aria-label=""></svg>
+        <div class="jc-donut-center" aria-hidden="true">
+          <span class="l">Revenue</span>
+          <span class="v" id="dRevenue">$0.00</span>
+        </div>
+      </div>
+      <div class="jc-bd-main">
+        <h2 class="jc-bd-title" id="bdTitle">Cost breakdown</h2>
+        <div class="jc-bd-cols">
+          <div class="jc-bd-col">
+            <div class="jc-bd-head"><span class="jc-dot" style="background:var(--c-labor)"></span>Labor<span class="jc-pct-pill" id="bLaborPct">0%</span></div>
+            <div class="jc-bd-row">Employees<span class="amt" id="bEmp">$0.00</span><span class="pct" id="bEmpPct">0%</span></div>
+            <div class="jc-bd-row">Subcontractors<span class="amt" id="bSub">$0.00</span><span class="pct" id="bSubPct">0%</span></div>
+          </div>
+          <div class="jc-bd-col">
+            <div class="jc-bd-head"><span class="jc-dot" style="background:var(--c-expense)"></span>Expenses<span class="jc-pct-pill" id="bExpPct">0%</span></div>
+            <div class="jc-bd-row">Materials<span class="amt" id="bMat">$0.00</span><span class="pct" id="bMatPct">0%</span></div>
+            <div class="jc-bd-row">Miscellaneous<span class="amt" id="bMisc">$0.00</span><span class="pct" id="bMiscPct">0%</span></div>
+          </div>
+          <div class="jc-bd-col">
+            <div class="jc-bd-head"><span class="jc-dot" style="background:var(--c-profit)"></span>Gross Profit<span class="jc-pct-pill" id="bGpPct">0%</span></div>
+            <div class="jc-bd-row">Revenue<span class="amt" id="bRev">$0.00</span></div>
+            <div class="jc-bd-row">Gross profit<span class="amt" id="bGp">$0.00</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Jobs -->
+  <section class="jc-panel" aria-labelledby="jobsTitle">
+    <div class="jc-jobs-head">
+      <h2 class="jc-jobs-title" id="jobsTitle" tabindex="-1">Jobs <span class="jc-count" id="jobsCount">0</span></h2>
+      <div class="jc-jobs-controls">
+        <div class="settings-field f-search">
+          <label class="settings-field-label" for="jobName">Job Name</label>
+          <input class="settings-field-input" id="jobName" type="text" placeholder="type job name..." autocomplete="off" />
+        </div>
+        <div class="settings-field f-status">
+          <label class="settings-field-label" for="statusSel">Status</label>
+          <select class="settings-field-input" id="statusSel">
+            <option>Costing Active</option>
+            <option>Ready for Costing</option>
+            <option>Costing Complete</option>
+          </select>
+        </div>
+        <div class="settings-field f-sort">
+          <label class="settings-field-label" for="sortSel">Sort By</label>
+          <select class="settings-field-input" id="sortSel">
+            <option value="pmDesc">Profit Margin (highest first)</option>
+            <option value="pmAsc">Profit Margin (lowest first)</option>
+            <option value="dateDesc">Newest first</option>
+            <option value="dateAsc">Oldest first</option>
+          </select>
+        </div>
+        <button type="button" class="btn btn-primary" id="jobsGo">Go</button>
+        <button type="button" class="btn btn-outline-primary" id="csvBtn">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download CSV
+        </button>
+      </div>
+    </div>
+    <div id="jobsBody"></div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- Sample data (fake) ---------------- */
+  // Alphabetical by display name. Tom Okafor is an inactive user still assigned to past jobs: no marker.
+  var SALESPEOPLE = [
+    { id: 'dw', name: 'Dana Whitfield' },
+    { id: 'lb', name: 'Lena Brooks' },
+    { id: 'mr', name: 'Marco Reyes' },
+    { id: 'ps', name: 'Priya Shah' },
+    { id: 'to', name: 'Tom Okafor' }
+  ];
+  // emp/sub = labor (Employees, Subcontractors); mat/misc = expenses (Materials, Miscellaneous)
+  var JOBS = [
+    { num: '4102231', name: 'Hillcrest Exterior Repaint',  date: '2026-10-08', status: 'Costing Active',    sp: 'mr', rev: 12400.00, emp: 2600.00, sub: 1200.00, mat: 1650.00, misc: 120.00 },
+    { num: '4102874', name: 'Oak Lane Cabinet Refinish',   date: '2026-11-03', status: 'Costing Active',    sp: 'dw', rev: 6850.75,  emp: 1400.00, sub: 0,       mat: 612.40,  misc: 45.00 },
+    { num: '4103015', name: 'Maple Court Interior',        date: '2026-09-15', status: 'Costing Active',    sp: 'ps', rev: 9200.00,  emp: 2150.00, sub: 900.00,  mat: 1080.25, misc: 60.00 },
+    { num: '4103352', name: 'Riverside Deck Stain',        date: '2026-06-22', status: 'Costing Active',    sp: null, rev: 3480.00,  emp: 1180.00, sub: 0,       mat: 540.80,  misc: 35.00 },
+    { num: '4103590', name: 'Birchwood Trim and Doors',    date: '2026-11-12', status: 'Costing Active',    sp: 'mr', rev: 4275.50,  emp: 980.00,  sub: 600.00,  mat: 410.00,  misc: 0 },
+    { num: '4103777', name: 'Summit Office Suite',         date: '2026-11-18', status: 'Ready for Costing', sp: 'dw', rev: 18900.00, emp: 0,       sub: 0,       mat: 0,       misc: 0 },
+    { num: '4103912', name: 'Cedar Ridge Fence',           date: '2026-11-20', status: 'Ready for Costing', sp: 'lb', rev: 0,        emp: 0,       sub: 0,       mat: 0,       misc: 0 },
+    { num: '4104068', name: 'Willow Bend Kitchen',         date: '2026-10-29', status: 'Ready for Costing', sp: null, rev: 5320.00,  emp: 900.00,  sub: 0,       mat: 380.00,  misc: 0 },
+    { num: '4104105', name: 'Harbor View Stucco',          date: '2026-11-10', status: 'Ready for Costing', sp: 'ps', rev: 7640.00,  emp: 1850.00, sub: 0,       mat: 720.60,  misc: 0 },
+    { num: '4100517', name: 'Pine Street Duplex',          date: '2026-03-14', status: 'Costing Complete',  sp: 'to', rev: 14250.00, emp: 3900.00, sub: 1500.00, mat: 2210.45, misc: 180.00 },
+    { num: '4100842', name: 'Elm Grove Church Hall',       date: '2025-11-02', status: 'Costing Complete',  sp: 'to', rev: 22600.00, emp: 6100.00, sub: 3200.00, mat: 3875.00, misc: 260.00 },
+    { num: '4101196', name: 'Lakeside Condo Unit 4',       date: '2026-05-27', status: 'Costing Complete',  sp: 'lb', rev: 8150.00,  emp: 2300.00, sub: 0,       mat: 960.30,  misc: 75.00 },
+    { num: '4101433', name: 'Foxglove Bathroom',           date: '2026-08-09', status: 'Costing Complete',  sp: 'mr', rev: 3925.00,  emp: 1100.00, sub: 0,       mat: 515.60,  misc: 40.00 }
+  ];
+  JOBS.forEach(function (j) {
+    j.labor = j.emp + j.sub;
+    j.expenses = j.mat + j.misc;
+    j.profit = j.rev - j.labor - j.expenses;
+    j.margin = j.rev > 0 ? j.profit / j.rev : 0;
+  });
+  // Fixed reference date so the sample date ranges stay meaningful.
+  var REF_TODAY = new Date(2026, 10, 25);
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  var SP_IDS = SALESPEOPLE.map(function (s) { return s.id; });
+  var ALL_KEYS = ['all', 'none'].concat(SP_IDS);
+  function spName(id) { for (var i = 0; i < SALESPEOPLE.length; i++) if (SALESPEOPLE[i].id === id) return SALESPEOPLE[i].name; return ''; }
+
+  /* ---------------- State ---------------- */
+  // Fresh open: All Salespeople. Nothing is remembered between visits.
+  var applied = { range: 'anytime', sp: new Set(ALL_KEYS), status: 'Costing Active', name: '', sort: 'pmDesc' };
+  var draft = new Set(ALL_KEYS); // unapplied checkbox state
+
+  /* ---------------- Helpers ---------------- */
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function money(n) { return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function moneyWhole(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+  function pct(part, whole) { return whole > 0 ? Math.round(part / whole * 100) + '%' : '0%'; }
+  function pct2(part, whole) { return (whole > 0 ? (part / whole * 100) : 0).toFixed(2) + '%'; }
+  function monthYear(iso) { var p = iso.split('-'); return MONTHS[+p[1] - 1] + ' ' + p[0]; }
+  function parseISO(iso) { var p = iso.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+
+  function isAllEquivalent(set) {
+    if (set.has('all')) return true;
+    if (!set.has('none')) return false;
+    return SP_IDS.every(function (id) { return set.has(id); });
+  }
+  function choicesOf(set) { return ALL_KEYS.filter(function (k) { return k !== 'all' && set.has(k); }); }
+
+  function inRange(job, range) {
+    if (range === 'anytime') return true;
+    var d = parseISO(job.date), y = REF_TODAY.getFullYear(), m = REF_TODAY.getMonth();
+    switch (range) {
+      case 'thisMonth': return d.getFullYear() === y && d.getMonth() === m;
+      case 'lastMonth': var lm = new Date(y, m - 1, 1); return d.getFullYear() === lm.getFullYear() && d.getMonth() === lm.getMonth();
+      case 'last90': var from = new Date(REF_TODAY); from.setDate(from.getDate() - 90); return d >= from && d <= REF_TODAY;
+      case 'thisYear': return d.getFullYear() === y;
+      case 'lastYear': return d.getFullYear() === y - 1;
+    }
+    return true;
+  }
+  function matchesSp(job, set) {
+    if (isAllEquivalent(set)) return true;
+    return job.sp === null ? set.has('none') : set.has(job.sp);
+  }
+
+  // Jobs that scope the summary cards and Cost breakdown: date range, Status, Salesperson.
+  function cardJobs() {
+    return JOBS.filter(function (j) {
+      return inRange(j, applied.range) && j.status === applied.status && matchesSp(j, applied.sp);
+    });
+  }
+  // Jobs list and Download CSV: the above plus the Job Name search, then Sort By.
+  function listJobs() {
+    var q = applied.name.trim().toLowerCase();
+    var rows = cardJobs().filter(function (j) { return !q || j.name.toLowerCase().indexOf(q) !== -1; });
+    var cmp = {
+      pmDesc: function (a, b) { return b.margin - a.margin; },
+      pmAsc: function (a, b) { return a.margin - b.margin; },
+      dateDesc: function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; },
+      dateAsc: function (a, b) { return a.date > b.date ? 1 : a.date < b.date ? -1 : 0; }
+    }[applied.sort];
+    return rows.slice().sort(cmp);
+  }
+
+  function totals(jobs) {
+    var t = { rev: 0, emp: 0, sub: 0, mat: 0, misc: 0 };
+    jobs.forEach(function (j) { t.rev += j.rev; t.emp += j.emp; t.sub += j.sub; t.mat += j.mat; t.misc += j.misc; });
+    t.labor = t.emp + t.sub; t.expenses = t.mat + t.misc; t.profit = t.rev - t.labor - t.expenses;
+    return t;
+  }
+
+  /* ---------------- Copy (approved strings) ---------------- */
+  function indicatorText(set) {
+    if (isAllEquivalent(set)) return '';
+    var sps = SP_IDS.filter(function (id) { return set.has(id); });
+    var none = set.has('none');
+    var n = sps.length;
+    if (n === 0 && none) return 'Totals for jobs with no salesperson only';
+    if (n === 1 && !none) return 'Totals for ' + spName(sps[0]) + ' only';
+    if (n === 1 && none) return 'Totals for ' + spName(sps[0]) + ' and jobs with no salesperson only';
+    if (n >= 2 && !none) return 'Totals for ' + n + ' salespeople only';
+    if (n >= 2 && none) return 'Totals for ' + n + ' salespeople and jobs with no salesperson only';
+    return '';
+  }
+  function emptySecondLine(set, count, status) {
+    var head = 'You have ' + count + ' job costing records, but none match status <b>' + esc(status) + '</b>';
+    if (isAllEquivalent(set)) return head + '.';
+    var ch = choicesOf(set);
+    if (ch.length === 1 && ch[0] === 'none') return head + ' and <b>No Salesperson</b>.';
+    if (ch.length === 1) return head + ' and salesperson <b>' + esc(spName(ch[0])) + '</b>.';
+    return head + ' and your <b>Salesperson</b> selection.';
+  }
+  function chipLine(set) {
+    if (isAllEquivalent(set)) return 'Show all jobs (any date):';
+    var ch = choicesOf(set);
+    if (ch.length === 1 && ch[0] === 'none') return 'Show all jobs with no salesperson (any date):';
+    if (ch.length === 1) return 'Show all jobs for ' + esc(spName(ch[0])) + ' (any date):';
+    return 'Show all jobs for your Salesperson selection (any date):';
+  }
+  // Closed control text. Several checked shows a count (prototype stand in).
+  function closedText(set) {
+    if (isAllEquivalent(set)) return 'All Salespeople';
+    var ch = choicesOf(set);
+    if (ch.length === 1) return ch[0] === 'none' ? 'No Salesperson' : spName(ch[0]);
+    return ch.length + ' selected';
+  }
+
+  /* ---------------- Salesperson control ---------------- */
+  var trigger = $('spTrigger'), panel = $('spPanel'), list = $('spList'), live = $('spLive'), wrap = $('spFilter');
+  var boxes = {};
+  (function buildList() {
+    var items = [{ k: 'all', label: 'All Salespeople' }, { k: 'none', label: 'No Salesperson' }]
+      .concat(SALESPEOPLE.map(function (s) { return { k: s.id, label: s.name }; }));
+    items.forEach(function (it) {
+      var row = document.createElement('label');
+      row.className = 'sp-row';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.value = it.k; cb.id = 'sp_' + it.k;
+      cb.addEventListener('change', onBoxChange);
+      row.appendChild(cb);
+      row.appendChild(document.createTextNode(it.label));
+      list.appendChild(row);
+      boxes[it.k] = cb;
+    });
+  })();
+
+  function syncBoxes() { ALL_KEYS.forEach(function (k) { boxes[k].checked = draft.has(k); }); }
+  function updateTrigger() { $('spTriggerText').textContent = closedText(draft); }
+  function announce(msg) {
+    live.textContent = '';
+    setTimeout(function () { live.textContent = msg; }, 60);
+  }
+
+  function onBoxChange(e) {
+    var k = e.target.value, v = e.target.checked;
+    var allWasChecked = draft.has('all');
+    var msg = null;
+    if (k === 'all') {
+      if (v) { draft = new Set(ALL_KEYS); msg = 'All choices checked'; }
+      else { draft = new Set(['none']); msg = 'Only No Salesperson checked'; }
+    } else if (allWasChecked && !v) {
+      // With All Salespeople checked, unchecking one box leaves only that box checked.
+      draft = new Set([k]);
+      msg = k === 'none' ? 'Only No Salesperson checked' : 'Only ' + spName(k) + ' checked';
+    } else {
+      if (v) draft.add(k); else draft.delete(k);
+    }
+    syncBoxes();
+    updateTrigger();
+    if (msg) announce(msg);
+  }
+
+  function isOpen() { return !panel.hidden; }
+  function openPanel() {
+    panel.hidden = false;
+    trigger.setAttribute('aria-expanded', 'true');
+    var first = ALL_KEYS.filter(function (k) { return draft.has(k); })[0] || 'all';
+    boxes[first].focus();
+  }
+  function closePanel(returnFocus) {
+    if (!isOpen()) return;
+    panel.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    live.textContent = '';
+    // Every box unchecked: revert to All Salespeople on close, no message.
+    if (draft.size === 0) { draft = new Set(ALL_KEYS); syncBoxes(); updateTrigger(); }
+    if (returnFocus) trigger.focus();
+  }
+
+  trigger.addEventListener('click', function () { isOpen() ? closePanel(false) : openPanel(); });
+  trigger.addEventListener('keydown', function (e) {
+    if ((e.key === 'Enter' || e.key === ' ') && !isOpen()) { e.preventDefault(); openPanel(); }
+    else if (e.key === 'Escape' && isOpen()) { e.preventDefault(); closePanel(true); }
+  });
+  panel.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { e.preventDefault(); closePanel(true); }
+    else if (e.key === 'Enter') { e.preventDefault(); } // Enter inside the list does not apply
+  });
+  wrap.addEventListener('focusout', function (e) {
+    if (isOpen() && (!e.relatedTarget || !wrap.contains(e.relatedTarget))) {
+      // relatedTarget is null when clicking a non focusable area; the document click handler covers that.
+      if (e.relatedTarget) closePanel(false);
+    }
+  });
+  document.addEventListener('click', function (e) { if (isOpen() && !wrap.contains(e.target)) closePanel(false); });
+
+  /* ---------------- Rendering ---------------- */
+  function renderDonut(t) {
+    var svg = $('donutSvg');
+    var r = 50, c = 2 * Math.PI * r, html = '';
+    if (t.rev > 0) {
+      var parts = [
+        { v: Math.max(t.labor, 0), col: 'var(--c-labor)' },
+        { v: Math.max(t.expenses, 0), col: 'var(--c-expense)' },
+        { v: Math.max(t.profit, 0), col: 'var(--c-profit)' }
+      ];
+      var sum = parts.reduce(function (a, p) { return a + p.v; }, 0) || 1;
+      var offset = 0;
+      parts.forEach(function (p) {
+        if (p.v <= 0) return;
+        var len = p.v / sum * c;
+        html += '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="' + p.col + '" stroke-width="14" stroke-dasharray="' + len + ' ' + (c - len) + '" stroke-dashoffset="' + (-offset) + '"></circle>';
+        offset += len;
+      });
+    }
+    svg.innerHTML = html; // $0 revenue: donut renders empty
+    svg.setAttribute('aria-label', 'Revenue ' + money(t.rev) + ': labor ' + pct(t.labor, t.rev) + ', expenses ' + pct(t.expenses, t.rev) + ', gross profit ' + pct(t.profit, t.rev));
+  }
+
+  var EDIT_SVG = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+  var ARROW_SVG = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+  var SEARCH_SVG = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+  var STATUS_CLASS = { 'Costing Active': 'st-active', 'Ready for Costing': 'st-ready', 'Costing Complete': 'st-complete' };
+  var STATUS_ACCENT = { 'Costing Active': '#5CC46A', 'Ready for Costing': '#EE9A4D', 'Costing Complete': '#A3AAB8' };
+
+  function rowHtml(j) {
+    var good = j.rev > 0 && j.margin > 0;
+    return '<div class="jc-row" style="--row-accent:' + STATUS_ACCENT[j.status] + '">' +
+      '<div class="jc-row-main">' +
+        '<h3 class="jc-row-name">#' + esc(j.num) + ' - ' + esc(j.name) + '</h3>' +
+        '<div class="jc-row-date">' + monthYear(j.date) +
+          ' <button type="button" class="icon-btn" data-edit="' + j.num + '" aria-label="Edit date for #' + j.num + '">' + EDIT_SVG + '</button></div>' +
+        '<span class="status-chip ' + STATUS_CLASS[j.status] + '">' + esc(j.status) + '</span>' +
+      '</div>' +
+      '<div class="margin-chip ' + (good ? 'good' : 'bad') + '"><span class="v">' + pct(j.profit, j.rev) + '</span><span class="l">Profit Margin</span></div>' +
+      '<div class="jc-stats">' +
+        '<div class="jc-stat"><div class="k">REVENUE</div><div class="v">' + moneyWhole(j.rev) + '</div></div>' +
+        '<div class="jc-stat"><div class="k">LABOR <span class="jc-pct-pill">' + pct(j.labor, j.rev) + '</span></div><div class="v">' + moneyWhole(j.labor) + '</div></div>' +
+        '<div class="jc-stat"><div class="k">EXPENSES <span class="jc-pct-pill">' + pct(j.expenses, j.rev) + '</span></div><div class="v">' + moneyWhole(j.expenses) + '</div></div>' +
+        '<div class="jc-stat"><div class="k">PROFIT</div><div class="v">' + moneyWhole(j.profit) + '</div></div>' +
+      '</div>' +
+      '<button type="button" class="jc-go-job" data-go="' + j.num + '" title="Go to Job Summary Page" aria-label="Go to Job Summary Page for #' + j.num + ' ' + esc(j.name) + '">' + ARROW_SVG + '</button>' +
+    '</div>';
+  }
+
+  function render(announceResults) {
+    var t = totals(cardJobs());
+    var rows = listJobs();
+
+    // Summary cards
+    $('cMargin').textContent = pct(t.profit, t.rev);
+    $('cMarginGp').textContent = money(t.profit);
+    $('cRevenue').textContent = money(t.rev);
+    $('cLabor').textContent = money(t.labor); $('cLaborPct').textContent = pct(t.labor, t.rev);
+    $('cExpenses').textContent = money(t.expenses); $('cExpensesPct').textContent = pct(t.expenses, t.rev);
+    $('cProfit').textContent = money(t.profit); $('cProfitPct').textContent = pct(t.profit, t.rev);
+
+    // Cost breakdown
+    $('dRevenue').textContent = money(t.rev);
+    $('bLaborPct').textContent = pct(t.labor, t.rev);
+    $('bEmp').textContent = money(t.emp); $('bEmpPct').textContent = pct(t.emp, t.rev);
+    $('bSub').textContent = money(t.sub); $('bSubPct').textContent = pct(t.sub, t.rev);
+    $('bExpPct').textContent = pct(t.expenses, t.rev);
+    $('bMat').textContent = money(t.mat); $('bMatPct').textContent = pct(t.mat, t.rev);
+    $('bMisc').textContent = money(t.misc); $('bMiscPct').textContent = pct(t.misc, t.rev);
+    $('bGpPct').textContent = pct(t.profit, t.rev);
+    $('bRev').textContent = money(t.rev);
+    $('bGp').textContent = money(t.profit);
+    renderDonut(t);
+
+    // Indicator (applied selection only)
+    var ind = indicatorText(applied.sp);
+    var indEl = $('spIndicator');
+    $('spIndicatorText').textContent = ind;
+    indEl.hidden = !ind;
+    ['summaryCards', 'costBreakdown'].forEach(function (id) {
+      if (ind) $(id).setAttribute('aria-describedby', 'spIndicatorText'); else $(id).removeAttribute('aria-describedby');
+    });
+    if (announceResults && ind) {
+      var rl = $('resultsLive'); rl.textContent = '';
+      setTimeout(function () { rl.textContent = ind; }, 80);
+    }
+
+    // Jobs list
+    $('jobsCount').textContent = rows.length;
+    var body = $('jobsBody');
+    if (rows.length) {
+      body.innerHTML = '<div class="jc-rows">' + rows.map(rowHtml).join('') + '</div>';
+    } else {
+      body.innerHTML = '<div class="jc-empty">' + SEARCH_SVG +
+        '<div class="t">No jobs match your current view.</div>' +
+        '<p>' + emptySecondLine(applied.sp, JOBS.length, applied.status) + '</p>' +
+        '<p>' + chipLine(applied.sp) + '</p>' +
+        '<div class="jc-chips">' + ['Costing Active', 'Ready for Costing', 'Costing Complete'].map(function (s) {
+          return '<button type="button" class="jc-chip" data-chip="' + s + '">' + s + '</button>';
+        }).join('') + '</div></div>';
+    }
+  }
+
+  // Put every control back to the applied values (unapplied changes are dropped).
+  function resetUiToApplied() {
+    $('dateRange').value = applied.range;
+    $('statusSel').value = applied.status;
+    $('jobName').value = applied.name;
+    $('sortSel').value = applied.sort;
+    closePanel(false);
+    draft = new Set(applied.sp);
+    syncBoxes(); updateTrigger();
+  }
+
+  /* ---------------- Actions ---------------- */
+  // Top bar Go: applies date range + Salesperson; keeps the Jobs section's applied Status, Job Name, Sort By.
+  $('topGo').addEventListener('click', function () {
+    closePanel(false);
+    applied.range = $('dateRange').value;
+    applied.sp = new Set(draft);
+    $('statusSel').value = applied.status; $('jobName').value = applied.name; $('sortSel').value = applied.sort;
+    render(true);
+  });
+
+  // Jobs section Go: applies Status, Job Name, Sort By; keeps the applied Salesperson selection.
+  function jobsGo() {
+    applied.status = $('statusSel').value;
+    applied.name = $('jobName').value;
+    applied.sort = $('sortSel').value;
+    resetUiToApplied();
+    render(false);
+  }
+  $('jobsGo').addEventListener('click', jobsGo);
+  $('jobName').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); jobsGo(); } });
+
+  $('jobsBody').addEventListener('click', function (e) {
+    var chip = e.target.closest('[data-chip]');
+    if (chip) {
+      // Chip: change Status, clear the date range, keep the applied Salesperson selection.
+      applied.status = chip.getAttribute('data-chip');
+      applied.range = 'anytime';
+      resetUiToApplied();
+      render(false);
+      $('jobsTitle').focus();
+      return;
+    }
+    var go = e.target.closest('[data-go]');
+    if (go) { toast('Opens the Job Summary Page for #' + go.getAttribute('data-go') + ' (not simulated in this prototype).'); return; }
+    var ed = e.target.closest('[data-edit]');
+    if (ed) { toast('Edits the job date (not simulated in this prototype).'); }
+  });
+
+  // Download CSV: the applied view only (never unapplied checkbox changes).
+  $('csvBtn').addEventListener('click', function () {
+    var head = ['Job Number', 'Job Name', 'Attribution Date', 'Costing Status', 'Salesperson', 'Revenue', 'Labor', 'Labor %', 'Expenses', 'Expenses %', 'Profit', 'Profit Margin %'];
+    var lines = [head];
+    listJobs().forEach(function (j) {
+      lines.push([j.num, j.name, monthYear(j.date), j.status, j.sp ? spName(j.sp) : '',
+        money(j.rev), money(j.labor), pct2(j.labor, j.rev), money(j.expenses), pct2(j.expenses, j.rev),
+        money(j.profit), pct2(j.profit, j.rev)]);
+    });
+    var csv = lines.map(function (r) {
+      return r.map(function (v) { v = String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(',');
+    }).join('\r\n');
+    var d = new Date();
+    var stamp = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'DripJobs_JobCosting_Dashboard_' + stamp + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+
+  var toastTimer;
+  function toast(msg) {
+    var el = $('toast');
+    el.textContent = msg; el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.hidden = true; }, 3200);
+  }
+
+  syncBoxes(); updateTrigger(); render(false);
+})();
+</script>
+</body>
+</html>
